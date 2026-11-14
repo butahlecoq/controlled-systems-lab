@@ -14,10 +14,23 @@
 namespace csl::registry {
 // Compatible-toolchain source interface. Checked registrations validate
 // callback results and freeze borrowed preparation state before execution.
-struct Identity { ModuleId id; std::string version; };
-struct Method { ModuleId id; std::optional<std::string> version; };
-struct Provenance { std::string port; Method requested; std::optional<Identity> actual; };
-struct Rejection { Provenance provenance; Diagnostics diagnostics; };
+struct Identity {
+    ModuleId id;
+    std::string version;
+};
+struct Method {
+    ModuleId id;
+    std::optional<std::string> version;
+};
+struct Provenance {
+    std::string port;
+    Method requested;
+    std::optional<Identity> actual;
+};
+struct Rejection {
+    Provenance provenance;
+    Diagnostics diagnostics;
+};
 enum class Scalar { binary64, binary32, exact, interval };
 enum class Completeness { unestablished, established };
 struct Output {
@@ -55,10 +68,18 @@ struct AdmissionDeclaration {
     // the envelope. Concrete prepare() remains mandatory in all cases.
     bool envelope_is_sufficient{};
 };
-struct Offer { Output output; };
+struct Offer {
+    Output output;
+};
 using Capability = std::variant<Offer, Diagnostics>;
-struct Transition { std::size_t producer; Output required; };
-struct SelectorRequest { OptimalFamily family; WitnessRequest selection; };
+struct Transition {
+    std::size_t producer;
+    Output required;
+};
+struct SelectorRequest {
+    OptimalFamily family;
+    WitnessRequest selection;
+};
 struct StrategyRequest {
     problem::ResolvedProblem problem;
     StrategyConfiguration configuration;
@@ -66,156 +87,200 @@ struct StrategyRequest {
     std::string strategy_version; // selected registration, frozen at preparation
     std::vector<TransformStepIdentity> lineage;
 };
-using CompleteFamilyVerifier = std::function<Diagnostics(const StrategyRequest&,const CompleteFamilyProposal&)>;
+using CompleteFamilyVerifier =
+    std::function<Diagnostics(const StrategyRequest &, const CompleteFamilyProposal &)>;
 
 struct LPPort {
-    using Request = LinearProgram; using Workspace = LPWorkspace;
-    static constexpr const char* name = "lp";
-    static Request snapshot(const Request& r) { return r; }
-    static ProgramOutcome run(Workspace& w, const Request& r, const ExecutionContext& c) { return w.solve(r,c); }
+    using Request = LinearProgram;
+    using Workspace = LPWorkspace;
+    static constexpr const char *name = "lp";
+    static Request snapshot(const Request &r) { return r; }
+    static ProgramOutcome run(Workspace &w, const Request &r, const ExecutionContext &c) {
+        return w.solve(r, c);
+    }
 };
 struct ConvexPort {
-    using Request = ConvexProgram; using Workspace = ConvexWorkspace;
-    static constexpr const char* name = "convex";
-    static Request snapshot(const Request& r) { return r; }
-    static ProgramOutcome run(Workspace& w, const Request& r, const ExecutionContext& c) { return w.solve(r,c); }
+    using Request = ConvexProgram;
+    using Workspace = ConvexWorkspace;
+    static constexpr const char *name = "convex";
+    static Request snapshot(const Request &r) { return r; }
+    static ProgramOutcome run(Workspace &w, const Request &r, const ExecutionContext &c) {
+        return w.solve(r, c);
+    }
 };
 struct GeometryPort {
-    using Request = OperationRequest; using Workspace = SetOperatorWorkspace;
-    static constexpr const char* name = "geometry";
-    static Request snapshot(const Request& r) { return r; }
-    static OperationOutcome run(Workspace& w, const Request& r, const ExecutionContext& c) { return w.apply(r,c); }
+    using Request = OperationRequest;
+    using Workspace = SetOperatorWorkspace;
+    static constexpr const char *name = "geometry";
+    static Request snapshot(const Request &r) { return r; }
+    static OperationOutcome run(Workspace &w, const Request &r, const ExecutionContext &c) {
+        return w.apply(r, c);
+    }
 };
 struct ConversionPort {
-    using Request = ConversionRequest; using Workspace = RepresentationConverterWorkspace;
-    static constexpr const char* name = "conversion";
-    static Request snapshot(const Request& r) { return r; }
-    static SetTransformOutcome run(Workspace& w, const Request& r, const ExecutionContext& c) { return w.convert(r,c); }
+    using Request = ConversionRequest;
+    using Workspace = RepresentationConverterWorkspace;
+    static constexpr const char *name = "conversion";
+    static Request snapshot(const Request &r) { return r; }
+    static SetTransformOutcome run(Workspace &w, const Request &r, const ExecutionContext &c) {
+        return w.convert(r, c);
+    }
 };
 struct ApproximationPort {
-    using Request = ApproximationRequest; using Workspace = SetApproximatorWorkspace;
-    static constexpr const char* name = "approximation";
-    static Request snapshot(const Request& r) { return r; }
-    static SetTransformOutcome run(Workspace& w, const Request& r, const ExecutionContext& c) { return w.approximate(r,c); }
+    using Request = ApproximationRequest;
+    using Workspace = SetApproximatorWorkspace;
+    static constexpr const char *name = "approximation";
+    static Request snapshot(const Request &r) { return r; }
+    static SetTransformOutcome run(Workspace &w, const Request &r, const ExecutionContext &c) {
+        return w.approximate(r, c);
+    }
 };
 struct SelectorPort {
-    using Request = SelectorRequest; using Workspace = WitnessSelectorWorkspace;
-    static constexpr const char* name = "selector";
-    static Request snapshot(const Request& r) { return r; }
-    static std::variant<WitnessSelection, Unsupported> run(Workspace& w, const Request& r, const ExecutionContext& c);
+    using Request = SelectorRequest;
+    using Workspace = WitnessSelectorWorkspace;
+    static constexpr const char *name = "selector";
+    static Request snapshot(const Request &r) { return r; }
+    static std::variant<WitnessSelection, Unsupported> run(Workspace &w, const Request &r,
+                                                           const ExecutionContext &c);
 };
 struct StrategyPort {
-    using Request = StrategyRequest; using Workspace = SynthesisWorkspace;
-    static constexpr const char* name = "strategy";
-    static Request snapshot(const Request&);
-    static SynthesisOutcome run(Workspace& w, const Request& r, const ExecutionContext& c);
+    using Request = StrategyRequest;
+    using Workspace = SynthesisWorkspace;
+    static constexpr const char *name = "strategy";
+    static Request snapshot(const Request &);
+    static SynthesisOutcome run(Workspace &w, const Request &r, const ExecutionContext &c);
 };
 
-template<class Port> struct Registration {
+template <class Port> struct Registration {
     Identity identity;
-    std::function<Capability(const typename Port::Request&, const Requirements&)> capabilities;
-    std::function<std::unique_ptr<typename Port::Workspace>(const typename Port::Request&)> factory;
+    std::function<Capability(const typename Port::Request &, const Requirements &)> capabilities;
+    std::function<std::unique_ptr<typename Port::Workspace>(const typename Port::Request &)>
+        factory;
     // The diagnostic may borrow this particular workspace; BoundWorkspace destroys
     // diagnostics before the mathematical workspace. No cross-creation state is shared.
-    std::function<std::unique_ptr<BasisDiagnostics>(const typename Port::Request&, typename Port::Workspace&)> basis_factory{};
-    std::function<AdmissionDeclaration(const RequestEnvelope&, const Requirements&)> admission_declaration{};
+    std::function<std::unique_ptr<BasisDiagnostics>(const typename Port::Request &,
+                                                    typename Port::Workspace &)>
+        basis_factory{};
+    std::function<AdmissionDeclaration(const RequestEnvelope &, const Requirements &)>
+        admission_declaration{};
 };
 namespace detail {
 struct PipelineAccess;
 struct ProviderAccess;
-Diagnostics check_request_policy(const Requirements&, bool has_basis, bool accepts_validated = false);
-Diagnostics check_offer(const Offer&, const Requirements&, bool has_basis, bool accepts_validated = false);
-Diagnostics check_transition(const Output&, const Output&);
+Diagnostics check_request_policy(const Requirements &, bool has_basis,
+                                 bool accepts_validated = false);
+Diagnostics check_offer(const Offer &, const Requirements &, bool has_basis,
+                        bool accepts_validated = false);
+Diagnostics check_transition(const Output &, const Output &);
 Rejection reject(Provenance, std::string field, std::string reason);
 Rejection capability_rejection(Provenance, Diagnostics);
 }
-template<class Port> class Registry {
+template <class Port> class Registry {
     std::map<std::string, Registration<Port>> entries_;
     friend struct detail::PipelineAccess;
     friend struct detail::ProviderAccess;
-public:
+
+  public:
     std::vector<Identity> identities() const {
         std::vector<Identity> result;
         result.reserve(entries_.size());
-        for (const auto& [id, entry] : entries_) {
+        for (const auto &[id, entry] : entries_) {
             static_cast<void>(id);
             result.push_back(entry.identity);
         }
         return result;
     }
     std::optional<Rejection> add(Registration<Port> entry) {
-        const Method requested{entry.identity.id,entry.identity.version};
-        Provenance provenance{Port::name,requested,entry.identity};
-        if (entry.identity.id.value.empty() || entry.identity.version.empty() || !entry.capabilities || !entry.factory)
-            return detail::reject(provenance,"registration","identity, version, capability and factory are required");
+        const Method requested{entry.identity.id, entry.identity.version};
+        Provenance provenance{Port::name, requested, entry.identity};
+        if (entry.identity.id.value.empty() || entry.identity.version.empty() ||
+            !entry.capabilities || !entry.factory)
+            return detail::reject(provenance, "registration",
+                                  "identity, version, capability and factory are required");
         const auto found = entries_.find(entry.identity.id.value);
         if (found != entries_.end()) {
             provenance.actual = found->second.identity;
-            return detail::reject(provenance,"registration","method ID already registered");
+            return detail::reject(provenance, "registration", "method ID already registered");
         }
-        entries_.emplace(entry.identity.id.value,std::move(entry));
+        entries_.emplace(entry.identity.id.value, std::move(entry));
         return {};
     }
 };
 // Borrows request and registry until synchronous preparation (including snapshot)
 // finishes. The producer must keep both stable throughout that interval.
-template<class Port> struct Selection {
-    const Registry<Port>& registry;
+template <class Port> struct Selection {
+    const Registry<Port> &registry;
     Method method;
-    const typename Port::Request& request;
+    const typename Port::Request &request;
     Requirements requirements;
     std::vector<Transition> inputs;
 };
-template<class Port> Selection<Port> select(const Registry<Port>& registry, Method method,
-    const typename Port::Request& request, Requirements requirements = {}, std::vector<Transition> inputs = {}) {
-    return {registry,std::move(method),request,std::move(requirements),std::move(inputs)};
+template <class Port>
+Selection<Port> select(const Registry<Port> &registry, Method method,
+                       const typename Port::Request &request, Requirements requirements = {},
+                       std::vector<Transition> inputs = {}) {
+    return {registry, std::move(method), request, std::move(requirements), std::move(inputs)};
 }
 
-template<class Port> class BoundWorkspace final : public ExclusiveWorkspace {
+template <class Port> class BoundWorkspace final : public ExclusiveWorkspace {
     std::shared_ptr<const typename Port::Request> request_;
     std::unique_ptr<typename Port::Workspace> workspace_;
     std::unique_ptr<BasisDiagnostics> basis_;
-    std::function<void(const LinearProgram&, const ProgramOutcome&)> lp_query_observer_;
+    std::function<void(const LinearProgram &, const ProgramOutcome &)> lp_query_observer_;
     friend struct detail::PipelineAccess;
     BoundWorkspace(std::shared_ptr<const typename Port::Request> request,
-        std::unique_ptr<typename Port::Workspace> workspace, std::unique_ptr<BasisDiagnostics> basis)
+                   std::unique_ptr<typename Port::Workspace> workspace,
+                   std::unique_ptr<BasisDiagnostics> basis)
         : request_(std::move(request)), workspace_(std::move(workspace)), basis_(std::move(basis)) {
-        if (!workspace_) throw std::logic_error("registered factory returned a null workspace");
+        if (!workspace_)
+            throw std::logic_error("registered factory returned a null workspace");
     }
-public:
-    auto run(const ExecutionContext& context) { return Port::run(*workspace_,*request_,context); }
-    template<class... Dependencies>
-        requires requires(typename Port::Workspace& workspace, const typename Port::Request& request,
-                          const ExecutionContext& context, Dependencies&&... dependencies) {
-            Port::run(workspace, request, context,
-                      std::forward<Dependencies>(dependencies)...);
+
+  public:
+    auto run(const ExecutionContext &context) { return Port::run(*workspace_, *request_, context); }
+    template <class... Dependencies>
+        requires requires(typename Port::Workspace &workspace,
+                          const typename Port::Request &request, const ExecutionContext &context,
+                          Dependencies &&...dependencies) {
+            Port::run(workspace, request, context, std::forward<Dependencies>(dependencies)...);
         }
-    auto run_with(const ExecutionContext& context, Dependencies&&... dependencies) {
-        return Port::run(*workspace_,*request_,context,
+    auto run_with(const ExecutionContext &context, Dependencies &&...dependencies) {
+        return Port::run(*workspace_, *request_, context,
                          std::forward<Dependencies>(dependencies)...);
     }
-    ProgramOutcome solve_dependency(const LinearProgram& program, const ExecutionContext& context)
-        requires std::is_same_v<Port,LPPort> {
-        auto outcome=workspace_->solve(program,context);
-        if(lp_query_observer_) lp_query_observer_(program,outcome);
+    ProgramOutcome solve_dependency(const LinearProgram &program, const ExecutionContext &context)
+        requires std::is_same_v<Port, LPPort>
+    {
+        auto outcome = workspace_->solve(program, context);
+        if (lp_query_observer_)
+            lp_query_observer_(program, outcome);
         return outcome;
     }
     void set_lp_query_observer(
-            std::function<void(const LinearProgram&, const ProgramOutcome&)> observer)
-        requires std::is_same_v<Port,LPPort> {
-        lp_query_observer_=std::move(observer);
+        std::function<void(const LinearProgram &, const ProgramOutcome &)> observer)
+        requires std::is_same_v<Port, LPPort>
+    {
+        lp_query_observer_ = std::move(observer);
     }
-    const BasisDiagnostics* basis() const { return basis_.get(); }
-    const WorkspaceIdentity& workspace_identity() const noexcept requires std::is_same_v<Port,LPPort> {
+    const BasisDiagnostics *basis() const { return basis_.get(); }
+    const WorkspaceIdentity &workspace_identity() const noexcept
+        requires std::is_same_v<Port, LPPort>
+    {
         return workspace_->workspace_identity();
     }
-    const std::optional<SolveAttempt>& last_attempt() const noexcept requires std::is_same_v<Port,LPPort> {
+    const std::optional<SolveAttempt> &last_attempt() const noexcept
+        requires std::is_same_v<Port, LPPort>
+    {
         return workspace_->last_attempt();
     }
-    const WorkspaceIdentity& workspace_identity() const noexcept requires std::is_same_v<Port,ConvexPort> {
+    const WorkspaceIdentity &workspace_identity() const noexcept
+        requires std::is_same_v<Port, ConvexPort>
+    {
         return workspace_->workspace_identity();
     }
-    const std::optional<ConvexSolveAttempt>& last_attempt() const noexcept requires std::is_same_v<Port,ConvexPort> {
+    const std::optional<ConvexSolveAttempt> &last_attempt() const noexcept
+        requires std::is_same_v<Port, ConvexPort>
+    {
         return workspace_->last_attempt();
     }
 };
@@ -224,87 +289,115 @@ public:
 // generated LP through a registry-selected LP workspace without exposing that
 // owned workspace or coupling the consumer to a concrete backend.
 class LPWorkspaceView final : public LPWorkspace {
-    BoundWorkspace<LPPort>& provider_;
-protected:
-    ProgramOutcome do_solve(const LinearProgram& program, const ExecutionContext& context) override {
-        return provider_.solve_dependency(program,context);
+    BoundWorkspace<LPPort> &provider_;
+
+  protected:
+    ProgramOutcome do_solve(const LinearProgram &program,
+                            const ExecutionContext &context) override {
+        return provider_.solve_dependency(program, context);
     }
-public:
-    explicit LPWorkspaceView(BoundWorkspace<LPPort>& provider) : provider_(provider) {}
+
+  public:
+    explicit LPWorkspaceView(BoundWorkspace<LPPort> &provider) : provider_(provider) {}
 };
 namespace detail {
-template<class Port> struct CheckedEntry {
-    const Registration<Port>* entry;
-    const typename Port::Request* request;
+template <class Port> struct CheckedEntry {
+    const Registration<Port> *entry{};
+    const typename Port::Request *request{};
     Requirements requirements;
     Provenance provenance;
     Offer offer;
 };
-template<class Port> struct PreparedEntry {
+template <class Port> struct PreparedEntry {
     Registration<Port> entry;
     std::shared_ptr<const typename Port::Request> request;
     Requirements requirements;
     Provenance provenance;
 };
 }
-template<class... Ports> class PreparedPipeline {
+template <class... Ports> class PreparedPipeline {
     std::tuple<detail::PreparedEntry<Ports>...> entries_;
     friend struct detail::PipelineAccess;
-    explicit PreparedPipeline(std::tuple<detail::PreparedEntry<Ports>...> entries) : entries_(std::move(entries)) {}
-public:
-    std::array<Provenance,sizeof...(Ports)> provenance() const {
-        return std::apply([](const auto&... entries) { return std::array<Provenance,sizeof...(Ports)>{entries.provenance...}; },entries_);
+    explicit PreparedPipeline(std::tuple<detail::PreparedEntry<Ports>...> entries)
+        : entries_(std::move(entries)) {}
+
+  public:
+    std::array<Provenance, sizeof...(Ports)> provenance() const {
+        return std::apply(
+            [](const auto &...entries) {
+                return std::array<Provenance, sizeof...(Ports)>{entries.provenance...};
+            },
+            entries_);
     }
     std::tuple<std::unique_ptr<BoundWorkspace<Ports>>...> create() const;
 };
-template<class... Ports> class CheckedPipeline {
+template <class... Ports> class CheckedPipeline {
     std::tuple<detail::CheckedEntry<Ports>...> entries_;
     friend struct detail::PipelineAccess;
     friend struct detail::ProviderAccess;
-    explicit CheckedPipeline(std::tuple<detail::CheckedEntry<Ports>...> entries) : entries_(std::move(entries)) {}
-public:
+    explicit CheckedPipeline(std::tuple<detail::CheckedEntry<Ports>...> entries)
+        : entries_(std::move(entries)) {}
+
+  public:
     // For registered planner composition. Input borrows remain live and unchanged
     // until snapshot returns; CheckedPipeline is not a retained prepared result.
     PreparedPipeline<Ports...> snapshot() const;
     std::vector<Provenance> provenance() const {
-        return std::apply([](const auto&... e) { return std::vector<Provenance>{e.provenance...}; },entries_);
+        return std::apply([](const auto &...e) { return std::vector<Provenance>{e.provenance...}; },
+                          entries_);
     }
 };
 namespace detail {
 struct PipelineAccess {
-    template<class Port> static std::unique_ptr<BoundWorkspace<Port>> create(const PreparedEntry<Port>& e) {
+    template <class Port>
+    static std::unique_ptr<BoundWorkspace<Port>> create(const PreparedEntry<Port> &e) {
         auto workspace = e.entry.factory(*e.request);
-        if (!workspace) throw std::logic_error("registered factory returned a null workspace");
-        auto basis = e.requirements.basis_diagnostics ? e.entry.basis_factory(*e.request,*workspace) : nullptr;
-        if (e.requirements.basis_diagnostics && !basis) throw std::logic_error("basis factory returned null");
-        return std::unique_ptr<BoundWorkspace<Port>>(new BoundWorkspace<Port>(e.request,std::move(workspace),std::move(basis)));
+        if (!workspace)
+            throw std::logic_error("registered factory returned a null workspace");
+        auto basis = e.requirements.basis_diagnostics
+                         ? e.entry.basis_factory(*e.request, *workspace)
+                         : nullptr;
+        if (e.requirements.basis_diagnostics && !basis)
+            throw std::logic_error("basis factory returned null");
+        return std::unique_ptr<BoundWorkspace<Port>>(
+            new BoundWorkspace<Port>(e.request, std::move(workspace), std::move(basis)));
     }
-    template<class Port> static std::unique_ptr<BoundWorkspace<Port>> bind(
-        std::shared_ptr<const typename Port::Request> request, std::unique_ptr<typename Port::Workspace> workspace) {
-        return std::unique_ptr<BoundWorkspace<Port>>(new BoundWorkspace<Port>(std::move(request),std::move(workspace),nullptr));
+    template <class Port>
+    static std::unique_ptr<BoundWorkspace<Port>>
+    bind(std::shared_ptr<const typename Port::Request> request,
+         std::unique_ptr<typename Port::Workspace> workspace) {
+        return std::unique_ptr<BoundWorkspace<Port>>(
+            new BoundWorkspace<Port>(std::move(request), std::move(workspace), nullptr));
     }
-    template<class Port> static PreparedEntry<Port> snapshot_entry(const CheckedEntry<Port>& e) {
-        auto request=Port::snapshot(*e.request);
-        if constexpr (std::is_same_v<Port,StrategyPort>)
-            request.strategy_version=e.provenance.actual->version;
-        return {*e.entry,std::make_shared<const typename Port::Request>(std::move(request)),e.requirements,e.provenance};
+    template <class Port> static PreparedEntry<Port> snapshot_entry(const CheckedEntry<Port> &e) {
+        auto request = Port::snapshot(*e.request);
+        if constexpr (std::is_same_v<Port, StrategyPort>)
+            request.strategy_version = e.provenance.actual->version;
+        return {*e.entry, std::make_shared<const typename Port::Request>(std::move(request)),
+                e.requirements, e.provenance};
     }
-    template<class... Ports> static PreparedPipeline<Ports...> snapshot(const CheckedPipeline<Ports...>& checked) {
-        return std::apply([](const auto&... e) {
-            return PreparedPipeline<Ports...>{std::tuple<PreparedEntry<Ports>...>{
-                snapshot_entry(e)...}};
-        },checked.entries_);
+    template <class... Ports>
+    static PreparedPipeline<Ports...> snapshot(const CheckedPipeline<Ports...> &checked) {
+        return std::apply(
+            [](const auto &...e) {
+                return PreparedPipeline<Ports...>{
+                    std::tuple<PreparedEntry<Ports>...>{snapshot_entry(e)...}};
+            },
+            checked.entries_);
     }
-    template<class Port> static std::variant<CheckedEntry<Port>,Rejection> check_entry(const Selection<Port>& s) {
-        Provenance provenance{Port::name,s.method,{}};
+    template <class Port>
+    static std::variant<CheckedEntry<Port>, Rejection> check_entry(const Selection<Port> &s) {
+        Provenance provenance{Port::name, s.method, {}};
         const auto found = s.registry.entries_.find(s.method.id.value);
-        if (found == s.registry.entries_.end()) return reject(provenance,"method","unknown method ID");
-        const auto& entry = found->second;
+        if (found == s.registry.entries_.end())
+            return reject(provenance, "method", "unknown method ID");
+        const auto &entry = found->second;
         provenance.actual = entry.identity;
         if (s.method.version && *s.method.version != entry.identity.version)
-            return reject(provenance,"method.version","requested version is unavailable");
-        const auto capability = entry.capabilities(s.request,s.requirements);
-        if (const auto* diagnostics = std::get_if<Diagnostics>(&capability)) return capability_rejection(provenance,*diagnostics);
+            return reject(provenance, "method.version", "requested version is unavailable");
+        const auto capability = entry.capabilities(s.request, s.requirements);
+        if (const auto *diagnostics = std::get_if<Diagnostics>(&capability))
+            return capability_rejection(provenance, *diagnostics);
         const auto offer = std::get<Offer>(capability);
         constexpr bool accepts_validated = [] {
             if constexpr (requires { Port::accepts_validated_assurance; })
@@ -312,101 +405,161 @@ struct PipelineAccess {
             else
                 return false;
         }();
-        auto diagnostics = check_offer(offer,s.requirements,static_cast<bool>(entry.basis_factory),accepts_validated);
-        if (!diagnostics.empty()) return Rejection{provenance,std::move(diagnostics)};
-        return CheckedEntry<Port>{&entry,&s.request,s.requirements,provenance,offer};
+        auto diagnostics = check_offer(offer, s.requirements,
+                                       static_cast<bool>(entry.basis_factory), accepts_validated);
+        if (!diagnostics.empty())
+            return Rejection{provenance, std::move(diagnostics)};
+        return CheckedEntry<Port>{&entry, &s.request, s.requirements, provenance, offer};
     }
-    template<class... Ports> static std::variant<CheckedPipeline<Ports...>,Rejection> check(const Selection<Ports>&... s) {
-        if constexpr (sizeof...(Ports)==0) {
+    template <class... Ports>
+    static std::variant<CheckedPipeline<Ports...>, Rejection> check(const Selection<Ports> &...s) {
+        if constexpr (sizeof...(Ports) == 0) {
             // A provider-only strategy has no fixed requests or transitions.
             // Do not instantiate unused transition bookkeeping for this case.
             return CheckedPipeline<>{std::tuple<>{}};
         } else {
             auto entries = std::tuple{check_entry(s)...};
             std::optional<Rejection> rejection;
-            std::apply([&](const auto&... e) {
-                ([&] { if (!rejection) if (const auto* r = std::get_if<Rejection>(&e)) rejection = *r; }(),...);
-            },entries);
-            if (rejection) return *rejection;
-            const auto offers = std::apply([](const auto&... e) {
-                return std::array<Offer,sizeof...(Ports)>{std::get<CheckedEntry<Ports>>(e).offer...};
-            },entries);
-            const auto provenances = std::apply([](const auto&... e) {
-                return std::array<Provenance,sizeof...(Ports)>{std::get<CheckedEntry<Ports>>(e).provenance...};
-            },entries);
+            std::apply(
+                [&](const auto &...e) {
+                    (
+                        [&] {
+                            if (!rejection)
+                                if (const auto *r = std::get_if<Rejection>(&e))
+                                    rejection = *r;
+                        }(),
+                        ...);
+                },
+                entries);
+            if (rejection)
+                return *rejection;
+            const auto offers = std::apply(
+                [](const auto &...e) {
+                    return std::array<Offer, sizeof...(Ports)>{
+                        std::get<CheckedEntry<Ports>>(e).offer...};
+                },
+                entries);
+            const auto provenances = std::apply(
+                [](const auto &...e) {
+                    return std::array<Provenance, sizeof...(Ports)>{
+                        std::get<CheckedEntry<Ports>>(e).provenance...};
+                },
+                entries);
             std::size_t index = 0;
-            ([&] {
-                for (const auto& transition : s.inputs) {
-                    if (rejection) break;
-                    if (transition.producer >= index) {
-                        rejection = reject(provenances[index],"transition.producer","producer must precede its consumer");
-                        break;
+            (
+                [&] {
+                    for (const auto &transition : s.inputs) {
+                        if (rejection)
+                            break;
+                        if (transition.producer >= index) {
+                            rejection = reject(provenances[index], "transition.producer",
+                                               "producer must precede its consumer");
+                            break;
+                        }
+                        auto diagnostics = check_transition(offers[transition.producer].output,
+                                                            transition.required);
+                        if (!diagnostics.empty())
+                            rejection = Rejection{provenances[index], std::move(diagnostics)};
                     }
-                    auto diagnostics = check_transition(offers[transition.producer].output,transition.required);
-                    if (!diagnostics.empty()) rejection = Rejection{provenances[index],std::move(diagnostics)};
-                }
-                ++index;
-            }(),...);
-            if (rejection) return *rejection;
-            return std::apply([](auto&... e) {
-                return CheckedPipeline<Ports...>{std::tuple<CheckedEntry<Ports>...>{std::get<CheckedEntry<Ports>>(std::move(e))...}};
-            },entries);
+                    ++index;
+                }(),
+                ...);
+            if (rejection)
+                return *rejection;
+            return std::apply(
+                [](auto &...e) {
+                    return CheckedPipeline<Ports...>{std::tuple<CheckedEntry<Ports>...>{
+                        std::get<CheckedEntry<Ports>>(std::move(e))...}};
+                },
+                entries);
         }
     }
 };
 }
-template<class... Ports> auto check_pipeline(const Selection<Ports>&... selections) {
+template <class... Ports> auto check_pipeline(const Selection<Ports> &...selections) {
     return detail::PipelineAccess::check(selections...);
 }
-template<class... Ports> auto prepare_pipeline(const Selection<Ports>&... selections)
-    -> std::variant<PreparedPipeline<Ports...>,Rejection> {
+template <class... Ports>
+auto prepare_pipeline(const Selection<Ports> &...selections)
+    -> std::variant<PreparedPipeline<Ports...>, Rejection> {
     auto checked = check_pipeline(selections...);
-    if (auto* rejection = std::get_if<Rejection>(&checked)) return *rejection;
+    if (auto *rejection = std::get_if<Rejection>(&checked))
+        return *rejection;
     return std::get<CheckedPipeline<Ports...>>(checked).snapshot();
 }
-template<class... Ports> PreparedPipeline<Ports...> CheckedPipeline<Ports...>::snapshot() const {
+template <class... Ports> PreparedPipeline<Ports...> CheckedPipeline<Ports...>::snapshot() const {
     return detail::PipelineAccess::snapshot(*this);
 }
-template<class... Ports> std::tuple<std::unique_ptr<BoundWorkspace<Ports>>...> PreparedPipeline<Ports...>::create() const {
-    return std::apply([](const auto&... e) { return std::tuple<std::unique_ptr<BoundWorkspace<Ports>>...>{detail::PipelineAccess::create(e)...}; },entries_);
+template <class... Ports>
+std::tuple<std::unique_ptr<BoundWorkspace<Ports>>...> PreparedPipeline<Ports...>::create() const {
+    return std::apply(
+        [](const auto &...e) {
+            return std::tuple<std::unique_ptr<BoundWorkspace<Ports>>...>{
+                detail::PipelineAccess::create(e)...};
+        },
+        entries_);
 }
 
 class StrategyPlan {
-    using Factory = std::function<std::unique_ptr<SynthesisWorkspace>(const StrategyRequest&,const Requirements&)>;
+    using Factory = std::function<std::unique_ptr<SynthesisWorkspace>(const StrategyRequest &,
+                                                                      const Requirements &)>;
     std::function<Factory()> snapshot_;
     std::vector<Provenance> provenance_;
     StrategyPlan(std::function<Factory()> snapshot, std::vector<Provenance> provenance)
         : snapshot_(std::move(snapshot)), provenance_(std::move(provenance)) {}
-    template<class... Ports,class Builder> friend StrategyPlan compose_strategy(CheckedPipeline<Ports...>,Builder);
+    template <class... Ports, class Builder>
+    friend StrategyPlan compose_strategy(CheckedPipeline<Ports...>, Builder);
     friend class StrategyRegistry;
     friend struct detail::ProviderAccess;
 };
-template<class... Ports,class Builder> StrategyPlan compose_strategy(CheckedPipeline<Ports...> checked, Builder builder) {
+template <class... Ports, class Builder>
+StrategyPlan compose_strategy(CheckedPipeline<Ports...> checked, Builder builder) {
     auto provenance = checked.provenance();
-    return StrategyPlan{[checked=std::move(checked),builder=std::move(builder)]() -> StrategyPlan::Factory {
-        auto prepared = checked.snapshot();
-        return [prepared=std::move(prepared),builder](const StrategyRequest& request,const Requirements& requirements) -> std::unique_ptr<SynthesisWorkspace> {
-            return builder(prepared.create(),request,requirements);
-        };
-    },std::move(provenance)};
+    return StrategyPlan{
+        [checked = std::move(checked), builder = std::move(builder)]() -> StrategyPlan::Factory {
+            auto prepared = checked.snapshot();
+            return [prepared = std::move(prepared), builder](
+                       const StrategyRequest &request,
+                       const Requirements &requirements) -> std::unique_ptr<SynthesisWorkspace> {
+                return builder(prepared.create(), request, requirements);
+            };
+        },
+        std::move(provenance)};
 }
 struct StrategyRegistration {
-    enum class ConfigurationSlot { lp, convex, hull, geometry, converter,
-        approximation, selector, representation };
+    enum class ConfigurationSlot {
+        lp,
+        convex,
+        hull,
+        geometry,
+        converter,
+        approximation,
+        selector,
+        representation
+    };
     Identity identity;
-    std::function<Capability(const StrategyRequest&,const Requirements&)> capabilities;
+    std::function<Capability(const StrategyRequest &, const Requirements &)> capabilities;
     // Pure planning only: declare every required typed dependency with
     // check_pipeline, then compose_strategy. No prepare/create/native work here.
-    std::function<std::variant<StrategyPlan,Rejection>(const StrategyRequest&,const Requirements&)> planner;
-    struct CompleteFamilyVerifierKey { ModuleId id; std::string version; } complete_family_verifier{};
+    std::function<std::variant<StrategyPlan, Rejection>(const StrategyRequest &,
+                                                        const Requirements &)>
+        planner;
+    struct CompleteFamilyVerifierKey {
+        ModuleId id;
+        std::string version;
+    } complete_family_verifier{};
     // Pure description of the ordered transformations this prepared strategy
     // expects to execute. Frozen into StrategyRequest before workspace creation.
     // Omitted callbacks preserve the empty-lineage contract.
-    std::function<std::vector<TransformStepIdentity>(const StrategyRequest&)> expected_lineage{};
-    struct PartialFamilyVerifierKey { ModuleId id; std::string version; } partial_family_verifier{};
+    std::function<std::vector<TransformStepIdentity>(const StrategyRequest &)> expected_lineage{};
+    struct PartialFamilyVerifierKey {
+        ModuleId id;
+        std::string version;
+    } partial_family_verifier{};
     // Optional pure selector for request-profile-specific complete-family proof
     // authority. When present it replaces (never falls back to) the static key.
-    std::function<std::optional<CompleteFamilyVerifierKey>(const StrategyRequest&)> complete_family_verifier_selector{};
+    std::function<std::optional<CompleteFamilyVerifierKey>(const StrategyRequest &)>
+        complete_family_verifier_selector{};
     // When set, identifies configuration fields consumed by this registration.
     // Unset retains the conservative legacy rule that every populated slot is active.
     std::optional<std::vector<ConfigurationSlot>> active_configuration_slots{};
@@ -421,21 +574,27 @@ class VerifiedStrategyWorkspace final : public SynthesisWorkspace {
     std::shared_ptr<const CompiledPartialFamilyVerifier> partial_verifier_;
     VerifiedFamilyAuthority authority_;
     std::optional<VerifiedPartialFamilyAuthority> partial_authority_;
-public:
+
+  public:
     VerifiedStrategyWorkspace(std::unique_ptr<SynthesisWorkspace> workspace,
-        std::shared_ptr<const StrategyRequest> request,std::shared_ptr<const CompiledCompleteFamilyVerifier> verifier,
-        VerifiedFamilyAuthority authority,std::shared_ptr<const CompiledPartialFamilyVerifier> partial_verifier,
-        std::optional<VerifiedPartialFamilyAuthority> partial_authority)
-        :workspace_(std::move(workspace)),request_(std::move(request)),verifier_(std::move(verifier)),
-         partial_verifier_(std::move(partial_verifier)),authority_(std::move(authority)),
-         partial_authority_(std::move(partial_authority)) {}
-    SynthesisResult solve(const problem::ResolvedProblem&,const FamilyRequest&,const ExecutionContext&) override;
+                              std::shared_ptr<const StrategyRequest> request,
+                              std::shared_ptr<const CompiledCompleteFamilyVerifier> verifier,
+                              VerifiedFamilyAuthority authority,
+                              std::shared_ptr<const CompiledPartialFamilyVerifier> partial_verifier,
+                              std::optional<VerifiedPartialFamilyAuthority> partial_authority)
+        : workspace_(std::move(workspace)), request_(std::move(request)),
+          verifier_(std::move(verifier)), partial_verifier_(std::move(partial_verifier)),
+          authority_(std::move(authority)), partial_authority_(std::move(partial_authority)) {}
+    SynthesisResult solve(const problem::ResolvedProblem &, const FamilyRequest &,
+                          const ExecutionContext &) override;
 };
 }
 class PreparedStrategy {
     std::shared_ptr<const StrategyRequest> request_;
     Requirements requirements_;
-    std::function<std::unique_ptr<SynthesisWorkspace>(const StrategyRequest&,const Requirements&)> factory_;
+    std::function<std::unique_ptr<SynthesisWorkspace>(const StrategyRequest &,
+                                                      const Requirements &)>
+        factory_;
     std::shared_ptr<const detail::CompiledCompleteFamilyVerifier> complete_family_verifier_;
     std::optional<detail::VerifiedFamilyAuthority> family_authority_;
     std::shared_ptr<const detail::CompiledPartialFamilyVerifier> partial_family_verifier_;
@@ -443,27 +602,35 @@ class PreparedStrategy {
     std::vector<Provenance> provenance_;
     friend class StrategyRegistry;
     PreparedStrategy(std::shared_ptr<const StrategyRequest> request, Requirements requirements,
-        std::function<std::unique_ptr<SynthesisWorkspace>(const StrategyRequest&,const Requirements&)> factory,
-        std::shared_ptr<const detail::CompiledCompleteFamilyVerifier> verifier,std::optional<detail::VerifiedFamilyAuthority> authority,
-        std::shared_ptr<const detail::CompiledPartialFamilyVerifier> partial_verifier,
-        std::optional<detail::VerifiedPartialFamilyAuthority> partial_authority,std::vector<Provenance> provenance)
-        : request_(std::move(request)),requirements_(std::move(requirements)),factory_(std::move(factory)),
-          complete_family_verifier_(std::move(verifier)),family_authority_(std::move(authority)),
-          partial_family_verifier_(std::move(partial_verifier)),partial_family_authority_(std::move(partial_authority)),
+                     std::function<std::unique_ptr<SynthesisWorkspace>(const StrategyRequest &,
+                                                                       const Requirements &)>
+                         factory,
+                     std::shared_ptr<const detail::CompiledCompleteFamilyVerifier> verifier,
+                     std::optional<detail::VerifiedFamilyAuthority> authority,
+                     std::shared_ptr<const detail::CompiledPartialFamilyVerifier> partial_verifier,
+                     std::optional<detail::VerifiedPartialFamilyAuthority> partial_authority,
+                     std::vector<Provenance> provenance)
+        : request_(std::move(request)), requirements_(std::move(requirements)),
+          factory_(std::move(factory)), complete_family_verifier_(std::move(verifier)),
+          family_authority_(std::move(authority)),
+          partial_family_verifier_(std::move(partial_verifier)),
+          partial_family_authority_(std::move(partial_authority)),
           provenance_(std::move(provenance)) {}
-public:
-    const std::vector<Provenance>& provenance() const { return provenance_; }
-    const Requirements& requirements() const { return requirements_; }
+
+  public:
+    const std::vector<Provenance> &provenance() const { return provenance_; }
+    const Requirements &requirements() const { return requirements_; }
     // Identity expectations frozen during preparation, including actual
     // registered strategy version and expected transformation lineage.
     SynthesisIdentityExpectation expected_synthesis_identity() const;
     std::unique_ptr<BoundWorkspace<StrategyPort>> create() const {
-        auto workspace=factory_(*request_,requirements_);
-        if((complete_family_verifier_&&family_authority_)||(partial_family_verifier_&&partial_family_authority_))
-            workspace=std::make_unique<detail::VerifiedStrategyWorkspace>(std::move(workspace),request_,
-                complete_family_verifier_,family_authority_.value(),
-                partial_family_verifier_,partial_family_authority_);
-        return detail::PipelineAccess::bind<StrategyPort>(request_,std::move(workspace));
+        auto workspace = factory_(*request_, requirements_);
+        if ((complete_family_verifier_ && family_authority_) ||
+            (partial_family_verifier_ && partial_family_authority_))
+            workspace = std::make_unique<detail::VerifiedStrategyWorkspace>(
+                std::move(workspace), request_, complete_family_verifier_,
+                family_authority_.value(), partial_family_verifier_, partial_family_authority_);
+        return detail::PipelineAccess::bind<StrategyPort>(request_, std::move(workspace));
     }
 };
 enum class PreparationObservationStatus { not_entered, accepted, rejected, threw };
@@ -475,26 +642,30 @@ struct StrategyPreparationObservation {
 };
 
 class StrategyRegistry {
-    std::map<std::string,StrategyRegistration> entries_;
-    std::variant<PreparedStrategy,Rejection> prepare_impl(const StrategyRequest&,
-        const Requirements&,std::optional<std::string>,StrategyPreparationObservation*) const;
-public:
+    std::map<std::string, StrategyRegistration> entries_;
+    std::variant<PreparedStrategy, Rejection> prepare_impl(const StrategyRequest &,
+                                                           const Requirements &,
+                                                           std::optional<std::string>,
+                                                           StrategyPreparationObservation *) const;
+
+  public:
     std::vector<Identity> identities() const {
         std::vector<Identity> result;
         result.reserve(entries_.size());
-        for (const auto& [id, entry] : entries_) {
+        for (const auto &[id, entry] : entries_) {
             static_cast<void>(id);
             result.push_back(entry.identity);
         }
         return result;
     }
-    std::optional<std::vector<StrategyRegistration::ConfigurationSlot>> active_configuration_slots(
-        const ModuleId&) const;
+    std::optional<std::vector<StrategyRegistration::ConfigurationSlot>>
+    active_configuration_slots(const ModuleId &) const;
     std::optional<Rejection> add(StrategyRegistration);
-    std::variant<PreparedStrategy,Rejection> prepare(const StrategyRequest&, const Requirements& = {},
-        std::optional<std::string> version = {}) const;
-    std::variant<PreparedStrategy,Rejection> prepare_observed(const StrategyRequest&,
-        const Requirements&,std::optional<std::string> version,
-        StrategyPreparationObservation&) const;
+    std::variant<PreparedStrategy, Rejection>
+    prepare(const StrategyRequest &, const Requirements & = {},
+            std::optional<std::string> version = {}) const;
+    std::variant<PreparedStrategy, Rejection>
+    prepare_observed(const StrategyRequest &, const Requirements &,
+                     std::optional<std::string> version, StrategyPreparationObservation &) const;
 };
 } // namespace csl::registry

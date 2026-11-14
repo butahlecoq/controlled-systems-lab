@@ -36,7 +36,8 @@ void vector(std::ostream &out, std::string_view id, std::string_view kind,
 std::string csv(std::string_view value) {
     std::string result = "\"";
     for (const char character : value) {
-        if (character == '"') result += '"';
+        if (character == '"')
+            result += '"';
         result += character;
     }
     return result + '"';
@@ -64,7 +65,8 @@ int main(int argc, char **argv) try {
         output << std::setprecision(std::numeric_limits<double>::max_digits10)
                << "model,kind,row,column,value\n";
         coordinate_records << "model,kind,index,name,unit\n";
-        metadata_records << "model,title,source_title,source_sha256,source_locator,source_qualification,time_step,time_unit\n";
+        metadata_records
+            << "model,title,source_title,source_sha256,source_locator,source_qualification,time_step,time_unit\n";
     }
     std::size_t models = 0, coordinates = 0;
     std::set<std::string> ids;
@@ -92,13 +94,14 @@ int main(int argc, char **argv) try {
                 vector(output, info.id, "nominal_w", *data.nominal_external);
             vector(output, info.id, "zero_input_first_step", next);
             metadata_records << csv(info.id) << ',' << csv(info.title) << ','
-                << csv(info.source.title) << ',' << csv(info.source.sha256) << ','
-                << csv(info.source.locator) << ',' << csv(info.source.qualification) << ','
-                << data.time_step.value << ',' << csv(data.time_step.unit) << '\n';
+                             << csv(info.source.title) << ',' << csv(info.source.sha256) << ','
+                             << csv(info.source.locator) << ',' << csv(info.source.qualification)
+                             << ',' << data.time_step.value << ',' << csv(data.time_step.unit)
+                             << '\n';
             const auto write_coordinates = [&](std::string_view kind, const auto &items) {
                 for (std::size_t i = 0; i < items.size(); ++i)
                     coordinate_records << csv(info.id) << ',' << kind << ',' << i << ','
-                        << csv(items[i].name) << ',' << csv(items[i].unit) << '\n';
+                                       << csv(items[i].name) << ',' << csv(items[i].unit) << '\n';
             };
             write_coordinates("state", data.states);
             write_coordinates("control", data.controls);

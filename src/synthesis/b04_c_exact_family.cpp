@@ -18,9 +18,8 @@ bool decimal_syntax(std::string_view value) {
         value.remove_prefix(1);
     if (value.empty())
         return false;
-    return std::all_of(value.begin(), value.end(), [](char digit) {
-        return digit >= '0' && digit <= '9';
-    });
+    return std::all_of(value.begin(), value.end(),
+                       [](char digit) { return digit >= '0' && digit <= '9'; });
 }
 
 bool exceeds_decimal_bit_cap(std::string_view value) {
@@ -40,14 +39,14 @@ bool exceeds_decimal_bit_cap(std::string_view value) {
 
 } // namespace
 
-HistoryMembership contains_exact_history(
-    const JointRelation& relation, std::span<const RationalCoordinate> history) {
+HistoryMembership contains_exact_history(const JointRelation &relation,
+                                         std::span<const RationalCoordinate> history) {
     if (relation.representation.value != exact_family_representation)
         return HistoryMembership::unsupported_relation;
     if (relation.coordinates != JointCoordinates{{4, 1, 0}, 16})
         return HistoryMembership::invalid_input;
-    const auto* exact = dynamic_cast<const detail::b04_c::ExactFamilyPayload*>(
-        relation.payload.get());
+    const auto *exact =
+        dynamic_cast<const detail::b04_c::ExactFamilyPayload *>(relation.payload.get());
     if (!exact)
         return HistoryMembership::unsupported_relation;
     if (history.size() != detail::b04_c::history_dimension)
@@ -59,7 +58,7 @@ HistoryMembership contains_exact_history(
     try {
         point.reserve(history.size());
         constexpr std::size_t max_decimal_digits = 2500;
-        for (const auto& coordinate : history) {
+        for (const auto &coordinate : history) {
             if (coordinate.numerator.empty() || coordinate.denominator.empty() ||
                 coordinate.numerator.size() > max_decimal_digits ||
                 coordinate.denominator.size() > max_decimal_digits)
@@ -84,18 +83,18 @@ HistoryMembership contains_exact_history(
                 return HistoryMembership::resource_limit;
             point.push_back(std::move(value));
         }
-    } catch (const std::bad_alloc&) {
+    } catch (const std::bad_alloc &) {
         return HistoryMembership::resource_limit;
-    } catch (const std::length_error&) {
+    } catch (const std::length_error &) {
         return HistoryMembership::resource_limit;
     }
 
     detail::b04_c::Membership membership;
     try {
         membership = exact->contains(point, budget);
-    } catch (const std::bad_alloc&) {
+    } catch (const std::bad_alloc &) {
         return HistoryMembership::resource_limit;
-    } catch (const std::length_error&) {
+    } catch (const std::length_error &) {
         return HistoryMembership::resource_limit;
     }
     switch (membership) {

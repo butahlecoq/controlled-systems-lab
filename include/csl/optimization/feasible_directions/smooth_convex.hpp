@@ -45,8 +45,14 @@ struct SmoothStationary {
 };
 
 enum class SmoothStopReason {
-    cancelled, deadline_expired, resource_limit, callback_failure, numerical_failure,
-    line_search_stall, operation_rejected, contract_rejected
+    cancelled,
+    deadline_expired,
+    resource_limit,
+    callback_failure,
+    numerical_failure,
+    line_search_stall,
+    operation_rejected,
+    contract_rejected
 };
 
 struct SmoothStopped {
@@ -59,8 +65,8 @@ struct SmoothStopped {
 
 using SmoothOutcome = std::variant<SmoothStationary, SmoothStopped, Diagnostics, Unsupported>;
 
-SmoothOutcome minimize(const LinearProgram& feasible_set, const SmoothObjective& objective,
-    std::span<const double> feasible_start, LPWorkspace& projection_workspace,
-    const ExecutionContext& context, SmoothPolicy policy = {});
+SmoothOutcome minimize(const LinearProgram &feasible_set, const SmoothObjective &objective,
+                       std::span<const double> feasible_start, LPWorkspace &projection_workspace,
+                       const ExecutionContext &context, SmoothPolicy policy = {});
 
 } // namespace csl::optimization::feasible_directions

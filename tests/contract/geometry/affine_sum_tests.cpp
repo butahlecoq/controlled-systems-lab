@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/geometry/affine_sum.hpp>
 #include <csl/geometry/basis_reuse_reducer.hpp>
@@ -21,283 +20,372 @@
 
 using namespace csl;
 using namespace csl::registry;
-static_assert(!std::is_constructible_v<AffineImage,FiniteDomain,Matrix,Vector>);
-static_assert(!std::is_constructible_v<AffineImage,MixedDomain,Matrix,Vector>);
+static_assert(!std::is_constructible_v<AffineImage, FiniteDomain, Matrix, Vector>);
+static_assert(!std::is_constructible_v<AffineImage, MixedDomain, Matrix, Vector>);
 namespace {
-template<class T,class... R> T take(std::variant<T,R...> value) {
-    if (!std::holds_alternative<T>(value)) std::visit([](const auto& failure) {
-        if constexpr (requires { failure.field; failure.explanation; })
-            std::cerr << failure.field << ": " << failure.explanation << '\n';
-        else if constexpr (requires { failure.diagnostics.begin()->field; })
-            for (const auto& item : failure.diagnostics) std::cerr << item.field << ": " << item.explanation << '\n';
-    }, value);
+template <class T, class... R> T take(std::variant<T, R...> value) {
+    if (!std::holds_alternative<T>(value))
+        std::visit(
+            [](const auto &failure) {
+                if constexpr (requires {
+                                  failure.field;
+                                  failure.explanation;
+                              })
+                    std::cerr << failure.field << ": " << failure.explanation << '\n';
+                else if constexpr (requires { failure.diagnostics.begin()->field; })
+                    for (const auto &item : failure.diagnostics)
+                        std::cerr << item.field << ": " << item.explanation << '\n';
+            },
+            value);
     REQUIRE(std::holds_alternative<T>(value));
     return std::get<T>(std::move(value));
 }
-template<class Port> PreparedProvider<Port> provider(Registration<Port> entry,Requirements requirements={}) {
-    if constexpr (std::is_same_v<Port,LPPort>) requirements.output.representation={"csl.program-result.v1"};
-    const Method method{entry.identity.id,entry.identity.version};
+template <class Port>
+PreparedProvider<Port> provider(Registration<Port> entry, Requirements requirements = {}) {
+    if constexpr (std::is_same_v<Port, LPPort>)
+        requirements.output.representation = {"csl.program-result.v1"};
+    const Method method{entry.identity.id, entry.identity.version};
     Registry<Port> registry;
     REQUIRE_FALSE(registry.add(std::move(entry)).has_value());
-    return take(prepare_provider(select_provider(registry,method,std::move(requirements))));
+    return take(prepare_provider(select_provider(registry, method, std::move(requirements))));
 }
 class KeepAllHullWorkspace final : public geometry::HullReducerWorkspace {
-public:
-    geometry::HullReductionResult reduce(const geometry::PointCloud& cloud, LPWorkspace&,
-            const ExecutionContext&) override {
+  public:
+    geometry::HullReductionResult reduce(const geometry::PointCloud &cloud, LPWorkspace &,
+                                         const ExecutionContext &) override {
         std::vector<std::size_t> retained(cloud.points.size());
-        std::iota(retained.begin(),retained.end(),std::size_t{0});
-        return geometry::HullReduction{geometry::ReductionStatus::complete,std::move(retained),{},0,{}};
+        std::iota(retained.begin(), retained.end(), std::size_t{0});
+        return geometry::HullReduction{
+            geometry::ReductionStatus::complete, std::move(retained), {}, 0, {}};
     }
 };
 class FixedReductionHullWorkspace final : public geometry::HullReducerWorkspace {
     geometry::HullReduction reduction_;
-public:
+
+  public:
     explicit FixedReductionHullWorkspace(geometry::HullReduction reduction)
         : reduction_(std::move(reduction)) {}
-    geometry::HullReductionResult reduce(const geometry::PointCloud&, LPWorkspace&,
-            const ExecutionContext&) override { return reduction_; }
+    geometry::HullReductionResult reduce(const geometry::PointCloud &, LPWorkspace &,
+                                         const ExecutionContext &) override {
+        return reduction_;
+    }
 };
-Registration<HullReducerPort> make_fixed_reduction_hull_registration(geometry::HullReduction reduction) {
-    return {{{"test.hull.fixed-reduction"},"1"},
-        [](const geometry::PointCloud&,const Requirements&) -> Capability { return Offer{}; },
-        [reduction=std::move(reduction)](const geometry::PointCloud&) {
+Registration<HullReducerPort>
+make_fixed_reduction_hull_registration(geometry::HullReduction reduction) {
+    return {
+        {{"test.hull.fixed-reduction"}, "1"},
+        [](const geometry::PointCloud &, const Requirements &) -> Capability { return Offer{}; },
+        [reduction = std::move(reduction)](const geometry::PointCloud &) {
             return std::make_unique<FixedReductionHullWorkspace>(reduction);
         }};
 }
 class FixedSourceIndexWorkspace final : public geometry::SourceIndexHullWorkspace {
     geometry::SourceIndexProposal proposal_;
-public:
+
+  public:
     explicit FixedSourceIndexWorkspace(geometry::SourceIndexProposal proposal)
-        :proposal_(std::move(proposal)){}
-    geometry::SourceIndexProposalResult propose(const geometry::PointCloud&,
-            const ExecutionContext&) override { return proposal_; }
+        : proposal_(std::move(proposal)) {}
+    geometry::SourceIndexProposalResult propose(const geometry::PointCloud &,
+                                                const ExecutionContext &) override {
+        return proposal_;
+    }
 };
-Registration<SourceIndexHullPort> make_fixed_source_index_registration(
-        geometry::SourceIndexProposal proposal) {
-    return {{{"test.source-index.fixed"},"1"},
-        [](const geometry::PointCloud&,const Requirements&) -> Capability {return Offer{};},
-        [proposal=std::move(proposal)](const geometry::PointCloud&) {
+Registration<SourceIndexHullPort>
+make_fixed_source_index_registration(geometry::SourceIndexProposal proposal) {
+    return {
+        {{"test.source-index.fixed"}, "1"},
+        [](const geometry::PointCloud &, const Requirements &) -> Capability { return Offer{}; },
+        [proposal = std::move(proposal)](const geometry::PointCloud &) {
             return std::make_unique<FixedSourceIndexWorkspace>(proposal);
         }};
 }
 class NearEndpointDroppingHullWorkspace final : public geometry::HullReducerWorkspace {
-public:
-    geometry::HullReductionResult reduce(const geometry::PointCloud& cloud, LPWorkspace&,
-            const ExecutionContext&) override {
+  public:
+    geometry::HullReductionResult reduce(const geometry::PointCloud &cloud, LPWorkspace &,
+                                         const ExecutionContext &) override {
         REQUIRE(cloud.points.size() == 2);
-        return geometry::HullReduction{geometry::ReductionStatus::complete,{0},
-            {{1,{{0,1.0}},{{"near-endpoint"},{"test-program"}},
-                {1e-3,0.0,1e-6,{"test.near-endpoint"}}}},0,{}};
+        return geometry::HullReduction{geometry::ReductionStatus::complete,
+                                       {0},
+                                       {{1,
+                                         {{0, 1.0}},
+                                         {{"near-endpoint"}, {"test-program"}},
+                                         {1e-3, 0.0, 1e-6, {"test.near-endpoint"}}}},
+                                       0,
+                                       {}};
     }
 };
 Registration<HullReducerPort> make_near_endpoint_hull_registration() {
-    return {{{"test.hull.near-endpoint"},"1"},
-        [](const geometry::PointCloud&,const Requirements&) -> Capability { return Offer{}; },
-        [](const geometry::PointCloud&) { return std::make_unique<NearEndpointDroppingHullWorkspace>(); }};
+    return {
+        {{"test.hull.near-endpoint"}, "1"},
+        [](const geometry::PointCloud &, const Requirements &) -> Capability { return Offer{}; },
+        [](const geometry::PointCloud &) {
+            return std::make_unique<NearEndpointDroppingHullWorkspace>();
+        }};
 }
 class UnestablishedConversionWorkspace final : public RepresentationConverterWorkspace {
     ConversionRequest request_;
-public:
-    explicit UnestablishedConversionWorkspace(ConversionRequest request) : request_(std::move(request)) {}
-    SetTransformOutcome convert(const ConversionRequest&,const ExecutionContext&) override {
-        const auto output=take(sets::make_v({{"unestablished-conversion-output"},1,{}},
-            {take(numeric::snapshot(Matrix{2,1,{0,1}})),
-             take(numeric::snapshot(Matrix{0,1,{}}))})).as_handle();
-        return OperationResult{output,SetRelation::equivalent,
-            {{request_.identity,{request_.input.id}},GeometryClaimScope::set_relation,
-             Unestablished{}, {"test conversion without numerical verification"},{}}};
+
+  public:
+    explicit UnestablishedConversionWorkspace(ConversionRequest request)
+        : request_(std::move(request)) {}
+    SetTransformOutcome convert(const ConversionRequest &, const ExecutionContext &) override {
+        const auto output = take(sets::make_v({{"unestablished-conversion-output"}, 1, {}},
+                                              {take(numeric::snapshot(Matrix{2, 1, {0, 1}})),
+                                               take(numeric::snapshot(Matrix{0, 1, {}}))}))
+                                .as_handle();
+        return OperationResult{output,
+                               SetRelation::equivalent,
+                               {{request_.identity, {request_.input.id}},
+                                GeometryClaimScope::set_relation,
+                                Unestablished{},
+                                {"test conversion without numerical verification"},
+                                {}}};
     }
 };
 class HighResidualConversionWorkspace final : public RepresentationConverterWorkspace {
     ConversionRequest request_;
     double upper_vertex_;
     double reported_residual_;
-public:
-    HighResidualConversionWorkspace(ConversionRequest request,double upper_vertex,double reported_residual)
-        : request_(std::move(request)),upper_vertex_(upper_vertex),reported_residual_(reported_residual) {}
-    SetTransformOutcome convert(const ConversionRequest&,const ExecutionContext&) override {
-        const auto output=take(sets::make_v({{"high-residual-conversion-output"},1,{}},
-            {take(numeric::snapshot(Matrix{2,1,{0,upper_vertex_}})),
-             take(numeric::snapshot(Matrix{0,1,{}}))})).as_handle();
-        return OperationResult{output,SetRelation::equivalent,
-            {{request_.identity,{request_.input.id}},GeometryClaimScope::set_relation,
-             NumericalCheck{0.0,0.0,reported_residual_,{"test.high-residual"}},
-             {"test conversion output and reported residual"},{}}};
+
+  public:
+    HighResidualConversionWorkspace(ConversionRequest request, double upper_vertex,
+                                    double reported_residual)
+        : request_(std::move(request)), upper_vertex_(upper_vertex),
+          reported_residual_(reported_residual) {}
+    SetTransformOutcome convert(const ConversionRequest &, const ExecutionContext &) override {
+        const auto output =
+            take(sets::make_v({{"high-residual-conversion-output"}, 1, {}},
+                              {take(numeric::snapshot(Matrix{2, 1, {0, upper_vertex_}})),
+                               take(numeric::snapshot(Matrix{0, 1, {}}))}))
+                .as_handle();
+        return OperationResult{
+            output,
+            SetRelation::equivalent,
+            {{request_.identity, {request_.input.id}},
+             GeometryClaimScope::set_relation,
+             NumericalCheck{0.0, 0.0, reported_residual_, {"test.high-residual"}},
+             {"test conversion output and reported residual"},
+             {}}};
     }
 };
 Registration<ConversionPort> make_unestablished_conversion_registration() {
-    return {{{"test.conversion.unestablished"},"1"},
-        [](const ConversionRequest&,const Requirements& requirements) -> Capability { return Offer{requirements.output}; },
-        [](const ConversionRequest& request) { return std::make_unique<UnestablishedConversionWorkspace>(request); }};
+    return {{{"test.conversion.unestablished"}, "1"},
+            [](const ConversionRequest &, const Requirements &requirements) -> Capability {
+                return Offer{requirements.output};
+            },
+            [](const ConversionRequest &request) {
+                return std::make_unique<UnestablishedConversionWorkspace>(request);
+            }};
 }
 Registration<ConversionPort> make_high_residual_conversion_registration() {
-    return {{{"test.conversion.high-residual"},"1"},
-        [](const ConversionRequest&,const Requirements& requirements) -> Capability { return Offer{requirements.output}; },
-        [](const ConversionRequest& request) { return std::make_unique<HighResidualConversionWorkspace>(request,1.0,1e100); }};
+    return {{{"test.conversion.high-residual"}, "1"},
+            [](const ConversionRequest &, const Requirements &requirements) -> Capability {
+                return Offer{requirements.output};
+            },
+            [](const ConversionRequest &request) {
+                return std::make_unique<HighResidualConversionWorkspace>(request, 1.0, 1e100);
+            }};
 }
 Registration<ConversionPort> make_inaccurate_conversion_registration() {
-    return {{{"test.conversion.inaccurate"},"1"},
-        [](const ConversionRequest&,const Requirements& requirements) -> Capability { return Offer{requirements.output}; },
-        [](const ConversionRequest& request) { return std::make_unique<HighResidualConversionWorkspace>(request,2.0,0.0); }};
+    return {{{"test.conversion.inaccurate"}, "1"},
+            [](const ConversionRequest &, const Requirements &requirements) -> Capability {
+                return Offer{requirements.output};
+            },
+            [](const ConversionRequest &request) {
+                return std::make_unique<HighResidualConversionWorkspace>(request, 2.0, 0.0);
+            }};
 }
 Registration<ConversionPort> make_one_unit_undercoverage_registration() {
-    return {{{"test.conversion.one-unit-undercoverage"},"1"},
-        [](const ConversionRequest&,const Requirements& requirements) -> Capability { return Offer{requirements.output}; },
-        [](const ConversionRequest& request) {
-            return std::make_unique<HighResidualConversionWorkspace>(request,9.0,0.0);
-        }};
+    return {{{"test.conversion.one-unit-undercoverage"}, "1"},
+            [](const ConversionRequest &, const Requirements &requirements) -> Capability {
+                return Offer{requirements.output};
+            },
+            [](const ConversionRequest &request) {
+                return std::make_unique<HighResidualConversionWorkspace>(request, 9.0, 0.0);
+            }};
 }
 Registration<ConversionPort> make_duplicate_row_residual_registration() {
-    return {{{"test.conversion.duplicate-row-residual"},"1"},
-        [](const ConversionRequest&,const Requirements& requirements) -> Capability { return Offer{requirements.output}; },
-        [](const ConversionRequest& request) { return std::make_unique<HighResidualConversionWorkspace>(request,1.0,2.5e-8); }};
+    return {{{"test.conversion.duplicate-row-residual"}, "1"},
+            [](const ConversionRequest &, const Requirements &requirements) -> Capability {
+                return Offer{requirements.output};
+            },
+            [](const ConversionRequest &request) {
+                return std::make_unique<HighResidualConversionWorkspace>(request, 1.0, 2.5e-8);
+            }};
 }
 class SubnormalResidualHullWorkspace final : public geometry::HullReducerWorkspace {
-public:
-    geometry::HullReductionResult reduce(const geometry::PointCloud& cloud,LPWorkspace&,
-            const ExecutionContext&) override {
-        REQUIRE(cloud.points.size()==3);
-        REQUIRE(cloud.points[0][0]==0.0);
-        REQUIRE(cloud.points[1][0]==std::numeric_limits<double>::denorm_min());
-        REQUIRE(cloud.points[2][0]==std::numeric_limits<double>::denorm_min());
-        return geometry::HullReduction{geometry::ReductionStatus::complete,{1,2},
-            {{0,{{1,0.5},{2,0.5}},{{"subnormal-hull"},{"test-program"}},
-                {1e-8,1e-8,0.0,{"test.subnormal"}}}},0,{}};
+  public:
+    geometry::HullReductionResult reduce(const geometry::PointCloud &cloud, LPWorkspace &,
+                                         const ExecutionContext &) override {
+        REQUIRE(cloud.points.size() == 3);
+        REQUIRE(cloud.points[0][0] == 0.0);
+        REQUIRE(cloud.points[1][0] == std::numeric_limits<double>::denorm_min());
+        REQUIRE(cloud.points[2][0] == std::numeric_limits<double>::denorm_min());
+        return geometry::HullReduction{geometry::ReductionStatus::complete,
+                                       {1, 2},
+                                       {{0,
+                                         {{1, 0.5}, {2, 0.5}},
+                                         {{"subnormal-hull"}, {"test-program"}},
+                                         {1e-8, 1e-8, 0.0, {"test.subnormal"}}}},
+                                       0,
+                                       {}};
     }
 };
 Registration<HullReducerPort> make_subnormal_hull_registration() {
-    return {{{"test.hull.subnormal"},"1"},
-        [](const geometry::PointCloud&,const Requirements&) -> Capability { return Offer{}; },
-        [](const geometry::PointCloud&) { return std::make_unique<SubnormalResidualHullWorkspace>(); }};
+    return {
+        {{"test.hull.subnormal"}, "1"},
+        [](const geometry::PointCloud &, const Requirements &) -> Capability { return Offer{}; },
+        [](const geometry::PointCloud &) {
+            return std::make_unique<SubnormalResidualHullWorkspace>();
+        }};
 }
 Registration<HullReducerPort> make_keep_all_hull_registration() {
-    return {{{"test.hull.keep-all"},"1"},
-        [](const geometry::PointCloud&,const Requirements&) -> Capability { return Offer{}; },
-        [](const geometry::PointCloud&) { return std::make_unique<KeepAllHullWorkspace>(); }};
+    return {
+        {{"test.hull.keep-all"}, "1"},
+        [](const geometry::PointCloud &, const Requirements &) -> Capability { return Offer{}; },
+        [](const geometry::PointCloud &) { return std::make_unique<KeepAllHullWorkspace>(); }};
 }
-geometry::AffineSumDependencies dependencies(bool phase=false,bool conversion=true) {
-    auto lp=phase ? take(optimization::phase_one::make_registration()) : take(adapters::lp::make_highs_registration());
+geometry::AffineSumDependencies dependencies(bool phase = false, bool conversion = true) {
+    auto lp = phase ? take(optimization::phase_one::make_registration())
+                    : take(adapters::lp::make_highs_registration());
     std::optional<PreparedProvider<ConversionPort>> converter;
-    if(conversion) {
+    if (conversion) {
         Requirements requirements;
-        requirements.output.representation={"csl.polyhedron.v"};
-        requirements.output.relation=SetRelation::equivalent;
-        converter=provider(take(adapters::polyhedral::make_qhull_registration(
-            take(adapters::lp::make_highs_registration()))),requirements);
+        requirements.output.representation = {"csl.polyhedron.v"};
+        requirements.output.relation = SetRelation::equivalent;
+        converter = provider(take(adapters::polyhedral::make_qhull_registration(
+                                 take(adapters::lp::make_highs_registration()))),
+                             requirements);
     }
-    return {provider(geometry::make_lp_hull_reducer_registration()),provider(std::move(lp)),std::move(converter)};
+    return {provider(geometry::make_lp_hull_reducer_registration()), provider(std::move(lp)),
+            std::move(converter)};
 }
-SetHandle vertices(std::string id,std::size_t n,Vector values,std::size_t count,
-                   std::vector<std::string> labels={}) {
-    return take(sets::make_v({{std::move(id)},n,std::move(labels)},
-        {take(numeric::snapshot(Matrix{count,n,std::move(values)})),
-         take(numeric::snapshot(Matrix{0,n,{}}))})).as_handle();
+SetHandle vertices(std::string id, std::size_t n, Vector values, std::size_t count,
+                   std::vector<std::string> labels = {}) {
+    return take(sets::make_v({{std::move(id)}, n, std::move(labels)},
+                             {take(numeric::snapshot(Matrix{count, n, std::move(values)})),
+                              take(numeric::snapshot(Matrix{0, n, {}}))}))
+        .as_handle();
 }
-OperationRequest request(GeometryOperation operation,std::string tag="case") {
-    return {{{"affine-sum-tests"},{tag},{"ideal-"+tag}},{"csl.geometry.affine-sum"},
-        std::move(operation),SetRelation::equivalent,Assurance::numerical};
+OperationRequest request(GeometryOperation operation, std::string tag = "case") {
+    return {{{"affine-sum-tests"}, {tag}, {"ideal-" + tag}},
+            {"csl.geometry.affine-sum"},
+            std::move(operation),
+            SetRelation::equivalent,
+            Assurance::numerical};
 }
-ExecutionContext context() {return {{},{},{},{1e-8,1e-8},"affine-sum-tests"};}
-OperationOutcome run(const OperationRequest& req,geometry::AffineSumDependencies deps,
-                     geometry::AffineSumOptions options={},ExecutionContext ctx=context()) {
+ExecutionContext context() { return {{}, {}, {}, {1e-8, 1e-8}, "affine-sum-tests"}; }
+OperationOutcome run(const OperationRequest &req, geometry::AffineSumDependencies deps,
+                     geometry::AffineSumOptions options = {}, ExecutionContext ctx = context()) {
     Registry<GeometryPort> registry;
-    REQUIRE_FALSE(registry.add(geometry::make_affine_sum_registration(std::move(deps),std::move(options))).has_value());
+    REQUIRE_FALSE(
+        registry.add(geometry::make_affine_sum_registration(std::move(deps), std::move(options)))
+            .has_value());
     Requirements requirements;
-    requirements.output.representation={"csl.polyhedron.v"};
-    requirements.output.relation=SetRelation::equivalent;
-    auto prepared=prepare_pipeline(select(registry,{{"csl.geometry.affine-sum"},{}},req,requirements));
-    if(auto* rejection=std::get_if<Rejection>(&prepared))return Unsupported{rejection->diagnostics};
-    auto [workspace]=std::get<PreparedPipeline<GeometryPort>>(prepared).create();
+    requirements.output.representation = {"csl.polyhedron.v"};
+    requirements.output.relation = SetRelation::equivalent;
+    auto prepared =
+        prepare_pipeline(select(registry, {{"csl.geometry.affine-sum"}, {}}, req, requirements));
+    if (auto *rejection = std::get_if<Rejection>(&prepared))
+        return Unsupported{rejection->diagnostics};
+    auto [workspace] = std::get<PreparedPipeline<GeometryPort>>(prepared).create();
     return workspace->run(ctx);
 }
-OperationOutcome run_source_index(const OperationRequest& req,
-        Registration<SourceIndexHullPort> selected,
-        geometry::HullCheckBudget budget={},geometry::AffineSumOptions options={},
-        std::optional<PreparedProvider<ConversionPort>> conversion={}) {
-    auto source=provider(std::move(selected));
-    geometry::SourceIndexAffineSumDependencies deps{std::move(source),std::move(conversion),budget};
+OperationOutcome run_source_index(const OperationRequest &req,
+                                  Registration<SourceIndexHullPort> selected,
+                                  geometry::HullCheckBudget budget = {},
+                                  geometry::AffineSumOptions options = {},
+                                  std::optional<PreparedProvider<ConversionPort>> conversion = {}) {
+    auto source = provider(std::move(selected));
+    geometry::SourceIndexAffineSumDependencies deps{std::move(source), std::move(conversion),
+                                                    budget};
     Registry<GeometryPort> registry;
-    REQUIRE_FALSE(registry.add(geometry::make_affine_sum_registration(std::move(deps),std::move(options))).has_value());
+    REQUIRE_FALSE(
+        registry.add(geometry::make_affine_sum_registration(std::move(deps), std::move(options)))
+            .has_value());
     Requirements requirements;
-    requirements.output.representation={"csl.polyhedron.v"};
-    requirements.output.relation=SetRelation::equivalent;
-    auto prepared=prepare_pipeline(select(registry,{{"csl.geometry.affine-sum.source-index"},{}},req,requirements));
-    if(auto* rejection=std::get_if<Rejection>(&prepared))return Unsupported{rejection->diagnostics};
-    auto [workspace]=std::get<PreparedPipeline<GeometryPort>>(prepared).create();
+    requirements.output.representation = {"csl.polyhedron.v"};
+    requirements.output.relation = SetRelation::equivalent;
+    auto prepared = prepare_pipeline(
+        select(registry, {{"csl.geometry.affine-sum.source-index"}, {}}, req, requirements));
+    if (auto *rejection = std::get_if<Rejection>(&prepared))
+        return Unsupported{rejection->diagnostics};
+    auto [workspace] = std::get<PreparedPipeline<GeometryPort>>(prepared).create();
     return workspace->run(context());
 }
-double support(const SetHandle& handle,const Vector& direction) {
-    auto data=take(sets::from_handle(handle));
-    const auto representation=data.representation();
-    const auto* v=std::get_if<sets::VRepresentation>(&representation);
+double support(const SetHandle &handle, const Vector &direction) {
+    auto data = take(sets::from_handle(handle));
+    const auto representation = data.representation();
+    const auto *v = std::get_if<sets::VRepresentation>(&representation);
     REQUIRE(v);
-    REQUIRE(v->rays.rows()==0);
-    double result=-std::numeric_limits<double>::infinity();
-    for(std::size_t i=0;i<v->vertices.rows();++i) {
-        double value=0;
-        for(std::size_t j=0;j<direction.size();++j)value+=direction[j]*v->vertices(i,j);
-        result=std::max(result,value);
+    REQUIRE(v->rays.rows() == 0);
+    double result = -std::numeric_limits<double>::infinity();
+    for (std::size_t i = 0; i < v->vertices.rows(); ++i) {
+        double value = 0;
+        for (std::size_t j = 0; j < direction.size(); ++j)
+            value += direction[j] * v->vertices(i, j);
+        result = std::max(result, value);
     }
     return result;
 }
 }
 TEST_CASE("registered affine image preserves the literal shifted reversed interval") {
-    const auto req=request(AffineImage{vertices("interval",1,{-1,2},2),{1,1,{-2}},{3}});
-    const auto result=take(run(req,dependencies()));
-    CHECK(support(result.output,{1})==doctest::Approx(5));
-    CHECK(support(result.output,{-1})==doctest::Approx(1));
+    const auto req = request(AffineImage{vertices("interval", 1, {-1, 2}, 2), {1, 1, {-2}}, {3}});
+    const auto result = take(run(req, dependencies()));
+    CHECK(support(result.output, {1}) == doctest::Approx(5));
+    CHECK(support(result.output, {-1}) == doctest::Approx(1));
     REQUIRE(result.evidence.error_bound.has_value());
-    CHECK(result.evidence.error_bound->bound==0.0);
-    CHECK(check_geometry_evidence(result.evidence,req).empty());
+    CHECK(result.evidence.error_bound->bound == 0.0);
+    CHECK(check_geometry_evidence(result.evidence, req).empty());
 }
 
 TEST_CASE("TEST-08 triangle intersection followed by affine image preserves the literal interval") {
-    const auto square=take(sets::make_h({{"chain-affine-square"},2,{}},
-        {take(numeric::snapshot(Matrix{4,2,{1,0,-1,0,0,1,0,-1}})),
-         take(numeric::snapshot_vector(Vector{1,0,1,0})),
-         take(numeric::snapshot(Matrix{0,2,{}})),take(numeric::snapshot_vector(Vector{}))}));
-    const auto cutting_halfspace=take(sets::make_h({{"chain-affine-cut"},2,{}},
-        {take(numeric::snapshot(Matrix{1,2,{1,1}})),
-         take(numeric::snapshot_vector(Vector{1})),
-         take(numeric::snapshot(Matrix{0,2,{}})),take(numeric::snapshot_vector(Vector{}))}));
-    const auto triangle=take(geometry::polyhedral::intersect_h(
-        square,cutting_halfspace,{"chain-affine-triangle"}));
-    const auto triangle_representation=triangle.representation();
+    const auto square = take(sets::make_h(
+        {{"chain-affine-square"}, 2, {}},
+        {take(numeric::snapshot(Matrix{4, 2, {1, 0, -1, 0, 0, 1, 0, -1}})),
+         take(numeric::snapshot_vector(Vector{1, 0, 1, 0})),
+         take(numeric::snapshot(Matrix{0, 2, {}})), take(numeric::snapshot_vector(Vector{}))}));
+    const auto cutting_halfspace = take(sets::make_h(
+        {{"chain-affine-cut"}, 2, {}},
+        {take(numeric::snapshot(Matrix{1, 2, {1, 1}})), take(numeric::snapshot_vector(Vector{1})),
+         take(numeric::snapshot(Matrix{0, 2, {}})), take(numeric::snapshot_vector(Vector{}))}));
+    const auto triangle = take(
+        geometry::polyhedral::intersect_h(square, cutting_halfspace, {"chain-affine-triangle"}));
+    const auto triangle_representation = triangle.representation();
     REQUIRE(std::holds_alternative<sets::HRepresentation>(triangle_representation));
-    const auto& triangle_h=std::get<sets::HRepresentation>(triangle_representation);
-    CHECK(triangle.metadata()->set.dimension==2);
-    CHECK(triangle_h.inequalities.rows()<=5);
-    CHECK(triangle_h.inequalities.cols()==2);
-    CHECK(triangle_h.equalities.rows()==0);
+    const auto &triangle_h = std::get<sets::HRepresentation>(triangle_representation);
+    CHECK(triangle.metadata()->set.dimension == 2);
+    CHECK(triangle_h.inequalities.rows() <= 5);
+    CHECK(triangle_h.inequalities.cols() == 2);
+    CHECK(triangle_h.equalities.rows() == 0);
 
-    const auto req=request(AffineImage{triangle.as_handle(),{1,2,{1,0}},{0}},
-        "triangle-intersection-affine-image");
-    const auto result=take(run(req,dependencies()));
-    CHECK(support(result.output,{1})==doctest::Approx(1));
-    CHECK(support(result.output,{-1})==doctest::Approx(0));
-    CHECK(check_geometry_evidence(result.evidence,req).empty());
-    CHECK(result.evidence.reference.identity==req.identity);
-    CHECK(result.evidence.reference.inputs==std::vector<SetId>{{"chain-affine-triangle"}});
+    const auto req = request(AffineImage{triangle.as_handle(), {1, 2, {1, 0}}, {0}},
+                             "triangle-intersection-affine-image");
+    const auto result = take(run(req, dependencies()));
+    CHECK(support(result.output, {1}) == doctest::Approx(1));
+    CHECK(support(result.output, {-1}) == doctest::Approx(0));
+    CHECK(check_geometry_evidence(result.evidence, req).empty());
+    CHECK(result.evidence.reference.identity == req.identity);
+    CHECK(result.evidence.reference.inputs == std::vector<SetId>{{"chain-affine-triangle"}});
 }
 
 TEST_CASE("TEST-08 Minkowski sum followed by affine image preserves literal support endpoints") {
-    const auto left=vertices("chain-sum-left",1,{0,1},2);
-    const auto right=vertices("chain-sum-right",1,{2,3},2);
-    const auto sum_request=request(MinkowskiSum{left,right},"interval-minkowski-chain");
-    const auto sum=take(run(sum_request,dependencies()));
-    CHECK(support(sum.output,{1})==4.0);
-    CHECK(support(sum.output,{-1})==-2.0);
-    CHECK(check_geometry_evidence(sum.evidence,sum_request).empty());
+    const auto left = vertices("chain-sum-left", 1, {0, 1}, 2);
+    const auto right = vertices("chain-sum-right", 1, {2, 3}, 2);
+    const auto sum_request = request(MinkowskiSum{left, right}, "interval-minkowski-chain");
+    const auto sum = take(run(sum_request, dependencies()));
+    CHECK(support(sum.output, {1}) == 4.0);
+    CHECK(support(sum.output, {-1}) == -2.0);
+    CHECK(check_geometry_evidence(sum.evidence, sum_request).empty());
 
-    const auto image_request=request(AffineImage{sum.output,{1,1,{-2}},{3}},
-        "minkowski-affine-chain");
-    const auto image=take(run(image_request,dependencies()));
-    CHECK(support(image.output,{1})==-1.0);
-    CHECK(support(image.output,{-1})==5.0);
-    CHECK(check_geometry_evidence(image.evidence,image_request).empty());
-    CHECK(image.evidence.reference.identity==image_request.identity);
-    CHECK(image.evidence.reference.inputs==std::vector<SetId>{sum.output.id});
+    const auto image_request =
+        request(AffineImage{sum.output, {1, 1, {-2}}, {3}}, "minkowski-affine-chain");
+    const auto image = take(run(image_request, dependencies()));
+    CHECK(support(image.output, {1}) == -1.0);
+    CHECK(support(image.output, {-1}) == 5.0);
+    CHECK(check_geometry_evidence(image.evidence, image_request).empty());
+    CHECK(image.evidence.reference.identity == image_request.identity);
+    CHECK(image.evidence.reference.inputs == std::vector<SetId>{sum.output.id});
 }
 
 TEST_CASE("fixed-seed integer rectangles have independently enumerated affine supports") {
@@ -315,19 +403,19 @@ TEST_CASE("fixed-seed integer rectangles have independently enumerated affine su
         const int y0 = draw(-4, 4);
         const int x1 = x0 + draw(1, 4);
         const int y1 = y0 + draw(1, 4);
-        const std::array<std::array<int, 2>, 4> corners{{
-            {{x0, y0}}, {{x1, y0}}, {{x1, y1}}, {{x0, y1}}}};
+        const std::array<std::array<int, 2>, 4> corners{
+            {{{x0, y0}}, {{x1, y0}}, {{x1, y1}}, {{x0, y1}}}};
         Vector coordinates;
-        for (const auto& point : corners) {
+        for (const auto &point : corners) {
             coordinates.push_back(static_cast<double>(point[0]));
             coordinates.push_back(static_cast<double>(point[1]));
         }
         const auto input = vertices("seeded-rectangle-" + std::to_string(case_index), 2,
-            std::move(coordinates), corners.size());
-        Matrix map{2, 2, {static_cast<double>(draw(-2, 2)),
-            static_cast<double>(draw(-2, 2)),
-            static_cast<double>(draw(-2, 2)),
-            static_cast<double>(draw(-2, 2))}};
+                                    std::move(coordinates), corners.size());
+        Matrix map{2,
+                   2,
+                   {static_cast<double>(draw(-2, 2)), static_cast<double>(draw(-2, 2)),
+                    static_cast<double>(draw(-2, 2)), static_cast<double>(draw(-2, 2))}};
         Vector shift{static_cast<double>(draw(-3, 3)), static_cast<double>(draw(-3, 3))};
 
         // The oracle enumerates the four rational rectangle corners and applies
@@ -335,18 +423,21 @@ TEST_CASE("fixed-seed integer rectangles have independently enumerated affine su
         std::array<std::array<int, 2>, 4> image{};
         for (std::size_t i = 0; i < corners.size(); ++i) {
             image[i][0] = static_cast<int>(map.values[0]) * corners[i][0] +
-                static_cast<int>(map.values[1]) * corners[i][1] + static_cast<int>(shift[0]);
+                          static_cast<int>(map.values[1]) * corners[i][1] +
+                          static_cast<int>(shift[0]);
             image[i][1] = static_cast<int>(map.values[2]) * corners[i][0] +
-                static_cast<int>(map.values[3]) * corners[i][1] + static_cast<int>(shift[1]);
+                          static_cast<int>(map.values[3]) * corners[i][1] +
+                          static_cast<int>(shift[1]);
         }
 
-        const auto result = take(run(request(AffineImage{input, map, shift},
-            "seeded-affine-" + std::to_string(case_index)), dependencies()));
-        for (const auto& direction : directions) {
+        const auto result = take(run(
+            request(AffineImage{input, map, shift}, "seeded-affine-" + std::to_string(case_index)),
+            dependencies()));
+        for (const auto &direction : directions) {
             int expected = std::numeric_limits<int>::min();
-            for (const auto& point : image) {
+            for (const auto &point : image) {
                 const int value = static_cast<int>(direction[0]) * point[0] +
-                    static_cast<int>(direction[1]) * point[1];
+                                  static_cast<int>(direction[1]) * point[1];
                 expected = std::max(expected, value);
             }
             CHECK(support(result.output, direction) == static_cast<double>(expected));
@@ -355,70 +446,71 @@ TEST_CASE("fixed-seed integer rectangles have independently enumerated affine su
 }
 
 TEST_CASE("affine reflection and translation of the unit box match rational support oracles") {
-    const auto box=vertices("unit-box-rational-oracle",2,{0,0,1,0,0,1,1,1},4,{"x","y"});
+    const auto box =
+        vertices("unit-box-rational-oracle", 2, {0, 0, 1, 0, 0, 1, 1, 1}, 4, {"x", "y"});
     // (x,y) -> (2-x, y-1), so the image is [1,2] x [-1,0].
-    const auto req=request(AffineImage{box,{2,2,{-1,0,0,1}},{2,-1}},
-        "reflected-translated-unit-box");
-    const auto result=take(run(req,dependencies()));
-    const auto data=take(sets::from_handle(result.output));
-    const auto representation=data.representation();
+    const auto req =
+        request(AffineImage{box, {2, 2, {-1, 0, 0, 1}}, {2, -1}}, "reflected-translated-unit-box");
+    const auto result = take(run(req, dependencies()));
+    const auto data = take(sets::from_handle(result.output));
+    const auto representation = data.representation();
     REQUIRE(std::holds_alternative<sets::VRepresentation>(representation));
-    const auto& image=std::get<sets::VRepresentation>(representation);
-    REQUIRE(image.vertices.rows()==4);
-    const std::array<std::array<double,2>,4> expected{{
-        {1,-1}, {1,0}, {2,-1}, {2,0}}};
-    for (const auto& point : expected) {
-        bool found=false;
-        for (std::size_t row=0;row<image.vertices.rows();++row)
-            found=found || (image.vertices(row,0)==point[0]
-                && image.vertices(row,1)==point[1]);
+    const auto &image = std::get<sets::VRepresentation>(representation);
+    REQUIRE(image.vertices.rows() == 4);
+    const std::array<std::array<double, 2>, 4> expected{{{1, -1}, {1, 0}, {2, -1}, {2, 0}}};
+    for (const auto &point : expected) {
+        bool found = false;
+        for (std::size_t row = 0; row < image.vertices.rows(); ++row)
+            found =
+                found || (image.vertices(row, 0) == point[0] && image.vertices(row, 1) == point[1]);
         CHECK(found);
     }
-    CHECK(support(result.output,{1,0})==2);
-    CHECK(support(result.output,{-1,0})==-1);
-    CHECK(support(result.output,{0,1})==0);
-    CHECK(support(result.output,{0,-1})==1);
-    CHECK(result.output.metadata.dimension==2);
-    CHECK(check_geometry_evidence(result.evidence,req).empty());
+    CHECK(support(result.output, {1, 0}) == 2);
+    CHECK(support(result.output, {-1, 0}) == -1);
+    CHECK(support(result.output, {0, 1}) == 0);
+    CHECK(support(result.output, {0, -1}) == 1);
+    CHECK(result.output.metadata.dimension == 2);
+    CHECK(check_geometry_evidence(result.evidence, req).empty());
 }
 
 TEST_CASE("interval Minkowski sum matches independent rational endpoint oracles") {
-    const auto lhs=vertices("first-rational-interval",1,{0,1},2,{"x"});
-    const auto rhs=vertices("second-rational-interval",1,{2,3},2,{"x"});
-    const auto req=request(MinkowskiSum{lhs,rhs},"interval-sum-[2,4]");
-    const auto result=take(run(req,dependencies()));
-    CHECK(support(result.output,{1})==4);
-    CHECK(support(result.output,{-1})==-2);
-    CHECK(result.output.metadata.dimension==1);
-    const auto representation=take(sets::from_handle(result.output)).representation();
+    const auto lhs = vertices("first-rational-interval", 1, {0, 1}, 2, {"x"});
+    const auto rhs = vertices("second-rational-interval", 1, {2, 3}, 2, {"x"});
+    const auto req = request(MinkowskiSum{lhs, rhs}, "interval-sum-[2,4]");
+    const auto result = take(run(req, dependencies()));
+    CHECK(support(result.output, {1}) == 4);
+    CHECK(support(result.output, {-1}) == -2);
+    CHECK(result.output.metadata.dimension == 1);
+    const auto representation = take(sets::from_handle(result.output)).representation();
     REQUIRE(std::holds_alternative<sets::VRepresentation>(representation));
-    const auto& sum=std::get<sets::VRepresentation>(representation);
-    REQUIRE(sum.vertices.cols()==1);
-    REQUIRE(sum.vertices.rows()>=2);
-    bool has_lower=false;
-    bool has_upper=false;
-    for(std::size_t row=0;row<sum.vertices.rows();++row) {
-        const double x=sum.vertices(row,0);
-        CHECK(x>=2.0);
-        CHECK(x<=4.0);
-        has_lower=has_lower || x==2.0;
-        has_upper=has_upper || x==4.0;
+    const auto &sum = std::get<sets::VRepresentation>(representation);
+    REQUIRE(sum.vertices.cols() == 1);
+    REQUIRE(sum.vertices.rows() >= 2);
+    bool has_lower = false;
+    bool has_upper = false;
+    for (std::size_t row = 0; row < sum.vertices.rows(); ++row) {
+        const double x = sum.vertices(row, 0);
+        CHECK(x >= 2.0);
+        CHECK(x <= 4.0);
+        has_lower = has_lower || x == 2.0;
+        has_upper = has_upper || x == 4.0;
     }
     CHECK(has_lower);
     CHECK(has_upper);
-    CHECK(check_geometry_evidence(result.evidence,req).empty());
+    CHECK(check_geometry_evidence(result.evidence, req).empty());
 }
 
 TEST_CASE("square Minkowski support identities survive actual LP backend substitution") {
-    const auto square=vertices("square",2,{0,0,1,0,1,1,0,1},4,{"x","y"});
-    const auto segment=vertices("segment",2,{-1,0,2,0},2,{"x","y"});
-    const auto req=request(MinkowskiSum{square,segment});
-    for(const bool phase : {false,true}) {
-        const auto result=take(run(req,dependencies(phase)));
-        CHECK(support(result.output,{1,2})==doctest::Approx(5));
-        CHECK(support(result.output,{-1,-2})==doctest::Approx(1));
-        CHECK(take(sets::from_handle(result.output)).metadata()->coordinate_labels==std::vector<std::string>{"x","y"});
-        CHECK(result.relation==SetRelation::equivalent);
+    const auto square = vertices("square", 2, {0, 0, 1, 0, 1, 1, 0, 1}, 4, {"x", "y"});
+    const auto segment = vertices("segment", 2, {-1, 0, 2, 0}, 2, {"x", "y"});
+    const auto req = request(MinkowskiSum{square, segment});
+    for (const bool phase : {false, true}) {
+        const auto result = take(run(req, dependencies(phase)));
+        CHECK(support(result.output, {1, 2}) == doctest::Approx(5));
+        CHECK(support(result.output, {-1, -2}) == doctest::Approx(1));
+        CHECK(take(sets::from_handle(result.output)).metadata()->coordinate_labels ==
+              std::vector<std::string>{"x", "y"});
+        CHECK(result.relation == SetRelation::equivalent);
         CHECK(std::holds_alternative<NumericalCheck>(result.evidence.support));
     }
 }
@@ -432,7 +524,7 @@ TEST_CASE("unavailable typed geometry operations are rejected at public admissio
     auto registration = geometry::make_affine_sum_registration(dependencies());
     auto factory = std::move(registration.factory);
     registration.factory = [&workspace_factory_calls, factory = std::move(factory)](
-                                const OperationRequest& operation) mutable {
+                               const OperationRequest &operation) mutable {
         ++workspace_factory_calls;
         return factory(operation);
     };
@@ -442,784 +534,944 @@ TEST_CASE("unavailable typed geometry operations are rejected at public admissio
     requirements.output.representation = {"csl.polyhedron.v"};
     requirements.output.relation = SetRelation::equivalent;
 
-    const auto prepared = prepare_pipeline(select(registry, {{"csl.geometry.affine-sum"}, {}}, req, requirements));
+    const auto prepared =
+        prepare_pipeline(select(registry, {{"csl.geometry.affine-sum"}, {}}, req, requirements));
 
     REQUIRE(std::holds_alternative<Rejection>(prepared));
-    const auto& diagnostics = std::get<Rejection>(prepared).diagnostics;
+    const auto &diagnostics = std::get<Rejection>(prepared).diagnostics;
     REQUIRE(diagnostics.size() == 1);
     CHECK(diagnostics.front().code == DiagnosticCode::unsupported);
     CHECK(diagnostics.front().field == "geometry.operation");
-    CHECK(diagnostics.front().explanation.find("affine images and Minkowski sums") != std::string::npos);
+    CHECK(diagnostics.front().explanation.find("affine images and Minkowski sums") !=
+          std::string::npos);
     CHECK(workspace_factory_calls == 0);
 }
 
 TEST_CASE("affine and sum operations use the selected hull reducer") {
-    auto selected=dependencies();
-    selected.hull=provider(make_keep_all_hull_registration());
-    const auto interval=vertices("interval",1,{0,1},2);
-    const auto req=request(MinkowskiSum{interval,interval},"selected-hull");
-    const auto result=take(run(req,std::move(selected)));
-    CHECK(support(result.output,{1})==doctest::Approx(2));
-    CHECK(support(result.output,{-1})==doctest::Approx(0));
-    const auto data=take(sets::from_handle(result.output));
-    const auto rep=data.representation();
+    auto selected = dependencies();
+    selected.hull = provider(make_keep_all_hull_registration());
+    const auto interval = vertices("interval", 1, {0, 1}, 2);
+    const auto req = request(MinkowskiSum{interval, interval}, "selected-hull");
+    const auto result = take(run(req, std::move(selected)));
+    CHECK(support(result.output, {1}) == doctest::Approx(2));
+    CHECK(support(result.output, {-1}) == doctest::Approx(0));
+    const auto data = take(sets::from_handle(result.output));
+    const auto rep = data.representation();
     REQUIRE(std::holds_alternative<sets::VRepresentation>(rep));
-    CHECK(std::get<sets::VRepresentation>(rep).vertices.rows()==4);
-    CHECK(std::any_of(result.evidence.assumptions.begin(),result.evidence.assumptions.end(),
-        [](const std::string& value){return value.find("test.hull.keep-all@1")!=std::string::npos;}));
+    CHECK(std::get<sets::VRepresentation>(rep).vertices.rows() == 4);
+    CHECK(std::any_of(result.evidence.assumptions.begin(), result.evidence.assumptions.end(),
+                      [](const std::string &value) {
+                          return value.find("test.hull.keep-all@1") != std::string::npos;
+                      }));
 }
 
-TEST_CASE("source-index affine and control-sum paths use the selected method and independent exact checker") {
+TEST_CASE(
+    "source-index affine and control-sum paths use the selected method and independent exact checker") {
     const std::vector<std::string> labels{"position", "velocity"};
-    const auto cloud=vertices("source-index-cloud",2,
-        {0,0, 1,0, 1,1, 0,1, 1.0/3.0,1.0/3.0, 0.5,0, 0,0},7,labels);
-    const Matrix identity{2,2,{1,0,0,1}};
-    const auto affine=request(AffineImage{cloud,identity,{0,0}},"source-index-affine");
-    geometry::AffineSumOptions affine_options; affine_options.affine_output_labels=labels;
-    const auto affine_result=run_source_index(affine,geometry::make_quickhull_source_index_registration(),{},affine_options);
+    const auto cloud =
+        vertices("source-index-cloud", 2,
+                 {0, 0, 1, 0, 1, 1, 0, 1, 1.0 / 3.0, 1.0 / 3.0, 0.5, 0, 0, 0}, 7, labels);
+    const Matrix identity{2, 2, {1, 0, 0, 1}};
+    const auto affine = request(AffineImage{cloud, identity, {0, 0}}, "source-index-affine");
+    geometry::AffineSumOptions affine_options;
+    affine_options.affine_output_labels = labels;
+    const auto affine_result = run_source_index(
+        affine, geometry::make_quickhull_source_index_registration(), {}, affine_options);
     REQUIRE(std::holds_alternative<OperationResult>(affine_result));
-    const auto& affine_output=std::get<OperationResult>(affine_result);
-    const auto affine_data=take(sets::from_handle(affine_output.output));
-    const auto affine_rep=affine_data.representation();
+    const auto &affine_output = std::get<OperationResult>(affine_result);
+    const auto affine_data = take(sets::from_handle(affine_output.output));
+    const auto affine_rep = affine_data.representation();
     REQUIRE(std::holds_alternative<sets::VRepresentation>(affine_rep));
-    CHECK(std::get<sets::VRepresentation>(affine_rep).vertices.rows()==4);
-    CHECK(support(affine_output.output,{1,0})==1.0);
-    CHECK(support(affine_output.output,{0,1})==1.0);
-    CHECK(affine_data.metadata()->coordinate_labels==labels);
-    CHECK(std::any_of(affine_output.evidence.assumptions.begin(),affine_output.evidence.assumptions.end(),
-        [](const auto& item){return item.find("checker invocation: provider=csl.geometry.bounded-hull-checker")!=std::string::npos && item.find("status=verified")!=std::string::npos;}));
-    CHECK(std::any_of(affine_output.evidence.assumptions.begin(),affine_output.evidence.assumptions.end(),
-        [](const auto& item){return item.find("source-index proposed original IDs: 0,1,2,3")!=std::string::npos;}));
-    CHECK(std::any_of(affine_output.evidence.assumptions.begin(),affine_output.evidence.assumptions.end(),
-        [](const auto& item){return item.find("selected vertex LP provider: not_used")!=std::string::npos;}));
+    CHECK(std::get<sets::VRepresentation>(affine_rep).vertices.rows() == 4);
+    CHECK(support(affine_output.output, {1, 0}) == 1.0);
+    CHECK(support(affine_output.output, {0, 1}) == 1.0);
+    CHECK(affine_data.metadata()->coordinate_labels == labels);
+    CHECK(std::any_of(
+        affine_output.evidence.assumptions.begin(), affine_output.evidence.assumptions.end(),
+        [](const auto &item) {
+            return item.find("checker invocation: provider=csl.geometry.bounded-hull-checker") !=
+                       std::string::npos &&
+                   item.find("status=verified") != std::string::npos;
+        }));
+    CHECK(std::any_of(affine_output.evidence.assumptions.begin(),
+                      affine_output.evidence.assumptions.end(), [](const auto &item) {
+                          return item.find("source-index proposed original IDs: 0,1,2,3") !=
+                                 std::string::npos;
+                      }));
+    CHECK(std::any_of(affine_output.evidence.assumptions.begin(),
+                      affine_output.evidence.assumptions.end(), [](const auto &item) {
+                          return item.find("selected vertex LP provider: not_used") !=
+                                 std::string::npos;
+                      }));
 
-    const auto segment=vertices("source-index-control-segment",2,{0,0,0.5,0,0.5,0},3,labels);
-    const auto sum=request(MinkowskiSum{cloud,segment},"source-index-control-sum");
-    const auto sum_result=run_source_index(sum,geometry::make_quickhull_source_index_registration());
+    const auto segment =
+        vertices("source-index-control-segment", 2, {0, 0, 0.5, 0, 0.5, 0}, 3, labels);
+    const auto sum = request(MinkowskiSum{cloud, segment}, "source-index-control-sum");
+    const auto sum_result =
+        run_source_index(sum, geometry::make_quickhull_source_index_registration());
     REQUIRE(std::holds_alternative<OperationResult>(sum_result));
-    const auto& sum_output=std::get<OperationResult>(sum_result);
-    CHECK(support(sum_output.output,{1,0})==doctest::Approx(1.5));
-    CHECK(support(sum_output.output,{0,1})==1.0);
-    CHECK(std::any_of(sum_output.evidence.assumptions.begin(),sum_output.evidence.assumptions.end(),
-        [](const auto& item){return item.find("source-index invocation:")!=std::string::npos && item.find("internal_invocations=1")!=std::string::npos;}));
+    const auto &sum_output = std::get<OperationResult>(sum_result);
+    CHECK(support(sum_output.output, {1, 0}) == doctest::Approx(1.5));
+    CHECK(support(sum_output.output, {0, 1}) == 1.0);
+    CHECK(std::any_of(sum_output.evidence.assumptions.begin(),
+                      sum_output.evidence.assumptions.end(), [](const auto &item) {
+                          return item.find("source-index invocation:") != std::string::npos &&
+                                 item.find("internal_invocations=1") != std::string::npos;
+                      }));
 }
 
-TEST_CASE("source-index evidence binds exact ordered checker input including interior coordinates") {
-    const Matrix identity{2,2,{1,0,0,1}};
-    const auto first=vertices("source-index-manifest-a",2,
-        {0,0, 1,0, 1,1, 0,1, 0.25,0.25},5);
-    const auto second=vertices("source-index-manifest-b",2,
-        {0,0, 1,0, 1,1, 0,1, 0.375,0.25},5);
-    const auto a=run_source_index(request(AffineImage{first,identity,{0,0}},"source-index-manifest-a"),
-        geometry::make_quickhull_source_index_registration());
-    const auto b=run_source_index(request(AffineImage{second,identity,{0,0}},"source-index-manifest-b"),
-        geometry::make_quickhull_source_index_registration());
+TEST_CASE(
+    "source-index evidence binds exact ordered checker input including interior coordinates") {
+    const Matrix identity{2, 2, {1, 0, 0, 1}};
+    const auto first =
+        vertices("source-index-manifest-a", 2, {0, 0, 1, 0, 1, 1, 0, 1, 0.25, 0.25}, 5);
+    const auto second =
+        vertices("source-index-manifest-b", 2, {0, 0, 1, 0, 1, 1, 0, 1, 0.375, 0.25}, 5);
+    const auto a =
+        run_source_index(request(AffineImage{first, identity, {0, 0}}, "source-index-manifest-a"),
+                         geometry::make_quickhull_source_index_registration());
+    const auto b =
+        run_source_index(request(AffineImage{second, identity, {0, 0}}, "source-index-manifest-b"),
+                         geometry::make_quickhull_source_index_registration());
     REQUIRE(std::holds_alternative<OperationResult>(a));
     REQUIRE(std::holds_alternative<OperationResult>(b));
-    const auto manifest=[](const OperationResult& result) -> std::string {
-        for(const auto& item:result.evidence.assumptions)
-            if(item.starts_with("source-index generated ordered cloud:")) return item;
+    const auto manifest = [](const OperationResult &result) -> std::string {
+        for (const auto &item : result.evidence.assumptions)
+            if (item.starts_with("source-index generated ordered cloud:"))
+                return item;
         return {};
     };
-    const auto manifest_a=manifest(std::get<OperationResult>(a));
-    const auto manifest_b=manifest(std::get<OperationResult>(b));
+    const auto manifest_a = manifest(std::get<OperationResult>(a));
+    const auto manifest_b = manifest(std::get<OperationResult>(b));
     CHECK_FALSE(manifest_a.empty());
     CHECK_FALSE(manifest_b.empty());
-    CHECK(manifest_a.find("encoding=binary64-bit-pattern-hex/row-order/1")!=std::string::npos);
-    CHECK(manifest_a.find("3fd0000000000000,3fd0000000000000")!=std::string::npos);
-    CHECK(manifest_a!=manifest_b);
-    CHECK(manifest_a.find("digest=")!=std::string::npos);
-    CHECK(std::any_of(std::get<OperationResult>(a).evidence.assumptions.begin(),
-        std::get<OperationResult>(a).evidence.assumptions.end(),[&](const auto& item) {
-            return item.starts_with("checker invocation:") && item.find(manifest_a.substr(
-                manifest_a.find("digest=")+7,64))!=std::string::npos &&
-                item.find("ordered_cloud_ref=source-index generated ordered cloud")!=std::string::npos;
+    CHECK(manifest_a.find("encoding=binary64-bit-pattern-hex/row-order/1") != std::string::npos);
+    CHECK(manifest_a.find("3fd0000000000000,3fd0000000000000") != std::string::npos);
+    CHECK(manifest_a != manifest_b);
+    CHECK(manifest_a.find("digest=") != std::string::npos);
+    CHECK(std::any_of(
+        std::get<OperationResult>(a).evidence.assumptions.begin(),
+        std::get<OperationResult>(a).evidence.assumptions.end(), [&](const auto &item) {
+            return item.starts_with("checker invocation:") &&
+                   item.find(manifest_a.substr(manifest_a.find("digest=") + 7, 64)) !=
+                       std::string::npos &&
+                   item.find("ordered_cloud_ref=source-index generated ordered cloud") !=
+                       std::string::npos;
         }));
 }
 
 TEST_CASE("built-in source-index QuickHull rechecks cancellation and deadline after kernel entry") {
     std::vector<Vector> points;
     points.reserve(100000);
-    std::uint32_t state=0x12345678U;
-    for(std::size_t i=0;i<100000;++i) {
-        state=1664525U*state+1013904223U;
-        const double x=static_cast<double>(state)/4294967296.0;
-        state=1664525U*state+1013904223U;
-        const double y=static_cast<double>(state)/4294967296.0;
-        points.push_back({x,y});
+    std::uint32_t state = 0x12345678U;
+    for (std::size_t i = 0; i < 100000; ++i) {
+        state = 1664525U * state + 1013904223U;
+        const double x = static_cast<double>(state) / 4294967296.0;
+        state = 1664525U * state + 1013904223U;
+        const double y = static_cast<double>(state) / 4294967296.0;
+        points.push_back({x, y});
     }
-    const geometry::PointCloud cloud{{"source-index-interruption-probe"},std::move(points)};
-    auto registration=geometry::make_quickhull_source_index_registration();
+    const geometry::PointCloud cloud{{"source-index-interruption-probe"}, std::move(points)};
+    auto registration = geometry::make_quickhull_source_index_registration();
 
     std::stop_source cancellation;
     ExecutionContext cancelled_context;
-    cancelled_context.cancellation=cancellation.get_token();
-    auto cancelled_workspace=registration.factory(cloud);
+    cancelled_context.cancellation = cancellation.get_token();
+    auto cancelled_workspace = registration.factory(cloud);
     std::jthread cancel_during_kernel([&] {
         std::this_thread::sleep_for(std::chrono::milliseconds{1});
         cancellation.request_stop();
     });
-    const auto cancelled=cancelled_workspace->propose(cloud,cancelled_context);
+    const auto cancelled = cancelled_workspace->propose(cloud, cancelled_context);
     cancel_during_kernel.join();
     REQUIRE(std::holds_alternative<geometry::SourceIndexProposal>(cancelled));
-    const auto& cancellation_result=std::get<geometry::SourceIndexProposal>(cancelled);
-    CHECK(cancellation_result.status==geometry::SourceIndexProposalStatus::stopped);
-    CHECK(cancellation_result.stop_reason=="cancelled_during_kernel");
-    CHECK(cancellation_result.raw_status=="kernel_returned_after_interruption");
+    const auto &cancellation_result = std::get<geometry::SourceIndexProposal>(cancelled);
+    CHECK(cancellation_result.status == geometry::SourceIndexProposalStatus::stopped);
+    CHECK(cancellation_result.stop_reason == "cancelled_during_kernel");
+    CHECK(cancellation_result.raw_status == "kernel_returned_after_interruption");
 
     ExecutionContext deadline_context;
-    deadline_context.deadline=std::chrono::steady_clock::now()+std::chrono::milliseconds{1};
-    auto deadline_workspace=registration.factory(cloud);
-    const auto deadline=deadline_workspace->propose(cloud,deadline_context);
+    deadline_context.deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds{1};
+    auto deadline_workspace = registration.factory(cloud);
+    const auto deadline = deadline_workspace->propose(cloud, deadline_context);
     REQUIRE(std::holds_alternative<geometry::SourceIndexProposal>(deadline));
-    const auto& deadline_result=std::get<geometry::SourceIndexProposal>(deadline);
-    CHECK(deadline_result.status==geometry::SourceIndexProposalStatus::stopped);
-    CHECK(deadline_result.stop_reason=="deadline_expired_during_kernel");
+    const auto &deadline_result = std::get<geometry::SourceIndexProposal>(deadline);
+    CHECK(deadline_result.status == geometry::SourceIndexProposalStatus::stopped);
+    CHECK(deadline_result.stop_reason == "deadline_expired_during_kernel");
 }
 
-TEST_CASE("source-index BTULSHOR propagates cooperative interruption through bounded legacy loops") {
+TEST_CASE(
+    "source-index BTULSHOR propagates cooperative interruption through bounded legacy loops") {
     std::vector<Vector> points;
     points.reserve(100000);
-    for(std::size_t i=0;i<100000;++i)
-        points.push_back({static_cast<double>(i)/100000.0,
-            static_cast<double>((i*7919U)%100003U)/100003.0});
-    const geometry::PointCloud cloud{{"source-index-legacy-interruption-probe"},std::move(points)};
-    auto registration=geometry::make_legacy_kpabep_source_index_registration();
+    for (std::size_t i = 0; i < 100000; ++i)
+        points.push_back({static_cast<double>(i) / 100000.0,
+                          static_cast<double>((i * 7919U) % 100003U) / 100003.0});
+    const geometry::PointCloud cloud{{"source-index-legacy-interruption-probe"}, std::move(points)};
+    auto registration = geometry::make_legacy_kpabep_source_index_registration();
     std::stop_source cancellation;
     ExecutionContext context_with_cancel;
-    context_with_cancel.cancellation=cancellation.get_token();
-    auto workspace=registration.factory(cloud);
+    context_with_cancel.cancellation = cancellation.get_token();
+    auto workspace = registration.factory(cloud);
     std::jthread cancel_during_kernel([&] {
         std::this_thread::sleep_for(std::chrono::milliseconds{1});
         cancellation.request_stop();
     });
-    const auto result=workspace->propose(cloud,context_with_cancel);
+    const auto result = workspace->propose(cloud, context_with_cancel);
     cancel_during_kernel.join();
     REQUIRE(std::holds_alternative<geometry::SourceIndexProposal>(result));
-    const auto& stopped=std::get<geometry::SourceIndexProposal>(result);
-    CHECK(stopped.status==geometry::SourceIndexProposalStatus::stopped);
-    CHECK(stopped.stop_reason.find("cancelled")!=std::string::npos);
+    const auto &stopped = std::get<geometry::SourceIndexProposal>(result);
+    CHECK(stopped.status == geometry::SourceIndexProposalStatus::stopped);
+    CHECK(stopped.stop_reason.find("cancelled") != std::string::npos);
 }
 
-TEST_CASE("source-index operation requires and records the independently selected H-to-V converter") {
-    const auto square=take(sets::make_h({{"source-index-h-square"},2,{}},
-        {take(numeric::snapshot(Matrix{4,2,{-1,0,1,0,0,-1,0,1}})),
-         take(numeric::snapshot_vector(Vector{0,1,0,1})),
-         take(numeric::snapshot(Matrix{0,2,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
-    const auto req=request(AffineImage{square,{2,2,{1,0,0,1}},{0,0}},"source-index-h-conversion");
-    const auto missing=run_source_index(req,geometry::make_quickhull_source_index_registration());
+TEST_CASE(
+    "source-index operation requires and records the independently selected H-to-V converter") {
+    const auto square =
+        take(sets::make_h({{"source-index-h-square"}, 2, {}},
+                          {take(numeric::snapshot(Matrix{4, 2, {-1, 0, 1, 0, 0, -1, 0, 1}})),
+                           take(numeric::snapshot_vector(Vector{0, 1, 0, 1})),
+                           take(numeric::snapshot(Matrix{0, 2, {}})),
+                           take(numeric::snapshot_vector(Vector{}))}))
+            .as_handle();
+    const auto req =
+        request(AffineImage{square, {2, 2, {1, 0, 0, 1}}, {0, 0}}, "source-index-h-conversion");
+    const auto missing =
+        run_source_index(req, geometry::make_quickhull_source_index_registration());
     REQUIRE(std::holds_alternative<Unsupported>(missing));
-    CHECK(std::get<Unsupported>(missing).diagnostics.front().field=="affine-sum.conversion");
+    CHECK(std::get<Unsupported>(missing).diagnostics.front().field == "affine-sum.conversion");
 
-    auto selected=dependencies();
+    auto selected = dependencies();
     REQUIRE(selected.conversion);
-    const auto converted=run_source_index(req,geometry::make_quickhull_source_index_registration(),{}, {},
-        selected.conversion);
+    const auto converted = run_source_index(
+        req, geometry::make_quickhull_source_index_registration(), {}, {}, selected.conversion);
     REQUIRE(std::holds_alternative<OperationResult>(converted));
-    const auto& evidence=std::get<OperationResult>(converted).evidence;
-    CHECK(std::any_of(evidence.assumptions.begin(),evidence.assumptions.end(),[](const auto& item) {
-        return item.find("H-to-V conversion invoked:")!=std::string::npos &&
-            item.find("csl.conversion.qhull")!=std::string::npos;
-    }));
-    CHECK(std::any_of(evidence.assumptions.begin(),evidence.assumptions.end(),[](const auto& item) {
-        return item.find("checker invocation:")!=std::string::npos && item.find("status=verified")!=std::string::npos;
-    }));
+    const auto &evidence = std::get<OperationResult>(converted).evidence;
+    CHECK(
+        std::any_of(evidence.assumptions.begin(), evidence.assumptions.end(), [](const auto &item) {
+            return item.find("H-to-V conversion invoked:") != std::string::npos &&
+                   item.find("csl.conversion.qhull") != std::string::npos;
+        }));
+    CHECK(
+        std::any_of(evidence.assumptions.begin(), evidence.assumptions.end(), [](const auto &item) {
+            return item.find("checker invocation:") != std::string::npos &&
+                   item.find("status=verified") != std::string::npos;
+        }));
 }
 
 TEST_CASE("affine operation records basis-reuse and recursive child LPPort invocations") {
-    std::vector<double> points{0,0, 1,0, 1,1, 0,1};
-    for(std::size_t x=1;x<=4;++x) for(std::size_t y=1;y<=4;++y) {
-        points.push_back(static_cast<double>(x)/5.0);
-        points.push_back(static_cast<double>(y)/5.0);
-    }
-    const auto cloud=vertices("child-lp-trace-cloud",2,std::move(points),20,{"x","y"});
-    const AffineImage image{cloud,{2,2,{1,0,0,1}},{0,0}};
-    const auto req=request(image,"child-lp-trace");
-    const auto selected_lp=take(adapters::lp::make_highs_registration());
-    auto basis_dependencies=geometry::AffineSumDependencies{
+    std::vector<double> points{0, 0, 1, 0, 1, 1, 0, 1};
+    for (std::size_t x = 1; x <= 4; ++x)
+        for (std::size_t y = 1; y <= 4; ++y) {
+            points.push_back(static_cast<double>(x) / 5.0);
+            points.push_back(static_cast<double>(y) / 5.0);
+        }
+    const auto cloud = vertices("child-lp-trace-cloud", 2, std::move(points), 20, {"x", "y"});
+    const AffineImage image{cloud, {2, 2, {1, 0, 0, 1}}, {0, 0}};
+    const auto req = request(image, "child-lp-trace");
+    const auto selected_lp = take(adapters::lp::make_highs_registration());
+    auto basis_dependencies = geometry::AffineSumDependencies{
         provider(geometry::make_basis_reuse_hull_reducer_registration()),
-        provider(selected_lp),{}};
-    const auto basis=run(req,std::move(basis_dependencies));
+        provider(selected_lp),
+        {}};
+    const auto basis = run(req, std::move(basis_dependencies));
     REQUIRE(std::holds_alternative<OperationResult>(basis));
-    const auto& basis_result=std::get<OperationResult>(basis);
-    const auto basis_data=take(sets::from_handle(basis_result.output));
-    const auto basis_vertices=std::get<sets::VRepresentation>(basis_data.representation()).vertices;
-    CHECK(basis_vertices.rows()<20);
-    CHECK(basis_vertices.rows()>=4);
-    CHECK(std::count_if(basis_result.evidence.assumptions.begin(),basis_result.evidence.assumptions.end(),
-        [](const auto& item){return item.find("HullReducerPort child LPPort invocation:")!=std::string::npos;})==1);
-    CHECK(std::any_of(basis_result.evidence.assumptions.begin(),basis_result.evidence.assumptions.end(),
-        [](const auto& item){return item.find("requested_provider=phase-one-bland@1")!=std::string::npos &&
-            item.find("actual_provider=phase-one-bland@1")!=std::string::npos &&
-            item.find("status=completed; mathematical_outcome=optimal")!=std::string::npos;}));
+    const auto &basis_result = std::get<OperationResult>(basis);
+    const auto basis_data = take(sets::from_handle(basis_result.output));
+    const auto basis_vertices =
+        std::get<sets::VRepresentation>(basis_data.representation()).vertices;
+    CHECK(basis_vertices.rows() < 20);
+    CHECK(basis_vertices.rows() >= 4);
+    CHECK(std::count_if(basis_result.evidence.assumptions.begin(),
+                        basis_result.evidence.assumptions.end(), [](const auto &item) {
+                            return item.find("HullReducerPort child LPPort invocation:") !=
+                                   std::string::npos;
+                        }) == 1);
+    CHECK(std::any_of(
+        basis_result.evidence.assumptions.begin(), basis_result.evidence.assumptions.end(),
+        [](const auto &item) {
+            return item.find("requested_provider=phase-one-bland@1") != std::string::npos &&
+                   item.find("actual_provider=phase-one-bland@1") != std::string::npos &&
+                   item.find("status=completed; mathematical_outcome=optimal") != std::string::npos;
+        }));
 
-    const auto recursive_lp=take(adapters::lp::make_highs_registration());
-    const auto outer_lp=take(adapters::lp::make_highs_registration());
-    auto recursive_dependencies=geometry::AffineSumDependencies{
+    const auto recursive_lp = take(adapters::lp::make_highs_registration());
+    const auto outer_lp = take(adapters::lp::make_highs_registration());
+    auto recursive_dependencies = geometry::AffineSumDependencies{
         provider(geometry::make_recursive_hull_reducer_registration(recursive_lp)),
-        provider(outer_lp),{}};
-    const auto recursive=run(req,std::move(recursive_dependencies));
+        provider(outer_lp),
+        {}};
+    const auto recursive = run(req, std::move(recursive_dependencies));
     REQUIRE(std::holds_alternative<OperationResult>(recursive));
-    const auto& recursive_result=std::get<OperationResult>(recursive);
-    const auto recursive_data=take(sets::from_handle(recursive_result.output));
-    const auto recursive_vertices=std::get<sets::VRepresentation>(recursive_data.representation()).vertices;
-    CHECK(recursive_vertices.rows()==20);
-    CHECK(recursive_vertices.rows()>=4);
-    const auto child_calls=std::count_if(recursive_result.evidence.assumptions.begin(),recursive_result.evidence.assumptions.end(),
-        [](const auto& item){return item.find("HullReducerPort child LPPort invocation:")!=std::string::npos;});
-    CHECK(child_calls>0);
-    CHECK(std::any_of(recursive_result.evidence.assumptions.begin(),recursive_result.evidence.assumptions.end(),
-        [child_calls](const auto& item){return item.find("child LPPort trace summary: captured="+std::to_string(child_calls)+
-            "; total="+std::to_string(child_calls)+"; omitted=0; capture_failed=false")!=std::string::npos;}));
+    const auto &recursive_result = std::get<OperationResult>(recursive);
+    const auto recursive_data = take(sets::from_handle(recursive_result.output));
+    const auto recursive_vertices =
+        std::get<sets::VRepresentation>(recursive_data.representation()).vertices;
+    CHECK(recursive_vertices.rows() == 20);
+    CHECK(recursive_vertices.rows() >= 4);
+    const auto child_calls = std::count_if(
+        recursive_result.evidence.assumptions.begin(), recursive_result.evidence.assumptions.end(),
+        [](const auto &item) {
+            return item.find("HullReducerPort child LPPort invocation:") != std::string::npos;
+        });
+    CHECK(child_calls > 0);
+    CHECK(std::any_of(
+        recursive_result.evidence.assumptions.begin(), recursive_result.evidence.assumptions.end(),
+        [child_calls](const auto &item) {
+            return item.find("child LPPort trace summary: captured=" + std::to_string(child_calls) +
+                             "; total=" + std::to_string(child_calls) +
+                             "; omitted=0; capture_failed=false") != std::string::npos;
+        }));
 }
 
 TEST_CASE("source-index operation retains malformed, near-tolerance and stopped method outcomes") {
-    const Matrix identity{2,2,{1,0,0,1}};
-    const auto square=vertices("source-index-bad-square",2,{0,0,1,0,1,1,0,1},4);
-    const auto request_square=request(AffineImage{square,identity,{0,0}},"source-index-malformed");
-    const auto malformed=run_source_index(request_square,make_fixed_source_index_registration(
-        {geometry::SourceIndexProposalStatus::completed,{0,1,2},"fixture-completed",{}, {"fixture method trace"},1}));
+    const Matrix identity{2, 2, {1, 0, 0, 1}};
+    const auto square = vertices("source-index-bad-square", 2, {0, 0, 1, 0, 1, 1, 0, 1}, 4);
+    const auto request_square =
+        request(AffineImage{square, identity, {0, 0}}, "source-index-malformed");
+    const auto malformed = run_source_index(
+        request_square,
+        make_fixed_source_index_registration({geometry::SourceIndexProposalStatus::completed,
+                                              {0, 1, 2},
+                                              "fixture-completed",
+                                              {},
+                                              {"fixture method trace"},
+                                              1}));
     REQUIRE(std::holds_alternative<Unsupported>(malformed));
-    CHECK(std::get<Unsupported>(malformed).diagnostics.front().field=="affine-sum.source-index.checker");
-    CHECK(std::get<Unsupported>(malformed).diagnostics.front().explanation.find("incorrect")!=std::string::npos);
-    CHECK(std::get<Unsupported>(malformed).diagnostics.front().explanation.find("proposed_ids=0,1,2,")!=std::string::npos);
+    CHECK(std::get<Unsupported>(malformed).diagnostics.front().field ==
+          "affine-sum.source-index.checker");
+    CHECK(std::get<Unsupported>(malformed).diagnostics.front().explanation.find("incorrect") !=
+          std::string::npos);
     CHECK(std::get<Unsupported>(malformed).diagnostics.front().explanation.find(
-        "source-index generated ordered cloud: digest=")!=std::string::npos);
-    CHECK(std::get<Unsupported>(malformed).diagnostics.front().explanation.find("; rows=")!=std::string::npos);
+              "proposed_ids=0,1,2,") != std::string::npos);
+    CHECK(std::get<Unsupported>(malformed).diagnostics.front().explanation.find(
+              "source-index generated ordered cloud: digest=") != std::string::npos);
+    CHECK(std::get<Unsupported>(malformed).diagnostics.front().explanation.find("; rows=") !=
+          std::string::npos);
 
-    const auto near_tolerance=vertices("source-index-near-tolerance",2,
-        {0,0,1,0,1,1,0,1,0.5,1.00000001},5);
-    const auto near_request=request(AffineImage{near_tolerance,identity,{0,0}},"source-index-near-tolerance");
-    const auto legacy=run_source_index(near_request,geometry::make_legacy_kpabep_source_index_registration());
+    const auto near_tolerance =
+        vertices("source-index-near-tolerance", 2, {0, 0, 1, 0, 1, 1, 0, 1, 0.5, 1.00000001}, 5);
+    const auto near_request =
+        request(AffineImage{near_tolerance, identity, {0, 0}}, "source-index-near-tolerance");
+    const auto legacy =
+        run_source_index(near_request, geometry::make_legacy_kpabep_source_index_registration());
     REQUIRE(std::holds_alternative<Unsupported>(legacy));
-    const auto& legacy_error=std::get<Unsupported>(legacy).diagnostics.front();
-    CHECK(legacy_error.field=="affine-sum.source-index.checker");
-    CHECK(legacy_error.explanation.find("input point lies outside")!=std::string::npos);
-    CHECK(legacy_error.explanation.find("csl.legacy.btulshor.reach.source-v1")!=std::string::npos);
-    CHECK(legacy_error.explanation.find("modif_status=")!=std::string::npos);
-    CHECK(legacy_error.explanation.find("source-index generated ordered cloud: digest=")!=std::string::npos);
-    CHECK(legacy_error.explanation.find("; rows=")!=std::string::npos);
+    const auto &legacy_error = std::get<Unsupported>(legacy).diagnostics.front();
+    CHECK(legacy_error.field == "affine-sum.source-index.checker");
+    CHECK(legacy_error.explanation.find("input point lies outside") != std::string::npos);
+    CHECK(legacy_error.explanation.find("csl.legacy.btulshor.reach.source-v1") !=
+          std::string::npos);
+    CHECK(legacy_error.explanation.find("modif_status=") != std::string::npos);
+    CHECK(legacy_error.explanation.find("source-index generated ordered cloud: digest=") !=
+          std::string::npos);
+    CHECK(legacy_error.explanation.find("; rows=") != std::string::npos);
 
-    auto stop_limits=geometry::LegacyKpabepOptions{};
-    stop_limits.max_pivots=0;
-    const auto stopped=run_source_index(request_square,
-        geometry::make_legacy_kpabep_source_index_registration(stop_limits));
+    auto stop_limits = geometry::LegacyKpabepOptions{};
+    stop_limits.max_pivots = 0;
+    const auto stopped = run_source_index(
+        request_square, geometry::make_legacy_kpabep_source_index_registration(stop_limits));
     CHECK(std::holds_alternative<OperationStopped>(stopped));
-    if(const auto* stop=std::get_if<OperationStopped>(&stopped))
-        CHECK(stop->diagnostics.find("source-index generated ordered cloud: digest=")!=std::string::npos);
+    if (const auto *stop = std::get_if<OperationStopped>(&stopped))
+        CHECK(stop->diagnostics.find("source-index generated ordered cloud: digest=") !=
+              std::string::npos);
 }
 
 TEST_CASE("source-index checker timeout refuses output without a reducer fallback") {
-    const Matrix identity{2,2,{1,0,0,1}};
-    const auto square=vertices("source-index-timeout-square",2,{0,0,1,0,1,1,0,1},4);
-    const auto req=request(AffineImage{square,identity,{0,0}},"source-index-timeout");
-    const auto outcome=run_source_index(req,geometry::make_quickhull_source_index_registration(),
-        {std::chrono::milliseconds{0},64});
+    const Matrix identity{2, 2, {1, 0, 0, 1}};
+    const auto square = vertices("source-index-timeout-square", 2, {0, 0, 1, 0, 1, 1, 0, 1}, 4);
+    const auto req = request(AffineImage{square, identity, {0, 0}}, "source-index-timeout");
+    const auto outcome = run_source_index(req, geometry::make_quickhull_source_index_registration(),
+                                          {std::chrono::milliseconds{0}, 64});
     REQUIRE(std::holds_alternative<OperationStopped>(outcome));
-    const auto& stop=std::get<OperationStopped>(outcome);
-    CHECK(stop.reason==StopReason::resource_limit);
-    CHECK(stop.diagnostics.find("checker timeout")!=std::string::npos);
-    CHECK(stop.diagnostics.find("raw proposal")!=std::string::npos);
-    CHECK(stop.diagnostics.find("source-index generated ordered cloud: digest=")!=std::string::npos);
-    CHECK(stop.diagnostics.find("; rows=")!=std::string::npos);
+    const auto &stop = std::get<OperationStopped>(outcome);
+    CHECK(stop.reason == StopReason::resource_limit);
+    CHECK(stop.diagnostics.find("checker timeout") != std::string::npos);
+    CHECK(stop.diagnostics.find("raw proposal") != std::string::npos);
+    CHECK(stop.diagnostics.find("source-index generated ordered cloud: digest=") !=
+          std::string::npos);
+    CHECK(stop.diagnostics.find("; rows=") != std::string::npos);
 }
 
 TEST_CASE("public affine operation removes exact duplicate and interior candidates") {
-    auto selected=dependencies();
-    selected.hull=provider(make_fixed_reduction_hull_registration({
-        geometry::ReductionStatus::complete,{0,1},
-        {{2,{{1,1.0}},{{"exact-duplicate"},{"test-program"}},
-            {0.0,0.0,0.0,{"test.exact"}}}},0,{}}));
-    const auto duplicate=vertices("exact-duplicate-candidates",1,{0,1,1},3);
-    const auto duplicate_result=take(run(request(AffineImage{duplicate,{1,1,{1}},{0}},"exact-duplicate"),
-        std::move(selected)));
-    const auto duplicate_rep=take(sets::from_handle(duplicate_result.output)).representation();
+    auto selected = dependencies();
+    selected.hull =
+        provider(make_fixed_reduction_hull_registration({geometry::ReductionStatus::complete,
+                                                         {0, 1},
+                                                         {{2,
+                                                           {{1, 1.0}},
+                                                           {{"exact-duplicate"}, {"test-program"}},
+                                                           {0.0, 0.0, 0.0, {"test.exact"}}}},
+                                                         0,
+                                                         {}}));
+    const auto duplicate = vertices("exact-duplicate-candidates", 1, {0, 1, 1}, 3);
+    const auto duplicate_result = take(run(
+        request(AffineImage{duplicate, {1, 1, {1}}, {0}}, "exact-duplicate"), std::move(selected)));
+    const auto duplicate_rep = take(sets::from_handle(duplicate_result.output)).representation();
     REQUIRE(std::holds_alternative<sets::VRepresentation>(duplicate_rep));
-    CHECK(std::get<sets::VRepresentation>(duplicate_rep).vertices.rows()==2);
-    CHECK(support(duplicate_result.output,{1})==1.0);
-    CHECK(support(duplicate_result.output,{-1})==0.0);
-    CHECK(std::any_of(duplicate_result.evidence.assumptions.begin(),duplicate_result.evidence.assumptions.end(),
-        [](const std::string& value){return value.find("exact binary64")!=std::string::npos;}));
+    CHECK(std::get<sets::VRepresentation>(duplicate_rep).vertices.rows() == 2);
+    CHECK(support(duplicate_result.output, {1}) == 1.0);
+    CHECK(support(duplicate_result.output, {-1}) == 0.0);
+    CHECK(std::any_of(duplicate_result.evidence.assumptions.begin(),
+                      duplicate_result.evidence.assumptions.end(), [](const std::string &value) {
+                          return value.find("exact binary64") != std::string::npos;
+                      }));
 
-    selected=dependencies();
-    selected.hull=provider(make_fixed_reduction_hull_registration({
-        geometry::ReductionStatus::complete,{0,1},
-        {{2,{{0,0.5},{1,0.5}},{{"exact-interior"},{"test-program"}},
-            {0.0,0.0,0.0,{"test.exact"}}}},0,{}}));
-    const auto interior=vertices("exact-interior-candidate",1,{0,1,0.5},3);
-    const auto interior_result=take(run(request(AffineImage{interior,{1,1,{1}},{0}},"exact-interior"),
-        std::move(selected)));
-    const auto interior_rep=take(sets::from_handle(interior_result.output)).representation();
+    selected = dependencies();
+    selected.hull =
+        provider(make_fixed_reduction_hull_registration({geometry::ReductionStatus::complete,
+                                                         {0, 1},
+                                                         {{2,
+                                                           {{0, 0.5}, {1, 0.5}},
+                                                           {{"exact-interior"}, {"test-program"}},
+                                                           {0.0, 0.0, 0.0, {"test.exact"}}}},
+                                                         0,
+                                                         {}}));
+    const auto interior = vertices("exact-interior-candidate", 1, {0, 1, 0.5}, 3);
+    const auto interior_result = take(run(
+        request(AffineImage{interior, {1, 1, {1}}, {0}}, "exact-interior"), std::move(selected)));
+    const auto interior_rep = take(sets::from_handle(interior_result.output)).representation();
     REQUIRE(std::holds_alternative<sets::VRepresentation>(interior_rep));
-    CHECK(std::get<sets::VRepresentation>(interior_rep).vertices.rows()==2);
-    CHECK(support(interior_result.output,{1})==1.0);
-    CHECK(support(interior_result.output,{-1})==0.0);
+    CHECK(std::get<sets::VRepresentation>(interior_rep).vertices.rows() == 2);
+    CHECK(support(interior_result.output, {1}) == 1.0);
+    CHECK(support(interior_result.output, {-1}) == 0.0);
 }
 
 TEST_CASE("public Minkowski sum removes exact duplicate candidates and preserves support") {
-    auto selected=dependencies();
-    selected.hull=provider(make_fixed_reduction_hull_registration({
-        geometry::ReductionStatus::complete,{0,1,3},
-        {{2,{{1,1.0}},{{"minkowski-duplicate"},{"test-program"}},
-            {0.0,0.0,0.0,{"test.exact"}}}},0,{}}));
-    const auto interval=vertices("minkowski-duplicate-input",1,{0,1},2);
-    const auto result=take(run(request(MinkowskiSum{interval,interval},"minkowski-duplicate"),
-        std::move(selected)));
-    const auto rep=take(sets::from_handle(result.output)).representation();
+    auto selected = dependencies();
+    selected.hull = provider(
+        make_fixed_reduction_hull_registration({geometry::ReductionStatus::complete,
+                                                {0, 1, 3},
+                                                {{2,
+                                                  {{1, 1.0}},
+                                                  {{"minkowski-duplicate"}, {"test-program"}},
+                                                  {0.0, 0.0, 0.0, {"test.exact"}}}},
+                                                0,
+                                                {}}));
+    const auto interval = vertices("minkowski-duplicate-input", 1, {0, 1}, 2);
+    const auto result = take(
+        run(request(MinkowskiSum{interval, interval}, "minkowski-duplicate"), std::move(selected)));
+    const auto rep = take(sets::from_handle(result.output)).representation();
     REQUIRE(std::holds_alternative<sets::VRepresentation>(rep));
-    CHECK(std::get<sets::VRepresentation>(rep).vertices.rows()==3);
-    CHECK(support(result.output,{1})==2.0);
-    CHECK(support(result.output,{-1})==0.0);
-    CHECK(std::any_of(result.evidence.assumptions.begin(),result.evidence.assumptions.end(),
-        [](const std::string& value){return value.find("exact binary64")!=std::string::npos;}));
+    CHECK(std::get<sets::VRepresentation>(rep).vertices.rows() == 3);
+    CHECK(support(result.output, {1}) == 2.0);
+    CHECK(support(result.output, {-1}) == 0.0);
+    CHECK(std::any_of(result.evidence.assumptions.begin(), result.evidence.assumptions.end(),
+                      [](const std::string &value) {
+                          return value.find("exact binary64") != std::string::npos;
+                      }));
 }
 
 TEST_CASE("public geometry operation falls back to the complete cloud for malformed reductions") {
-    auto selected=dependencies();
-    selected.hull=provider(make_fixed_reduction_hull_registration({
-        geometry::ReductionStatus::complete,{0,1},{},0,{}}));
-    const auto cloud=vertices("malformed-reduction-candidates",1,{0,1,0.5},3);
-    const auto result=take(run(request(AffineImage{cloud,{1,1,{1}},{0}},"malformed-reduction"),
-        std::move(selected)));
-    const auto rep=take(sets::from_handle(result.output)).representation();
+    auto selected = dependencies();
+    selected.hull = provider(make_fixed_reduction_hull_registration(
+        {geometry::ReductionStatus::complete, {0, 1}, {}, 0, {}}));
+    const auto cloud = vertices("malformed-reduction-candidates", 1, {0, 1, 0.5}, 3);
+    const auto result = take(run(
+        request(AffineImage{cloud, {1, 1, {1}}, {0}}, "malformed-reduction"), std::move(selected)));
+    const auto rep = take(sets::from_handle(result.output)).representation();
     REQUIRE(std::holds_alternative<sets::VRepresentation>(rep));
-    CHECK(std::get<sets::VRepresentation>(rep).vertices.rows()==3);
-    CHECK(support(result.output,{1})==1.0);
-    CHECK(support(result.output,{-1})==0.0);
-    CHECK(std::any_of(result.evidence.assumptions.begin(),result.evidence.assumptions.end(),
-        [](const std::string& value){return value.find("all generated candidates retained")!=std::string::npos;}));
+    CHECK(std::get<sets::VRepresentation>(rep).vertices.rows() == 3);
+    CHECK(support(result.output, {1}) == 1.0);
+    CHECK(support(result.output, {-1}) == 0.0);
+    CHECK(std::any_of(result.evidence.assumptions.begin(), result.evidence.assumptions.end(),
+                      [](const std::string &value) {
+                          return value.find("all generated candidates retained") !=
+                                 std::string::npos;
+                      }));
 }
 
 TEST_CASE("rectangular and singular affine maps retain their actual ambient spaces") {
-    const auto interval=vertices("control",1,{-1,2},2);
-    auto rectangular=request(AffineImage{interval,{2,1,{2,-1}},{1,3}});
+    const auto interval = vertices("control", 1, {-1, 2}, 2);
+    auto rectangular = request(AffineImage{interval, {2, 1, {2, -1}}, {1, 3}});
     geometry::AffineSumOptions options;
-    options.affine_output_labels={"state-a","state-b"};
-    auto result=take(run(rectangular,dependencies(),options));
-    CHECK(result.output.metadata.dimension==2);
-    CHECK(support(result.output,{1,2})==doctest::Approx(7));
-    CHECK(support(result.output,{1,0})==doctest::Approx(5));
-    const auto square=vertices("square",2,{0,0,1,0,1,1,0,1},4);
+    options.affine_output_labels = {"state-a", "state-b"};
+    auto result = take(run(rectangular, dependencies(), options));
+    CHECK(result.output.metadata.dimension == 2);
+    CHECK(support(result.output, {1, 2}) == doctest::Approx(7));
+    CHECK(support(result.output, {1, 0}) == doctest::Approx(5));
+    const auto square = vertices("square", 2, {0, 0, 1, 0, 1, 1, 0, 1}, 4);
     // The rational map (x,y) -> (x,0) sends the unit square to the
     // one-dimensional segment [(0,0),(1,0)] in a two-dimensional ambient space.
-    auto singular=request(AffineImage{square,{2,2,{1,0,0,0}},{0,0}});
-    result=take(run(singular,dependencies()));
-    CHECK(result.output.metadata.dimension==2);
-    CHECK(support(result.output,{1,0})==1.0);
-    CHECK(support(result.output,{-1,0})==0.0);
-    CHECK(support(result.output,{0,1})==0.0);
-    CHECK(support(result.output,{0,-1})==0.0);
-    const auto singular_rep=take(sets::from_handle(result.output)).representation();
+    auto singular = request(AffineImage{square, {2, 2, {1, 0, 0, 0}}, {0, 0}});
+    result = take(run(singular, dependencies()));
+    CHECK(result.output.metadata.dimension == 2);
+    CHECK(support(result.output, {1, 0}) == 1.0);
+    CHECK(support(result.output, {-1, 0}) == 0.0);
+    CHECK(support(result.output, {0, 1}) == 0.0);
+    CHECK(support(result.output, {0, -1}) == 0.0);
+    const auto singular_rep = take(sets::from_handle(result.output)).representation();
     REQUIRE(std::holds_alternative<sets::VRepresentation>(singular_rep));
-    const auto& segment=std::get<sets::VRepresentation>(singular_rep);
-    REQUIRE(segment.vertices.rows()>=2);
-    const double origin_x=segment.vertices(0,0);
-    const double origin_y=segment.vertices(0,1);
+    const auto &segment = std::get<sets::VRepresentation>(singular_rep);
+    REQUIRE(segment.vertices.rows() >= 2);
+    const double origin_x = segment.vertices(0, 0);
+    const double origin_y = segment.vertices(0, 1);
     std::optional<std::size_t> observed_affine_rank;
-    for(std::size_t row=1;row<segment.vertices.rows();++row) {
-        const double dx=segment.vertices(row,0)-origin_x;
-        const double dy=segment.vertices(row,1)-origin_y;
-        if(dx==0.0 && dy==0.0) continue;
-        observed_affine_rank=1;
-        for(std::size_t candidate=1;candidate<segment.vertices.rows();++candidate) {
-            const double candidate_x=segment.vertices(candidate,0)-origin_x;
-            const double candidate_y=segment.vertices(candidate,1)-origin_y;
-            if(dx*candidate_y-dy*candidate_x!=0.0) observed_affine_rank=2;
+    for (std::size_t row = 1; row < segment.vertices.rows(); ++row) {
+        const double dx = segment.vertices(row, 0) - origin_x;
+        const double dy = segment.vertices(row, 1) - origin_y;
+        if (dx == 0.0 && dy == 0.0)
+            continue;
+        observed_affine_rank = 1;
+        for (std::size_t candidate = 1; candidate < segment.vertices.rows(); ++candidate) {
+            const double candidate_x = segment.vertices(candidate, 0) - origin_x;
+            const double candidate_y = segment.vertices(candidate, 1) - origin_y;
+            if (dx * candidate_y - dy * candidate_x != 0.0)
+                observed_affine_rank = 2;
         }
         break;
     }
     REQUIRE(observed_affine_rank.has_value());
-    constexpr std::size_t expected_affine_rank=1; // (x,y) -> (x,0) maps the square to a segment.
-    CHECK(*observed_affine_rank==expected_affine_rank);
-    const auto singular_data=take(sets::from_handle(result.output));
+    constexpr std::size_t expected_affine_rank = 1; // (x,y) -> (x,0) maps the square to a segment.
+    CHECK(*observed_affine_rank == expected_affine_rank);
+    const auto singular_data = take(sets::from_handle(result.output));
     // Affine-dimension metadata is intentionally absent: missing claims mean
     // unknown by the set-data contract, so rank is derived from returned points.
     CHECK_FALSE(singular_data.metadata()->affine_dimension.has_value());
-    bool has_left=false;
-    bool has_right=false;
-    for(std::size_t row=0;row<segment.vertices.rows();++row) {
-        const double x=segment.vertices(row,0);
-        const double y=segment.vertices(row,1);
-        CHECK(y==0.0);
-        CHECK(x>=0.0);
-        CHECK(x<=1.0);
-        has_left=has_left || (x==0.0 && y==0.0);
-        has_right=has_right || (x==1.0 && y==0.0);
+    bool has_left = false;
+    bool has_right = false;
+    for (std::size_t row = 0; row < segment.vertices.rows(); ++row) {
+        const double x = segment.vertices(row, 0);
+        const double y = segment.vertices(row, 1);
+        CHECK(y == 0.0);
+        CHECK(x >= 0.0);
+        CHECK(x <= 1.0);
+        has_left = has_left || (x == 0.0 && y == 0.0);
+        has_right = has_right || (x == 1.0 && y == 0.0);
     }
     CHECK(has_left);
     CHECK(has_right);
-    auto zero=request(AffineImage{square,{1,2,{0,0}},{7}});
-    result=take(run(zero,dependencies()));
-    CHECK(support(result.output,{1})==doctest::Approx(7));
-    const auto rep=take(sets::from_handle(result.output)).representation();
+    auto zero = request(AffineImage{square, {1, 2, {0, 0}}, {7}});
+    result = take(run(zero, dependencies()));
+    CHECK(support(result.output, {1}) == doctest::Approx(7));
+    const auto rep = take(sets::from_handle(result.output)).representation();
     REQUIRE(std::holds_alternative<sets::VRepresentation>(rep));
-    CHECK(std::get<sets::VRepresentation>(rep).vertices.rows()==1);
+    CHECK(std::get<sets::VRepresentation>(rep).vertices.rows() == 1);
 }
 
 TEST_CASE("selected H conversion preserves explicit equalities and infeasible empty sets") {
-    auto h=take(sets::make_h({{"h-segment"},2,{}},
-        {take(numeric::snapshot(Matrix{2,2,{1,0,-1,0}})),take(numeric::snapshot_vector(Vector{2,1})),
-         take(numeric::snapshot(Matrix{1,2,{0,1}})),take(numeric::snapshot_vector(Vector{3}))})).as_handle();
-    const auto req=request(AffineImage{h,{1,2,{2,-1}},{4}});
-    const auto result=take(run(req,dependencies()));
-    CHECK(support(result.output,{1})==doctest::Approx(5));
-    CHECK(support(result.output,{-1})==doctest::Approx(1));
+    auto h = take(sets::make_h({{"h-segment"}, 2, {}},
+                               {take(numeric::snapshot(Matrix{2, 2, {1, 0, -1, 0}})),
+                                take(numeric::snapshot_vector(Vector{2, 1})),
+                                take(numeric::snapshot(Matrix{1, 2, {0, 1}})),
+                                take(numeric::snapshot_vector(Vector{3}))}))
+                 .as_handle();
+    const auto req = request(AffineImage{h, {1, 2, {2, -1}}, {4}});
+    const auto result = take(run(req, dependencies()));
+    CHECK(support(result.output, {1}) == doctest::Approx(5));
+    CHECK(support(result.output, {-1}) == doctest::Approx(1));
     CHECK_FALSE(result.evidence.error_bound.has_value());
-    CHECK(std::holds_alternative<Unsupported>(run(req,dependencies(false,false))));
-    h=take(sets::make_h({{"contradiction"},1,{}},
-        {take(numeric::snapshot(Matrix{2,1,{1,-1}})),take(numeric::snapshot_vector(Vector{0,-1})),
-         take(numeric::snapshot(Matrix{0,1,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
-    const auto empty=take(run(request(AffineImage{h,{1,1,{1}},{0}}),dependencies()));
-    CHECK(std::isinf(support(empty.output,{1})));
-    CHECK(support(empty.output,{1})<0);
+    CHECK(std::holds_alternative<Unsupported>(run(req, dependencies(false, false))));
+    h = take(sets::make_h({{"contradiction"}, 1, {}},
+                          {take(numeric::snapshot(Matrix{2, 1, {1, -1}})),
+                           take(numeric::snapshot_vector(Vector{0, -1})),
+                           take(numeric::snapshot(Matrix{0, 1, {}})),
+                           take(numeric::snapshot_vector(Vector{}))}))
+            .as_handle();
+    const auto empty = take(run(request(AffineImage{h, {1, 1, {1}}, {0}}), dependencies()));
+    CHECK(std::isinf(support(empty.output, {1})));
+    CHECK(support(empty.output, {1}) < 0);
 }
 
 TEST_CASE("public geometry operation rejects H-to-V vertices without numerical evidence") {
-    auto h=take(sets::make_h({{"h-interval-unestablished"},1,{}},
-        {take(numeric::snapshot(Matrix{2,1,{-1,1}})),take(numeric::snapshot_vector(Vector{0,1})),
-         take(numeric::snapshot(Matrix{0,1,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
-    auto selected=dependencies(false,false);
+    auto h = take(sets::make_h({{"h-interval-unestablished"}, 1, {}},
+                               {take(numeric::snapshot(Matrix{2, 1, {-1, 1}})),
+                                take(numeric::snapshot_vector(Vector{0, 1})),
+                                take(numeric::snapshot(Matrix{0, 1, {}})),
+                                take(numeric::snapshot_vector(Vector{}))}))
+                 .as_handle();
+    auto selected = dependencies(false, false);
     Requirements conversion_requirements;
-    conversion_requirements.output.representation={"csl.polyhedron.v"};
-    conversion_requirements.output.relation=SetRelation::equivalent;
-    selected.conversion=provider(make_unestablished_conversion_registration(),conversion_requirements);
-    const auto result=run(request(AffineImage{h,{1,1,{1}},{0}},"unestablished-conversion"),std::move(selected));
+    conversion_requirements.output.representation = {"csl.polyhedron.v"};
+    conversion_requirements.output.relation = SetRelation::equivalent;
+    selected.conversion =
+        provider(make_unestablished_conversion_registration(), conversion_requirements);
+    const auto result = run(request(AffineImage{h, {1, 1, {1}}, {0}}, "unestablished-conversion"),
+                            std::move(selected));
     CHECK(std::holds_alternative<Unsupported>(result));
 }
 
-TEST_CASE("public geometry operation rejects valid H-to-V vertices with excessive reported residual") {
-    auto h=take(sets::make_h({{"h-interval-high-residual"},1,{}},
-        {take(numeric::snapshot(Matrix{2,1,{-1,1}})),take(numeric::snapshot_vector(Vector{0,1})),
-         take(numeric::snapshot(Matrix{0,1,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
-    auto selected=dependencies(false,false);
+TEST_CASE(
+    "public geometry operation rejects valid H-to-V vertices with excessive reported residual") {
+    auto h = take(sets::make_h({{"h-interval-high-residual"}, 1, {}},
+                               {take(numeric::snapshot(Matrix{2, 1, {-1, 1}})),
+                                take(numeric::snapshot_vector(Vector{0, 1})),
+                                take(numeric::snapshot(Matrix{0, 1, {}})),
+                                take(numeric::snapshot_vector(Vector{}))}))
+                 .as_handle();
+    auto selected = dependencies(false, false);
     Requirements conversion_requirements;
-    conversion_requirements.output.representation={"csl.polyhedron.v"};
-    conversion_requirements.output.relation=SetRelation::equivalent;
-    selected.conversion=provider(make_high_residual_conversion_registration(),conversion_requirements);
-    const auto result=run(request(AffineImage{h,{1,1,{1}},{0}},"high-residual-conversion"),std::move(selected));
+    conversion_requirements.output.representation = {"csl.polyhedron.v"};
+    conversion_requirements.output.relation = SetRelation::equivalent;
+    selected.conversion =
+        provider(make_high_residual_conversion_registration(), conversion_requirements);
+    const auto result = run(request(AffineImage{h, {1, 1, {1}}, {0}}, "high-residual-conversion"),
+                            std::move(selected));
     CHECK(std::holds_alternative<Unsupported>(result));
 }
 
 TEST_CASE("affine and Minkowski error bounds compose independently checked 1D H coverage") {
-    const auto h1=take(sets::make_h({{"h-undercovered-left"},1,{}},
-        {take(numeric::snapshot(Matrix{2,1,{-1,1}})),take(numeric::snapshot_vector(Vector{0,10})),
-         take(numeric::snapshot(Matrix{0,1,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
-    const auto h2=take(sets::make_h({{"h-undercovered-right"},1,{}},
-        {take(numeric::snapshot(Matrix{2,1,{-1,1}})),take(numeric::snapshot_vector(Vector{0,10})),
-         take(numeric::snapshot(Matrix{0,1,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
+    const auto h1 = take(sets::make_h({{"h-undercovered-left"}, 1, {}},
+                                      {take(numeric::snapshot(Matrix{2, 1, {-1, 1}})),
+                                       take(numeric::snapshot_vector(Vector{0, 10})),
+                                       take(numeric::snapshot(Matrix{0, 1, {}})),
+                                       take(numeric::snapshot_vector(Vector{}))}))
+                        .as_handle();
+    const auto h2 = take(sets::make_h({{"h-undercovered-right"}, 1, {}},
+                                      {take(numeric::snapshot(Matrix{2, 1, {-1, 1}})),
+                                       take(numeric::snapshot_vector(Vector{0, 10})),
+                                       take(numeric::snapshot(Matrix{0, 1, {}})),
+                                       take(numeric::snapshot_vector(Vector{}))}))
+                        .as_handle();
     const auto selected_converter = [&] {
-        auto selected=dependencies(false,false);
+        auto selected = dependencies(false, false);
         Requirements requirements;
-        requirements.output.representation={"csl.polyhedron.v"};
-        requirements.output.relation=SetRelation::equivalent;
-        selected.conversion=provider(make_one_unit_undercoverage_registration(),requirements);
-        selected.hull=provider(make_keep_all_hull_registration());
+        requirements.output.representation = {"csl.polyhedron.v"};
+        requirements.output.relation = SetRelation::equivalent;
+        selected.conversion = provider(make_one_unit_undercoverage_registration(), requirements);
+        selected.hull = provider(make_keep_all_hull_registration());
         return selected;
     };
 
-    const auto image=take(run(request(AffineImage{h1,{1,1,{2}},{0}},"compose-affine-h-coverage"),
-        selected_converter()));
-    CHECK(support(image.output,{1})==18.0);
+    const auto image =
+        take(run(request(AffineImage{h1, {1, 1, {2}}, {0}}, "compose-affine-h-coverage"),
+                 selected_converter()));
+    CHECK(support(image.output, {1}) == 18.0);
     REQUIRE(image.evidence.error_bound.has_value());
-    CHECK(image.evidence.error_bound->bound==2.0);
+    CHECK(image.evidence.error_bound->bound == 2.0);
 
-    const auto rounded_image=take(run(
-        request(AffineImage{h1,{1,1,{0.1}},{0}},"compose-affine-generation-rounding"),
-        selected_converter()));
-    CHECK(support(rounded_image.output,{1})==doctest::Approx(0.9));
+    const auto rounded_image =
+        take(run(request(AffineImage{h1, {1, 1, {0.1}}, {0}}, "compose-affine-generation-rounding"),
+                 selected_converter()));
+    CHECK(support(rounded_image.output, {1}) == doctest::Approx(0.9));
     REQUIRE(rounded_image.evidence.error_bound.has_value());
-    CHECK(rounded_image.evidence.error_bound->bound>0.1);
+    CHECK(rounded_image.evidence.error_bound->bound > 0.1);
 
-    const auto sum=take(run(request(MinkowskiSum{h1,h2},"compose-sum-h-coverage"),
-        selected_converter()));
-    CHECK(support(sum.output,{1})==18.0);
+    const auto sum =
+        take(run(request(MinkowskiSum{h1, h2}, "compose-sum-h-coverage"), selected_converter()));
+    CHECK(support(sum.output, {1}) == 18.0);
     REQUIRE(sum.evidence.error_bound.has_value());
-    CHECK(sum.evidence.error_bound->bound==2.0);
+    CHECK(sum.evidence.error_bound->bound == 2.0);
 
-    const auto empty=take(sets::make_empty({{"empty-affine-sum-input"},1,{}})).as_handle();
-    const auto empty_sum=take(run(request(MinkowskiSum{empty,h2},"compose-empty-h-coverage"),
-        selected_converter()));
+    const auto empty = take(sets::make_empty({{"empty-affine-sum-input"}, 1, {}})).as_handle();
+    const auto empty_sum = take(
+        run(request(MinkowskiSum{empty, h2}, "compose-empty-h-coverage"), selected_converter()));
     REQUIRE(empty_sum.evidence.error_bound.has_value());
-    CHECK(empty_sum.evidence.error_bound->bound==0.0);
+    CHECK(empty_sum.evidence.error_bound->bound == 0.0);
 }
 
 TEST_CASE("affine images compose exact higher-dimensional box coverage with candidate rounding") {
-    const auto box=take(sets::make_h({{"affine-box-coverage"},2,{}},
-        {take(numeric::snapshot(Matrix{4,2,{1,0,-1,0,0,1,0,-1}})),
-         take(numeric::snapshot_vector(Vector{3,0,1,1})),
-         take(numeric::snapshot(Matrix{0,2,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
-    const auto req=request(AffineImage{box,{1,2,{0.1,0.0}},{0.0}},
-        "compose-affine-box-coverage");
-    const auto result=take(run(req,dependencies()));
+    const auto box =
+        take(sets::make_h({{"affine-box-coverage"}, 2, {}},
+                          {take(numeric::snapshot(Matrix{4, 2, {1, 0, -1, 0, 0, 1, 0, -1}})),
+                           take(numeric::snapshot_vector(Vector{3, 0, 1, 1})),
+                           take(numeric::snapshot(Matrix{0, 2, {}})),
+                           take(numeric::snapshot_vector(Vector{}))}))
+            .as_handle();
+    const auto req =
+        request(AffineImage{box, {1, 2, {0.1, 0.0}}, {0.0}}, "compose-affine-box-coverage");
+    const auto result = take(run(req, dependencies()));
 
-    CHECK(support(result.output,{1})==0.30000000000000004);
-    CHECK(support(result.output,{-1})==0.0);
+    CHECK(support(result.output, {1}) == 0.30000000000000004);
+    CHECK(support(result.output, {-1}) == 0.0);
     REQUIRE(result.evidence.error_bound.has_value());
-    CHECK(result.evidence.error_bound->bound==0x1p-55);
-    CHECK(std::any_of(result.evidence.assumptions.begin(),result.evidence.assumptions.end(),
-        [](const std::string& assumption) {
-            return assumption.find("axis-aligned box rows")!=std::string::npos;
-        }));
-    CHECK(check_geometry_evidence(result.evidence,req).empty());
+    CHECK(result.evidence.error_bound->bound == 0x1p-55);
+    CHECK(std::any_of(result.evidence.assumptions.begin(), result.evidence.assumptions.end(),
+                      [](const std::string &assumption) {
+                          return assumption.find("axis-aligned box rows") != std::string::npos;
+                      }));
+    CHECK(check_geometry_evidence(result.evidence, req).empty());
 }
 
 TEST_CASE("Minkowski sums compose independent exact higher-dimensional box coverage") {
-    const auto box=[](std::string id,Vector bounds) {
-        return take(sets::make_h({{std::move(id)},2,{}},
-            {take(numeric::snapshot(Matrix{4,2,{1,0,-1,0,0,1,0,-1}})),
-             take(numeric::snapshot_vector(std::move(bounds))),
-             take(numeric::snapshot(Matrix{0,2,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
+    const auto box = [](std::string id, Vector bounds) {
+        return take(sets::make_h({{std::move(id)}, 2, {}},
+                                 {take(numeric::snapshot(Matrix{4, 2, {1, 0, -1, 0, 0, 1, 0, -1}})),
+                                  take(numeric::snapshot_vector(std::move(bounds))),
+                                  take(numeric::snapshot(Matrix{0, 2, {}})),
+                                  take(numeric::snapshot_vector(Vector{}))}))
+            .as_handle();
     };
-    const auto left=box("sum-box-left",{1,0,1,0});
-    const auto right=box("sum-box-right",{3,-2,3,-2});
-    const auto req=request(MinkowskiSum{left,right},"compose-sum-box-coverage");
-    const auto result=take(run(req,dependencies()));
+    const auto left = box("sum-box-left", {1, 0, 1, 0});
+    const auto right = box("sum-box-right", {3, -2, 3, -2});
+    const auto req = request(MinkowskiSum{left, right}, "compose-sum-box-coverage");
+    const auto result = take(run(req, dependencies()));
 
-    CHECK(support(result.output,{1,0})==4.0);
-    CHECK(support(result.output,{-1,0})==-2.0);
-    CHECK(support(result.output,{0,1})==4.0);
-    CHECK(support(result.output,{0,-1})==-2.0);
+    CHECK(support(result.output, {1, 0}) == 4.0);
+    CHECK(support(result.output, {-1, 0}) == -2.0);
+    CHECK(support(result.output, {0, 1}) == 4.0);
+    CHECK(support(result.output, {0, -1}) == -2.0);
     REQUIRE(result.evidence.error_bound.has_value());
-    CHECK(result.evidence.error_bound->bound==0.0);
-    CHECK(std::count_if(result.evidence.assumptions.begin(),result.evidence.assumptions.end(),
-        [](const std::string& assumption) {
-            return assumption.find("axis-aligned box rows")!=std::string::npos;
-        })==2);
-    CHECK(check_geometry_evidence(result.evidence,req).empty());
+    CHECK(result.evidence.error_bound->bound == 0.0);
+    CHECK(std::count_if(result.evidence.assumptions.begin(), result.evidence.assumptions.end(),
+                        [](const std::string &assumption) {
+                            return assumption.find("axis-aligned box rows") != std::string::npos;
+                        }) == 2);
+    CHECK(check_geometry_evidence(result.evidence, req).empty());
 }
 
 TEST_CASE("generic affine-sum provider preserves exact four-dimensional cube sums") {
     Vector cube_points;
-    cube_points.reserve(16*4);
-    for(std::size_t mask=0;mask<16;++mask)
-        for(std::size_t coordinate=0;coordinate<4;++coordinate)
-            cube_points.push_back((mask&(std::size_t{1}<<coordinate))?1.0:-1.0);
-    const auto cube=vertices("4d-cube",4,std::move(cube_points),16,
-        {"x1","x2","x3","x4"});
-    const auto req=request(MinkowskiSum{cube,cube},"four-dimensional-cube-minkowski");
-    const auto result=take(run(req,dependencies()));
-    const auto imported=sets::from_handle(result.output);
+    cube_points.reserve(16 * 4);
+    for (std::size_t mask = 0; mask < 16; ++mask)
+        for (std::size_t coordinate = 0; coordinate < 4; ++coordinate)
+            cube_points.push_back((mask & (std::size_t{1} << coordinate)) ? 1.0 : -1.0);
+    const auto cube = vertices("4d-cube", 4, std::move(cube_points), 16, {"x1", "x2", "x3", "x4"});
+    const auto req = request(MinkowskiSum{cube, cube}, "four-dimensional-cube-minkowski");
+    const auto result = take(run(req, dependencies()));
+    const auto imported = sets::from_handle(result.output);
     REQUIRE(std::holds_alternative<sets::SetData>(imported));
-    const auto representation=std::get<sets::SetData>(imported).representation();
+    const auto representation = std::get<sets::SetData>(imported).representation();
     REQUIRE(std::holds_alternative<sets::VRepresentation>(representation));
-    const auto& hull=std::get<sets::VRepresentation>(representation);
+    const auto &hull = std::get<sets::VRepresentation>(representation);
     // V-to-V affine sums may retain redundant candidates.  The public set
     // contract is exact support, not minimal vertex materialization.
-    CHECK(hull.vertices.rows()>=16);
-    CHECK(hull.vertices.cols()==4);
-    for(std::size_t row=0;row<hull.vertices.rows();++row)
-        for(std::size_t column=0;column<hull.vertices.cols();++column)
-            CHECK(std::abs(hull.vertices(row,column))<=2.0);
-    for(std::size_t mask=0;mask<16;++mask) {
+    CHECK(hull.vertices.rows() >= 16);
+    CHECK(hull.vertices.cols() == 4);
+    for (std::size_t row = 0; row < hull.vertices.rows(); ++row)
+        for (std::size_t column = 0; column < hull.vertices.cols(); ++column)
+            CHECK(std::abs(hull.vertices(row, column)) <= 2.0);
+    for (std::size_t mask = 0; mask < 16; ++mask) {
         Vector direction(4);
-        for(std::size_t coordinate=0;coordinate<4;++coordinate)
-            direction[coordinate]=(mask&(std::size_t{1}<<coordinate))?1.0:-1.0;
-        CHECK(support(result.output,direction)==8.0);
+        for (std::size_t coordinate = 0; coordinate < 4; ++coordinate)
+            direction[coordinate] = (mask & (std::size_t{1} << coordinate)) ? 1.0 : -1.0;
+        CHECK(support(result.output, direction) == 8.0);
     }
-    CHECK(check_geometry_evidence(result.evidence,req).empty());
+    CHECK(check_geometry_evidence(result.evidence, req).empty());
 }
 
-TEST_CASE("public geometry operation rejects an H-to-V vertex outside H rows despite zero reported residual") {
-    auto h=take(sets::make_h({{"h-interval-inaccurate"},1,{}},
-        {take(numeric::snapshot(Matrix{2,1,{-1,1}})),take(numeric::snapshot_vector(Vector{0,1})),
-         take(numeric::snapshot(Matrix{0,1,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
-    auto selected=dependencies(false,false);
+TEST_CASE(
+    "public geometry operation rejects an H-to-V vertex outside H rows despite zero reported residual") {
+    auto h = take(sets::make_h({{"h-interval-inaccurate"}, 1, {}},
+                               {take(numeric::snapshot(Matrix{2, 1, {-1, 1}})),
+                                take(numeric::snapshot_vector(Vector{0, 1})),
+                                take(numeric::snapshot(Matrix{0, 1, {}})),
+                                take(numeric::snapshot_vector(Vector{}))}))
+                 .as_handle();
+    auto selected = dependencies(false, false);
     Requirements conversion_requirements;
-    conversion_requirements.output.representation={"csl.polyhedron.v"};
-    conversion_requirements.output.relation=SetRelation::equivalent;
-    selected.conversion=provider(make_inaccurate_conversion_registration(),conversion_requirements);
-    const auto result=run(request(AffineImage{h,{1,1,{1}},{0}},"inaccurate-conversion"),std::move(selected));
+    conversion_requirements.output.representation = {"csl.polyhedron.v"};
+    conversion_requirements.output.relation = SetRelation::equivalent;
+    selected.conversion =
+        provider(make_inaccurate_conversion_registration(), conversion_requirements);
+    const auto result = run(request(AffineImage{h, {1, 1, {1}}, {0}}, "inaccurate-conversion"),
+                            std::move(selected));
     CHECK(std::holds_alternative<Unsupported>(result));
 }
 
 TEST_CASE("public geometry operation applies reported conversion residual threshold per H row") {
-    auto h=take(sets::make_h({{"h-interval-duplicate-rows"},1,{}},
-        {take(numeric::snapshot(Matrix{4,1,{-1,1,-1,1}})),
-         take(numeric::snapshot_vector(Vector{0,1,0,1})),
-         take(numeric::snapshot(Matrix{0,1,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
-    auto selected=dependencies(false,false);
+    auto h = take(sets::make_h({{"h-interval-duplicate-rows"}, 1, {}},
+                               {take(numeric::snapshot(Matrix{4, 1, {-1, 1, -1, 1}})),
+                                take(numeric::snapshot_vector(Vector{0, 1, 0, 1})),
+                                take(numeric::snapshot(Matrix{0, 1, {}})),
+                                take(numeric::snapshot_vector(Vector{}))}))
+                 .as_handle();
+    auto selected = dependencies(false, false);
     Requirements conversion_requirements;
-    conversion_requirements.output.representation={"csl.polyhedron.v"};
-    conversion_requirements.output.relation=SetRelation::equivalent;
-    selected.conversion=provider(make_duplicate_row_residual_registration(),conversion_requirements);
-    const auto result=run(request(AffineImage{h,{1,1,{1}},{0}},"duplicate-row-conversion-residual"),
-        std::move(selected));
+    conversion_requirements.output.representation = {"csl.polyhedron.v"};
+    conversion_requirements.output.relation = SetRelation::equivalent;
+    selected.conversion =
+        provider(make_duplicate_row_residual_registration(), conversion_requirements);
+    const auto result =
+        run(request(AffineImage{h, {1, 1, {1}}, {0}}, "duplicate-row-conversion-residual"),
+            std::move(selected));
     CHECK(std::holds_alternative<Unsupported>(result));
 }
 
-TEST_CASE("public geometry operation preserves near-extreme support under loose reducer tolerance") {
-    const auto interval=vertices("near-endpoint-interval",1,{0,1e-6},2);
-    auto selected=dependencies();
-    selected.hull=provider(make_near_endpoint_hull_registration());
-    auto ctx=context();
-    ctx.numerical={1e-3,0.0};
-    const auto result=run(request(AffineImage{interval,{1,1,{1}},{0}},"loose-hull-tolerance"),
-        std::move(selected),{},ctx);
+TEST_CASE(
+    "public geometry operation preserves near-extreme support under loose reducer tolerance") {
+    const auto interval = vertices("near-endpoint-interval", 1, {0, 1e-6}, 2);
+    auto selected = dependencies();
+    selected.hull = provider(make_near_endpoint_hull_registration());
+    auto ctx = context();
+    ctx.numerical = {1e-3, 0.0};
+    const auto result =
+        run(request(AffineImage{interval, {1, 1, {1}}, {0}}, "loose-hull-tolerance"),
+            std::move(selected), {}, ctx);
     REQUIRE(std::holds_alternative<OperationResult>(result));
-    const auto& completed=std::get<OperationResult>(result);
-    CHECK(completed.relation==SetRelation::equivalent);
-    CHECK(support(completed.output,{1})==doctest::Approx(1e-6));
-    const auto rep=take(sets::from_handle(completed.output)).representation();
+    const auto &completed = std::get<OperationResult>(result);
+    CHECK(completed.relation == SetRelation::equivalent);
+    CHECK(support(completed.output, {1}) == doctest::Approx(1e-6));
+    const auto rep = take(sets::from_handle(completed.output)).representation();
     REQUIRE(std::holds_alternative<sets::VRepresentation>(rep));
-    CHECK(std::get<sets::VRepresentation>(rep).vertices.rows()==2);
+    CHECK(std::get<sets::VRepresentation>(rep).vertices.rows() == 2);
 }
 
-TEST_CASE("affine-image evidence outwardly bounds cancellation against exact stored-dyadic inputs") {
+TEST_CASE(
+    "affine-image evidence outwardly bounds cancellation against exact stored-dyadic inputs") {
     // The stored inputs are all exact binary64 integers. Their real-valued
     // affine image is 10^16 + 1 - 10^16 = 1, but left-to-right binary64
     // accumulation rounds away the one before subtracting 10^16.
-    const auto input=vertices("cancellation-singleton",3,{1e16,1,-1e16},1);
-    auto selected=dependencies(false,false);
-    selected.hull=provider(make_keep_all_hull_registration());
-    const auto completed=take(run(request(AffineImage{input,{1,3,{1,1,1}},{0}},
-        "cancellation-is-not-real-equality"),std::move(selected)));
-    CHECK(completed.relation==SetRelation::equivalent);
-    CHECK(support(completed.output,{1})==0.0);
-    CHECK(support(completed.output,{1})!=1.0);
+    const auto input = vertices("cancellation-singleton", 3, {1e16, 1, -1e16}, 1);
+    auto selected = dependencies(false, false);
+    selected.hull = provider(make_keep_all_hull_registration());
+    const auto completed = take(run(
+        request(AffineImage{input, {1, 3, {1, 1, 1}}, {0}}, "cancellation-is-not-real-equality"),
+        std::move(selected)));
+    CHECK(completed.relation == SetRelation::equivalent);
+    CHECK(support(completed.output, {1}) == 0.0);
+    CHECK(support(completed.output, {1}) != 1.0);
     REQUIRE(completed.evidence.error_bound.has_value());
-    CHECK(completed.evidence.error_bound->metric.value=="csl.geometry.metric.l-infinity");
-    CHECK(completed.evidence.error_bound->bound==1.0);
-    CHECK(completed.evidence.error_bound->units==
-        "maximum absolute output-coordinate units; empty-to-empty distance is defined as zero");
+    CHECK(completed.evidence.error_bound->metric.value == "csl.geometry.metric.l-infinity");
+    CHECK(completed.evidence.error_bound->bound == 1.0);
+    CHECK(completed.evidence.error_bound->units ==
+          "maximum absolute output-coordinate units; empty-to-empty distance is defined as zero");
 }
 
 TEST_CASE("affine-image evidence rounds a subnormal underflow error outward") {
-    const auto input=take(sets::make_singleton({{"subnormal-underflow-input"},1,{}},
-        take(numeric::snapshot_vector(Vector{std::ldexp(1.0,-1022)})))).as_handle();
-    const double coefficient=std::ldexp(1.0,-53);
-    auto selected=dependencies(false,false);
-    selected.hull=provider(make_keep_all_hull_registration());
-    const auto completed=take(run(request(AffineImage{input,{1,1,{coefficient}},{0}},
-        "subnormal-underflow-bound"),std::move(selected)));
-    CHECK(support(completed.output,{1})==0.0);
+    const auto input =
+        take(sets::make_singleton({{"subnormal-underflow-input"}, 1, {}},
+                                  take(numeric::snapshot_vector(Vector{std::ldexp(1.0, -1022)}))))
+            .as_handle();
+    const double coefficient = std::ldexp(1.0, -53);
+    auto selected = dependencies(false, false);
+    selected.hull = provider(make_keep_all_hull_registration());
+    const auto completed = take(
+        run(request(AffineImage{input, {1, 1, {coefficient}}, {0}}, "subnormal-underflow-bound"),
+            std::move(selected)));
+    CHECK(support(completed.output, {1}) == 0.0);
     REQUIRE(completed.evidence.error_bound.has_value());
-    CHECK(completed.evidence.error_bound->bound==std::numeric_limits<double>::denorm_min());
+    CHECK(completed.evidence.error_bound->bound == std::numeric_limits<double>::denorm_min());
 }
 
 TEST_CASE("affine-image evidence rounds a nonrepresentable error to the next binary64") {
-    const auto input=take(sets::make_singleton({{"outward-round-input"},3,{}},
-        take(numeric::snapshot_vector(Vector{1.0,std::ldexp(1.0,-53),
-            std::numeric_limits<double>::denorm_min()})))).as_handle();
-    auto selected=dependencies(false,false);
-    selected.hull=provider(make_keep_all_hull_registration());
-    const auto completed=take(run(request(AffineImage{input,{1,3,{1,1,1}},{0}},
-        "outward-round-nonrepresentable-error"),std::move(selected)));
-    CHECK(support(completed.output,{1})==1.0);
+    const auto input =
+        take(sets::make_singleton(
+                 {{"outward-round-input"}, 3, {}},
+                 take(numeric::snapshot_vector(Vector{1.0, std::ldexp(1.0, -53),
+                                                      std::numeric_limits<double>::denorm_min()}))))
+            .as_handle();
+    auto selected = dependencies(false, false);
+    selected.hull = provider(make_keep_all_hull_registration());
+    const auto completed = take(run(
+        request(AffineImage{input, {1, 3, {1, 1, 1}}, {0}}, "outward-round-nonrepresentable-error"),
+        std::move(selected)));
+    CHECK(support(completed.output, {1}) == 1.0);
     REQUIRE(completed.evidence.error_bound.has_value());
-    CHECK(completed.evidence.error_bound->bound==0x1.0000000000001p-53);
+    CHECK(completed.evidence.error_bound->bound == 0x1.0000000000001p-53);
 }
 
 TEST_CASE("affine and Minkowski operations publish zero for exact ordinary candidates") {
-    auto selected=dependencies(false,false);
-    selected.hull=provider(make_keep_all_hull_registration());
-    const auto interval=vertices("exact-bound-interval",1,{0,1},2);
-    const auto image=take(run(request(AffineImage{interval,{1,1,{1}},{0}},
-        "exact-affine-bound"),selected));
+    auto selected = dependencies(false, false);
+    selected.hull = provider(make_keep_all_hull_registration());
+    const auto interval = vertices("exact-bound-interval", 1, {0, 1}, 2);
+    const auto image =
+        take(run(request(AffineImage{interval, {1, 1, {1}}, {0}}, "exact-affine-bound"), selected));
     REQUIRE(image.evidence.error_bound.has_value());
-    CHECK(image.evidence.error_bound->bound==0.0);
+    CHECK(image.evidence.error_bound->bound == 0.0);
 
-    const auto left=vertices("exact-bound-left",1,{0,1},2);
-    const auto right=vertices("exact-bound-right",1,{2,3},2);
-    const auto sum=take(run(request(MinkowskiSum{left,right},"exact-minkowski-bound"),
-        std::move(selected)));
+    const auto left = vertices("exact-bound-left", 1, {0, 1}, 2);
+    const auto right = vertices("exact-bound-right", 1, {2, 3}, 2);
+    const auto sum =
+        take(run(request(MinkowskiSum{left, right}, "exact-minkowski-bound"), std::move(selected)));
     REQUIRE(sum.evidence.error_bound.has_value());
-    CHECK(sum.evidence.error_bound->bound==0.0);
+    CHECK(sum.evidence.error_bound->bound == 0.0);
 }
 
 TEST_CASE("Minkowski evidence bounds rounded singleton addition") {
-    const auto left=take(sets::make_singleton({{"large-summand"},1,{}},
-        take(numeric::snapshot_vector(Vector{1e16})))).as_handle();
-    const auto right=take(sets::make_singleton({{"unit-summand"},1,{}},
-        take(numeric::snapshot_vector(Vector{1.0})))).as_handle();
-    auto selected=dependencies(false,false);
-    selected.hull=provider(make_keep_all_hull_registration());
-    const auto completed=take(run(request(MinkowskiSum{left,right},"minkowski-cancellation-bound"),
-        std::move(selected)));
-    CHECK(support(completed.output,{1})==1e16);
+    const auto left = take(sets::make_singleton({{"large-summand"}, 1, {}},
+                                                take(numeric::snapshot_vector(Vector{1e16}))))
+                          .as_handle();
+    const auto right = take(sets::make_singleton({{"unit-summand"}, 1, {}},
+                                                 take(numeric::snapshot_vector(Vector{1.0}))))
+                           .as_handle();
+    auto selected = dependencies(false, false);
+    selected.hull = provider(make_keep_all_hull_registration());
+    const auto completed = take(run(
+        request(MinkowskiSum{left, right}, "minkowski-cancellation-bound"), std::move(selected)));
+    CHECK(support(completed.output, {1}) == 1e16);
     REQUIRE(completed.evidence.error_bound.has_value());
-    CHECK(completed.evidence.error_bound->bound==1.0);
+    CHECK(completed.evidence.error_bound->bound == 1.0);
 }
 
 TEST_CASE("public geometry operation retains a zero endpoint despite subnormal product underflow") {
-    const double tiny=std::numeric_limits<double>::denorm_min();
-    const auto cloud=vertices("subnormal-candidates",1,{0,tiny,tiny},3);
-    auto selected=dependencies();
-    selected.hull=provider(make_subnormal_hull_registration());
-    const auto result=run(request(AffineImage{cloud,{1,1,{1}},{0}},"subnormal-hull-residual"),
-        std::move(selected));
+    const double tiny = std::numeric_limits<double>::denorm_min();
+    const auto cloud = vertices("subnormal-candidates", 1, {0, tiny, tiny}, 3);
+    auto selected = dependencies();
+    selected.hull = provider(make_subnormal_hull_registration());
+    const auto result =
+        run(request(AffineImage{cloud, {1, 1, {1}}, {0}}, "subnormal-hull-residual"),
+            std::move(selected));
     REQUIRE(std::holds_alternative<OperationResult>(result));
-    const auto& completed=std::get<OperationResult>(result);
-    CHECK(completed.relation==SetRelation::equivalent);
-    CHECK(support(completed.output,{-1})==doctest::Approx(0.0));
-    const auto rep=take(sets::from_handle(completed.output)).representation();
+    const auto &completed = std::get<OperationResult>(result);
+    CHECK(completed.relation == SetRelation::equivalent);
+    CHECK(support(completed.output, {-1}) == doctest::Approx(0.0));
+    const auto rep = take(sets::from_handle(completed.output)).representation();
     REQUIRE(std::holds_alternative<sets::VRepresentation>(rep));
-    CHECK(std::get<sets::VRepresentation>(rep).vertices.rows()==3);
+    CHECK(std::get<sets::VRepresentation>(rep).vertices.rows() == 3);
 }
 
 TEST_CASE("empty singleton and R0 definitions survive image and sum") {
-    const auto empty=take(sets::make_empty({{"empty"},1,{}})).as_handle();
-    const auto point=take(sets::make_singleton({{"point"},1,{}},take(numeric::snapshot_vector(Vector{3})))).as_handle();
-    auto result=take(run(request(MinkowskiSum{empty,point}),dependencies()));
-    CHECK(support(result.output,{1})==-std::numeric_limits<double>::infinity());
+    const auto empty = take(sets::make_empty({{"empty"}, 1, {}})).as_handle();
+    const auto point =
+        take(sets::make_singleton({{"point"}, 1, {}}, take(numeric::snapshot_vector(Vector{3}))))
+            .as_handle();
+    auto result = take(run(request(MinkowskiSum{empty, point}), dependencies()));
+    CHECK(support(result.output, {1}) == -std::numeric_limits<double>::infinity());
     REQUIRE(result.evidence.error_bound.has_value());
-    CHECK(result.evidence.error_bound->bound==0.0);
-    result=take(run(request(MinkowskiSum{point,point}),dependencies()));
-    CHECK(support(result.output,{1})==doctest::Approx(6));
-    const auto r0=take(sets::make_universal({{"r0"},0,{}})).as_handle();
-    result=take(run(request(AffineImage{r0,{2,0,{}},{2,5}}),dependencies()));
-    CHECK(support(result.output,{1,1})==doctest::Approx(7));
+    CHECK(result.evidence.error_bound->bound == 0.0);
+    result = take(run(request(MinkowskiSum{point, point}), dependencies()));
+    CHECK(support(result.output, {1}) == doctest::Approx(6));
+    const auto r0 = take(sets::make_universal({{"r0"}, 0, {}})).as_handle();
+    result = take(run(request(AffineImage{r0, {2, 0, {}}, {2, 5}}), dependencies()));
+    CHECK(support(result.output, {1, 1}) == doctest::Approx(7));
     REQUIRE(result.evidence.error_bound.has_value());
-    CHECK(result.evidence.error_bound->bound==0.0);
-    result=take(run(request(AffineImage{point,{0,1,{}},{}}),dependencies()));
-    CHECK(result.output.metadata.dimension==0);
-    CHECK(support(result.output,{})==0);
+    CHECK(result.evidence.error_bound->bound == 0.0);
+    result = take(run(request(AffineImage{point, {0, 1, {}}, {}}), dependencies()));
+    CHECK(result.output.metadata.dimension == 0);
+    CHECK(support(result.output, {}) == 0);
     REQUIRE(result.evidence.error_bound.has_value());
-    CHECK(result.evidence.error_bound->bound==0.0);
-    result=take(run(request(MinkowskiSum{r0,r0}),dependencies()));
-    CHECK(result.output.metadata.dimension==0);
-    CHECK(support(result.output,{})==0);
+    CHECK(result.evidence.error_bound->bound == 0.0);
+    result = take(run(request(MinkowskiSum{r0, r0}), dependencies()));
+    CHECK(result.output.metadata.dimension == 0);
+    CHECK(support(result.output, {}) == 0);
     REQUIRE(result.evidence.error_bound.has_value());
-    CHECK(result.evidence.error_bound->bound==0.0);
+    CHECK(result.evidence.error_bound->bound == 0.0);
 }
 
 TEST_CASE("admission rejects wrong dimensions labels assurance foreign payloads and rays") {
-    const auto input=vertices("interval",1,{0,1},2,{"x"});
-    auto req=request(AffineImage{input,{1,2,{1,0}},{0}});
-    CHECK(std::holds_alternative<Unsupported>(run(req,dependencies())));
-    req=request(MinkowskiSum{input,vertices("other",1,{0,1},2,{"u"})});
-    CHECK(std::holds_alternative<Unsupported>(run(req,dependencies())));
-    req=request(AffineImage{input,{1,1,{1}},{0}});
-    req.assurance=Assurance::validated;
-    CHECK(std::holds_alternative<Unsupported>(run(req,dependencies())));
-    auto foreign=input;
-    foreign.payload=std::make_shared<SetPayload>();
-    req=request(AffineImage{foreign,{1,1,{1}},{0}});
-    CHECK(std::holds_alternative<Unsupported>(run(req,dependencies())));
-    const auto ray=take(sets::make_v({{"ray"},1,{}},
-        {take(numeric::snapshot(Matrix{1,1,{0}})),take(numeric::snapshot(Matrix{1,1,{1}}))})).as_handle();
-    CHECK(std::holds_alternative<Unsupported>(run(request(AffineImage{ray,{1,1,{1}},{0}}),dependencies())));
-    const auto universal=take(sets::make_universal({{"r1"},1,{}})).as_handle();
-    CHECK(std::holds_alternative<Unsupported>(run(request(MinkowskiSum{universal,input}),dependencies())));
+    const auto input = vertices("interval", 1, {0, 1}, 2, {"x"});
+    auto req = request(AffineImage{input, {1, 2, {1, 0}}, {0}});
+    CHECK(std::holds_alternative<Unsupported>(run(req, dependencies())));
+    req = request(MinkowskiSum{input, vertices("other", 1, {0, 1}, 2, {"u"})});
+    CHECK(std::holds_alternative<Unsupported>(run(req, dependencies())));
+    req = request(AffineImage{input, {1, 1, {1}}, {0}});
+    req.assurance = Assurance::validated;
+    CHECK(std::holds_alternative<Unsupported>(run(req, dependencies())));
+    auto foreign = input;
+    foreign.payload = std::make_shared<SetPayload>();
+    req = request(AffineImage{foreign, {1, 1, {1}}, {0}});
+    CHECK(std::holds_alternative<Unsupported>(run(req, dependencies())));
+    const auto ray =
+        take(sets::make_v({{"ray"}, 1, {}}, {take(numeric::snapshot(Matrix{1, 1, {0}})),
+                                             take(numeric::snapshot(Matrix{1, 1, {1}}))}))
+            .as_handle();
+    CHECK(std::holds_alternative<Unsupported>(
+        run(request(AffineImage{ray, {1, 1, {1}}, {0}}), dependencies())));
+    const auto universal = take(sets::make_universal({{"r1"}, 1, {}})).as_handle();
+    CHECK(std::holds_alternative<Unsupported>(
+        run(request(MinkowskiSum{universal, input}), dependencies())));
 }
 
 TEST_CASE("affine image rejects non-finite map and offset even for an empty input") {
-    const auto empty=take(sets::make_empty({{"empty-non-finite-map"},1,{}})).as_handle();
-    const double infinity=std::numeric_limits<double>::infinity();
-    const double nan=std::numeric_limits<double>::quiet_NaN();
-    CHECK(std::holds_alternative<Unsupported>(run(
-        request(AffineImage{empty,{1,1,{nan}},{0}}),dependencies())));
-    CHECK(std::holds_alternative<Unsupported>(run(
-        request(AffineImage{empty,{1,1,{1}},{infinity}}),dependencies())));
+    const auto empty = take(sets::make_empty({{"empty-non-finite-map"}, 1, {}})).as_handle();
+    const double infinity = std::numeric_limits<double>::infinity();
+    const double nan = std::numeric_limits<double>::quiet_NaN();
+    CHECK(std::holds_alternative<Unsupported>(
+        run(request(AffineImage{empty, {1, 1, {nan}}, {0}}), dependencies())));
+    CHECK(std::holds_alternative<Unsupported>(
+        run(request(AffineImage{empty, {1, 1, {1}}, {infinity}}), dependencies())));
 }
 
-TEST_CASE("positive-dimensional universal inputs are request-scoped unsupported affine and sum operands") {
+TEST_CASE(
+    "positive-dimensional universal inputs are request-scoped unsupported affine and sum operands") {
     const auto universal = take(sets::make_universal({{"universal-line"}, 1, {}})).as_handle();
     const auto interval = vertices("unit-interval-for-universal-sum", 1, {0, 1}, 2);
-    const auto check_rejection = [](const OperationRequest& req, std::vector<SetId> inputs) {
+    const auto check_rejection = [](const OperationRequest &req, std::vector<SetId> inputs) {
         std::size_t factory_calls = 0;
         auto registration = geometry::make_affine_sum_registration(dependencies());
         auto factory = std::move(registration.factory);
-        registration.factory = [&factory_calls, factory = std::move(factory)](const OperationRequest& operation) mutable {
+        registration.factory = [&factory_calls, factory = std::move(factory)](
+                                   const OperationRequest &operation) mutable {
             ++factory_calls;
             return factory(operation);
         };
@@ -1230,7 +1482,7 @@ TEST_CASE("positive-dimensional universal inputs are request-scoped unsupported 
         requirements.output.relation = SetRelation::equivalent;
         const auto admission = geometry::prepare_geometry_operation(
             select(registry, {{"csl.geometry.affine-sum"}, {}}, req, requirements));
-        const auto* rejection = std::get_if<geometry::GeometryAdmissionRejection>(&admission);
+        const auto *rejection = std::get_if<geometry::GeometryAdmissionRejection>(&admission);
         REQUIRE(rejection);
         CHECK(rejection->reference.identity == req.identity);
         CHECK(rejection->reference.inputs == inputs);
@@ -1243,32 +1495,34 @@ TEST_CASE("positive-dimensional universal inputs are request-scoped unsupported 
         CHECK(factory_calls == 0);
     };
     check_rejection(request(AffineImage{universal, {1, 1, {1}}, {0}}, "universal-affine"),
-        {universal.id});
+                    {universal.id});
     check_rejection(request(MinkowskiSum{universal, interval}, "universal-minkowski"),
-        {universal.id, interval.id});
+                    {universal.id, interval.id});
     check_rejection(request(MinkowskiSum{interval, universal}, "universal-minkowski-right"),
-        {interval.id, universal.id});
+                    {interval.id, universal.id});
 }
 
 TEST_CASE("candidate limits and pre-request stops never publish successful geometry") {
-    const auto input=vertices("interval",1,{0,1},2);
-    const auto req=request(MinkowskiSum{input,input});
+    const auto input = vertices("interval", 1, {0, 1}, 2);
+    const auto req = request(MinkowskiSum{input, input});
     geometry::AffineSumOptions options;
-    options.max_candidates=3;
-    CHECK(std::holds_alternative<Unsupported>(run(req,dependencies(),options)));
-    options.max_candidates=4;
-    const auto admitted=take(run(req,dependencies(),options));
-    CHECK(support(admitted.output,{1})==2.0);
-    CHECK(support(admitted.output,{-1})==0.0);
-    CHECK(check_geometry_evidence(admitted.evidence,req).empty());
+    options.max_candidates = 3;
+    CHECK(std::holds_alternative<Unsupported>(run(req, dependencies(), options)));
+    options.max_candidates = 4;
+    const auto admitted = take(run(req, dependencies(), options));
+    CHECK(support(admitted.output, {1}) == 2.0);
+    CHECK(support(admitted.output, {-1}) == 0.0);
+    CHECK(check_geometry_evidence(admitted.evidence, req).empty());
     std::stop_source stop;
     stop.request_stop();
-    auto ctx=context();ctx.cancellation=stop.get_token();
-    auto stopped=run(req,dependencies(),{},ctx);
+    auto ctx = context();
+    ctx.cancellation = stop.get_token();
+    auto stopped = run(req, dependencies(), {}, ctx);
     REQUIRE(std::holds_alternative<OperationStopped>(stopped));
-    CHECK(std::get<OperationStopped>(stopped).reason==StopReason::cancelled);
-    ctx=context();ctx.deadline=std::chrono::steady_clock::now()-std::chrono::seconds(1);
-    stopped=run(req,dependencies(),{},ctx);
+    CHECK(std::get<OperationStopped>(stopped).reason == StopReason::cancelled);
+    ctx = context();
+    ctx.deadline = std::chrono::steady_clock::now() - std::chrono::seconds(1);
+    stopped = run(req, dependencies(), {}, ctx);
     REQUIRE(std::holds_alternative<OperationStopped>(stopped));
-    CHECK(std::get<OperationStopped>(stopped).reason==StopReason::resource_limit);
+    CHECK(std::get<OperationStopped>(stopped).reason == StopReason::resource_limit);
 }

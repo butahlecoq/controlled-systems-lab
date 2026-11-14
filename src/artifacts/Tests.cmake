@@ -1,15 +1,15 @@
 add_executable(timing_collector_tests tests/execution/timing_collector.cpp)
-target_link_libraries(timing_collector_tests PRIVATE CSL::artifacts doctest::doctest Threads::Threads)
+target_link_libraries(timing_collector_tests PRIVATE CSL::artifacts doctest::doctest_with_main Threads::Threads)
 add_test(NAME timing_collector_tests COMMAND timing_collector_tests)
 csl_test_target(timing_collector_tests artifacts)
 
 add_executable(operation_observability_tests tests/integration/operation_observability.cpp)
-target_link_libraries(operation_observability_tests PRIVATE CSL::artifacts doctest::doctest)
+target_link_libraries(operation_observability_tests PRIVATE CSL::artifacts doctest::doctest_with_main)
 add_test(NAME operation_observability_tests COMMAND operation_observability_tests)
 csl_test_target(operation_observability_tests artifacts)
 
 add_executable(run_statistics_contract tests/artifacts/run_statistics_contract.cpp)
-target_link_libraries(run_statistics_contract PRIVATE CSL::artifacts CSL::registry CSL::optimization CSL::approximation doctest::doctest Threads::Threads)
+target_link_libraries(run_statistics_contract PRIVATE CSL::artifacts CSL::registry CSL::optimization CSL::approximation doctest::doctest_with_main Threads::Threads)
 target_compile_definitions(run_statistics_contract PRIVATE CSL_STATISTICS_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/tests/artifacts/fixtures/run-statistics-v3.json")
 target_compile_definitions(run_statistics_contract PRIVATE CSL_STATISTICS_V2_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/tests/artifacts/fixtures/run-statistics-v2.json")
 target_compile_definitions(run_statistics_contract PRIVATE CSL_STATISTICS_V1_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/tests/artifacts/fixtures/run-statistics-v1.json")
@@ -18,7 +18,7 @@ add_test(NAME run_statistics_contract COMMAND run_statistics_contract)
 csl_test_target(run_statistics_contract artifacts)
 
 add_executable(mpc01_comparison_manifest_tests tests/artifacts/mpc01_comparison_manifest.cpp)
-target_link_libraries(mpc01_comparison_manifest_tests PRIVATE CSL::artifacts doctest::doctest)
+target_link_libraries(mpc01_comparison_manifest_tests PRIVATE CSL::artifacts doctest::doctest_with_main)
 target_compile_definitions(mpc01_comparison_manifest_tests PRIVATE
   CSL_MPC01_COMPARISON_RECORDS_FILE="${PROJECT_SOURCE_DIR}/docs/research/evidence/mpc01-external-qps-20261026-r3/comparison-records.jsonl"
   CSL_MPC01_STRATEGY_AB_RECORD_FILE="${PROJECT_SOURCE_DIR}/docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-comparison-record.json"
@@ -28,41 +28,41 @@ add_test(NAME mpc01_comparison_manifest_tests COMMAND mpc01_comparison_manifest_
 csl_test_target(mpc01_comparison_manifest_tests artifacts)
 
 add_executable(h_relation_attachment_contract tests/artifacts/h_relation_attachment_contract.cpp)
-target_link_libraries(h_relation_attachment_contract PRIVATE CSL::artifacts CSL::optimization doctest::doctest)
+target_link_libraries(h_relation_attachment_contract PRIVATE CSL::artifacts CSL::optimization doctest::doctest_with_main)
 add_test(NAME h_relation_attachment_contract COMMAND h_relation_attachment_contract)
 csl_test_target(h_relation_attachment_contract artifacts)
 
 add_executable(bounded_hull_check_record_test tests/artifacts/bounded_hull_check_record_test.cpp)
-target_link_libraries(bounded_hull_check_record_test PRIVATE CSL::artifacts doctest::doctest)
+target_link_libraries(bounded_hull_check_record_test PRIVATE CSL::artifacts doctest::doctest_with_main)
 add_test(NAME bounded_hull_check_record_test COMMAND bounded_hull_check_record_test)
 csl_test_target(bounded_hull_check_record_test artifacts)
 
 add_executable(scenario_sweep_contract tests/artifacts/scenario_sweep_contract.cpp)
-target_link_libraries(scenario_sweep_contract PRIVATE CSL::artifacts doctest::doctest)
+target_link_libraries(scenario_sweep_contract PRIVATE CSL::artifacts doctest::doctest_with_main)
 target_compile_definitions(scenario_sweep_contract PRIVATE CSL_SWEEP_RUN_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/tests/artifacts/fixtures/run-statistics-v3.json")
 target_include_directories(scenario_sweep_contract SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
 add_test(NAME scenario_sweep_contract COMMAND scenario_sweep_contract)
 csl_test_target(scenario_sweep_contract artifacts)
 
 add_executable(final_plot_data_contract tests/artifacts/final_plot_data.cpp)
-target_link_libraries(final_plot_data_contract PRIVATE CSL::artifacts doctest::doctest)
+target_link_libraries(final_plot_data_contract PRIVATE CSL::artifacts doctest::doctest_with_main)
 add_test(NAME final_plot_data_contract COMMAND final_plot_data_contract)
 csl_test_target(final_plot_data_contract artifacts)
 
 add_executable(plot_request_contract tests/artifacts/plot_request_contract.cpp)
-target_link_libraries(plot_request_contract PRIVATE CSL::artifacts CSL::polyhedral CSL::strategy_ts01 doctest::doctest)
+target_link_libraries(plot_request_contract PRIVATE CSL::artifacts CSL::polyhedral CSL::strategy_ts01 doctest::doctest_with_main)
 target_compile_definitions(plot_request_contract PRIVATE CSL_FUEL_PROJECTION_ORACLES="${CMAKE_CURRENT_SOURCE_DIR}/tests/artifacts/fixtures/fuel-projection-analytic-oracles.json")
 target_include_directories(plot_request_contract SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
 add_test(NAME plot_request_contract COMMAND plot_request_contract)
 csl_test_target(plot_request_contract artifacts)
 
 add_executable(stage_projection_capture_tests tests/artifacts/stage_projection_capture_tests.cpp)
-target_link_libraries(stage_projection_capture_tests PRIVATE CSL::artifacts CSL::polyhedral doctest::doctest)
+target_link_libraries(stage_projection_capture_tests PRIVATE CSL::artifacts CSL::polyhedral doctest::doctest_with_main)
 add_test(NAME stage_projection_capture_tests COMMAND stage_projection_capture_tests)
 csl_test_target(stage_projection_capture_tests artifacts)
 
 add_executable(stage_projection_capture_integration_tests tests/artifacts/stage_projection_capture_integration_tests.cpp)
-target_link_libraries(stage_projection_capture_integration_tests PRIVATE CSL::artifacts CSL::polyhedral doctest::doctest)
+target_link_libraries(stage_projection_capture_integration_tests PRIVATE CSL::artifacts CSL::polyhedral doctest::doctest_with_main)
 add_test(NAME stage_projection_capture_integration_tests COMMAND stage_projection_capture_integration_tests)
 csl_test_target(stage_projection_capture_integration_tests artifacts)
 
@@ -71,13 +71,13 @@ add_test(NAME stage_projection_architecture_boundary
 set_tests_properties(stage_projection_architecture_boundary PROPERTIES LABELS artifacts)
 
 add_executable(stage_projection_batch_contract tests/artifacts/stage_projection_batch_contract.cpp)
-target_link_libraries(stage_projection_batch_contract PRIVATE CSL::artifacts CSL::polyhedral doctest::doctest)
+target_link_libraries(stage_projection_batch_contract PRIVATE CSL::artifacts CSL::polyhedral doctest::doctest_with_main)
 target_compile_definitions(stage_projection_batch_contract PRIVATE CSL_STAGE_PROJECTION_BATCH_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/tests/artifacts/fixtures/stage-projection-batch-v1.json")
 target_include_directories(stage_projection_batch_contract SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
 add_test(NAME stage_projection_batch_contract COMMAND stage_projection_batch_contract)
 csl_test_target(stage_projection_batch_contract artifacts)
 
 add_executable(plot_document_json_contract tests/artifacts/plot_document_json.cpp)
-target_link_libraries(plot_document_json_contract PRIVATE CSL::artifacts doctest::doctest)
+target_link_libraries(plot_document_json_contract PRIVATE CSL::artifacts doctest::doctest_with_main)
 add_test(NAME plot_document_json_contract COMMAND plot_document_json_contract)
 csl_test_target(plot_document_json_contract artifacts)

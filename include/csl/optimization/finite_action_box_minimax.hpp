@@ -26,8 +26,7 @@ struct BoxPlanStopped {
     std::vector<std::size_t> action_indices;
     OperationStopped reason;
 };
-using FiniteActionBoxPlanAttempt =
-    std::variant<BoxPlanScored, BoxPlanUnscored, BoxPlanStopped>;
+using FiniteActionBoxPlanAttempt = std::variant<BoxPlanScored, BoxPlanUnscored, BoxPlanStopped>;
 
 struct FiniteActionBoxReplay {
     double worst_value;
@@ -50,8 +49,8 @@ struct BoxPlanReplayStopped {
     OperationStopped reason;
 };
 struct BoxNoScoredCandidate {};
-using FiniteActionBoxSelectionOutcome = std::variant<BoxPlanSelected,
-    BoxPlanReplayRefused, BoxPlanReplayStopped, BoxNoScoredCandidate>;
+using FiniteActionBoxSelectionOutcome =
+    std::variant<BoxPlanSelected, BoxPlanReplayRefused, BoxPlanReplayStopped, BoxNoScoredCandidate>;
 
 struct FiniteActionBoxMinimaxResult {
     ProblemId problem;
@@ -62,8 +61,8 @@ struct FiniteActionBoxMinimaxResult {
     Assurance assurance{Assurance::numerical};
 };
 
-using FiniteActionBoxMinimaxOutcome = std::variant<FiniteActionBoxMinimaxResult,
-    Unsupported, OperationStopped>;
+using FiniteActionBoxMinimaxOutcome =
+    std::variant<FiniteActionBoxMinimaxResult, Unsupported, OperationStopped>;
 
 // Scores every fixed open-loop plan against its terminal outer box and retains
 // scored, unsupported, and stopped attempts. It replays the best scored plan
@@ -82,8 +81,8 @@ using FiniteActionBoxMinimaxOutcome = std::variant<FiniteActionBoxMinimaxResult,
 // limits bound P, C, replay histories R, and exact points per replay stage.
 // Bounded V/singleton catalogues and
 // universal safe sets are supported; other set forms are not.
-FiniteActionBoxMinimaxOutcome finite_action_box_minimax(
-    const FiniteActionMinimaxRequest& request, FiniteActionBoxMinimaxLimits limits,
-    const ExecutionContext& context = {});
+FiniteActionBoxMinimaxOutcome finite_action_box_minimax(const FiniteActionMinimaxRequest &request,
+                                                        FiniteActionBoxMinimaxLimits limits,
+                                                        const ExecutionContext &context = {});
 
 } // namespace csl::optimization

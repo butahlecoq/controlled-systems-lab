@@ -13,8 +13,7 @@ using SetResult = std::variant<sets::SetData, Diagnostics>;
 // Intersect two H descriptions while keeping inequalities and affine
 // equalities in their separate authored conventions. Conversion to V is a
 // separate operation and can therefore enumerate vertices created by cuts.
-SetResult intersect_h(const sets::SetData& left, const sets::SetData& right,
-                     SetId output_id);
+SetResult intersect_h(const sets::SetData &left, const sets::SetData &right, SetId output_id);
 
 // Registered native-H intersection. It admits only equivalent numerical
 // intersections over already materialized H operands.
@@ -33,8 +32,8 @@ using HalfspaceReductionResult = std::variant<HalfspaceReduction, Diagnostics>;
 // A row is removed only when the selected workspace returns a completed,
 // correctly bound supported lower bound for min(-a_i*x), establishing
 // max(a_i*x-b_i) <= 0 over the remaining rows. Unsupported evidence is kept.
-HalfspaceReductionResult remove_redundant_halfspaces(
-    const sets::SetData& input, SetId output_id, LPWorkspace& lp,
-    const ExecutionContext& context);
+HalfspaceReductionResult remove_redundant_halfspaces(const sets::SetData &input, SetId output_id,
+                                                     LPWorkspace &lp,
+                                                     const ExecutionContext &context);
 
 } // namespace csl::geometry::polyhedral

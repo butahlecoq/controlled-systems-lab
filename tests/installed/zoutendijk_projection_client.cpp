@@ -11,6 +11,7 @@ static_assert(std::is_same_v<std::variant_alternative_t<1, ProjectionOutcome>, P
 
 int main() {
     const ProjectionPolicy policy{};
-    if (policy.max_iterations == 0) return 1;
+    if (policy.max_iterations == 0)
+        return 1;
     std::cout << "Installed Zoutendijk client: success and stopped result types are distinct\n";
 }

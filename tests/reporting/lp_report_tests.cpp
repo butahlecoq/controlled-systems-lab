@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include "lp_report.hpp"
 #include <limits>
@@ -13,7 +12,8 @@ TEST_CASE("literal catalogue uses the actual registered LP and owns the returned
     for (std::size_t i = 0; i < fixtures.size(); ++i) {
         const auto trial = run_trial(fixtures[i], {});
         INFO(trial.error);
-        for (const auto& error : trial.errors) INFO(error);
+        for (const auto &error : trial.errors)
+            INFO(error);
         REQUIRE(trial.passed());
         REQUIRE(trial.result.has_value());
         CHECK(trial.actual_version == "1.1.0+highs.1.11.0");
@@ -22,14 +22,17 @@ TEST_CASE("literal catalogue uses the actual registered LP and owns the returned
         CHECK(trial.attempt->state == csl::SolveAttemptState::returned_result);
         CHECK(trial.attempt->stamp.program().identity() == fixtures[i].input.identity);
         CHECK(trial.result->raw_diagnostics.find("native_run=true") != std::string::npos);
-        CHECK(trial.result->raw_diagnostics.find(std::string("native.downstream.hvectorbase_sha256=")+CSL_HIGHS_PATCHED_SOURCE_SHA256) != std::string::npos);
+        CHECK(trial.result->raw_diagnostics.find(
+                  std::string("native.downstream.hvectorbase_sha256=") +
+                  CSL_HIGHS_PATCHED_SOURCE_SHA256) != std::string::npos);
         CHECK(trial.result->raw_diagnostics.find("model.reused=false") != std::string::npos);
         if (i < 3) {
             REQUIRE(trial.objective.has_value());
             CHECK(*trial.objective == doctest::Approx(expected[i]));
             CHECK(trial.result->outcome.value == csl::MathematicalOutcome::optimal);
         } else {
-            CHECK(trial.result->outcome.value == (i == 3 ? csl::MathematicalOutcome::infeasible : csl::MathematicalOutcome::unbounded));
+            CHECK(trial.result->outcome.value == (i == 3 ? csl::MathematicalOutcome::infeasible
+                                                         : csl::MathematicalOutcome::unbounded));
         }
         CHECK(trial.timings[5].available);
         CHECK(trial.timings[5].start <= trial.timings[3].start);
@@ -40,16 +43,20 @@ TEST_CASE("literal catalogue uses the actual registered LP and owns the returned
 }
 
 TEST_CASE("infeasible LP report names independently verified Farkas support") {
-    const auto fixture=catalogue()[3];
-    const auto trial=run_trial(fixture,{});
+    const auto fixture = catalogue()[3];
+    const auto trial = run_trial(fixture, {});
     INFO(trial.error);
-    for(const auto& error:trial.errors) INFO(error);
+    for (const auto &error : trial.errors)
+        INFO(error);
     REQUIRE(trial.passed());
     REQUIRE(trial.result);
-    const auto json=trial_json(fixture,trial,1,1,"test");
-    CHECK(json.find("\"support\":{\"kind\":\"exact_farkas_verified\"}")!=std::string::npos);
-    CHECK(json.find("\"assumptions\":[\"binary64 numerical output; exact_farkas_verified\"]")!=std::string::npos);
-    CHECK(catalogue_json().find("binary64 numerical output; exact_farkas_verified support required")!=std::string::npos);
+    const auto json = trial_json(fixture, trial, 1, 1, "test");
+    CHECK(json.find("\"support\":{\"kind\":\"exact_farkas_verified\"}") != std::string::npos);
+    CHECK(json.find("\"assumptions\":[\"binary64 numerical output; exact_farkas_verified\"]") !=
+          std::string::npos);
+    CHECK(catalogue_json().find(
+              "binary64 numerical output; exact_farkas_verified support required") !=
+          std::string::npos);
 }
 
 TEST_CASE("pre-cancelled functional trial retains current result without passing oracle") {
@@ -78,40 +85,46 @@ TEST_CASE("JSON writer preserves escaping binary64 signed zero and rejects nonfi
 }
 
 TEST_CASE("preparation rejection retains diagnostic and never claims a solve") {
-    auto fixture=catalogue()[0];
-    fixture.input.identity.program={"test-unsupported-tiny"};
-    fixture.input.constraints.values[0]=1e-13;
-    const auto trial=run_trial(fixture,{});
-    CHECK(trial.harness_status=="unsupported");
+    auto fixture = catalogue()[0];
+    fixture.input.identity.program = {"test-unsupported-tiny"};
+    fixture.input.constraints.values[0] = 1e-13;
+    const auto trial = run_trial(fixture, {});
+    CHECK(trial.harness_status == "unsupported");
     CHECK_FALSE(trial.passed());
     CHECK_FALSE(trial.result.has_value());
     CHECK_FALSE(trial.timings[3].available);
-    CHECK(trial.error.find("highs.matrix")!=std::string::npos);
-    CHECK(trial.error.find("1e-12")!=std::string::npos);
+    CHECK(trial.error.find("highs.matrix") != std::string::npos);
+    CHECK(trial.error.find("1e-12") != std::string::npos);
 }
 
 TEST_CASE("exceptional total explicitly records owner unwind while preserving the exception") {
     Interval total;
-    total.available=true;
-    total.start=Clock::now().time_since_epoch().count();
-    bool destroyed=false;
-    struct Owner { bool& destroyed; ~Owner() { destroyed=true; } };
+    total.available = true;
+    total.start = Clock::now().time_since_epoch().count();
+    bool destroyed = false;
+    struct Owner {
+        bool &destroyed;
+        ~Owner() { destroyed = true; }
+    };
     try {
-        record_failure_unwind(total,[&] {
+        record_failure_unwind(total, [&] {
             Owner owner{destroyed};
             throw std::runtime_error("controlled failure");
         });
         FAIL("failure must propagate");
-    } catch (const std::runtime_error& error) {
-        CHECK(std::string(error.what())=="controlled failure");
+    } catch (const std::runtime_error &error) {
+        CHECK(std::string(error.what()) == "controlled failure");
     }
     CHECK(destroyed);
     CHECK(total.includes_unwind);
-    CHECK(total.end>=total.start);
-    const auto successful=run_trial(catalogue()[0],{});
+    CHECK(total.end >= total.start);
+    const auto successful = run_trial(catalogue()[0], {});
     CHECK_FALSE(successful.timings[5].includes_unwind);
-    auto bad=catalogue()[0];bad.input.identity.program={"unwind-preparation"};bad.input.constraints.values[0]=1e-13;
-    const auto failed=run_trial(bad,{});
+    auto bad = catalogue()[0];
+    bad.input.identity.program = {"unwind-preparation"};
+    bad.input.constraints.values[0] = 1e-13;
+    const auto failed = run_trial(bad, {});
     CHECK(failed.timings[5].includes_unwind);
-    CHECK(trial_json(bad,failed,1,1,"test").find("end_to_end_including_unwind")!=std::string::npos);
+    CHECK(trial_json(bad, failed, 1, 1, "test").find("end_to_end_including_unwind") !=
+          std::string::npos);
 }

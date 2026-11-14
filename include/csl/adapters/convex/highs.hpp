@@ -9,6 +9,7 @@ struct HighsConvexOptions {
     std::optional<std::size_t> feasibility_iteration_limit;
     std::optional<std::size_t> qp_iteration_limit;
 };
-using HighsConvexRegistrationResult = std::variant<registry::Registration<registry::ConvexPort>,Diagnostics>;
+using HighsConvexRegistrationResult =
+    std::variant<registry::Registration<registry::ConvexPort>, Diagnostics>;
 HighsConvexRegistrationResult make_highs_registration(HighsConvexOptions = {});
 }

@@ -20,17 +20,18 @@ struct WorstCaseIntervalRequest {
 // the request's stored V rows and the exact-real objective described by its
 // stored binary64 coefficients. The request ID binds those immutable inputs.
 class WorstCaseIntervalBounds {
-public:
-    const ProblemId& problem() const noexcept { return problem_; }
-    const RequestId& request() const noexcept { return request_; }
-    const SetId& domain() const noexcept { return domain_; }
+  public:
+    const ProblemId &problem() const noexcept { return problem_; }
+    const RequestId &request() const noexcept { return request_; }
+    const SetId &domain() const noexcept { return domain_; }
     double lower() const noexcept { return lower_; }
     double upper() const noexcept { return upper_; }
-private:
-    WorstCaseIntervalBounds(ProblemId problem, RequestId request, SetId domain,
-            double lower, double upper)
-        : problem_(std::move(problem)), request_(std::move(request)),
-          domain_(std::move(domain)), lower_(lower), upper_(upper) {}
+
+  private:
+    WorstCaseIntervalBounds(ProblemId problem, RequestId request, SetId domain, double lower,
+                            double upper)
+        : problem_(std::move(problem)), request_(std::move(request)), domain_(std::move(domain)),
+          lower_(lower), upper_(upper) {}
     ProblemId problem_;
     RequestId request_;
     SetId domain_;
@@ -39,12 +40,12 @@ private:
     friend struct WorstCaseIntervalBuilder;
 };
 struct WorstCaseIntervalEmpty {};
-using WorstCaseIntervalOutcome = std::variant<WorstCaseIntervalBounds,
-    WorstCaseIntervalEmpty, Unsupported, OperationStopped>;
+using WorstCaseIntervalOutcome =
+    std::variant<WorstCaseIntervalBounds, WorstCaseIntervalEmpty, Unsupported, OperationStopped>;
 
 // The interval upper bound uses the domain's coordinate box, so it remains
 // valid without a floating-point convexity or PSD claim. It can be conservative.
-WorstCaseIntervalOutcome worst_case_interval(const WorstCaseIntervalRequest&,
-    const ExecutionContext& context = {});
+WorstCaseIntervalOutcome worst_case_interval(const WorstCaseIntervalRequest &,
+                                             const ExecutionContext &context = {});
 
 } // namespace csl::optimization

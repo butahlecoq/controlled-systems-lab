@@ -12,15 +12,15 @@ registry::Registration<registry::ApproximationPort> make_box_registration(SetId 
 // directions. The output contains each direction's positive and negative
 // support slab, giving 2n rows for an n-dimensional input. Except in 2D, an exact
 // residual certificate must prove nonsingularity; unresolved bases are rejected.
-registry::Registration<registry::ApproximationPort> make_parallelotope_registration(
-    SetId output_id, Matrix orientation_rows);
+registry::Registration<registry::ApproximationPort>
+make_parallelotope_registration(SetId output_id, Matrix orientation_rows);
 
 // Four corners are ordered around one finite binary64 box or parallelogram.
 // The registry verifies its exact shape, then run_registered independently
 // checks every corner against the native H reference.
-registry::Registration<registry::ApproximationPort> make_inscribed_box_registration(
-    SetId output_id, Matrix ordered_corners);
-registry::Registration<registry::ApproximationPort> make_inscribed_parallelotope_registration(
-    SetId output_id, Matrix ordered_corners);
+registry::Registration<registry::ApproximationPort>
+make_inscribed_box_registration(SetId output_id, Matrix ordered_corners);
+registry::Registration<registry::ApproximationPort>
+make_inscribed_parallelotope_registration(SetId output_id, Matrix ordered_corners);
 
 } // namespace csl::geometry::approximation

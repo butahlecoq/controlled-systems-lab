@@ -39,7 +39,7 @@ struct FlexiblePitchCase {
     DiscretizationReceipt discretization;
 };
 
-template<class T> using FlexiblePitchResult = std::variant<T, Diagnostics>;
+template <class T> using FlexiblePitchResult = std::variant<T, Diagnostics>;
 
 std::span<const CaseInfo> flexible_pitch_cases() noexcept;
 FlexiblePitchResult<FlexiblePitchCase> make_flexible_pitch_case(std::string_view id);
@@ -48,6 +48,6 @@ FlexiblePitchResult<FlexiblePitchParameters> flexible_pitch_parameters(std::stri
 // Assemble E*x_dot=A_tilde*x+B_tilde*delta, then solve the checked descriptor.
 // Singular or numerically unresolved E never yields an explicit rate model.
 FlexiblePitchResult<FlexiblePitchDescriptor>
-assemble_flexible_pitch(const FlexiblePitchParameters&);
+assemble_flexible_pitch(const FlexiblePitchParameters &);
 
 } // namespace csl::model::catalogue

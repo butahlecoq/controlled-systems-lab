@@ -7,8 +7,8 @@
 using namespace csl;
 using namespace csl::numeric;
 
-template<class T> T accepted(Result<T> result) {
-    if (const auto* error = std::get_if<Diagnostic>(&result))
+template <class T> T accepted(Result<T> result) {
+    if (const auto *error = std::get_if<Diagnostic>(&result))
         throw std::runtime_error(error->field + ": " + error->explanation);
     return std::get<T>(std::move(result));
 }
@@ -16,7 +16,7 @@ template<class T> T accepted(Result<T> result) {
 int main() {
     try {
         const auto vector = accepted(snapshot_vector(Vector{7, 11, 13}));
-        const auto check = [&](const MatrixView& matrix) {
+        const auto check = [&](const MatrixView &matrix) {
             if (accepted(multiply(matrix, vector)) != Vector{68, 161})
                 throw std::runtime_error("Literal matrix-vector oracle failed.");
         };
@@ -39,12 +39,14 @@ int main() {
         if (accepted(multiply(zero, accepted(snapshot_vector({})))) != Vector{0, 0})
             throw std::runtime_error("Zero-control shape failed.");
         const auto invalid = snapshot(Matrix{2, 3, {1}});
-        const auto* error = std::get_if<Diagnostic>(&invalid);
-        if (!error || error->code != DiagnosticCode::invalid_input || error->field != "numeric.dense.storage")
+        const auto *error = std::get_if<Diagnostic>(&invalid);
+        if (!error || error->code != DiagnosticCode::invalid_input ||
+            error->field != "numeric.dense.storage")
             throw std::runtime_error("Malformed storage diagnostic failed.");
-        std::cout << "Installed numeric client: dense/CSR snapshots and retained literal fixture passed\n";
+        std::cout
+            << "Installed numeric client: dense/CSR snapshots and retained literal fixture passed\n";
         return 0;
-    } catch (const std::exception& error) {
+    } catch (const std::exception &error) {
         std::cerr << error.what() << '\n';
         return 1;
     }

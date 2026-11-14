@@ -1,105 +1,144 @@
-name: C++ core, nominal reachability, numeric and set data tooling quality
+name: Maintained native tooling quality
 
 on:
   pull_request:
     paths:
-      - 'include/csl/core/**'
-      - 'include/csl/evidence/**'
-      - 'src/contracts/**'
-      - 'include/csl/numeric/data.hpp'
-      - 'src/numeric/data.cpp'
-      - 'src/numeric/Module.cmake'
-      - 'src/numeric/Tests.cmake'
-      - 'include/csl/sets/contracts.hpp'
-      - 'include/csl/sets/data.hpp'
-      - 'src/sets/data.cpp'
-      - 'src/sets/Module.cmake'
-      - 'src/sets/Tests.cmake'
-      - 'include/csl/reachability/nominal_forward.hpp'
-      - 'include/csl/reachability/nominal_predecessor.hpp'
-      - 'include/csl/reachability/nominal_tube.hpp'
-      - 'src/reachability/nominal_forward.cpp'
-      - 'src/reachability/nominal_predecessor.cpp'
-      - 'src/reachability/nominal_tube.cpp'
-      - 'src/reachability/Module.cmake'
-      - 'src/reachability/Tests.cmake'
-      - 'src/geometry/Module.cmake'
+      - 'include/**'
+      - 'src/**'
+      - 'tests/**'
+      - 'examples/**'
       - 'cmake/**'
       - 'CMakeLists.txt'
       - 'CMakePresets.json'
       - '.clang-format'
       - '.clang-tidy'
       - 'requirements-cpp-quality.txt'
-      - 'scripts/ci/check_cpp_core.cmake'
+      - 'scripts/ci/check_cpp_quality.py'
+      - 'scripts/ci/cpp-quality-policy.json'
       - '.github/workflows/cpp-core-quality.yml'
   push:
     branches: [main]
     paths:
-      - 'include/csl/core/**'
-      - 'include/csl/evidence/**'
-      - 'src/contracts/**'
-      - 'include/csl/numeric/data.hpp'
-      - 'src/numeric/data.cpp'
-      - 'src/numeric/Module.cmake'
-      - 'src/numeric/Tests.cmake'
-      - 'include/csl/sets/contracts.hpp'
-      - 'include/csl/sets/data.hpp'
-      - 'src/sets/data.cpp'
-      - 'src/sets/Module.cmake'
-      - 'src/sets/Tests.cmake'
-      - 'include/csl/reachability/nominal_forward.hpp'
-      - 'include/csl/reachability/nominal_predecessor.hpp'
-      - 'include/csl/reachability/nominal_tube.hpp'
-      - 'src/reachability/nominal_forward.cpp'
-      - 'src/reachability/nominal_predecessor.cpp'
-      - 'src/reachability/nominal_tube.cpp'
-      - 'src/reachability/Module.cmake'
-      - 'src/reachability/Tests.cmake'
-      - 'src/geometry/Module.cmake'
+      - 'include/**'
+      - 'src/**'
+      - 'tests/**'
+      - 'examples/**'
       - 'cmake/**'
       - 'CMakeLists.txt'
       - 'CMakePresets.json'
       - '.clang-format'
       - '.clang-tidy'
       - 'requirements-cpp-quality.txt'
-      - 'scripts/ci/check_cpp_core.cmake'
+      - 'scripts/ci/check_cpp_quality.py'
+      - 'scripts/ci/cpp-quality-policy.json'
       - '.github/workflows/cpp-core-quality.yml'
 
 permissions:
   contents: read
 
 jobs:
-  cpp-core-quality:
+  cpp-quality:
+    name: Native quality / ${{ matrix.profile }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - profile: core
+            highs: 'OFF'
+            qhull: 'OFF'
+            casadi: 'OFF'
+          - profile: highs
+            highs: 'ON'
+            qhull: 'ON'
+            casadi: 'OFF'
+          - profile: casadi
+            highs: 'OFF'
+            qhull: 'OFF'
+            casadi: 'ON'
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      BUILD_ROOT: build/cpp-quality-${{ matrix.profile }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.11.14'
+      - name: Install pinned development and native-client dependencies
+        run: python -m pip install --disable-pip-version-check -r requirements-cpp-quality.txt -r benchmarks/reporting/closed_loop/requirements.txt
+      - name: Locate the actual native CasADi package
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          import casadi
+          with open(os.environ['GITHUB_ENV'], 'a') as stream:
+              stream.write(f'CASADI_CMAKE_DIR={Path(casadi.__file__).resolve().parent / "cmake"}\n')
+          PY
+      - name: Check all retained native formatting and preservation
+        run: python scripts/ci/check_cpp_quality.py format
+      - name: Exercise Git and metadata boundaries without synthetic qualification
+        run: python -m unittest discover -s tests/ci -p test_cpp_quality.py
+      - name: Configure actual profile targets and every public header
+        run: >-
+          cmake --preset core -B "$BUILD_ROOT"
+          -DCMAKE_C_COMPILER=clang-18 -DCMAKE_CXX_COMPILER=clang++-18
+          -DCSL_CPP_QUALITY=ON -DCSL_CPP_QUALITY_PROFILE=${{ matrix.profile }}
+          -DCSL_ENABLE_HIGHS=${{ matrix.highs }} -DCSL_ENABLE_QHULL=${{ matrix.qhull }}
+          -DCSL_ENABLE_CASADI=${{ matrix.casadi }} -Dcasadi_DIR="$CASADI_CMAKE_DIR"
+          -DPython3_EXECUTABLE="$(command -v python)"
+          -DCSL_NATIVE_FRAME_TEST_PYTHON="$(command -v python)"
+      - name: Build the complete real profile serially
+        run: cmake --build "$BUILD_ROOT" --parallel 1
+      - name: Run functional unit and installed-package checks
+        run: >-
+          ctest --test-dir "$BUILD_ROOT" --output-on-failure --no-tests=error
+          -LE reporting ${{ matrix.profile == 'casadi' && '-E ^installed_public_client$' || '' }}
+      - name: Qualify the actual CasADi installed consumers
+        if: matrix.profile == 'casadi'
+        run: |
+          cmake --install "$BUILD_ROOT" --prefix "$PWD/$BUILD_ROOT/prefix"
+          cmake -DCSL_SOURCE_DIR="$PWD" -DCSL_INSTALL_PREFIX="$PWD/$BUILD_ROOT/prefix" \
+            -DCSL_WORK_DIR="$PWD/$BUILD_ROOT/casadi-consumer" -DCSL_CASADI_DIR="$CASADI_CMAKE_DIR" \
+            -DCSL_EXPORT_COMPILE_COMMANDS=ON -P cmake/RunCasadiInstalledClient.cmake
+      - name: Analyze real commands and compiled header dependencies
+        run: python scripts/ci/check_cpp_quality.py analyze --build "$BUILD_ROOT" --receipt "$BUILD_ROOT/cpp-quality-receipt.json"
+      - name: Retain source/context evidence without binaries
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: cpp-quality-${{ github.sha }}-${{ matrix.profile }}
+          path: |
+            ${{ env.BUILD_ROOT }}/cpp-quality-receipt.json
+            ${{ env.BUILD_ROOT }}/cpp-quality-profile.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  cpp-quality-coverage:
+    name: Native quality / complete retained scope
+    needs: cpp-quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
-          python-version: '3.12'
-      - name: Install pinned development tools
-        run: python -m pip install --disable-pip-version-check -r requirements-cpp-quality.txt
-      - name: Check core, nominal reachability, numeric and set data formatting
-        run: cmake -DCSL_CPP_QUALITY_MODE=format -P scripts/ci/check_cpp_core.cmake
-      - name: Configure real C++20 compilation contexts
+          python-version: '3.11.14'
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: cpp-quality-${{ github.sha }}-*
+          path: build/native-quality-receipts
+      - name: Reject missing, stale or uncovered source/profile identities
         run: >-
-          cmake --preset core -B build/cpp-quality
-          -DCMAKE_C_COMPILER=clang-18 -DCMAKE_CXX_COMPILER=clang++-18
-          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-      - name: Build selected modules and standalone headers
-        run: >-
-          cmake --build build/cpp-quality --parallel 1
-          --target csl_contracts csl_core_header_checks csl_nominal_header_checks
-          csl_nominal_forward csl_nominal_tube csl_polyhedral
-          csl_numeric header_numeric_data_hpp numeric_tests numeric_buffer_views_tests
-          csl_sets header_sets_contracts_hpp header_sets_data_hpp sets_tests sets_public_client
-          public_headers_client public_headers_lp_first_client
-          contract_tests public_client projection_predecessor_tests projection_predecessor_public_client
-      - name: Analyze selected public headers and implementations
-        run: cmake -DCSL_CPP_QUALITY_MODE=tidy -P scripts/ci/check_cpp_core.cmake
-      - name: Exercise existing core, predecessor, numeric and set behavior
-        run: >-
-          ctest --test-dir build/cpp-quality --output-on-failure
-          -R '^(contract_tests|public_client|projection_predecessor_tests|projection_predecessor_public_client|numeric_tests|numeric_buffer_views_tests|public_headers_client|public_headers_lp_first_client|numeric_dependency_direction|sets_tests|sets_public_client)$'
+          python scripts/ci/check_cpp_quality.py coverage
+          --receipt build/native-quality-receipts/cpp-quality-${{ github.sha }}-core/cpp-quality-receipt.json
+          --receipt build/native-quality-receipts/cpp-quality-${{ github.sha }}-highs/cpp-quality-receipt.json
+          --receipt build/native-quality-receipts/cpp-quality-${{ github.sha }}-casadi/cpp-quality-receipt.json

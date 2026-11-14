@@ -34,7 +34,7 @@ struct QhullOptions {
     // Called inline immediately before each native qh_new_qhull invocation.
     // Separate workspaces may invoke it concurrently; callback exceptions propagate.
     std::function<void()> before_native_call;
-    std::function<void(const ConversionObservation&)> observe;
+    std::function<void(const ConversionObservation &)> observe;
 };
 
 using QhullRegistrationResult =
@@ -43,8 +43,8 @@ using QhullRegistrationResult =
 // Uses the caller-selected LP implementation for feasibility, boundedness,
 // and relative-interior prerequisites. The returned registration owns a copy
 // of that registration; it does not retain a Registry or borrowed requests.
-QhullRegistrationResult make_qhull_registration(
-    registry::Registration<registry::LPPort> lp_registration,
-    QhullOptions options = {});
+QhullRegistrationResult
+make_qhull_registration(registry::Registration<registry::LPPort> lp_registration,
+                        QhullOptions options = {});
 
 } // namespace csl::adapters::polyhedral

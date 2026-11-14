@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <csl/adapters/convex/highs.hpp>
 #include <csl/controllers/discrete_mpc.hpp>
 #include <csl/registry/registry.hpp>

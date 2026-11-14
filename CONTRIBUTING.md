@@ -28,46 +28,66 @@ The initial source-bound observed-state pilot has a [standalone numerical report
 
 Before retiring local worktrees or builds, inspect their status and preserve authored files. Keep raw records and versioned published evidence intact.
 
-The C++ quality gate covers every maintained header under `include/csl/core`,
-the outcome-evidence implementation `src/contracts/outcomes.cpp`, and the
-`nominal_forward`, `nominal_predecessor` and `nominal_tube` public headers under
-`include/csl/reachability` and their implementations under `src/reachability`, plus
-`include/csl/numeric/data.hpp`, `src/numeric/data.cpp`,
-`include/csl/sets/contracts.hpp`, `include/csl/sets/data.hpp`, and `src/sets/data.cpp`. Install
-`requirements-cpp-quality.txt` in a virtual environment to use clang-format and
-clang-tidy 23.1.3 with CMake 3.31.6. Run the checks from the repository root:
+The native quality gate discovers every retained C/C++ source under `include`,
+`src`, `tests` and `examples`, including new files. At main `9a81334f` this is
+565 mutable paths and all 136 public headers. Two exact B06 measured-source
+fixtures remain immutable, verified against their named captured owner; four
+installed forge probes retain their checked compiler refusals. Benchmark/report
+drivers, native tools/probes and compatibility sources remain required adoption
+queues under [issue 993](https://github.com/butahlecoq/controlled-systems-lab/issues/993);
+this scope does not claim whole-repository completion.
+
+Install `requirements-cpp-quality.txt` for clang-format/clang-tidy 23.1.3 and
+CMake 3.31.6. The canonical entry point is `scripts/ci/check_cpp_quality.py`.
+For the core profile, run:
 
 ```sh
-cmake -DCSL_CPP_QUALITY_MODE=format -P scripts/ci/check_cpp_core.cmake
-cmake --preset core -B build/cpp-quality -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-cmake --build build/cpp-quality --parallel 1 \
-  --target csl_contracts csl_core_header_checks csl_nominal_header_checks \
-  csl_nominal_forward csl_nominal_tube csl_polyhedral \
-  csl_numeric header_numeric_data_hpp numeric_tests numeric_buffer_views_tests \
-  csl_sets header_sets_contracts_hpp header_sets_data_hpp sets_tests sets_public_client \
-  public_headers_client public_headers_lp_first_client \
-  contract_tests public_client projection_predecessor_tests projection_predecessor_public_client
-cmake -DCSL_CPP_QUALITY_MODE=tidy -P scripts/ci/check_cpp_core.cmake
-ctest --test-dir build/cpp-quality --output-on-failure \
-  -R '^(contract_tests|public_client|projection_predecessor_tests|projection_predecessor_public_client|numeric_tests|numeric_buffer_views_tests|public_headers_client|public_headers_lp_first_client|numeric_dependency_direction|sets_tests|sets_public_client)$'
+python scripts/ci/check_cpp_quality.py format
+cmake --preset core -B build/quality-core \
+  -DCSL_CPP_QUALITY=ON -DCSL_CPP_QUALITY_PROFILE=core
+cmake --build build/quality-core --parallel 1
+ctest --test-dir build/quality-core --output-on-failure -R '^installed_public_client$'
+python scripts/ci/check_cpp_quality.py analyze --build build/quality-core \
+  --receipt build/quality-core/cpp-quality-receipt.json
 ```
 
-The analyzer uses the actual selected implementation sources and each selected
-header's standalone CMake compilation context. It refuses a missing command, a foreign
-source tree or a tool-version mismatch. New core headers also need their entry
-in `src/contracts/Tests.cmake`; nominal header contexts are registered in
-`src/reachability/Tests.cmake`. This prevents a selected header without a real
-compilation context from passing. The numeric data header uses the existing
-`header_numeric_data_hpp` context in `src/contracts/Tests.cmake`. Set contracts use
-the existing `header_sets_contracts_hpp` context there; the set data header uses
-`header_sets_data_hpp`, registered in `src/sets/Tests.cmake`.
-The focused policy enables core/C++ analyzers, selected bug-prone constructs and
-portability checks, with warnings treated as errors. Formatting applies only to
-the selected maintained source files; third-party code, immutable source captures
-and generated scientific data are excluded. The
-`C++ core, nominal reachability, numeric and set data tooling quality` workflow enforces this scope.
-Other maintained C++ modules still require
-coverage under [issue 993](https://github.com/butahlecoq/controlled-systems-lab/issues/993).
+The complete gate also requires actual HiGHS+Qhull and CasADi profiles. Use
+`CSL_CPP_QUALITY_PROFILE=highs` with both native adapters enabled, and
+`CSL_CPP_QUALITY_PROFILE=casadi` with CasADi enabled and HiGHS/Qhull disabled.
+Both require `BUILD_TESTING=ON`; the CasADi profile needs a matching native
+`casadi_DIR` and its existing installed-consumer check. The workflow contains the
+complete configure/install commands. Reconcile the three successful receipts:
+
+```sh
+python scripts/ci/check_cpp_quality.py coverage \
+  --receipt build/quality-core/cpp-quality-receipt.json \
+  --receipt build/quality-highs/cpp-quality-receipt.json \
+  --receipt build/quality-casadi/cpp-quality-receipt.json
+```
+
+CMake generates standalone public-header targets and records exact input bytes.
+The gate validates actual target ownership, compilation databases and built Ninja
+dependency records, including current-byte SDK source/header copies. Installed
+header contexts match each profile's actual install manifest; their three-profile
+union must cover every public header, including the optional CasADi adapter. It rejects
+foreign or stale profiles, missing contexts, missing optional profiles, and
+uncovered new sources or private/test/example headers. Reconfigure and build
+after changing native or quality configuration inputs. Quality/exported SDK
+contexts use explicit configuration: source/configuration hashes reject stale
+ownership before Ninja checks for any pending compile or link action. Normal
+native profiles retain automatic CMake regeneration. JSON receipts from other
+CI jobs can be reconciled only against identical native and quality inputs;
+their compilation databases are never reused in another checkout.
+
+The existing analyzer, portability and strict warning policy remains enforced;
+compiler warnings, installed clients and sanitizer CI are retained. First-party
+tests link the compiled `doctest::doctest_with_main` target; custom entry points
+link `csl_doctest_runtime`. Do not define `DOCTEST_CONFIG_IMPLEMENT` or
+`DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN` in maintained sources or compiler flags.
+The gate rejects that ownership regression with the required target names. The
+`Maintained native tooling quality` workflow enforces this complete retained-root
+scope. Its artifacts contain context/coverage JSON, with 14-day retention,
+without native binaries or scientific capture rewrites.
 
 The Python tools under `scripts/ci` and `scripts/catalogue`, tests under
 `tests/ci`, `scripts/reports/frozen_native_bundle.py`,

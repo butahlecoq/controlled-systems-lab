@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
 #include <csl/input/scenario_loader.hpp>
@@ -11,35 +10,38 @@ namespace {
 using namespace csl;
 using namespace csl::input;
 
-LoadedScenario load(const char* name) {
+LoadedScenario load(const char *name) {
     const auto result = load_scenario_file(std::filesystem::path(CSL_SCENARIO_TEMPLATE_DIR) / name);
-    if (const auto* failure = std::get_if<InputFailure>(&result))
+    if (const auto *failure = std::get_if<InputFailure>(&result))
         FAIL_CHECK("scenario rejected at " << failure->path << ": " << failure->observed);
-    else if (const auto* unsupported = std::get_if<UnsupportedInput>(&result))
+    else if (const auto *unsupported = std::get_if<UnsupportedInput>(&result))
         FAIL_CHECK("scenario unsupported at " << unsupported->path << ": " << unsupported->feature);
     REQUIRE(std::holds_alternative<LoadedScenario>(result));
     return std::get<LoadedScenario>(result);
 }
 
-Vector step(const LoadedScenario& scenario, std::size_t stage, const Vector& state, const Vector& control) {
+Vector step(const LoadedScenario &scenario, std::size_t stage, const Vector &state,
+            const Vector &control) {
     const auto result = scenario.problem().model().step({stage}, state, control, {});
     REQUIRE(std::holds_alternative<Vector>(result));
     return std::get<Vector>(result);
 }
 
-double cost(const LoadedScenario& scenario, const Vector& state) {
+double cost(const LoadedScenario &scenario, const Vector &state) {
     const auto result = optimization::evaluate(scenario.problem().objective(), state);
     REQUIRE(std::holds_alternative<double>(result));
     return std::get<double>(result);
 }
 
-bool has_box_bounds(const AdmissibleSet& set, const Vector& lower, const Vector& upper) {
-    const auto* handle = std::get_if<SetHandle>(&set);
-    if (!handle) return false;
+bool has_box_bounds(const AdmissibleSet &set, const Vector &lower, const Vector &upper) {
+    const auto *handle = std::get_if<SetHandle>(&set);
+    if (!handle)
+        return false;
     const auto result = sets::from_handle(*handle);
-    if (!std::holds_alternative<sets::SetData>(result)) return false;
+    if (!std::holds_alternative<sets::SetData>(result))
+        return false;
     const auto representation = std::get<sets::SetData>(result).representation();
-    const auto* h = std::get_if<sets::HRepresentation>(&representation);
+    const auto *h = std::get_if<sets::HRepresentation>(&representation);
     if (!h || lower.size() != upper.size() || h->inequalities.cols() != lower.size() ||
         h->inequalities.rows() != 2 * lower.size() || h->equalities.rows() != 0)
         return false;
@@ -52,22 +54,22 @@ bool has_box_bounds(const AdmissibleSet& set, const Vector& lower, const Vector&
             for (std::size_t column = 0; column < lower.size(); ++column) {
                 const double expected = column == axis ? 1.0 : 0.0;
                 unit_row &= h->inequalities(row, column) == expected ||
-                    h->inequalities(row, column) == -expected;
+                            h->inequalities(row, column) == -expected;
             }
-            if (!unit_row) continue;
+            if (!unit_row)
+                continue;
             if (h->inequalities(row, axis) == 1.0 && h->upper_bounds[row] == upper[axis])
                 found_upper = true;
             if (h->inequalities(row, axis) == -1.0 && h->upper_bounds[row] == -lower[axis])
                 found_lower = true;
         }
-        if (!found_lower || !found_upper) return false;
+        if (!found_lower || !found_upper)
+            return false;
     }
     return true;
 }
 
-bool within(double value, double lower, double upper) {
-    return lower <= value && value <= upper;
-}
+bool within(double value, double lower, double upper) { return lower <= value && value <= upper; }
 }
 
 TEST_CASE("minimal LTI linear-objective template loads and has a literal transition and cost") {
@@ -110,7 +112,8 @@ TEST_CASE("LTV residual-norm template evaluates every authored stage against a l
     CHECK(cost(scenario, x2) == doctest::Approx(1));
 }
 
-TEST_CASE("double-integrator generality template has independently derived transitions and tracking cost") {
+TEST_CASE(
+    "double-integrator generality template has independently derived transitions and tracking cost") {
     const auto scenario = load("double-integrator-generality.json");
     CHECK(scenario.problem().model().horizon() == 3);
     CHECK(scenario.problem().model().dimensions() == Dimensions{2, 1, 0});
@@ -129,10 +132,10 @@ TEST_CASE("double-integrator generality template has independently derived trans
 
     const auto control_description = scenario.problem().controls().description();
     REQUIRE(control_description);
-    const auto* controls = std::get_if<ContinuousDomain>(control_description.get());
+    const auto *controls = std::get_if<ContinuousDomain>(control_description.get());
     REQUIRE(controls);
     REQUIRE(controls->stages.size() == 3);
-    for (const auto& stage : controls->stages)
+    for (const auto &stage : controls->stages)
         CHECK(has_box_bounds(stage, {-1}, {1}));
 
     const auto x1 = step(scenario, 0, {0, 0}, {0.5});
@@ -153,25 +156,25 @@ TEST_CASE("double-integrator generality template has independently derived trans
 }
 
 TEST_CASE("temporal slew template preserves its independent two-control optimal family") {
-    const auto scenario=load("temporal-slew-integrator.json");
-    CHECK(scenario.source()->schema=="csl.scenario/2");
-    CHECK(scenario.metadata()->id=="temporal-slew-integrator");
-    CHECK(scenario.problem().model().horizon()==2);
-    const auto temporal=scenario.problem().constraints().temporal();
+    const auto scenario = load("temporal-slew-integrator.json");
+    CHECK(scenario.source()->schema == "csl.scenario/2");
+    CHECK(scenario.metadata()->id == "temporal-slew-integrator");
+    CHECK(scenario.problem().model().horizon() == 2);
+    const auto temporal = scenario.problem().constraints().temporal();
     REQUIRE(temporal);
-    REQUIRE(temporal->joint_map.rows()==1);
-    REQUIRE(temporal->joint_map.cols()==5);
-    CHECK(temporal->joint_map(0,3)==-1);
-    CHECK(temporal->joint_map(0,4)==1);
-    REQUIRE(temporal->bounds->size()==1);
-    CHECK(temporal->bounds->at(0).lower==-.25);
-    CHECK(temporal->bounds->at(0).upper==.25);
+    REQUIRE(temporal->joint_map.rows() == 1);
+    REQUIRE(temporal->joint_map.cols() == 5);
+    CHECK(temporal->joint_map(0, 3) == -1);
+    CHECK(temporal->joint_map(0, 4) == 1);
+    REQUIRE(temporal->bounds->size() == 1);
+    CHECK(temporal->bounds->at(0).lower == -.25);
+    CHECK(temporal->bounds->at(0).upper == .25);
 
-    const auto x1=step(scenario,0,{0},{0.125});
-    const auto x2=step(scenario,1,x1,{-0.125});
-    CHECK(x1==Vector{0.125});
-    CHECK(x2==Vector{0});
-    CHECK(cost(scenario,x2)==doctest::Approx(0));
-    CHECK(std::abs(-0.125-0.125)<=0.25);
-    CHECK(std::abs(1.0-(-1.0))>0.25);
+    const auto x1 = step(scenario, 0, {0}, {0.125});
+    const auto x2 = step(scenario, 1, x1, {-0.125});
+    CHECK(x1 == Vector{0.125});
+    CHECK(x2 == Vector{0});
+    CHECK(cost(scenario, x2) == doctest::Approx(0));
+    CHECK(std::abs(-0.125 - 0.125) <= 0.25);
+    CHECK(std::abs(1.0 - (-1.0)) > 0.25);
 }

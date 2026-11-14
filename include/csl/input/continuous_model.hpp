@@ -12,9 +12,9 @@ struct ContinuousModelInput {
     std::string schema;
 };
 using ContinuousModelLoadResult =
-    std::variant<ContinuousModelInput,InputFailure,UnsupportedInput,OperationStopped>;
+    std::variant<ContinuousModelInput, InputFailure, UnsupportedInput, OperationStopped>;
 
 ContinuousModelLoadResult load_continuous_model(std::span<const std::byte>,
-                                                const LoadOptions& = {});
+                                                const LoadOptions & = {});
 
 } // namespace csl::input

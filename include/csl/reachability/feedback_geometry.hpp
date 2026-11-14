@@ -23,13 +23,19 @@ struct FeedbackZonotopeMembership {
     std::vector<sets::FactorId> factors;
 };
 // x = center + factor * z, ||z||_2 <= 1, including singular factors.
-struct FeedbackEllipsoidMembership { Vector center; Matrix factor; };
-using FeedbackMembership = std::variant<FeedbackHMembership,
-    FeedbackZonotopeMembership, FeedbackEllipsoidMembership>;
+struct FeedbackEllipsoidMembership {
+    Vector center;
+    Matrix factor;
+};
+using FeedbackMembership =
+    std::variant<FeedbackHMembership, FeedbackZonotopeMembership, FeedbackEllipsoidMembership>;
 
 // A strict source predicate is retained separately from the closed outer set.
 // For example, orbit radius > 0 uses coordinate 0 and lower_bound 0.
-struct StrictCoordinateLowerBound { std::size_t coordinate; double lower_bound; };
+struct StrictCoordinateLowerBound {
+    std::size_t coordinate;
+    double lower_bound;
+};
 
 struct FeedbackSet {
     FeedbackFamily family;
@@ -91,13 +97,14 @@ struct FeedbackGeometryDependencies {
 // A deliberately coarse cover for a clipped bounded H intersection. This is
 // distinct from correlated native propagation. Polytope requires its original H
 // operand and is not constructed by this axis-only helper.
-std::variant<FeedbackMembership, Diagnostics> axis_enclosure(FeedbackFamily,
-    SetId, const Vector& lower, const Vector& upper,
-    const std::vector<std::string>& coordinate_labels);
+std::variant<FeedbackMembership, Diagnostics>
+axis_enclosure(FeedbackFamily, SetId, const Vector &lower, const Vector &upper,
+               const std::vector<std::string> &coordinate_labels);
 
-FeedbackGeometryOutcome feedback_geometry(const problem::ResolvedProblem&, RequestId,
-    const SetHandle& terminal_feasibility, FeedbackFamily,
-    const std::vector<StrictCoordinateLowerBound>& strict_source_domain,
-    const FeedbackGeometryDependencies&, const ExecutionContext&);
+FeedbackGeometryOutcome
+feedback_geometry(const problem::ResolvedProblem &, RequestId,
+                  const SetHandle &terminal_feasibility, FeedbackFamily,
+                  const std::vector<StrictCoordinateLowerBound> &strict_source_domain,
+                  const FeedbackGeometryDependencies &, const ExecutionContext &);
 
 } // namespace csl::reachability

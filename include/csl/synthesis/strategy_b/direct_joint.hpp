@@ -9,7 +9,8 @@
 namespace csl::synthesis::strategy_b {
 // Exact dyadic interpretation with the private bounded exact-H resource limits.
 inline constexpr char nominal_linear_exact_profile[] = "strategy-b.nominal-linear-exact-v1";
-inline constexpr char nominal_linear_exact_verifier[] = "csl.verifier.strategy-b.nominal-linear-exact";
+inline constexpr char nominal_linear_exact_verifier[] =
+    "csl.verifier.strategy-b.nominal-linear-exact";
 inline constexpr char nominal_linear_exact_proof[] = "strategy-b.nominal-linear-exact-v1";
 namespace timing {
 inline constexpr artifacts::SpanId run{0};
@@ -30,29 +31,32 @@ struct JointProgram {
     std::variant<LinearProgram, ConvexProgram> program;
 };
 using JointProgramOutcome = std::variant<JointProgram, Diagnostics, OperationStopped>;
-JointProgramOutcome build_joint_program(const problem::ResolvedProblem&, const FamilyRequest&);
+JointProgramOutcome build_joint_program(const problem::ResolvedProblem &, const FamilyRequest &);
 
 // Retains program-scoped evidence without asserting binary64 program/problem
 // equivalence or numerical coverage of the optimal relation.
 class DirectJointPayload final : public JointRelationPayload {
-public:
+  public:
     JointProgram construction;
     sets::SetData relation;
     std::optional<ProgramResult> optimization;
     std::optional<registry::Provenance> provider;
     Diagnostics diagnostics;
     DirectJointPayload(JointProgram, sets::SetData);
-    const sets::SetData* h_relation_for_recording() const noexcept override { return &relation; }
+    const sets::SetData *h_relation_for_recording() const noexcept override { return &relation; }
 };
 class DirectJointWorkspace final : public SynthesisWorkspace {
     registry::PreparedProvider<registry::LPPort> lp_;
     registry::PreparedProvider<registry::ConvexPort> convex_;
-public:
-    DirectJointWorkspace(registry::PreparedProvider<registry::LPPort>, registry::PreparedProvider<registry::ConvexPort>);
-    SynthesisResult solve(const problem::ResolvedProblem&, const FamilyRequest&, const ExecutionContext&) override;
+
+  public:
+    DirectJointWorkspace(registry::PreparedProvider<registry::LPPort>,
+                         registry::PreparedProvider<registry::ConvexPort>);
+    SynthesisResult solve(const problem::ResolvedProblem &, const FamilyRequest &,
+                          const ExecutionContext &) override;
 };
 // Composes injected registries into the existing StrategyRegistry admission
 // path; no owned or fallback registries are created.
-registry::StrategyRegistration make_registration(const registry::Registry<registry::LPPort>&,
-    const registry::Registry<registry::ConvexPort>&);
+registry::StrategyRegistration make_registration(const registry::Registry<registry::LPPort> &,
+                                                 const registry::Registry<registry::ConvexPort> &);
 } // namespace csl::synthesis::strategy_b

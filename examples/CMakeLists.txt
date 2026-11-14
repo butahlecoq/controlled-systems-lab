@@ -85,6 +85,9 @@ if(DEFINED EXAMPLE_EXE)
 endif()
 
 project(CSLExamples LANGUAGES CXX)
+if(CMAKE_EXPORT_COMPILE_COMMANDS)
+  cmake_file_api(QUERY API_VERSION 1 CODEMODEL 2 CACHE 2 CMAKEFILES 1 TOOLCHAINS 1)
+endif()
 find_package(CSL 0.1 CONFIG REQUIRED)
 enable_testing()
 

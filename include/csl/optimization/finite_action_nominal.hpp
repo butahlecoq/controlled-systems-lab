@@ -74,8 +74,8 @@ struct NominalPlanStopped {
     std::vector<std::size_t> action_indices;
     OperationStopped reason;
 };
-using NominalPlanAttempt = std::variant<NominalPlanScored, NominalPlanRejected,
-    NominalPlanUnscored, NominalPlanStopped>;
+using NominalPlanAttempt =
+    std::variant<NominalPlanScored, NominalPlanRejected, NominalPlanUnscored, NominalPlanStopped>;
 
 struct NominalTrajectory {
     std::vector<Vector> states; // Includes the authored state at stage zero.
@@ -85,9 +85,10 @@ struct NominalTrajectory {
     double running_objective{};
     double total_objective{};
 };
-using NominalPlanTrace = std::variant<reachability::FixedPlanReachable,
-    reachability::FinitePlanBoxTrace, reachability::FinitePlanZonotopeTrace,
-    reachability::FinitePlanParallelotopeTrace, reachability::FinitePlanEllipsoidTrace>;
+using NominalPlanTrace =
+    std::variant<reachability::FixedPlanReachable, reachability::FinitePlanBoxTrace,
+                 reachability::FinitePlanZonotopeTrace, reachability::FinitePlanParallelotopeTrace,
+                 reachability::FinitePlanEllipsoidTrace>;
 
 struct NominalTrackSelected {
     std::vector<NominalPlanAttempt> attempts;
@@ -112,8 +113,8 @@ struct NominalTrackStopped {
     NominalSearchCoverage coverage;
     OperationStopped reason;
 };
-using NominalTrackOutcome = std::variant<NominalTrackSelected,
-    NominalTrackNoScoredCandidate, NominalTrackUnsupported, NominalTrackStopped>;
+using NominalTrackOutcome = std::variant<NominalTrackSelected, NominalTrackNoScoredCandidate,
+                                         NominalTrackUnsupported, NominalTrackStopped>;
 
 struct NominalProfileResult {
     NominalRepresentation representation;
@@ -128,21 +129,22 @@ struct FiniteActionNominalResult {
     std::size_t original_horizon{};
     std::size_t absolute_stage_offset{};
 };
-using FiniteActionNominalOutcome = std::variant<FiniteActionNominalResult,
-    Unsupported, OperationStopped>;
+using FiniteActionNominalOutcome =
+    std::variant<FiniteActionNominalResult, Unsupported, OperationStopped>;
 
 // Compares exact and approximate fixed-plan selection for one deterministic
 // nominal input. Approximate scores are enclosure estimates; each selected
 // plan is separately replayed from the authored state and disturbance values.
-FiniteActionNominalOutcome finite_action_nominal(
-    const FiniteActionNominalRequest&, FiniteActionNominalLimits,
-    const ExecutionContext& = {});
+FiniteActionNominalOutcome finite_action_nominal(const FiniteActionNominalRequest &,
+                                                 FiniteActionNominalLimits,
+                                                 const ExecutionContext & = {});
 
 // Runs exactly one selected representation route. The all-five comparison
 // overload above remains available to existing callers; a selected query does
 // not execute inactive representation modules.
-FiniteActionNominalOutcome finite_action_nominal_profile(
-    const FiniteActionNominalRequest&, FiniteActionNominalLimits,
-    NominalRepresentation, const ExecutionContext& = {});
+FiniteActionNominalOutcome finite_action_nominal_profile(const FiniteActionNominalRequest &,
+                                                         FiniteActionNominalLimits,
+                                                         NominalRepresentation,
+                                                         const ExecutionContext & = {});
 
 } // namespace csl::optimization

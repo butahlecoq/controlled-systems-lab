@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
 #include <csl/input/scenario_loader.hpp>
@@ -31,1788 +30,2353 @@
 using namespace csl;
 using namespace csl::synthesis::strategy_b;
 namespace {
-namespace ar=csl::artifacts;
-namespace ob=csl::execution::observability;
-bool feasible(const JointProgram&,const Vector&);
-bool feasible_without_temporal_rows(const JointProgram&,const Vector&);
+namespace ar = csl::artifacts;
+namespace ob = csl::execution::observability;
+bool feasible(const JointProgram &, const Vector &);
+bool feasible_without_temporal_rows(const JointProgram &, const Vector &);
 ar::ClockDomain test_wall_domain() {
-    return {{"test-wall"},ar::ClockMetric::steady_wall,"run",1,1,
-        ar::Available<std::uint64_t>{1},"strategy-b-test"};
+    return {{"test-wall"},
+            ar::ClockMetric::steady_wall,
+            "run",
+            1,
+            1,
+            ar::Available<std::uint64_t>{1},
+            "strategy-b-test"};
 }
-class StrategyTimingClock final:public ob::TimingClock {
-public:
+class StrategyTimingClock final : public ob::TimingClock {
+  public:
     std::atomic<std::int64_t> ticks{0};
-    ar::ClockDomain wall_domain() const override{return test_wall_domain();}
-    std::optional<ar::ClockDomain> cpu_domain() const override{return {};}
-    ar::Metric<std::int64_t> wall_now() noexcept override{return ar::Available<std::int64_t>{ticks.fetch_add(10)};}
-    ar::Metric<std::int64_t> cpu_now() noexcept override{return ar::Unavailable{ar::MissingReason::not_supported,{}};}
-};
-class ProposalOnlyWorkspace final:public SynthesisWorkspace {
-    CompleteFamilyProposal proposal_;
-public:
-    explicit ProposalOnlyWorkspace(CompleteFamilyProposal proposal):proposal_(std::move(proposal)){}
-    SynthesisResult solve(const problem::ResolvedProblem&,const FamilyRequest&,const ExecutionContext&) override {
-        SynthesisResult result;result.termination=Termination::completed;result.complete_proposal=proposal_;return result;
+    ar::ClockDomain wall_domain() const override { return test_wall_domain(); }
+    std::optional<ar::ClockDomain> cpu_domain() const override { return {}; }
+    ar::Metric<std::int64_t> wall_now() noexcept override {
+        return ar::Available<std::int64_t>{ticks.fetch_add(10)};
+    }
+    ar::Metric<std::int64_t> cpu_now() noexcept override {
+        return ar::Unavailable{ar::MissingReason::not_supported, {}};
     }
 };
-class SyntheticRelationCandidateWorkspace final:public SynthesisWorkspace {
-public:
-    SynthesisResult solve(const problem::ResolvedProblem& problem,const FamilyRequest& request,
-        const ExecutionContext&) override {
+class ProposalOnlyWorkspace final : public SynthesisWorkspace {
+    CompleteFamilyProposal proposal_;
+
+  public:
+    explicit ProposalOnlyWorkspace(CompleteFamilyProposal proposal)
+        : proposal_(std::move(proposal)) {}
+    SynthesisResult solve(const problem::ResolvedProblem &, const FamilyRequest &,
+                          const ExecutionContext &) override {
+        SynthesisResult result;
+        result.termination = Termination::completed;
+        result.complete_proposal = proposal_;
+        return result;
+    }
+};
+class SyntheticRelationCandidateWorkspace final : public SynthesisWorkspace {
+  public:
+    SynthesisResult solve(const problem::ResolvedProblem &problem, const FamilyRequest &request,
+                          const ExecutionContext &) override {
         const ModuleId strategy{"csl.synthesis.strategy-b"};
         const std::string version{"synthetic-1"};
-        const FamilyIdentity identity{problem.identity(),request,problem.constraints().coordinates(),strategy,version,{}};
-        const ClaimEvidence feasibility{problem.identity(),
-            SymbolicArgument{"synthetic relation feasibility","fixture claim only"}};
-        CandidateFamily candidate{{identity.coordinates,request.representation,
-            std::make_shared<const JointRelationPayload>()},
-            FeasibleCandidateEvidence{feasibility},RelationFeasibilityEvidence{feasibility}};
-        const auto published=FamilyPublisher::publish(identity,std::move(candidate));
+        const FamilyIdentity identity{
+            problem.identity(), request, problem.constraints().coordinates(),
+            strategy,           version, {}};
+        const ClaimEvidence feasibility{
+            problem.identity(),
+            SymbolicArgument{"synthetic relation feasibility", "fixture claim only"}};
+        CandidateFamily candidate{{identity.coordinates, request.representation,
+                                   std::make_shared<const JointRelationPayload>()},
+                                  FeasibleCandidateEvidence{feasibility},
+                                  RelationFeasibilityEvidence{feasibility}};
+        const auto published = FamilyPublisher::publish(identity, std::move(candidate));
         SynthesisResult result;
-        result.termination=Termination::completed;
-        result.outcome={problem.identity(),MathematicalOutcome::undetermined,
-            SymbolicArgument{"synthetic candidate","No optimality claim"},{}};
-        if(const auto* diagnostics=std::get_if<Diagnostics>(&published)) {
-            result.termination=Termination::contract_rejected;
-            result.stop=ContractValidationFailure{*diagnostics,{},std::monostate{}};
+        result.termination = Termination::completed;
+        result.outcome = {problem.identity(),
+                          MathematicalOutcome::undetermined,
+                          SymbolicArgument{"synthetic candidate", "No optimality claim"},
+                          {}};
+        if (const auto *diagnostics = std::get_if<Diagnostics>(&published)) {
+            result.termination = Termination::contract_rejected;
+            result.stop = ContractValidationFailure{*diagnostics, {}, std::monostate{}};
             return result;
         }
-        result.family=std::get<OptimalFamily>(published);
+        result.family = std::get<OptimalFamily>(published);
         return result;
     }
 };
 registry::StrategyRegistration proposal_only_strategy(CompleteFamilyProposal proposal) {
     registry::StrategyRegistration registration;
-    registration.identity={{"csl.synthesis.strategy-b"},"1"};
-    registration.capabilities=[](const registry::StrategyRequest&,const registry::Requirements& requirements)->registry::Capability {
+    registration.identity = {{"csl.synthesis.strategy-b"}, "1"};
+    registration.capabilities =
+        [](const registry::StrategyRequest &,
+           const registry::Requirements &requirements) -> registry::Capability {
         return registry::Offer{requirements.output};
     };
-    registration.planner=[proposal=std::move(proposal)](const registry::StrategyRequest&,const registry::Requirements&)->std::variant<registry::StrategyPlan,registry::Rejection> {
-        auto checked=registry::check_pipeline();
-        return registry::compose_strategy(std::get<registry::CheckedPipeline<>>(std::move(checked)),[proposal](auto,const registry::StrategyRequest&,const registry::Requirements&) {
-            return std::make_unique<ProposalOnlyWorkspace>(proposal);
-        });
+    registration.planner = [proposal = std::move(proposal)](const registry::StrategyRequest &,
+                                                            const registry::Requirements &)
+        -> std::variant<registry::StrategyPlan, registry::Rejection> {
+        auto checked = registry::check_pipeline();
+        return registry::compose_strategy(
+            std::get<registry::CheckedPipeline<>>(std::move(checked)),
+            [proposal](auto, const registry::StrategyRequest &, const registry::Requirements &) {
+                return std::make_unique<ProposalOnlyWorkspace>(proposal);
+            });
     };
-    registration.complete_family_verifier={{"csl.verifier.ts01-analytic"},"1"};
-    registration.expected_lineage=[](const registry::StrategyRequest& request) {
+    registration.complete_family_verifier = {{"csl.verifier.ts01-analytic"}, "1"};
+    registration.expected_lineage = [](const registry::StrategyRequest &request) {
         return detail::expected_ts01_lineage(request.problem.identity());
     };
     return registration;
 }
 registry::StrategyRegistration proposal_only_ts02_strategy(CompleteFamilyProposal proposal) {
     registry::StrategyRegistration registration;
-    registration.identity={{"csl.synthesis.strategy-b"},"1"};
-    registration.capabilities=[](const registry::StrategyRequest&,const registry::Requirements& requirements)->registry::Capability {
+    registration.identity = {{"csl.synthesis.strategy-b"}, "1"};
+    registration.capabilities =
+        [](const registry::StrategyRequest &,
+           const registry::Requirements &requirements) -> registry::Capability {
         return registry::Offer{requirements.output};
     };
-    registration.planner=[proposal=std::move(proposal)](const registry::StrategyRequest&,const registry::Requirements&)->std::variant<registry::StrategyPlan,registry::Rejection> {
-        auto checked=registry::check_pipeline();
-        return registry::compose_strategy(std::get<registry::CheckedPipeline<>>(std::move(checked)),[proposal](auto,const registry::StrategyRequest&,const registry::Requirements&) {
-            return std::make_unique<ProposalOnlyWorkspace>(proposal);
-        });
+    registration.planner = [proposal = std::move(proposal)](const registry::StrategyRequest &,
+                                                            const registry::Requirements &)
+        -> std::variant<registry::StrategyPlan, registry::Rejection> {
+        auto checked = registry::check_pipeline();
+        return registry::compose_strategy(
+            std::get<registry::CheckedPipeline<>>(std::move(checked)),
+            [proposal](auto, const registry::StrategyRequest &, const registry::Requirements &) {
+                return std::make_unique<ProposalOnlyWorkspace>(proposal);
+            });
     };
-    registration.complete_family_verifier={{synthesis::ts02_constant_integrator_verifier},"1"};
-    registration.expected_lineage=[](const registry::StrategyRequest& request) {
+    registration.complete_family_verifier = {{synthesis::ts02_constant_integrator_verifier}, "1"};
+    registration.expected_lineage = [](const registry::StrategyRequest &request) {
         return detail::expected_ts02_lineage(request.problem.identity());
     };
     return registration;
 }
-template<class T, class... R> T accepted(std::variant<T,R...> value) {
-    REQUIRE(std::holds_alternative<T>(value)); return std::get<T>(std::move(value));
+template <class T, class... R> T accepted(std::variant<T, R...> value) {
+    REQUIRE(std::holds_alternative<T>(value));
+    return std::get<T>(std::move(value));
 }
-sets::SetData bounded_interval(double lower,double upper) {
-    return accepted(sets::make_h({{"bounded-interval"},1,{}},
-        {accepted(numeric::snapshot(Matrix{2,1,{1,-1}})),
-         accepted(numeric::snapshot_vector(Vector{upper,-lower})),
-         accepted(numeric::snapshot(Matrix{0,1,{}})),
-         accepted(numeric::snapshot_vector(Vector{}))}));
+sets::SetData bounded_interval(double lower, double upper) {
+    return accepted(sets::make_h({{"bounded-interval"}, 1, {}},
+                                 {accepted(numeric::snapshot(Matrix{2, 1, {1, -1}})),
+                                  accepted(numeric::snapshot_vector(Vector{upper, -lower})),
+                                  accepted(numeric::snapshot(Matrix{0, 1, {}})),
+                                  accepted(numeric::snapshot_vector(Vector{}))}));
 }
-sets::SetData interval(double upper) { return bounded_interval(0,upper); }
-Problem integrator(TerminalObjective objective = QuadraticTerminal{{1,1,{2}},{-2},1}) {
-    const auto unit=interval(1).as_handle();
-    return {{"integrator"},std::make_shared<const SystemModel>(SystemModel{{{1,1,0},TimeDomain::discrete,
-        LinearStage{{1,1,{1}},{1,1,{1}},{1,0,{}},{0}}},{}}),
-        {0,1,2},KnownInitial{{0}},ContinuousDomain{{unit,unit}},
-        {UniversalSet{1},UniversalSet{1},UniversalSet{1}},{},{},
-        InformationPattern::nominal_open_loop,std::move(objective)};
+sets::SetData interval(double upper) { return bounded_interval(0, upper); }
+Problem integrator(TerminalObjective objective = QuadraticTerminal{{1, 1, {2}}, {-2}, 1}) {
+    const auto unit = interval(1).as_handle();
+    return {{"integrator"},
+            std::make_shared<const SystemModel>(
+                SystemModel{{{1, 1, 0},
+                             TimeDomain::discrete,
+                             LinearStage{{1, 1, {1}}, {1, 1, {1}}, {1, 0, {}}, {0}}},
+                            {}}),
+            {0, 1, 2},
+            KnownInitial{{0}},
+            ContinuousDomain{{unit, unit}},
+            {UniversalSet{1}, UniversalSet{1}, UniversalSet{1}},
+            {},
+            {},
+            InformationPattern::nominal_open_loop,
+            std::move(objective)};
 }
 Problem mpc02_two_state_integrator() {
-    const auto control=bounded_interval(-1,1).as_handle();
-    const auto model=std::make_shared<const SystemModel>(SystemModel{
-        Dynamics{{2,1,0},TimeDomain::discrete,std::vector<LinearStage>{
-            LinearStage{{2,2,{1,0,0,1}},{2,1,{1,0}},{2,0,{}},{0,0}},
-            LinearStage{{2,2,{1,0,0,1}},{2,1,{0,1}},{2,0,{}},{0,0}}}},
+    const auto control = bounded_interval(-1, 1).as_handle();
+    const auto model = std::make_shared<const SystemModel>(SystemModel{
+        Dynamics{{2, 1, 0},
+                 TimeDomain::discrete,
+                 std::vector<LinearStage>{
+                     LinearStage{{2, 2, {1, 0, 0, 1}}, {2, 1, {1, 0}}, {2, 0, {}}, {0, 0}},
+                     LinearStage{{2, 2, {1, 0, 0, 1}}, {2, 1, {0, 1}}, {2, 0, {}}, {0, 0}}}},
         {}});
-    return {{"mpc02-slew-2d-v1"},model,
-        {0,1,2},KnownInitial{{0,0}},ContinuousDomain{{control,control}},
-        {UniversalSet{2},UniversalSet{2},UniversalSet{2}},{},{},InformationPattern::nominal_open_loop,
-        QuadraticTerminal{{2,2,{2,0,0,2}},{-1,0},0.25}};
+    return {{"mpc02-slew-2d-v1"},
+            model,
+            {0, 1, 2},
+            KnownInitial{{0, 0}},
+            ContinuousDomain{{control, control}},
+            {UniversalSet{2}, UniversalSet{2}, UniversalSet{2}},
+            {},
+            {},
+            InformationPattern::nominal_open_loop,
+            QuadraticTerminal{{2, 2, {2, 0, 0, 2}}, {-1, 0}, 0.25}};
 }
-problem::ResolvedProblem resolve(const Problem& p) {
-    return accepted(problem::resolve(p,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+problem::ResolvedProblem resolve(const Problem &p) {
+    return accepted(
+        problem::resolve(p, {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}));
 }
-FamilyRequest request(const problem::ResolvedProblem& p) {
-    FamilyRequest r; r.objective=p.identity(); r.profile="nominal_open_loop";
-    r.representation={"csl.polyhedron.h"}; return r;
+FamilyRequest request(const problem::ResolvedProblem &p) {
+    FamilyRequest r;
+    r.objective = p.identity();
+    r.profile = "nominal_open_loop";
+    r.representation = {"csl.polyhedron.h"};
+    return r;
 }
-CompleteFamilyProposal exact_ts01_proposal(const problem::ResolvedProblem& problem,const FamilyRequest& family) {
-    const auto coordinates=problem.constraints().coordinates();
-    const auto lineage=detail::expected_ts01_lineage(problem.identity());
-    const FamilyIdentity identity{problem.identity(),family,coordinates,{"csl.synthesis.strategy-b"},"1",lineage};
-    auto payload=accepted(synthesis::strategy_ts01::ExactJointRelation::canonical());
-    const SymbolicArgument derivation{"T-S01 exact analytic derivation",
+CompleteFamilyProposal exact_ts01_proposal(const problem::ResolvedProblem &problem,
+                                           const FamilyRequest &family) {
+    const auto coordinates = problem.constraints().coordinates();
+    const auto lineage = detail::expected_ts01_lineage(problem.identity());
+    const FamilyIdentity identity{problem.identity(),           family, coordinates,
+                                  {"csl.synthesis.strategy-b"}, "1",    lineage};
+    auto payload = accepted(synthesis::strategy_ts01::ExactJointRelation::canonical());
+    const SymbolicArgument derivation{
+        "T-S01 exact analytic derivation",
         "x2=u0+u1 and (x2-1)^2>=0; zero is attained exactly when u0+u1=1. With u0,u1 in [0,1], the full canonical optimal history relation is the segment (0,s,1,s,1-s), s in [0,1]."};
-    const ClaimEvidence claim{problem.identity(),derivation};
-    const ObjectiveBound bound{0,claim};
-    CompleteOptimalFamily complete{{coordinates,family.representation,payload},
-        {claim,{bound,bound}},
-        {identity,RegisteredCompletenessEvidence{{"csl.verifier.ts01-analytic"},"1","TS01-analytic-v1"}},
+    const ClaimEvidence claim{problem.identity(), derivation};
+    const ObjectiveBound bound{0, claim};
+    CompleteOptimalFamily complete{
+        {coordinates, family.representation, payload},
+        {claim, {bound, bound}},
+        {identity,
+         RegisteredCompletenessEvidence{{"csl.verifier.ts01-analytic"}, "1", "TS01-analytic-v1"}},
         Assurance::numerical};
-    return {identity,std::move(complete)};
+    return {identity, std::move(complete)};
 }
 TEST_CASE("initial intermediate and terminal constraints survive the sparse lift") {
-    auto input=integrator(); input.states={Singleton{{0}},interval(0.5).as_handle(),Singleton{{1}}};
-    const auto p=resolve(input);const auto q=accepted(build_joint_program(p,request(p)));
+    auto input = integrator();
+    input.states = {Singleton{{0}}, interval(0.5).as_handle(), Singleton{{1}}};
+    const auto p = resolve(input);
+    const auto q = accepted(build_joint_program(p, request(p)));
     // The independent relation is x1=u0, x2=u0+u1, with x1 in [0,0.5]
     // and x2=1. The intermediate slab therefore removes feasible histories.
-    CHECK(feasible(q,{0,0.25,1,0.25,0.75}));
-    CHECK_FALSE(feasible(q,{0,0.75,1,0.75,0.25}));
-    CHECK_FALSE(feasible(q,{0,0.25,0.5,0.25,0.25}));
-    CHECK_FALSE(feasible(q,{0.1,0.25,1,0.15,0.75}));
+    CHECK(feasible(q, {0, 0.25, 1, 0.25, 0.75}));
+    CHECK_FALSE(feasible(q, {0, 0.75, 1, 0.75, 0.25}));
+    CHECK_FALSE(feasible(q, {0, 0.25, 0.5, 0.25, 0.25}));
+    CHECK_FALSE(feasible(q, {0.1, 0.25, 1, 0.15, 0.75}));
 }
 TEST_CASE("one-stage affine dynamics preserve neutral relation indexing and authored bounds") {
     Problem input{{"one-stage-affine"},
-        std::make_shared<const SystemModel>(SystemModel{{{1,1,0},TimeDomain::discrete,
-            LinearStage{{1,1,{2}},{1,1,{3}},{1,0,{}},{-1}}},{}}),
-        {0,1},KnownInitial{{4}},ContinuousDomain{{bounded_interval(0.25,0.75).as_handle()}},
-        {UniversalSet{1},bounded_interval(6,8).as_handle()},{},{},
-        InformationPattern::nominal_open_loop,LinearTerminal{{0},0}};
-    const auto p=resolve(input);
-    const auto q=accepted(build_joint_program(p,request(p)));
+                  std::make_shared<const SystemModel>(
+                      SystemModel{{{1, 1, 0},
+                                   TimeDomain::discrete,
+                                   LinearStage{{1, 1, {2}}, {1, 1, {3}}, {1, 0, {}}, {-1}}},
+                                  {}}),
+                  {0, 1},
+                  KnownInitial{{4}},
+                  ContinuousDomain{{bounded_interval(0.25, 0.75).as_handle()}},
+                  {UniversalSet{1}, bounded_interval(6, 8).as_handle()},
+                  {},
+                  {},
+                  InformationPattern::nominal_open_loop,
+                  LinearTerminal{{0}, 0}};
+    const auto p = resolve(input);
+    const auto q = accepted(build_joint_program(p, request(p)));
 
     // Independent relation order is [x0,x1,u0], with x1=2*x0+3*u0-1.
-    CHECK(q.coordinates.dimensions.state==1);
-    CHECK(q.coordinates.dimensions.control==1);
-    CHECK(q.coordinates.horizon==1);
-    CHECK(feasible(q,{4,7.9,0.3}));
-    CHECK_FALSE(feasible(q,{4,8.5,0.5})); // dynamics/control valid; state bound fails
-    CHECK_FALSE(feasible(q,{4,7,0}));     // dynamics/state valid; control bound fails
+    CHECK(q.coordinates.dimensions.state == 1);
+    CHECK(q.coordinates.dimensions.control == 1);
+    CHECK(q.coordinates.horizon == 1);
+    CHECK(feasible(q, {4, 7.9, 0.3}));
+    CHECK_FALSE(feasible(q, {4, 8.5, 0.5})); // dynamics/control valid; state bound fails
+    CHECK_FALSE(feasible(q, {4, 7, 0}));     // dynamics/state valid; control bound fails
 
-    const auto transition=std::find_if(q.rows.begin(),q.rows.end(),[](const auto& row) {
-        return row.source==RowSource::transition;
+    const auto transition = std::find_if(q.rows.begin(), q.rows.end(), [](const auto &row) {
+        return row.source == RowSource::transition;
     });
-    REQUIRE(transition!=q.rows.end());
-    CHECK(transition->stage==0);
-    REQUIRE(transition->program_row<q.bounds.size());
-    const auto row=transition->program_row;
-    REQUIRE(q.constraints.row_offsets[row+1]-q.constraints.row_offsets[row]==3);
-    CHECK(q.constraints.column_indices[q.constraints.row_offsets[row]]==0);
-    CHECK(q.constraints.values[q.constraints.row_offsets[row]]==-2);
-    CHECK(q.constraints.column_indices[q.constraints.row_offsets[row]+1]==1);
-    CHECK(q.constraints.values[q.constraints.row_offsets[row]+1]==1);
-    CHECK(q.constraints.column_indices[q.constraints.row_offsets[row]+2]==2);
-    CHECK(q.constraints.values[q.constraints.row_offsets[row]+2]==-3);
+    REQUIRE(transition != q.rows.end());
+    CHECK(transition->stage == 0);
+    REQUIRE(transition->program_row < q.bounds.size());
+    const auto row = transition->program_row;
+    REQUIRE(q.constraints.row_offsets[row + 1] - q.constraints.row_offsets[row] == 3);
+    CHECK(q.constraints.column_indices[q.constraints.row_offsets[row]] == 0);
+    CHECK(q.constraints.values[q.constraints.row_offsets[row]] == -2);
+    CHECK(q.constraints.column_indices[q.constraints.row_offsets[row] + 1] == 1);
+    CHECK(q.constraints.values[q.constraints.row_offsets[row] + 1] == 1);
+    CHECK(q.constraints.column_indices[q.constraints.row_offsets[row] + 2] == 2);
+    CHECK(q.constraints.values[q.constraints.row_offsets[row] + 2] == -3);
     REQUIRE(q.bounds[row].lower.has_value());
     REQUIRE(q.bounds[row].upper.has_value());
-    CHECK(*q.bounds[row].lower==-1);
-    CHECK(*q.bounds[row].upper==-1);
+    CHECK(*q.bounds[row].lower == -1);
+    CHECK(*q.bounds[row].upper == -1);
 }
 TEST_CASE("singular dynamics and affine stage offsets require no inverse") {
-    auto input=integrator(); input.model=std::make_shared<const SystemModel>(SystemModel{
-        {{1,1,0},TimeDomain::discrete,std::vector<LinearStage>{
-            {{1,1,{0}},{1,1,{1}},{1,0,{}},{2}},
-            {{1,1,{0}},{1,1,{1}},{1,0,{}},{-1}}}}, {}});
-    const auto p=resolve(input); const auto q=accepted(build_joint_program(p,request(p)));
+    auto input = integrator();
+    input.model = std::make_shared<const SystemModel>(
+        SystemModel{{{1, 1, 0},
+                     TimeDomain::discrete,
+                     std::vector<LinearStage>{{{1, 1, {0}}, {1, 1, {1}}, {1, 0, {}}, {2}},
+                                              {{1, 1, {0}}, {1, 1, {1}}, {1, 0, {}}, {-1}}}},
+                    {}});
+    const auto p = resolve(input);
+    const auto q = accepted(build_joint_program(p, request(p)));
     // With A=0, the neutral transitions are x1=2+u0 and x2=-1+u1.
-    CHECK(feasible(q,{0,2.5,-0.25,0.5,0.75}));
-    CHECK_FALSE(feasible(q,{0,2.5,2.25,0.5,0.75}));
+    CHECK(feasible(q, {0, 2.5, -0.25, 0.5, 0.75}));
+    CHECK_FALSE(feasible(q, {0, 2.5, 2.25, 0.5, 0.75}));
 }
 TEST_CASE("each heterogeneous transition retains its own matrices and affine offset") {
-    auto input=integrator();
-    input.initial=KnownInitial{{1}};
-    input.states={UniversalSet{1},UniversalSet{1},Singleton{{0.25}}};
-    input.controls=ContinuousDomain{{bounded_interval(0,1).as_handle(),
-                                     bounded_interval(0,2).as_handle()}};
-    input.model=std::make_shared<const SystemModel>(SystemModel{
-        {{1,1,0},TimeDomain::discrete,std::vector<LinearStage>{
-            {{1,1,{2}},{1,1,{1}},{1,0,{}},{0.5}},
-            {{1,1,{-1}},{1,1,{2}},{1,0,{}},{-0.25}}}}, {}});
-    const auto p=resolve(input);
-    const auto q=accepted(build_joint_program(p,request(p)));
+    auto input = integrator();
+    input.initial = KnownInitial{{1}};
+    input.states = {UniversalSet{1}, UniversalSet{1}, Singleton{{0.25}}};
+    input.controls =
+        ContinuousDomain{{bounded_interval(0, 1).as_handle(), bounded_interval(0, 2).as_handle()}};
+    input.model = std::make_shared<const SystemModel>(
+        SystemModel{{{1, 1, 0},
+                     TimeDomain::discrete,
+                     std::vector<LinearStage>{{{1, 1, {2}}, {1, 1, {1}}, {1, 0, {}}, {0.5}},
+                                              {{1, 1, {-1}}, {1, 1, {2}}, {1, 0, {}}, {-0.25}}}},
+                    {}});
+    const auto p = resolve(input);
+    const auto q = accepted(build_joint_program(p, request(p)));
 
-    CHECK(feasible(q,{1,3,0.25,0.5,1.75}));
-    CHECK_FALSE(feasible(q,{1,2,0.25,0.5,1.25}));
-    CHECK_FALSE(feasible(q,{1,3,0.25,0.5,1.5}));
+    CHECK(feasible(q, {1, 3, 0.25, 0.5, 1.75}));
+    CHECK_FALSE(feasible(q, {1, 2, 0.25, 0.5, 1.25}));
+    CHECK_FALSE(feasible(q, {1, 3, 0.25, 0.5, 1.5}));
 }
 TEST_CASE("temporal rows keep their authored joint coordinates and row lineage") {
-    auto input=integrator();input.temporal=TemporalConstraints{{1,5,{0,2},{3,4},{1,1}},{{0.5,0.5}}};
-    const auto p=resolve(input);const auto q=accepted(build_joint_program(p,request(p)));
-    CHECK(feasible(q,{0,0.25,0.5,0.25,0.25}));
-    CHECK_FALSE(feasible(q,{0,0.25,1,0.25,0.75}));
-    REQUIRE_FALSE(q.rows.empty());CHECK(q.rows.back().source==RowSource::temporal);
-    CHECK(q.rows.back().source_row==0);
+    auto input = integrator();
+    input.temporal = TemporalConstraints{{1, 5, {0, 2}, {3, 4}, {1, 1}}, {{0.5, 0.5}}};
+    const auto p = resolve(input);
+    const auto q = accepted(build_joint_program(p, request(p)));
+    CHECK(feasible(q, {0, 0.25, 0.5, 0.25, 0.25}));
+    CHECK_FALSE(feasible(q, {0, 0.25, 1, 0.25, 0.75}));
+    REQUIRE_FALSE(q.rows.empty());
+    CHECK(q.rows.back().source == RowSource::temporal);
+    CHECK(q.rows.back().source_row == 0);
 }
 TEST_CASE("authored cross-time control equation excludes a stagewise-admissible history") {
-    auto input=integrator(LinearTerminal{{0},0});
-    input.temporal=TemporalConstraints{
-        {1,5,{0,2},{3,4},{1,-1}},{{0.5,0.5}}};
-    const auto p=resolve(input);
-    const auto q=accepted(build_joint_program(p,request(p)));
+    auto input = integrator(LinearTerminal{{0}, 0});
+    input.temporal = TemporalConstraints{{1, 5, {0, 2}, {3, 4}, {1, -1}}, {{0.5, 0.5}}};
+    const auto p = resolve(input);
+    const auto q = accepted(build_joint_program(p, request(p)));
 
     // Canonical joint order is [x0, x1, x2, u0, u1]. Both histories satisfy
     // x1=x0+u0, x2=x1+u1 and the stagewise control boxes [0,1]. The authored
     // temporal row adds u0-u1=0.5: it retains the first history and rejects
     // the second, which a stagewise/Cartesian relaxation would retain.
-    const Vector accepted_history{0,0.75,1,0.75,0.25};
-    const Vector stagewise_only_history{0,0.25,1,0.25,0.75};
-    CHECK(feasible_without_temporal_rows(q,accepted_history));
-    CHECK(feasible(q,accepted_history));
-    CHECK(feasible_without_temporal_rows(q,stagewise_only_history));
-    CHECK_FALSE(feasible(q,stagewise_only_history));
+    const Vector accepted_history{0, 0.75, 1, 0.75, 0.25};
+    const Vector stagewise_only_history{0, 0.25, 1, 0.25, 0.75};
+    CHECK(feasible_without_temporal_rows(q, accepted_history));
+    CHECK(feasible(q, accepted_history));
+    CHECK(feasible_without_temporal_rows(q, stagewise_only_history));
+    CHECK_FALSE(feasible(q, stagewise_only_history));
 
-    REQUIRE(q.rows.size()==8);
-    const auto& temporal=q.rows.back();
-    CHECK(temporal.source==RowSource::temporal);
-    CHECK(temporal.stage==0);
-    CHECK(temporal.source_row==0);
-    CHECK(temporal.program_row==7);
-    REQUIRE(q.constraints.row_offsets[7]==11);
-    REQUIRE(q.constraints.row_offsets[8]==13);
-    CHECK(q.constraints.column_indices[11]==3);
-    CHECK(q.constraints.values[11]==1);
-    CHECK(q.constraints.column_indices[12]==4);
-    CHECK(q.constraints.values[12]==-1);
-    REQUIRE(q.bounds.size()==8);
-    CHECK(q.bounds[7].lower==0.5);
-    CHECK(q.bounds[7].upper==0.5);
+    REQUIRE(q.rows.size() == 8);
+    const auto &temporal = q.rows.back();
+    CHECK(temporal.source == RowSource::temporal);
+    CHECK(temporal.stage == 0);
+    CHECK(temporal.source_row == 0);
+    CHECK(temporal.program_row == 7);
+    REQUIRE(q.constraints.row_offsets[7] == 11);
+    REQUIRE(q.constraints.row_offsets[8] == 13);
+    CHECK(q.constraints.column_indices[11] == 3);
+    CHECK(q.constraints.values[11] == 1);
+    CHECK(q.constraints.column_indices[12] == 4);
+    CHECK(q.constraints.values[12] == -1);
+    REQUIRE(q.bounds.size() == 8);
+    CHECK(q.bounds[7].lower == 0.5);
+    CHECK(q.bounds[7].upper == 0.5);
     // This only verifies the generated candidate joint relation. It establishes
     // no all-history optimal-family coverage or completeness guarantee.
 }
 TEST_CASE("v2 slew scenario compiles its 2D feasible polygon into the direct joint relation") {
-    const auto loaded=input::load_scenario_file(CSL_TEMPORAL_SCENARIO_PATH);
+    const auto loaded = input::load_scenario_file(CSL_TEMPORAL_SCENARIO_PATH);
     REQUIRE(std::holds_alternative<input::LoadedScenario>(loaded));
-    const auto source=std::get<input::LoadedScenario>(loaded).problem();
-    const auto program=accepted(build_joint_program(source,request(source)));
+    const auto source = std::get<input::LoadedScenario>(loaded).problem();
+    const auto program = accepted(build_joint_program(source, request(source)));
 
     // u0,u1 lie in [-1,1]^2 and -1/4 <= u1-u0 <= 1/4. These six
     // independently derived corners exercise the entire clipped polygon.
-    for(const Vector controls:std::vector<Vector>{{-1,-1},{-.75,-1},{1,.75},{1,1},{.75,1},{-1,-.75}})
-        CHECK(feasible(program,{0,controls[0],controls[0]+controls[1],controls[0],controls[1]}));
-    CHECK_FALSE(feasible(program,{0,1,0,1,-1}));
+    for (const Vector controls :
+         std::vector<Vector>{{-1, -1}, {-.75, -1}, {1, .75}, {1, 1}, {.75, 1}, {-1, -.75}})
+        CHECK(feasible(program,
+                       {0, controls[0], controls[0] + controls[1], controls[0], controls[1]}));
+    CHECK_FALSE(feasible(program, {0, 1, 0, 1, -1}));
 
     // The objective is x2^2. The full zero-cost family is u1=-u0 with
     // |u0|<=1/8; these literals test both endpoints and its interior.
-    for(const double first:{-.125,0.0,.125})
-        CHECK(feasible(program,{0,first,0,first,-first}));
-    CHECK(feasible(program,{0,.1,.2,.1,.1}));
+    for (const double first : {-.125, 0.0, .125})
+        CHECK(feasible(program, {0, first, 0, first, -first}));
+    CHECK(feasible(program, {0, .1, .2, .1, .1}));
 }
 TEST_CASE("temporal coupling prevents the physical-state-only false terminal optimum") {
-    auto input=integrator(QuadraticTerminal{{1,1,{2}},{0},0});
-    const auto control=bounded_interval(-1,1).as_handle();
-    input.controls=ContinuousDomain{{control,control}};
-    input.states={UniversalSet{1},Singleton{{1}},UniversalSet{1}};
-    input.temporal=TemporalConstraints{{1,5,{0,2},{3,4},{-1,1}},{{-.25,.25}}};
-    const auto p=resolve(input);
-    const auto q=accepted(build_joint_program(p,request(p)));
+    auto input = integrator(QuadraticTerminal{{1, 1, {2}}, {0}, 0});
+    const auto control = bounded_interval(-1, 1).as_handle();
+    input.controls = ContinuousDomain{{control, control}};
+    input.states = {UniversalSet{1}, Singleton{{1}}, UniversalSet{1}};
+    input.temporal = TemporalConstraints{{1, 5, {0, 2}, {3, 4}, {-1, 1}}, {{-.25, .25}}};
+    const auto p = resolve(input);
+    const auto q = accepted(build_joint_program(p, request(p)));
 
     // x1=1 forces u0=1. The slew row then restricts u1 to [3/4,1],
     // so x2 lies in [7/4,2] and min x2^2 is 49/16.
-    CHECK(feasible(q,{0,1,1.75,1,.75}));
-    CHECK(feasible(q,{0,1,1.875,1,.875}));
-    CHECK(feasible(q,{0,1,2,1,1}));
-    CHECK_FALSE(feasible(q,{0,1,1.5,1,.5}));
+    CHECK(feasible(q, {0, 1, 1.75, 1, .75}));
+    CHECK(feasible(q, {0, 1, 1.875, 1, .875}));
+    CHECK(feasible(q, {0, 1, 2, 1, 1}));
+    CHECK_FALSE(feasible(q, {0, 1, 1.5, 1, .5}));
 
     // Dropping just the history-coupling row models physical-state-only
     // propagation with an independent u1 in [-1,1]. It admits u=(1,-1),
     // x2=0 and cost 0, the false optimum from the #9 counterexample.
-    CHECK(feasible_without_temporal_rows(q,{0,1,0,1,-1}));
-    CHECK_FALSE(feasible(q,{0,1,0,1,-1}));
-    CHECK(1.75*1.75==49.0/16.0);
-    CHECK(0.0*0.0==0.0);
+    CHECK(feasible_without_temporal_rows(q, {0, 1, 0, 1, -1}));
+    CHECK_FALSE(feasible(q, {0, 1, 0, 1, -1}));
+    CHECK(1.75 * 1.75 == 49.0 / 16.0);
+    CHECK(0.0 * 0.0 == 0.0);
 }
-TEST_CASE("MPC-02 registers distinct constraint tracks and direct and memory-lift relations agree") {
+TEST_CASE(
+    "MPC-02 registers distinct constraint tracks and direct and memory-lift relations agree") {
     enum class ScenarioTrack { unconstrained, stage_box, slew, l1_budget };
-    const std::array<std::tuple<const char*, std::string_view, ScenarioTrack, Vector, double>,4> scenarios{{
-        {"mpc02-unconstrained-2d.json","mpc02-unconstrained-2d-v1",ScenarioTrack::unconstrained,{.5,0},0},
-        {"mpc02-stage-box-2d.json","mpc02-stage-box-2d-v1",ScenarioTrack::stage_box,{.5,0},0},
-        {"mpc02-slew-2d.json","mpc02-slew-2d-v1",ScenarioTrack::slew,{.375,.125},1.0/32.0},
-        {"mpc02-l1-budget-2d.json","mpc02-l1-budget-2d-v1",ScenarioTrack::l1_budget,{.25,0},1.0/16.0}}};
-    for(const auto& [file,id,track,controls,cost]:scenarios) {
-        const auto loaded=input::load_scenario_file(std::string(CSL_MPC02_SCENARIO_DIR)+"/"+file);
+    const std::array<std::tuple<const char *, std::string_view, ScenarioTrack, Vector, double>, 4>
+        scenarios{{{"mpc02-unconstrained-2d.json",
+                    "mpc02-unconstrained-2d-v1",
+                    ScenarioTrack::unconstrained,
+                    {.5, 0},
+                    0},
+                   {"mpc02-stage-box-2d.json",
+                    "mpc02-stage-box-2d-v1",
+                    ScenarioTrack::stage_box,
+                    {.5, 0},
+                    0},
+                   {"mpc02-slew-2d.json",
+                    "mpc02-slew-2d-v1",
+                    ScenarioTrack::slew,
+                    {.375, .125},
+                    1.0 / 32.0},
+                   {"mpc02-l1-budget-2d.json",
+                    "mpc02-l1-budget-2d-v1",
+                    ScenarioTrack::l1_budget,
+                    {.25, 0},
+                    1.0 / 16.0}}};
+    for (const auto &[file, id, track, controls, cost] : scenarios) {
+        const auto loaded =
+            input::load_scenario_file(std::string(CSL_MPC02_SCENARIO_DIR) + "/" + file);
         REQUIRE(std::holds_alternative<input::LoadedScenario>(loaded));
-        const auto& scenario=std::get<input::LoadedScenario>(loaded);
-        CHECK(scenario.metadata()->id==id);
-        CHECK(scenario.problem().model().horizon()==2);
-        CHECK(scenario.problem().model().dimensions()==Dimensions{2,1,0});
-        const auto loaded_problem=scenario.problem();
-        const auto loaded_joint=accepted(build_joint_program(loaded_problem,request(loaded_problem)));
+        const auto &scenario = std::get<input::LoadedScenario>(loaded);
+        CHECK(scenario.metadata()->id == id);
+        CHECK(scenario.problem().model().horizon() == 2);
+        CHECK(scenario.problem().model().dimensions() == Dimensions{2, 1, 0});
+        const auto loaded_problem = scenario.problem();
+        const auto loaded_joint =
+            accepted(build_joint_program(loaded_problem, request(loaded_problem)));
         const problem::ControlHistory analytic_history{
-            {{0,0},{controls[0],0},{controls[0],controls[1]}},
-            {{controls[0]},{controls[1]}}};
-        const auto flatten_history=[](const problem::ControlHistory& history) {
+            {{0, 0}, {controls[0], 0}, {controls[0], controls[1]}}, {{controls[0]}, {controls[1]}}};
+        const auto flatten_history = [](const problem::ControlHistory &history) {
             Vector result;
-            for(const auto& state:history.states) result.insert(result.end(),state.begin(),state.end());
-            for(const auto& control:history.controls) result.insert(result.end(),control.begin(),control.end());
+            for (const auto &state : history.states)
+                result.insert(result.end(), state.begin(), state.end());
+            for (const auto &control : history.controls)
+                result.insert(result.end(), control.begin(), control.end());
             return result;
         };
-        const auto analytic_coordinates=flatten_history(analytic_history);
-        CHECK(feasible(loaded_joint,analytic_coordinates));
-        const auto analytic_cost=accepted(optimization::evaluate_primal(
-            std::get<ConvexProgram>(loaded_joint.program),analytic_coordinates,
-            {1e-12,1e-12},{{"mpc02-authored-scenario-oracle"},"1"}));
-        CHECK(analytic_cost.original_objective==doctest::Approx(cost).epsilon(1e-12));
+        const auto analytic_coordinates = flatten_history(analytic_history);
+        CHECK(feasible(loaded_joint, analytic_coordinates));
+        const auto analytic_cost = accepted(optimization::evaluate_primal(
+            std::get<ConvexProgram>(loaded_joint.program), analytic_coordinates, {1e-12, 1e-12},
+            {{"mpc02-authored-scenario-oracle"}, "1"}));
+        CHECK(analytic_cost.original_objective == doctest::Approx(cost).epsilon(1e-12));
 
-        switch(track) {
-            case ScenarioTrack::slew:
-                CHECK_FALSE(feasible(loaded_joint,
-                    flatten_history({{{0,0},{1,0},{1,-1}},{{1},{-1}}})));
-                break;
-            case ScenarioTrack::l1_budget:
-                CHECK_FALSE(feasible(loaded_joint,
-                    flatten_history({{{0,0},{.25,0},{.25,.25}},{{.25},{.25}}})));
-                break;
-            case ScenarioTrack::stage_box:
-                CHECK_FALSE(feasible(loaded_joint,
-                    flatten_history({{{0,0},{2,0},{2,0}},{{2},{0}}})));
-                break;
-            case ScenarioTrack::unconstrained:
-                CHECK(feasible(loaded_joint,
-                    flatten_history({{{0,0},{2,0},{2,0}},{{2},{0}}})));
-                break;
+        switch (track) {
+        case ScenarioTrack::slew:
+            CHECK_FALSE(
+                feasible(loaded_joint, flatten_history({{{0, 0}, {1, 0}, {1, -1}}, {{1}, {-1}}})));
+            break;
+        case ScenarioTrack::l1_budget:
+            CHECK_FALSE(feasible(
+                loaded_joint, flatten_history({{{0, 0}, {.25, 0}, {.25, .25}}, {{.25}, {.25}}})));
+            break;
+        case ScenarioTrack::stage_box:
+            CHECK_FALSE(
+                feasible(loaded_joint, flatten_history({{{0, 0}, {2, 0}, {2, 0}}, {{2}, {0}}})));
+            break;
+        case ScenarioTrack::unconstrained:
+            CHECK(feasible(loaded_joint, flatten_history({{{0, 0}, {2, 0}, {2, 0}}, {{2}, {0}}})));
+            break;
         }
     }
 
-    const auto loaded_slew=input::load_scenario_file(
-        std::string(CSL_MPC02_SCENARIO_DIR)+"/mpc02-slew-2d.json");
+    const auto loaded_slew =
+        input::load_scenario_file(std::string(CSL_MPC02_SCENARIO_DIR) + "/mpc02-slew-2d.json");
     REQUIRE(std::holds_alternative<input::LoadedScenario>(loaded_slew));
-    const auto loaded_slew_problem=std::get<input::LoadedScenario>(loaded_slew).problem();
-    auto authored=mpc02_two_state_integrator();
-    authored.temporal=TemporalConstraints{{1,8,{0,2},{6,7},{-1,1}},{{-.25,.25}}};
-    const auto direct_problem=resolve(authored);
-    const auto direct_joint=accepted(build_joint_program(direct_problem,request(direct_problem)));
-    const auto loaded_slew_joint=accepted(build_joint_program(
-        loaded_slew_problem,request(loaded_slew_problem)));
-    CHECK(loaded_slew_joint.coordinates==direct_joint.coordinates);
-    CHECK(loaded_slew_joint.source_to_program==direct_joint.source_to_program);
-    REQUIRE(loaded_slew_joint.rows.size()==direct_joint.rows.size());
-    for(std::size_t i=0;i<direct_joint.rows.size();++i) {
-        CHECK(loaded_slew_joint.rows[i].source==direct_joint.rows[i].source);
-        CHECK(loaded_slew_joint.rows[i].stage==direct_joint.rows[i].stage);
-        CHECK(loaded_slew_joint.rows[i].source_row==direct_joint.rows[i].source_row);
-        CHECK(loaded_slew_joint.rows[i].program_row==direct_joint.rows[i].program_row);
+    const auto loaded_slew_problem = std::get<input::LoadedScenario>(loaded_slew).problem();
+    auto authored = mpc02_two_state_integrator();
+    authored.temporal = TemporalConstraints{{1, 8, {0, 2}, {6, 7}, {-1, 1}}, {{-.25, .25}}};
+    const auto direct_problem = resolve(authored);
+    const auto direct_joint =
+        accepted(build_joint_program(direct_problem, request(direct_problem)));
+    const auto loaded_slew_joint =
+        accepted(build_joint_program(loaded_slew_problem, request(loaded_slew_problem)));
+    CHECK(loaded_slew_joint.coordinates == direct_joint.coordinates);
+    CHECK(loaded_slew_joint.source_to_program == direct_joint.source_to_program);
+    REQUIRE(loaded_slew_joint.rows.size() == direct_joint.rows.size());
+    for (std::size_t i = 0; i < direct_joint.rows.size(); ++i) {
+        CHECK(loaded_slew_joint.rows[i].source == direct_joint.rows[i].source);
+        CHECK(loaded_slew_joint.rows[i].stage == direct_joint.rows[i].stage);
+        CHECK(loaded_slew_joint.rows[i].source_row == direct_joint.rows[i].source_row);
+        CHECK(loaded_slew_joint.rows[i].program_row == direct_joint.rows[i].program_row);
     }
-    CHECK(loaded_slew_joint.constraints.rows==direct_joint.constraints.rows);
-    CHECK(loaded_slew_joint.constraints.cols==direct_joint.constraints.cols);
-    CHECK(loaded_slew_joint.constraints.row_offsets==direct_joint.constraints.row_offsets);
-    CHECK(loaded_slew_joint.constraints.column_indices==direct_joint.constraints.column_indices);
-    CHECK(loaded_slew_joint.constraints.values==direct_joint.constraints.values);
-    REQUIRE(loaded_slew_joint.bounds.size()==direct_joint.bounds.size());
-    for(std::size_t i=0;i<direct_joint.bounds.size();++i) {
-        CHECK(loaded_slew_joint.bounds[i].lower==direct_joint.bounds[i].lower);
-        CHECK(loaded_slew_joint.bounds[i].upper==direct_joint.bounds[i].upper);
+    CHECK(loaded_slew_joint.constraints.rows == direct_joint.constraints.rows);
+    CHECK(loaded_slew_joint.constraints.cols == direct_joint.constraints.cols);
+    CHECK(loaded_slew_joint.constraints.row_offsets == direct_joint.constraints.row_offsets);
+    CHECK(loaded_slew_joint.constraints.column_indices == direct_joint.constraints.column_indices);
+    CHECK(loaded_slew_joint.constraints.values == direct_joint.constraints.values);
+    REQUIRE(loaded_slew_joint.bounds.size() == direct_joint.bounds.size());
+    for (std::size_t i = 0; i < direct_joint.bounds.size(); ++i) {
+        CHECK(loaded_slew_joint.bounds[i].lower == direct_joint.bounds[i].lower);
+        CHECK(loaded_slew_joint.bounds[i].upper == direct_joint.bounds[i].upper);
     }
-    CHECK(direct_joint.coordinates==JointCoordinates{{2,1,0},2});
+    CHECK(direct_joint.coordinates == JointCoordinates{{2, 1, 0}, 2});
 
-    const auto stagewise=mpc02_two_state_integrator();
-    const auto slew=problem::lift_one_step_slew(stagewise,
-        {problem::UnconstrainedFirstAction{}, {bounded_interval(-.25,.25).as_handle()}});
+    const auto stagewise = mpc02_two_state_integrator();
+    const auto slew =
+        problem::lift_one_step_slew(stagewise, {problem::UnconstrainedFirstAction{},
+                                                {bounded_interval(-.25, .25).as_handle()}});
     REQUIRE(std::holds_alternative<problem::SlewMemoryLift>(slew));
-    const auto& lift=std::get<problem::SlewMemoryLift>(slew);
-    const auto lifted_problem=resolve(lift.problem);
-    const auto lifted_joint=accepted(build_joint_program(lifted_problem,request(lifted_problem)));
-    CHECK(lifted_joint.coordinates==JointCoordinates{{3,1,0},2});
-    CHECK(direct_joint.rows.size()==11);
-    CHECK(lifted_joint.rows.size()==18);
+    const auto &lift = std::get<problem::SlewMemoryLift>(slew);
+    const auto lifted_problem = resolve(lift.problem);
+    const auto lifted_joint =
+        accepted(build_joint_program(lifted_problem, request(lifted_problem)));
+    CHECK(lifted_joint.coordinates == JointCoordinates{{3, 1, 0}, 2});
+    CHECK(direct_joint.rows.size() == 11);
+    CHECK(lifted_joint.rows.size() == 18);
 
-    const auto flatten=[](const std::vector<Vector>& states,const std::vector<Vector>& controls) {
+    const auto flatten = [](const std::vector<Vector> &states,
+                            const std::vector<Vector> &controls) {
         Vector result;
-        for(const auto& state:states) result.insert(result.end(),state.begin(),state.end());
-        for(const auto& control:controls) result.insert(result.end(),control.begin(),control.end());
+        for (const auto &state : states)
+            result.insert(result.end(), state.begin(), state.end());
+        for (const auto &control : controls)
+            result.insert(result.end(), control.begin(), control.end());
         return result;
     };
     // The box intersected with |u1-u0|<=1/4 has these six exact vertices.
     // M maps each control vertex to the original terminal state, with
     // x2=(u0,u1). The lift stores p1=u0 and p2=u1 separately.
-    const std::vector<Vector> vertices{{-1,-1},{-.75,-1},{1,.75},{1,1},{.75,1},{-1,-.75}};
-    for(const auto& u:vertices) {
-        const problem::ControlHistory history{{{0,0},{u[0],0},{u[0],u[1]}},{{u[0]},{u[1]}}};
-        const auto direct_coordinates=flatten(history.states,history.controls);
-        REQUIRE(feasible(direct_joint,direct_coordinates));
-        const auto lifted_history=problem::lift_history(lift.coordinates,history);
+    const std::vector<Vector> vertices{{-1, -1}, {-.75, -1}, {1, .75},
+                                       {1, 1},   {.75, 1},   {-1, -.75}};
+    for (const auto &u : vertices) {
+        const problem::ControlHistory history{{{0, 0}, {u[0], 0}, {u[0], u[1]}}, {{u[0]}, {u[1]}}};
+        const auto direct_coordinates = flatten(history.states, history.controls);
+        REQUIRE(feasible(direct_joint, direct_coordinates));
+        const auto lifted_history = problem::lift_history(lift.coordinates, history);
         REQUIRE(std::holds_alternative<problem::LiftedControlHistory>(lifted_history));
-        const auto& mapped=std::get<problem::LiftedControlHistory>(lifted_history);
-        const auto lifted_coordinates=flatten(mapped.augmented_states,mapped.increments);
-        CHECK(feasible(lifted_joint,lifted_coordinates));
-        const auto recovered=problem::recover_history(lift.coordinates,mapped,0,0);
+        const auto &mapped = std::get<problem::LiftedControlHistory>(lifted_history);
+        const auto lifted_coordinates = flatten(mapped.augmented_states, mapped.increments);
+        CHECK(feasible(lifted_joint, lifted_coordinates));
+        const auto recovered = problem::recover_history(lift.coordinates, mapped, 0, 0);
         REQUIRE(std::holds_alternative<problem::ControlHistory>(recovered));
-        CHECK(std::get<problem::ControlHistory>(recovered).states==history.states);
-        CHECK(std::get<problem::ControlHistory>(recovered).controls==history.controls);
+        CHECK(std::get<problem::ControlHistory>(recovered).states == history.states);
+        CHECK(std::get<problem::ControlHistory>(recovered).controls == history.controls);
     }
     // Enumerate the same exact polygon as the lifted program's projection
     // onto (p1,p2)=(u0,u1), construct each augmented history directly, and
     // recover it back to the original state/control coordinates. This checks
     // the reverse inclusion independently of lift_history above.
-    const std::vector<Vector> lifted_projection_vertices{
-        {-1,-1},{-.75,-1},{1,.75},{1,1},{.75,1},{-1,-.75}};
-    for(const auto& u:lifted_projection_vertices) {
-        const problem::LiftedControlHistory lifted{
-            {{0,0,0},{u[0],0,u[0]},{u[0],u[1],u[1]}},
-            {{u[0]},{u[1]-u[0]}}};
-        const auto lifted_coordinates=flatten(lifted.augmented_states,lifted.increments);
-        REQUIRE(feasible(lifted_joint,lifted_coordinates));
-        const auto recovered=problem::recover_history(lift.coordinates,lifted,1e-12,1e-12);
+    const std::vector<Vector> lifted_projection_vertices{{-1, -1}, {-.75, -1}, {1, .75},
+                                                         {1, 1},   {.75, 1},   {-1, -.75}};
+    for (const auto &u : lifted_projection_vertices) {
+        const problem::LiftedControlHistory lifted{{{0, 0, 0}, {u[0], 0, u[0]}, {u[0], u[1], u[1]}},
+                                                   {{u[0]}, {u[1] - u[0]}}};
+        const auto lifted_coordinates = flatten(lifted.augmented_states, lifted.increments);
+        REQUIRE(feasible(lifted_joint, lifted_coordinates));
+        const auto recovered = problem::recover_history(lift.coordinates, lifted, 1e-12, 1e-12);
         REQUIRE(std::holds_alternative<problem::ControlHistory>(recovered));
-        const auto& history=std::get<problem::ControlHistory>(recovered);
-        CHECK(feasible(direct_joint,flatten(history.states,history.controls)));
-        CHECK((history.controls==std::vector<Vector>{{u[0]},{u[1]}}));
-        CHECK((history.states==std::vector<Vector>{{0,0},{u[0],0},{u[0],u[1]}}));
+        const auto &history = std::get<problem::ControlHistory>(recovered);
+        CHECK(feasible(direct_joint, flatten(history.states, history.controls)));
+        CHECK((history.controls == std::vector<Vector>{{u[0]}, {u[1]}}));
+        CHECK((history.states == std::vector<Vector>{{0, 0}, {u[0], 0}, {u[0], u[1]}}));
     }
-    const problem::ControlHistory slew_violating{{{0,0},{-1,0},{-1,1}},{{-1},{1}}};
-    const auto rejected_direct=flatten(slew_violating.states,slew_violating.controls);
-    CHECK_FALSE(feasible(direct_joint,rejected_direct));
-    const auto rejected_lift=problem::lift_history(lift.coordinates,slew_violating);
+    const problem::ControlHistory slew_violating{{{0, 0}, {-1, 0}, {-1, 1}}, {{-1}, {1}}};
+    const auto rejected_direct = flatten(slew_violating.states, slew_violating.controls);
+    CHECK_FALSE(feasible(direct_joint, rejected_direct));
+    const auto rejected_lift = problem::lift_history(lift.coordinates, slew_violating);
     REQUIRE(std::holds_alternative<problem::LiftedControlHistory>(rejected_lift));
-    CHECK_FALSE(feasible(lifted_joint,flatten(std::get<problem::LiftedControlHistory>(rejected_lift).augmented_states,
-        std::get<problem::LiftedControlHistory>(rejected_lift).increments)));
+    CHECK_FALSE(
+        feasible(lifted_joint,
+                 flatten(std::get<problem::LiftedControlHistory>(rejected_lift).augmented_states,
+                         std::get<problem::LiftedControlHistory>(rejected_lift).increments)));
 
     // Strict convexity gives one optimum. The rate bound is active at
     // (u0,u1)=(3/8,1/8), xT=(3/8,1/8), with cost 1/32.
-    const double u0=3.0/8.0,u1=1.0/8.0;
-    const Vector direct_optimum{0,0,u0,0,u0,u1,u0,u1};
-    const Vector lifted_optimum{0,0,0,u0,0,u0,u0,u1,u1,u0,-.25};
-    REQUIRE(feasible(direct_joint,direct_optimum));
-    REQUIRE(feasible(lifted_joint,lifted_optimum));
-    const auto direct_cost=accepted(optimization::evaluate_primal(std::get<ConvexProgram>(direct_joint.program),
-        direct_optimum,{1e-12,1e-12},{{"mpc02-analytic-oracle"},"1"}));
-    const auto lifted_cost=accepted(optimization::evaluate_primal(std::get<ConvexProgram>(lifted_joint.program),
-        lifted_optimum,{1e-12,1e-12},{{"mpc02-analytic-oracle"},"1"}));
-    CHECK(direct_cost.original_objective==doctest::Approx(1.0/32.0).epsilon(1e-12));
-    CHECK(lifted_cost.original_objective==doctest::Approx(direct_cost.original_objective).epsilon(1e-12));
-
+    const double u0 = 3.0 / 8.0, u1 = 1.0 / 8.0;
+    const Vector direct_optimum{0, 0, u0, 0, u0, u1, u0, u1};
+    const Vector lifted_optimum{0, 0, 0, u0, 0, u0, u0, u1, u1, u0, -.25};
+    REQUIRE(feasible(direct_joint, direct_optimum));
+    REQUIRE(feasible(lifted_joint, lifted_optimum));
+    const auto direct_cost = accepted(
+        optimization::evaluate_primal(std::get<ConvexProgram>(direct_joint.program), direct_optimum,
+                                      {1e-12, 1e-12}, {{"mpc02-analytic-oracle"}, "1"}));
+    const auto lifted_cost = accepted(
+        optimization::evaluate_primal(std::get<ConvexProgram>(lifted_joint.program), lifted_optimum,
+                                      {1e-12, 1e-12}, {{"mpc02-analytic-oracle"}, "1"}));
+    CHECK(direct_cost.original_objective == doctest::Approx(1.0 / 32.0).epsilon(1e-12));
+    CHECK(lifted_cost.original_objective ==
+          doctest::Approx(direct_cost.original_objective).epsilon(1e-12));
 }
 TEST_CASE("MPC-02 direct and memory-lift agree with authored slew oracle on a control grid") {
-    auto authored=mpc02_two_state_integrator();
-    authored.temporal=TemporalConstraints{{1,8,{0,2},{6,7},{-1,1}},{{-.25,.25}}};
-    const auto direct_problem=resolve(authored);
-    const auto direct_joint=accepted(build_joint_program(direct_problem,request(direct_problem)));
-    const auto stagewise=mpc02_two_state_integrator();
-    const auto slew=problem::lift_one_step_slew(stagewise,
-        {problem::UnconstrainedFirstAction{}, {bounded_interval(-.25,.25).as_handle()}});
+    auto authored = mpc02_two_state_integrator();
+    authored.temporal = TemporalConstraints{{1, 8, {0, 2}, {6, 7}, {-1, 1}}, {{-.25, .25}}};
+    const auto direct_problem = resolve(authored);
+    const auto direct_joint =
+        accepted(build_joint_program(direct_problem, request(direct_problem)));
+    const auto stagewise = mpc02_two_state_integrator();
+    const auto slew =
+        problem::lift_one_step_slew(stagewise, {problem::UnconstrainedFirstAction{},
+                                                {bounded_interval(-.25, .25).as_handle()}});
     REQUIRE(std::holds_alternative<problem::SlewMemoryLift>(slew));
-    const auto& lift=std::get<problem::SlewMemoryLift>(slew);
-    const auto lifted_problem=resolve(lift.problem);
-    const auto lifted_joint=accepted(build_joint_program(lifted_problem,request(lifted_problem)));
+    const auto &lift = std::get<problem::SlewMemoryLift>(slew);
+    const auto lifted_problem = resolve(lift.problem);
+    const auto lifted_joint =
+        accepted(build_joint_program(lifted_problem, request(lifted_problem)));
 
-    const auto flatten=[](const std::vector<Vector>& states,const std::vector<Vector>& controls) {
+    const auto flatten = [](const std::vector<Vector> &states,
+                            const std::vector<Vector> &controls) {
         Vector result;
-        for(const auto& state:states) result.insert(result.end(),state.begin(),state.end());
-        for(const auto& control:controls) result.insert(result.end(),control.begin(),control.end());
+        for (const auto &state : states)
+            result.insert(result.end(), state.begin(), state.end());
+        for (const auto &control : controls)
+            result.insert(result.end(), control.begin(), control.end());
         return result;
     };
     // Independent 5x5 oracle compares each program with the authored box and
     // slew equations, then compares objectives for every feasible history.
-    const std::vector<double> grid{-0.5,-0.25,0.0,0.25,0.5};
-    std::size_t tested=0, feasible_points=0;
-    for(const double grid_u0:grid) for(const double grid_u1:grid) {
-        const problem::ControlHistory history{
-            {{0,0},{grid_u0,0},{grid_u0,grid_u1}},{{grid_u0},{grid_u1}}};
-        const auto direct_coordinates=flatten(history.states,history.controls);
-        const auto lifted_history=problem::lift_history(lift.coordinates,history);
-        REQUIRE(std::holds_alternative<problem::LiftedControlHistory>(lifted_history));
-        const auto& mapped=std::get<problem::LiftedControlHistory>(lifted_history);
-        const auto lifted_coordinates=flatten(mapped.augmented_states,mapped.increments);
-        const bool direct_is_feasible=feasible(direct_joint,direct_coordinates);
-        const bool lifted_is_feasible=feasible(lifted_joint,lifted_coordinates);
-        const bool authored_is_feasible=std::abs(grid_u0)<=1.0 && std::abs(grid_u1)<=1.0
-            && std::abs(grid_u1-grid_u0)<=0.25;
-        CHECK(direct_is_feasible==authored_is_feasible);
-        CHECK(lifted_is_feasible==authored_is_feasible);
-        CHECK(direct_is_feasible==lifted_is_feasible);
-        if(direct_is_feasible) {
-            ++feasible_points;
-            const auto direct_grid_cost=accepted(optimization::evaluate_primal(
-                std::get<ConvexProgram>(direct_joint.program),direct_coordinates,
-                {1e-12,1e-12},{{"mpc02-grid-oracle"},"1"}));
-            const auto lifted_grid_cost=accepted(optimization::evaluate_primal(
-                std::get<ConvexProgram>(lifted_joint.program),lifted_coordinates,
-                {1e-12,1e-12},{{"mpc02-grid-oracle"},"1"}));
-            CHECK(lifted_grid_cost.original_objective==
-                doctest::Approx(direct_grid_cost.original_objective).epsilon(1e-12));
+    const std::vector<double> grid{-0.5, -0.25, 0.0, 0.25, 0.5};
+    std::size_t tested = 0, feasible_points = 0;
+    for (const double grid_u0 : grid)
+        for (const double grid_u1 : grid) {
+            const problem::ControlHistory history{{{0, 0}, {grid_u0, 0}, {grid_u0, grid_u1}},
+                                                  {{grid_u0}, {grid_u1}}};
+            const auto direct_coordinates = flatten(history.states, history.controls);
+            const auto lifted_history = problem::lift_history(lift.coordinates, history);
+            REQUIRE(std::holds_alternative<problem::LiftedControlHistory>(lifted_history));
+            const auto &mapped = std::get<problem::LiftedControlHistory>(lifted_history);
+            const auto lifted_coordinates = flatten(mapped.augmented_states, mapped.increments);
+            const bool direct_is_feasible = feasible(direct_joint, direct_coordinates);
+            const bool lifted_is_feasible = feasible(lifted_joint, lifted_coordinates);
+            const bool authored_is_feasible = std::abs(grid_u0) <= 1.0 &&
+                                              std::abs(grid_u1) <= 1.0 &&
+                                              std::abs(grid_u1 - grid_u0) <= 0.25;
+            CHECK(direct_is_feasible == authored_is_feasible);
+            CHECK(lifted_is_feasible == authored_is_feasible);
+            CHECK(direct_is_feasible == lifted_is_feasible);
+            if (direct_is_feasible) {
+                ++feasible_points;
+                const auto direct_grid_cost = accepted(optimization::evaluate_primal(
+                    std::get<ConvexProgram>(direct_joint.program), direct_coordinates,
+                    {1e-12, 1e-12}, {{"mpc02-grid-oracle"}, "1"}));
+                const auto lifted_grid_cost = accepted(optimization::evaluate_primal(
+                    std::get<ConvexProgram>(lifted_joint.program), lifted_coordinates,
+                    {1e-12, 1e-12}, {{"mpc02-grid-oracle"}, "1"}));
+                CHECK(lifted_grid_cost.original_objective ==
+                      doctest::Approx(direct_grid_cost.original_objective).epsilon(1e-12));
+            }
+            ++tested;
         }
-        ++tested;
-    }
-    CHECK(tested==25);
-    CHECK(feasible_points==13);
+    CHECK(tested == 25);
+    CHECK(feasible_points == 13);
 }
 TEST_CASE("multiple authored temporal rows retain independent history constraints") {
-    auto input=integrator(LinearTerminal{{0},0});
-    SparseMatrix temporal_map{2,5,{0,2,4},{3,4,3,4},{1,1,1,-1}};
-    input.temporal=TemporalConstraints{std::move(temporal_map),{{1,1},{0.5,0.5}}};
-    const auto p=resolve(input);
-    const auto q=accepted(build_joint_program(p,request(p)));
+    auto input = integrator(LinearTerminal{{0}, 0});
+    SparseMatrix temporal_map{2, 5, {0, 2, 4}, {3, 4, 3, 4}, {1, 1, 1, -1}};
+    input.temporal = TemporalConstraints{std::move(temporal_map), {{1, 1}, {0.5, 0.5}}};
+    const auto p = resolve(input);
+    const auto q = accepted(build_joint_program(p, request(p)));
 
     // The first row fixes u0+u1=1 and the second fixes u0-u1=1/2.
     // Both rows are cross-time constraints; neither is recoverable from
     // independent stage boxes alone.
-    const Vector both_rows{0,0.75,1,0.75,0.25};
-    const Vector first_only{0,0.5,1,0.5,0.5};
-    const Vector second_only{0,1,1,1,0};
-    CHECK(feasible(q,both_rows));
-    CHECK_FALSE(feasible(q,first_only));
-    CHECK_FALSE(feasible(q,second_only));
+    const Vector both_rows{0, 0.75, 1, 0.75, 0.25};
+    const Vector first_only{0, 0.5, 1, 0.5, 0.5};
+    const Vector second_only{0, 1, 1, 1, 0};
+    CHECK(feasible(q, both_rows));
+    CHECK_FALSE(feasible(q, first_only));
+    CHECK_FALSE(feasible(q, second_only));
 
-    REQUIRE(q.rows.size()==9);
-    CHECK(q.rows[7].source==RowSource::temporal);
-    CHECK(q.rows[7].source_row==0);
-    CHECK(q.rows[8].source==RowSource::temporal);
-    CHECK(q.rows[8].source_row==1);
-    CHECK(q.bounds[7].lower==1);
-    CHECK(q.bounds[7].upper==1);
-    CHECK(q.bounds[8].lower==0.5);
-    CHECK(q.bounds[8].upper==0.5);
-    CHECK(q.constraints.column_indices[q.constraints.row_offsets[7]]==3);
-    CHECK(q.constraints.column_indices[q.constraints.row_offsets[7]+1]==4);
-    CHECK(q.constraints.column_indices[q.constraints.row_offsets[8]]==3);
-    CHECK(q.constraints.column_indices[q.constraints.row_offsets[8]+1]==4);
+    REQUIRE(q.rows.size() == 9);
+    CHECK(q.rows[7].source == RowSource::temporal);
+    CHECK(q.rows[7].source_row == 0);
+    CHECK(q.rows[8].source == RowSource::temporal);
+    CHECK(q.rows[8].source_row == 1);
+    CHECK(q.bounds[7].lower == 1);
+    CHECK(q.bounds[7].upper == 1);
+    CHECK(q.bounds[8].lower == 0.5);
+    CHECK(q.bounds[8].upper == 0.5);
+    CHECK(q.constraints.column_indices[q.constraints.row_offsets[7]] == 3);
+    CHECK(q.constraints.column_indices[q.constraints.row_offsets[7] + 1] == 4);
+    CHECK(q.constraints.column_indices[q.constraints.row_offsets[8]] == 3);
+    CHECK(q.constraints.column_indices[q.constraints.row_offsets[8] + 1] == 4);
 }
 TEST_CASE("independent grid oracle agrees with both authored temporal rows") {
-    auto input=integrator(LinearTerminal{{0},0});
-    SparseMatrix temporal_map{2,5,{0,2,4},{3,4,3,4},{1,1,1,-1}};
-    input.temporal=TemporalConstraints{std::move(temporal_map),{{1,1},{0.5,0.5}}};
-    const auto p=resolve(input);
-    const auto q=accepted(build_joint_program(p,request(p)));
+    auto input = integrator(LinearTerminal{{0}, 0});
+    SparseMatrix temporal_map{2, 5, {0, 2, 4}, {3, 4, 3, 4}, {1, 1, 1, -1}};
+    input.temporal = TemporalConstraints{std::move(temporal_map), {{1, 1}, {0.5, 0.5}}};
+    const auto p = resolve(input);
+    const auto q = accepted(build_joint_program(p, request(p)));
 
     // Enumerate a finite control grid independently of the assembled program.
     // The state coordinates are filled from the integrator recurrence, while
     // admissibility is decided only from the authored temporal equations.
-    const std::vector<double> grid{0,.25,.5,.75,1};
-    std::size_t expected_count=0, observed_count=0;
-    for(const double u0:grid) for(const double u1:grid) {
-        const bool expected=std::abs(u0+u1-1.0)<=1e-12
-            && std::abs(u0-u1-.5)<=1e-12;
-        const Vector history{0,u0,u0+u1,u0,u1};
-        const bool observed=feasible(q,history);
-        CHECK(observed==expected);
-        expected_count+=expected ? 1 : 0;
-        observed_count+=observed ? 1 : 0;
+    const std::vector<double> grid{0, .25, .5, .75, 1};
+    std::size_t expected_count = 0, observed_count = 0;
+    for (const double u0 : grid)
+        for (const double u1 : grid) {
+            const bool expected =
+                std::abs(u0 + u1 - 1.0) <= 1e-12 && std::abs(u0 - u1 - .5) <= 1e-12;
+            const Vector history{0, u0, u0 + u1, u0, u1};
+            const bool observed = feasible(q, history);
+            CHECK(observed == expected);
+            expected_count += expected ? 1 : 0;
+            observed_count += observed ? 1 : 0;
+        }
+    CHECK(expected_count == 1);
+    CHECK(observed_count == expected_count);
+}
+bool feasible(const JointProgram &p, const Vector &x) {
+    for (std::size_t i = 0; i < p.constraints.rows; ++i) {
+        double v = 0;
+        for (auto j = p.constraints.row_offsets[i]; j < p.constraints.row_offsets[i + 1]; ++j)
+            v += p.constraints.values[j] * x[p.constraints.column_indices[j]];
+        if (p.bounds[i].lower && v < *p.bounds[i].lower - 1e-10)
+            return false;
+        if (p.bounds[i].upper && v > *p.bounds[i].upper + 1e-10)
+            return false;
     }
-    CHECK(expected_count==1);
-    CHECK(observed_count==expected_count);
-}
-bool feasible(const JointProgram& p,const Vector& x) {
-    for(std::size_t i=0;i<p.constraints.rows;++i) {
-        double v=0;for(auto j=p.constraints.row_offsets[i];j<p.constraints.row_offsets[i+1];++j)
-            v+=p.constraints.values[j]*x[p.constraints.column_indices[j]];
-        if(p.bounds[i].lower&&v<*p.bounds[i].lower-1e-10)return false;
-        if(p.bounds[i].upper&&v>*p.bounds[i].upper+1e-10)return false;
-    }return true;
-}
-bool feasible_without_temporal_rows(const JointProgram& p,const Vector& x) {
-    for(std::size_t i=0;i<p.constraints.rows;++i) {
-        if(p.rows[i].source==RowSource::temporal) continue;
-        double v=0;for(auto j=p.constraints.row_offsets[i];j<p.constraints.row_offsets[i+1];++j)
-            v+=p.constraints.values[j]*x[p.constraints.column_indices[j]];
-        if(p.bounds[i].lower&&v<*p.bounds[i].lower-1e-10)return false;
-        if(p.bounds[i].upper&&v>*p.bounds[i].upper+1e-10)return false;
-    }return true;
-}
-bool contains(const sets::SetData& set,const Vector& x,double tolerance=1e-10) {
-    const auto h=std::get<sets::HRepresentation>(set.representation());
-    for(std::size_t i=0;i<h.inequalities.rows();++i) {double v=0;for(std::size_t j=0;j<x.size();++j)v+=h.inequalities(i,j)*x[j];if(v>h.upper_bounds[i]+tolerance)return false;}
-    for(std::size_t i=0;i<h.equalities.rows();++i) {double v=0;for(std::size_t j=0;j<x.size();++j)v+=h.equalities(i,j)*x[j];if(std::abs(v-h.equality_values[i])>tolerance)return false;}
     return true;
 }
-std::size_t equality_rank(const sets::HRepresentation& h) {
-    std::vector<Vector> rows(h.equalities.rows(),Vector(h.equalities.cols()));
-    for(std::size_t r=0;r<rows.size();++r) {
-        double scale=0;
-        for(std::size_t c=0;c<rows[r].size();++c)scale=std::max(scale,std::abs(h.equalities(r,c)));
-        if(scale>0)for(std::size_t c=0;c<rows[r].size();++c)rows[r][c]=h.equalities(r,c)/scale;
+bool feasible_without_temporal_rows(const JointProgram &p, const Vector &x) {
+    for (std::size_t i = 0; i < p.constraints.rows; ++i) {
+        if (p.rows[i].source == RowSource::temporal)
+            continue;
+        double v = 0;
+        for (auto j = p.constraints.row_offsets[i]; j < p.constraints.row_offsets[i + 1]; ++j)
+            v += p.constraints.values[j] * x[p.constraints.column_indices[j]];
+        if (p.bounds[i].lower && v < *p.bounds[i].lower - 1e-10)
+            return false;
+        if (p.bounds[i].upper && v > *p.bounds[i].upper + 1e-10)
+            return false;
     }
-    std::size_t rank=0;
-    for(std::size_t c=0;c<h.equalities.cols() && rank<rows.size();++c) {
-        auto pivot=rank;while(pivot<rows.size() && std::abs(rows[pivot][c])<1e-10)++pivot;
-        if(pivot==rows.size())continue;
-        std::swap(rows[rank],rows[pivot]);
-        const auto divisor=rows[rank][c];for(std::size_t j=c;j<rows[rank].size();++j)rows[rank][j]/=divisor;
-        for(std::size_t r=0;r<rows.size();++r)if(r!=rank) {
-            const auto factor=rows[r][c];for(std::size_t j=c;j<rows[r].size();++j)rows[r][j]-=factor*rows[rank][j];
-        }
+    return true;
+}
+bool contains(const sets::SetData &set, const Vector &x, double tolerance = 1e-10) {
+    const auto h = std::get<sets::HRepresentation>(set.representation());
+    for (std::size_t i = 0; i < h.inequalities.rows(); ++i) {
+        double v = 0;
+        for (std::size_t j = 0; j < x.size(); ++j)
+            v += h.inequalities(i, j) * x[j];
+        if (v > h.upper_bounds[i] + tolerance)
+            return false;
+    }
+    for (std::size_t i = 0; i < h.equalities.rows(); ++i) {
+        double v = 0;
+        for (std::size_t j = 0; j < x.size(); ++j)
+            v += h.equalities(i, j) * x[j];
+        if (std::abs(v - h.equality_values[i]) > tolerance)
+            return false;
+    }
+    return true;
+}
+std::size_t equality_rank(const sets::HRepresentation &h) {
+    std::vector<Vector> rows(h.equalities.rows(), Vector(h.equalities.cols()));
+    for (std::size_t r = 0; r < rows.size(); ++r) {
+        double scale = 0;
+        for (std::size_t c = 0; c < rows[r].size(); ++c)
+            scale = std::max(scale, std::abs(h.equalities(r, c)));
+        if (scale > 0)
+            for (std::size_t c = 0; c < rows[r].size(); ++c)
+                rows[r][c] = h.equalities(r, c) / scale;
+    }
+    std::size_t rank = 0;
+    for (std::size_t c = 0; c < h.equalities.cols() && rank < rows.size(); ++c) {
+        auto pivot = rank;
+        while (pivot < rows.size() && std::abs(rows[pivot][c]) < 1e-10)
+            ++pivot;
+        if (pivot == rows.size())
+            continue;
+        std::swap(rows[rank], rows[pivot]);
+        const auto divisor = rows[rank][c];
+        for (std::size_t j = c; j < rows[rank].size(); ++j)
+            rows[rank][j] /= divisor;
+        for (std::size_t r = 0; r < rows.size(); ++r)
+            if (r != rank) {
+                const auto factor = rows[r][c];
+                for (std::size_t j = c; j < rows[r].size(); ++j)
+                    rows[r][j] -= factor * rows[rank][j];
+            }
         ++rank;
     }
     return rank;
 }
-std::pair<double,double> parameter_interval(const sets::HRepresentation& h,
-    const Vector& origin,const Vector& direction,double tolerance=1e-7) {
-    auto lower=-std::numeric_limits<double>::infinity();
-    auto upper=std::numeric_limits<double>::infinity();
-    for(std::size_t i=0;i<h.equalities.rows();++i) {
-        long double row_scale=std::abs(static_cast<long double>(h.equality_values[i]));
-        for(std::size_t j=0;j<origin.size();++j) {
-            row_scale=std::max(row_scale,std::abs(static_cast<long double>(h.equalities(i,j))));
+std::pair<double, double> parameter_interval(const sets::HRepresentation &h, const Vector &origin,
+                                             const Vector &direction, double tolerance = 1e-7) {
+    auto lower = -std::numeric_limits<double>::infinity();
+    auto upper = std::numeric_limits<double>::infinity();
+    for (std::size_t i = 0; i < h.equalities.rows(); ++i) {
+        long double row_scale = std::abs(static_cast<long double>(h.equality_values[i]));
+        for (std::size_t j = 0; j < origin.size(); ++j) {
+            row_scale = std::max(row_scale, std::abs(static_cast<long double>(h.equalities(i, j))));
         }
-        long double at_origin=0,slope=0;
-        const auto divisor=row_scale>0?row_scale:1.0L;
-        const auto value=static_cast<long double>(h.equality_values[i])/divisor;
-        for(std::size_t j=0;j<origin.size();++j) {
-            const auto coefficient=static_cast<long double>(h.equalities(i,j))/divisor;
-            at_origin+=coefficient*origin[j];slope+=coefficient*direction[j];
+        long double at_origin = 0, slope = 0;
+        const auto divisor = row_scale > 0 ? row_scale : 1.0L;
+        const auto value = static_cast<long double>(h.equality_values[i]) / divisor;
+        for (std::size_t j = 0; j < origin.size(); ++j) {
+            const auto coefficient = static_cast<long double>(h.equalities(i, j)) / divisor;
+            at_origin += coefficient * origin[j];
+            slope += coefficient * direction[j];
         }
-        const auto residual=value-at_origin;
-        if(slope==0) {
-            CHECK(std::abs(residual)<=tolerance);
+        const auto residual = value - at_origin;
+        if (slope == 0) {
+            CHECK(std::abs(residual) <= tolerance);
             continue;
         }
         // Any nonzero equality slope restricts the line to one parameter
         // value, however small that slope is. Do not use a residual tolerance
         // to turn a midpoint-only intersection into a full segment.
-        const auto endpoint=residual/slope;
-        lower=std::max(lower,static_cast<double>(endpoint));
-        upper=std::min(upper,static_cast<double>(endpoint));
+        const auto endpoint = residual / slope;
+        lower = std::max(lower, static_cast<double>(endpoint));
+        upper = std::min(upper, static_cast<double>(endpoint));
     }
-    for(std::size_t i=0;i<h.inequalities.rows();++i) {
-        long double row_scale=std::abs(static_cast<long double>(h.upper_bounds[i]));
-        for(std::size_t j=0;j<origin.size();++j)
-            row_scale=std::max(row_scale,std::abs(static_cast<long double>(h.inequalities(i,j))));
-        const auto divisor=row_scale>0?row_scale:1.0L;
-        long double at_origin=0,slope=0;
-        for(std::size_t j=0;j<origin.size();++j) {
-            const auto coefficient=static_cast<long double>(h.inequalities(i,j))/divisor;
-            at_origin+=coefficient*origin[j];slope+=coefficient*direction[j];
+    for (std::size_t i = 0; i < h.inequalities.rows(); ++i) {
+        long double row_scale = std::abs(static_cast<long double>(h.upper_bounds[i]));
+        for (std::size_t j = 0; j < origin.size(); ++j)
+            row_scale =
+                std::max(row_scale, std::abs(static_cast<long double>(h.inequalities(i, j))));
+        const auto divisor = row_scale > 0 ? row_scale : 1.0L;
+        long double at_origin = 0, slope = 0;
+        for (std::size_t j = 0; j < origin.size(); ++j) {
+            const auto coefficient = static_cast<long double>(h.inequalities(i, j)) / divisor;
+            at_origin += coefficient * origin[j];
+            slope += coefficient * direction[j];
         }
-        const auto rhs=static_cast<long double>(h.upper_bounds[i])/divisor-at_origin;
-        if(slope==0) {
-            CHECK(rhs>=-tolerance);
+        const auto rhs = static_cast<long double>(h.upper_bounds[i]) / divisor - at_origin;
+        if (slope == 0) {
+            CHECK(rhs >= -tolerance);
             continue;
         }
-        const auto endpoint=rhs/slope;
-        if(slope>0)upper=std::min(upper,static_cast<double>(endpoint));
-        else lower=std::max(lower,static_cast<double>(endpoint));
+        const auto endpoint = rhs / slope;
+        if (slope > 0)
+            upper = std::min(upper, static_cast<double>(endpoint));
+        else
+            lower = std::max(lower, static_cast<double>(endpoint));
     }
-    return {lower,upper};
+    return {lower, upper};
 }
 sets::HRepresentation scaled_parameter_interval(double row_scale) {
-    const Matrix inequalities{2,5,{0,row_scale,0,0,0,0,-row_scale,0,0,0}};
-    const Vector bounds{row_scale,0};
-    const auto set=accepted(sets::make_h({{"scaled-parameter-interval"},5,{"x0","x1","x2","u0","u1"}},
-        {accepted(numeric::snapshot(inequalities)),accepted(numeric::snapshot_vector(bounds)),
-         accepted(numeric::snapshot(Matrix{0,5,{}})),accepted(numeric::snapshot_vector(Vector{}))}));
+    const Matrix inequalities{2, 5, {0, row_scale, 0, 0, 0, 0, -row_scale, 0, 0, 0}};
+    const Vector bounds{row_scale, 0};
+    const auto set = accepted(sets::make_h(
+        {{"scaled-parameter-interval"}, 5, {"x0", "x1", "x2", "u0", "u1"}},
+        {accepted(numeric::snapshot(inequalities)), accepted(numeric::snapshot_vector(bounds)),
+         accepted(numeric::snapshot(Matrix{0, 5, {}})),
+         accepted(numeric::snapshot_vector(Vector{}))}));
     return std::get<sets::HRepresentation>(set.representation());
 }
 sets::HRepresentation midpoint_equality_parameter_interval() {
-    const auto set=accepted(sets::make_h({{"midpoint-equality-interval"},5,{"x0","x1","x2","u0","u1"}},
-        {accepted(numeric::snapshot(Matrix{2,5,{0,1,0,0,0,0,-1,0,0,0}})),
-         accepted(numeric::snapshot_vector(Vector{1,0})),
-         accepted(numeric::snapshot(Matrix{1,5,{1,1e-11,0,0,0}})),
-         accepted(numeric::snapshot_vector(Vector{5e-12}))}));
+    const auto set = accepted(
+        sets::make_h({{"midpoint-equality-interval"}, 5, {"x0", "x1", "x2", "u0", "u1"}},
+                     {accepted(numeric::snapshot(Matrix{2, 5, {0, 1, 0, 0, 0, 0, -1, 0, 0, 0}})),
+                      accepted(numeric::snapshot_vector(Vector{1, 0})),
+                      accepted(numeric::snapshot(Matrix{1, 5, {1, 1e-11, 0, 0, 0}})),
+                      accepted(numeric::snapshot_vector(Vector{5e-12}))}));
     return std::get<sets::HRepresentation>(set.representation());
 }
-template<class Program,class Base> class OracleWorkspace final:public Base {
-    Vector anchor_;double value_;bool wrong_;Termination termination_;std::stop_source* stop_;
+template <class Program, class Base> class OracleWorkspace final : public Base {
+    Vector anchor_;
+    double value_;
+    bool wrong_;
+    Termination termination_;
+    std::stop_source *stop_;
     MathematicalOutcome outcome_;
     std::function<void()> before_return_;
-    ProgramOutcome do_solve(const Program& p,const ExecutionContext&) override {
-        auto id=p.identity();if(wrong_)id.program={"foreign"};
-        EvidenceSupport support=SymbolicArgument{"literal-joint-oracle","Hand-minimized objective on the authored joint relation."};
-        ProgramObjectiveBound bound{value_,{id,support,{}}};
-        if(stop_)stop_->request_stop();
-        const bool no_finite_solution=outcome_==MathematicalOutcome::infeasible ||
-            outcome_==MathematicalOutcome::infimum_not_attained;
-        ProgramResult result{termination_,{id,outcome_,no_finite_solution?EvidenceSupport{Unestablished{}}:support,{}},
-            no_finite_solution?std::nullopt:std::optional<Vector>{anchor_},
-            no_finite_solution?ProgramObjectiveEvidence{}:ProgramObjectiveEvidence{bound,bound},
+    ProgramOutcome do_solve(const Program &p, const ExecutionContext &) override {
+        auto id = p.identity();
+        if (wrong_)
+            id.program = {"foreign"};
+        EvidenceSupport support = SymbolicArgument{
+            "literal-joint-oracle", "Hand-minimized objective on the authored joint relation."};
+        ProgramObjectiveBound bound{value_, {id, support, {}}};
+        if (stop_)
+            stop_->request_stop();
+        const bool no_finite_solution = outcome_ == MathematicalOutcome::infeasible ||
+                                        outcome_ == MathematicalOutcome::infimum_not_attained;
+        ProgramResult result{
+            termination_,
+            {id, outcome_, no_finite_solution ? EvidenceSupport{Unestablished{}} : support, {}},
+            no_finite_solution ? std::nullopt : std::optional<Vector>{anchor_},
+            no_finite_solution ? ProgramObjectiveEvidence{}
+                               : ProgramObjectiveEvidence{bound, bound},
             "independent analytic oracle"};
-        if(before_return_)before_return_();
+        if (before_return_)
+            before_return_();
         return result;
     }
-public: OracleWorkspace(Vector a,double v,bool wrong,Termination term,std::stop_source* stop,std::function<void()> before_return={},
-    MathematicalOutcome outcome=MathematicalOutcome::optimal):anchor_(std::move(a)),value_(v),wrong_(wrong),termination_(term),stop_(stop),outcome_(outcome),before_return_(std::move(before_return)){}
+
+  public:
+    OracleWorkspace(Vector a, double v, bool wrong, Termination term, std::stop_source *stop,
+                    std::function<void()> before_return = {},
+                    MathematicalOutcome outcome = MathematicalOutcome::optimal)
+        : anchor_(std::move(a)), value_(v), wrong_(wrong), termination_(term), stop_(stop),
+          outcome_(outcome), before_return_(std::move(before_return)) {}
 };
-DirectJointWorkspace oracle(Vector anchor,double value,bool wrong=false,bool reject=false,Termination term=Termination::completed,std::stop_source* stop=nullptr) {
-    registry::Registry<registry::LPPort> lp;registry::Registry<registry::ConvexPort> qp;
-    registry::Requirements requirements;requirements.output.representation={"csl.program-result.v1"};
-    const auto offer=[=](const auto&,const registry::Requirements&)->registry::Capability {
-        if(reject)return Diagnostics{{DiagnosticCode::unsupported,"oracle.capacity","Generated program rejected by injected provider."}};
+DirectJointWorkspace oracle(Vector anchor, double value, bool wrong = false, bool reject = false,
+                            Termination term = Termination::completed,
+                            std::stop_source *stop = nullptr) {
+    registry::Registry<registry::LPPort> lp;
+    registry::Registry<registry::ConvexPort> qp;
+    registry::Requirements requirements;
+    requirements.output.representation = {"csl.program-result.v1"};
+    const auto offer = [=](const auto &, const registry::Requirements &) -> registry::Capability {
+        if (reject)
+            return Diagnostics{{DiagnosticCode::unsupported, "oracle.capacity",
+                                "Generated program rejected by injected provider."}};
         return registry::Offer{requirements.output};
     };
-    lp.add({{{"oracle-lp"},"1"},offer,[=](const LinearProgram&){return std::make_unique<OracleWorkspace<LinearProgram,LPWorkspace>>(anchor,value,wrong,term,stop);}});
-    qp.add({{{"oracle-qp"},"1"},offer,[=](const ConvexProgram&){return std::make_unique<OracleWorkspace<ConvexProgram,ConvexWorkspace>>(anchor,value,wrong,term,stop);}});
-    return {accepted(registry::prepare_provider(registry::select_provider(lp,registry::Method{{"oracle-lp"},{}},requirements))),
-        accepted(registry::prepare_provider(registry::select_provider(qp,registry::Method{{"oracle-qp"},{}},requirements)))};
+    lp.add({{{"oracle-lp"}, "1"}, offer, [=](const LinearProgram &) {
+                return std::make_unique<OracleWorkspace<LinearProgram, LPWorkspace>>(
+                    anchor, value, wrong, term, stop);
+            }});
+    qp.add({{{"oracle-qp"}, "1"}, offer, [=](const ConvexProgram &) {
+                return std::make_unique<OracleWorkspace<ConvexProgram, ConvexWorkspace>>(
+                    anchor, value, wrong, term, stop);
+            }});
+    return {accepted(registry::prepare_provider(
+                registry::select_provider(lp, registry::Method{{"oracle-lp"}, {}}, requirements))),
+            accepted(registry::prepare_provider(
+                registry::select_provider(qp, registry::Method{{"oracle-qp"}, {}}, requirements)))};
 }
-const DirectJointPayload& payload(const SynthesisResult& r) {
-    REQUIRE(r.family);CHECK(r.family->target()==FamilyTarget::candidate_relaxation);
-    const auto& candidate=std::get<CandidateFamily>(r.family->outcome());
-    const auto cast=std::dynamic_pointer_cast<const DirectJointPayload>(candidate.relation.payload);REQUIRE(cast);return *cast;
+const DirectJointPayload &payload(const SynthesisResult &r) {
+    REQUIRE(r.family);
+    CHECK(r.family->target() == FamilyTarget::candidate_relaxation);
+    const auto &candidate = std::get<CandidateFamily>(r.family->outcome());
+    const auto cast =
+        std::dynamic_pointer_cast<const DirectJointPayload>(candidate.relation.payload);
+    REQUIRE(cast);
+    return *cast;
 }
-SynthesisResult run_strategy_a(const problem::ResolvedProblem& p,const FamilyRequest& family) {
-    auto lp=accepted(adapters::lp::make_highs_registration());
-    auto convex=accepted(adapters::convex::make_highs_registration());
-    auto converter=accepted(adapters::polyhedral::make_qhull_registration(lp));
-    auto projection=geometry::polyhedral::make_projection_registration();
-    auto selected=[]<class Port>(registry::Registration<Port> entry,std::string representation) {
+SynthesisResult run_strategy_a(const problem::ResolvedProblem &p, const FamilyRequest &family) {
+    auto lp = accepted(adapters::lp::make_highs_registration());
+    auto convex = accepted(adapters::convex::make_highs_registration());
+    auto converter = accepted(adapters::polyhedral::make_qhull_registration(lp));
+    auto projection = geometry::polyhedral::make_projection_registration();
+    auto selected = []<class Port>(registry::Registration<Port> entry, std::string representation) {
         registry::Registry<Port> providers;
-        const registry::Method method{entry.identity.id,entry.identity.version};
+        const registry::Method method{entry.identity.id, entry.identity.version};
         REQUIRE_FALSE(providers.add(std::move(entry)).has_value());
-        registry::Requirements required;required.output.representation={std::move(representation)};
-        if constexpr(std::is_same_v<Port,registry::GeometryPort> || std::is_same_v<Port,registry::ConversionPort>)
-            required.output.relation=SetRelation::equivalent;
-        return accepted(registry::prepare_provider(registry::select_provider(providers,method,required)));
+        registry::Requirements required;
+        required.output.representation = {std::move(representation)};
+        if constexpr (std::is_same_v<Port, registry::GeometryPort> ||
+                      std::is_same_v<Port, registry::ConversionPort>)
+            required.output.relation = SetRelation::equivalent;
+        return accepted(
+            registry::prepare_provider(registry::select_provider(providers, method, required)));
     };
-    auto affine=geometry::make_affine_sum_registration({
-        selected(geometry::make_lp_hull_reducer_registration(),""),
-        selected(lp,"csl.program-result.v1"),selected(converter,"csl.polyhedron.v")});
-    registry::Registry<registry::GeometryPort> projections,affines;
+    auto affine = geometry::make_affine_sum_registration(
+        {selected(geometry::make_lp_hull_reducer_registration(), ""),
+         selected(lp, "csl.program-result.v1"), selected(converter, "csl.polyhedron.v")});
+    registry::Registry<registry::GeometryPort> projections, affines;
     registry::Registry<registry::ConversionPort> conversions;
-    registry::Registry<registry::LPPort> lps;registry::Registry<registry::ConvexPort> convexes;
-    const registry::Method pm{projection.identity.id,projection.identity.version};
-    const registry::Method am{affine.identity.id,affine.identity.version};
-    const registry::Method cm{converter.identity.id,converter.identity.version};
-    const registry::Method lm{lp.identity.id,lp.identity.version};
-    const registry::Method qm{convex.identity.id,convex.identity.version};
+    registry::Registry<registry::LPPort> lps;
+    registry::Registry<registry::ConvexPort> convexes;
+    const registry::Method pm{projection.identity.id, projection.identity.version};
+    const registry::Method am{affine.identity.id, affine.identity.version};
+    const registry::Method cm{converter.identity.id, converter.identity.version};
+    const registry::Method lm{lp.identity.id, lp.identity.version};
+    const registry::Method qm{convex.identity.id, convex.identity.version};
     REQUIRE_FALSE(projections.add(std::move(projection)).has_value());
     REQUIRE_FALSE(affines.add(std::move(affine)).has_value());
     REQUIRE_FALSE(conversions.add(std::move(converter)).has_value());
     REQUIRE_FALSE(lps.add(std::move(lp)).has_value());
     REQUIRE_FALSE(convexes.add(std::move(convex)).has_value());
-    registry::Requirements h,v,program;
-    h.output.representation={"csl.polyhedron.h"};h.output.relation=SetRelation::equivalent;
-    v.output.representation={"csl.polyhedron.v"};v.output.relation=SetRelation::equivalent;
-    program.output.representation={"csl.program-result.v1"};
-    auto providers=accepted(registry::check_providers(
-        registry::select_provider(projections,pm,h),registry::select_provider(affines,am,v),
-        registry::select_provider(conversions,cm,h),registry::select_provider(lps,lm,program),
-        registry::select_provider(convexes,qm,program)));
-    auto registration=synthesis::strategy_a::make_registration(std::move(providers));
-    registry::StrategyRegistry strategies;REQUIRE_FALSE(strategies.add(std::move(registration)).has_value());
-    StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.reach-back"};
-    registry::StrategyRequest query{p,configuration,family,"1",{}};
-    registry::Requirements output;output.output.representation={"csl.polyhedron.h"};
-    output.output.family=family.target;output.output.completeness=registry::Completeness::unestablished;
-    auto prepared=accepted(strategies.prepare(query,output));auto workspace=prepared.create();
-    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    registry::Requirements h, v, program;
+    h.output.representation = {"csl.polyhedron.h"};
+    h.output.relation = SetRelation::equivalent;
+    v.output.representation = {"csl.polyhedron.v"};
+    v.output.relation = SetRelation::equivalent;
+    program.output.representation = {"csl.program-result.v1"};
+    auto providers = accepted(registry::check_providers(
+        registry::select_provider(projections, pm, h), registry::select_provider(affines, am, v),
+        registry::select_provider(conversions, cm, h), registry::select_provider(lps, lm, program),
+        registry::select_provider(convexes, qm, program)));
+    auto registration = synthesis::strategy_a::make_registration(std::move(providers));
+    registry::StrategyRegistry strategies;
+    REQUIRE_FALSE(strategies.add(std::move(registration)).has_value());
+    StrategyConfiguration configuration;
+    configuration.strategy = {"csl.synthesis.reach-back"};
+    registry::StrategyRequest query{p, configuration, family, "1", {}};
+    registry::Requirements output;
+    output.output.representation = {"csl.polyhedron.h"};
+    output.output.family = family.target;
+    output.output.completeness = registry::Completeness::unestablished;
+    auto prepared = accepted(strategies.prepare(query, output));
+    auto workspace = prepared.create();
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
     return accepted(workspace->run(context));
 }
-const sets::SetData& strategy_a_relation(const SynthesisResult& result) {
-    REQUIRE(result.family);REQUIRE(result.family->target()==FamilyTarget::candidate_relaxation);
-    const auto& candidate=std::get<CandidateFamily>(result.family->outcome());
-    const auto* data=dynamic_cast<const synthesis::strategy_a::CandidateHistory*>(candidate.relation.payload.get());
-    REQUIRE(data);return data->history.relation;
+const sets::SetData &strategy_a_relation(const SynthesisResult &result) {
+    REQUIRE(result.family);
+    REQUIRE(result.family->target() == FamilyTarget::candidate_relaxation);
+    const auto &candidate = std::get<CandidateFamily>(result.family->outcome());
+    const auto *data = dynamic_cast<const synthesis::strategy_a::CandidateHistory *>(
+        candidate.relation.payload.get());
+    REQUIRE(data);
+    return data->history.relation;
 }
-registry::PreparedStrategy registered_prepared(const problem::ResolvedProblem& p,const FamilyRequest& q,
-    bool foreign_provider=false,Termination solver_termination=Termination::completed,std::stop_source* stop=nullptr,
-    std::function<void()> before_return={},MathematicalOutcome solver_outcome=MathematicalOutcome::optimal) {
-    registry::Registry<registry::LPPort> lp;registry::Registry<registry::ConvexPort> qp;registry::StrategyRegistry strategies;
-    auto linear=accepted(adapters::lp::make_highs_registration());auto convex=accepted(adapters::convex::make_highs_registration());
-    if(foreign_provider) {
-        registry::Requirements program_requirements;program_requirements.output.representation={"csl.program-result.v1"};
-        const auto offer=[=](const auto&,const registry::Requirements&)->registry::Capability{return registry::Offer{program_requirements.output};};
-        linear={{{"oracle-lp"},"1"},offer,[](const LinearProgram&){return std::make_unique<OracleWorkspace<LinearProgram,LPWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,true,Termination::completed,nullptr);}};
-        convex={{{"oracle-qp"},"1"},offer,[](const ConvexProgram&){return std::make_unique<OracleWorkspace<ConvexProgram,ConvexWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,true,Termination::completed,nullptr);}};
-    } else if(solver_termination!=Termination::completed || stop || before_return || solver_outcome!=MathematicalOutcome::optimal) {
-        registry::Requirements program_requirements;program_requirements.output.representation={"csl.program-result.v1"};
-        const auto offer=[=](const auto&,const registry::Requirements&)->registry::Capability{return registry::Offer{program_requirements.output};};
-        linear={{{"oracle-lp"},"1"},offer,[=](const LinearProgram&){return std::make_unique<OracleWorkspace<LinearProgram,LPWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,false,solver_termination,stop,before_return,solver_outcome);}};
-        convex={{{"oracle-qp"},"1"},offer,[=](const ConvexProgram&){return std::make_unique<OracleWorkspace<ConvexProgram,ConvexWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,false,solver_termination,stop,before_return,solver_outcome);}};
+registry::PreparedStrategy
+registered_prepared(const problem::ResolvedProblem &p, const FamilyRequest &q,
+                    bool foreign_provider = false,
+                    Termination solver_termination = Termination::completed,
+                    std::stop_source *stop = nullptr, std::function<void()> before_return = {},
+                    MathematicalOutcome solver_outcome = MathematicalOutcome::optimal) {
+    registry::Registry<registry::LPPort> lp;
+    registry::Registry<registry::ConvexPort> qp;
+    registry::StrategyRegistry strategies;
+    auto linear = accepted(adapters::lp::make_highs_registration());
+    auto convex = accepted(adapters::convex::make_highs_registration());
+    if (foreign_provider) {
+        registry::Requirements program_requirements;
+        program_requirements.output.representation = {"csl.program-result.v1"};
+        const auto offer = [=](const auto &,
+                               const registry::Requirements &) -> registry::Capability {
+            return registry::Offer{program_requirements.output};
+        };
+        linear = {{{"oracle-lp"}, "1"}, offer, [](const LinearProgram &) {
+                      return std::make_unique<OracleWorkspace<LinearProgram, LPWorkspace>>(
+                          Vector{0, 0.25, 1, 0.25, 0.75}, 0, true, Termination::completed, nullptr);
+                  }};
+        convex = {{{"oracle-qp"}, "1"}, offer, [](const ConvexProgram &) {
+                      return std::make_unique<OracleWorkspace<ConvexProgram, ConvexWorkspace>>(
+                          Vector{0, 0.25, 1, 0.25, 0.75}, 0, true, Termination::completed, nullptr);
+                  }};
+    } else if (solver_termination != Termination::completed || stop || before_return ||
+               solver_outcome != MathematicalOutcome::optimal) {
+        registry::Requirements program_requirements;
+        program_requirements.output.representation = {"csl.program-result.v1"};
+        const auto offer = [=](const auto &,
+                               const registry::Requirements &) -> registry::Capability {
+            return registry::Offer{program_requirements.output};
+        };
+        linear = {{{"oracle-lp"}, "1"}, offer, [=](const LinearProgram &) {
+                      return std::make_unique<OracleWorkspace<LinearProgram, LPWorkspace>>(
+                          Vector{0, 0.25, 1, 0.25, 0.75}, 0, false, solver_termination, stop,
+                          before_return, solver_outcome);
+                  }};
+        convex = {{{"oracle-qp"}, "1"}, offer, [=](const ConvexProgram &) {
+                      return std::make_unique<OracleWorkspace<ConvexProgram, ConvexWorkspace>>(
+                          Vector{0, 0.25, 1, 0.25, 0.75}, 0, false, solver_termination, stop,
+                          before_return, solver_outcome);
+                  }};
     }
-    const auto lid=linear.identity.id,qid=convex.identity.id;lp.add(std::move(linear));qp.add(std::move(convex));
-    CHECK_FALSE(strategies.add(make_registration(lp,qp)));
-    StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.strategy-b"};configuration.lp=lid;configuration.convex=qid;
-    configuration.representation={"csl.polyhedron.h"};
-    registry::Requirements requirements;requirements.output.representation={"csl.polyhedron.h"};
-    requirements.output.family=q.target;
-    requirements.output.completeness=q.target==FamilyTarget::exact_optimal_relation?
-        registry::Completeness::established:registry::Completeness::unestablished;
-    return accepted(strategies.prepare({p,configuration,q,"1"},requirements));
+    const auto lid = linear.identity.id, qid = convex.identity.id;
+    lp.add(std::move(linear));
+    qp.add(std::move(convex));
+    CHECK_FALSE(strategies.add(make_registration(lp, qp)));
+    StrategyConfiguration configuration;
+    configuration.strategy = {"csl.synthesis.strategy-b"};
+    configuration.lp = lid;
+    configuration.convex = qid;
+    configuration.representation = {"csl.polyhedron.h"};
+    registry::Requirements requirements;
+    requirements.output.representation = {"csl.polyhedron.h"};
+    requirements.output.family = q.target;
+    requirements.output.completeness = q.target == FamilyTarget::exact_optimal_relation
+                                           ? registry::Completeness::established
+                                           : registry::Completeness::unestablished;
+    return accepted(strategies.prepare({p, configuration, q, "1"}, requirements));
 }
 struct PlannedStrategyTiming {
     std::shared_ptr<ob::TimingCollector> collector;
     ar::ResolvedConfiguration configuration;
 };
-PlannedStrategyTiming planned_strategy_timing(const problem::ResolvedProblem& p,
-    const FamilyRequest& q,const ProgramIdentity& program,const ar::ModuleIdentity& backend,
-    const std::vector<registry::Provenance>& provenance,const std::shared_ptr<StrategyTimingClock>& clock,
-    bool split_build=false) {
-    const ar::Unavailable missing{ar::MissingReason::not_instrumented,{}};
-    const ar::ModuleIdentity strategy{{"csl.synthesis.strategy-b"},"1",missing};
-    auto lp=ar::ModuleIdentity{{"csl.lp.highs"},"1",missing};
-    auto convex=ar::ModuleIdentity{{"csl.convex.highs"},"1",missing};
-    bool found_lp=false,found_convex=false;
-    for(const auto& item:provenance)if(item.actual) {
-        if(item.port=="lp"){lp={item.actual->id,item.actual->version,missing};found_lp=true;}
-        if(item.port=="convex"){convex={item.actual->id,item.actual->version,missing};found_convex=true;}
-    }
-    REQUIRE(found_lp);REQUIRE(found_convex);
+PlannedStrategyTiming planned_strategy_timing(
+    const problem::ResolvedProblem &p, const FamilyRequest &q, const ProgramIdentity &program,
+    const ar::ModuleIdentity &backend, const std::vector<registry::Provenance> &provenance,
+    const std::shared_ptr<StrategyTimingClock> &clock, bool split_build = false) {
+    const ar::Unavailable missing{ar::MissingReason::not_instrumented, {}};
+    const ar::ModuleIdentity strategy{{"csl.synthesis.strategy-b"}, "1", missing};
+    auto lp = ar::ModuleIdentity{{"csl.lp.highs"}, "1", missing};
+    auto convex = ar::ModuleIdentity{{"csl.convex.highs"}, "1", missing};
+    bool found_lp = false, found_convex = false;
+    for (const auto &item : provenance)
+        if (item.actual) {
+            if (item.port == "lp") {
+                lp = {item.actual->id, item.actual->version, missing};
+                found_lp = true;
+            }
+            if (item.port == "convex") {
+                convex = {item.actual->id, item.actual->version, missing};
+                found_convex = true;
+            }
+        }
+    REQUIRE(found_lp);
+    REQUIRE(found_convex);
     ar::ConfigurationInput configuration;
-    configuration.collection={true,ar::CollectionMode::detail,8,10000,8,1000};
-    configuration.modules={{"strategy",strategy,{}},{"lp",lp,{}},{"convex",convex,{}}};
-    configuration.resources={1,1,1,{}};configuration.numerical=q.numerical;
-    configuration.output={ar::OutputKind::synthesis,q.assurance,q.target,q.representation,{0,0,{},{}}};
-    configuration.selector={{"test.selector"},"1",{}};
-    configuration.strategy={{"csl.synthesis.strategy-b"},lp.id,convex.id,{},{},{},{},{"test.selector"},q.representation};
-    auto resolved=accepted(ar::resolve_configuration(configuration));
+    configuration.collection = {true, ar::CollectionMode::detail, 8, 10000, 8, 1000};
+    configuration.modules = {{"strategy", strategy, {}}, {"lp", lp, {}}, {"convex", convex, {}}};
+    configuration.resources = {1, 1, 1, {}};
+    configuration.numerical = q.numerical;
+    configuration.output = {
+        ar::OutputKind::synthesis, q.assurance, q.target, q.representation, {0, 0, {}, {}}};
+    configuration.selector = {{"test.selector"}, "1", {}};
+    configuration.strategy = {{"csl.synthesis.strategy-b"},
+                              lp.id,
+                              convex.id,
+                              {},
+                              {},
+                              {},
+                              {},
+                              {"test.selector"},
+                              q.representation};
+    auto resolved = accepted(ar::resolve_configuration(configuration));
     std::vector<ar::SpanDescriptor> spans(2);
-    spans[0].id={501};spans[0].shard=0;spans[0].bucket=0;spans[0].task="strategy";spans[0].operation="run";
-    spans[0].module=strategy;spans[0].clock=test_wall_domain().id;spans[0].requested_assurance=q.assurance;
-    spans[0].applied_assurance=ar::Available<Assurance>{q.assurance};
-    spans[1].id={502};spans[1].parent=ar::SpanParent{{501},ar::ParentKind::nested};spans[1].shard=0;spans[1].bucket=0;
-    spans[1].task="strategy";spans[1].operation="program.solve";spans[1].module=strategy;
-    spans[1].backend=std::make_shared<const ar::ModuleIdentity>(backend);
-    spans[1].program=std::make_shared<const ProgramIdentity>(program);spans[1].clock=test_wall_domain().id;
-    spans[1].requested_assurance=q.assurance;spans[1].applied_assurance=ar::Available<Assurance>{q.assurance};
-    std::vector<std::string> operations{"run","program.solve"};
-    if(split_build) {
-        const std::array<std::string,4> names{"strategy-b/program-build","strategy-b/joint-h-assembly",
-            "strategy-b/objective-lift","strategy-b/program-freeze"};
-        for(std::size_t i=0;i<names.size();++i) {
-            ar::SpanDescriptor span{};span.id={503+i};
-            span.parent=ar::SpanParent{{i?503u:501u},ar::ParentKind::nested};
-            span.task="strategy";span.operation=names[i];span.module=strategy;span.clock=test_wall_domain().id;
-            span.requested_assurance=q.assurance;span.applied_assurance=ar::Available<Assurance>{q.assurance};
-            spans.push_back(std::move(span));operations.push_back(names[i]);
+    spans[0].id = {501};
+    spans[0].shard = 0;
+    spans[0].bucket = 0;
+    spans[0].task = "strategy";
+    spans[0].operation = "run";
+    spans[0].module = strategy;
+    spans[0].clock = test_wall_domain().id;
+    spans[0].requested_assurance = q.assurance;
+    spans[0].applied_assurance = ar::Available<Assurance>{q.assurance};
+    spans[1].id = {502};
+    spans[1].parent = ar::SpanParent{{501}, ar::ParentKind::nested};
+    spans[1].shard = 0;
+    spans[1].bucket = 0;
+    spans[1].task = "strategy";
+    spans[1].operation = "program.solve";
+    spans[1].module = strategy;
+    spans[1].backend = std::make_shared<const ar::ModuleIdentity>(backend);
+    spans[1].program = std::make_shared<const ProgramIdentity>(program);
+    spans[1].clock = test_wall_domain().id;
+    spans[1].requested_assurance = q.assurance;
+    spans[1].applied_assurance = ar::Available<Assurance>{q.assurance};
+    std::vector<std::string> operations{"run", "program.solve"};
+    if (split_build) {
+        const std::array<std::string, 4> names{
+            "strategy-b/program-build", "strategy-b/joint-h-assembly", "strategy-b/objective-lift",
+            "strategy-b/program-freeze"};
+        for (std::size_t i = 0; i < names.size(); ++i) {
+            ar::SpanDescriptor span{};
+            span.id = {503 + i};
+            span.parent = ar::SpanParent{{i ? 503u : 501u}, ar::ParentKind::nested};
+            span.task = "strategy";
+            span.operation = names[i];
+            span.module = strategy;
+            span.clock = test_wall_domain().id;
+            span.requested_assurance = q.assurance;
+            span.applied_assurance = ar::Available<Assurance>{q.assurance};
+            spans.push_back(std::move(span));
+            operations.push_back(names[i]);
         }
     }
-    const auto plan=accepted(ob::make_collection_plan({p,resolved,{"strategy-timing-run"},
-        {test_wall_domain()},std::move(spans),1,{"strategy"},std::move(operations)}));
-    return {accepted(ob::make_timing_collector(plan,clock,{501},{{502}})),std::move(resolved)};
+    const auto plan = accepted(ob::make_collection_plan({p,
+                                                         resolved,
+                                                         {"strategy-timing-run"},
+                                                         {test_wall_domain()},
+                                                         std::move(spans),
+                                                         1,
+                                                         {"strategy"},
+                                                         std::move(operations)}));
+    return {accepted(ob::make_timing_collector(plan, clock, {501}, {{502}})), std::move(resolved)};
 }
-void require_publishable_timing(const problem::ResolvedProblem& p,const SynthesisResult& result,
-    const PlannedStrategyTiming& timing,const ob::TimingReport& report) {
-    const auto coordinates=p.constraints().coordinates();
-    const ar::Unavailable missing{ar::MissingReason::not_instrumented,{}};
-    ar::RunRecord record{p.identity(),coordinates.dimensions,coordinates.horizon,timing.configuration,
-        {"strategy-timing-run"},ar::project_final(result),report.observations,
-        {missing,missing,missing,missing,true,ar::MemoryAccounting::unlimited},{},{},ar::ProblemProvenance::problem_revalidated};
-    const auto published=ar::publish_run({p,std::move(record)});
+void require_publishable_timing(const problem::ResolvedProblem &p, const SynthesisResult &result,
+                                const PlannedStrategyTiming &timing,
+                                const ob::TimingReport &report) {
+    const auto coordinates = p.constraints().coordinates();
+    const ar::Unavailable missing{ar::MissingReason::not_instrumented, {}};
+    ar::RunRecord record{
+        p.identity(),
+        coordinates.dimensions,
+        coordinates.horizon,
+        timing.configuration,
+        {"strategy-timing-run"},
+        ar::project_final(result),
+        report.observations,
+        {missing, missing, missing, missing, true, ar::MemoryAccounting::unlimited},
+        {},
+        {},
+        ar::ProblemProvenance::problem_revalidated};
+    const auto published = ar::publish_run({p, std::move(record)});
     REQUIRE(std::holds_alternative<ar::RunStatistics>(published));
 }
 }
 TEST_CASE("Strategy B records planned run and actual generated-program solver spans") {
-    const auto p=resolve(integrator());const auto q=request(p);const auto prepared=registered_prepared(p,q);
-    const auto joint=accepted(build_joint_program(p,q));
-    const auto program=std::visit([](const auto& value){return value.identity();},joint.program);
-    const auto provenance=prepared.provenance();
-    const auto port=std::holds_alternative<LinearProgram>(joint.program)?"lp":"convex";
-    const auto provider=std::find_if(provenance.begin(),provenance.end(),[&](const auto& item){return item.port==port;});
-    REQUIRE(provider!=provenance.end());REQUIRE(provider->actual);
-    auto clock=std::make_shared<StrategyTimingClock>();
-    ExecutionContext context;context.numerical=q.numerical;context.run_id="strategy-timing-run";
-    context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
-    const auto timing=planned_strategy_timing(p,q,program,{provider->actual->id,provider->actual->version,
-        ar::Unavailable{ar::MissingReason::not_instrumented,{}}},provenance,clock);
-    context.timing=timing.collector;
+    const auto p = resolve(integrator());
+    const auto q = request(p);
+    const auto prepared = registered_prepared(p, q);
+    const auto joint = accepted(build_joint_program(p, q));
+    const auto program =
+        std::visit([](const auto &value) { return value.identity(); }, joint.program);
+    const auto provenance = prepared.provenance();
+    const auto port = std::holds_alternative<LinearProgram>(joint.program) ? "lp" : "convex";
+    const auto provider = std::find_if(provenance.begin(), provenance.end(),
+                                       [&](const auto &item) { return item.port == port; });
+    REQUIRE(provider != provenance.end());
+    REQUIRE(provider->actual);
+    auto clock = std::make_shared<StrategyTimingClock>();
+    ExecutionContext context;
+    context.numerical = q.numerical;
+    context.run_id = "strategy-timing-run";
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    const auto timing =
+        planned_strategy_timing(p, q, program,
+                                {provider->actual->id, provider->actual->version,
+                                 ar::Unavailable{ar::MissingReason::not_instrumented, {}}},
+                                provenance, clock);
+    context.timing = timing.collector;
 
-    const auto result=accepted(prepared.create()->run(context));
-    CHECK(result.termination==Termination::completed);
-    const auto report=accepted(context.timing->snapshot());
-    REQUIRE(report.spans.size()==2);
-    CHECK(report.spans[0].id==ar::SpanId{501});CHECK(report.spans[1].id==ar::SpanId{502});
-    CHECK(std::get<ar::Available<std::uint64_t>>(report.run_wall_ticks).value==30);
-    CHECK(std::get<ar::Available<std::uint64_t>>(report.spans[0].inclusive_wall_ticks).value==30);
-    CHECK(std::get<ar::Available<std::uint64_t>>(report.spans[1].inclusive_wall_ticks).value==10);
-    require_publishable_timing(p,result,timing,report);
+    const auto result = accepted(prepared.create()->run(context));
+    CHECK(result.termination == Termination::completed);
+    const auto report = accepted(context.timing->snapshot());
+    REQUIRE(report.spans.size() == 2);
+    CHECK(report.spans[0].id == ar::SpanId{501});
+    CHECK(report.spans[1].id == ar::SpanId{502});
+    CHECK(std::get<ar::Available<std::uint64_t>>(report.run_wall_ticks).value == 30);
+    CHECK(std::get<ar::Available<std::uint64_t>>(report.spans[0].inclusive_wall_ticks).value == 30);
+    CHECK(std::get<ar::Available<std::uint64_t>>(report.spans[1].inclusive_wall_ticks).value == 10);
+    require_publishable_timing(p, result, timing, report);
 }
 TEST_CASE("Strategy B closes the run and solver spans when the solver stops") {
-    const auto p=resolve(integrator());const auto q=request(p);std::stop_source cancellation;
-    const auto prepared=registered_prepared(p,q,false,Termination::cancelled,&cancellation);
-    const auto joint=accepted(build_joint_program(p,q));
-    const auto program=std::visit([](const auto& value){return value.identity();},joint.program);
-    const auto provenance=prepared.provenance();
-    const auto port=std::holds_alternative<LinearProgram>(joint.program)?"lp":"convex";
-    const auto provider=std::find_if(provenance.begin(),provenance.end(),[&](const auto& item){return item.port==port;});
-    REQUIRE(provider!=provenance.end());REQUIRE(provider->actual);
-    auto clock=std::make_shared<StrategyTimingClock>();
-    ExecutionContext context;context.numerical=q.numerical;context.run_id="strategy-timing-run";
-    const auto timing=planned_strategy_timing(p,q,program,{provider->actual->id,provider->actual->version,
-        ar::Unavailable{ar::MissingReason::not_instrumented,{}}},provenance,clock);
-    context.timing=timing.collector;
-    context.cancellation=cancellation.get_token();
+    const auto p = resolve(integrator());
+    const auto q = request(p);
+    std::stop_source cancellation;
+    const auto prepared = registered_prepared(p, q, false, Termination::cancelled, &cancellation);
+    const auto joint = accepted(build_joint_program(p, q));
+    const auto program =
+        std::visit([](const auto &value) { return value.identity(); }, joint.program);
+    const auto provenance = prepared.provenance();
+    const auto port = std::holds_alternative<LinearProgram>(joint.program) ? "lp" : "convex";
+    const auto provider = std::find_if(provenance.begin(), provenance.end(),
+                                       [&](const auto &item) { return item.port == port; });
+    REQUIRE(provider != provenance.end());
+    REQUIRE(provider->actual);
+    auto clock = std::make_shared<StrategyTimingClock>();
+    ExecutionContext context;
+    context.numerical = q.numerical;
+    context.run_id = "strategy-timing-run";
+    const auto timing =
+        planned_strategy_timing(p, q, program,
+                                {provider->actual->id, provider->actual->version,
+                                 ar::Unavailable{ar::MissingReason::not_instrumented, {}}},
+                                provenance, clock);
+    context.timing = timing.collector;
+    context.cancellation = cancellation.get_token();
 
-    const auto result=accepted(prepared.create()->run(context));
-    CHECK(result.termination==Termination::cancelled);
-    const auto report=accepted(context.timing->snapshot());
-    REQUIRE(report.spans.size()==2);
-    CHECK(std::get<ar::Available<std::uint64_t>>(report.run_wall_ticks).value==30);
-    const auto& records=report.observations.description().spans;REQUIRE(records.size()==2);
+    const auto result = accepted(prepared.create()->run(context));
+    CHECK(result.termination == Termination::cancelled);
+    const auto report = accepted(context.timing->snapshot());
+    REQUIRE(report.spans.size() == 2);
+    CHECK(std::get<ar::Available<std::uint64_t>>(report.run_wall_ticks).value == 30);
+    const auto &records = report.observations.description().spans;
+    REQUIRE(records.size() == 2);
     CHECK(std::holds_alternative<ar::ReturnedSpan>(records[0].status));
-    CHECK(std::get<ar::Available<Termination>>(records[0].termination).value==Termination::cancelled);
+    CHECK(std::get<ar::Available<Termination>>(records[0].termination).value ==
+          Termination::cancelled);
     CHECK(std::holds_alternative<ar::ReturnedSpan>(records[1].status));
-    CHECK(std::get<ar::Available<Termination>>(records[1].termination).value==Termination::cancelled);
-    require_publishable_timing(p,result,timing,report);
+    CHECK(std::get<ar::Available<Termination>>(records[1].termination).value ==
+          Termination::cancelled);
+    require_publishable_timing(p, result, timing, report);
 }
-TEST_CASE("Strategy B observes sparse assembly and program freeze without changing the joint problem") {
-    for(const bool linear:{false,true}) {
+TEST_CASE(
+    "Strategy B observes sparse assembly and program freeze without changing the joint problem") {
+    for (const bool linear : {false, true}) {
         CAPTURE(linear);
-        const auto p=resolve(linear?integrator(LinearTerminal{{1},0}):integrator());
-        const auto q=request(p);const auto joint=accepted(build_joint_program(p,q));
-        const auto prepared=registered_prepared(p,q);const auto provenance=prepared.provenance();
-        const auto port=linear?"lp":"convex";
-        const auto provider=std::find_if(provenance.begin(),provenance.end(),[&](const auto& item){return item.port==port;});
-        REQUIRE(provider!=provenance.end());REQUIRE(provider->actual);
-        const auto program=std::visit([](const auto& value){return value.identity();},joint.program);
-        auto clock=std::make_shared<StrategyTimingClock>();
-        const auto timing=planned_strategy_timing(p,q,program,{provider->actual->id,provider->actual->version,
-            ar::Unavailable{ar::MissingReason::not_instrumented,{}}},provenance,clock,true);
-        ExecutionContext context;context.numerical=q.numerical;context.run_id="strategy-timing-run";
-        context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});context.timing=timing.collector;
-        const auto result=accepted(prepared.create()->run(context));
-        REQUIRE(result.termination==Termination::completed);
-        CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+        const auto p = resolve(linear ? integrator(LinearTerminal{{1}, 0}) : integrator());
+        const auto q = request(p);
+        const auto joint = accepted(build_joint_program(p, q));
+        const auto prepared = registered_prepared(p, q);
+        const auto provenance = prepared.provenance();
+        const auto port = linear ? "lp" : "convex";
+        const auto provider = std::find_if(provenance.begin(), provenance.end(),
+                                           [&](const auto &item) { return item.port == port; });
+        REQUIRE(provider != provenance.end());
+        REQUIRE(provider->actual);
+        const auto program =
+            std::visit([](const auto &value) { return value.identity(); }, joint.program);
+        auto clock = std::make_shared<StrategyTimingClock>();
+        const auto timing =
+            planned_strategy_timing(p, q, program,
+                                    {provider->actual->id, provider->actual->version,
+                                     ar::Unavailable{ar::MissingReason::not_instrumented, {}}},
+                                    provenance, clock, true);
+        ExecutionContext context;
+        context.numerical = q.numerical;
+        context.run_id = "strategy-timing-run";
+        context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+        context.timing = timing.collector;
+        const auto result = accepted(prepared.create()->run(context));
+        REQUIRE(result.termination == Termination::completed);
+        CHECK(result.outcome.value == MathematicalOutcome::undetermined);
         REQUIRE(payload(result).optimization);
-        CHECK(payload(result).optimization->outcome.value==MathematicalOutcome::optimal);
-        const auto& retained=payload(result).construction;
-        CHECK(retained.constraints.row_offsets==joint.constraints.row_offsets);
-        CHECK(retained.constraints.column_indices==joint.constraints.column_indices);
-        CHECK(retained.constraints.values==joint.constraints.values);
-        CHECK(retained.source_to_program==joint.source_to_program);
+        CHECK(payload(result).optimization->outcome.value == MathematicalOutcome::optimal);
+        const auto &retained = payload(result).construction;
+        CHECK(retained.constraints.row_offsets == joint.constraints.row_offsets);
+        CHECK(retained.constraints.column_indices == joint.constraints.column_indices);
+        CHECK(retained.constraints.values == joint.constraints.values);
+        CHECK(retained.source_to_program == joint.source_to_program);
         REQUIRE_FALSE(result.incumbents.empty());
-        for(const auto& candidate:result.incumbents) {
-            const auto& w=candidate.witness;
-            REQUIRE(w.states.size()==3);REQUIRE(w.controls.size()==2);CHECK(w.states[0][0]==0);
-            for(std::size_t t=0;t<2;++t) {
-                CHECK(w.controls[t][0]>=0);CHECK(w.controls[t][0]<=1);
-                CHECK(w.states[t+1][0]==doctest::Approx(w.states[t][0]+w.controls[t][0]));
+        for (const auto &candidate : result.incumbents) {
+            const auto &w = candidate.witness;
+            REQUIRE(w.states.size() == 3);
+            REQUIRE(w.controls.size() == 2);
+            CHECK(w.states[0][0] == 0);
+            for (std::size_t t = 0; t < 2; ++t) {
+                CHECK(w.controls[t][0] >= 0);
+                CHECK(w.controls[t][0] <= 1);
+                CHECK(w.states[t + 1][0] == doctest::Approx(w.states[t][0] + w.controls[t][0]));
             }
-            const auto original=linear?w.states[2][0]:std::pow(w.states[2][0]-1,2);
-            CHECK(original==doctest::Approx(0));CHECK(w.original_objective==doctest::Approx(original));
+            const auto original = linear ? w.states[2][0] : std::pow(w.states[2][0] - 1, 2);
+            CHECK(original == doctest::Approx(0));
+            CHECK(w.original_objective == doctest::Approx(original));
         }
-        const auto report=accepted(context.timing->snapshot());const auto& records=report.observations.description().spans;
-        REQUIRE(records.size()==6);
-        for(std::size_t i=2;i<6;++i) {
+        const auto report = accepted(context.timing->snapshot());
+        const auto &records = report.observations.description().spans;
+        REQUIRE(records.size() == 6);
+        for (std::size_t i = 2; i < 6; ++i) {
             REQUIRE(records[i].completion_observed);
-            CHECK(std::get<ar::ReturnedSpan>(records[i].status).termination==Termination::completed);
-            CHECK(std::get<ar::Available<std::uint64_t>>(report.spans[i].inclusive_wall_ticks).value>0);
+            CHECK(std::get<ar::ReturnedSpan>(records[i].status).termination ==
+                  Termination::completed);
+            CHECK(
+                std::get<ar::Available<std::uint64_t>>(report.spans[i].inclusive_wall_ticks).value >
+                0);
         }
-        CHECK(records[3].descriptor.input_size==joint.constraints.cols);
-        CHECK(records[3].descriptor.output_size==joint.constraints.values.size());
-        CHECK(records[5].descriptor.input_size==joint.constraints.values.size());
-        CHECK(records[5].descriptor.output_size==joint.constraints.cols);
-        require_publishable_timing(p,result,timing,report);
+        CHECK(records[3].descriptor.input_size == joint.constraints.cols);
+        CHECK(records[3].descriptor.output_size == joint.constraints.values.size());
+        CHECK(records[5].descriptor.input_size == joint.constraints.values.size());
+        CHECK(records[5].descriptor.output_size == joint.constraints.cols);
+        require_publishable_timing(p, result, timing, report);
     }
 }
 TEST_CASE("Strategy B split build observations retain a later resource stop") {
-    const auto p=resolve(integrator(LinearTerminal{{1},0}));auto q=request(p);q.materialization_limit=1;
-    const auto joint=accepted(build_joint_program(p,q));const auto prepared=registered_prepared(p,q);
-    const auto provenance=prepared.provenance();
-    const auto provider=std::find_if(provenance.begin(),provenance.end(),[](const auto& item){return item.port=="lp";});
-    REQUIRE(provider!=provenance.end());REQUIRE(provider->actual);
-    const auto program=std::get<LinearProgram>(joint.program).identity();auto clock=std::make_shared<StrategyTimingClock>();
-    const auto timing=planned_strategy_timing(p,q,program,{provider->actual->id,provider->actual->version,
-        ar::Unavailable{ar::MissingReason::not_instrumented,{}}},provenance,clock,true);
-    ExecutionContext context;context.numerical=q.numerical;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
-    context.timing=timing.collector;const auto result=accepted(prepared.create()->run(context));
-    CHECK(result.termination==Termination::resource_limit);CHECK(result.incumbents.empty());
-    const auto report=accepted(context.timing->snapshot());const auto& records=report.observations.description().spans;
-    REQUIRE(records.size()==6);CHECK_FALSE(records[1].completion_observed);
-    for(std::size_t i=2;i<6;++i)REQUIRE(records[i].completion_observed);
+    const auto p = resolve(integrator(LinearTerminal{{1}, 0}));
+    auto q = request(p);
+    q.materialization_limit = 1;
+    const auto joint = accepted(build_joint_program(p, q));
+    const auto prepared = registered_prepared(p, q);
+    const auto provenance = prepared.provenance();
+    const auto provider = std::find_if(provenance.begin(), provenance.end(),
+                                       [](const auto &item) { return item.port == "lp"; });
+    REQUIRE(provider != provenance.end());
+    REQUIRE(provider->actual);
+    const auto program = std::get<LinearProgram>(joint.program).identity();
+    auto clock = std::make_shared<StrategyTimingClock>();
+    const auto timing =
+        planned_strategy_timing(p, q, program,
+                                {provider->actual->id, provider->actual->version,
+                                 ar::Unavailable{ar::MissingReason::not_instrumented, {}}},
+                                provenance, clock, true);
+    ExecutionContext context;
+    context.numerical = q.numerical;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    context.timing = timing.collector;
+    const auto result = accepted(prepared.create()->run(context));
+    CHECK(result.termination == Termination::resource_limit);
+    CHECK(result.incumbents.empty());
+    const auto report = accepted(context.timing->snapshot());
+    const auto &records = report.observations.description().spans;
+    REQUIRE(records.size() == 6);
+    CHECK_FALSE(records[1].completion_observed);
+    for (std::size_t i = 2; i < 6; ++i)
+        REQUIRE(records[i].completion_observed);
 }
 TEST_CASE("row-derived intervals are invariant under positive H-row scaling") {
-    const Vector origin{0,0,0.5,0,0.5},direction{0,1,0,1,0};
-    for(const double scale:{1e-200,1.0,1e200}) {
-        const auto interval=parameter_interval(scaled_parameter_interval(scale),origin,direction);
-        CHECK(std::isfinite(interval.first));CHECK(std::isfinite(interval.second));
-        CHECK(std::abs(interval.first)<=1e-12);CHECK(std::abs(interval.second-1)<=1e-12);
+    const Vector origin{0, 0, 0.5, 0, 0.5}, direction{0, 1, 0, 1, 0};
+    for (const double scale : {1e-200, 1.0, 1e200}) {
+        const auto interval =
+            parameter_interval(scaled_parameter_interval(scale), origin, direction);
+        CHECK(std::isfinite(interval.first));
+        CHECK(std::isfinite(interval.second));
+        CHECK(std::abs(interval.first) <= 1e-12);
+        CHECK(std::abs(interval.second - 1) <= 1e-12);
     }
 }
 TEST_CASE("a nearly parallel equality collapses the parameter interval") {
-    const auto interval=parameter_interval(midpoint_equality_parameter_interval(),
-        Vector{0,0,0,0,0},Vector{0,1,0,0,0});
-    CHECK(std::isfinite(interval.first));CHECK(std::isfinite(interval.second));
-    CHECK(std::abs(interval.first-0.5)<=1e-12);CHECK(std::abs(interval.second-0.5)<=1e-12);
+    const auto interval = parameter_interval(midpoint_equality_parameter_interval(),
+                                             Vector{0, 0, 0, 0, 0}, Vector{0, 1, 0, 0, 0});
+    CHECK(std::isfinite(interval.first));
+    CHECK(std::isfinite(interval.second));
+    CHECK(std::abs(interval.first - 0.5) <= 1e-12);
+    CHECK(std::abs(interval.second - 0.5) <= 1e-12);
 }
 TEST_CASE("joint program preserves the two-step integrator and original terminal objective") {
-    const auto p=resolve(integrator()); const auto program=accepted(build_joint_program(p,request(p)));
-    CHECK(feasible(program,{0,0,1,0,1})); CHECK(feasible(program,{0,1,1,1,0}));
-    CHECK_FALSE(feasible(program,{0,0,1,1,0}));
-    const auto& qp=std::get<ConvexProgram>(program.program);
-    const auto e=accepted(optimization::evaluate_primal(qp,Vector{0,1,2,1,1},{1e-8,1e-8},{{"oracle"},"1"}));
-    CHECK(e.original_objective==1); CHECK(program.rows.size()==program.constraints.rows);
-    CHECK(program.source_to_program==std::vector<std::size_t>{0,1,2,3,4});
+    const auto p = resolve(integrator());
+    const auto program = accepted(build_joint_program(p, request(p)));
+    CHECK(feasible(program, {0, 0, 1, 0, 1}));
+    CHECK(feasible(program, {0, 1, 1, 1, 0}));
+    CHECK_FALSE(feasible(program, {0, 0, 1, 1, 0}));
+    const auto &qp = std::get<ConvexProgram>(program.program);
+    const auto e = accepted(
+        optimization::evaluate_primal(qp, Vector{0, 1, 2, 1, 1}, {1e-8, 1e-8}, {{"oracle"}, "1"}));
+    CHECK(e.original_objective == 1);
+    CHECK(program.rows.size() == program.constraints.rows);
+    CHECK(program.source_to_program == std::vector<std::size_t>{0, 1, 2, 3, 4});
 }
 TEST_CASE("T-S01 extracts all correlated optimal histories without claiming completeness") {
-    const auto p=resolve(integrator());const auto r=oracle({0,0.25,1,0.25,0.75},0).solve(p,request(p),{});
-    const auto& data=payload(r);CHECK(contains(data.relation,{0,0,1,0,1}));
-    CHECK(contains(data.relation,{0,1,1,1,0}));CHECK(contains(data.relation,{0,0.25,1,0.25,0.75}));
-    CHECK(contains(data.relation,{0,0.5,1,0.5,0.5}));
-    CHECK_FALSE(contains(data.relation,{0,1,2,1,1}));CHECK_FALSE(contains(data.relation,{0,0,0,0,0}));
-    CHECK_FALSE(contains(data.relation,{0,0,1,1,0}));
-    REQUIRE(data.optimization);CHECK(data.optimization->objective.lower->value==0);
-    CHECK(r.termination==Termination::completed);
-    CHECK(r.outcome.value==MathematicalOutcome::undetermined);CHECK_FALSE(r.objective.lower);
-    REQUIRE(r.objective.upper);CHECK(r.objective.upper->value==0);REQUIRE(r.incumbents.size()==1);
-    CHECK(r.incumbents[0].witness.original_objective==0);
+    const auto p = resolve(integrator());
+    const auto r = oracle({0, 0.25, 1, 0.25, 0.75}, 0).solve(p, request(p), {});
+    const auto &data = payload(r);
+    CHECK(contains(data.relation, {0, 0, 1, 0, 1}));
+    CHECK(contains(data.relation, {0, 1, 1, 1, 0}));
+    CHECK(contains(data.relation, {0, 0.25, 1, 0.25, 0.75}));
+    CHECK(contains(data.relation, {0, 0.5, 1, 0.5, 0.5}));
+    CHECK_FALSE(contains(data.relation, {0, 1, 2, 1, 1}));
+    CHECK_FALSE(contains(data.relation, {0, 0, 0, 0, 0}));
+    CHECK_FALSE(contains(data.relation, {0, 0, 1, 1, 0}));
+    REQUIRE(data.optimization);
+    CHECK(data.optimization->objective.lower->value == 0);
+    CHECK(r.termination == Termination::completed);
+    CHECK(r.outcome.value == MathematicalOutcome::undetermined);
+    CHECK_FALSE(r.objective.lower);
+    REQUIRE(r.objective.upper);
+    CHECK(r.objective.upper->value == 0);
+    REQUIRE(r.incumbents.size() == 1);
+    CHECK(r.incumbents[0].witness.original_objective == 0);
     CHECK_FALSE(r.family->registry_verified());
 
     // Both strategies receive the same resolved problem and effective request.
-    const auto a_result=run_strategy_a(p,request(p));
-    CHECK(a_result.termination==Termination::completed);
-    CHECK(a_result.outcome.value==MathematicalOutcome::undetermined);
-    CHECK(r.family->target()==FamilyTarget::candidate_relaxation);
-    REQUIRE(a_result.family);CHECK(a_result.family->target()==FamilyTarget::candidate_relaxation);
+    const auto a_result = run_strategy_a(p, request(p));
+    CHECK(a_result.termination == Termination::completed);
+    CHECK(a_result.outcome.value == MathematicalOutcome::undetermined);
+    CHECK(r.family->target() == FamilyTarget::candidate_relaxation);
+    REQUIRE(a_result.family);
+    CHECK(a_result.family->target() == FamilyTarget::candidate_relaxation);
     CHECK_FALSE(a_result.family->registry_verified());
-    const auto& a_relation=strategy_a_relation(a_result);
-    for(const auto* relation:{&data.relation,&a_relation}) {
-        CHECK(contains(*relation,{0,0,1,0,1}));
-        CHECK(contains(*relation,{0,0.25,1,0.25,0.75}));
-        CHECK(contains(*relation,{0,1,1,1,0}));
-        CHECK_FALSE(contains(*relation,{0,0,0,0,0}));
+    const auto &a_relation = strategy_a_relation(a_result);
+    for (const auto *relation : {&data.relation, &a_relation}) {
+        CHECK(contains(*relation, {0, 0, 1, 0, 1}));
+        CHECK(contains(*relation, {0, 0.25, 1, 0.25, 0.75}));
+        CHECK(contains(*relation, {0, 1, 1, 1, 0}));
+        CHECK_FALSE(contains(*relation, {0, 0, 0, 0, 0}));
     }
-    const Vector first{0,0,1,0,1},direction{0,1,0,1,-1};
-    const auto b_h=std::get<sets::HRepresentation>(data.relation.representation());
-    const auto a_h=std::get<sets::HRepresentation>(a_relation.representation());
-    CHECK(equality_rank(b_h)==4);CHECK(equality_rank(a_h)==4);
-    for(const auto* h:{&b_h,&a_h}) {
-        const auto interval=parameter_interval(*h,first,direction);
-        CHECK(std::isfinite(interval.first));CHECK(std::isfinite(interval.second));
-        CHECK(std::abs(interval.first)<=1e-7);CHECK(std::abs(interval.second-1)<=1e-7);
+    const Vector first{0, 0, 1, 0, 1}, direction{0, 1, 0, 1, -1};
+    const auto b_h = std::get<sets::HRepresentation>(data.relation.representation());
+    const auto a_h = std::get<sets::HRepresentation>(a_relation.representation());
+    CHECK(equality_rank(b_h) == 4);
+    CHECK(equality_rank(a_h) == 4);
+    for (const auto *h : {&b_h, &a_h}) {
+        const auto interval = parameter_interval(*h, first, direction);
+        CHECK(std::isfinite(interval.first));
+        CHECK(std::isfinite(interval.second));
+        CHECK(std::abs(interval.first) <= 1e-7);
+        CHECK(std::abs(interval.second - 1) <= 1e-7);
     }
 }
 TEST_CASE("T-S02 constant objective retains every feasible history and terminal point") {
-    for(const TerminalObjective objective:std::vector<TerminalObjective>{LinearTerminal{{0},3},QuadraticTerminal{{1,1,{0}},{0},3},ResidualNormTerminal{{1,1,{0}},{3}}}) {
-        const auto p=resolve(integrator(objective));const auto q=request(p);
-        const auto r=oracle({0,0,0,0,0},3).solve(p,q,{});
-        const auto& data=payload(r);CHECK(contains(data.relation,{0,0,0,0,0}));CHECK(contains(data.relation,{0,1,2,1,1}));
-        CHECK(contains(data.relation,{0,0.3,1.1,0.3,0.8}));CHECK_FALSE(contains(data.relation,{0,0,1,1,0}));
-        CHECK(r.termination==Termination::completed);
-        CHECK(r.outcome.value==MathematicalOutcome::undetermined);
-        CHECK(r.family->target()==FamilyTarget::candidate_relaxation);
+    for (const TerminalObjective objective : std::vector<TerminalObjective>{
+             LinearTerminal{{0}, 3}, QuadraticTerminal{{1, 1, {0}}, {0}, 3},
+             ResidualNormTerminal{{1, 1, {0}}, {3}}}) {
+        const auto p = resolve(integrator(objective));
+        const auto q = request(p);
+        const auto r = oracle({0, 0, 0, 0, 0}, 3).solve(p, q, {});
+        const auto &data = payload(r);
+        CHECK(contains(data.relation, {0, 0, 0, 0, 0}));
+        CHECK(contains(data.relation, {0, 1, 2, 1, 1}));
+        CHECK(contains(data.relation, {0, 0.3, 1.1, 0.3, 0.8}));
+        CHECK_FALSE(contains(data.relation, {0, 0, 1, 1, 0}));
+        CHECK(r.termination == Termination::completed);
+        CHECK(r.outcome.value == MathematicalOutcome::undetermined);
+        CHECK(r.family->target() == FamilyTarget::candidate_relaxation);
         CHECK_FALSE(r.family->registry_verified());
-        const auto a_result=run_strategy_a(p,q);
-        CHECK(a_result.termination==Termination::completed);
-        CHECK(a_result.outcome.value==MathematicalOutcome::undetermined);
-        REQUIRE(a_result.family);CHECK(a_result.family->target()==FamilyTarget::candidate_relaxation);
+        const auto a_result = run_strategy_a(p, q);
+        CHECK(a_result.termination == Termination::completed);
+        CHECK(a_result.outcome.value == MathematicalOutcome::undetermined);
+        REQUIRE(a_result.family);
+        CHECK(a_result.family->target() == FamilyTarget::candidate_relaxation);
         CHECK_FALSE(a_result.family->registry_verified());
-        const auto& a_relation=strategy_a_relation(a_result);
-        for(const auto* relation:{&data.relation,&a_relation}) {
-            CHECK(contains(*relation,{0,0,0,0,0}));
-            CHECK(contains(*relation,{0,0,1,0,1}));
-            CHECK(contains(*relation,{0,1,1,1,0}));
-            CHECK(contains(*relation,{0,1,2,1,1}));
-            CHECK(contains(*relation,{0,0.3,1.1,0.3,0.8}));
-            CHECK_FALSE(contains(*relation,{0,0,1,1,0}));
-            CHECK_FALSE(contains(*relation,{0,1.1,1.1,1.1,0}));
+        const auto &a_relation = strategy_a_relation(a_result);
+        for (const auto *relation : {&data.relation, &a_relation}) {
+            CHECK(contains(*relation, {0, 0, 0, 0, 0}));
+            CHECK(contains(*relation, {0, 0, 1, 0, 1}));
+            CHECK(contains(*relation, {0, 1, 1, 1, 0}));
+            CHECK(contains(*relation, {0, 1, 2, 1, 1}));
+            CHECK(contains(*relation, {0, 0.3, 1.1, 0.3, 0.8}));
+            CHECK_FALSE(contains(*relation, {0, 0, 1, 1, 0}));
+            CHECK_FALSE(contains(*relation, {0, 1.1, 1.1, 1.1, 0}));
         }
-        CHECK(equality_rank(std::get<sets::HRepresentation>(data.relation.representation()))==3);
-        CHECK(equality_rank(std::get<sets::HRepresentation>(a_relation.representation()))==3);
+        CHECK(equality_rank(std::get<sets::HRepresentation>(data.relation.representation())) == 3);
+        CHECK(equality_rank(std::get<sets::HRepresentation>(a_relation.representation())) == 3);
     }
 }
 TEST_CASE("T-S03 singular A preserves earlier controls at a unique terminal optimum") {
-    auto input=integrator(QuadraticTerminal{{1,1,{2}},{-1},0.25});
-    auto model=*input.model;std::get<LinearStage>(model.dynamics.stages).A.values={0};input.model=std::make_shared<const SystemModel>(model);
-    const auto p=resolve(input);const auto q=request(p);
+    auto input = integrator(QuadraticTerminal{{1, 1, {2}}, {-1}, 0.25});
+    auto model = *input.model;
+    std::get<LinearStage>(model.dynamics.stages).A.values = {0};
+    input.model = std::make_shared<const SystemModel>(model);
+    const auto p = resolve(input);
+    const auto q = request(p);
     // Independent full-history derivation: x0=0, x1=u0, x2=u1, and
     // u0,u1 in [0,1]. The objective (x2-1/2)^2 has minimum zero exactly
     // when x2=u1=1/2, leaving u0 free. Thus the full optimal relation is
     // {(0,a,1/2,a,1/2) : 0 <= a <= 1} in (x0,x1,x2,u0,u1) order.
     // Both A stages are zero, so the state matrix is singular.
-    auto b_workspace=registered_prepared(p,q).create();
-    ExecutionContext b_context;b_context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
-    const auto result=accepted(b_workspace->run(b_context));
-    CHECK(result.termination==Termination::completed);
-    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
-    REQUIRE(result.family);CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
-    CHECK_FALSE(result.family->registry_verified());CHECK_FALSE(result.family->partial_registry_verified());
-    const auto& data=payload(result);const auto& relation=data.relation;
-    const Vector first{0,0,0.5,0,0.5},last{0,1,0.5,1,0.5};
-    for(double a:{0.0,0.125,0.25,0.5,0.875,1.0})
-        CHECK(contains(relation,{0,a,0.5,a,0.5}));
-    CHECK_FALSE(contains(relation,{0,0.25,0.6,0.25,0.5}));
-    CHECK_FALSE(contains(relation,{0,0.25,0.5,0.25,0.75}));
-    const auto b_h=std::get<sets::HRepresentation>(relation.representation());
-    CHECK(equality_rank(b_h)==4);
+    auto b_workspace = registered_prepared(p, q).create();
+    ExecutionContext b_context;
+    b_context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    const auto result = accepted(b_workspace->run(b_context));
+    CHECK(result.termination == Termination::completed);
+    CHECK(result.outcome.value == MathematicalOutcome::undetermined);
+    REQUIRE(result.family);
+    CHECK(result.family->target() == FamilyTarget::candidate_relaxation);
+    CHECK_FALSE(result.family->registry_verified());
+    CHECK_FALSE(result.family->partial_registry_verified());
+    const auto &data = payload(result);
+    const auto &relation = data.relation;
+    const Vector first{0, 0, 0.5, 0, 0.5}, last{0, 1, 0.5, 1, 0.5};
+    for (double a : {0.0, 0.125, 0.25, 0.5, 0.875, 1.0})
+        CHECK(contains(relation, {0, a, 0.5, a, 0.5}));
+    CHECK_FALSE(contains(relation, {0, 0.25, 0.6, 0.25, 0.5}));
+    CHECK_FALSE(contains(relation, {0, 0.25, 0.5, 0.25, 0.75}));
+    const auto b_h = std::get<sets::HRepresentation>(relation.representation());
+    CHECK(equality_rank(b_h) == 4);
 
     // Compare the same resolved profile through Strategy A. Rank four plus
     // the shared endpoints confines each convex H set to the same line;
     // intersecting every H-row with this line must yield the entire interval.
-    const auto a_result=run_strategy_a(p,q);const auto& a_relation=strategy_a_relation(a_result);
-    CHECK(a_result.termination==Termination::completed);
-    CHECK(a_result.outcome.value==MathematicalOutcome::undetermined);
-    REQUIRE(a_result.family);CHECK(a_result.family->target()==FamilyTarget::candidate_relaxation);
+    const auto a_result = run_strategy_a(p, q);
+    const auto &a_relation = strategy_a_relation(a_result);
+    CHECK(a_result.termination == Termination::completed);
+    CHECK(a_result.outcome.value == MathematicalOutcome::undetermined);
+    REQUIRE(a_result.family);
+    CHECK(a_result.family->target() == FamilyTarget::candidate_relaxation);
     CHECK_FALSE(a_result.family->registry_verified());
-    const auto a_h=std::get<sets::HRepresentation>(a_relation.representation());
-    CHECK(equality_rank(a_h)==4);
-    CHECK(contains(relation,first));CHECK(contains(relation,last));
-    CHECK(contains(a_relation,first,1e-7));CHECK(contains(a_relation,last,1e-7));
-    const Vector direction{0,1,0,1,0};
-    const auto b_interval=parameter_interval(b_h,first,direction);
-    const auto a_interval=parameter_interval(a_h,first,direction);
-    CHECK(std::isfinite(b_interval.first));CHECK(std::isfinite(b_interval.second));
-    CHECK(std::abs(b_interval.first)<=1e-7);CHECK(std::abs(b_interval.second-1)<=1e-7);
-    CHECK(std::isfinite(a_interval.first));CHECK(std::isfinite(a_interval.second));
-    CHECK(std::abs(a_interval.first)<=1e-7);CHECK(std::abs(a_interval.second-1)<=1e-7);
-    for(const auto& point:std::vector<Vector>{{0,0.25,0.6,0.25,0.5},{0,0.25,0.5,0.25,0.75}}) {
-        CHECK_FALSE(contains(relation,point));CHECK_FALSE(contains(a_relation,point,1e-7));
+    const auto a_h = std::get<sets::HRepresentation>(a_relation.representation());
+    CHECK(equality_rank(a_h) == 4);
+    CHECK(contains(relation, first));
+    CHECK(contains(relation, last));
+    CHECK(contains(a_relation, first, 1e-7));
+    CHECK(contains(a_relation, last, 1e-7));
+    const Vector direction{0, 1, 0, 1, 0};
+    const auto b_interval = parameter_interval(b_h, first, direction);
+    const auto a_interval = parameter_interval(a_h, first, direction);
+    CHECK(std::isfinite(b_interval.first));
+    CHECK(std::isfinite(b_interval.second));
+    CHECK(std::abs(b_interval.first) <= 1e-7);
+    CHECK(std::abs(b_interval.second - 1) <= 1e-7);
+    CHECK(std::isfinite(a_interval.first));
+    CHECK(std::isfinite(a_interval.second));
+    CHECK(std::abs(a_interval.first) <= 1e-7);
+    CHECK(std::abs(a_interval.second - 1) <= 1e-7);
+    for (const auto &point :
+         std::vector<Vector>{{0, 0.25, 0.6, 0.25, 0.5}, {0, 0.25, 0.5, 0.25, 0.75}}) {
+        CHECK_FALSE(contains(relation, point));
+        CHECK_FALSE(contains(a_relation, point, 1e-7));
     }
 }
 TEST_CASE("registered Strategy B publishes the exact T-S03 singular-dynamics family") {
-    auto input=integrator();
-    auto model=*input.model;
-    std::get<LinearStage>(model.dynamics.stages).A.values={0};
-    input.model=std::make_shared<const SystemModel>(model);
-    const auto p=resolve(input);
-    auto exact=request(p);
-    exact.profile=synthesis::ts03_singular_integrator_profile;
-    exact.target=FamilyTarget::exact_optimal_relation;
+    auto input = integrator();
+    auto model = *input.model;
+    std::get<LinearStage>(model.dynamics.stages).A.values = {0};
+    input.model = std::make_shared<const SystemModel>(model);
+    const auto p = resolve(input);
+    auto exact = request(p);
+    exact.profile = synthesis::ts03_singular_integrator_profile;
+    exact.target = FamilyTarget::exact_optimal_relation;
 
-    const auto prepared=registered_prepared(p,exact);
-    auto workspace=prepared.create();
+    const auto prepared = registered_prepared(p, exact);
+    auto workspace = prepared.create();
     ExecutionContext context;
-    context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
-    context.numerical=exact.numerical;
-    const auto result=accepted(workspace->run(context));
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    context.numerical = exact.numerical;
+    const auto result = accepted(workspace->run(context));
 
-    REQUIRE(result.termination==Termination::completed);
-    REQUIRE(result.outcome.value==MathematicalOutcome::optimal);
+    REQUIRE(result.termination == Termination::completed);
+    REQUIRE(result.outcome.value == MathematicalOutcome::optimal);
     REQUIRE(result.objective.lower);
     REQUIRE(result.objective.upper);
-    CHECK(result.objective.lower->value==0);
-    CHECK(result.objective.upper->value==0);
+    CHECK(result.objective.lower->value == 0);
+    CHECK(result.objective.upper->value == 0);
     REQUIRE(result.family);
-    CHECK(result.family->target()==FamilyTarget::exact_optimal_relation);
+    CHECK(result.family->target() == FamilyTarget::exact_optimal_relation);
     CHECK(result.family->registry_verified());
-    CHECK(result.family->identity().request==exact);
-    const auto& complete=std::get<CompleteOptimalFamily>(result.family->outcome());
-    const auto* proof=std::get_if<RegisteredCompletenessEvidence>(&complete.completeness.support);
+    CHECK(result.family->identity().request == exact);
+    const auto &complete = std::get<CompleteOptimalFamily>(result.family->outcome());
+    const auto *proof = std::get_if<RegisteredCompletenessEvidence>(&complete.completeness.support);
     REQUIRE(proof);
-    CHECK(proof->verifier==ModuleId{synthesis::ts03_singular_integrator_verifier});
-    CHECK(proof->proof==synthesis::ts03_singular_integrator_proof);
-    const auto relation=std::dynamic_pointer_cast<const synthesis::Ts03SingularIntegratorRelation>(
-        complete.relation.payload);
+    CHECK(proof->verifier == ModuleId{synthesis::ts03_singular_integrator_verifier});
+    CHECK(proof->proof == synthesis::ts03_singular_integrator_proof);
+    const auto relation =
+        std::dynamic_pointer_cast<const synthesis::Ts03SingularIntegratorRelation>(
+            complete.relation.payload);
     REQUIRE(relation);
-    const auto& h=relation->h_polyhedron();
-    CHECK(contains(h,{0,0,1,0,1}));
-    CHECK(contains(h,{0,0.25,1,0.25,1}));
-    CHECK(contains(h,{0,1,1,1,1}));
-    CHECK_FALSE(contains(h,{0,0.25,0.75,0.25,1}));
-    CHECK_FALSE(contains(h,{0,0.25,1,0.25,0.75}));
-    const auto representation=h.representation();
-    const auto* polyhedron=std::get_if<sets::HRepresentation>(&representation);
+    const auto &h = relation->h_polyhedron();
+    CHECK(contains(h, {0, 0, 1, 0, 1}));
+    CHECK(contains(h, {0, 0.25, 1, 0.25, 1}));
+    CHECK(contains(h, {0, 1, 1, 1, 1}));
+    CHECK_FALSE(contains(h, {0, 0.25, 0.75, 0.25, 1}));
+    CHECK_FALSE(contains(h, {0, 0.25, 1, 0.25, 0.75}));
+    const auto representation = h.representation();
+    const auto *polyhedron = std::get_if<sets::HRepresentation>(&representation);
     REQUIRE(polyhedron);
-    CHECK(polyhedron->equalities.rows()==4);
-    CHECK(polyhedron->inequalities.rows()==2);
+    CHECK(polyhedron->equalities.rows() == 4);
+    CHECK(polyhedron->inequalities.rows() == 2);
 }
 TEST_CASE("provider rejection retains the feasible candidate and scoped request provenance") {
-    const auto p=resolve(integrator());const auto r=oracle({0,0.25,1,0.25,0.75},0,false,true).solve(p,request(p),{});
-    CHECK(r.termination==Termination::operation_rejected);const auto& data=payload(r);CHECK_FALSE(data.optimization);
-    CHECK(contains(data.relation,{0,1,2,1,1}));REQUIRE(std::holds_alternative<ScopedRequestRejection>(r.stop));
-    const auto& stop=std::get<ScopedRequestRejection>(r.stop);CHECK(stop.request.port=="convex");
-    CHECK(stop.retained.partial_or_candidate_family);CHECK_FALSE(stop.completed_lineage.empty());
+    const auto p = resolve(integrator());
+    const auto r = oracle({0, 0.25, 1, 0.25, 0.75}, 0, false, true).solve(p, request(p), {});
+    CHECK(r.termination == Termination::operation_rejected);
+    const auto &data = payload(r);
+    CHECK_FALSE(data.optimization);
+    CHECK(contains(data.relation, {0, 1, 2, 1, 1}));
+    REQUIRE(std::holds_alternative<ScopedRequestRejection>(r.stop));
+    const auto &stop = std::get<ScopedRequestRejection>(r.stop);
+    CHECK(stop.request.port == "convex");
+    CHECK(stop.retained.partial_or_candidate_family);
+    CHECK_FALSE(stop.completed_lineage.empty());
 }
 TEST_CASE("foreign solver evidence cannot refine or promote the candidate") {
-    const auto p=resolve(integrator());const auto r=oracle({0,0.25,1,0.25,0.75},0,true).solve(p,request(p),{});
-    CHECK(r.termination==Termination::contract_rejected);const auto& data=payload(r);CHECK_FALSE(data.optimization);
-    CHECK(contains(data.relation,{0,1,2,1,1}));CHECK(r.incumbents.empty());CHECK_FALSE(r.objective.upper);
+    const auto p = resolve(integrator());
+    const auto r = oracle({0, 0.25, 1, 0.25, 0.75}, 0, true).solve(p, request(p), {});
+    CHECK(r.termination == Termination::contract_rejected);
+    const auto &data = payload(r);
+    CHECK_FALSE(data.optimization);
+    CHECK(contains(data.relation, {0, 1, 2, 1, 1}));
+    CHECK(r.incumbents.empty());
+    CHECK_FALSE(r.objective.upper);
 }
 TEST_CASE("stopped solver evidence remains scoped while valid incumbent and candidate survive") {
-    const auto p=resolve(integrator());const auto r=oracle({0,0.25,1,0.25,0.75},0,false,false,Termination::resource_limit).solve(p,request(p),{});
-    CHECK(r.termination==Termination::resource_limit);const auto& data=payload(r);REQUIRE(data.optimization);
-    CHECK(contains(data.relation,{0,1,1,1,0}));REQUIRE(r.objective.upper);CHECK(r.objective.upper->value==0);
-    CHECK(r.incumbents.size()==1);
+    const auto p = resolve(integrator());
+    const auto r = oracle({0, 0.25, 1, 0.25, 0.75}, 0, false, false, Termination::resource_limit)
+                       .solve(p, request(p), {});
+    CHECK(r.termination == Termination::resource_limit);
+    const auto &data = payload(r);
+    REQUIRE(data.optimization);
+    CHECK(contains(data.relation, {0, 1, 1, 1, 0}));
+    REQUIRE(r.objective.upper);
+    CHECK(r.objective.upper->value == 0);
+    CHECK(r.incumbents.size() == 1);
 }
 TEST_CASE("numerical failure preserves the caller-visible incumbent bound and candidate") {
-    const auto p=resolve(integrator());
-    const auto prepared=registered_prepared(p,request(p),false,Termination::numerical_failure);
-    auto workspace=prepared.create();
-    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
-    const auto result=accepted(workspace->run(context));
-    CHECK(result.termination==Termination::numerical_failure);
-    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    const auto p = resolve(integrator());
+    const auto prepared = registered_prepared(p, request(p), false, Termination::numerical_failure);
+    auto workspace = prepared.create();
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    const auto result = accepted(workspace->run(context));
+    CHECK(result.termination == Termination::numerical_failure);
+    CHECK(result.outcome.value == MathematicalOutcome::undetermined);
     CHECK(result.spans.empty());
     REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
-    const auto& stop=std::get<ScopedOperationStopped>(result.stop);
-    CHECK(stop.stop.reason==StopReason::numerical_failure);
-    CHECK(stop.stop.diagnostics=="independent analytic oracle");
-    CHECK(stop.request.request==RequestId{"syn04-joint:"+p.identity().value});
-    CHECK(stop.request.port=="convex");
-    CHECK(stop.request.requested_module==ModuleId{"oracle-qp"});
+    const auto &stop = std::get<ScopedOperationStopped>(result.stop);
+    CHECK(stop.stop.reason == StopReason::numerical_failure);
+    CHECK(stop.stop.diagnostics == "independent analytic oracle");
+    CHECK(stop.request.request == RequestId{"syn04-joint:" + p.identity().value});
+    CHECK(stop.request.port == "convex");
+    CHECK(stop.request.requested_module == ModuleId{"oracle-qp"});
     CHECK_FALSE(stop.request.requested_version);
-    CHECK(stop.request.actual_module==ModuleId{"oracle-qp"});
-    CHECK(stop.request.actual_version=="1");
+    CHECK(stop.request.actual_module == ModuleId{"oracle-qp"});
+    CHECK(stop.request.actual_version == "1");
 
     REQUIRE(result.family);
-    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK(result.family->target() == FamilyTarget::candidate_relaxation);
     REQUIRE(std::holds_alternative<CandidateFamily>(result.family->outcome()));
-    const auto& data=payload(result);
-    CHECK(contains(data.relation,{0,0.25,1,0.25,0.75}));
+    const auto &data = payload(result);
+    CHECK(contains(data.relation, {0, 0.25, 1, 0.25, 0.75}));
     REQUIRE(data.optimization);
-    CHECK(data.optimization->termination==Termination::numerical_failure);
-    CHECK(data.optimization->raw_diagnostics=="independent analytic oracle");
+    CHECK(data.optimization->termination == Termination::numerical_failure);
+    CHECK(data.optimization->raw_diagnostics == "independent analytic oracle");
     REQUIRE(data.optimization->objective.lower);
-    CHECK(data.optimization->objective.lower->value==0);
-    CHECK(data.optimization->objective.lower->evidence.subject==data.optimization->outcome.subject);
-    CHECK(std::holds_alternative<SymbolicArgument>(data.optimization->objective.lower->evidence.support));
+    CHECK(data.optimization->objective.lower->value == 0);
+    CHECK(data.optimization->objective.lower->evidence.subject ==
+          data.optimization->outcome.subject);
+    CHECK(std::holds_alternative<SymbolicArgument>(
+        data.optimization->objective.lower->evidence.support));
     REQUIRE(data.optimization->objective.upper);
-    CHECK(data.optimization->objective.upper->value==0);
-    CHECK(data.optimization->objective.upper->evidence.subject==data.optimization->outcome.subject);
-    CHECK(std::holds_alternative<SymbolicArgument>(data.optimization->objective.upper->evidence.support));
-    REQUIRE(result.incumbents.size()==1);
-    CHECK(result.incumbents.front().feasibility_claim.problem==p.identity());
-    CHECK(std::holds_alternative<NumericalCheck>(result.incumbents.front().feasibility_claim.support));
+    CHECK(data.optimization->objective.upper->value == 0);
+    CHECK(data.optimization->objective.upper->evidence.subject ==
+          data.optimization->outcome.subject);
+    CHECK(std::holds_alternative<SymbolicArgument>(
+        data.optimization->objective.upper->evidence.support));
+    REQUIRE(result.incumbents.size() == 1);
+    CHECK(result.incumbents.front().feasibility_claim.problem == p.identity());
+    CHECK(std::holds_alternative<NumericalCheck>(
+        result.incumbents.front().feasibility_claim.support));
     REQUIRE(result.objective.upper);
-    CHECK(result.objective.upper->value==0);
-    CHECK(result.objective.upper->evidence.problem==p.identity());
+    CHECK(result.objective.upper->value == 0);
+    CHECK(result.objective.upper->evidence.problem == p.identity());
     CHECK(std::holds_alternative<NumericalCheck>(result.objective.upper->evidence.support));
     CHECK(stop.retained.upper_bound);
-    CHECK(stop.retained.incumbents==1);
+    CHECK(stop.retained.incumbents == 1);
     CHECK(stop.retained.partial_or_candidate_family);
 }
 TEST_CASE("registered resource limit preserves scoped solver evidence and feasible candidate") {
-    const auto p=resolve(integrator());
-    const auto q=request(p);
-    const auto prepared=registered_prepared(p,q,false,Termination::resource_limit);
-    auto workspace=prepared.create();
-    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
-    const auto result=accepted(workspace->run(context));
+    const auto p = resolve(integrator());
+    const auto q = request(p);
+    const auto prepared = registered_prepared(p, q, false, Termination::resource_limit);
+    auto workspace = prepared.create();
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    const auto result = accepted(workspace->run(context));
 
-    CHECK(result.termination==Termination::resource_limit);
-    CHECK(result.outcome.subject==p.identity());
-    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK(result.termination == Termination::resource_limit);
+    CHECK(result.outcome.subject == p.identity());
+    CHECK(result.outcome.value == MathematicalOutcome::undetermined);
     CHECK_FALSE(result.complete_proposal);
     CHECK_FALSE(result.partial_proposal);
     REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
-    const auto& stop=std::get<ScopedOperationStopped>(result.stop);
-    CHECK(stop.stop.reason==StopReason::resource_limit);
-    CHECK(stop.stop.diagnostics=="independent analytic oracle");
-    CHECK(stop.request.request==RequestId{"syn04-joint:"+p.identity().value});
-    CHECK(stop.request.port=="convex");
-    CHECK(stop.request.requested_module==ModuleId{"oracle-qp"});
+    const auto &stop = std::get<ScopedOperationStopped>(result.stop);
+    CHECK(stop.stop.reason == StopReason::resource_limit);
+    CHECK(stop.stop.diagnostics == "independent analytic oracle");
+    CHECK(stop.request.request == RequestId{"syn04-joint:" + p.identity().value});
+    CHECK(stop.request.port == "convex");
+    CHECK(stop.request.requested_module == ModuleId{"oracle-qp"});
     CHECK_FALSE(stop.request.requested_version);
-    CHECK(stop.request.actual_module==ModuleId{"oracle-qp"});
-    CHECK(stop.request.actual_version=="1");
+    CHECK(stop.request.actual_module == ModuleId{"oracle-qp"});
+    CHECK(stop.request.actual_version == "1");
 
     REQUIRE(result.family);
-    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK(result.family->target() == FamilyTarget::candidate_relaxation);
     REQUIRE(std::holds_alternative<CandidateFamily>(result.family->outcome()));
-    const auto& data=payload(result);
-    CHECK(contains(data.relation,{0,0.25,1,0.25,0.75}));
+    const auto &data = payload(result);
+    CHECK(contains(data.relation, {0, 0.25, 1, 0.25, 0.75}));
     REQUIRE(data.optimization);
-    CHECK(data.optimization->termination==Termination::resource_limit);
-    CHECK(data.optimization->outcome.value==MathematicalOutcome::optimal);
-    CHECK(data.optimization->raw_diagnostics=="independent analytic oracle");
+    CHECK(data.optimization->termination == Termination::resource_limit);
+    CHECK(data.optimization->outcome.value == MathematicalOutcome::optimal);
+    CHECK(data.optimization->raw_diagnostics == "independent analytic oracle");
     REQUIRE(data.optimization->objective.lower);
-    CHECK(data.optimization->objective.lower->value==0);
-    CHECK(data.optimization->objective.lower->evidence.subject==data.optimization->outcome.subject);
-    CHECK(std::holds_alternative<SymbolicArgument>(data.optimization->objective.lower->evidence.support));
+    CHECK(data.optimization->objective.lower->value == 0);
+    CHECK(data.optimization->objective.lower->evidence.subject ==
+          data.optimization->outcome.subject);
+    CHECK(std::holds_alternative<SymbolicArgument>(
+        data.optimization->objective.lower->evidence.support));
     REQUIRE(data.optimization->objective.upper);
-    CHECK(data.optimization->objective.upper->value==0);
-    CHECK(data.optimization->objective.upper->evidence.subject==data.optimization->outcome.subject);
-    CHECK(std::holds_alternative<SymbolicArgument>(data.optimization->objective.upper->evidence.support));
-    REQUIRE(result.incumbents.size()==1);
-    CHECK(result.incumbents.front().feasibility_claim.problem==p.identity());
-    CHECK(std::holds_alternative<NumericalCheck>(result.incumbents.front().feasibility_claim.support));
+    CHECK(data.optimization->objective.upper->value == 0);
+    CHECK(data.optimization->objective.upper->evidence.subject ==
+          data.optimization->outcome.subject);
+    CHECK(std::holds_alternative<SymbolicArgument>(
+        data.optimization->objective.upper->evidence.support));
+    REQUIRE(result.incumbents.size() == 1);
+    CHECK(result.incumbents.front().feasibility_claim.problem == p.identity());
+    CHECK(std::holds_alternative<NumericalCheck>(
+        result.incumbents.front().feasibility_claim.support));
     REQUIRE(result.objective.upper);
-    CHECK(result.objective.upper->value==0);
-    CHECK(result.objective.upper->evidence.problem==p.identity());
+    CHECK(result.objective.upper->value == 0);
+    CHECK(result.objective.upper->evidence.problem == p.identity());
     CHECK(std::holds_alternative<NumericalCheck>(result.objective.upper->evidence.support));
     CHECK_FALSE(result.objective.lower);
     CHECK_FALSE(stop.retained.lower_bound);
     CHECK(stop.retained.upper_bound);
-    CHECK(stop.retained.incumbents==1);
+    CHECK(stop.retained.incumbents == 1);
     CHECK(stop.retained.partial_or_candidate_family);
 }
-TEST_CASE("registered deadline expiring as solver returns resource limit keeps deadline stop reason") {
-    const auto p=resolve(integrator());
-    const auto q=request(p);
+TEST_CASE(
+    "registered deadline expiring as solver returns resource limit keeps deadline stop reason") {
+    const auto p = resolve(integrator());
+    const auto q = request(p);
     ExecutionContext context;
-    const auto prepared=registered_prepared(p,q,false,Termination::resource_limit,nullptr,[&context] {
-        REQUIRE_FALSE(context.deadline);
-        context.deadline=std::chrono::steady_clock::now();
-    },MathematicalOutcome::infeasible);
-    auto workspace=prepared.create();
-    const auto result=accepted(workspace->run(context));
+    const auto prepared = registered_prepared(
+        p, q, false, Termination::resource_limit, nullptr,
+        [&context] {
+            REQUIRE_FALSE(context.deadline);
+            context.deadline = std::chrono::steady_clock::now();
+        },
+        MathematicalOutcome::infeasible);
+    auto workspace = prepared.create();
+    const auto result = accepted(workspace->run(context));
 
-    CHECK(result.termination==Termination::deadline_expired);
-    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK(result.termination == Termination::deadline_expired);
+    CHECK(result.outcome.value == MathematicalOutcome::undetermined);
     REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
-    CHECK(std::get<ScopedOperationStopped>(result.stop).stop.reason==StopReason::deadline_expired);
+    CHECK(std::get<ScopedOperationStopped>(result.stop).stop.reason ==
+          StopReason::deadline_expired);
 }
 TEST_CASE("registered provider deadline preserves termination without caller deadline") {
-    const auto p=resolve(integrator());const auto q=request(p);
-    const auto prepared=registered_prepared(p,q,false,Termination::deadline_expired);
-    auto workspace=prepared.create();
-    const auto result=accepted(workspace->run({}));
-    CHECK(result.termination==Termination::deadline_expired);
+    const auto p = resolve(integrator());
+    const auto q = request(p);
+    const auto prepared = registered_prepared(p, q, false, Termination::deadline_expired);
+    auto workspace = prepared.create();
+    const auto result = accepted(workspace->run({}));
+    CHECK(result.termination == Termination::deadline_expired);
     REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
-    CHECK(std::get<ScopedOperationStopped>(result.stop).stop.reason==StopReason::deadline_expired);
-    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK(std::get<ScopedOperationStopped>(result.stop).stop.reason ==
+          StopReason::deadline_expired);
+    CHECK(result.outcome.value == MathematicalOutcome::undetermined);
 }
 TEST_CASE("registered cancellation takes priority when deadline and resource limit coincide") {
-    const auto p=resolve(integrator());
-    const auto q=request(p);
+    const auto p = resolve(integrator());
+    const auto q = request(p);
     ExecutionContext context;
     std::stop_source cancellation;
-    context.cancellation=cancellation.get_token();
-    const auto prepared=registered_prepared(p,q,false,Termination::resource_limit,nullptr,[&context,&cancellation] {
-        context.deadline=std::chrono::steady_clock::now();
-        cancellation.request_stop();
-    },MathematicalOutcome::infeasible);
-    auto workspace=prepared.create();
-    const auto result=accepted(workspace->run(context));
+    context.cancellation = cancellation.get_token();
+    const auto prepared = registered_prepared(
+        p, q, false, Termination::resource_limit, nullptr,
+        [&context, &cancellation] {
+            context.deadline = std::chrono::steady_clock::now();
+            cancellation.request_stop();
+        },
+        MathematicalOutcome::infeasible);
+    auto workspace = prepared.create();
+    const auto result = accepted(workspace->run(context));
 
-    CHECK(result.termination==Termination::cancelled);
+    CHECK(result.termination == Termination::cancelled);
     REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
-    CHECK(std::get<ScopedOperationStopped>(result.stop).stop.reason==StopReason::cancelled);
+    CHECK(std::get<ScopedOperationStopped>(result.stop).stop.reason == StopReason::cancelled);
 }
-TEST_CASE("registered cancellation after optimization retains candidate and scoped objective evidence") {
-    const auto p=resolve(integrator());const auto q=request(p);std::stop_source source;
-    const auto prepared=registered_prepared(p,q,false,Termination::completed,&source);
-    auto workspace=prepared.create();ExecutionContext context;context.cancellation=source.get_token();
-    const auto result=accepted(workspace->run(context));
-    CHECK(result.termination==Termination::cancelled);
-    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+TEST_CASE(
+    "registered cancellation after optimization retains candidate and scoped objective evidence") {
+    const auto p = resolve(integrator());
+    const auto q = request(p);
+    std::stop_source source;
+    const auto prepared = registered_prepared(p, q, false, Termination::completed, &source);
+    auto workspace = prepared.create();
+    ExecutionContext context;
+    context.cancellation = source.get_token();
+    const auto result = accepted(workspace->run(context));
+    CHECK(result.termination == Termination::cancelled);
+    CHECK(result.outcome.value == MathematicalOutcome::undetermined);
     REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
-    const auto& stop=std::get<ScopedOperationStopped>(result.stop);
-    CHECK(stop.stop.reason==StopReason::cancelled);
-    CHECK(stop.stop.diagnostics=="Original-problem anchor verification stopped; program evidence and feasible candidate retained.");
-    CHECK(stop.request.request==RequestId{"syn04-joint:"+p.identity().value});
-    CHECK(stop.request.port=="convex");
-    CHECK(result.spans.empty()); // Strategy B emits no timing spans on this path; instrumentation is tracked in #89.
+    const auto &stop = std::get<ScopedOperationStopped>(result.stop);
+    CHECK(stop.stop.reason == StopReason::cancelled);
+    CHECK(
+        stop.stop.diagnostics ==
+        "Original-problem anchor verification stopped; program evidence and feasible candidate retained.");
+    CHECK(stop.request.request == RequestId{"syn04-joint:" + p.identity().value});
+    CHECK(stop.request.port == "convex");
+    CHECK(result.spans.empty()); // Strategy B emits no timing spans on this path; instrumentation
+                                 // is tracked in #89.
     REQUIRE(result.family);
-    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK(result.family->target() == FamilyTarget::candidate_relaxation);
     REQUIRE(std::holds_alternative<CandidateFamily>(result.family->outcome()));
-    const auto& data=payload(result);REQUIRE(data.optimization);
-    CHECK(data.optimization->termination==Termination::completed);
-    CHECK(contains(data.relation,{0,0.25,1,0.25,0.75}));
-    REQUIRE(data.optimization->objective.lower);CHECK(data.optimization->objective.lower->value==0);
-    CHECK(data.optimization->objective.lower->evidence.subject==data.optimization->outcome.subject);
-    CHECK(std::holds_alternative<SymbolicArgument>(data.optimization->objective.lower->evidence.support));
-    REQUIRE(data.optimization->objective.upper);CHECK(data.optimization->objective.upper->value==0);
-    CHECK(data.optimization->objective.upper->evidence.subject==data.optimization->outcome.subject);
-    CHECK(std::holds_alternative<SymbolicArgument>(data.optimization->objective.upper->evidence.support));
+    const auto &data = payload(result);
+    REQUIRE(data.optimization);
+    CHECK(data.optimization->termination == Termination::completed);
+    CHECK(contains(data.relation, {0, 0.25, 1, 0.25, 0.75}));
+    REQUIRE(data.optimization->objective.lower);
+    CHECK(data.optimization->objective.lower->value == 0);
+    CHECK(data.optimization->objective.lower->evidence.subject ==
+          data.optimization->outcome.subject);
+    CHECK(std::holds_alternative<SymbolicArgument>(
+        data.optimization->objective.lower->evidence.support));
+    REQUIRE(data.optimization->objective.upper);
+    CHECK(data.optimization->objective.upper->value == 0);
+    CHECK(data.optimization->objective.upper->evidence.subject ==
+          data.optimization->outcome.subject);
+    CHECK(std::holds_alternative<SymbolicArgument>(
+        data.optimization->objective.upper->evidence.support));
     CHECK(result.incumbents.empty());
     CHECK_FALSE(stop.retained.lower_bound);
     CHECK_FALSE(stop.retained.upper_bound);
-    CHECK(stop.retained.incumbents==0);
+    CHECK(stop.retained.incumbents == 0);
     CHECK(stop.retained.partial_or_candidate_family);
 }
 
-TEST_CASE("registered deadline expiry after optimization retains candidate and scoped objective evidence") {
-    const auto p=resolve(integrator());const auto q=request(p);
+TEST_CASE(
+    "registered deadline expiry after optimization retains candidate and scoped objective evidence") {
+    const auto p = resolve(integrator());
+    const auto q = request(p);
     ExecutionContext context;
     // A test-only synchronous hook expires the caller-owned context after the
     // optimizer constructs its result. No deadline exists during admission or
     // program construction, so scheduling delays cannot cause pre-solve expiry.
-    const auto prepared=registered_prepared(p,q,false,Termination::completed,nullptr,[&context] {
-        REQUIRE_FALSE(context.deadline);
-        context.deadline=std::chrono::steady_clock::now();
-    });
-    auto workspace=prepared.create();
-    const auto result=accepted(workspace->run(context));
-    CHECK(result.termination==Termination::deadline_expired);
-    CHECK(result.outcome.subject==p.identity());
-    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    const auto prepared =
+        registered_prepared(p, q, false, Termination::completed, nullptr, [&context] {
+            REQUIRE_FALSE(context.deadline);
+            context.deadline = std::chrono::steady_clock::now();
+        });
+    auto workspace = prepared.create();
+    const auto result = accepted(workspace->run(context));
+    CHECK(result.termination == Termination::deadline_expired);
+    CHECK(result.outcome.subject == p.identity());
+    CHECK(result.outcome.value == MathematicalOutcome::undetermined);
     CHECK(std::holds_alternative<Unestablished>(result.outcome.support));
     REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
-    const auto& stop=std::get<ScopedOperationStopped>(result.stop);
-    CHECK(stop.stop.reason==StopReason::deadline_expired);
-    CHECK(stop.stop.diagnostics=="Original-problem anchor verification stopped; program evidence and feasible candidate retained.");
-    CHECK(stop.request.request==RequestId{"syn04-joint:"+p.identity().value});
-    CHECK(stop.request.port=="convex");
-    CHECK(result.spans.empty()); // No timing spans are emitted here; instrumentation is tracked in #89.
+    const auto &stop = std::get<ScopedOperationStopped>(result.stop);
+    CHECK(stop.stop.reason == StopReason::deadline_expired);
+    CHECK(
+        stop.stop.diagnostics ==
+        "Original-problem anchor verification stopped; program evidence and feasible candidate retained.");
+    CHECK(stop.request.request == RequestId{"syn04-joint:" + p.identity().value});
+    CHECK(stop.request.port == "convex");
+    CHECK(result.spans
+              .empty()); // No timing spans are emitted here; instrumentation is tracked in #89.
     REQUIRE(result.family);
-    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
-    CHECK(result.family->identity().request==q);
+    CHECK(result.family->target() == FamilyTarget::candidate_relaxation);
+    CHECK(result.family->identity().request == q);
     REQUIRE(std::holds_alternative<CandidateFamily>(result.family->outcome()));
     CHECK_FALSE(result.family->registry_verified());
     CHECK_FALSE(result.complete_proposal);
-    const auto& candidate=std::get<CandidateFamily>(result.family->outcome());
-    CHECK(candidate.relation.coordinates==JointCoordinates{{1,1,0},2});
-    CHECK(candidate.relation.representation==RepresentationId{"csl.polyhedron.h"});
+    const auto &candidate = std::get<CandidateFamily>(result.family->outcome());
+    CHECK(candidate.relation.coordinates == JointCoordinates{{1, 1, 0}, 2});
+    CHECK(candidate.relation.representation == RepresentationId{"csl.polyhedron.h"});
     CHECK(std::holds_alternative<HeuristicRelationEvidence>(candidate.relation_to_target));
     CHECK(std::holds_alternative<Unestablished>(candidate.feasibility));
-    const auto& data=payload(result);REQUIRE(data.optimization);
-    REQUIRE(data.diagnostics.size()==1);
-    CHECK(data.diagnostics[0].code==DiagnosticCode::unsupported);
-    CHECK(data.diagnostics[0].field=="verification");
-    CHECK(data.diagnostics[0].explanation=="deadline observed");
-    CHECK(data.optimization->termination==Termination::completed);
-    CHECK(data.optimization->outcome.value==MathematicalOutcome::optimal);
-    CHECK(data.optimization->outcome.subject.problem==p.identity());
-    CHECK(data.optimization->outcome.subject.program==ProgramId{"syn04-joint:"+p.identity().value});
-    CHECK(data.optimization->primal==std::optional<Vector>{{0,0.25,1,0.25,0.75}});
-    CHECK(data.optimization->raw_diagnostics=="independent analytic oracle");
-    CHECK(contains(data.relation,{0,0.25,1,0.25,0.75}));
-    for(const auto* bound:{&data.optimization->objective.lower,&data.optimization->objective.upper}) {
+    const auto &data = payload(result);
+    REQUIRE(data.optimization);
+    REQUIRE(data.diagnostics.size() == 1);
+    CHECK(data.diagnostics[0].code == DiagnosticCode::unsupported);
+    CHECK(data.diagnostics[0].field == "verification");
+    CHECK(data.diagnostics[0].explanation == "deadline observed");
+    CHECK(data.optimization->termination == Termination::completed);
+    CHECK(data.optimization->outcome.value == MathematicalOutcome::optimal);
+    CHECK(data.optimization->outcome.subject.problem == p.identity());
+    CHECK(data.optimization->outcome.subject.program ==
+          ProgramId{"syn04-joint:" + p.identity().value});
+    CHECK(data.optimization->primal == std::optional<Vector>{{0, 0.25, 1, 0.25, 0.75}});
+    CHECK(data.optimization->raw_diagnostics == "independent analytic oracle");
+    CHECK(contains(data.relation, {0, 0.25, 1, 0.25, 0.75}));
+    for (const auto *bound :
+         {&data.optimization->objective.lower, &data.optimization->objective.upper}) {
         REQUIRE(*bound);
-        CHECK((*bound)->value==0);
-        CHECK((*bound)->evidence.subject.problem==p.identity());
-        CHECK((*bound)->evidence.subject.program==ProgramId{"syn04-joint:"+p.identity().value});
+        CHECK((*bound)->value == 0);
+        CHECK((*bound)->evidence.subject.problem == p.identity());
+        CHECK((*bound)->evidence.subject.program == ProgramId{"syn04-joint:" + p.identity().value});
         REQUIRE(std::holds_alternative<SymbolicArgument>((*bound)->evidence.support));
-        const auto& support=std::get<SymbolicArgument>((*bound)->evidence.support);
-        CHECK(support.reference=="literal-joint-oracle");
-        CHECK(support.assumptions=="Hand-minimized objective on the authored joint relation.");
+        const auto &support = std::get<SymbolicArgument>((*bound)->evidence.support);
+        CHECK(support.reference == "literal-joint-oracle");
+        CHECK(support.assumptions == "Hand-minimized objective on the authored joint relation.");
     }
     CHECK_FALSE(result.objective.lower);
     CHECK_FALSE(result.objective.upper);
     CHECK(result.incumbents.empty());
     CHECK_FALSE(stop.retained.lower_bound);
     CHECK_FALSE(stop.retained.upper_bound);
-    CHECK(stop.retained.incumbents==0);
+    CHECK(stop.retained.incumbents == 0);
     CHECK(stop.retained.partial_or_candidate_family);
 }
 
-TEST_CASE("registered Strategy B publishes complete T-S01 evidence only through the exact profile gate") {
-    const auto p=resolve(integrator());
-    auto exact=request(p);exact.profile=synthesis::strategy_ts01::profile_id;exact.target=FamilyTarget::exact_optimal_relation;
-    registry::Registry<registry::LPPort> lp;registry::Registry<registry::ConvexPort> qp;registry::StrategyRegistry strategies;
-    auto lp_registration=accepted(adapters::lp::make_highs_registration());
-    auto convex_registration=accepted(adapters::convex::make_highs_registration());
-    const auto lp_id=lp_registration.identity.id,convex_id=convex_registration.identity.id;
+TEST_CASE(
+    "registered Strategy B publishes complete T-S01 evidence only through the exact profile gate") {
+    const auto p = resolve(integrator());
+    auto exact = request(p);
+    exact.profile = synthesis::strategy_ts01::profile_id;
+    exact.target = FamilyTarget::exact_optimal_relation;
+    registry::Registry<registry::LPPort> lp;
+    registry::Registry<registry::ConvexPort> qp;
+    registry::StrategyRegistry strategies;
+    auto lp_registration = accepted(adapters::lp::make_highs_registration());
+    auto convex_registration = accepted(adapters::convex::make_highs_registration());
+    const auto lp_id = lp_registration.identity.id, convex_id = convex_registration.identity.id;
     REQUIRE_FALSE(lp.add(std::move(lp_registration)));
     REQUIRE_FALSE(qp.add(std::move(convex_registration)));
-    REQUIRE_FALSE(strategies.add(make_registration(lp,qp)));
-    StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.strategy-b"};
-    configuration.lp=lp_id;configuration.convex=convex_id;configuration.representation={"csl.polyhedron.h"};
-    registry::Requirements requirements;requirements.output.representation={"csl.polyhedron.h"};
-    requirements.output.assurance=Assurance::numerical;requirements.output.family=FamilyTarget::exact_optimal_relation;
-    requirements.output.completeness=registry::Completeness::established;
-    auto prepared=strategies.prepare({p,configuration,exact,"1"},requirements);
+    REQUIRE_FALSE(strategies.add(make_registration(lp, qp)));
+    StrategyConfiguration configuration;
+    configuration.strategy = {"csl.synthesis.strategy-b"};
+    configuration.lp = lp_id;
+    configuration.convex = convex_id;
+    configuration.representation = {"csl.polyhedron.h"};
+    registry::Requirements requirements;
+    requirements.output.representation = {"csl.polyhedron.h"};
+    requirements.output.assurance = Assurance::numerical;
+    requirements.output.family = FamilyTarget::exact_optimal_relation;
+    requirements.output.completeness = registry::Completeness::established;
+    auto prepared = strategies.prepare({p, configuration, exact, "1"}, requirements);
     REQUIRE(std::holds_alternative<registry::PreparedStrategy>(prepared));
-    auto workspace=std::get<registry::PreparedStrategy>(std::move(prepared)).create();
-    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
-    context.numerical=exact.numerical;
-    const auto result=accepted(workspace->run(context));
-    REQUIRE(result.termination==Termination::completed);
+    auto workspace = std::get<registry::PreparedStrategy>(std::move(prepared)).create();
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    context.numerical = exact.numerical;
+    const auto result = accepted(workspace->run(context));
+    REQUIRE(result.termination == Termination::completed);
     REQUIRE(result.family);
-    CHECK(result.family->target()==FamilyTarget::exact_optimal_relation);
+    CHECK(result.family->target() == FamilyTarget::exact_optimal_relation);
     CHECK(result.family->registry_verified());
-    CHECK(result.outcome.value==MathematicalOutcome::optimal);
-    const auto& identity=result.family->identity();
-    CHECK(identity.strategy==ModuleId{"csl.synthesis.strategy-b"});
-    CHECK(identity.strategy_version=="1");
-    REQUIRE(identity.lineage.size()==2);
-    CHECK(identity.lineage[0].request==RequestId{"syn04-build:"+p.identity().value});
-    CHECK(identity.lineage[1].request==RequestId{"syn04-extract:"+p.identity().value});
-    const SetId feasible_id{"syn04-feasible:"+p.identity().value};
-    const SetId optimal_id{"syn04-optimal-level:"+p.identity().value};
+    CHECK(result.outcome.value == MathematicalOutcome::optimal);
+    const auto &identity = result.family->identity();
+    CHECK(identity.strategy == ModuleId{"csl.synthesis.strategy-b"});
+    CHECK(identity.strategy_version == "1");
+    REQUIRE(identity.lineage.size() == 2);
+    CHECK(identity.lineage[0].request == RequestId{"syn04-build:" + p.identity().value});
+    CHECK(identity.lineage[1].request == RequestId{"syn04-extract:" + p.identity().value});
+    const SetId feasible_id{"syn04-feasible:" + p.identity().value};
+    const SetId optimal_id{"syn04-optimal-level:" + p.identity().value};
     const std::vector<TransformStepIdentity> expected_lineage{
-        {{"syn04-build:"+p.identity().value},{p.identity().value},feasible_id,{"csl.synthesis.strategy-b"},"1"},
-        {{"syn04-extract:"+p.identity().value},feasible_id,optimal_id,{"csl.synthesis.strategy-b"},"1"}};
-    CHECK(identity.lineage==expected_lineage);
-    const auto& complete=std::get<CompleteOptimalFamily>(result.family->outcome());
-    const auto relation=std::dynamic_pointer_cast<const synthesis::strategy_ts01::ExactJointRelation>(complete.relation.payload);
+        {{"syn04-build:" + p.identity().value},
+         {p.identity().value},
+         feasible_id,
+         {"csl.synthesis.strategy-b"},
+         "1"},
+        {{"syn04-extract:" + p.identity().value},
+         feasible_id,
+         optimal_id,
+         {"csl.synthesis.strategy-b"},
+         "1"}};
+    CHECK(identity.lineage == expected_lineage);
+    const auto &complete = std::get<CompleteOptimalFamily>(result.family->outcome());
+    const auto relation =
+        std::dynamic_pointer_cast<const synthesis::strategy_ts01::ExactJointRelation>(
+            complete.relation.payload);
     REQUIRE(relation);
-    CHECK(relation->contains(Vector{0,0.5,1,0.5,0.5}));
-    CHECK(relation->contains(Vector{0,0.75,1,0.75,0.25}));
-    CHECK_FALSE(relation->contains(Vector{0,0.5,1,0.5,0.25}));
+    CHECK(relation->contains(Vector{0, 0.5, 1, 0.5, 0.5}));
+    CHECK(relation->contains(Vector{0, 0.75, 1, 0.75, 0.25}));
+    CHECK_FALSE(relation->contains(Vector{0, 0.5, 1, 0.5, 0.25}));
 
-    const registry::StrategyRequest frozen{p,configuration,exact,"1",expected_lineage};
-    const CompleteFamilyProposal proposal{identity,complete};
-    const auto verifier=registry::detail::find_compiled_verifier({"csl.verifier.ts01-analytic"},"1");
+    const registry::StrategyRequest frozen{p, configuration, exact, "1", expected_lineage};
+    const CompleteFamilyProposal proposal{identity, complete};
+    const auto verifier =
+        registry::detail::find_compiled_verifier({"csl.verifier.ts01-analytic"}, "1");
     REQUIRE(verifier);
-    CHECK(verifier->verify(frozen,proposal).empty());
-    auto wrong_request=frozen;wrong_request.lineage[1].version="foreign";
-    CHECK_FALSE(verifier->verify(wrong_request,proposal).empty());
-    auto wrong_proposal=proposal;wrong_proposal.identity.lineage[1].version="foreign";
-    wrong_proposal.family.completeness.binding=wrong_proposal.identity;
-    CHECK_FALSE(verifier->verify(frozen,wrong_proposal).empty());
+    CHECK(verifier->verify(frozen, proposal).empty());
+    auto wrong_request = frozen;
+    wrong_request.lineage[1].version = "foreign";
+    CHECK_FALSE(verifier->verify(wrong_request, proposal).empty());
+    auto wrong_proposal = proposal;
+    wrong_proposal.identity.lineage[1].version = "foreign";
+    wrong_proposal.family.completeness.binding = wrong_proposal.identity;
+    CHECK_FALSE(verifier->verify(frozen, wrong_proposal).empty());
 
     // The registered workspace is reusable, but runtime evidence belongs to one solve only.
-    std::stop_source stop;stop.request_stop();
-    auto stopped_context=context;stopped_context.cancellation=stop.get_token();
-    const auto stopped=accepted(workspace->run(stopped_context));
-    CHECK(stopped.termination==Termination::cancelled);
+    std::stop_source stop;
+    stop.request_stop();
+    auto stopped_context = context;
+    stopped_context.cancellation = stop.get_token();
+    const auto stopped = accepted(workspace->run(stopped_context));
+    CHECK(stopped.termination == Termination::cancelled);
     CHECK_FALSE(stopped.family);
 
-    const auto rerun=accepted(workspace->run(context));
-    REQUIRE(rerun.termination==Termination::completed);
+    const auto rerun = accepted(workspace->run(context));
+    REQUIRE(rerun.termination == Termination::completed);
     REQUIRE(rerun.family);
-    CHECK(rerun.family->target()==FamilyTarget::exact_optimal_relation);
+    CHECK(rerun.family->target() == FamilyTarget::exact_optimal_relation);
     CHECK(rerun.family->registry_verified());
-    CHECK(rerun.family->identity()==identity);
-    CHECK(check_synthesis_result(rerun,identity).empty());
+    CHECK(rerun.family->identity() == identity);
+    CHECK(check_synthesis_result(rerun, identity).empty());
 
-    const auto neighboring=resolve(integrator(QuadraticTerminal{{1,1,{2}},{-1},0.25}));
-    auto unsupported=request(neighboring);unsupported.profile=synthesis::strategy_ts01::profile_id;
-    unsupported.target=FamilyTarget::exact_optimal_relation;
-    CHECK(std::holds_alternative<registry::Rejection>(strategies.prepare({neighboring,configuration,unsupported,"1"},requirements)));
+    const auto neighboring = resolve(integrator(QuadraticTerminal{{1, 1, {2}}, {-1}, 0.25}));
+    auto unsupported = request(neighboring);
+    unsupported.profile = synthesis::strategy_ts01::profile_id;
+    unsupported.target = FamilyTarget::exact_optimal_relation;
+    CHECK(std::holds_alternative<registry::Rejection>(
+        strategies.prepare({neighboring, configuration, unsupported, "1"}, requirements)));
 }
 TEST_CASE("registered Strategy B candidate respects a nonempty intermediate-state constraint") {
-    auto input=integrator();
-    input.states={UniversalSet{1},interval(0.5).as_handle(),UniversalSet{1}};
-    const auto p=resolve(input);
-    const auto q=request(p);
-    const auto prepared=registered_prepared(p,q);
-    auto workspace=prepared.create();
+    auto input = integrator();
+    input.states = {UniversalSet{1}, interval(0.5).as_handle(), UniversalSet{1}};
+    const auto p = resolve(input);
+    const auto q = request(p);
+    const auto prepared = registered_prepared(p, q);
+    auto workspace = prepared.create();
     ExecutionContext context;
-    context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
 
-    const auto result=accepted(workspace->run(context));
+    const auto result = accepted(workspace->run(context));
 
-    CHECK(result.termination==Termination::completed);
-    CHECK(result.outcome.subject==p.identity());
-    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK(result.termination == Termination::completed);
+    CHECK(result.outcome.subject == p.identity());
+    CHECK(result.outcome.value == MathematicalOutcome::undetermined);
     CHECK_FALSE(result.complete_proposal);
     CHECK_FALSE(result.partial_proposal);
     REQUIRE(result.family);
-    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK(result.family->target() == FamilyTarget::candidate_relaxation);
     CHECK_FALSE(result.family->registry_verified());
-    const auto& candidate=payload(result);
-    CHECK(contains(candidate.relation,{0,0.25,1,0.25,0.75}));
-    CHECK_FALSE(contains(candidate.relation,{0,0.75,1,0.75,0.25}));
+    const auto &candidate = payload(result);
+    CHECK(contains(candidate.relation, {0, 0.25, 1, 0.25, 0.75}));
+    CHECK_FALSE(contains(candidate.relation, {0, 0.75, 1, 0.75, 0.25}));
 }
 TEST_CASE("registered Strategy B candidate retains different control sets at each stage") {
-    const auto interval_between=[](double lower,double upper) {
-        return accepted(sets::make_h({{"stage-control-window"},1,{}},
-            {accepted(numeric::snapshot(Matrix{2,1,{1,-1}})),
-             accepted(numeric::snapshot_vector(Vector{upper,-lower})),
-             accepted(numeric::snapshot(Matrix{0,1,{}})),
-             accepted(numeric::snapshot_vector(Vector{}))}));
+    const auto interval_between = [](double lower, double upper) {
+        return accepted(sets::make_h({{"stage-control-window"}, 1, {}},
+                                     {accepted(numeric::snapshot(Matrix{2, 1, {1, -1}})),
+                                      accepted(numeric::snapshot_vector(Vector{upper, -lower})),
+                                      accepted(numeric::snapshot(Matrix{0, 1, {}})),
+                                      accepted(numeric::snapshot_vector(Vector{}))}));
     };
-    auto input=integrator();
-    input.controls=ContinuousDomain{{interval_between(0.25,0.75).as_handle(),
-                                     interval_between(0.6,0.8).as_handle()}};
-    const auto p=resolve(input);
-    const auto q=request(p);
-    auto workspace=registered_prepared(p,q).create();
+    auto input = integrator();
+    input.controls = ContinuousDomain{
+        {interval_between(0.25, 0.75).as_handle(), interval_between(0.6, 0.8).as_handle()}};
+    const auto p = resolve(input);
+    const auto q = request(p);
+    auto workspace = registered_prepared(p, q).create();
     ExecutionContext context;
-    context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
 
-    const auto result=accepted(workspace->run(context));
+    const auto result = accepted(workspace->run(context));
 
-    CHECK(result.termination==Termination::completed);
-    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK(result.termination == Termination::completed);
+    CHECK(result.outcome.value == MathematicalOutcome::undetermined);
     CHECK_FALSE(result.complete_proposal);
     REQUIRE(result.family);
-    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK(result.family->target() == FamilyTarget::candidate_relaxation);
     CHECK_FALSE(result.family->registry_verified());
-    const auto& candidate=payload(result);
+    const auto &candidate = payload(result);
     // All histories satisfy x1=u0, x2=x1+u1, and x2=1. Only the first lies
     // in [0.25,0.75] x [0.6,0.8]; each rejected history violates one stage.
-    CHECK(contains(candidate.relation,{0,0.4,1,0.4,0.6}));
-    CHECK_FALSE(contains(candidate.relation,{0,0.2,1,0.2,0.8}));
-    CHECK_FALSE(contains(candidate.relation,{0,0.5,1,0.5,0.5}));
+    CHECK(contains(candidate.relation, {0, 0.4, 1, 0.4, 0.6}));
+    CHECK_FALSE(contains(candidate.relation, {0, 0.2, 1, 0.2, 0.8}));
+    CHECK_FALSE(contains(candidate.relation, {0, 0.5, 1, 0.5, 0.5}));
 }
 TEST_CASE("Strategy B T-S01 rejects a matching self-reported lineage without runtime evidence") {
-    const auto p=resolve(integrator());
-    auto exact=request(p);exact.profile=synthesis::strategy_ts01::profile_id;exact.target=FamilyTarget::exact_optimal_relation;
-    StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.strategy-b"};
-    configuration.representation={"csl.polyhedron.h"};
-    registry::Requirements requirements;requirements.output.representation={"csl.polyhedron.h"};
-    requirements.output.assurance=Assurance::numerical;requirements.output.family=FamilyTarget::exact_optimal_relation;
-    requirements.output.completeness=registry::Completeness::established;
-    const auto proposal=exact_ts01_proposal(p,exact);
-    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    const auto p = resolve(integrator());
+    auto exact = request(p);
+    exact.profile = synthesis::strategy_ts01::profile_id;
+    exact.target = FamilyTarget::exact_optimal_relation;
+    StrategyConfiguration configuration;
+    configuration.strategy = {"csl.synthesis.strategy-b"};
+    configuration.representation = {"csl.polyhedron.h"};
+    registry::Requirements requirements;
+    requirements.output.representation = {"csl.polyhedron.h"};
+    requirements.output.assurance = Assurance::numerical;
+    requirements.output.family = FamilyTarget::exact_optimal_relation;
+    requirements.output.completeness = registry::Completeness::established;
+    const auto proposal = exact_ts01_proposal(p, exact);
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
     registry::StrategyRegistry forged_strategies;
     REQUIRE_FALSE(forged_strategies.add(proposal_only_strategy(proposal)));
-    auto forged=forged_strategies.prepare({p,configuration,exact,"1"},requirements);
+    auto forged = forged_strategies.prepare({p, configuration, exact, "1"}, requirements);
     REQUIRE(std::holds_alternative<registry::PreparedStrategy>(forged));
-    auto forged_workspace=std::get<registry::PreparedStrategy>(std::move(forged)).create();
-    const auto rejected=accepted(forged_workspace->run(context));
-    CHECK(rejected.termination==Termination::contract_rejected);
+    auto forged_workspace = std::get<registry::PreparedStrategy>(std::move(forged)).create();
+    const auto rejected = accepted(forged_workspace->run(context));
+    CHECK(rejected.termination == Termination::contract_rejected);
     CHECK_FALSE(rejected.family);
     CHECK_FALSE(rejected.complete_proposal);
     REQUIRE(std::holds_alternative<ContractValidationFailure>(rejected.stop));
     CHECK(std::any_of(std::get<ContractValidationFailure>(rejected.stop).diagnostics.begin(),
-        std::get<ContractValidationFailure>(rejected.stop).diagnostics.end(),[](const Diagnostic& diagnostic) {
-            return diagnostic.code==DiagnosticCode::evidence_mismatch&&diagnostic.field=="family.runtime_receipt";
-        }));
+                      std::get<ContractValidationFailure>(rejected.stop).diagnostics.end(),
+                      [](const Diagnostic &diagnostic) {
+                          return diagnostic.code == DiagnosticCode::evidence_mismatch &&
+                                 diagnostic.field == "family.runtime_receipt";
+                      }));
 
-    auto reordered=proposal;
-    std::reverse(reordered.identity.lineage.begin(),reordered.identity.lineage.end());
-    reordered.family.completeness.binding=reordered.identity;
+    auto reordered = proposal;
+    std::reverse(reordered.identity.lineage.begin(), reordered.identity.lineage.end());
+    reordered.family.completeness.binding = reordered.identity;
     registry::StrategyRegistry reordered_strategies;
     REQUIRE_FALSE(reordered_strategies.add(proposal_only_strategy(std::move(reordered))));
-    auto reordered_prepared=reordered_strategies.prepare({p,configuration,exact,"1"},requirements);
+    auto reordered_prepared =
+        reordered_strategies.prepare({p, configuration, exact, "1"}, requirements);
     REQUIRE(std::holds_alternative<registry::PreparedStrategy>(reordered_prepared));
-    auto reordered_workspace=std::get<registry::PreparedStrategy>(std::move(reordered_prepared)).create();
-    const auto reordered_result=accepted(reordered_workspace->run(context));
-    CHECK(reordered_result.termination==Termination::contract_rejected);
+    auto reordered_workspace =
+        std::get<registry::PreparedStrategy>(std::move(reordered_prepared)).create();
+    const auto reordered_result = accepted(reordered_workspace->run(context));
+    CHECK(reordered_result.termination == Termination::contract_rejected);
     CHECK_FALSE(reordered_result.family);
     REQUIRE(std::holds_alternative<ContractValidationFailure>(reordered_result.stop));
-    CHECK(std::any_of(std::get<ContractValidationFailure>(reordered_result.stop).diagnostics.begin(),
-        std::get<ContractValidationFailure>(reordered_result.stop).diagnostics.end(),[](const Diagnostic& diagnostic) {
-            return diagnostic.code==DiagnosticCode::evidence_mismatch&&diagnostic.field=="family.proposal.binding";
-        }));
+    CHECK(
+        std::any_of(std::get<ContractValidationFailure>(reordered_result.stop).diagnostics.begin(),
+                    std::get<ContractValidationFailure>(reordered_result.stop).diagnostics.end(),
+                    [](const Diagnostic &diagnostic) {
+                        return diagnostic.code == DiagnosticCode::evidence_mismatch &&
+                               diagnostic.field == "family.proposal.binding";
+                    }));
 }
 TEST_CASE("late T-S01 provider rejection retains a typed candidate relation and executed lineage") {
-    const auto p=resolve(integrator());
-    auto exact=request(p);exact.profile=synthesis::strategy_ts01::profile_id;
-    exact.target=FamilyTarget::exact_optimal_relation;
-    registry::Registry<registry::LPPort> lp;registry::Registry<registry::ConvexPort> qp;
+    const auto p = resolve(integrator());
+    auto exact = request(p);
+    exact.profile = synthesis::strategy_ts01::profile_id;
+    exact.target = FamilyTarget::exact_optimal_relation;
+    registry::Registry<registry::LPPort> lp;
+    registry::Registry<registry::ConvexPort> qp;
     registry::StrategyRegistry strategies;
-    auto lp_registration=accepted(adapters::lp::make_highs_registration());
-    auto convex_registration=accepted(adapters::convex::make_highs_registration());
-    const auto lp_id=lp_registration.identity.id,convex_id=convex_registration.identity.id;
-    const auto convex_version=convex_registration.identity.version;
-    convex_registration.capabilities=[](const ConvexProgram&,const registry::Requirements&)->registry::Capability {
-        return Diagnostics{{DiagnosticCode::unsupported,"injected.late_rejection","Rejected after joint construction."}};
+    auto lp_registration = accepted(adapters::lp::make_highs_registration());
+    auto convex_registration = accepted(adapters::convex::make_highs_registration());
+    const auto lp_id = lp_registration.identity.id, convex_id = convex_registration.identity.id;
+    const auto convex_version = convex_registration.identity.version;
+    convex_registration.capabilities = [](const ConvexProgram &,
+                                          const registry::Requirements &) -> registry::Capability {
+        return Diagnostics{{DiagnosticCode::unsupported, "injected.late_rejection",
+                            "Rejected after joint construction."}};
     };
     REQUIRE_FALSE(lp.add(std::move(lp_registration)));
     REQUIRE_FALSE(qp.add(std::move(convex_registration)));
-    REQUIRE_FALSE(strategies.add(make_registration(lp,qp)));
-    StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.strategy-b"};
-    configuration.lp=lp_id;configuration.convex=convex_id;configuration.representation={"csl.polyhedron.h"};
-    registry::Requirements requirements;requirements.output.representation={"csl.polyhedron.h"};
-    requirements.output.assurance=Assurance::numerical;
-    requirements.output.family=FamilyTarget::exact_optimal_relation;
-    requirements.output.completeness=registry::Completeness::established;
-    auto prepared=strategies.prepare({p,configuration,exact,"1"},requirements);
+    REQUIRE_FALSE(strategies.add(make_registration(lp, qp)));
+    StrategyConfiguration configuration;
+    configuration.strategy = {"csl.synthesis.strategy-b"};
+    configuration.lp = lp_id;
+    configuration.convex = convex_id;
+    configuration.representation = {"csl.polyhedron.h"};
+    registry::Requirements requirements;
+    requirements.output.representation = {"csl.polyhedron.h"};
+    requirements.output.assurance = Assurance::numerical;
+    requirements.output.family = FamilyTarget::exact_optimal_relation;
+    requirements.output.completeness = registry::Completeness::established;
+    auto prepared = strategies.prepare({p, configuration, exact, "1"}, requirements);
     REQUIRE(std::holds_alternative<registry::PreparedStrategy>(prepared));
-    auto workspace=std::get<registry::PreparedStrategy>(std::move(prepared)).create();
-    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
-    context.numerical=exact.numerical;
-    const auto result=accepted(workspace->run(context));
-    CHECK(result.termination==Termination::operation_rejected);
-    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    auto workspace = std::get<registry::PreparedStrategy>(std::move(prepared)).create();
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    context.numerical = exact.numerical;
+    const auto result = accepted(workspace->run(context));
+    CHECK(result.termination == Termination::operation_rejected);
+    CHECK(result.outcome.value == MathematicalOutcome::undetermined);
     CHECK_FALSE(result.complete_proposal);
     CHECK_FALSE(result.partial_proposal);
     REQUIRE(result.family);
-    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK(result.family->target() == FamilyTarget::candidate_relaxation);
     CHECK_FALSE(result.family->registry_verified());
     REQUIRE(std::holds_alternative<CandidateFamily>(result.family->outcome()));
-    const auto& identity=result.family->identity();
-    CHECK(identity.problem==p.identity());
-    CHECK(identity.request==exact);
-    CHECK(identity.strategy==ModuleId{"csl.synthesis.strategy-b"});
-    CHECK(identity.strategy_version=="1");
-    REQUIRE(identity.lineage.size()==1);
-    CHECK(identity.lineage[0].request==RequestId{"syn04-build:"+p.identity().value});
-    const auto& candidate=std::get<CandidateFamily>(result.family->outcome());
-    CHECK(candidate.relation.representation==RepresentationId{"csl.polyhedron.h"});
+    const auto &identity = result.family->identity();
+    CHECK(identity.problem == p.identity());
+    CHECK(identity.request == exact);
+    CHECK(identity.strategy == ModuleId{"csl.synthesis.strategy-b"});
+    CHECK(identity.strategy_version == "1");
+    REQUIRE(identity.lineage.size() == 1);
+    CHECK(identity.lineage[0].request == RequestId{"syn04-build:" + p.identity().value});
+    const auto &candidate = std::get<CandidateFamily>(result.family->outcome());
+    CHECK(candidate.relation.representation == RepresentationId{"csl.polyhedron.h"});
     CHECK(std::holds_alternative<HeuristicRelationEvidence>(candidate.relation_to_target));
     CHECK(std::holds_alternative<Unestablished>(candidate.feasibility));
-    const auto retained_payload=std::dynamic_pointer_cast<const DirectJointPayload>(candidate.relation.payload);
+    const auto retained_payload =
+        std::dynamic_pointer_cast<const DirectJointPayload>(candidate.relation.payload);
     REQUIRE(retained_payload);
     CHECK_FALSE(retained_payload->optimization);
-    CHECK(contains(retained_payload->relation,{0,0,1,0,1}));
-    CHECK(contains(retained_payload->relation,{0,1,1,1,0}));
+    CHECK(contains(retained_payload->relation, {0, 0, 1, 0, 1}));
+    CHECK(contains(retained_payload->relation, {0, 1, 1, 1, 0}));
     CHECK_FALSE(result.objective.lower);
     CHECK_FALSE(result.objective.upper);
     CHECK(result.incumbents.empty());
     REQUIRE(std::holds_alternative<ScopedRequestRejection>(result.stop));
-    const auto& stop=std::get<ScopedRequestRejection>(result.stop);
-    CHECK(stop.request.request==RequestId{"syn04-joint:"+p.identity().value});
-    CHECK(stop.request.port=="convex");
-    CHECK(stop.request.requested_module==convex_id);
+    const auto &stop = std::get<ScopedRequestRejection>(result.stop);
+    CHECK(stop.request.request == RequestId{"syn04-joint:" + p.identity().value});
+    CHECK(stop.request.port == "convex");
+    CHECK(stop.request.requested_module == convex_id);
     CHECK_FALSE(stop.request.requested_version);
     REQUIRE(stop.request.actual_module);
-    CHECK(*stop.request.actual_module==convex_id);
+    CHECK(*stop.request.actual_module == convex_id);
     REQUIRE(stop.request.actual_version);
-    CHECK(*stop.request.actual_version==convex_version);
-    REQUIRE(stop.diagnostics.size()==1);
-    CHECK(stop.diagnostics[0].code==DiagnosticCode::unsupported);
-    CHECK(stop.diagnostics[0].field=="injected.late_rejection");
-    // This caller-injected text is an end-to-end preservation oracle, not a library-owned diagnostic sentence.
-    CHECK(stop.diagnostics[0].explanation=="Rejected after joint construction.");
-    CHECK(stop.completed_lineage==identity.lineage);
-    REQUIRE(stop.completed_lineage.size()==1);
-    CHECK(stop.completed_lineage[0].request==RequestId{"syn04-build:"+p.identity().value});
+    CHECK(*stop.request.actual_version == convex_version);
+    REQUIRE(stop.diagnostics.size() == 1);
+    CHECK(stop.diagnostics[0].code == DiagnosticCode::unsupported);
+    CHECK(stop.diagnostics[0].field == "injected.late_rejection");
+    // This caller-injected text is an end-to-end preservation oracle, not a library-owned
+    // diagnostic sentence.
+    CHECK(stop.diagnostics[0].explanation == "Rejected after joint construction.");
+    CHECK(stop.completed_lineage == identity.lineage);
+    REQUIRE(stop.completed_lineage.size() == 1);
+    CHECK(stop.completed_lineage[0].request == RequestId{"syn04-build:" + p.identity().value});
     CHECK(stop.retained.partial_or_candidate_family);
     CHECK_FALSE(stop.retained.lower_bound);
     CHECK_FALSE(stop.retained.upper_bound);
-    CHECK(stop.retained.incumbents==0);
+    CHECK(stop.retained.incumbents == 0);
 }
 TEST_CASE("unsupported assurance targets and policy mismatch fail before solving") {
-    const auto p=resolve(integrator());auto workspace=oracle({0,0.25,1,0.25,0.75},0);
-    for(auto target:{FamilyTarget::exact_optimal_relation,FamilyTarget::partial_relation}) {
-        auto q=request(p);q.target=target;const auto r=workspace.solve(p,q,{});CHECK(r.termination==Termination::operation_rejected);CHECK_FALSE(r.family);
+    const auto p = resolve(integrator());
+    auto workspace = oracle({0, 0.25, 1, 0.25, 0.75}, 0);
+    for (auto target : {FamilyTarget::exact_optimal_relation, FamilyTarget::partial_relation}) {
+        auto q = request(p);
+        q.target = target;
+        const auto r = workspace.solve(p, q, {});
+        CHECK(r.termination == Termination::operation_rejected);
+        CHECK_FALSE(r.family);
     }
-    auto q=request(p);q.assurance=Assurance::validated;auto r=workspace.solve(p,q,{});CHECK(r.termination==Termination::operation_rejected);CHECK_FALSE(r.family);
-    q=request(p);ExecutionContext context;context.numerical={1e-3,1e-3};r=workspace.solve(p,q,context);
-    CHECK(r.termination==Termination::contract_rejected);CHECK_FALSE(r.family);
+    auto q = request(p);
+    q.assurance = Assurance::validated;
+    auto r = workspace.solve(p, q, {});
+    CHECK(r.termination == Termination::operation_rejected);
+    CHECK_FALSE(r.family);
+    q = request(p);
+    ExecutionContext context;
+    context.numerical = {1e-3, 1e-3};
+    r = workspace.solve(p, q, context);
+    CHECK(r.termination == Termination::contract_rejected);
+    CHECK_FALSE(r.family);
 }
-TEST_CASE("registered Strategy B rejects partial-family preparation before creating solver workspaces") {
-    const auto p=resolve(integrator());auto q=request(p);q.target=FamilyTarget::partial_relation;
-    registry::Registry<registry::LPPort> lp;registry::Registry<registry::ConvexPort> qp;
+TEST_CASE(
+    "registered Strategy B rejects partial-family preparation before creating solver workspaces") {
+    const auto p = resolve(integrator());
+    auto q = request(p);
+    q.target = FamilyTarget::partial_relation;
+    registry::Registry<registry::LPPort> lp;
+    registry::Registry<registry::ConvexPort> qp;
     registry::StrategyRegistry strategies;
-    auto linear=accepted(adapters::lp::make_highs_registration());
-    auto convex=accepted(adapters::convex::make_highs_registration());
-    const auto lp_id=linear.identity.id,convex_id=convex.identity.id;
-    std::size_t lp_factory_calls=0,convex_factory_calls=0;
-    const auto lp_factory=linear.factory;
-    linear.factory=[&lp_factory_calls,lp_factory](const LinearProgram& program) {
-        ++lp_factory_calls;return lp_factory(program);
+    auto linear = accepted(adapters::lp::make_highs_registration());
+    auto convex = accepted(adapters::convex::make_highs_registration());
+    const auto lp_id = linear.identity.id, convex_id = convex.identity.id;
+    std::size_t lp_factory_calls = 0, convex_factory_calls = 0;
+    const auto lp_factory = linear.factory;
+    linear.factory = [&lp_factory_calls, lp_factory](const LinearProgram &program) {
+        ++lp_factory_calls;
+        return lp_factory(program);
     };
-    const auto convex_factory=convex.factory;
-    convex.factory=[&convex_factory_calls,convex_factory](const ConvexProgram& program) {
-        ++convex_factory_calls;return convex_factory(program);
+    const auto convex_factory = convex.factory;
+    convex.factory = [&convex_factory_calls, convex_factory](const ConvexProgram &program) {
+        ++convex_factory_calls;
+        return convex_factory(program);
     };
-    REQUIRE_FALSE(lp.add(std::move(linear)));REQUIRE_FALSE(qp.add(std::move(convex)));
-    REQUIRE_FALSE(strategies.add(make_registration(lp,qp)));
-    StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.strategy-b"};
-    configuration.lp=lp_id;configuration.convex=convex_id;configuration.representation=q.representation;
-    registry::Requirements requirements;requirements.output.representation=q.representation;
-    requirements.output.assurance=q.assurance;requirements.output.family=q.target;
-    requirements.output.completeness=registry::Completeness::unestablished;
+    REQUIRE_FALSE(lp.add(std::move(linear)));
+    REQUIRE_FALSE(qp.add(std::move(convex)));
+    REQUIRE_FALSE(strategies.add(make_registration(lp, qp)));
+    StrategyConfiguration configuration;
+    configuration.strategy = {"csl.synthesis.strategy-b"};
+    configuration.lp = lp_id;
+    configuration.convex = convex_id;
+    configuration.representation = q.representation;
+    registry::Requirements requirements;
+    requirements.output.representation = q.representation;
+    requirements.output.assurance = q.assurance;
+    requirements.output.family = q.target;
+    requirements.output.completeness = registry::Completeness::unestablished;
 
-    const auto prepared=strategies.prepare({p,configuration,q,"1"},requirements);
+    const auto prepared = strategies.prepare({p, configuration, q, "1"}, requirements);
     REQUIRE(std::holds_alternative<registry::Rejection>(prepared));
-    const auto& rejection=std::get<registry::Rejection>(prepared);
-    CHECK(rejection.provenance.port=="strategy");
-    CHECK(rejection.provenance.requested.id==ModuleId{"csl.synthesis.strategy-b"});
+    const auto &rejection = std::get<registry::Rejection>(prepared);
+    CHECK(rejection.provenance.port == "strategy");
+    CHECK(rejection.provenance.requested.id == ModuleId{"csl.synthesis.strategy-b"});
     CHECK_FALSE(rejection.provenance.requested.version);
     REQUIRE(rejection.provenance.actual);
-    CHECK(rejection.provenance.actual->id==ModuleId{"csl.synthesis.strategy-b"});
-    CHECK(rejection.provenance.actual->version=="1");
-    REQUIRE(rejection.diagnostics.size()==1);
-    CHECK(rejection.diagnostics.front().code==DiagnosticCode::unsupported);
-    CHECK(rejection.diagnostics.front().field=="joint.coverage");
-    CHECK(rejection.diagnostics.front().explanation==
+    CHECK(rejection.provenance.actual->id == ModuleId{"csl.synthesis.strategy-b"});
+    CHECK(rejection.provenance.actual->version == "1");
+    REQUIRE(rejection.diagnostics.size() == 1);
+    CHECK(rejection.diagnostics.front().code == DiagnosticCode::unsupported);
+    CHECK(rejection.diagnostics.front().field == "joint.coverage");
+    CHECK(
+        rejection.diagnostics.front().explanation ==
         "Complete-family verifiers require the bounded nominal linear exact profile or a reviewed T-S01/T-S02/T-S03 profile.");
-    CHECK(lp_factory_calls==0);
-    CHECK(convex_factory_calls==0);
+    CHECK(lp_factory_calls == 0);
+    CHECK(convex_factory_calls == 0);
 }
-TEST_CASE("existing StrategyRegistry snapshots admitted native providers and returns the constant-objective relation") {
-    const auto p=resolve(integrator(LinearTerminal{{0},3}));
-    const auto prepared=registered_prepared(p,request(p));CHECK(prepared.provenance().size()==3);
-    auto workspace=prepared.create();ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
-    const auto result=accepted(workspace->run(context));const auto& data=payload(result);
-    CHECK(contains(data.relation,{0,0,0,0,0}));CHECK(contains(data.relation,{0,1,2,1,1}));
-    REQUIRE(data.provider);CHECK(data.provider->actual->id.value!="oracle-lp");
-    CHECK(result.outcome.value==MathematicalOutcome::undetermined);CHECK(result.family->identity().request==request(p));
-    CHECK(result.family->identity().lineage.size()==2);REQUIRE(result.objective.upper);CHECK(result.objective.upper->value==3);
+TEST_CASE(
+    "existing StrategyRegistry snapshots admitted native providers and returns the constant-objective relation") {
+    const auto p = resolve(integrator(LinearTerminal{{0}, 3}));
+    const auto prepared = registered_prepared(p, request(p));
+    CHECK(prepared.provenance().size() == 3);
+    auto workspace = prepared.create();
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    const auto result = accepted(workspace->run(context));
+    const auto &data = payload(result);
+    CHECK(contains(data.relation, {0, 0, 0, 0, 0}));
+    CHECK(contains(data.relation, {0, 1, 2, 1, 1}));
+    REQUIRE(data.provider);
+    CHECK(data.provider->actual->id.value != "oracle-lp");
+    CHECK(result.outcome.value == MathematicalOutcome::undetermined);
+    CHECK(result.family->identity().request == request(p));
+    CHECK(result.family->identity().lineage.size() == 2);
+    REQUIRE(result.objective.upper);
+    CHECK(result.objective.upper->value == 3);
 }
 TEST_CASE("Strategy B registers the exact T-S02 constant-objective history family") {
-    const auto p=resolve(integrator(LinearTerminal{{0},3}));
-    auto exact=request(p);exact.profile="ts02_constant_integrator";
-    exact.target=FamilyTarget::exact_optimal_relation;
-    registry::Registry<registry::LPPort> lp;registry::Registry<registry::ConvexPort> qp;
+    const auto p = resolve(integrator(LinearTerminal{{0}, 3}));
+    auto exact = request(p);
+    exact.profile = "ts02_constant_integrator";
+    exact.target = FamilyTarget::exact_optimal_relation;
+    registry::Registry<registry::LPPort> lp;
+    registry::Registry<registry::ConvexPort> qp;
     registry::StrategyRegistry strategies;
-    auto linear=accepted(adapters::lp::make_highs_registration());
-    auto convex=accepted(adapters::convex::make_highs_registration());
-    const auto lp_id=linear.identity.id,convex_id=convex.identity.id;
-    REQUIRE_FALSE(lp.add(std::move(linear)));REQUIRE_FALSE(qp.add(std::move(convex)));
-    REQUIRE_FALSE(strategies.add(make_registration(lp,qp)));
-    StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.strategy-b"};
-    configuration.lp=lp_id;configuration.convex=convex_id;configuration.representation={"csl.polyhedron.h"};
-    registry::Requirements requirements;requirements.output.representation={"csl.polyhedron.h"};
-    requirements.output.assurance=Assurance::numerical;
-    requirements.output.family=FamilyTarget::exact_optimal_relation;
-    requirements.output.completeness=registry::Completeness::established;
-    auto prepared=strategies.prepare({p,configuration,exact,"1"},requirements);
+    auto linear = accepted(adapters::lp::make_highs_registration());
+    auto convex = accepted(adapters::convex::make_highs_registration());
+    const auto lp_id = linear.identity.id, convex_id = convex.identity.id;
+    REQUIRE_FALSE(lp.add(std::move(linear)));
+    REQUIRE_FALSE(qp.add(std::move(convex)));
+    REQUIRE_FALSE(strategies.add(make_registration(lp, qp)));
+    StrategyConfiguration configuration;
+    configuration.strategy = {"csl.synthesis.strategy-b"};
+    configuration.lp = lp_id;
+    configuration.convex = convex_id;
+    configuration.representation = {"csl.polyhedron.h"};
+    registry::Requirements requirements;
+    requirements.output.representation = {"csl.polyhedron.h"};
+    requirements.output.assurance = Assurance::numerical;
+    requirements.output.family = FamilyTarget::exact_optimal_relation;
+    requirements.output.completeness = registry::Completeness::established;
+    auto prepared = strategies.prepare({p, configuration, exact, "1"}, requirements);
     REQUIRE(std::holds_alternative<registry::PreparedStrategy>(prepared));
-    auto workspace=std::get<registry::PreparedStrategy>(std::move(prepared)).create();
-    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
-    context.numerical=exact.numerical;
-    const auto result=accepted(workspace->run(context));
-    REQUIRE(result.termination==Termination::completed);
+    auto workspace = std::get<registry::PreparedStrategy>(std::move(prepared)).create();
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    context.numerical = exact.numerical;
+    const auto result = accepted(workspace->run(context));
+    REQUIRE(result.termination == Termination::completed);
     REQUIRE(result.family);
-    CHECK(result.family->target()==FamilyTarget::exact_optimal_relation);
+    CHECK(result.family->target() == FamilyTarget::exact_optimal_relation);
     CHECK(result.family->registry_verified());
-    CHECK(result.outcome.value==MathematicalOutcome::optimal);
-    CHECK(result.outcome.subject==p.identity());
-    CHECK(result.family->identity().problem==p.identity());
-    CHECK(result.family->identity().request==exact);
-    CHECK(result.family->identity().coordinates==p.constraints().coordinates());
-    CHECK(result.family->identity().strategy==ModuleId{"csl.synthesis.strategy-b"});
-    CHECK(result.family->identity().strategy_version=="1");
-    REQUIRE(result.family->identity().lineage.size()==1);
-    CHECK(result.family->identity().lineage.front().request==RequestId{"syn04-build:"+p.identity().value});
-    const auto& complete=std::get<CompleteOptimalFamily>(result.family->outcome());
-    const auto* proof=std::get_if<RegisteredCompletenessEvidence>(&complete.completeness.support);
+    CHECK(result.outcome.value == MathematicalOutcome::optimal);
+    CHECK(result.outcome.subject == p.identity());
+    CHECK(result.family->identity().problem == p.identity());
+    CHECK(result.family->identity().request == exact);
+    CHECK(result.family->identity().coordinates == p.constraints().coordinates());
+    CHECK(result.family->identity().strategy == ModuleId{"csl.synthesis.strategy-b"});
+    CHECK(result.family->identity().strategy_version == "1");
+    REQUIRE(result.family->identity().lineage.size() == 1);
+    CHECK(result.family->identity().lineage.front().request ==
+          RequestId{"syn04-build:" + p.identity().value});
+    const auto &complete = std::get<CompleteOptimalFamily>(result.family->outcome());
+    const auto *proof = std::get_if<RegisteredCompletenessEvidence>(&complete.completeness.support);
     REQUIRE(proof);
-    CHECK(proof->verifier==ModuleId{"csl.verifier.ts02-constant-integrator"});
-    CHECK(proof->verifier_version=="1");
-    CHECK(proof->proof=="TS02-constant-integrator-v1");
-    const auto payload=std::dynamic_pointer_cast<const synthesis::Ts02ConstantIntegratorRelation>(complete.relation.payload);
+    CHECK(proof->verifier == ModuleId{"csl.verifier.ts02-constant-integrator"});
+    CHECK(proof->verifier_version == "1");
+    CHECK(proof->proof == "TS02-constant-integrator-v1");
+    const auto payload = std::dynamic_pointer_cast<const synthesis::Ts02ConstantIntegratorRelation>(
+        complete.relation.payload);
     REQUIRE(payload);
-    const auto& metadata=*payload->h_polyhedron().metadata();
-    CHECK(metadata.id==SetId{"ts02-optimal-histories"});
-    CHECK(metadata.set.dimension==5);
-    CHECK(metadata.coordinate_labels==std::vector<std::string>{"x0","x1","x2","u0","u1"});
-    CHECK(complete.relation.coordinates==p.constraints().coordinates());
-    CHECK(complete.relation.representation==RepresentationId{"csl.polyhedron.h"});
+    const auto &metadata = *payload->h_polyhedron().metadata();
+    CHECK(metadata.id == SetId{"ts02-optimal-histories"});
+    CHECK(metadata.set.dimension == 5);
+    CHECK(metadata.coordinate_labels == std::vector<std::string>{"x0", "x1", "x2", "u0", "u1"});
+    CHECK(complete.relation.coordinates == p.constraints().coordinates());
+    CHECK(complete.relation.representation == RepresentationId{"csl.polyhedron.h"});
 
     // Independent public-result oracle: x0=0, x1=x0+u0, x2=x1+u1,
     // 0<=u0,u1<=1. The objective is identically 3, so every point in this
@@ -1820,216 +2384,252 @@ TEST_CASE("Strategy B registers the exact T-S02 constant-objective history famil
     // row and bound without treating storage order (or equality sign) as
     // semantic; the compiled verifier below is supplemental, not the
     // mathematical oracle for this claim.
-    const auto representation=payload->h_polyhedron().representation();
+    const auto representation = payload->h_polyhedron().representation();
     REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
-    const auto& h=std::get<sets::HRepresentation>(representation);
-    const Matrix expected_inequalities{4,5,{0,0,0,1,0, 0,0,0,-1,0,
-        0,0,0,0,1, 0,0,0,0,-1}};
-    const Vector expected_upper{1,0,1,0};
-    const Matrix expected_equalities{3,5,{1,0,0,0,0, -1,1,0,-1,0,
-        0,-1,1,0,-1}};
-    const Vector expected_values{0,0,0};
-    REQUIRE(h.inequalities.rows()==expected_inequalities.rows);
-    REQUIRE(h.inequalities.cols()==expected_inequalities.cols);
-    REQUIRE(h.upper_bounds.size()==expected_upper.size());
-    REQUIRE(h.equalities.rows()==expected_equalities.rows);
-    REQUIRE(h.equalities.cols()==expected_equalities.cols);
-    REQUIRE(h.equality_values.size()==expected_values.size());
-    const auto rows_match=[](const auto& actual_matrix,const auto& actual_bounds,
-        const Matrix& expected_matrix,const Vector& expected_bounds,bool allow_sign_reversal) {
-        if(actual_matrix.rows()!=expected_matrix.rows || actual_matrix.cols()!=expected_matrix.cols ||
-            actual_bounds.size()!=expected_bounds.size())return false;
-        std::vector<bool> matched(expected_matrix.rows,false);
-        for(std::size_t i=0;i<actual_matrix.rows();++i) {
-            bool found=false;
-            for(std::size_t k=0;k<expected_matrix.rows && !found;++k)if(!matched[k]) {
-                for(const double sign:{1.0,-1.0}) {
-                    if(sign<0 && !allow_sign_reversal)continue;
-                    bool equal=actual_bounds[i]==sign*expected_bounds[k];
-                    for(std::size_t j=0;j<actual_matrix.cols() && equal;++j)
-                        equal=actual_matrix(i,j)==sign*expected_matrix.values[k*expected_matrix.cols+j];
-                    if(equal) {matched[k]=true;found=true;break;}
+    const auto &h = std::get<sets::HRepresentation>(representation);
+    const Matrix expected_inequalities{
+        4, 5, {0, 0, 0, 1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1}};
+    const Vector expected_upper{1, 0, 1, 0};
+    const Matrix expected_equalities{3, 5, {1, 0, 0, 0, 0, -1, 1, 0, -1, 0, 0, -1, 1, 0, -1}};
+    const Vector expected_values{0, 0, 0};
+    REQUIRE(h.inequalities.rows() == expected_inequalities.rows);
+    REQUIRE(h.inequalities.cols() == expected_inequalities.cols);
+    REQUIRE(h.upper_bounds.size() == expected_upper.size());
+    REQUIRE(h.equalities.rows() == expected_equalities.rows);
+    REQUIRE(h.equalities.cols() == expected_equalities.cols);
+    REQUIRE(h.equality_values.size() == expected_values.size());
+    const auto rows_match = [](const auto &actual_matrix, const auto &actual_bounds,
+                               const Matrix &expected_matrix, const Vector &expected_bounds,
+                               bool allow_sign_reversal) {
+        if (actual_matrix.rows() != expected_matrix.rows ||
+            actual_matrix.cols() != expected_matrix.cols ||
+            actual_bounds.size() != expected_bounds.size())
+            return false;
+        std::vector<bool> matched(expected_matrix.rows, false);
+        for (std::size_t i = 0; i < actual_matrix.rows(); ++i) {
+            bool found = false;
+            for (std::size_t k = 0; k < expected_matrix.rows && !found; ++k)
+                if (!matched[k]) {
+                    for (const double sign : {1.0, -1.0}) {
+                        if (sign < 0 && !allow_sign_reversal)
+                            continue;
+                        bool equal = actual_bounds[i] == sign * expected_bounds[k];
+                        for (std::size_t j = 0; j < actual_matrix.cols() && equal; ++j)
+                            equal = actual_matrix(i, j) ==
+                                    sign * expected_matrix.values[k * expected_matrix.cols + j];
+                        if (equal) {
+                            matched[k] = true;
+                            found = true;
+                            break;
+                        }
+                    }
                 }
-            }
-            if(!found)return false;
+            if (!found)
+                return false;
         }
         return true;
     };
-    CHECK(rows_match(h.inequalities,h.upper_bounds,expected_inequalities,expected_upper,false));
-    CHECK(rows_match(h.equalities,h.equality_values,expected_equalities,expected_values,true));
-    CHECK(contains(payload->h_polyhedron(),{0,0,0,0,0}));
-    CHECK(contains(payload->h_polyhedron(),{0,1,2,1,1}));
-    const Vector first_same_terminal_history{0,0.3,1.1,0.3,0.8};
-    const Vector second_same_terminal_history{0,0.5,1.1,0.5,0.6};
-    CHECK(contains(payload->h_polyhedron(),first_same_terminal_history));
-    CHECK(contains(payload->h_polyhedron(),second_same_terminal_history));
-    CHECK(first_same_terminal_history[2]==second_same_terminal_history[2]);
-    CHECK_FALSE(contains(payload->h_polyhedron(),{0,0,1,1,0}));
-    REQUIRE(complete.optimum.bounds.lower);REQUIRE(complete.optimum.bounds.upper);
-    CHECK(complete.optimum.bounds.lower->value==3);
-    CHECK(complete.optimum.bounds.upper->value==3);
-    const registry::StrategyRequest frozen{p,configuration,exact,"1",result.family->identity().lineage};
-    CompleteFamilyProposal proposal{result.family->identity(),complete};
-    const auto verifier=registry::detail::find_compiled_verifier({synthesis::ts02_constant_integrator_verifier},"1");
+    CHECK(rows_match(h.inequalities, h.upper_bounds, expected_inequalities, expected_upper, false));
+    CHECK(rows_match(h.equalities, h.equality_values, expected_equalities, expected_values, true));
+    CHECK(contains(payload->h_polyhedron(), {0, 0, 0, 0, 0}));
+    CHECK(contains(payload->h_polyhedron(), {0, 1, 2, 1, 1}));
+    const Vector first_same_terminal_history{0, 0.3, 1.1, 0.3, 0.8};
+    const Vector second_same_terminal_history{0, 0.5, 1.1, 0.5, 0.6};
+    CHECK(contains(payload->h_polyhedron(), first_same_terminal_history));
+    CHECK(contains(payload->h_polyhedron(), second_same_terminal_history));
+    CHECK(first_same_terminal_history[2] == second_same_terminal_history[2]);
+    CHECK_FALSE(contains(payload->h_polyhedron(), {0, 0, 1, 1, 0}));
+    REQUIRE(complete.optimum.bounds.lower);
+    REQUIRE(complete.optimum.bounds.upper);
+    CHECK(complete.optimum.bounds.lower->value == 3);
+    CHECK(complete.optimum.bounds.upper->value == 3);
+    const registry::StrategyRequest frozen{p, configuration, exact, "1",
+                                           result.family->identity().lineage};
+    CompleteFamilyProposal proposal{result.family->identity(), complete};
+    const auto verifier = registry::detail::find_compiled_verifier(
+        {synthesis::ts02_constant_integrator_verifier}, "1");
     REQUIRE(verifier);
-    CHECK(verifier->verify(frozen,proposal).empty());
-    auto candidate_request=frozen;candidate_request.family.target=FamilyTarget::candidate_relaxation;
-    CHECK_FALSE(verifier->verify(candidate_request,proposal).empty());
-    auto wrong_objective=resolve(integrator(LinearTerminal{{0},4}));
-    auto wrong_request=frozen;wrong_request.problem=wrong_objective;wrong_request.family.objective=wrong_objective.identity();
-    wrong_request.lineage=detail::expected_ts02_lineage(wrong_objective.identity());
-    CHECK_FALSE(verifier->verify(wrong_request,proposal).empty());
-    auto forged_relation=proposal;
-    auto enlarged_upper=expected_upper;enlarged_upper[0]=2;
-    const auto inequalities=accepted(numeric::snapshot(expected_inequalities));
-    const auto upper=accepted(numeric::snapshot_vector(enlarged_upper));
-    const auto equalities=accepted(numeric::snapshot(expected_equalities));
-    const auto values=accepted(numeric::snapshot_vector(expected_values));
-    auto enlarged=accepted(sets::make_h({{"ts02-optimal-histories"},5,{"x0","x1","x2","u0","u1"}},
-        {inequalities,upper,equalities,values}));
-    forged_relation.family.relation.payload=std::make_shared<const synthesis::Ts02ConstantIntegratorRelation>(std::move(enlarged));
-    CHECK_FALSE(verifier->verify(frozen,forged_relation).empty());
-    auto candidate_profile=exact;candidate_profile.target=FamilyTarget::candidate_relaxation;
-    registry::Requirements candidate_requirements;candidate_requirements.output.representation={"csl.polyhedron.h"};
-    candidate_requirements.output.assurance=Assurance::numerical;
-    candidate_requirements.output.family=FamilyTarget::candidate_relaxation;
-    candidate_requirements.output.completeness=registry::Completeness::unestablished;
-    CHECK(std::holds_alternative<registry::Rejection>(strategies.prepare({p,configuration,candidate_profile,"1"},candidate_requirements)));
+    CHECK(verifier->verify(frozen, proposal).empty());
+    auto candidate_request = frozen;
+    candidate_request.family.target = FamilyTarget::candidate_relaxation;
+    CHECK_FALSE(verifier->verify(candidate_request, proposal).empty());
+    auto wrong_objective = resolve(integrator(LinearTerminal{{0}, 4}));
+    auto wrong_request = frozen;
+    wrong_request.problem = wrong_objective;
+    wrong_request.family.objective = wrong_objective.identity();
+    wrong_request.lineage = detail::expected_ts02_lineage(wrong_objective.identity());
+    CHECK_FALSE(verifier->verify(wrong_request, proposal).empty());
+    auto forged_relation = proposal;
+    auto enlarged_upper = expected_upper;
+    enlarged_upper[0] = 2;
+    const auto inequalities = accepted(numeric::snapshot(expected_inequalities));
+    const auto upper = accepted(numeric::snapshot_vector(enlarged_upper));
+    const auto equalities = accepted(numeric::snapshot(expected_equalities));
+    const auto values = accepted(numeric::snapshot_vector(expected_values));
+    auto enlarged =
+        accepted(sets::make_h({{"ts02-optimal-histories"}, 5, {"x0", "x1", "x2", "u0", "u1"}},
+                              {inequalities, upper, equalities, values}));
+    forged_relation.family.relation.payload =
+        std::make_shared<const synthesis::Ts02ConstantIntegratorRelation>(std::move(enlarged));
+    CHECK_FALSE(verifier->verify(frozen, forged_relation).empty());
+    auto candidate_profile = exact;
+    candidate_profile.target = FamilyTarget::candidate_relaxation;
+    registry::Requirements candidate_requirements;
+    candidate_requirements.output.representation = {"csl.polyhedron.h"};
+    candidate_requirements.output.assurance = Assurance::numerical;
+    candidate_requirements.output.family = FamilyTarget::candidate_relaxation;
+    candidate_requirements.output.completeness = registry::Completeness::unestablished;
+    CHECK(std::holds_alternative<registry::Rejection>(
+        strategies.prepare({p, configuration, candidate_profile, "1"}, candidate_requirements)));
 }
 TEST_CASE("Strategy B rejects unsupported completeness support at the public strategy boundary") {
-    const auto p=resolve(integrator(LinearTerminal{{0},3}));
-    auto exact=request(p);exact.profile=synthesis::ts02_constant_integrator_profile;
-    exact.target=FamilyTarget::exact_optimal_relation;
-    const auto trusted=registered_prepared(p,exact);
-    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
-    context.numerical=exact.numerical;
-    const auto trusted_result=accepted(trusted.create()->run(context));
+    const auto p = resolve(integrator(LinearTerminal{{0}, 3}));
+    auto exact = request(p);
+    exact.profile = synthesis::ts02_constant_integrator_profile;
+    exact.target = FamilyTarget::exact_optimal_relation;
+    const auto trusted = registered_prepared(p, exact);
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    context.numerical = exact.numerical;
+    const auto trusted_result = accepted(trusted.create()->run(context));
     REQUIRE(trusted_result.family);
     REQUIRE(trusted_result.family->registry_verified());
-    const auto& verified=std::get<CompleteOptimalFamily>(trusted_result.family->outcome());
-    CompleteFamilyProposal proposal{trusted_result.family->identity(),verified};
+    const auto &verified = std::get<CompleteOptimalFamily>(trusted_result.family->outcome());
+    CompleteFamilyProposal proposal{trusted_result.family->identity(), verified};
 
     // Preserve the valid problem/request/strategy binding and mutate only the support variant.
     const std::vector<CompletenessSupport> unsupported_supports{
         Unestablished{},
-        SymbolicArgument{"problem:"+p.identity().value, "unchecked symbolic assertion"},
-        CertificateReference{"problem:"+p.identity().value+"/certificate", "unselected verifier"},
-        NumericalCheck{0,0,0,{"unselected numerical verifier"}}};
-    const std::vector<std::string> names{
-        "unestablished", "symbolic argument", "unchecked certificate reference", "residual-only numerical check"};
-    REQUIRE(unsupported_supports.size()==names.size());
-    for(std::size_t i=0;i<unsupported_supports.size();++i) {
+        SymbolicArgument{"problem:" + p.identity().value, "unchecked symbolic assertion"},
+        CertificateReference{"problem:" + p.identity().value + "/certificate",
+                             "unselected verifier"},
+        NumericalCheck{0, 0, 0, {"unselected numerical verifier"}}};
+    const std::vector<std::string> names{"unestablished", "symbolic argument",
+                                         "unchecked certificate reference",
+                                         "residual-only numerical check"};
+    REQUIRE(unsupported_supports.size() == names.size());
+    for (std::size_t i = 0; i < unsupported_supports.size(); ++i) {
         CAPTURE(names[i]);
-        auto forged=proposal;
-        forged.family.completeness.support=unsupported_supports[i];
+        auto forged = proposal;
+        forged.family.completeness.support = unsupported_supports[i];
 
         registry::StrategyRegistry strategies;
         REQUIRE_FALSE(strategies.add(proposal_only_ts02_strategy(std::move(forged))));
-        StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.strategy-b"};
-        configuration.representation={"csl.polyhedron.h"};
-        registry::Requirements requirements;requirements.output.representation={"csl.polyhedron.h"};
-        requirements.output.assurance=Assurance::numerical;
-        requirements.output.family=FamilyTarget::exact_optimal_relation;
-        requirements.output.completeness=registry::Completeness::established;
-        const registry::StrategyRequest strategy_request{p,configuration,exact,"1",
-            detail::expected_ts02_lineage(p.identity())};
-        const auto prepared=strategies.prepare(strategy_request,requirements);
+        StrategyConfiguration configuration;
+        configuration.strategy = {"csl.synthesis.strategy-b"};
+        configuration.representation = {"csl.polyhedron.h"};
+        registry::Requirements requirements;
+        requirements.output.representation = {"csl.polyhedron.h"};
+        requirements.output.assurance = Assurance::numerical;
+        requirements.output.family = FamilyTarget::exact_optimal_relation;
+        requirements.output.completeness = registry::Completeness::established;
+        const registry::StrategyRequest strategy_request{
+            p, configuration, exact, "1", detail::expected_ts02_lineage(p.identity())};
+        const auto prepared = strategies.prepare(strategy_request, requirements);
         REQUIRE(std::holds_alternative<registry::PreparedStrategy>(prepared));
-        const auto result=accepted(std::get<registry::PreparedStrategy>(prepared).create()->run(context));
-        CHECK(result.termination==Termination::contract_rejected);
+        const auto result =
+            accepted(std::get<registry::PreparedStrategy>(prepared).create()->run(context));
+        CHECK(result.termination == Termination::contract_rejected);
         CHECK_FALSE(result.family);
         CHECK_FALSE(result.complete_proposal);
-        CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+        CHECK(result.outcome.value == MathematicalOutcome::undetermined);
         REQUIRE(std::holds_alternative<ContractValidationFailure>(result.stop));
-        const auto& diagnostics=std::get<ContractValidationFailure>(result.stop).diagnostics;
-        CHECK(std::any_of(diagnostics.begin(),diagnostics.end(),[](const Diagnostic& diagnostic) {
-            return diagnostic.code==DiagnosticCode::evidence_mismatch&&
-                diagnostic.field=="family.proposal.verifier";
+        const auto &diagnostics = std::get<ContractValidationFailure>(result.stop).diagnostics;
+        CHECK(std::any_of(diagnostics.begin(), diagnostics.end(), [](const Diagnostic &diagnostic) {
+            return diagnostic.code == DiagnosticCode::evidence_mismatch &&
+                   diagnostic.field == "family.proposal.verifier";
         }));
     }
 }
 
-TEST_CASE("registered Strategy B reports a completed unbounded objective without a finite lower bound") {
-    auto input=integrator(LinearTerminal{{-1},0});
-    input.controls=ContinuousDomain{{UniversalSet{1},UniversalSet{1}}};
-    input.states={UniversalSet{1},UniversalSet{1},UniversalSet{1}};
-    const auto p=resolve(input);
-    const auto q=request(p);
-    const auto prepared=registered_prepared(p,q);
-    auto workspace=prepared.create();
+TEST_CASE(
+    "registered Strategy B reports a completed unbounded objective without a finite lower bound") {
+    auto input = integrator(LinearTerminal{{-1}, 0});
+    input.controls = ContinuousDomain{{UniversalSet{1}, UniversalSet{1}}};
+    input.states = {UniversalSet{1}, UniversalSet{1}, UniversalSet{1}};
+    const auto p = resolve(input);
+    const auto q = request(p);
+    const auto prepared = registered_prepared(p, q);
+    auto workspace = prepared.create();
     ExecutionContext context;
-    context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
 
-    const auto result=accepted(workspace->run(context));
+    const auto result = accepted(workspace->run(context));
 
     // Independent ray oracle: x0=0, u0=u1=t, x1=t, x2=2t is feasible
     // for every t>=0 and the authored objective is -x2=-2t, so its infimum
     // is -infinity. Solver termination is successful even though no optimum
     // or complete optimal-history family exists.
-    CHECK(result.termination==Termination::completed);
-    CHECK(result.outcome.subject==p.identity());
-    CHECK(result.outcome.value==MathematicalOutcome::unbounded);
+    CHECK(result.termination == Termination::completed);
+    CHECK(result.outcome.subject == p.identity());
+    CHECK(result.outcome.value == MathematicalOutcome::unbounded);
     CHECK(std::holds_alternative<Unestablished>(result.outcome.support));
-    const auto generated_program=ProgramId{"syn04-joint:"+p.identity().value};
-    CHECK(std::any_of(result.outcome.assumptions.begin(),result.outcome.assumptions.end(),[&](const std::string& assumption) {
-        return assumption.find(generated_program.value)!=std::string::npos;
-    }));
-    CHECK(std::any_of(result.outcome.assumptions.begin(),result.outcome.assumptions.end(),[](const std::string& assumption) {
-        return assumption.find("not independently validated")!=std::string::npos;
-    }));
+    const auto generated_program = ProgramId{"syn04-joint:" + p.identity().value};
+    CHECK(std::any_of(result.outcome.assumptions.begin(), result.outcome.assumptions.end(),
+                      [&](const std::string &assumption) {
+                          return assumption.find(generated_program.value) != std::string::npos;
+                      }));
+    CHECK(std::any_of(result.outcome.assumptions.begin(), result.outcome.assumptions.end(),
+                      [](const std::string &assumption) {
+                          return assumption.find("not independently validated") !=
+                                 std::string::npos;
+                      }));
     CHECK_FALSE(result.objective.lower);
     CHECK_FALSE(result.complete_proposal);
     CHECK_FALSE(result.partial_proposal);
     CHECK_FALSE(result.family);
 }
-TEST_CASE("registered Strategy B does not promote generated infeasibility over a feasible source candidate") {
-    const auto p=resolve(integrator(LinearTerminal{{0},3}));
-    const auto q=request(p);
-    const auto prepared=registered_prepared(p,q,false,Termination::completed,nullptr,{},MathematicalOutcome::infeasible);
-    auto workspace=prepared.create();
+TEST_CASE(
+    "registered Strategy B does not promote generated infeasibility over a feasible source candidate") {
+    const auto p = resolve(integrator(LinearTerminal{{0}, 3}));
+    const auto q = request(p);
+    const auto prepared = registered_prepared(p, q, false, Termination::completed, nullptr, {},
+                                              MathematicalOutcome::infeasible);
+    auto workspace = prepared.create();
     ExecutionContext context;
-    context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
 
-    const auto result=accepted(workspace->run(context));
+    const auto result = accepted(workspace->run(context));
 
     // The source has a feasible history (x0,x1,x2,u0,u1)=(0,0.25,1,0.25,0.75).
     // Without a checked transfer certificate, generated-program infeasibility
     // cannot override the independently checked source candidate.
-    CHECK(result.termination==Termination::completed);
-    CHECK(result.outcome.subject==p.identity());
-    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK(result.termination == Termination::completed);
+    CHECK(result.outcome.subject == p.identity());
+    CHECK(result.outcome.value == MathematicalOutcome::undetermined);
     CHECK(std::holds_alternative<Unestablished>(result.outcome.support));
     CHECK_FALSE(result.objective.lower);
     CHECK_FALSE(result.objective.upper);
     CHECK_FALSE(result.complete_proposal);
     CHECK_FALSE(result.partial_proposal);
     REQUIRE(result.family);
-    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
-    const auto& candidate=std::get<CandidateFamily>(result.family->outcome());
-    const auto retained=std::dynamic_pointer_cast<const DirectJointPayload>(candidate.relation.payload);
+    CHECK(result.family->target() == FamilyTarget::candidate_relaxation);
+    const auto &candidate = std::get<CandidateFamily>(result.family->outcome());
+    const auto retained =
+        std::dynamic_pointer_cast<const DirectJointPayload>(candidate.relation.payload);
     REQUIRE(retained);
     REQUIRE(retained->optimization);
-    CHECK(retained->optimization->termination==Termination::completed);
-    CHECK(retained->optimization->outcome.value==MathematicalOutcome::infeasible);
+    CHECK(retained->optimization->termination == Termination::completed);
+    CHECK(retained->optimization->outcome.value == MathematicalOutcome::infeasible);
 }
 TEST_CASE("registered Strategy B rejects source infeasibility without a transfer certificate") {
-    auto input=integrator(LinearTerminal{{1},0});
+    auto input = integrator(LinearTerminal{{1}, 0});
     // The authored dynamics are x1=x0+u0 with x0=0 and 0<=u0<=1,
     // while the stage-one state constraint requires x1=2. This is a direct
     // mathematical contradiction, independent of any solver-injected result.
-    input.states={Singleton{{0}},Singleton{{2}},UniversalSet{1}};
-    const auto p=resolve(input);
-    const auto q=request(p);
-    const auto prepared=registered_prepared(p,q);
-    auto workspace=prepared.create();
+    input.states = {Singleton{{0}}, Singleton{{2}}, UniversalSet{1}};
+    const auto p = resolve(input);
+    const auto q = request(p);
+    const auto prepared = registered_prepared(p, q);
+    auto workspace = prepared.create();
     ExecutionContext context;
-    context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
 
-    const auto result=accepted(workspace->run(context));
+    const auto result = accepted(workspace->run(context));
 
-    CHECK(result.termination==Termination::contract_rejected);
-    CHECK(result.outcome.subject==p.identity());
-    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK(result.termination == Termination::contract_rejected);
+    CHECK(result.outcome.subject == p.identity());
+    CHECK(result.outcome.value == MathematicalOutcome::undetermined);
     CHECK(std::holds_alternative<Unestablished>(result.outcome.support));
     REQUIRE(std::holds_alternative<ContractValidationFailure>(result.stop));
     CHECK_FALSE(result.objective.lower);
@@ -2039,38 +2639,39 @@ TEST_CASE("registered Strategy B rejects source infeasibility without a transfer
     CHECK_FALSE(result.partial_proposal);
     CHECK(result.incumbents.empty());
 }
-TEST_CASE("registered Strategy B rejects empty-control infeasibility without a transfer certificate") {
-    auto feasible_input=integrator(LinearTerminal{{0},0});
-    feasible_input.controls=ContinuousDomain{{Singleton{{0}},Singleton{{0}}}};
-    const auto feasible_problem=resolve(feasible_input);
-    const auto feasible_request=request(feasible_problem);
-    auto feasible_workspace=registered_prepared(feasible_problem,feasible_request).create();
+TEST_CASE(
+    "registered Strategy B rejects empty-control infeasibility without a transfer certificate") {
+    auto feasible_input = integrator(LinearTerminal{{0}, 0});
+    feasible_input.controls = ContinuousDomain{{Singleton{{0}}, Singleton{{0}}}};
+    const auto feasible_problem = resolve(feasible_input);
+    const auto feasible_request = request(feasible_problem);
+    auto feasible_workspace = registered_prepared(feasible_problem, feasible_request).create();
     ExecutionContext context;
-    context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
 
-    const auto feasible_result=accepted(feasible_workspace->run(context));
+    const auto feasible_result = accepted(feasible_workspace->run(context));
 
-    CHECK(feasible_result.termination==Termination::completed);
-    CHECK(feasible_result.outcome.subject==feasible_problem.identity());
+    CHECK(feasible_result.termination == Termination::completed);
+    CHECK(feasible_result.outcome.subject == feasible_problem.identity());
     // The source has a literal feasible optimum, but Strategy B makes only a
     // candidate-family claim here and does not establish source optimality.
-    CHECK(feasible_result.outcome.value==MathematicalOutcome::undetermined);
-    REQUIRE(feasible_result.incumbents.size()==1);
-    CHECK(feasible_result.incumbents.front().witness.original_objective==0);
-    CHECK(feasible_result.incumbents.front().witness.states==std::vector<Vector>{{0},{0},{0}});
-    CHECK(feasible_result.incumbents.front().witness.controls==std::vector<Vector>{{0},{0}});
+    CHECK(feasible_result.outcome.value == MathematicalOutcome::undetermined);
+    REQUIRE(feasible_result.incumbents.size() == 1);
+    CHECK(feasible_result.incumbents.front().witness.original_objective == 0);
+    CHECK(feasible_result.incumbents.front().witness.states == std::vector<Vector>{{0}, {0}, {0}});
+    CHECK(feasible_result.incumbents.front().witness.controls == std::vector<Vector>{{0}, {0}});
 
-    auto empty_input=integrator(LinearTerminal{{0},0});
-    empty_input.controls=ContinuousDomain{{EmptySet{1},interval(1).as_handle()}};
-    const auto empty_problem=resolve(empty_input);
-    const auto empty_request=request(empty_problem);
-    auto empty_workspace=registered_prepared(empty_problem,empty_request).create();
+    auto empty_input = integrator(LinearTerminal{{0}, 0});
+    empty_input.controls = ContinuousDomain{{EmptySet{1}, interval(1).as_handle()}};
+    const auto empty_problem = resolve(empty_input);
+    const auto empty_request = request(empty_problem);
+    auto empty_workspace = registered_prepared(empty_problem, empty_request).create();
 
-    const auto result=accepted(empty_workspace->run(context));
+    const auto result = accepted(empty_workspace->run(context));
 
-    CHECK(result.termination==Termination::contract_rejected);
-    CHECK(result.outcome.subject==empty_problem.identity());
-    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK(result.termination == Termination::contract_rejected);
+    CHECK(result.outcome.subject == empty_problem.identity());
+    CHECK(result.outcome.value == MathematicalOutcome::undetermined);
     CHECK(std::holds_alternative<Unestablished>(result.outcome.support));
     CHECK_FALSE(result.objective.lower);
     CHECK_FALSE(result.objective.upper);
@@ -2079,447 +2680,615 @@ TEST_CASE("registered Strategy B rejects empty-control infeasibility without a t
     CHECK_FALSE(result.partial_proposal);
     CHECK(result.incumbents.empty());
 }
-TEST_CASE("registered Strategy B retains unattained-infimum program evidence while the public boundary rejects its source conflict") {
-    const auto p=resolve(integrator(LinearTerminal{{0},3}));
-    const auto q=request(p);
-    const auto prepared=registered_prepared(p,q,false,Termination::completed,nullptr,{},MathematicalOutcome::infimum_not_attained);
-    auto workspace=prepared.create();
+TEST_CASE(
+    "registered Strategy B retains unattained-infimum program evidence while the public boundary rejects its source conflict") {
+    const auto p = resolve(integrator(LinearTerminal{{0}, 3}));
+    const auto q = request(p);
+    const auto prepared = registered_prepared(p, q, false, Termination::completed, nullptr, {},
+                                              MathematicalOutcome::infimum_not_attained);
+    auto workspace = prepared.create();
     ExecutionContext context;
-    context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
 
-    const auto result=accepted(workspace->run(context));
+    const auto result = accepted(workspace->run(context));
 
     // The authored integrator has feasible histories, so the injected solver's
     // unattained-infimum status cannot be transferred to the source problem.
-    CHECK(result.termination==Termination::contract_rejected);
-    CHECK(result.outcome.subject==p.identity());
-    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK(result.termination == Termination::contract_rejected);
+    CHECK(result.outcome.subject == p.identity());
+    CHECK(result.outcome.value == MathematicalOutcome::undetermined);
     CHECK(std::holds_alternative<Unestablished>(result.outcome.support));
     CHECK_FALSE(result.objective.lower);
     CHECK_FALSE(result.objective.upper);
     CHECK_FALSE(result.complete_proposal);
     CHECK_FALSE(result.partial_proposal);
     REQUIRE(result.family);
-    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
-    const auto& candidate=std::get<CandidateFamily>(result.family->outcome());
-    const auto retained=std::dynamic_pointer_cast<const DirectJointPayload>(candidate.relation.payload);
+    CHECK(result.family->target() == FamilyTarget::candidate_relaxation);
+    const auto &candidate = std::get<CandidateFamily>(result.family->outcome());
+    const auto retained =
+        std::dynamic_pointer_cast<const DirectJointPayload>(candidate.relation.payload);
     REQUIRE(retained);
     REQUIRE(retained->optimization);
-    CHECK(retained->optimization->termination==Termination::completed);
-    CHECK(retained->optimization->outcome.value==MathematicalOutcome::infimum_not_attained);
+    CHECK(retained->optimization->termination == Termination::completed);
+    CHECK(retained->optimization->outcome.value == MathematicalOutcome::infimum_not_attained);
     CHECK_FALSE(retained->optimization->primal);
     CHECK_FALSE(retained->optimization->objective.lower);
     CHECK_FALSE(retained->optimization->objective.upper);
 }
 TEST_CASE("T-S02 verifier admits constant linear quadratic and residual norm objectives") {
-    const std::vector<TerminalObjective> objectives{
-        QuadraticTerminal{{1,1,{0}},{0},3},ResidualNormTerminal{{1,1,{0}},{3}}};
-    for(const auto& objective:objectives) {
-        const auto p=resolve(integrator(objective));auto exact=request(p);
-        exact.profile=synthesis::ts02_constant_integrator_profile;
-        exact.target=FamilyTarget::exact_optimal_relation;
-        const auto prepared=registered_prepared(p,exact);auto workspace=prepared.create();
-        ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
-        context.numerical=exact.numerical;
-        const auto result=accepted(workspace->run(context));
-        REQUIRE(result.termination==Termination::completed);
-        REQUIRE(result.family);CHECK(result.family->target()==FamilyTarget::exact_optimal_relation);
-        CHECK(result.family->registry_verified());CHECK(result.outcome.value==MathematicalOutcome::optimal);
-        REQUIRE(result.objective.lower);REQUIRE(result.objective.upper);
-        CHECK(result.objective.lower->value==3);CHECK(result.objective.upper->value==3);
+    const std::vector<TerminalObjective> objectives{QuadraticTerminal{{1, 1, {0}}, {0}, 3},
+                                                    ResidualNormTerminal{{1, 1, {0}}, {3}}};
+    for (const auto &objective : objectives) {
+        const auto p = resolve(integrator(objective));
+        auto exact = request(p);
+        exact.profile = synthesis::ts02_constant_integrator_profile;
+        exact.target = FamilyTarget::exact_optimal_relation;
+        const auto prepared = registered_prepared(p, exact);
+        auto workspace = prepared.create();
+        ExecutionContext context;
+        context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+        context.numerical = exact.numerical;
+        const auto result = accepted(workspace->run(context));
+        REQUIRE(result.termination == Termination::completed);
+        REQUIRE(result.family);
+        CHECK(result.family->target() == FamilyTarget::exact_optimal_relation);
+        CHECK(result.family->registry_verified());
+        CHECK(result.outcome.value == MathematicalOutcome::optimal);
+        REQUIRE(result.objective.lower);
+        REQUIRE(result.objective.upper);
+        CHECK(result.objective.lower->value == 3);
+        CHECK(result.objective.upper->value == 3);
     }
 }
-TEST_CASE("registered Strategy B candidate identity mismatches are rejected by the caller boundary") {
-    const auto p=resolve(integrator(LinearTerminal{{0},3}));
-    const auto prepared=registered_prepared(p,request(p));
-    auto workspace=prepared.create();
-    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
-    const auto result=accepted(workspace->run(context));
+TEST_CASE(
+    "registered Strategy B candidate identity mismatches are rejected by the caller boundary") {
+    const auto p = resolve(integrator(LinearTerminal{{0}, 3}));
+    const auto prepared = registered_prepared(p, request(p));
+    auto workspace = prepared.create();
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    const auto result = accepted(workspace->run(context));
     REQUIRE(result.family);
-    const auto& family=*result.family;
-    const SynthesisIdentityExpectation expected{p.identity(),request(p),p.constraints().coordinates(),
-        {"csl.synthesis.strategy-b"},"1",std::nullopt};
-    REQUIRE(family.target()==FamilyTarget::candidate_relaxation);
+    const auto &family = *result.family;
+    const SynthesisIdentityExpectation expected{
+        p.identity(), request(p),  p.constraints().coordinates(), {"csl.synthesis.strategy-b"},
+        "1",          std::nullopt};
+    REQUIRE(family.target() == FamilyTarget::candidate_relaxation);
     REQUIRE(std::holds_alternative<CandidateFamily>(family.outcome()));
-    CHECK(check_synthesis_result(result,expected).empty());
+    CHECK(check_synthesis_result(result, expected).empty());
 
-    auto expect_identity_rejection=[&](SynthesisIdentityExpectation expected) {
-        const auto diagnostics=check_synthesis_result(result,expected);
-        CHECK(std::any_of(diagnostics.begin(),diagnostics.end(),[](const Diagnostic& diagnostic) {
-            return diagnostic.code==DiagnosticCode::evidence_mismatch && diagnostic.field=="family.identity";
+    auto expect_identity_rejection = [&](SynthesisIdentityExpectation expected) {
+        const auto diagnostics = check_synthesis_result(result, expected);
+        CHECK(std::any_of(diagnostics.begin(), diagnostics.end(), [](const Diagnostic &diagnostic) {
+            return diagnostic.code == DiagnosticCode::evidence_mismatch &&
+                   diagnostic.field == "family.identity";
         }));
-        CHECK(family.target()==FamilyTarget::candidate_relaxation);
+        CHECK(family.target() == FamilyTarget::candidate_relaxation);
         CHECK(std::holds_alternative<CandidateFamily>(family.outcome()));
     };
 
-    auto wrong_problem=expected;wrong_problem.problem.value+="-foreign";expect_identity_rejection(wrong_problem);
-    auto wrong_request=expected;wrong_request.request.profile+="-foreign";expect_identity_rejection(wrong_request);
-    auto wrong_objective=expected;
-    wrong_objective.request.objective=resolve(integrator()).identity();
+    auto wrong_problem = expected;
+    wrong_problem.problem.value += "-foreign";
+    expect_identity_rejection(wrong_problem);
+    auto wrong_request = expected;
+    wrong_request.request.profile += "-foreign";
+    expect_identity_rejection(wrong_request);
+    auto wrong_objective = expected;
+    wrong_objective.request.objective = resolve(integrator()).identity();
     expect_identity_rejection(wrong_objective);
-    auto wrong_coordinates=expected;++wrong_coordinates.coordinates.horizon;expect_identity_rejection(wrong_coordinates);
-    auto wrong_strategy=expected;wrong_strategy.strategy={"csl.synthesis.foreign"};expect_identity_rejection(wrong_strategy);
-    auto wrong_version=expected;wrong_version.strategy_version+="-foreign";expect_identity_rejection(wrong_version);
-    auto wrong_lineage=expected;
-    wrong_lineage.lineage=std::vector<TransformStepIdentity>{{
-        RequestId{"foreign-generated-request"},SetId{"foreign-input"},SetId{"foreign-output"},
-        ModuleId{"csl.geometry.foreign"},"1"}};
+    auto wrong_coordinates = expected;
+    ++wrong_coordinates.coordinates.horizon;
+    expect_identity_rejection(wrong_coordinates);
+    auto wrong_strategy = expected;
+    wrong_strategy.strategy = {"csl.synthesis.foreign"};
+    expect_identity_rejection(wrong_strategy);
+    auto wrong_version = expected;
+    wrong_version.strategy_version += "-foreign";
+    expect_identity_rejection(wrong_version);
+    auto wrong_lineage = expected;
+    wrong_lineage.lineage = std::vector<TransformStepIdentity>{
+        {RequestId{"foreign-generated-request"}, SetId{"foreign-input"}, SetId{"foreign-output"},
+         ModuleId{"csl.geometry.foreign"}, "1"}};
     expect_identity_rejection(wrong_lineage);
 }
 
-TEST_CASE("synthetic Strategy B registration preserves inner-feasible candidate without optimal-family promotion") {
-    const auto p=resolve(integrator());
-    auto family_request=request(p);
-    family_request.target=FamilyTarget::candidate_relaxation;
-    family_request.representation={"synthetic-joint-relation"};
+TEST_CASE(
+    "synthetic Strategy B registration preserves inner-feasible candidate without optimal-family promotion") {
+    const auto p = resolve(integrator());
+    auto family_request = request(p);
+    family_request.target = FamilyTarget::candidate_relaxation;
+    family_request.representation = {"synthetic-joint-relation"};
     StrategyConfiguration configuration;
-    configuration.strategy={"csl.synthesis.strategy-b"};
-    const registry::StrategyRequest strategy_request{p,configuration,family_request,"synthetic-1"};
+    configuration.strategy = {"csl.synthesis.strategy-b"};
+    const registry::StrategyRequest strategy_request{p, configuration, family_request,
+                                                     "synthetic-1"};
     registry::Requirements requirements;
-    requirements.output.representation=family_request.representation;
-    requirements.output.assurance=Assurance::numerical;
-    requirements.output.family=FamilyTarget::candidate_relaxation;
-    requirements.output.completeness=registry::Completeness::unestablished;
+    requirements.output.representation = family_request.representation;
+    requirements.output.assurance = Assurance::numerical;
+    requirements.output.family = FamilyTarget::candidate_relaxation;
+    requirements.output.completeness = registry::Completeness::unestablished;
 
     registry::StrategyRegistry strategies;
     registry::StrategyRegistration registration;
-    registration.identity={{"csl.synthesis.strategy-b"},"synthetic-1"};
-    registration.capabilities=[](const registry::StrategyRequest&,const registry::Requirements& requested)
-        ->registry::Capability { return registry::Offer{requested.output}; };
-    registration.planner=[](const registry::StrategyRequest&,const registry::Requirements&)
-        ->std::variant<registry::StrategyPlan,registry::Rejection> {
-        auto checked=std::get<registry::CheckedPipeline<>>(registry::check_pipeline());
-        return registry::compose_strategy(std::move(checked),[](auto,const registry::StrategyRequest&,
-            const registry::Requirements&) { return std::make_unique<SyntheticRelationCandidateWorkspace>(); });
+    registration.identity = {{"csl.synthesis.strategy-b"}, "synthetic-1"};
+    registration.capabilities =
+        [](const registry::StrategyRequest &,
+           const registry::Requirements &requested) -> registry::Capability {
+        return registry::Offer{requested.output};
+    };
+    registration.planner = [](const registry::StrategyRequest &, const registry::Requirements &)
+        -> std::variant<registry::StrategyPlan, registry::Rejection> {
+        auto checked = std::get<registry::CheckedPipeline<>>(registry::check_pipeline());
+        return registry::compose_strategy(
+            std::move(checked),
+            [](auto, const registry::StrategyRequest &, const registry::Requirements &) {
+                return std::make_unique<SyntheticRelationCandidateWorkspace>();
+            });
     };
     REQUIRE_FALSE(strategies.add(std::move(registration)).has_value());
 
-    const auto prepared=strategies.prepare(strategy_request,requirements);
+    const auto prepared = strategies.prepare(strategy_request, requirements);
     REQUIRE(std::holds_alternative<registry::PreparedStrategy>(prepared));
-    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
-    context.numerical=family_request.numerical;
-    const auto answer=std::get<registry::PreparedStrategy>(prepared).create()->run(context);
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    context.numerical = family_request.numerical;
+    const auto answer = std::get<registry::PreparedStrategy>(prepared).create()->run(context);
     REQUIRE(std::holds_alternative<SynthesisResult>(answer));
-    const auto& result=std::get<SynthesisResult>(answer);
-    CHECK(result.termination==Termination::completed);
-    CHECK(result.outcome.subject==p.identity());
-    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    const auto &result = std::get<SynthesisResult>(answer);
+    CHECK(result.termination == Termination::completed);
+    CHECK(result.outcome.subject == p.identity());
+    CHECK(result.outcome.value == MathematicalOutcome::undetermined);
     CHECK(std::holds_alternative<SymbolicArgument>(result.outcome.support));
-    CHECK(std::get<SymbolicArgument>(result.outcome.support).reference=="synthetic candidate");
-    CHECK(std::get<SymbolicArgument>(result.outcome.support).assumptions=="No optimality claim");
+    CHECK(std::get<SymbolicArgument>(result.outcome.support).reference == "synthetic candidate");
+    CHECK(std::get<SymbolicArgument>(result.outcome.support).assumptions == "No optimality claim");
     REQUIRE(result.family);
-    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK(result.family->target() == FamilyTarget::candidate_relaxation);
     CHECK_FALSE(result.family->registry_verified());
     CHECK_FALSE(result.complete_proposal);
     CHECK_FALSE(result.partial_proposal);
-    const auto& identity=result.family->identity();
-    CHECK(identity.problem==p.identity());
-    CHECK(identity.request==family_request);
-    CHECK(identity.coordinates==p.constraints().coordinates());
-    CHECK(identity.strategy==ModuleId{"csl.synthesis.strategy-b"});
-    CHECK(identity.strategy_version=="synthetic-1");
+    const auto &identity = result.family->identity();
+    CHECK(identity.problem == p.identity());
+    CHECK(identity.request == family_request);
+    CHECK(identity.coordinates == p.constraints().coordinates());
+    CHECK(identity.strategy == ModuleId{"csl.synthesis.strategy-b"});
+    CHECK(identity.strategy_version == "synthetic-1");
     CHECK(identity.lineage.empty());
 
     REQUIRE(std::holds_alternative<CandidateFamily>(result.family->outcome()));
-    const auto& candidate=std::get<CandidateFamily>(result.family->outcome());
-    CHECK(candidate.relation.coordinates==identity.coordinates);
-    CHECK(candidate.relation.representation==family_request.representation);
+    const auto &candidate = std::get<CandidateFamily>(result.family->outcome());
+    CHECK(candidate.relation.coordinates == identity.coordinates);
+    CHECK(candidate.relation.representation == family_request.representation);
     REQUIRE(std::holds_alternative<FeasibleCandidateEvidence>(candidate.relation_to_target));
-    const auto& inner=std::get<FeasibleCandidateEvidence>(candidate.relation_to_target);
-    CHECK(inner.feasibility.problem==p.identity());
+    const auto &inner = std::get<FeasibleCandidateEvidence>(candidate.relation_to_target);
+    CHECK(inner.feasibility.problem == p.identity());
     REQUIRE(std::holds_alternative<SymbolicArgument>(inner.feasibility.support));
-    CHECK(std::get<SymbolicArgument>(inner.feasibility.support).reference=="synthetic relation feasibility");
-    CHECK(std::get<SymbolicArgument>(inner.feasibility.support).assumptions=="fixture claim only");
+    CHECK(std::get<SymbolicArgument>(inner.feasibility.support).reference ==
+          "synthetic relation feasibility");
+    CHECK(std::get<SymbolicArgument>(inner.feasibility.support).assumptions ==
+          "fixture claim only");
     REQUIRE(std::holds_alternative<RelationFeasibilityEvidence>(candidate.feasibility));
-    const auto& whole_relation=std::get<RelationFeasibilityEvidence>(candidate.feasibility);
-    CHECK(whole_relation.support.problem==p.identity());
+    const auto &whole_relation = std::get<RelationFeasibilityEvidence>(candidate.feasibility);
+    CHECK(whole_relation.support.problem == p.identity());
     REQUIRE(std::holds_alternative<SymbolicArgument>(whole_relation.support.support));
-    CHECK(std::get<SymbolicArgument>(whole_relation.support.support).reference=="synthetic relation feasibility");
-    CHECK(std::get<SymbolicArgument>(whole_relation.support.support).assumptions=="fixture claim only");
+    CHECK(std::get<SymbolicArgument>(whole_relation.support.support).reference ==
+          "synthetic relation feasibility");
+    CHECK(std::get<SymbolicArgument>(whole_relation.support.support).assumptions ==
+          "fixture claim only");
 }
-TEST_CASE("late extraction materialization stop retains program evidence incumbent and feasible candidate") {
-    const auto p=resolve(integrator());auto q=request(p);q.materialization_limit=7;
-    const auto r=oracle({0,0.25,1,0.25,0.75},0).solve(p,q,{});
-    CHECK(r.termination==Termination::resource_limit);const auto& data=payload(r);REQUIRE(data.optimization);
-    CHECK(contains(data.relation,{0,1,2,1,1}));REQUIRE(r.objective.upper);CHECK(r.incumbents.size()==1);
+TEST_CASE(
+    "late extraction materialization stop retains program evidence incumbent and feasible candidate") {
+    const auto p = resolve(integrator());
+    auto q = request(p);
+    q.materialization_limit = 7;
+    const auto r = oracle({0, 0.25, 1, 0.25, 0.75}, 0).solve(p, q, {});
+    CHECK(r.termination == Termination::resource_limit);
+    const auto &data = payload(r);
+    REQUIRE(data.optimization);
+    CHECK(contains(data.relation, {0, 1, 2, 1, 1}));
+    REQUIRE(r.objective.upper);
+    CHECK(r.incumbents.size() == 1);
     REQUIRE(std::holds_alternative<ScopedOperationStopped>(r.stop));
     CHECK(std::get<ScopedOperationStopped>(r.stop).retained.upper_bound);
     CHECK(std::get<ScopedOperationStopped>(r.stop).retained.partial_or_candidate_family);
 }
 TEST_CASE("early cancellation and deadline retain their distinct source stop reasons") {
-    const auto p=resolve(integrator());auto workspace=oracle({0,0.25,1,0.25,0.75},0);
-    std::stop_source stop;stop.request_stop();ExecutionContext cancellation;cancellation.cancellation=stop.get_token();
-    const auto cancelled=workspace.solve(p,request(p),cancellation);CHECK(cancelled.termination==Termination::cancelled);
-    REQUIRE(std::holds_alternative<ScopedOperationStopped>(cancelled.stop));CHECK(std::get<ScopedOperationStopped>(cancelled.stop).stop.reason==StopReason::cancelled);
+    const auto p = resolve(integrator());
+    auto workspace = oracle({0, 0.25, 1, 0.25, 0.75}, 0);
+    std::stop_source stop;
+    stop.request_stop();
+    ExecutionContext cancellation;
+    cancellation.cancellation = stop.get_token();
+    const auto cancelled = workspace.solve(p, request(p), cancellation);
+    CHECK(cancelled.termination == Termination::cancelled);
+    REQUIRE(std::holds_alternative<ScopedOperationStopped>(cancelled.stop));
+    CHECK(std::get<ScopedOperationStopped>(cancelled.stop).stop.reason == StopReason::cancelled);
     CHECK_FALSE(cancelled.family);
-    ExecutionContext deadline;deadline.deadline=std::chrono::steady_clock::now();
-    const auto expired=workspace.solve(p,request(p),deadline);CHECK(expired.termination==Termination::deadline_expired);
-    REQUIRE(std::holds_alternative<ScopedOperationStopped>(expired.stop));CHECK(std::get<ScopedOperationStopped>(expired.stop).stop.reason==StopReason::deadline_expired);
+    ExecutionContext deadline;
+    deadline.deadline = std::chrono::steady_clock::now();
+    const auto expired = workspace.solve(p, request(p), deadline);
+    CHECK(expired.termination == Termination::deadline_expired);
+    REQUIRE(std::holds_alternative<ScopedOperationStopped>(expired.stop));
+    CHECK(std::get<ScopedOperationStopped>(expired.stop).stop.reason ==
+          StopReason::deadline_expired);
     CHECK_FALSE(expired.family);
-    const FamilyIdentity expected{p.identity(),request(p),p.constraints().coordinates(),{"csl.synthesis.strategy-b"},"1",{}};
-    CHECK(check_synthesis_result(expired,expected).empty());
+    const FamilyIdentity expected{
+        p.identity(), request(p), p.constraints().coordinates(), {"csl.synthesis.strategy-b"},
+        "1",          {}};
+    CHECK(check_synthesis_result(expired, expected).empty());
 }
 TEST_CASE("early materialization row limit is a resource stop accepted by the shared boundary") {
-    const auto p=resolve(integrator());auto q=request(p);q.materialization_limit=0;
-    const auto r=oracle({0,0.25,1,0.25,0.75},0).solve(p,q,{});
-    CHECK(r.termination==Termination::resource_limit);CHECK(r.outcome.value==MathematicalOutcome::undetermined);
+    const auto p = resolve(integrator());
+    auto q = request(p);
+    q.materialization_limit = 0;
+    const auto r = oracle({0, 0.25, 1, 0.25, 0.75}, 0).solve(p, q, {});
+    CHECK(r.termination == Termination::resource_limit);
+    CHECK(r.outcome.value == MathematicalOutcome::undetermined);
     REQUIRE(std::holds_alternative<ScopedOperationStopped>(r.stop));
-    const auto& stop=std::get<ScopedOperationStopped>(r.stop);
-    CHECK(stop.stop.reason==StopReason::resource_limit);CHECK(stop.request.port=="strategy");
-    CHECK_FALSE(stop.request.request.value.empty());CHECK_FALSE(stop.stop.diagnostics.empty());
-    CHECK_FALSE(stop.retained.lower_bound);CHECK_FALSE(stop.retained.upper_bound);
-    CHECK(stop.retained.incumbents==0);CHECK_FALSE(stop.retained.partial_or_candidate_family);
-    CHECK_FALSE(r.family);CHECK(r.incumbents.empty());CHECK_FALSE(r.objective.upper);
-    const FamilyIdentity expected{p.identity(),q,p.constraints().coordinates(),{"csl.synthesis.strategy-b"},"1",{}};
-    CHECK(check_synthesis_result(r,expected).empty());
+    const auto &stop = std::get<ScopedOperationStopped>(r.stop);
+    CHECK(stop.stop.reason == StopReason::resource_limit);
+    CHECK(stop.request.port == "strategy");
+    CHECK_FALSE(stop.request.request.value.empty());
+    CHECK_FALSE(stop.stop.diagnostics.empty());
+    CHECK_FALSE(stop.retained.lower_bound);
+    CHECK_FALSE(stop.retained.upper_bound);
+    CHECK(stop.retained.incumbents == 0);
+    CHECK_FALSE(stop.retained.partial_or_candidate_family);
+    CHECK_FALSE(r.family);
+    CHECK(r.incumbents.empty());
+    CHECK_FALSE(r.objective.upper);
+    const FamilyIdentity expected{
+        p.identity(), q, p.constraints().coordinates(), {"csl.synthesis.strategy-b"}, "1", {}};
+    CHECK(check_synthesis_result(r, expected).empty());
 }
 TEST_CASE("residual norm keeps the original value rather than its solver square") {
-    const auto p=resolve(integrator(ResidualNormTerminal{{1,1,{2}},{7}}));
-    const auto program=accepted(build_joint_program(p,request(p)));
-    const auto evaluated=accepted(optimization::evaluate_primal(std::get<ConvexProgram>(program.program),Vector{0,1,2,1,1},{1e-8,1e-8},{{"norm-oracle"},"1"}));
-    CHECK(evaluated.original_objective==3);CHECK(evaluated.solver_objective==9);
-    const auto r=oracle({0,1,2,1,1},3).solve(p,request(p),{});const auto& data=payload(r);
-    CHECK(contains(data.relation,{0,1,2,1,1}));CHECK_FALSE(contains(data.relation,{0,0.5,1,0.5,0.5}));
-    REQUIRE(r.objective.upper);CHECK(r.objective.upper->value==3);CHECK(r.incumbents[0].witness.original_objective==3);
+    const auto p = resolve(integrator(ResidualNormTerminal{{1, 1, {2}}, {7}}));
+    const auto program = accepted(build_joint_program(p, request(p)));
+    const auto evaluated = accepted(
+        optimization::evaluate_primal(std::get<ConvexProgram>(program.program),
+                                      Vector{0, 1, 2, 1, 1}, {1e-8, 1e-8}, {{"norm-oracle"}, "1"}));
+    CHECK(evaluated.original_objective == 3);
+    CHECK(evaluated.solver_objective == 9);
+    const auto r = oracle({0, 1, 2, 1, 1}, 3).solve(p, request(p), {});
+    const auto &data = payload(r);
+    CHECK(contains(data.relation, {0, 1, 2, 1, 1}));
+    CHECK_FALSE(contains(data.relation, {0, 0.5, 1, 0.5, 0.5}));
+    REQUIRE(r.objective.upper);
+    CHECK(r.objective.upper->value == 3);
+    CHECK(r.incumbents[0].witness.original_objective == 3);
 }
 TEST_CASE("zero horizon retains the initial terminal point with no artificial control") {
-    auto input=integrator(LinearTerminal{{2},1});input.times={0};input.initial=KnownInitial{{2}};
-    input.controls=ContinuousDomain{{}};input.states={UniversalSet{1}};
-    const auto p=resolve(input);const auto r=oracle({2},5).solve(p,request(p),{});const auto& data=payload(r);
-    CHECK(contains(data.relation,{2}));CHECK_FALSE(contains(data.relation,{1}));
-    CHECK(data.construction.coordinates.horizon==0);REQUIRE(r.incumbents.size()==1);
-    CHECK(r.incumbents[0].witness.controls.empty());CHECK(r.incumbents[0].witness.states.size()==1);
+    auto input = integrator(LinearTerminal{{2}, 1});
+    input.times = {0};
+    input.initial = KnownInitial{{2}};
+    input.controls = ContinuousDomain{{}};
+    input.states = {UniversalSet{1}};
+    const auto p = resolve(input);
+    const auto r = oracle({2}, 5).solve(p, request(p), {});
+    const auto &data = payload(r);
+    CHECK(contains(data.relation, {2}));
+    CHECK_FALSE(contains(data.relation, {1}));
+    CHECK(data.construction.coordinates.horizon == 0);
+    REQUIRE(r.incumbents.size() == 1);
+    CHECK(r.incumbents[0].witness.controls.empty());
+    CHECK(r.incumbents[0].witness.states.size() == 1);
 }
 TEST_CASE("native V constraints are rejected instead of silently omitted") {
-    auto input=integrator();const auto vertex=accepted(sets::make_v({{"state-vertex"},1,{}},
-        {accepted(numeric::snapshot(Matrix{1,1,{0.5}})),accepted(numeric::snapshot(Matrix{0,1,{}}))}));
-    input.states[1]=vertex.as_handle();const auto p=resolve(input);
-    const auto built=build_joint_program(p,request(p));REQUIRE(std::holds_alternative<Diagnostics>(built));
-    const auto r=oracle({0,0.25,1,0.25,0.75},0).solve(p,request(p),{});
-    CHECK(r.termination==Termination::operation_rejected);CHECK_FALSE(r.family);
+    auto input = integrator();
+    const auto vertex = accepted(
+        sets::make_v({{"state-vertex"}, 1, {}}, {accepted(numeric::snapshot(Matrix{1, 1, {0.5}})),
+                                                 accepted(numeric::snapshot(Matrix{0, 1, {}}))}));
+    input.states[1] = vertex.as_handle();
+    const auto p = resolve(input);
+    const auto built = build_joint_program(p, request(p));
+    REQUIRE(std::holds_alternative<Diagnostics>(built));
+    const auto r = oracle({0, 0.25, 1, 0.25, 0.75}, 0).solve(p, request(p), {});
+    CHECK(r.termination == Termination::operation_rejected);
+    CHECK_FALSE(r.family);
 }
 TEST_CASE("an infeasible numerical anchor cannot narrow the relation or supply an incumbent") {
-    const auto p=resolve(integrator());const auto r=oracle({0,1,1,1,1},0).solve(p,request(p),{});
-    const auto& data=payload(r);CHECK(contains(data.relation,{0,1,2,1,1}));
-    CHECK(r.incumbents.empty());CHECK_FALSE(r.objective.upper);CHECK(r.outcome.value==MathematicalOutcome::undetermined);
+    const auto p = resolve(integrator());
+    const auto r = oracle({0, 1, 1, 1, 1}, 0).solve(p, request(p), {});
+    const auto &data = payload(r);
+    CHECK(contains(data.relation, {0, 1, 2, 1, 1}));
+    CHECK(r.incumbents.empty());
+    CHECK_FALSE(r.objective.upper);
+    CHECK(r.outcome.value == MathematicalOutcome::undetermined);
 }
 TEST_CASE("cancellation after solving retains program evidence and stops original verification") {
-    const auto p=resolve(integrator());std::stop_source source;ExecutionContext context;context.cancellation=source.get_token();
-    const auto r=oracle({0,0.25,1,0.25,0.75},0,false,false,Termination::completed,&source).solve(p,request(p),context);
-    CHECK(r.termination==Termination::cancelled);const auto& data=payload(r);REQUIRE(data.optimization);
-    CHECK(contains(data.relation,{0,1,2,1,1}));CHECK(r.incumbents.empty());CHECK_FALSE(r.objective.upper);
-    REQUIRE(std::holds_alternative<ScopedOperationStopped>(r.stop));CHECK(std::get<ScopedOperationStopped>(r.stop).stop.reason==StopReason::cancelled);
+    const auto p = resolve(integrator());
+    std::stop_source source;
+    ExecutionContext context;
+    context.cancellation = source.get_token();
+    const auto r =
+        oracle({0, 0.25, 1, 0.25, 0.75}, 0, false, false, Termination::completed, &source)
+            .solve(p, request(p), context);
+    CHECK(r.termination == Termination::cancelled);
+    const auto &data = payload(r);
+    REQUIRE(data.optimization);
+    CHECK(contains(data.relation, {0, 1, 2, 1, 1}));
+    CHECK(r.incumbents.empty());
+    CHECK_FALSE(r.objective.upper);
+    REQUIRE(std::holds_alternative<ScopedOperationStopped>(r.stop));
+    CHECK(std::get<ScopedOperationStopped>(r.stop).stop.reason == StopReason::cancelled);
 }
 TEST_CASE("registered deadline stop survives public result sanitization") {
-    const auto p=resolve(integrator());const auto prepared=registered_prepared(p,request(p));
-    ExecutionContext context;context.deadline=std::chrono::steady_clock::now()-std::chrono::seconds(1);
-    auto workspace=prepared.create();const auto r=accepted(workspace->run(context));
-    CHECK(r.termination==Termination::deadline_expired);REQUIRE(std::holds_alternative<ScopedOperationStopped>(r.stop));
-    CHECK(std::get<ScopedOperationStopped>(r.stop).stop.reason==StopReason::deadline_expired);
-    CHECK_FALSE(r.family);CHECK(r.incumbents.empty());CHECK(r.outcome.value==MathematicalOutcome::undetermined);
+    const auto p = resolve(integrator());
+    const auto prepared = registered_prepared(p, request(p));
+    ExecutionContext context;
+    context.deadline = std::chrono::steady_clock::now() - std::chrono::seconds(1);
+    auto workspace = prepared.create();
+    const auto r = accepted(workspace->run(context));
+    CHECK(r.termination == Termination::deadline_expired);
+    REQUIRE(std::holds_alternative<ScopedOperationStopped>(r.stop));
+    CHECK(std::get<ScopedOperationStopped>(r.stop).stop.reason == StopReason::deadline_expired);
+    CHECK_FALSE(r.family);
+    CHECK(r.incumbents.empty());
+    CHECK(r.outcome.value == MathematicalOutcome::undetermined);
 }
 TEST_CASE("registered early row-budget stop survives public result sanitization") {
-    const auto p=resolve(integrator());auto q=request(p);q.materialization_limit=0;
-    const auto prepared=registered_prepared(p,q);auto workspace=prepared.create();const auto r=accepted(workspace->run({}));
-    CHECK(r.termination==Termination::resource_limit);REQUIRE(std::holds_alternative<ScopedOperationStopped>(r.stop));
-    CHECK(std::get<ScopedOperationStopped>(r.stop).stop.reason==StopReason::resource_limit);
-    CHECK_FALSE(r.family);CHECK(r.incumbents.empty());CHECK(r.outcome.value==MathematicalOutcome::undetermined);
+    const auto p = resolve(integrator());
+    auto q = request(p);
+    q.materialization_limit = 0;
+    const auto prepared = registered_prepared(p, q);
+    auto workspace = prepared.create();
+    const auto r = accepted(workspace->run({}));
+    CHECK(r.termination == Termination::resource_limit);
+    REQUIRE(std::holds_alternative<ScopedOperationStopped>(r.stop));
+    CHECK(std::get<ScopedOperationStopped>(r.stop).stop.reason == StopReason::resource_limit);
+    CHECK_FALSE(r.family);
+    CHECK(r.incumbents.empty());
+    CHECK(r.outcome.value == MathematicalOutcome::undetermined);
 }
 TEST_CASE("registered Strategy B preserves its prepared numerical policy in the public result") {
-    const auto p=resolve(integrator());auto q=request(p);
-    q.assurance=Assurance::numerical;q.numerical={1e-7,2e-7};
-    const auto prepared=registered_prepared(p,q);
+    const auto p = resolve(integrator());
+    auto q = request(p);
+    q.assurance = Assurance::numerical;
+    q.numerical = {1e-7, 2e-7};
+    const auto prepared = registered_prepared(p, q);
 
-    auto matching_workspace=prepared.create();
+    auto matching_workspace = prepared.create();
     ExecutionContext matching_context;
-    matching_context.numerical={1e-7,2e-7};
-    matching_context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
-    const auto result=accepted(matching_workspace->run(matching_context));
+    matching_context.numerical = {1e-7, 2e-7};
+    matching_context.resources =
+        std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    const auto result = accepted(matching_workspace->run(matching_context));
     REQUIRE(result.family);
-    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
-    CHECK(result.family->identity().request.numerical.absolute_tolerance==1e-7);
-    CHECK(result.family->identity().request.numerical.relative_tolerance==2e-7);
-    CHECK(result.family->identity().request.numerical==(NumericalPolicy{1e-7,2e-7}));
+    CHECK(result.family->target() == FamilyTarget::candidate_relaxation);
+    CHECK(result.family->identity().request.numerical.absolute_tolerance == 1e-7);
+    CHECK(result.family->identity().request.numerical.relative_tolerance == 2e-7);
+    CHECK(result.family->identity().request.numerical == (NumericalPolicy{1e-7, 2e-7}));
 
-    auto mismatched_workspace=prepared.create();
+    auto mismatched_workspace = prepared.create();
     ExecutionContext mismatched_context;
-    mismatched_context.numerical={1e-6,2e-7};
-    mismatched_context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
-    const auto unsupported=mismatched_workspace->run(mismatched_context);
+    mismatched_context.numerical = {1e-6, 2e-7};
+    mismatched_context.resources =
+        std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    const auto unsupported = mismatched_workspace->run(mismatched_context);
     REQUIRE(std::holds_alternative<SynthesisResult>(unsupported));
-    const auto& rejected=std::get<SynthesisResult>(unsupported);
-    CHECK(rejected.termination==Termination::contract_rejected);
-    CHECK(rejected.outcome.value==MathematicalOutcome::undetermined);
+    const auto &rejected = std::get<SynthesisResult>(unsupported);
+    CHECK(rejected.termination == Termination::contract_rejected);
+    CHECK(rejected.outcome.value == MathematicalOutcome::undetermined);
     REQUIRE(std::holds_alternative<ContractValidationFailure>(rejected.stop));
-    const auto& failure=std::get<ContractValidationFailure>(rejected.stop);
-    REQUIRE(failure.diagnostics.size()==1);
-    CHECK(failure.diagnostics.front().code==DiagnosticCode::invalid_input);
-    CHECK(failure.diagnostics.front().field=="family.numerical");
-    CHECK(failure.diagnostics.front().explanation==
-        "ExecutionContext numerical policy differs from the prepared family request");
+    const auto &failure = std::get<ContractValidationFailure>(rejected.stop);
+    REQUIRE(failure.diagnostics.size() == 1);
+    CHECK(failure.diagnostics.front().code == DiagnosticCode::invalid_input);
+    CHECK(failure.diagnostics.front().field == "family.numerical");
+    CHECK(failure.diagnostics.front().explanation ==
+          "ExecutionContext numerical policy differs from the prepared family request");
     CHECK_FALSE(failure.retained.lower_bound);
     CHECK_FALSE(failure.retained.upper_bound);
-    CHECK(failure.retained.incumbents==0);
+    CHECK(failure.retained.incumbents == 0);
     CHECK_FALSE(failure.retained.partial_or_candidate_family);
     CHECK_FALSE(rejected.objective.lower);
     CHECK_FALSE(rejected.objective.upper);
     CHECK_FALSE(rejected.family);
     CHECK(rejected.incumbents.empty());
     CHECK(rejected.spans.empty());
-    CHECK(check_synthesis_result(rejected,prepared.expected_synthesis_identity()).empty());
+    CHECK(check_synthesis_result(rejected, prepared.expected_synthesis_identity()).empty());
 }
 TEST_CASE("validation failure uses the contract product without a sanitizer replacement") {
-    const auto p=resolve(integrator());const auto q=request(p);ExecutionContext context;context.numerical={1e-3,1e-3};
-    const auto direct=oracle({0,0.25,1,0.25,0.75},0).solve(p,q,context);
-    CHECK(direct.termination==Termination::contract_rejected);REQUIRE(std::holds_alternative<ContractValidationFailure>(direct.stop));
-    const SynthesisIdentityExpectation expected{p.identity(),q,p.constraints().coordinates(),
-        {"csl.synthesis.strategy-b"},"1",std::nullopt};
-    CHECK(check_synthesis_result(direct,expected).empty());
-    const auto prepared=registered_prepared(p,q,true);auto workspace=prepared.create();const auto r=accepted(workspace->run({}));
-    CHECK(r.termination==Termination::contract_rejected);REQUIRE(std::holds_alternative<ContractValidationFailure>(r.stop));
-    const auto& failure=std::get<ContractValidationFailure>(r.stop);REQUIRE_FALSE(failure.diagnostics.empty());
-    for(const auto& error:failure.diagnostics) {CHECK(error.code==DiagnosticCode::evidence_mismatch);CHECK(error.field!="result.stop");}
-    CHECK(r.incumbents.empty());CHECK(failure.retained.partial_or_candidate_family);
-    const auto& data=payload(r);CHECK_FALSE(data.optimization);CHECK(contains(data.relation,{0,1,2,1,1}));
-    CHECK(check_synthesis_result(r,expected).empty());
+    const auto p = resolve(integrator());
+    const auto q = request(p);
+    ExecutionContext context;
+    context.numerical = {1e-3, 1e-3};
+    const auto direct = oracle({0, 0.25, 1, 0.25, 0.75}, 0).solve(p, q, context);
+    CHECK(direct.termination == Termination::contract_rejected);
+    REQUIRE(std::holds_alternative<ContractValidationFailure>(direct.stop));
+    const SynthesisIdentityExpectation expected{
+        p.identity(), q,           p.constraints().coordinates(), {"csl.synthesis.strategy-b"},
+        "1",          std::nullopt};
+    CHECK(check_synthesis_result(direct, expected).empty());
+    const auto prepared = registered_prepared(p, q, true);
+    auto workspace = prepared.create();
+    const auto r = accepted(workspace->run({}));
+    CHECK(r.termination == Termination::contract_rejected);
+    REQUIRE(std::holds_alternative<ContractValidationFailure>(r.stop));
+    const auto &failure = std::get<ContractValidationFailure>(r.stop);
+    REQUIRE_FALSE(failure.diagnostics.empty());
+    for (const auto &error : failure.diagnostics) {
+        CHECK(error.code == DiagnosticCode::evidence_mismatch);
+        CHECK(error.field != "result.stop");
+    }
+    CHECK(r.incumbents.empty());
+    CHECK(failure.retained.partial_or_candidate_family);
+    const auto &data = payload(r);
+    CHECK_FALSE(data.optimization);
+    CHECK(contains(data.relation, {0, 1, 2, 1, 1}));
+    CHECK(check_synthesis_result(r, expected).empty());
 }
 
 TEST_CASE("bounded nominal Strategy B exact family admits horizons two four eight") {
-    for (const std::size_t horizon : {2u,4u,8u}) for(const bool constant : {false,true}) {
-        CAPTURE(horizon);CAPTURE(constant);
-        auto source=integrator(constant ? LinearTerminal{{0},3} : LinearTerminal{{1},0});
-        source.id={"b-exact-horizon-"+std::to_string(horizon)};
-        source.times.resize(horizon+1);
-        for(std::size_t stage=0;stage<=horizon;++stage) source.times[stage]=static_cast<double>(stage);
-        source.controls=ContinuousDomain{std::vector<AdmissibleSet>(horizon,interval(1).as_handle())};
-        source.states=std::vector<AdmissibleSet>(horizon+1,UniversalSet{1});
-        const auto problem=resolve(source);
-        auto family=request(problem);family.profile="strategy-b.nominal-linear-exact-v1";
-        family.target=FamilyTarget::exact_optimal_relation;
-        const auto prepared=registered_prepared(problem,family);
-        const auto result=accepted(prepared.create()->run({}));
-        CHECK(result.termination==Termination::completed);
-        REQUIRE(result.family);
-        CHECK(result.family->registry_verified());
-        CHECK(std::holds_alternative<CompleteOptimalFamily>(result.family->outcome()));
-        const auto& complete=std::get<CompleteOptimalFamily>(result.family->outcome());
-        REQUIRE(complete.relation.payload);
-        const auto* relation=complete.relation.payload->h_relation_for_recording();
-        REQUIRE(relation);
-        CHECK(relation->metadata()->set.dimension==2*horizon+1);
-        CHECK(contains(*relation,Vector(2*horizon+1,0)));
-        Vector nonoptimal(2*horizon+1,0);nonoptimal[horizon]=1;nonoptimal[2*horizon]=1;
-        CHECK(contains(*relation,nonoptimal)==constant);
-        Vector interior(2*horizon+1,0);
-        for(std::size_t stage=0;stage<horizon;++stage) {
-            interior[horizon+1+stage]=0.25;
-            interior[stage+1]=interior[stage]+0.25;
+    for (const std::size_t horizon : {2u, 4u, 8u})
+        for (const bool constant : {false, true}) {
+            CAPTURE(horizon);
+            CAPTURE(constant);
+            auto source = integrator(constant ? LinearTerminal{{0}, 3} : LinearTerminal{{1}, 0});
+            source.id = {"b-exact-horizon-" + std::to_string(horizon)};
+            source.times.resize(horizon + 1);
+            for (std::size_t stage = 0; stage <= horizon; ++stage)
+                source.times[stage] = static_cast<double>(stage);
+            source.controls =
+                ContinuousDomain{std::vector<AdmissibleSet>(horizon, interval(1).as_handle())};
+            source.states = std::vector<AdmissibleSet>(horizon + 1, UniversalSet{1});
+            const auto problem = resolve(source);
+            auto family = request(problem);
+            family.profile = "strategy-b.nominal-linear-exact-v1";
+            family.target = FamilyTarget::exact_optimal_relation;
+            const auto prepared = registered_prepared(problem, family);
+            const auto result = accepted(prepared.create()->run({}));
+            CHECK(result.termination == Termination::completed);
+            REQUIRE(result.family);
+            CHECK(result.family->registry_verified());
+            CHECK(std::holds_alternative<CompleteOptimalFamily>(result.family->outcome()));
+            const auto &complete = std::get<CompleteOptimalFamily>(result.family->outcome());
+            REQUIRE(complete.relation.payload);
+            const auto *relation = complete.relation.payload->h_relation_for_recording();
+            REQUIRE(relation);
+            CHECK(relation->metadata()->set.dimension == 2 * horizon + 1);
+            CHECK(contains(*relation, Vector(2 * horizon + 1, 0)));
+            Vector nonoptimal(2 * horizon + 1, 0);
+            nonoptimal[horizon] = 1;
+            nonoptimal[2 * horizon] = 1;
+            CHECK(contains(*relation, nonoptimal) == constant);
+            Vector interior(2 * horizon + 1, 0);
+            for (std::size_t stage = 0; stage < horizon; ++stage) {
+                interior[horizon + 1 + stage] = 0.25;
+                interior[stage + 1] = interior[stage] + 0.25;
+            }
+            CHECK(contains(*relation, interior) == constant);
+            REQUIRE(result.objective.lower);
+            REQUIRE(result.objective.upper);
+            CHECK(result.objective.lower->value == (constant ? 3 : 0));
+            CHECK(result.objective.upper->value == (constant ? 3 : 0));
+            REQUIRE_FALSE(result.incumbents.empty());
+            const auto &witness = result.incumbents.front().witness;
+            REQUIRE(witness.states.size() == horizon + 1);
+            REQUIRE(witness.controls.size() == horizon);
+            CHECK(witness.states.front()[0] == doctest::Approx(0));
+            for (std::size_t stage = 0; stage < horizon; ++stage) {
+                CHECK(witness.controls[stage][0] >= -1e-8);
+                CHECK(witness.controls[stage][0] <= 1 + 1e-8);
+                CHECK(witness.states[stage + 1][0] ==
+                      doctest::Approx(witness.states[stage][0] + witness.controls[stage][0]));
+            }
+            const double objective = constant ? 3 : witness.states.back()[0];
+            CHECK(objective == doctest::Approx(constant ? 3 : 0));
+            CHECK(witness.original_objective == doctest::Approx(objective));
         }
-        CHECK(contains(*relation,interior)==constant);
-        REQUIRE(result.objective.lower);REQUIRE(result.objective.upper);
-        CHECK(result.objective.lower->value==(constant?3:0));
-        CHECK(result.objective.upper->value==(constant?3:0));
-        REQUIRE_FALSE(result.incumbents.empty());
-        const auto& witness=result.incumbents.front().witness;
-        REQUIRE(witness.states.size()==horizon+1);REQUIRE(witness.controls.size()==horizon);
-        CHECK(witness.states.front()[0]==doctest::Approx(0));
-        for(std::size_t stage=0;stage<horizon;++stage) {
-            CHECK(witness.controls[stage][0]>=-1e-8);
-            CHECK(witness.controls[stage][0]<=1+1e-8);
-            CHECK(witness.states[stage+1][0]==doctest::Approx(witness.states[stage][0]+witness.controls[stage][0]));
-        }
-        const double objective=constant?3:witness.states.back()[0];
-        CHECK(objective==doctest::Approx(constant?3:0));
-        CHECK(witness.original_objective==doctest::Approx(objective));
-    }
 }
 
 TEST_CASE("nominal B exact verifier rejects foreign bindings and missing or extra histories") {
-    const auto problem=resolve(integrator(LinearTerminal{{0},3}));
-    auto family=request(problem);family.profile="strategy-b.nominal-linear-exact-v1";
-    family.target=FamilyTarget::exact_optimal_relation;
-    const auto result=accepted(registered_prepared(problem,family).create()->run({}));
+    const auto problem = resolve(integrator(LinearTerminal{{0}, 3}));
+    auto family = request(problem);
+    family.profile = "strategy-b.nominal-linear-exact-v1";
+    family.target = FamilyTarget::exact_optimal_relation;
+    const auto result = accepted(registered_prepared(problem, family).create()->run({}));
     REQUIRE(result.family);
-    const CompleteFamilyProposal proposal{result.family->identity(),std::get<CompleteOptimalFamily>(result.family->outcome())};
-    StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.strategy-b"};
-    configuration.representation=family.representation;
-    registry::StrategyRequest query{problem,configuration,family,"1",proposal.identity.lineage};
-    const auto verifier=registry::detail::find_compiled_verifier({"csl.verifier.strategy-b.nominal-linear-exact"},"1");
+    const CompleteFamilyProposal proposal{
+        result.family->identity(), std::get<CompleteOptimalFamily>(result.family->outcome())};
+    StrategyConfiguration configuration;
+    configuration.strategy = {"csl.synthesis.strategy-b"};
+    configuration.representation = family.representation;
+    registry::StrategyRequest query{problem, configuration, family, "1", proposal.identity.lineage};
+    const auto verifier = registry::detail::find_compiled_verifier(
+        {"csl.verifier.strategy-b.nominal-linear-exact"}, "1");
     REQUIRE(verifier);
-    REQUIRE(verifier->verify(query,proposal).empty());
+    REQUIRE(verifier->verify(query, proposal).empty());
     SUBCASE("foreign producer") {
-        auto altered=proposal;altered.identity.strategy={"csl.synthesis.reach-back"};
-        altered.family.completeness.binding=altered.identity;
-        CHECK_FALSE(verifier->verify(query,altered).empty());
+        auto altered = proposal;
+        altered.identity.strategy = {"csl.synthesis.reach-back"};
+        altered.family.completeness.binding = altered.identity;
+        CHECK_FALSE(verifier->verify(query, altered).empty());
     }
     SUBCASE("foreign verifier") {
-        auto altered=proposal;
-        altered.family.completeness.support=RegisteredCompletenessEvidence{{"csl.verifier.strategy-a.nominal-linear-exact"},"1","strategy-b.nominal-linear-exact-v1"};
-        CHECK_FALSE(verifier->verify(query,altered).empty());
+        auto altered = proposal;
+        altered.family.completeness.support =
+            RegisteredCompletenessEvidence{{"csl.verifier.strategy-a.nominal-linear-exact"},
+                                           "1",
+                                           "strategy-b.nominal-linear-exact-v1"};
+        CHECK_FALSE(verifier->verify(query, altered).empty());
     }
     SUBCASE("foreign proof") {
-        auto altered=proposal;
-        altered.family.completeness.support=RegisteredCompletenessEvidence{{"csl.verifier.strategy-b.nominal-linear-exact"},"1","nominal-linear-exact-v1"};
-        CHECK_FALSE(verifier->verify(query,altered).empty());
+        auto altered = proposal;
+        altered.family.completeness.support = RegisteredCompletenessEvidence{
+            {"csl.verifier.strategy-b.nominal-linear-exact"}, "1", "nominal-linear-exact-v1"};
+        CHECK_FALSE(verifier->verify(query, altered).empty());
     }
     SUBCASE("foreign lineage") {
-        auto altered=proposal;
-        altered.identity.lineage=registry::detail::strategy_a_nominal_linear_exact_lineage(problem.identity(),2);
-        altered.family.completeness.binding=altered.identity;query.lineage=altered.identity.lineage;
-        CHECK_FALSE(verifier->verify(query,altered).empty());
+        auto altered = proposal;
+        altered.identity.lineage =
+            registry::detail::strategy_a_nominal_linear_exact_lineage(problem.identity(), 2);
+        altered.family.completeness.binding = altered.identity;
+        query.lineage = altered.identity.lineage;
+        CHECK_FALSE(verifier->verify(query, altered).empty());
     }
-    for(const double upper : {0.5,2.0}) {
-        auto altered=proposal;
-        auto original=integrator(LinearTerminal{{0},3});
-        original.controls=ContinuousDomain{{interval(upper).as_handle(),interval(1).as_handle()}};
-        const auto other=resolve(original);
-        const auto other_result=accepted(registered_prepared(other,request(other)).create()->run({}));
+    for (const double upper : {0.5, 2.0}) {
+        auto altered = proposal;
+        auto original = integrator(LinearTerminal{{0}, 3});
+        original.controls =
+            ContinuousDomain{{interval(upper).as_handle(), interval(1).as_handle()}};
+        const auto other = resolve(original);
+        const auto other_result =
+            accepted(registered_prepared(other, request(other)).create()->run({}));
         REQUIRE(other_result.family);
-        const auto& candidate=std::get<CandidateFamily>(other_result.family->outcome());
-        altered.family.relation.payload=candidate.relation.payload;
+        const auto &candidate = std::get<CandidateFamily>(other_result.family->outcome());
+        altered.family.relation.payload = candidate.relation.payload;
         REQUIRE(altered.family.relation.payload->h_relation_for_recording());
-        const auto& relation=*altered.family.relation.payload->h_relation_for_recording();
-        CHECK(contains(relation,{0,1,1,1,0})==(upper==2));
-        CHECK(contains(relation,{0,2,2,2,0})==(upper==2));
-        CHECK_FALSE(verifier->verify(query,altered).empty());
+        const auto &relation = *altered.family.relation.payload->h_relation_for_recording();
+        CHECK(contains(relation, {0, 1, 1, 1, 0}) == (upper == 2));
+        CHECK(contains(relation, {0, 2, 2, 2, 0}) == (upper == 2));
+        CHECK_FALSE(verifier->verify(query, altered).empty());
     }
 }
 TEST_CASE("nominal B exact stops preserve the direct program candidate") {
-    const auto problem=resolve(integrator(LinearTerminal{{0},0}));
-    auto family=request(problem);family.profile="strategy-b.nominal-linear-exact-v1";
-    family.target=FamilyTarget::exact_optimal_relation;
+    const auto problem = resolve(integrator(LinearTerminal{{0}, 0}));
+    auto family = request(problem);
+    family.profile = "strategy-b.nominal-linear-exact-v1";
+    family.target = FamilyTarget::exact_optimal_relation;
     SUBCASE("row budget") {
-        family.materialization_limit=8;
-        const auto result=accepted(registered_prepared(problem,family).create()->run({}));
-        CHECK(result.termination==Termination::resource_limit);
-        REQUIRE(result.family);CHECK_FALSE(result.complete_proposal);
+        family.materialization_limit = 8;
+        const auto result = accepted(registered_prepared(problem, family).create()->run({}));
+        CHECK(result.termination == Termination::resource_limit);
+        REQUIRE(result.family);
+        CHECK_FALSE(result.complete_proposal);
         CHECK(payload(result).optimization.has_value());
     }
     SUBCASE("cancel after program") {
-        std::stop_source cancellation;ExecutionContext context;context.cancellation=cancellation.get_token();
-        const auto prepared=registered_prepared(problem,family,false,Termination::completed,&cancellation);
-        const auto result=accepted(prepared.create()->run(context));
-        CHECK(result.termination==Termination::cancelled);
-        REQUIRE(result.family);CHECK_FALSE(result.complete_proposal);
+        std::stop_source cancellation;
+        ExecutionContext context;
+        context.cancellation = cancellation.get_token();
+        const auto prepared =
+            registered_prepared(problem, family, false, Termination::completed, &cancellation);
+        const auto result = accepted(prepared.create()->run(context));
+        CHECK(result.termination == Termination::cancelled);
+        REQUIRE(result.family);
+        CHECK_FALSE(result.complete_proposal);
         CHECK(payload(result).optimization.has_value());
     }
 }
 TEST_CASE("nominal B exact verifier rejects feasible nonoptimal histories") {
-    const auto problem=resolve(integrator(LinearTerminal{{1},0}));
-    auto family=request(problem);family.profile="strategy-b.nominal-linear-exact-v1";
-    family.target=FamilyTarget::exact_optimal_relation;
-    const auto result=accepted(registered_prepared(problem,family).create()->run({}));
+    const auto problem = resolve(integrator(LinearTerminal{{1}, 0}));
+    auto family = request(problem);
+    family.profile = "strategy-b.nominal-linear-exact-v1";
+    family.target = FamilyTarget::exact_optimal_relation;
+    const auto result = accepted(registered_prepared(problem, family).create()->run({}));
     REQUIRE(result.family);
-    auto altered=CompleteFamilyProposal{result.family->identity(),std::get<CompleteOptimalFamily>(result.family->outcome())};
-    const auto constant=resolve(integrator(LinearTerminal{{0},3}));
-    const auto feasible=accepted(registered_prepared(constant,request(constant)).create()->run({}));
+    auto altered = CompleteFamilyProposal{
+        result.family->identity(), std::get<CompleteOptimalFamily>(result.family->outcome())};
+    const auto constant = resolve(integrator(LinearTerminal{{0}, 3}));
+    const auto feasible =
+        accepted(registered_prepared(constant, request(constant)).create()->run({}));
     REQUIRE(feasible.family);
-    altered.family.relation.payload=std::get<CandidateFamily>(feasible.family->outcome()).relation.payload;
-    REQUIRE(contains(*altered.family.relation.payload->h_relation_for_recording(),{0,1,2,1,1}));
-    StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.strategy-b"};
-    configuration.representation=family.representation;
-    registry::StrategyRequest query{problem,configuration,family,"1",altered.identity.lineage};
-    const auto verifier=registry::detail::find_compiled_verifier({"csl.verifier.strategy-b.nominal-linear-exact"},"1");
+    altered.family.relation.payload =
+        std::get<CandidateFamily>(feasible.family->outcome()).relation.payload;
+    REQUIRE(
+        contains(*altered.family.relation.payload->h_relation_for_recording(), {0, 1, 2, 1, 1}));
+    StrategyConfiguration configuration;
+    configuration.strategy = {"csl.synthesis.strategy-b"};
+    configuration.representation = family.representation;
+    registry::StrategyRequest query{problem, configuration, family, "1", altered.identity.lineage};
+    const auto verifier = registry::detail::find_compiled_verifier(
+        {"csl.verifier.strategy-b.nominal-linear-exact"}, "1");
     REQUIRE(verifier);
-    CHECK_FALSE(verifier->verify(query,altered).empty());
+    CHECK_FALSE(verifier->verify(query, altered).empty());
 }

@@ -171,49 +171,47 @@ struct HullReduction {
 using HullReductionResult = std::variant<HullReduction, Diagnostics>;
 
 class HullReducerWorkspace : public ExclusiveWorkspace {
-public:
-    virtual HullReductionResult reduce(const PointCloud&, LPWorkspace&,
-                                       const ExecutionContext&) = 0;
+  public:
+    virtual HullReductionResult reduce(const PointCloud &, LPWorkspace &,
+                                       const ExecutionContext &) = 0;
 };
 
 // Uses independent zero-objective barycentric feasibility programs. Solver
 // residuals propose witnesses only; exact dyadic verification of nonnegative
 // weights, unit sum, and coordinate reconstruction authorizes removal.
 // All other outcomes conservatively retain the candidate.
-HullReductionResult reduce_hull(const PointCloud&, LPWorkspace&,
-                                const ExecutionContext&);
+HullReductionResult reduce_hull(const PointCloud &, LPWorkspace &, const ExecutionContext &);
 
 // Applies the archived Scientific Research bounding-box score as a deterministic
 // candidate order, then runs the same certified LP reduction over original IDs.
-HullReductionResult reduce_ordered_hull(const PointCloud&, LPWorkspace&,
-                                        const ExecutionContext&);
+HullReductionResult reduce_ordered_hull(const PointCloud &, LPWorkspace &,
+                                        const ExecutionContext &);
 
 // Paper-informed safe adaptation of A43: it uses the existing certified
 // Phase-I basis-reuse strategy and completes with a full membership recheck.
 // It does not implement the paper's per-candidate artificial-basis sequence or
 // largest-norm pivot tie rule.
-HullReductionResult reduce_itis17_a43_hull(const PointCloud&, LPWorkspace&,
-                                           const ExecutionContext&);
+HullReductionResult reduce_itis17_a43_hull(const PointCloud &, LPWorkspace &,
+                                           const ExecutionContext &);
 
 enum class A43PivotRule { phase_one_order, largest_norm_tie };
 // Candidate-by-candidate A43 artificial-basis adaptation. The largest-norm
 // variant applies the paper's pivot tie rule to structural columns. Every
 // deletion still requires an exact dyadic certificate and a complete recheck.
-HullReductionResult reduce_itis17_a43_paper_hull(const PointCloud&, LPWorkspace&,
-    const ExecutionContext&, A43PivotRule);
+HullReductionResult reduce_itis17_a43_paper_hull(const PointCloud &, LPWorkspace &,
+                                                 const ExecutionContext &, A43PivotRule);
 
 // A44 incremental LP membership using the paper's farthest-first reading of
 // its conflicting ordering statements and its k+1 initial candidate set. A
 // complete LP recheck follows the incremental pass.
-HullReductionResult reduce_itis17_a44_hull(const PointCloud&, LPWorkspace&,
-                                           const ExecutionContext&);
+HullReductionResult reduce_itis17_a44_hull(const PointCloud &, LPWorkspace &,
+                                           const ExecutionContext &);
 
 // Streams candidates in the archived Constrained QLPHULL signed max-absolute
 // box order; after ten certified redundant outcomes, filters the remainder
 // against a fixed retained group plus nearby candidates, then certifies its hull.
-HullReductionResult reduce_grouped_hull(const PointCloud&, LPWorkspace&,
-                                        const ExecutionContext&);
-
+HullReductionResult reduce_grouped_hull(const PointCloud &, LPWorkspace &,
+                                        const ExecutionContext &);
 
 } // namespace csl::geometry
 
@@ -221,10 +219,10 @@ namespace csl::registry {
 struct HullReducerPort {
     using Request = geometry::PointCloud;
     using Workspace = geometry::HullReducerWorkspace;
-    static constexpr const char* name = "hull-reducer";
-    static Request snapshot(const Request& request) { return request; }
-    static geometry::HullReductionResult run(Workspace& workspace, const Request& request,
-            const ExecutionContext& context, LPWorkspace& lp) {
+    static constexpr const char *name = "hull-reducer";
+    static Request snapshot(const Request &request) { return request; }
+    static geometry::HullReductionResult run(Workspace &workspace, const Request &request,
+                                             const ExecutionContext &context, LPWorkspace &lp) {
         return workspace.reduce(request, lp, context);
     }
 };
@@ -243,7 +241,8 @@ make_recursive_hull_reducer_registration(registry::Registration<registry::LPPort
 registry::Registration<registry::HullReducerPort> make_lp_hull_reducer_registration();
 registry::Registration<registry::HullReducerPort> make_ordered_hull_reducer_registration();
 registry::Registration<registry::HullReducerPort> make_itis17_a43_hull_reducer_registration();
-registry::Registration<registry::HullReducerPort> make_itis17_a43_paper_hull_reducer_registration(A43PivotRule);
+registry::Registration<registry::HullReducerPort>
+    make_itis17_a43_paper_hull_reducer_registration(A43PivotRule);
 registry::Registration<registry::HullReducerPort> make_itis17_a44_hull_reducer_registration();
 registry::Registration<registry::HullReducerPort> make_itis17_a44_paper_hull_reducer_registration();
 registry::Registration<registry::HullReducerPort> make_grouped_hull_reducer_registration();

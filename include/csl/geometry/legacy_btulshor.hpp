@@ -41,8 +41,7 @@ struct Stopped {
     std::string message;
 };
 
-template <class T>
-using Outcome = std::variant<T, Stopped>;
+template <class T> using Outcome = std::variant<T, Stopped>;
 
 struct ModifRequest {
     Matrix a;
@@ -70,7 +69,7 @@ struct ModifResult {
 
 struct ModifPort {
     std::string id;
-    std::function<Outcome<ModifResult>(const ModifRequest&, const Limits&)> run;
+    std::function<Outcome<ModifResult>(const ModifRequest &, const Limits &)> run;
 };
 
 struct KpabepCandidateStep {
@@ -90,7 +89,8 @@ struct KpabepResult {
 
 struct KpabepPort {
     std::string id;
-    std::function<Outcome<KpabepResult>(std::span<const Vector>, const ModifPort&, const Limits&)> run;
+    std::function<Outcome<KpabepResult>(std::span<const Vector>, const ModifPort &, const Limits &)>
+        run;
 };
 
 struct ReachRequest {
@@ -113,15 +113,15 @@ struct ReachResult {
     std::size_t pivots{};
 };
 
-Outcome<ModifResult> modif(const ModifRequest& request, const Limits& limits = {});
+Outcome<ModifResult> modif(const ModifRequest &request, const Limits &limits = {});
 ModifPort source_modif_port();
 Outcome<KpabepResult> kpabep(std::span<const Vector> points,
-                             const ModifPort& modif_port = source_modif_port(),
-                             const Limits& limits = {});
+                             const ModifPort &modif_port = source_modif_port(),
+                             const Limits &limits = {});
 KpabepPort source_kpabep_port();
-Outcome<ReachResult> reach(const ReachRequest& request,
-                           const KpabepPort& kpabep_port = source_kpabep_port(),
-                           const ModifPort& modif_port = source_modif_port(),
-                           const Limits& limits = {});
+Outcome<ReachResult> reach(const ReachRequest &request,
+                           const KpabepPort &kpabep_port = source_kpabep_port(),
+                           const ModifPort &modif_port = source_modif_port(),
+                           const Limits &limits = {});
 
 } // namespace csl::geometry::legacy_btulshor

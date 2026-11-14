@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/simulation/nonlinear_replay.hpp>
 #include <algorithm>
@@ -26,7 +25,7 @@ Plant analytic_toy() {
     plant.hold = ControlHold::constant_on_interval;
     plant.numerical = NumericalPolicy{1e-12, 1e-12};
     plant.transition = [](std::span<const double> state, std::span<const double> control,
-        std::span<const PlantParameter> parameters, double, double) {
+                          std::span<const PlantParameter> parameters, double, double) {
         return Vector{state[0] + control[0] + parameters[0].value * control[0] * control[0]};
     };
     plant.objective = [](std::span<const double> terminal, std::span<const PlantParameter>) {
@@ -34,9 +33,9 @@ Plant analytic_toy() {
     };
     return plant;
 }
-bool missing(const ReplayRecord& record, const std::string& field) {
-    return std::find(record.missing_prerequisites.begin(),
-        record.missing_prerequisites.end(), field) != record.missing_prerequisites.end();
+bool missing(const ReplayRecord &record, const std::string &field) {
+    return std::find(record.missing_prerequisites.begin(), record.missing_prerequisites.end(),
+                     field) != record.missing_prerequisites.end();
 }
 std::vector<double> quadratic_step_oracle(std::span<const double> controls) {
     std::vector<double> states{0.0};
@@ -50,7 +49,7 @@ double riccati_rk4_step(double state, double step) {
     const double k2 = derivative(state + step * k1 / 2.0);
     const double k3 = derivative(state + step * k2 / 2.0);
     const double k4 = derivative(state + step * k3);
-    return state + step * (k1 + 2.0*k2 + 2.0*k3 + k4) / 6.0;
+    return state + step * (k1 + 2.0 * k2 + 2.0 * k3 + k4) / 6.0;
 }
 }
 
@@ -69,7 +68,8 @@ TEST_CASE("two tied linear control sums have different independent nonlinear rep
     CHECK(first_oracle == std::vector<double>{0.0, 0.0, 2.0});
     CHECK(second_oracle == std::vector<double>{0.0, 0.75, 1.5});
     CHECK(a.states == std::vector<Vector>{{first_oracle[0]}, {first_oracle[1]}, {first_oracle[2]}});
-    CHECK(b.states == std::vector<Vector>{{second_oracle[0]}, {second_oracle[1]}, {second_oracle[2]}});
+    CHECK(b.states ==
+          std::vector<Vector>{{second_oracle[0]}, {second_oracle[1]}, {second_oracle[2]}});
     REQUIRE(a.original_objective.has_value());
     REQUIRE(b.original_objective.has_value());
     CHECK(*a.original_objective == 2.0);
@@ -89,7 +89,8 @@ TEST_CASE("two tied linear control sums have different independent nonlinear rep
     CHECK(a.replay_time >= std::chrono::steady_clock::duration::zero());
 }
 
-TEST_CASE("adaptive RK4 replay records applied limits and independently checkable local estimates") {
+TEST_CASE(
+    "adaptive RK4 replay records applied limits and independently checkable local estimates") {
     auto plant = analytic_toy();
     plant.identity = {"analytic.riccati-ode", "1", "TEST-22 analytic reference x'=1+x^2"};
     plant.initial_state = Vector{0.0};
@@ -99,7 +100,9 @@ TEST_CASE("adaptive RK4 replay records applied limits and independently checkabl
     plant.integration_limits = IntegrationLimits{1e-4, 0.0, 100000};
     plant.transition = {};
     plant.dynamics = [](double, std::span<const double> state, std::span<const double>,
-        std::span<const PlantParameter>) { return Vector{1.0 + state[0]*state[0]}; };
+                        std::span<const PlantParameter>) {
+        return Vector{1.0 + state[0] * state[0]};
+    };
     const auto record = replay(plant, std::vector<Vector>{{0.0}});
     REQUIRE(record.status == ReplayStatus::complete);
     REQUIRE(record.states.size() == 2);
@@ -108,9 +111,10 @@ TEST_CASE("adaptive RK4 replay records applied limits and independently checkabl
     REQUIRE(record.integration_receipts.size() == 1);
     CHECK(record.integration_receipts[0].accepted_steps == 1);
     CHECK(record.integration_receipts[0].rejected_steps == 0);
-    CHECK(record.integration_receipts[0].accepted_steps + record.integration_receipts[0].rejected_steps <=
-        plant.integration_limits->max_attempts_per_interval);
-    const auto* residual = std::get_if<AvailableIntegrationResidual>(&record.integration_residual);
+    CHECK(record.integration_receipts[0].accepted_steps +
+              record.integration_receipts[0].rejected_steps <=
+          plant.integration_limits->max_attempts_per_interval);
+    const auto *residual = std::get_if<AvailableIntegrationResidual>(&record.integration_residual);
     REQUIRE(residual != nullptr);
     CHECK(residual->definition.find("not a certified global error bound") != std::string::npos);
     REQUIRE(residual->measurements.size() == 1);
@@ -130,9 +134,9 @@ TEST_CASE("declared physical intervals and control order determine replay") {
     plant.objective_name = "terminal length";
     plant.objective_unit = "length";
     plant.transition = [](std::span<const double> state, std::span<const double> control,
-        std::span<const PlantParameter> parameters, double start, double end) {
+                          std::span<const PlantParameter> parameters, double start, double end) {
         const double u = control[0];
-        return Vector{state[0] + (end-start)*u + parameters[0].value*u*u, state[1]+u};
+        return Vector{state[0] + (end - start) * u + parameters[0].value * u * u, state[1] + u};
     };
     const std::vector<Vector> first{{0.0}, {1.0}};
     const std::vector<Vector> swapped{{1.0}, {0.0}};
@@ -179,21 +183,20 @@ TEST_CASE("invalid numeric inputs and callback failures retain distinct outcomes
     CHECK(replay(plant, nan_control).status == ReplayStatus::invalid_input);
     plant = analytic_toy();
     plant.transition = [](std::span<const double>, std::span<const double>,
-        std::span<const PlantParameter>, double, double) {
-        return Vector{std::numeric_limits<double>::infinity()};
-    };
+                          std::span<const PlantParameter>, double,
+                          double) { return Vector{std::numeric_limits<double>::infinity()}; };
     const std::vector<Vector> controls{{0.0}, {1.0}};
     const auto nonfinite = replay(plant, controls);
     CHECK(nonfinite.status == ReplayStatus::numerical_failure);
     CHECK(nonfinite.states.size() == 1);
     plant.transition = [](std::span<const double>, std::span<const double>,
-        std::span<const PlantParameter>, double, double) -> Vector {
-        throw std::runtime_error("plant stopped");
-    };
+                          std::span<const PlantParameter>, double,
+                          double) -> Vector { throw std::runtime_error("plant stopped"); };
     CHECK(replay(plant, controls).status == ReplayStatus::callback_failure);
 }
 
-TEST_CASE("unsupported declarations, cancellation and deadline do not create a completed objective") {
+TEST_CASE(
+    "unsupported declarations, cancellation and deadline do not create a completed objective") {
     auto plant = analytic_toy();
     const std::vector<Vector> controls{{0.0}, {1.0}};
     plant.times = std::vector<double>{0.0, 1.0, 1.0};
@@ -234,10 +237,10 @@ TEST_CASE("context exhaustion inside the final callbacks cannot report completio
     std::stop_source source;
     ExecutionContext cancelled;
     cancelled.cancellation = source.get_token();
-    plant.transition = [&source](std::span<const double> state,
-        std::span<const double> control, std::span<const PlantParameter> parameters,
-        double, double) {
-        if (control[0] == 1.0) source.request_stop();
+    plant.transition = [&source](std::span<const double> state, std::span<const double> control,
+                                 std::span<const PlantParameter> parameters, double, double) {
+        if (control[0] == 1.0)
+            source.request_stop();
         return Vector{state[0] + control[0] + parameters[0].value * control[0] * control[0]};
     };
     const auto stopped = replay(plant, controls, cancelled);
@@ -248,7 +251,7 @@ TEST_CASE("context exhaustion inside the final callbacks cannot report completio
     plant = analytic_toy();
     ExecutionContext expired;
     plant.objective = [&expired](std::span<const double> terminal,
-        std::span<const PlantParameter>) {
+                                 std::span<const PlantParameter>) {
         expired.deadline = std::chrono::steady_clock::now() - std::chrono::seconds(1);
         return terminal[0];
     };

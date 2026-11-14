@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
 #include <csl/synthesis/finite_mixed_branch.hpp>
@@ -14,26 +13,31 @@ using namespace csl::synthesis;
 namespace {
 Problem mixed_problem() {
     return {{"mixed-source"},
-        std::make_shared<const SystemModel>(SystemModel{{{1, 3, 0}, TimeDomain::discrete,
-            std::vector<LinearStage>{
-                {{1, 1, {1}}, {1, 3, {1, 10, 100}}, {1, 0, {}}, {2}},
-                {{1, 1, {2}}, {1, 3, {4, 10, 100}}, {1, 0, {}}, {3}}}}, {}}),
-        {0, 1, 2}, KnownInitial{{0}},
-        MixedDomain{ContinuousDomain{{UniversalSet{1}, UniversalSet{1}}},
-                    FiniteDomain{2, {{3, 4}, {3, 4}, {0, -1}}}},
-        {UniversalSet{1}, UniversalSet{1}, UniversalSet{1}}, {}, {},
-        InformationPattern::nominal_open_loop, LinearTerminal{{1}, 0}};
+            std::make_shared<const SystemModel>(SystemModel{
+                {{1, 3, 0},
+                 TimeDomain::discrete,
+                 std::vector<LinearStage>{{{1, 1, {1}}, {1, 3, {1, 10, 100}}, {1, 0, {}}, {2}},
+                                          {{1, 1, {2}}, {1, 3, {4, 10, 100}}, {1, 0, {}}, {3}}}},
+                {}}),
+            {0, 1, 2},
+            KnownInitial{{0}},
+            MixedDomain{ContinuousDomain{{UniversalSet{1}, UniversalSet{1}}},
+                        FiniteDomain{2, {{3, 4}, {3, 4}, {0, -1}}}},
+            {UniversalSet{1}, UniversalSet{1}, UniversalSet{1}},
+            {},
+            {},
+            InformationPattern::nominal_open_loop,
+            LinearTerminal{{1}, 0}};
 }
 
 problem::ResolvedProblem resolved_mixed_problem() {
-    auto result = problem::resolve(mixed_problem(),
-        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
+    auto result = problem::resolve(
+        mixed_problem(), {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
     REQUIRE(std::holds_alternative<problem::ResolvedProblem>(result));
     return std::get<problem::ResolvedProblem>(std::move(result));
 }
 
-template<class T, class... Errors>
-T take(std::variant<T, Errors...> value) {
+template <class T, class... Errors> T take(std::variant<T, Errors...> value) {
     REQUIRE(std::holds_alternative<T>(value));
     return std::get<T>(std::move(value));
 }
@@ -41,40 +45,49 @@ T take(std::variant<T, Errors...> value) {
 numeric::MatrixView matrix(Matrix value);
 numeric::VectorView vector(Vector value);
 SetHandle interval(std::string id, double lo, double hi, std::string label = "x") {
-    auto result = sets::make_h({{std::move(id)}, 1, {std::move(label)}},
-        {matrix({2, 1, {1, -1}}), vector({hi, -lo}),
-         matrix({0, 1, {}}), vector({})});
+    auto result =
+        sets::make_h({{std::move(id)}, 1, {std::move(label)}},
+                     {matrix({2, 1, {1, -1}}), vector({hi, -lo}), matrix({0, 1, {}}), vector({})});
     REQUIRE(std::holds_alternative<sets::SetData>(result));
     return std::get<sets::SetData>(std::move(result)).as_handle();
 }
 
 problem::ResolvedProblem mixed_linear_tie_problem() {
-    const auto controls = take(sets::make_h({{"mixed-continuous-interval"}, 1, {"u"}},
-        {matrix({2, 1, {1, -1}}), vector({1, 1}), matrix({0, 1, {}}), vector({})}));
-    const auto terminal = take(sets::make_h({{"mixed-terminal-halfline"}, 1, {"x1"}},
-        {matrix({1, 1, {-1}}), vector({0}), matrix({0, 1, {}}), vector({})}));
-    Problem source{{"mixed-linear-tie"},
-        std::make_shared<const SystemModel>(SystemModel{{{1, 2, 0}, TimeDomain::discrete,
-            LinearStage{{1, 1, {0}}, {1, 2, {1, 1}}, {1, 0, {}}, {0}}}, {}}),
-        {0, 1}, KnownInitial{{0}},
+    const auto controls = take(
+        sets::make_h({{"mixed-continuous-interval"}, 1, {"u"}},
+                     {matrix({2, 1, {1, -1}}), vector({1, 1}), matrix({0, 1, {}}), vector({})}));
+    const auto terminal =
+        take(sets::make_h({{"mixed-terminal-halfline"}, 1, {"x1"}},
+                          {matrix({1, 1, {-1}}), vector({0}), matrix({0, 1, {}}), vector({})}));
+    Problem source{
+        {"mixed-linear-tie"},
+        std::make_shared<const SystemModel>(
+            SystemModel{{{1, 2, 0},
+                         TimeDomain::discrete,
+                         LinearStage{{1, 1, {0}}, {1, 2, {1, 1}}, {1, 0, {}}, {0}}},
+                        {}}),
+        {0, 1},
+        KnownInitial{{0}},
         MixedDomain{ContinuousDomain{{controls.as_handle()}}, FiniteDomain{1, {{-1}, {1}, {-1}}}},
-        {interval("mixed-initial-state", 0.0, 0.0, "x1"), terminal.as_handle()}, {}, {},
+        {interval("mixed-initial-state", 0.0, 0.0, "x1"), terminal.as_handle()},
+        {},
+        {},
         InformationPattern::nominal_open_loop,
         LinearTerminal{{1}, 0}};
-    auto resolved = problem::resolve(source,
-        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
+    auto resolved =
+        problem::resolve(source, {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
     REQUIRE(std::holds_alternative<problem::ResolvedProblem>(resolved));
     return std::get<problem::ResolvedProblem>(std::move(resolved));
 }
 
-FiniteMixedBranchProblem branch(const problem::ResolvedProblem& problem,
+FiniteMixedBranchProblem branch(const problem::ResolvedProblem &problem,
                                 std::vector<std::size_t> indices) {
     auto result = prepare_finite_mixed_branch(problem, FiniteActionHistory{std::move(indices)});
     REQUIRE(std::holds_alternative<FiniteMixedBranchProblem>(result));
     return std::get<FiniteMixedBranchProblem>(std::move(result));
 }
 
-FiniteMixedBranchCursor cursor(const problem::ResolvedProblem& problem) {
+FiniteMixedBranchCursor cursor(const problem::ResolvedProblem &problem) {
     auto result = FiniteMixedBranchCursor::prepare(problem);
     REQUIRE(std::holds_alternative<FiniteMixedBranchCursor>(result));
     return std::get<FiniteMixedBranchCursor>(std::move(result));
@@ -86,8 +99,8 @@ sets::SetData relation(std::string id, std::size_t dimension) {
     return std::get<sets::SetData>(std::move(result));
 }
 
-FiniteActionHistory history_of(const FiniteMixedBranchEntry& entry) {
-    if (const auto* prepared = std::get_if<FiniteMixedBranchProblem>(&entry))
+FiniteActionHistory history_of(const FiniteMixedBranchEntry &entry) {
+    if (const auto *prepared = std::get_if<FiniteMixedBranchProblem>(&entry))
         return prepared->history;
     return std::get<FailedFiniteMixedBranch>(entry).history;
 }
@@ -105,22 +118,27 @@ numeric::VectorView vector(Vector value) {
 }
 
 Problem one_step_tied_mixed_problem() {
-    return {{"mixed-tied-families"},
-        std::make_shared<const SystemModel>(SystemModel{{{1, 2, 0}, TimeDomain::discrete,
-            std::vector<LinearStage>{
-                {{1, 1, {0}}, {1, 2, {0, 1}}, {1, 0, {}}, {0}}}}, {}}),
-        {0, 1}, KnownInitial{{0}},
-        MixedDomain{ContinuousDomain{{UniversalSet{1}}},
-                    FiniteDomain{1, {{-1}, {0}, {1}, {0}}}},
-        {UniversalSet{1}, UniversalSet{1}}, {}, {},
+    return {
+        {"mixed-tied-families"},
+        std::make_shared<const SystemModel>(
+            SystemModel{{{1, 2, 0},
+                         TimeDomain::discrete,
+                         std::vector<LinearStage>{{{1, 1, {0}}, {1, 2, {0, 1}}, {1, 0, {}}, {0}}}},
+                        {}}),
+        {0, 1},
+        KnownInitial{{0}},
+        MixedDomain{ContinuousDomain{{UniversalSet{1}}}, FiniteDomain{1, {{-1}, {0}, {1}, {0}}}},
+        {UniversalSet{1}, UniversalSet{1}},
+        {},
+        {},
         InformationPattern::nominal_open_loop,
         QuadraticTerminal{{1, 1, {2}}, {0}, 0}};
 }
 
 sets::SetData analytic_branch_family(std::string id, double terminal_state) {
     auto result = sets::make_h({SetId{std::move(id)}, 3, {}},
-        {matrix({0, 3, {}}), vector({}),
-         matrix({2, 3, {1, 0, 0, 0, 1, 0}}), vector({0, terminal_state})});
+                               {matrix({0, 3, {}}), vector({}), matrix({2, 3, {1, 0, 0, 0, 1, 0}}),
+                                vector({0, terminal_state})});
     REQUIRE(std::holds_alternative<sets::SetData>(result));
     return std::get<sets::SetData>(std::move(result));
 }
@@ -136,11 +154,11 @@ TEST_CASE("mixed branch substitutes discrete values and retains the source coord
     CHECK(result.coordinates.discrete_controls == std::vector<Vector>{{3, 4}, {0, -1}});
     CHECK(result.problem.id.value.ends_with("/finite-branch/0/2"));
     CHECK(std::holds_alternative<ContinuousDomain>(result.problem.controls));
-    const auto branch_resolved = problem::resolve(result.problem,
-        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
+    const auto branch_resolved = problem::resolve(
+        result.problem, {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
     CHECK(std::holds_alternative<problem::ResolvedProblem>(branch_resolved));
 
-    const auto& stages = std::get<std::vector<LinearStage>>(result.problem.model->dynamics.stages);
+    const auto &stages = std::get<std::vector<LinearStage>>(result.problem.model->dynamics.stages);
     REQUIRE(stages.size() == 2);
     CHECK(stages[0].B.rows == 1);
     CHECK(stages[0].B.cols == 1);
@@ -153,7 +171,7 @@ TEST_CASE("mixed branch substitutes discrete values and retains the source coord
     const auto source_description = source.description();
     CHECK(source_description->model->dynamics.dimensions.control == 3);
     REQUIRE(std::holds_alternative<MixedDomain>(source_description->controls));
-    const auto& source_mixed = std::get<MixedDomain>(source_description->controls);
+    const auto &source_mixed = std::get<MixedDomain>(source_description->controls);
     CHECK(source_mixed.discrete.catalogue == std::vector<Vector>{{3, 4}, {3, 4}, {0, -1}});
 }
 
@@ -170,15 +188,15 @@ TEST_CASE("mixed branch keeps catalogue indices distinct for duplicate action va
 TEST_CASE("branch relation lift restores source control coordinates and fixes discrete values") {
     const auto source = resolved_mixed_problem();
     const auto mixed_branch = branch(source, {0, 2});
-    const auto relation = sets::make_h({"continuous-branch", 5, {}},
-        {matrix({1, 5, {0, 0, 1, 0, 0}}), vector({1}),
-         matrix({0, 5, {}}), vector({})});
+    const auto relation =
+        sets::make_h({"continuous-branch", 5, {}}, {matrix({1, 5, {0, 0, 1, 0, 0}}), vector({1}),
+                                                    matrix({0, 5, {}}), vector({})});
     REQUIRE(std::holds_alternative<sets::SetData>(relation));
 
-    const auto lifted = lift_finite_mixed_branch_relation(
-        mixed_branch, std::get<sets::SetData>(relation));
+    const auto lifted =
+        lift_finite_mixed_branch_relation(mixed_branch, std::get<sets::SetData>(relation));
     REQUIRE(std::holds_alternative<sets::SetData>(lifted));
-    const auto& data = std::get<sets::SetData>(lifted);
+    const auto &data = std::get<sets::SetData>(lifted);
     CHECK(data.metadata()->set.dimension == 9);
     const auto h = std::get<sets::HRepresentation>(data.representation());
     CHECK(h.inequalities.rows() == 1);
@@ -207,31 +225,30 @@ TEST_CASE("mixed branch rejects malformed histories and unsupported information 
 
     auto authored = *source.description();
     authored.information = InformationPattern::feedback;
-    const auto feedback_result = problem::resolve(authored,
-        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
+    const auto feedback_result = problem::resolve(
+        authored, {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
     REQUIRE(std::holds_alternative<problem::ResolvedProblem>(feedback_result));
-    const auto& feedback = std::get<problem::ResolvedProblem>(feedback_result);
+    const auto &feedback = std::get<problem::ResolvedProblem>(feedback_result);
     auto unsupported = prepare_finite_mixed_branch(feedback, FiniteActionHistory{{0, 2}});
     REQUIRE(std::holds_alternative<Diagnostics>(unsupported));
     CHECK(std::get<Diagnostics>(unsupported).front().code == DiagnosticCode::unsupported);
     auto unsupported_cursor = FiniteMixedBranchCursor::prepare(feedback);
     REQUIRE(std::holds_alternative<Diagnostics>(unsupported_cursor));
-    CHECK(std::get<Diagnostics>(unsupported_cursor).front().field ==
-        "finite_mixed_branch.profile");
+    CHECK(std::get<Diagnostics>(unsupported_cursor).front().field == "finite_mixed_branch.profile");
 }
 
 TEST_CASE("mixed branch rejects non-finite offsets created by finite inputs") {
     auto authored = mixed_problem();
     auto model = *authored.model;
-    auto& stages = std::get<std::vector<LinearStage>>(model.dynamics.stages);
+    auto &stages = std::get<std::vector<LinearStage>>(model.dynamics.stages);
     stages[0].B.values[1] = std::numeric_limits<double>::max();
     authored.model = std::make_shared<const SystemModel>(std::move(model));
-    const auto resolved = problem::resolve(authored,
-        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
+    const auto resolved = problem::resolve(
+        authored, {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
     REQUIRE(std::holds_alternative<problem::ResolvedProblem>(resolved));
 
-    const auto result = prepare_finite_mixed_branch(
-        std::get<problem::ResolvedProblem>(resolved), FiniteActionHistory{{0, 0}});
+    const auto result = prepare_finite_mixed_branch(std::get<problem::ResolvedProblem>(resolved),
+                                                    FiniteActionHistory{{0, 0}});
     REQUIRE(std::holds_alternative<Diagnostics>(result));
     CHECK(std::get<Diagnostics>(result).front().code == DiagnosticCode::unsupported);
     CHECK(std::get<Diagnostics>(result).front().field == "finite_mixed_branch.affine_offset");
@@ -252,8 +269,8 @@ TEST_CASE("mixed branch cursor streams bounded index histories and preserves dup
     CHECK(history_of(first.entries[2]) == FiniteActionHistory{{0, 2}});
     CHECK(history_of(first.entries[3]) == FiniteActionHistory{{1, 0}});
     CHECK_FALSE(first.complete);
-    const auto& duplicate_zero = std::get<FiniteMixedBranchProblem>(first.entries[0]);
-    const auto& duplicate_one = std::get<FiniteMixedBranchProblem>(first.entries[3]);
+    const auto &duplicate_zero = std::get<FiniteMixedBranchProblem>(first.entries[0]);
+    const auto &duplicate_one = std::get<FiniteMixedBranchProblem>(first.entries[3]);
     CHECK(duplicate_zero.coordinates.discrete_controls[0] == Vector{3, 4});
     CHECK(duplicate_one.coordinates.discrete_controls[0] == Vector{3, 4});
     CHECK(duplicate_zero.problem.id != duplicate_one.problem.id);
@@ -280,11 +297,11 @@ TEST_CASE("mixed branch cursor retains refusals and continues preparing later hi
     controls.discrete.catalogue = {{0, -1}, {3, 4}, {0, -1}};
     authored.controls = std::move(controls);
     auto model = *authored.model;
-    auto& stages = std::get<std::vector<LinearStage>>(model.dynamics.stages);
+    auto &stages = std::get<std::vector<LinearStage>>(model.dynamics.stages);
     stages[1].B.values[1] = std::numeric_limits<double>::max();
     authored.model = std::make_shared<const SystemModel>(std::move(model));
-    const auto resolved = problem::resolve(authored,
-        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
+    const auto resolved = problem::resolve(
+        authored, {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
     REQUIRE(std::holds_alternative<problem::ResolvedProblem>(resolved));
 
     auto branches = cursor(std::get<problem::ResolvedProblem>(resolved));
@@ -292,7 +309,7 @@ TEST_CASE("mixed branch cursor retains refusals and continues preparing later hi
     REQUIRE(page.entries.size() == 3);
     CHECK(std::holds_alternative<FiniteMixedBranchProblem>(page.entries[0]));
     REQUIRE(std::holds_alternative<FailedFiniteMixedBranch>(page.entries[1]));
-    const auto& refusal = std::get<FailedFiniteMixedBranch>(page.entries[1]);
+    const auto &refusal = std::get<FailedFiniteMixedBranch>(page.entries[1]);
     CHECK(refusal.history == FiniteActionHistory{{0, 1}});
     REQUIRE(refusal.diagnostics.size() == 1);
     CHECK(refusal.diagnostics.front().field == "finite_mixed_branch.affine_offset");
@@ -305,15 +322,15 @@ TEST_CASE("zero-horizon mixed branch cursor emits one empty history") {
     auto authored = mixed_problem();
     authored.times = {0};
     auto model = *authored.model;
-    auto& dynamics = model.dynamics;
+    auto &dynamics = model.dynamics;
     dynamics.stages = std::vector<LinearStage>{};
     authored.model = std::make_shared<const SystemModel>(std::move(model));
     auto controls = std::get<MixedDomain>(authored.controls);
     controls.continuous.stages.clear();
     authored.controls = std::move(controls);
     authored.states.resize(1);
-    const auto resolved = problem::resolve(authored,
-        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
+    const auto resolved = problem::resolve(
+        authored, {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
     REQUIRE(std::holds_alternative<problem::ResolvedProblem>(resolved));
 
     auto branches = cursor(std::get<problem::ResolvedProblem>(resolved));
@@ -327,24 +344,22 @@ TEST_CASE("zero-horizon mixed branch cursor emits one empty history") {
 
 TEST_CASE("mixed branch portfolio preserves every globally minimal history tie") {
     const auto source = resolved_mixed_problem();
-    std::vector<FiniteMixedBranchEvaluation> evaluations{
-        {branch(source, {0, 0}), 2.0},
-        {branch(source, {0, 1}), 1.0},
-        {branch(source, {1, 0}), 1.0 + 5e-13},
-        {branch(source, {2, 2}), 3.0}};
+    std::vector<FiniteMixedBranchEvaluation> evaluations{{branch(source, {0, 0}), 2.0},
+                                                         {branch(source, {0, 1}), 1.0},
+                                                         {branch(source, {1, 0}), 1.0 + 5e-13},
+                                                         {branch(source, {2, 2}), 3.0}};
 
-    const auto selected = select_finite_mixed_branch_portfolio(
-        std::move(evaluations), true, 1e-12);
+    const auto selected = select_finite_mixed_branch_portfolio(std::move(evaluations), true, 1e-12);
     REQUIRE(std::holds_alternative<FiniteMixedBranchPortfolio>(selected));
-    const auto& portfolio = std::get<FiniteMixedBranchPortfolio>(selected);
+    const auto &portfolio = std::get<FiniteMixedBranchPortfolio>(selected);
     CHECK(portfolio.complete);
     REQUIRE(portfolio.optimum.has_value());
     CHECK(*portfolio.optimum == doctest::Approx(1.0));
     REQUIRE(portfolio.optimal_evaluation_indices == std::vector<std::size_t>{1, 2});
     CHECK(std::get<FiniteMixedBranchProblem>(portfolio.evaluations[1].branch).history ==
-        FiniteActionHistory{{0, 1}});
+          FiniteActionHistory{{0, 1}});
     CHECK(std::get<FiniteMixedBranchProblem>(portfolio.evaluations[2].branch).history ==
-        FiniteActionHistory{{1, 0}});
+          FiniteActionHistory{{1, 0}});
 }
 
 TEST_CASE("mixed branch portfolio keeps each tied continuous relation attached to its history") {
@@ -355,18 +370,20 @@ TEST_CASE("mixed branch portfolio keeps each tied continuous relation attached t
 
     const auto selected = select_finite_mixed_branch_portfolio(std::move(evaluations), true, 0.0);
     REQUIRE(std::holds_alternative<FiniteMixedBranchPortfolio>(selected));
-    const auto& portfolio = std::get<FiniteMixedBranchPortfolio>(selected);
+    const auto &portfolio = std::get<FiniteMixedBranchPortfolio>(selected);
     CHECK(portfolio.complete);
     CHECK(portfolio.all_selected_relations_present);
     REQUIRE(portfolio.optimal_evaluation_indices == std::vector<std::size_t>{0, 1});
     REQUIRE(portfolio.evaluations[0].continuous_relation.has_value());
     REQUIRE(portfolio.evaluations[1].continuous_relation.has_value());
-    CHECK(portfolio.evaluations[0].continuous_relation->metadata()->id.value == "continuous-family-a");
-    CHECK(portfolio.evaluations[1].continuous_relation->metadata()->id.value == "continuous-family-b");
+    CHECK(portfolio.evaluations[0].continuous_relation->metadata()->id.value ==
+          "continuous-family-a");
+    CHECK(portfolio.evaluations[1].continuous_relation->metadata()->id.value ==
+          "continuous-family-b");
     CHECK(std::get<FiniteMixedBranchProblem>(portfolio.evaluations[0].branch).history ==
-        FiniteActionHistory{{0, 1}});
+          FiniteActionHistory{{0, 1}});
     CHECK(std::get<FiniteMixedBranchProblem>(portfolio.evaluations[1].branch).history ==
-        FiniteActionHistory{{1, 0}});
+          FiniteActionHistory{{1, 0}});
 }
 
 TEST_CASE("mixed branch portfolio reports missing continuous relations without dropping ties") {
@@ -377,7 +394,7 @@ TEST_CASE("mixed branch portfolio reports missing continuous relations without d
 
     const auto selected = select_finite_mixed_branch_portfolio(std::move(evaluations), true, 0.0);
     REQUIRE(std::holds_alternative<FiniteMixedBranchPortfolio>(selected));
-    const auto& portfolio = std::get<FiniteMixedBranchPortfolio>(selected);
+    const auto &portfolio = std::get<FiniteMixedBranchPortfolio>(selected);
     CHECK_FALSE(portfolio.all_selected_relations_present);
     CHECK(portfolio.optimal_evaluation_indices == std::vector<std::size_t>{0, 1});
 }
@@ -386,18 +403,21 @@ TEST_CASE("mixed branch portfolio rejects a relation in the wrong branch coordin
     const auto source = resolved_mixed_problem();
     auto result = select_finite_mixed_branch_portfolio(
         std::vector<FiniteMixedBranchEvaluation>{
-            {branch(source, {0, 1}), 1.0, relation("wrong-dimension", 4)}}, true, 0.0);
+            {branch(source, {0, 1}), 1.0, relation("wrong-dimension", 4)}},
+        true, 0.0);
     REQUIRE(std::holds_alternative<Diagnostics>(result));
     CHECK(std::get<Diagnostics>(result).front().field == "finite_mixed_branch.relation");
 }
 
-TEST_CASE("independent one-step oracle retains every tied catalogue branch and its continuous family") {
-    const auto resolved = problem::resolve(one_step_tied_mixed_problem(),
-        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
+TEST_CASE(
+    "independent one-step oracle retains every tied catalogue branch and its continuous family") {
+    const auto resolved =
+        problem::resolve(one_step_tied_mixed_problem(),
+                         {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
     REQUIRE(std::holds_alternative<problem::ResolvedProblem>(resolved));
-    const auto& source = std::get<problem::ResolvedProblem>(resolved);
+    const auto &source = std::get<problem::ResolvedProblem>(resolved);
     const auto description = source.description();
-    const auto& source_mixed = std::get<MixedDomain>(description->controls);
+    const auto &source_mixed = std::get<MixedDomain>(description->controls);
 
     auto branches = cursor(source);
     const auto page = branches.take_prefix(8);
@@ -409,7 +429,7 @@ TEST_CASE("independent one-step oracle retains every tied catalogue branch and i
     double oracle_minimum = std::numeric_limits<double>::infinity();
     for (std::size_t row = 0; row < page.entries.size(); ++row) {
         REQUIRE(std::holds_alternative<FiniteMixedBranchProblem>(page.entries[row]));
-        const auto& prepared = std::get<FiniteMixedBranchProblem>(page.entries[row]);
+        const auto &prepared = std::get<FiniteMixedBranchProblem>(page.entries[row]);
         const FiniteActionHistory expected_history{{row}};
         CHECK(prepared.history == expected_history);
 
@@ -422,16 +442,18 @@ TEST_CASE("independent one-step oracle retains every tied catalogue branch and i
             oracle_minimum = objective;
             oracle_minimizers.clear();
         }
-        if (objective == oracle_minimum) oracle_minimizers.push_back(row);
+        if (objective == oracle_minimum)
+            oracle_minimizers.push_back(row);
 
-        evaluations.push_back({prepared, objective,
-            analytic_branch_family("oracle-history-" + std::to_string(row), terminal_state)});
+        evaluations.push_back(
+            {prepared, objective,
+             analytic_branch_family("oracle-history-" + std::to_string(row), terminal_state)});
     }
 
-    const auto selected = select_finite_mixed_branch_portfolio(
-        std::move(evaluations), page.complete, 0.0);
+    const auto selected =
+        select_finite_mixed_branch_portfolio(std::move(evaluations), page.complete, 0.0);
     REQUIRE(std::holds_alternative<FiniteMixedBranchPortfolio>(selected));
-    const auto& portfolio = std::get<FiniteMixedBranchPortfolio>(selected);
+    const auto &portfolio = std::get<FiniteMixedBranchPortfolio>(selected);
     CHECK(portfolio.complete);
     REQUIRE(portfolio.optimum.has_value());
     CHECK(*portfolio.optimum == oracle_minimum);
@@ -440,16 +462,16 @@ TEST_CASE("independent one-step oracle retains every tied catalogue branch and i
     CHECK(portfolio.all_selected_relations_present);
 
     for (const auto index : oracle_minimizers) {
-        const auto& evaluation = portfolio.evaluations[index];
-        const auto& selected_branch = std::get<FiniteMixedBranchProblem>(evaluation.branch);
+        const auto &evaluation = portfolio.evaluations[index];
+        const auto &selected_branch = std::get<FiniteMixedBranchProblem>(evaluation.branch);
         CHECK(selected_branch.history == FiniteActionHistory{{index}});
         REQUIRE(evaluation.continuous_relation.has_value());
         CHECK(evaluation.continuous_relation->metadata()->set.dimension == 3);
 
-        const auto lifted = lift_finite_mixed_branch_relation(
-            selected_branch, *evaluation.continuous_relation);
+        const auto lifted =
+            lift_finite_mixed_branch_relation(selected_branch, *evaluation.continuous_relation);
         REQUIRE(std::holds_alternative<sets::SetData>(lifted));
-        const auto& source_relation = std::get<sets::SetData>(lifted);
+        const auto &source_relation = std::get<sets::SetData>(lifted);
         CHECK(source_relation.metadata()->set.dimension == 4);
         const auto h = std::get<sets::HRepresentation>(source_relation.representation());
         REQUIRE(h.inequalities.rows() == 0);
@@ -481,16 +503,17 @@ TEST_CASE("mixed branch solve retains strategy refusals and does not claim a glo
     ExecutionContext context;
     context.numerical = request.family.numerical;
 
-    const auto outcome = solve_finite_mixed_branch_portfolio(source, no_strategies, request, context);
+    const auto outcome =
+        solve_finite_mixed_branch_portfolio(source, no_strategies, request, context);
     REQUIRE(std::holds_alternative<FiniteMixedBranchSolveResult>(outcome));
-    const auto& result = std::get<FiniteMixedBranchSolveResult>(outcome);
+    const auto &result = std::get<FiniteMixedBranchSolveResult>(outcome);
     CHECK(result.history_enumeration_complete);
     CHECK_FALSE(result.every_branch_solved);
     CHECK(result.portfolio.enumeration_complete);
     CHECK_FALSE(result.portfolio.complete);
     CHECK_FALSE(result.portfolio.optimum.has_value());
     REQUIRE(result.portfolio.evaluations.size() == 3);
-    for (const auto& evaluation : result.portfolio.evaluations)
+    for (const auto &evaluation : result.portfolio.evaluations)
         CHECK(std::holds_alternative<FailedFiniteMixedBranch>(evaluation.branch));
 }
 
@@ -512,9 +535,10 @@ TEST_CASE("mixed branch solve reports pre-cancellation without claiming complete
     context.numerical = request.family.numerical;
     context.cancellation = cancellation.get_token();
 
-    const auto outcome = solve_finite_mixed_branch_portfolio(source, no_strategies, request, context);
+    const auto outcome =
+        solve_finite_mixed_branch_portfolio(source, no_strategies, request, context);
     REQUIRE(std::holds_alternative<FiniteMixedBranchSolveResult>(outcome));
-    const auto& result = std::get<FiniteMixedBranchSolveResult>(outcome);
+    const auto &result = std::get<FiniteMixedBranchSolveResult>(outcome);
     REQUIRE(result.stop.has_value());
     CHECK(result.stop->reason == StopReason::cancelled);
     CHECK_FALSE(result.history_enumeration_complete);
@@ -539,9 +563,10 @@ TEST_CASE("mixed branch solve reports an expired deadline without claiming compl
     context.numerical = request.family.numerical;
     context.deadline = std::chrono::steady_clock::time_point::min();
 
-    const auto outcome = solve_finite_mixed_branch_portfolio(source, no_strategies, request, context);
+    const auto outcome =
+        solve_finite_mixed_branch_portfolio(source, no_strategies, request, context);
     REQUIRE(std::holds_alternative<FiniteMixedBranchSolveResult>(outcome));
-    const auto& result = std::get<FiniteMixedBranchSolveResult>(outcome);
+    const auto &result = std::get<FiniteMixedBranchSolveResult>(outcome);
     REQUIRE(result.stop.has_value());
     CHECK(result.stop->reason == StopReason::deadline_expired);
     CHECK_FALSE(result.history_enumeration_complete);
@@ -554,14 +579,13 @@ TEST_CASE("mixed branch portfolio keeps preparation refusals and incomplete enum
     auto refused = FailedFiniteMixedBranch{
         FiniteActionHistory{{2, 1}},
         Diagnostics{{DiagnosticCode::unsupported, "finite_mixed_branch.profile", "test refusal"}}};
-    std::vector<FiniteMixedBranchEvaluation> evaluations{
-        {branch(source, {0, 0}), 4.0}, {std::move(refused), std::nullopt},
-        {branch(source, {0, 2}), 2.0}};
+    std::vector<FiniteMixedBranchEvaluation> evaluations{{branch(source, {0, 0}), 4.0},
+                                                         {std::move(refused), std::nullopt},
+                                                         {branch(source, {0, 2}), 2.0}};
 
-    const auto selected = select_finite_mixed_branch_portfolio(
-        std::move(evaluations), false, 0.0);
+    const auto selected = select_finite_mixed_branch_portfolio(std::move(evaluations), false, 0.0);
     REQUIRE(std::holds_alternative<FiniteMixedBranchPortfolio>(selected));
-    const auto& portfolio = std::get<FiniteMixedBranchPortfolio>(selected);
+    const auto &portfolio = std::get<FiniteMixedBranchPortfolio>(selected);
     CHECK_FALSE(portfolio.complete);
     REQUIRE(portfolio.optimum.has_value());
     CHECK(*portfolio.optimum == doctest::Approx(2.0));
@@ -572,13 +596,15 @@ TEST_CASE("mixed branch portfolio keeps preparation refusals and incomplete enum
 
 TEST_CASE("complete history enumeration with a refused branch is not a complete optimum") {
     const auto source = resolved_mixed_problem();
-    auto refused = FailedFiniteMixedBranch{FiniteActionHistory{{2, 1}},
+    auto refused = FailedFiniteMixedBranch{
+        FiniteActionHistory{{2, 1}},
         Diagnostics{{DiagnosticCode::unsupported, "branch", "solver unavailable"}}};
-    const auto outcome = select_finite_mixed_branch_portfolio({
-        {branch(source, {0, 0}), 4.0}, {std::move(refused), std::nullopt},
-        {branch(source, {0, 2}), 2.0}}, true, 0.0);
+    const auto outcome = select_finite_mixed_branch_portfolio({{branch(source, {0, 0}), 4.0},
+                                                               {std::move(refused), std::nullopt},
+                                                               {branch(source, {0, 2}), 2.0}},
+                                                              true, 0.0);
     REQUIRE(std::holds_alternative<FiniteMixedBranchPortfolio>(outcome));
-    const auto& portfolio = std::get<FiniteMixedBranchPortfolio>(outcome);
+    const auto &portfolio = std::get<FiniteMixedBranchPortfolio>(outcome);
     CHECK(portfolio.enumeration_complete);
     CHECK_FALSE(portfolio.complete);
     CHECK(portfolio.optimum == 2.0);
@@ -594,7 +620,8 @@ TEST_CASE("mixed branch portfolio rejects missing, non-finite and invalid object
     CHECK(std::get<Diagnostics>(missing).front().code == DiagnosticCode::invalid_input);
 
     auto nonfinite = select_finite_mixed_branch_portfolio(
-        std::vector<FiniteMixedBranchEvaluation>{{prepared, std::numeric_limits<double>::quiet_NaN()}},
+        std::vector<FiniteMixedBranchEvaluation>{
+            {prepared, std::numeric_limits<double>::quiet_NaN()}},
         true, 0.0);
     REQUIRE(std::holds_alternative<Diagnostics>(nonfinite));
     CHECK(std::get<Diagnostics>(nonfinite).front().code == DiagnosticCode::invalid_input);
