@@ -131,7 +131,7 @@ def capture(source_root: Path, build_root: Path, output_root: Path, build_log: P
     line = stdout.decode("utf-8").strip()
     match = re.search(
         r"provider=([^;]+); source J=([^;]+); u0=([^;]+); u1=([^;]+); "
-        r"max H violation=([^;]+); start=cold; start policy=([^;]+); "
+        r"max H violation=([^;]+); start=cold; start policy=(.+?); "
         r"readback unavailable=([^;]+); (.+)$",
         line,
     )
