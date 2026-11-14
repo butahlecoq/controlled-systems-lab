@@ -29,39 +29,38 @@ template <class T, class... E> T take(std::variant<T, E...> value) {
 
 optimization::HistoryOptimizationRequest make_request() {
     constexpr std::size_t n = 8;
-    Matrix inequalities{4, n, {0, 0, 0, 0, 0, 0, 1, 0,
-                               0, 0, 0, 0, 0, 0, -1, 0,
-                               0, 0, 0, 0, 0, 0, 0, 1,
-                               0, 0, 0, 0, 0, 0, 0, -1}};
-    Matrix equalities{6, n, {1, 0, 0, 0, 0, 0, 0, 0,
-                            0, 1, 0, 0, 0, 0, 0, 0,
-                            -1, 0, 1, 0, 0, 0, -1, 0,
-                            0, -1, 0, 1, 0, 0, 0, 0,
-                            0, 0, -1, 0, 1, 0, 0, 0,
-                            0, 0, 0, -1, 0, 1, 0, -1}};
-    auto set = take(sets::make_h({{"membership-integrator-history"}, n, {}},
-        {take(numeric::snapshot(inequalities)),
-         take(numeric::snapshot_vector(Vector{1, 0, 1, 0})),
-         take(numeric::snapshot(equalities)),
-         take(numeric::snapshot_vector(Vector(6, 0)))}));
+    Matrix inequalities{4, n, {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, -1, 0,
+                               0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,  -1}};
+    Matrix equalities{6, n, {1,  0, 0,  0, 0, 0, 0,  0, 0, 1,  0, 0,  0, 0, 0, 0,
+                             -1, 0, 1,  0, 0, 0, -1, 0, 0, -1, 0, 1,  0, 0, 0, 0,
+                             0,  0, -1, 0, 1, 0, 0,  0, 0, 0,  0, -1, 0, 1, 0, -1}};
+    auto set = take(sets::make_h(
+        {{"membership-integrator-history"}, n, {}},
+        {take(numeric::snapshot(inequalities)), take(numeric::snapshot_vector(Vector{1, 0, 1, 0})),
+         take(numeric::snapshot(equalities)), take(numeric::snapshot_vector(Vector(6, 0)))}));
     synthesis::JointHistoryRelation histories{{{2, 1, 0}, 2}, std::move(set)};
 
     optimization::HistoryZonotopeMembership selected{{0.4, 0.0}, {2, 1, {0.2, 0.0}}};
     optimization::HistoryMembershipOrigin origin{
-        {"source-stage-1-zonotope"}, {"selected-stage-1-zonotope"},
-        optimization::HistorySetFamily::zonotope, SetRelation::equivalent,
-        "integrator-state-(x,y)", {2, 3},
+        {"source-stage-1-zonotope"},
+        {"selected-stage-1-zonotope"},
+        optimization::HistorySetFamily::zonotope,
+        SetRelation::equivalent,
+        "integrator-state-(x,y)",
+        {2, 3},
         optimization::HistorySourceGeometry{{"source-stage-1-zonotope"},
-                                             optimization::HistorySetFamily::zonotope,
-                                             optimization::HistoryMembershipShape{selected}}};
+                                            optimization::HistorySetFamily::zonotope,
+                                            optimization::HistoryMembershipShape{selected}}};
     optimization::HistoryDomain domain{
         std::move(histories),
         {{{1}, std::move(origin), optimization::HistoryMembershipShape{selected}}},
         "integrator-state-(x,y)"};
 
-    TerminalObjective terminal = ResidualNormTerminal{
-        Matrix{2, 2, {1, 0, 0, 1}}, Vector{1, 1}, Vector{1, 1}};
-    optimization::RunningControlCost running{"half-l1-control", 2,
+    TerminalObjective terminal =
+        ResidualNormTerminal{Matrix{2, 2, {1, 0, 0, 1}}, Vector{1, 1}, Vector{1, 1}};
+    optimization::RunningControlCost running{
+        "half-l1-control",
+        2,
         {{0, {optimization::EuclideanControlPenalty{{1, 1, {1}}, {0}, 0.5}}},
          {1, {optimization::EuclideanControlPenalty{{1, 1, {1}}, {0}, 0.5}}}}};
     auto compiled = optimization::compile_history_cost(domain.original, terminal, running, 0);
@@ -72,24 +71,23 @@ optimization::HistoryOptimizationRequest make_request() {
             std::move(domain),
             std::get<optimization::HistoryCostProgram>(std::move(compiled)),
             optimization::SuppliedStart{{0, 0, 0.4, 0, 0.4, 0.5, 0.4, 0.5},
-                {optimization::HistoryZonotopeWitness{{0.0}}}}};
+                                        {optimization::HistoryZonotopeWitness{{0.0}}}}};
 }
 
 void write_outputs(const std::filesystem::path &directory,
                    const optimization::HistoryOptimizationResult &result) {
     std::filesystem::create_directories(directory);
-    const auto witness = std::get<optimization::HistoryZonotopeWitness>(
-        result.membership_witnesses.at(0));
+    const auto witness =
+        std::get<optimization::HistoryZonotopeWitness>(result.membership_witnesses.at(0));
     std::ofstream csv(directory / "history.csv");
-    csv << std::setprecision(17)
-        << "series,stage,x,y,u0,u1,source_J,zonotope_coefficient\n"
+    csv << std::setprecision(17) << "series,stage,x,y,u0,u1,source_J,zonotope_coefficient\n"
         << "optimized,0," << result.history[0] << ',' << result.history[1] << ','
         << result.history[6] << ',' << result.history[7] << ',' << result.source_cost.total
         << ",\noptimized,1," << result.history[2] << ',' << result.history[3] << ','
-        << result.history[6] << ',' << result.history[7] << ',' << result.source_cost.total
-        << ',' << witness.coefficients.at(0) << "\noptimized,2," << result.history[4]
-        << ',' << result.history[5] << ',' << result.history[6] << ',' << result.history[7]
-        << ',' << result.source_cost.total << ",\nselected-zonotope,1,0.2,0,0,0,0,-1\n"
+        << result.history[6] << ',' << result.history[7] << ',' << result.source_cost.total << ','
+        << witness.coefficients.at(0) << "\noptimized,2," << result.history[4] << ','
+        << result.history[5] << ',' << result.history[6] << ',' << result.history[7] << ','
+        << result.source_cost.total << ",\nselected-zonotope,1,0.2,0,0,0,0,-1\n"
         << "selected-zonotope,1,0.6,0,0,0,0,1\n";
     if (!csv)
         throw std::runtime_error("failed to write history.csv");
@@ -107,30 +105,33 @@ void write_outputs(const std::filesystem::path &directory,
         << "<path d=\"M" << px(0.2) << ' ' << py(0) << " L" << px(0.6) << ' ' << py(0)
         << "\" stroke=\"#D55E00\" stroke-width=\"12\" stroke-linecap=\"round\"/>"
         << "<polyline points=\"" << px(result.history[0]) << ',' << py(result.history[1]) << ' '
-        << px(result.history[2]) << ',' << py(result.history[3]) << ' '
-        << px(result.history[4]) << ',' << py(result.history[5])
+        << px(result.history[2]) << ',' << py(result.history[3]) << ' ' << px(result.history[4])
+        << ',' << py(result.history[5])
         << "\" fill=\"none\" stroke=\"#0072B2\" stroke-width=\"5\"/>"
         << "<circle cx=\"" << px(result.history[2]) << "\" cy=\"" << py(result.history[3])
-        << "\" r=\"8\" fill=\"#D55E00\"/><circle cx=\"" << px(result.history[4]
-        << "\" cy=\"" << py(result.history[5]) << "\" r=\"8\" fill=\"#009E73\"/>"
+        << "\" r=\"8\" fill=\"#D55E00\"/><circle cx=\"" << px(result.history[4]) << "\" cy=\""
+        << py(result.history[5]) << "\" r=\"8\" fill=\"#009E73\"/>"
         << "<text x=\"145\" y=\"92\" fill=\"#D55E00\">selected stage-1 zonotope: (0.4,0)+0.2[-1,1](1,0)</text>"
         << "<text x=\"145\" y=\"120\" fill=\"#0072B2\">optimized state history (blue), x₀→x₁→x₂</text>"
-        << "<text x=\"145\" y=\"148\" fill=\"#009E73\">terminal state x₂ = ("
-        << result.history[4] << ',' << result.history[5] << ")</text></svg>";
+        << "<text x=\"145\" y=\"148\" fill=\"#009E73\">terminal state x₂ = (" << result.history[4]
+        << ',' << result.history[5] << ")</text></svg>";
     if (!svg)
         throw std::runtime_error("failed to write history.svg");
 
     std::ofstream html(directory / "index.html");
-    html << "<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>2D typed history membership</title>"
-         << "<main><h1>2D typed stage-membership example</h1><p>Two-state integrator: "
-         << "x₀=(0,0), x₁=x₀+(u₀,0), x₂=x₁+(0,u₁), and 0≤u₀,u₁≤1. At stage 1, "
-         << "the state must also belong to the rank-one zonotope Z=(0.4,0)+0.2[-1,1](1,0).</p>"
-         << "<img src=\"history.svg\" alt=\"Selected stage-one zonotope and actual optimized state history\">"
-         << "<p>Objective: J=||x₂−(1,1)||₂+0.5(|u₀|+|u₁|). The solver returns "
-         << "u₀=" << result.history[6] << ", u₁=" << result.history[7]
-         << ", J=" << result.source_cost.total << ". The independently checked latent zonotope coefficient is "
-         << witness.coefficients.at(0) << "; maximum full-H violation is "
-         << result.maximum_history_violation << ".</p><a href=\"history.csv\">History CSV</a></main></html>";
+    html
+        << "<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>2D typed history membership</title>"
+        << "<main><h1>2D typed stage-membership example</h1><p>Two-state integrator: "
+        << "x₀=(0,0), x₁=x₀+(u₀,0), x₂=x₁+(0,u₁), and 0≤u₀,u₁≤1. At stage 1, "
+        << "the state must also belong to the rank-one zonotope Z=(0.4,0)+0.2[-1,1](1,0).</p>"
+        << "<img src=\"history.svg\" alt=\"Selected stage-one zonotope and actual optimized state history\">"
+        << "<p>Objective: J=||x₂−(1,1)||₂+0.5(|u₀|+|u₁|). The solver returns "
+        << "u₀=" << result.history[6] << ", u₁=" << result.history[7]
+        << ", J=" << result.source_cost.total
+        << ". The independently checked latent zonotope coefficient is "
+        << witness.coefficients.at(0) << "; maximum full-H violation is "
+        << result.maximum_history_violation
+        << ".</p><a href=\"history.csv\">History CSV</a></main></html>";
     if (!html)
         throw std::runtime_error("failed to write index.html");
 }
@@ -150,31 +151,38 @@ int main(int argc, char **argv) {
             throw std::runtime_error("could not register the CasADi history optimizer");
         registry::Requirements requirements;
         requirements.output.representation = {"csl.whole-history-source-cost.v1"};
-        auto prepared = registry::prepare_provider(registry::select_provider(providers, method, requirements));
-        if (!std::holds_alternative<registry::PreparedProvider<registry::HistoryOptimizerPort>>(prepared))
+        auto prepared =
+            registry::prepare_provider(registry::select_provider(providers, method, requirements));
+        if (!std::holds_alternative<registry::PreparedProvider<registry::HistoryOptimizerPort>>(
+                prepared))
             throw std::runtime_error("CasADi history optimizer unavailable");
-        auto pipeline = std::get<registry::PreparedProvider<registry::HistoryOptimizerPort>>(prepared).prepare(request);
-        if (!std::holds_alternative<registry::PreparedPipeline<registry::HistoryOptimizerPort>>(pipeline))
+        auto pipeline =
+            std::get<registry::PreparedProvider<registry::HistoryOptimizerPort>>(prepared).prepare(
+                request);
+        if (!std::holds_alternative<registry::PreparedPipeline<registry::HistoryOptimizerPort>>(
+                pipeline))
             throw std::runtime_error("whole-history membership request rejected");
-        auto workspaces = std::get<registry::PreparedPipeline<registry::HistoryOptimizerPort>>(pipeline).create();
+        auto workspaces =
+            std::get<registry::PreparedPipeline<registry::HistoryOptimizerPort>>(pipeline).create();
         auto outcome = std::get<0>(workspaces)->run(ExecutionContext{});
         if (!std::holds_alternative<optimization::HistoryOptimizationResult>(outcome))
             throw std::runtime_error("whole-history membership solve failed");
         const auto &result = std::get<optimization::HistoryOptimizationResult>(outcome);
         write_outputs(argv[1], result);
         const auto &start = std::get<optimization::VerifiedSuppliedStart>(result.initialization);
-        const auto &witness = std::get<optimization::HistoryZonotopeWitness>(result.membership_witnesses.at(0));
+        const auto &witness =
+            std::get<optimization::HistoryZonotopeWitness>(result.membership_witnesses.at(0));
         std::cout << std::setprecision(17)
                   << "source_commit=" << CSL_HISTORY_MEMBERSHIP_SOURCE_COMMIT
                   << "; compiler=" << CSL_HISTORY_MEMBERSHIP_COMPILER
                   << "; casadi_version=" << CSL_HISTORY_MEMBERSHIP_CASADI_VERSION
                   << "; provider=" << method.id.value << '@' << *method.version
-                  << "; source_J=" << result.source_cost.total
-                  << "; u0=" << result.history[6] << "; u1=" << result.history[7]
-                  << "; x1=" << result.history[2] << ',' << result.history[3]
-                  << "; x2=" << result.history[4] << ',' << result.history[5]
+                  << "; source_J=" << result.source_cost.total << "; u0=" << result.history[6]
+                  << "; u1=" << result.history[7] << "; x1=" << result.history[2] << ','
+                  << result.history[3] << "; x2=" << result.history[4] << ',' << result.history[5]
                   << "; membership_lambda=" << witness.coefficients.at(0)
-                  << "; supplied_start_readback=" << (start.supplied_history == start.primal_readback)
+                  << "; supplied_start_readback="
+                  << (start.supplied_history == start.primal_readback)
                   << "; max_H_violation=" << result.maximum_history_violation
                   << "; diagnostics=" << result.diagnostics << '\n';
         return 0;
