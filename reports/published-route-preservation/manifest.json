@@ -3439,6 +3439,885 @@
       "sha256": "14a7f042fb3fb4ffb3268f55a7ff3f0b3436fcf9a1a59e51aa65106955a9ae3c",
       "size": 9166126,
       "source_commit": "dfc708d22a9f7e9247c0a7177e3e401478991a2e"
+    },
+    {
+      "members": {
+        "mpc08-complete-5a9414f2ae07b6708738/OFFLINE_SHA256SUMS": {
+          "publish": true,
+          "sha256": "15a549b356e707f1f670df5b29e07a9d02b1a8e5ac3d7cc6f3d72a6759bd92d2",
+          "size": 11037
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/README.md": {
+          "publish": true,
+          "sha256": "21160008171d2dfff532c8f6244ce890383c32e5513887f029e015eac693603a",
+          "size": 1745
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/SHA256SUMS": {
+          "publish": true,
+          "sha256": "cd3e5109bf1af1e5b29e5f89c40944450f9f3269b5808e980aadd71841281608",
+          "size": 6186
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/exact/SHA256SUMS": {
+          "publish": true,
+          "sha256": "ed12c202597232807b05a2f039222f99227b202732857577aef1f3e7bd2a98d8",
+          "size": 1349
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/exact/critical-regions.png": {
+          "publish": true,
+          "sha256": "2873657f767ef1a91b051946fef63f99a6a7ab7aa18b43ebf635022407b57522",
+          "size": 165320
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/exact/critical-regions.svg": {
+          "publish": true,
+          "sha256": "7c9338ddabfd08043aa2b583b70f2f218fef5aca6d9445703842df668930035c",
+          "size": 79797
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/exact/exact-reference.json": {
+          "publish": true,
+          "sha256": "66bdef3797fff0e94eaa90e38726f22a42c69d05460600fa4f6e47363740e0d1",
+          "size": 263346
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/exact/index.html": {
+          "publish": true,
+          "sha256": "65cd8f5d0c153d0f9016d3d5aec28168db3ecf03b3fa2fec664433bee664dd98",
+          "size": 327602
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/exact/manifest.json": {
+          "publish": true,
+          "sha256": "35c4e0f6bfbd785754d84b2998412653c80d7fa02f5f3e8d91979a42cbb65643",
+          "size": 7510
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/exact/native-build-receipt.json": {
+          "publish": true,
+          "sha256": "ba7f8cdf7549ac5a50a7f67b79db6aa47e864e5556f3b21c37e5301b3c6b2c77",
+          "size": 11091
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/exact/native-summary.json": {
+          "publish": true,
+          "sha256": "3c83d4be88cfdb48c22f80805ba57afa95a5c9b8ec4fd5a25e881ca2826866c2",
+          "size": 2803
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/exact/nonunique.csv": {
+          "publish": true,
+          "sha256": "8cbd530d026b456f27336b19f2c7bb5ca9c0e21c18bdfb153c3d133a775d79d0",
+          "size": 238
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/exact/nonunique.stderr.txt": {
+          "publish": true,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "size": 0
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/exact/nonunique.stdout.jsonl": {
+          "publish": true,
+          "sha256": "44c2bb935479efb70283f3bd2d19197d10652e3d438bfb8197f9b7f375f3cf39",
+          "size": 58299
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/exact/support.csv": {
+          "publish": true,
+          "sha256": "9505f03396addf9b7d30ae2a3429c123435b918ce8bd82834ea818634783fe0f",
+          "size": 6145
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/exact/support.stderr.txt": {
+          "publish": true,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "size": 0
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/exact/support.stdout.jsonl": {
+          "publish": true,
+          "sha256": "6fc2fe562c8be4b170e667bf4128b6f9c29900d174d1bd0060ba93e0269c1b39",
+          "size": 82435
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/exact/unique.csv": {
+          "publish": true,
+          "sha256": "4b1725b936e571e3d1869d74f7e7dfecdede143d6f3aabafc63f1ef99fe717c1",
+          "size": 611
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/exact/unique.stderr.txt": {
+          "publish": true,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "size": 0
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/exact/unique.stdout.jsonl": {
+          "publish": true,
+          "sha256": "ce996ac643198cabd69f77d0aa4f2b460ccf36e80578f88035e5725edb55e8d1",
+          "size": 167890
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/horizon/SHA256SUMS": {
+          "publish": true,
+          "sha256": "0fe6ee4383aa088c100fafc83ffef0b2f272365a39cdb7ba66e6fc3c7b8aa284",
+          "size": 738
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/horizon/horizon-regions.png": {
+          "publish": true,
+          "sha256": "9dc3777f8f912844aedee93847b024f96e1e04d83016e56ed4cc20a560882e1c",
+          "size": 118742
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/horizon/horizon-regions.svg": {
+          "publish": true,
+          "sha256": "ecc9ea1102bc931b5ce4bd68dea5f2e9527cac6d6df8efbda8f9c36014fe6b71",
+          "size": 79085
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/horizon/manifest.json": {
+          "publish": true,
+          "sha256": "fb00629baa0a294c967dfc8625034e290cd6761f889d03ee2b95c830fe293ec7",
+          "size": 2124
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/horizon/native-build-receipt.json": {
+          "publish": true,
+          "sha256": "93e8fa3df89ab8df6e38ffbb42d5bf87f185e750044802ad363e197353bd1032",
+          "size": 11099
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/horizon/queries.csv": {
+          "publish": true,
+          "sha256": "b1dbd3d7e27f4db565e7a82b1c7ba1b7e30a9be854f53e905c0384c217acba23",
+          "size": 111
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/horizon/reference.json": {
+          "publish": true,
+          "sha256": "48f3d2fd4c213ee33ef54b0f72a6a7526d647e3b9a4c2f56c250e29d6c03df79",
+          "size": 43570
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/horizon/stderr.txt": {
+          "publish": true,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "size": 0
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/horizon/stdout.jsonl": {
+          "publish": true,
+          "sha256": "bfc6e24c4bfdfd156f2d251671e761e83256546b791846619ef2f07776ce45c5",
+          "size": 33327
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/captures/horizon/summary.json": {
+          "publish": true,
+          "sha256": "c19f1fdd18c120ca0dfec09d0b5109aad18d588551b6f2b7107b13646debb230",
+          "size": 4288
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/evidence/mpc08-exact-regions-79ec2978-20261110/README.md": {
+          "publish": true,
+          "sha256": "b371bd4babf268f2d6d163ddf1c8bf922cadd7ec4b960d089f02d2670e50b80b",
+          "size": 4338
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/evidence/mpc08-exact-regions-79ec2978-20261110/SHA256SUMS": {
+          "publish": true,
+          "sha256": "4b5fcbac7a4e158dc52c43834409ccddc3ba03ae95a0d8b0a47556899b5a5d22",
+          "size": 233
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/evidence/mpc08-exact-regions-79ec2978-20261110/capture.zip": {
+          "publish": true,
+          "sha256": "6487e8c642efc2f4c4ea9ab5cc83719c511022d4a1ee0e4fd2a9429a7ff29e76",
+          "size": 197858
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/evidence/mpc08-exact-regions-79ec2978-20261110/summary.json": {
+          "publish": true,
+          "sha256": "0026b03a7514a479dcbe7b52e58c369b6c847c88a029ca2bcf03a02081abc61f",
+          "size": 4470
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/evidence/mpc08-horizon-regions-01762505-20261110/README.md": {
+          "publish": true,
+          "sha256": "fcd7074b00fd1438a905cd545d54e473076c3925660e37f8df679754cf6e49a4",
+          "size": 5933
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/evidence/mpc08-horizon-regions-01762505-20261110/SHA256SUMS": {
+          "publish": true,
+          "sha256": "bd2c153d4642383abc1d75299775d9b1b6b78119b9b714455e1de253290dc818",
+          "size": 233
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/evidence/mpc08-horizon-regions-01762505-20261110/capture.zip": {
+          "publish": true,
+          "sha256": "1553ddb806ee4ac7b71c93bfa6a31f42efa177b4f800a30e391263174287c4ff",
+          "size": 125014
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/evidence/mpc08-horizon-regions-01762505-20261110/summary.json": {
+          "publish": true,
+          "sha256": "cc0f62feb8c0c68c76f7abb112c308c7944e68345f59829066f1e17667da63d0",
+          "size": 5781
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/figures/exact-critical-regions.png": {
+          "publish": true,
+          "sha256": "2873657f767ef1a91b051946fef63f99a6a7ab7aa18b43ebf635022407b57522",
+          "size": 165320
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/figures/exact-critical-regions.svg": {
+          "publish": true,
+          "sha256": "7c9338ddabfd08043aa2b583b70f2f218fef5aca6d9445703842df668930035c",
+          "size": 79797
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/figures/horizon-regions.png": {
+          "publish": true,
+          "sha256": "9dc3777f8f912844aedee93847b024f96e1e04d83016e56ed4cc20a560882e1c",
+          "size": 118742
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/figures/horizon-regions.svg": {
+          "publish": true,
+          "sha256": "ecc9ea1102bc931b5ce4bd68dea5f2e9527cac6d6df8efbda8f9c36014fe6b71",
+          "size": 79085
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/index.html": {
+          "publish": true,
+          "sha256": "3f21fedacbf63bb28514c7cee67e7d63ec4eb0e51d437c1d2216701209f419b6",
+          "size": 5815
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/minimal-inputs.json": {
+          "publish": true,
+          "sha256": "39ca7ef57460d914cb7878d0589a219e7be748abd723029bb7a55dcb0fc33613",
+          "size": 1633
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/offline_check.py": {
+          "publish": true,
+          "sha256": "ff3aa11bd6f3e7d985b48a7d5d01ca4e4c605f7bf101ddd1c3dfb7d5d9aa3a30",
+          "size": 651
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/publication-manifest.json": {
+          "publish": true,
+          "sha256": "fb31355bbff6df533acb56ff6ee3c0b806f6ff62205ccd3e57cca6d91b423bc8",
+          "size": 20985
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-files.json": {
+          "publish": true,
+          "sha256": "5acb30c5d19933eb826e4f98fa2a74f77e593173c5d74a1b583afbc526f438ee",
+          "size": 1640
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/HEAD": {
+          "publish": false,
+          "sha256": "940dd8c63a2f9c99f124f89091842a06f8f4a66b6a376407eb15728d483bfd62",
+          "size": 25
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/config": {
+          "publish": false,
+          "sha256": "4db84cec131596e0ab82bd869bb291a9b1cfcb3552970ea15a55dacb0b1e3282",
+          "size": 48
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/01/7625057d253ae191405ca163bbda85729af3aa": {
+          "publish": false,
+          "sha256": "b96b692253239dd3d8f8346e0a399f0a3ee125ef59844789ab3d9204e4b6fbff",
+          "size": 200
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/01/9fd371b5a18c9b122294336892a262125272be": {
+          "publish": false,
+          "sha256": "19efbd03d8d3818cf27b26afbc5032151210839ebc202ed9dd0ca7007a93fbdd",
+          "size": 4185
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/04/9ce829b196c8dbecb36003f474202349c62f8e": {
+          "publish": false,
+          "sha256": "b1e4448f301aec4416502d3d8af2944ff067b509364998ce96530ac070a19a0f",
+          "size": 170
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/04/cb52a9fb7a1a3996ef0162a9b66583efd398b5": {
+          "publish": false,
+          "sha256": "fd9d88f0dd7667ed912dff2dbdaf92408066ab8a01b6259a31f755437ff5ba6a",
+          "size": 1633
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/07/52d9e851d89d926ee93f536f6c7381902e5afd": {
+          "publish": false,
+          "sha256": "e9163273fe4283f178d4fc78661f3e1bac41ef92b42df1181470a3e36089b2c1",
+          "size": 388
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/0d/34d8c3728aac38795fadac5ff6b3fae47c006f": {
+          "publish": false,
+          "sha256": "a49d4c5f8750166d2ed7dcfbdb3869f37806999e2d799cbd7887101f02abb73c",
+          "size": 4935
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/1b/62da810a2c645d1b153e487b296bdb5951de8d": {
+          "publish": false,
+          "sha256": "457d7cf031266c9df80906e5223bfc10b1131cbc0ec89fe57b0c0c381e813b15",
+          "size": 5023
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/1b/f111201064b191ee20f70c9ba5ed39abf5be38": {
+          "publish": false,
+          "sha256": "ad6401a2e7c64301704c860d8234e4ee945c28678ee3ef4ccba6720622caea98",
+          "size": 328
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/2e/e2575b675af56af03c95e8568b6e177c6c0a73": {
+          "publish": false,
+          "sha256": "1328a628fce455ecc47be7e83c03cc0da6b6bddeab273ddbbe18efeb9c187cc3",
+          "size": 1878
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/2f/e565beab6d8184b84a9119b85f52596959ef42": {
+          "publish": false,
+          "sha256": "fdc0801a289e55ef1cb4b148a757e4592ad8458394106b0856591c4bb7aaacc1",
+          "size": 6744
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/37/9e18e71831d8042169b7ff88ca6938827aa21a": {
+          "publish": false,
+          "sha256": "fef9bdd13c1ee46fdda0105cb0c23bdcd9c9a35c97cec312581e1ce3255cfbb2",
+          "size": 680
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/39/47efd8c07588483f5c8ead7c7845c0d4da4119": {
+          "publish": false,
+          "sha256": "6ff6fb496b0ff8b7dfef182abf9998b3de205fe78494348ec36bad5b9dfdd477",
+          "size": 6757
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/47/3a1aa53214edf040d366b6355989f49fb9d8b6": {
+          "publish": false,
+          "sha256": "5d61f09597b81aa31c63a4f18759da155b498cd01e6f340d45e4a8c9ef9588ab",
+          "size": 6465
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/48/b4d5fca139cd2bd78cb530dbc5716d13498c5d": {
+          "publish": false,
+          "sha256": "90ac4d6f406aec56e15aa344def29329bfc58f800b7a857db289d99539ebc93f",
+          "size": 154
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/4e/552e5b42479269722f341ef12f1a8b88ff255c": {
+          "publish": false,
+          "sha256": "dd2273a4ffe3242aca6f6adf6c0449e53f1432616141f9dc8872829bac671829",
+          "size": 170
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/56/6d4e12660d90b656605984919dbe243d227c69": {
+          "publish": false,
+          "sha256": "abfac7837d1bb3c93b8f207ee7a44e04b0fbaf429373402d1d4efe098ab2c5f6",
+          "size": 682
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/5a/2211f0fa6e4f88c92aab64ecf18ffddcfddce4": {
+          "publish": false,
+          "sha256": "5e55cbfb151dc4b11f48ab4a6504a470bfab9afe12a3c41a3fd8094aeaf47545",
+          "size": 2532
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/5c/4dc2730aea06d539a965b755405a864deda391": {
+          "publish": false,
+          "sha256": "3dffb06ab99e8b7cb19296b5e3f670bbb86e4a420f88987467a251a432fc5981",
+          "size": 170
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/62/959af24c37a54226790adc95e3e2f6e61c6bc1": {
+          "publish": false,
+          "sha256": "ec59eea92fe017ee7241496d9b3bdab37154eb9638ba34884a2545625b853ccf",
+          "size": 4526
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/64/c487654cbfb097ce20b0e5a5aa940177637d36": {
+          "publish": false,
+          "sha256": "d86defc2927c9fe5ef3740ae5c64b1eb6a34afdaec5c5bd444c113913b15d19f",
+          "size": 871
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/64/e3ace72519e3f2fb6864899530d475fae89502": {
+          "publish": false,
+          "sha256": "48c9f9470b9801930870a4cbdc34e1764384e5856e0ea232f2f490b4b30b7fab",
+          "size": 965
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/79/ec2978bb18a77abf5817b6f940aa3a89b0e488": {
+          "publish": false,
+          "sha256": "5904905523f2cab180edb81dd2feb272c9928be172dd8ebb069fa60d6b466d8b",
+          "size": 198
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/7d/8802ff8167bc2bdb942e6ab3476afdb4d4975a": {
+          "publish": false,
+          "sha256": "59ab681aab0edb946e0cfe88ca331a944d5ca075b0876a9e2ad4ea61fc33711c",
+          "size": 1877
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/82/6fdeb4b70cadaf59847cc5ff310ecc2ccf24e7": {
+          "publish": false,
+          "sha256": "3968e4818b920988bfca559562a097ddc3f556398e4cc5aed29decb39e1f3d91",
+          "size": 9376
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/8b/9f15f0789ebe6527bdfc920dc904245939247d": {
+          "publish": false,
+          "sha256": "bc7768b052899a0da9128b9994cb30de41fe46cb548b6953f7b767a836e9a965",
+          "size": 5871
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/91/c6ee837908e265ddccfad104874d22b8740846": {
+          "publish": false,
+          "sha256": "2185b755d5c0d0fa28f69114992f15ff6dc19b38570090e0d38ed65147dfae95",
+          "size": 155
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/95/13e73065c04f7cd88a2459c72dd44ad824d4f8": {
+          "publish": false,
+          "sha256": "6ab04bd6145b917c287b625296a19af1f7843d7e2f3f297585b821f979b4ea22",
+          "size": 1342
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/9b/b8986044c4532f80012b7b1f05e24a6af913bb": {
+          "publish": false,
+          "sha256": "473fc8e747a0fd2599057c2aaf0f2054951fd48f6b7cab5a8cdd5c58ce88e0fb",
+          "size": 4346
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/ac/c95cfe6c4e75f1016172057b86a25c22a104ef": {
+          "publish": false,
+          "sha256": "daeb149dd6c6cf8adefa9cd2f9062118ea4dbf5f88ccd168badce542cbc62907",
+          "size": 1952
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/d2/2efd6a09d2c16899bb8f3789e2e92ca605b206": {
+          "publish": false,
+          "sha256": "81273108c684ad239b8b5551850beca153bc8caaa4e04fd36eae0c6f2e47629b",
+          "size": 7911
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/d2/5299c3c46497700313a3b974590e93a641afc6": {
+          "publish": false,
+          "sha256": "6afe3c85e22052c1956cd7a291e4959a1b8adc21fc92476a6471da4354851f1c",
+          "size": 952
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/d9/342b1cc69559884ba8c90bfbabdf8bc9d0a482": {
+          "publish": false,
+          "sha256": "ff691108504c210b5fba7a208bf3f4d371062c4b9cb010d8a56b83fa4f8909f5",
+          "size": 681
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/e3/5fe819b4150970b7269e43ca0c2047687ea3c1": {
+          "publish": false,
+          "sha256": "9b60399b5419fbca40303b1ff8908f8f4629cf82b9703b90becb2d21b150a17e",
+          "size": 387
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/f4/4c5b82b8fa5af304cf55d2215c6844af4546f0": {
+          "publish": false,
+          "sha256": "ac729fb17f45a4aae12dda7ccebb4337894eb6557c9ebf34966d117c9552ce34",
+          "size": 4478
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/objects/fb/85568d925b365e55119292312b4ce2d1e5839d": {
+          "publish": false,
+          "sha256": "9da26fcbf6f6ac05fa5cd20dfe4fed1c088b79b18c0e201903f336b9af617773",
+          "size": 1688
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/.git/refs/heads/evidence": {
+          "publish": false,
+          "sha256": "43bd4de1fd510fb42e70c77604d4c8ada763d64468694442c8d13bb96ee73556",
+          "size": 41
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/benchmarks/reporting/mpc08_explicit/capture_exact_regions.py": {
+          "publish": true,
+          "sha256": "bf17c0549cece774b6b3aa6ba7852b6adf82fd1c1376cfcf09617ead72f5ce64",
+          "size": 14032
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/benchmarks/reporting/mpc08_explicit/capture_horizon_regions.py": {
+          "publish": true,
+          "sha256": "d1ec28f6376b9b512fe18dccb8f34c6432f529abee930227e7497ebf12e3a6f0",
+          "size": 14399
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/benchmarks/reporting/mpc08_explicit/exact_regions.py": {
+          "publish": true,
+          "sha256": "f8ea15f578c377fb56bcf378af843221ca09bfe9bdf4d25f101a81c00fdd38cc",
+          "size": 12714
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py": {
+          "publish": true,
+          "sha256": "5dc48dc9fd0978b855539754b62a1f3005a260e90f887f708fcc33f62fc468ef",
+          "size": 17782
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/benchmarks/reporting/mpc08_explicit/horizon_regions.py": {
+          "publish": true,
+          "sha256": "8565ca0af3325c913edf982da3fb342ab54031793b20b1e419f57fd51642d2b7",
+          "size": 6754
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/benchmarks/reporting/mpc08_explicit/mpc08_strategy_comparison.cpp": {
+          "publish": true,
+          "sha256": "49f9ec07615d65e5093a23a4a947a10c6e990be8d1e19661361e5a7078d7f693",
+          "size": 34418
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/benchmarks/reporting/mpc08_explicit/recheck_exact_regions.py": {
+          "publish": true,
+          "sha256": "c193fc2ed4089a20b402016a88d53d9d8557f5ff452edb921f453bf6d2ade219",
+          "size": 4202
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/benchmarks/reporting/review05/highs_clock_events.py": {
+          "publish": true,
+          "sha256": "8685e3cb6fdd3fd89eeb377f6ce82ce8b56fb4898ae8155bcd4fd4d17753ca27",
+          "size": 5008
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/benchmarks/reporting/review05/run_horizon_ladder.py": {
+          "publish": true,
+          "sha256": "1c674bd4622969daca1c3cfe2b4982dfde92c42e9b38a104fbda9f5ac349e43b",
+          "size": 14509
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/scripts/reports/figure_style.py": {
+          "publish": true,
+          "sha256": "c2f7078df95b9d75fe90f0f407023383cae4b58dd688dfa5fa5ac5b9d18664c6",
+          "size": 1833
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/source-root/scripts/reports/stage_mpc08_complete.py": {
+          "publish": true,
+          "sha256": "ca491c56ccf3f8d236f88176c39310ead8f0811958697acbafa154b31896bf5d",
+          "size": 25901
+        },
+        "mpc08-complete-5a9414f2ae07b6708738/verification.json": {
+          "publish": true,
+          "sha256": "08cd9783e0db99c889ae4a83b871bfdad1c98da1dff14f7bf5f82f4c40648228",
+          "size": 6222
+        }
+      },
+      "path": "mpc08-complete-5a9414f2ae07b6708738.zip",
+      "sha256": "8e8351b8cca2eed02f80d0f9930d2fd78ecff8cdd242b35b75f1d651b9c26dd6",
+      "size": 1110737
+    },
+    {
+      "members": {
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/OFFLINE_SHA256SUMS": {
+          "publish": true,
+          "sha256": "fbbaa1e2511e89f766d5cdecee68165789f397440e08ba0da13aca5c83807407",
+          "size": 8327
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/README.md": {
+          "publish": true,
+          "sha256": "19f59c8acfbe455996a199def2d4108a6979848e34a976aeea0ad192067a1b46",
+          "size": 1861
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/SHA256SUMS": {
+          "publish": true,
+          "sha256": "3918a1c96f7c5097c5fd56a8ea6cf5df5d1365a02619e47bc5bc57b1353eb05c",
+          "size": 3742
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/figures/branches.png": {
+          "publish": true,
+          "sha256": "fb00b0c78a24539a2c95011e0909cd2b1e806ba02753a568893381dbdbf0ba71",
+          "size": 60105
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/figures/branches.svg": {
+          "publish": true,
+          "sha256": "70b56d9e7e6eda62fb02522c4de40316fb957cd32eca5a230141e26e5f9d3eaa",
+          "size": 29754
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/figures/paths.png": {
+          "publish": true,
+          "sha256": "2e4179fda5c4223df23cff155880507e5ef7e9f7585ee99e6cb01dd67a0d93cb",
+          "size": 82340
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/figures/paths.svg": {
+          "publish": true,
+          "sha256": "13112b0fe720cfbe37e54dcf23193aac18f587e6646abef6ce1c682c6deb1cbf",
+          "size": 57581
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/index.html": {
+          "publish": true,
+          "sha256": "db23e5cd7c0d23c662824aa83f6c1e3845ebe7c5e08ee45b35deb986332e7b5a",
+          "size": 6776
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/minimal-inputs.json": {
+          "publish": true,
+          "sha256": "a817ed461a4babc20af3c266042af2c691ef4a69a4cc96322f4272ef0401a1e7",
+          "size": 33509
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/offline_check.py": {
+          "publish": true,
+          "sha256": "22019b2c099de0066e3661fde6f8a5d333c632685246e124fab4a0c12350a0ab",
+          "size": 329
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/original/README.md": {
+          "publish": true,
+          "sha256": "0d6bd683b900995663354be0d23884dd79164200c89ad2360c609daed01e0b35",
+          "size": 6906
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/original/SHA256SUMS": {
+          "publish": true,
+          "sha256": "b41039541c43f6d563752d92aab13ced6b9a49f90ebe745cdb118c8f0074b887",
+          "size": 795
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/original/branches.png": {
+          "publish": true,
+          "sha256": "fb00b0c78a24539a2c95011e0909cd2b1e806ba02753a568893381dbdbf0ba71",
+          "size": 60105
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/original/branches.svg": {
+          "publish": true,
+          "sha256": "70b56d9e7e6eda62fb02522c4de40316fb957cd32eca5a230141e26e5f9d3eaa",
+          "size": 29754
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/original/capture.zip": {
+          "publish": true,
+          "sha256": "c617fedc6b1ffd857187f11a043d4a9d341a889d69ef4d7f94b111fb6dbc7633",
+          "size": 1697524
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/original/figure-data.json": {
+          "publish": true,
+          "sha256": "4010a41d7521b15e5fa65fe1e34272a6f7e326f5b1bf86fa4d62fdf6cc1a377f",
+          "size": 2617
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/original/figure-export.json": {
+          "publish": true,
+          "sha256": "23929f21b51542c71fbdbee1a02e15536dc37dcb16fac3d054293cb63c8a7073",
+          "size": 870
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/original/metrics.json": {
+          "publish": true,
+          "sha256": "e984ee35a29a5856b54a6375c1850359092f908f778512d321cc23b708adacc3",
+          "size": 146689
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/original/paths.png": {
+          "publish": true,
+          "sha256": "2e4179fda5c4223df23cff155880507e5ef7e9f7585ee99e6cb01dd67a0d93cb",
+          "size": 82340
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/original/paths.svg": {
+          "publish": true,
+          "sha256": "13112b0fe720cfbe37e54dcf23193aac18f587e6646abef6ce1c682c6deb1cbf",
+          "size": 57581
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/original/verification.json": {
+          "publish": true,
+          "sha256": "05800025b152a01206959bf6a572067291f8d87956a75682b69abf38d135089f",
+          "size": 150194
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/publication-manifest.json": {
+          "publish": true,
+          "sha256": "4108ccd5f8e877c72af0d6d8a3bb6294bf69421d9fa825f81b248064f887b8c5",
+          "size": 11021
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/reading/README.md": {
+          "publish": true,
+          "sha256": "49e8023a8634d67f6fff8e9c380495270cde602065ac2f57aea56bd2d243fb5a",
+          "size": 440
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/reading/SHA256SUMS": {
+          "publish": true,
+          "sha256": "3817decb10d40d85b2ee628c26f1222e5009a477eeeee11b149dba9f1a19a39b",
+          "size": 239
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/reading/metrics.json": {
+          "publish": true,
+          "sha256": "2adb4ca3d4c9d7c9121f89442215e1ebb825ad5e5e529e40834bca3c282ecc98",
+          "size": 146689
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/reading/verification.json": {
+          "publish": true,
+          "sha256": "37f9e41fdd7aebf61a9d70cc06ba54c80d0b309d713c80796eaf14f482e9a377",
+          "size": 150261
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-files.json": {
+          "publish": true,
+          "sha256": "0d8deb1b6d6b47e2ab3a260b6e20afaec1c51743bc484f020ff3799cccde0955",
+          "size": 1707
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/HEAD": {
+          "publish": false,
+          "sha256": "940dd8c63a2f9c99f124f89091842a06f8f4a66b6a376407eb15728d483bfd62",
+          "size": 25
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/config": {
+          "publish": false,
+          "sha256": "4db84cec131596e0ab82bd869bb291a9b1cfcb3552970ea15a55dacb0b1e3282",
+          "size": 48
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/0c/10c94a56e9209025205a3eb94a0b047a93d354": {
+          "publish": false,
+          "sha256": "fa606c460b622f921da84ac6a88f55e44d3752f2934191ba7d20951215c0e5a3",
+          "size": 403
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/12/66184669f3421c0e74b457f079c886f7e7e5ac": {
+          "publish": false,
+          "sha256": "95fda98387003277295bb0d51dba570bf3facb80492e8137fcd01840f60ad231",
+          "size": 8479
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/2b/397304c48815126a72bc314fe9960b3558453c": {
+          "publish": false,
+          "sha256": "cbea127dc93aaaf8a5f63dcb2dd32c27e031cc891cf57bdea0a4cc8c1fd55d64",
+          "size": 1320
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/2f/e565beab6d8184b84a9119b85f52596959ef42": {
+          "publish": false,
+          "sha256": "fdc0801a289e55ef1cb4b148a757e4592ad8458394106b0856591c4bb7aaacc1",
+          "size": 6744
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/32/76be7dd62c7226890876963576e80e269973b2": {
+          "publish": false,
+          "sha256": "dcabe0028689785bdf3e2fccc99d97a886a15d9a01cc8d492ffbbb9563c688ae",
+          "size": 2317
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/37/9e18e71831d8042169b7ff88ca6938827aa21a": {
+          "publish": false,
+          "sha256": "fef9bdd13c1ee46fdda0105cb0c23bdcd9c9a35c97cec312581e1ce3255cfbb2",
+          "size": 680
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/38/9d03681c2bfae1099a2b18dcb16f129b2d0feb": {
+          "publish": false,
+          "sha256": "4c89dc0c2cbfd0fbf876bc1de76534106cf3c2c923f54b94e417a71b2ca50963",
+          "size": 403
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/43/f6d69fcb4f5f3444141d5c92fb23cff376d866": {
+          "publish": false,
+          "sha256": "e83f1b633f1beea3c20b238d8b429aa17fadeee83e40a0cb929649e97020a593",
+          "size": 170
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/48/b4d5fca139cd2bd78cb530dbc5716d13498c5d": {
+          "publish": false,
+          "sha256": "90ac4d6f406aec56e15aa344def29329bfc58f800b7a857db289d99539ebc93f",
+          "size": 154
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/52/5871ea658c3147f30c96e9cb7824b91ed410f2": {
+          "publish": false,
+          "sha256": "56e7c2ebdaad2640489353d74053c0ba44aa3b53bb129cd0c2946b5ed73350f1",
+          "size": 197
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/57/59b88678fdd980163412332482ea4f0f6c257f": {
+          "publish": false,
+          "sha256": "5314e885762cde08913449ca83e96c7f871a27b2bc8cb3cbd632b330afe8e54d",
+          "size": 1773
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/5c/4dc2730aea06d539a965b755405a864deda391": {
+          "publish": false,
+          "sha256": "3dffb06ab99e8b7cb19296b5e3f670bbb86e4a420f88987467a251a432fc5981",
+          "size": 170
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/5d/4b42327e6e241694f7cdbe630db052ae556774": {
+          "publish": false,
+          "sha256": "0406dfb6b65f775673418fcfcfccb7a2e5dc647dbe5ade274e7cc0c133c1c5c1",
+          "size": 1512
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/5e/378c12cab9d0b0bd1ba15487a269f725befb3c": {
+          "publish": false,
+          "sha256": "05bbc14da49b699f297d88407cf64ab02f33b568b8731c5d5e1fcee3a55e4a5b",
+          "size": 2100
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/5e/d56edaef9fa1d642c9f2728e31a17dc7490f90": {
+          "publish": false,
+          "sha256": "dd20005aa95a6744cb65ab37f1eb0676fbd5f8406e422615549912c47da0d1ba",
+          "size": 5624
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/62/1976bab3f3a2b370861351799b275711e36482": {
+          "publish": false,
+          "sha256": "81346d4d860369b3e9186103f07967f3c8c1fb64785f8e047193a3240694dc3d",
+          "size": 312
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/62/50e383620158edd3cf2ca55d0a3815c696e692": {
+          "publish": false,
+          "sha256": "12397e0f67f9c8452484df0ca57cd7019ca2161efaa5e61851bd574c8bbd41a3",
+          "size": 1540
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/62/bb883a817d943f55dbf097be126331356d1ff6": {
+          "publish": false,
+          "sha256": "fbedf40d487422368952ac65713e785db966d8de8349b03bed2ef47e60a0ff7f",
+          "size": 959
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/63/aec84be861699f84d44bb2c9f6c5b8b0476d96": {
+          "publish": false,
+          "sha256": "5f9bc898066a392bace296d5b5604f3e116ca519148759bc1612ff318e7a336e",
+          "size": 1903
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/64/c487654cbfb097ce20b0e5a5aa940177637d36": {
+          "publish": false,
+          "sha256": "d86defc2927c9fe5ef3740ae5c64b1eb6a34afdaec5c5bd444c113913b15d19f",
+          "size": 871
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/73/73bd97192f83a3b0e03d6a073256ca230f3217": {
+          "publish": false,
+          "sha256": "17e306afc7fa0daae07149de0de576fe11c546f2d71f0da9ab5d35c12d666f56",
+          "size": 199
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/84/a769f1bce571ca089ea0303f33e0944123ee02": {
+          "publish": false,
+          "sha256": "bbb74d0e7ea0293e71097019d40c469a77cda526be9cf95e1e6b72260ba8dfba",
+          "size": 5536
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/92/9df364150ad114c4edc62a715a97b697f947c4": {
+          "publish": false,
+          "sha256": "40c948f8d81128768899ffcba5b993df302af1b7e02c35ffc81ac68a70cfcd55",
+          "size": 682
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/93/019d90f5ec8186e7f694f1a0a1f8efc1451b9c": {
+          "publish": false,
+          "sha256": "807a5e317838f7552af3f76e6fe3af83e501e295eb68ac4937f7439b6adef0f0",
+          "size": 2250
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/9f/b5a54fd29e0c01eb2962739f18c133e0241185": {
+          "publish": false,
+          "sha256": "4f7adc06451c33c77697cf9d8115e50fb8aa7bca1c8362a1c3647bd17edfc652",
+          "size": 680
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/ac/c95cfe6c4e75f1016172057b86a25c22a104ef": {
+          "publish": false,
+          "sha256": "daeb149dd6c6cf8adefa9cd2f9062118ea4dbf5f88ccd168badce542cbc62907",
+          "size": 1952
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/b0/489322228ef9745643687c40ef3c5784cea839": {
+          "publish": false,
+          "sha256": "81bdc8222fe2a93f19d6ec3fc90a364079e9bbcbb94d9b82fe7453707cfd059c",
+          "size": 939
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/c3/4284f52afbced48c9d380622680b1876f1a877": {
+          "publish": false,
+          "sha256": "d86b03f32b17da2db0a626e8b5e8e7a322a7d13a96e5d975f249d9bcee246506",
+          "size": 2095
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/d2/5299c3c46497700313a3b974590e93a641afc6": {
+          "publish": false,
+          "sha256": "6afe3c85e22052c1956cd7a291e4959a1b8adc21fc92476a6471da4354851f1c",
+          "size": 952
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/d9/a6e449f3bfb548bd1ef8c843b11faa1262e006": {
+          "publish": false,
+          "sha256": "c5afa458586367259054056dbc1bef19a8ed5cb2a13ba071a9e4a78abe63573d",
+          "size": 2249
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/e8/4b7247957ea36fa0e761b18eacd1e31d3f6b1d": {
+          "publish": false,
+          "sha256": "05b7e4b4f14546a387982916aecda663551ec850142db8bb07f931a6388ff5fd",
+          "size": 170
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/f1/39f0f49056e48b9e1b47370daadd8a29702375": {
+          "publish": false,
+          "sha256": "85bb81946882e2f3c6b0e2d216ed9f2e9d32bf2daede6cde47b1ef3c33085446",
+          "size": 1902
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/objects/f2/1dbde98cc3b1ab0473cd763a2ceada37ed99c4": {
+          "publish": false,
+          "sha256": "e80b51d8451acd6f14d921b013c1c53456cce10f2ddb884831947cac834423da",
+          "size": 4948
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/.git/refs/heads/evidence": {
+          "publish": false,
+          "sha256": "3eea78874af89113b02b3030b552a730319bf62f3f2a1b9a3fc2b8242833ea97",
+          "size": 41
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/benchmarks/reporting/mpc10/CMakeLists.txt": {
+          "publish": true,
+          "sha256": "6421adc4296ac9f4e5f99670f4f574394c0928e86b322963641bb2ba5c7680f0",
+          "size": 2020
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/benchmarks/reporting/mpc10/bridge.cpp": {
+          "publish": true,
+          "sha256": "7a5d89baf8223a85c300162779f2bd1f61ce1448fd225964849b65057c9e10d7",
+          "size": 19335
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/benchmarks/reporting/mpc10/check.py": {
+          "publish": true,
+          "sha256": "79e686cdb818593b12d790b105a759301ad0660fcf08e71c9d485bd49738bb31",
+          "size": 18353
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/benchmarks/reporting/mpc10/evidence.py": {
+          "publish": true,
+          "sha256": "296c564f542fdb367f0e2e27d21c7b3be59cb6a7041792ed0ab891de7330cc46",
+          "size": 4299
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/benchmarks/reporting/mpc10/figures.py": {
+          "publish": true,
+          "sha256": "27d5e490a6b0572753d1c8b97b618e4ebc5414e1d470798804a9ae633f6ab74d",
+          "size": 5314
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/benchmarks/reporting/mpc10/fixtures.py": {
+          "publish": true,
+          "sha256": "afdca13af17f0b5249455bd667688445256818c2ed4afe2bcd8171025c70be85",
+          "size": 3673
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/benchmarks/reporting/mpc10/metrics.py": {
+          "publish": true,
+          "sha256": "13b0df87b5fb90ae31d4a3dca49af1c5279f61c5e43e0d44d9b3cac0162f8b75",
+          "size": 4568
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/benchmarks/reporting/mpc10/oracle.py": {
+          "publish": true,
+          "sha256": "dc9b50add0d6dde9da92315537847ba11e4cfc823bdab8280464102ddf820335",
+          "size": 4075
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/benchmarks/reporting/mpc10/run.py": {
+          "publish": true,
+          "sha256": "dd23511ce25a5e1fe7d8c84563841d8a02f4bcdbce00a524f261242d723605c2",
+          "size": 5416
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/benchmarks/reporting/mpc10/scip_reference.py": {
+          "publish": true,
+          "sha256": "a01c836e118b7a3b66b67f87f4f69139ad02041c1091cb633e1cf4f74de7e707",
+          "size": 6029
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/scripts/reports/figure_style.py": {
+          "publish": true,
+          "sha256": "c2f7078df95b9d75fe90f0f407023383cae4b58dd688dfa5fa5ac5b9d18664c6",
+          "size": 1833
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/scripts/reports/plot.py": {
+          "publish": true,
+          "sha256": "12403aa6d6c425636e7a8f1be11e1664955334267279484b5c672f129afbfa3a",
+          "size": 4406
+        },
+        "mpc10-comparison-cbf22e8c7e22c30bf91f/source-root/scripts/reports/stage_mpc10_comparison.py": {
+          "publish": true,
+          "sha256": "1620154a76ef4c728a429e7b8c9cfde7e1bad93a52f4e201f7bb30b0772acadb",
+          "size": 23817
+        }
+      },
+      "path": "mpc10-comparison-cbf22e8c7e22c30bf91f.zip",
+      "sha256": "05c9be1e826fb032caf11108ae9bea2644bf60f039f296205e2114aa9f787224",
+      "size": 1833175
     }
   ],
   "baseline": {
