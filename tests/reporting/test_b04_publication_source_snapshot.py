@@ -34,8 +34,9 @@ class B04PublicationSourceSnapshotTests(unittest.TestCase):
         row = next(row for row in catalogue["reports"] if row["report_kind"] == publication.KIND)
         adapted = publication.adapt(BUNDLE)
         self.assertEqual(adapted.report_id, row["report_id"])
-        self.assertEqual(hashlib.sha256(publication.offline_zip(BUNDLE, adapted)).hexdigest(),
-                         row["zip_sha256"])
+        self.assertEqual(
+            hashlib.sha256(publication.offline_zip(BUNDLE, adapted)).hexdigest(), row["zip_sha256"]
+        )
 
     def test_rejects_tampered_snapshot_scientific_source_and_manifest(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -44,8 +45,10 @@ class B04PublicationSourceSnapshotTests(unittest.TestCase):
             shutil.copytree(BUNDLE, bundle)
             copy_sources(root)
             with patch.object(publication, "ROOT", root):
-                for relative in (publication.SNAPSHOT_ROOT / "scripts/reports/site.py",
-                                 Path("docs/research/tools/check_b04_c_exact_fiber.py")):
+                for relative in (
+                    publication.SNAPSHOT_ROOT / "scripts/reports/site.py",
+                    Path("docs/research/tools/check_b04_c_exact_fiber.py"),
+                ):
                     source = root / relative
                     original = source.read_bytes()
                     source.write_bytes(original + b"\n# tampered\n")
@@ -113,15 +116,23 @@ class B04PublicationSourceSnapshotTests(unittest.TestCase):
             copy_sources(root)
             manifest = root / publication.SPINE_SNAPSHOT_ROOT / "manifest.json"
             document = json.loads(manifest.read_bytes())
-            for key, value in (("owner_report_id", "another-report"),
-                               ("owner_manifest_sha256", "0" * 64)):
+            for key, value in (
+                ("owner_report_id", "another-report"),
+                ("owner_manifest_sha256", "0" * 64),
+            ):
                 with self.subTest(field=key):
                     wrong = dict(document)
                     wrong[key] = value
                     raw = json.dumps(wrong).encode()
                     manifest.write_bytes(raw)
-                    with patch.object(publication, "ROOT", root), patch.object(
-                            publication, "SPINE_SNAPSHOT_MANIFEST_SHA256", hashlib.sha256(raw).hexdigest()):
+                    with (
+                        patch.object(publication, "ROOT", root),
+                        patch.object(
+                            publication,
+                            "SPINE_SNAPSHOT_MANIFEST_SHA256",
+                            hashlib.sha256(raw).hexdigest(),
+                        ),
+                    ):
                         with self.assertRaisesRegex(ValueError, "source owner mismatch"):
                             publication.adapt(BUNDLE)
 
