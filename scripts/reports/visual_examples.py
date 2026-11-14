@@ -28,6 +28,7 @@ import site_additions
 import site_design
 import stage_buryatia_dim4
 import stage_buryatia_volterra
+import stage_discrete_mpc_2d
 import stage_ext07
 import stage_native_discrete_models
 import stage_native_extended_models
@@ -1395,6 +1396,10 @@ def build(catalog, site):
         Path(__file__).resolve().parents[2]
     )
     saved_figures += history_card
+    mpc_files, mpc_inventory, mpc_card = stage_discrete_mpc_2d.build(
+        Path(__file__).resolve().parents[2]
+    )
+    saved_figures += mpc_card
     extended_files, extended_inventory, extended_cards = stage_native_extended_models.build(
         Path(__file__).resolve().parents[2]
     )
@@ -1461,6 +1466,7 @@ def build(catalog, site):
     outputs.update(tracking_files)
     outputs.update(row_scaling_files)
     outputs.update(history_files)
+    outputs.update(mpc_files)
     outputs.update(extended_files)
     repository_root = Path(__file__).resolve().parents[2]
     cost_page_root = repository_root / "docs/examples/history-cost-2d-v1"
@@ -1657,6 +1663,7 @@ def build(catalog, site):
     gallery_inventory.extend(tracking_inventory)
     gallery_inventory.extend(row_scaling_inventory)
     gallery_inventory.extend(history_inventory)
+    gallery_inventory.extend(mpc_inventory)
     gallery_inventory.extend(extended_inventory)
     geometry_first = geometry_inventory[0]
     gallery_inventory.append(

@@ -126,6 +126,7 @@ csl_example(native_slide50_reachability CSL::model_catalogue CSL::generator_adap
 csl_example(native_model_catalogue CSL::model_catalogue CSL::generator_adapter CSL::quickhull_2d)
 csl_example(native_four_state_reachability CSL::model_catalogue CSL::geometry_generators CSL::quickhull_2d)
 csl_example(native_discrete_models CSL::model_catalogue)
+csl_example(discrete_mpc_2d CSL::controllers CSL::model_catalogue CSL::highs_convex)
 
 if(TARGET CSL::highs_convex AND TARGET CSL::model_catalogue)
   add_executable(native_model_tracking native_model_tracking.cpp)
@@ -143,7 +144,7 @@ endif()
 if(TARGET CSL::highs_convex AND TARGET CSL::model_catalogue)
   add_executable(quadcopter_mpc quadcopter_mpc.cpp quadcopter_mpc_task.cpp)
   target_link_libraries(quadcopter_mpc PRIVATE CSL::highs_convex CSL::model_catalogue
-    CSL::nominal_quadratic_history)
+    CSL::nominal_quadratic_history CSL::controllers)
   target_compile_features(quadcopter_mpc PRIVATE cxx_std_20)
   set_target_properties(quadcopter_mpc PROPERTIES CXX_EXTENSIONS OFF)
   add_executable(quadcopter_mpc_scalar_contract quadcopter_mpc_scalar_contract.cpp quadcopter_mpc_task.cpp)
@@ -198,6 +199,14 @@ example_check(native_four_state_source_case native_four_state_reachability "" 0
   "Native four-state reachability: fifteen transitions and 1280 support checks passed")
 example_check(native_discrete_source_models native_discrete_models "" 0
   "Native discrete model data: 35 models")
+if(TARGET discrete_mpc_2d)
+  add_test(NAME discrete_mpc_2d_matched_open_loop_and_feedback
+    COMMAND "${CMAKE_COMMAND}"
+      "-DEXAMPLE_EXE=$<TARGET_FILE:discrete_mpc_2d>"
+      "-DOUTPUT_PARENT=${CMAKE_CURRENT_BINARY_DIR}"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/discrete_mpc_2d_check.cmake")
+  set_tests_properties(discrete_mpc_2d_matched_open_loop_and_feedback PROPERTIES TIMEOUT 60)
+endif()
 example_check(native_flexible_pitch_synthetic_ladder native_flexible_pitch "" 0
   "Native flexible pitch: 3 synthetic physical models; support_checks=4920 projection_checks=47232")
 example_check(native_spatial_flight_synthetic_deviation_reachability native_spatial_flight "" 0

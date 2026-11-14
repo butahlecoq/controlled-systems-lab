@@ -39,6 +39,9 @@ file(COPY
   "${CSL_SOURCE_DIR}/examples/native_model_catalogue.cpp"
   "${CSL_SOURCE_DIR}/examples/native_four_state_reachability.cpp"
   "${CSL_SOURCE_DIR}/examples/native_discrete_models.cpp"
+  "${CSL_SOURCE_DIR}/examples/native_model_tracking.cpp"
+  "${CSL_SOURCE_DIR}/examples/discrete_mpc_2d.cpp"
+  "${CSL_SOURCE_DIR}/examples/discrete_mpc_2d_check.cmake"
   "${CSL_SOURCE_DIR}/examples/native_flexible_pitch.cpp"
   "${CSL_SOURCE_DIR}/examples/nominal_quadratic_history_2d.cpp"
   "${CSL_SOURCE_DIR}/examples/native_spatial_flight.cpp"
@@ -154,6 +157,7 @@ foreach(example_file CMakeLists.txt registered_lp.cpp registered_convex.cpp
     source_index_geometry_2d.cpp adaptive_ode_replay.cpp scenario_backend_substitution.cpp
     native_slide50_reachability.cpp native_model_catalogue.cpp native_four_state_reachability.cpp
     native_discrete_models.cpp native_model_tracking.cpp native_catalogue_projection.hpp
+    discrete_mpc_2d.cpp discrete_mpc_2d_check.cmake
     quadcopter_mpc.cpp quadcopter_mpc_task.cpp quadcopter_mpc_task.hpp quadcopter_mpc_scalar_contract.cpp
     quadcopter_mpc_check.cmake native_flexible_pitch.cpp
     nominal_quadratic_history_2d.cpp native_spatial_flight.cpp
