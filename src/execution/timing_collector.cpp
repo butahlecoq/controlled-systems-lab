@@ -538,7 +538,7 @@ make_timing_collector(CollectionPlan plan, std::shared_ptr<TimingClock> clock, a
             auto ancestor = [&](std::size_t candidate, std::size_t descendant) {
                 auto parent = spans[descendant].parent;
                 while (parent) {
-                    auto at = *index(parent->id);
+                    const auto at = index(parent->id).value();
                     if (at == candidate)
                         return true;
                     parent = spans[at].parent;
@@ -551,7 +551,7 @@ make_timing_collector(CollectionPlan plan, std::shared_ptr<TimingClock> clock, a
                 if (i != *root && !ancestor(*root, i))
                     return error("timing.run", "Every span must descend from the run span");
                 if (spans[i].parent)
-                    owner->children[*index(spans[i].parent->id)].push_back(i);
+                    owner->children[index(spans[i].parent->id).value()].push_back(i);
             }
             for (auto id : workers) {
                 auto at = index(id);
