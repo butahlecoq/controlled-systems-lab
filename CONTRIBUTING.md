@@ -77,7 +77,7 @@ and ty type checking. The gate also covers `scripts/reports/site_additions.py`,
 `scripts/reports/stage_app02.py`, and their tests
 `tests/reporting/test_site_additions.py` and `tests/reporting/test_app02_saved.py`.
 Install
-`requirements-quality.txt` in a virtual environment, then run `ruff check`, `ruff format --check`, `ty check` and
+`requirements-quality.txt` and `scripts/reports/requirements.txt` in a virtual environment, then run `ruff check`, `ruff format --check`, `ty check` and
 `python -m unittest discover -s tests/ci -p 'test_*.py'` from the repository root.
 The `Python tooling quality` workflow enforces these checks. Other Python
 tools remain outside this initial gate; broader adoption and immutable-source
@@ -99,6 +99,39 @@ arguments are needed for the lint, format or type checks. The workflow triggers
 on tooling-tree changes and exercises existing compatibility consumers with
 `python -m unittest discover -s tests/reporting -p 'test_syn03_strategy_a_report.py'` and
 `python -m unittest discover -s tests/reporting -p 'test_syn03_ts02_report.py'`.
+
+The shared publication spine also uses the default Ruff and ty gate: report data,
+source identity, publication policies and registrations, collection, rendering,
+site staging, page design, landing pages, the gallery, the learning book, and
+figure styling/plotting. The B04-C source-owner adapter and its snapshot tests
+are included. Run the matching saved-data and malformed-input consumers with:
+
+```sh
+python -m unittest tests.reporting.test_report_data tests.reporting.test_render \
+  tests.reporting.test_publication_policy tests.reporting.test_report_source_identity \
+  tests.reporting.test_registered_kinds tests.reporting.test_landing \
+  tests.reporting.test_learning_book tests.reporting.test_plot \
+  tests.reporting.test_b04_publication_source_snapshot \
+  tests.reporting.test_publication_spine_boundaries
+```
+
+The reporting requirements add the pinned Matplotlib producer and JSON Schema
+validator to the quality environment. These tests validate saved inputs and
+render reports; they do not launch benchmarks. Frozen evidence source capsules
+remain outside the maintained-file formatting/type scope. In particular, B04-C
+publication checks select its authenticated, versioned historical source bytes;
+formatting a maintained helper does not change the execution source of an old
+capture. The EXT04 observed-replay, finite-feedback and three GEO07 publication owners
+use the same exact inventory and archive checks for retained routes and join
+the default quality scope. Use `ruff check --show-files` for the current selected paths; broader Python
+adoption remains tracked in issue 993.
+
+The workflow additionally exercises the saved convex/collector/gallery consumers,
+publication lifecycle tests, and the EXT04, finite-feedback and GEO07 owner
+families. Publisher-byte identity checks apply to unpinned publications; retained
+historical routes require both their exact source inventory and the exact
+regenerated archive. Repacking a native evidence ZIP changes its identity bytes
+and cannot reuse a historical route.
 
 The workflow exercises OPT07's oracle, collector and saved-report tests with
 `python -m unittest discover -s tests/reporting -p 'test_opt07_*.py'`, OPT11's

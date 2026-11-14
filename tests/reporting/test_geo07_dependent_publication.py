@@ -97,7 +97,8 @@ class DependentPublication(unittest.TestCase):
             with self.assertRaises(ValueError):
                 stage.stage(catalog, site)
 
-    def test_public_identity_binds_publisher_bytes(self):
+    @mock.patch.dict(stage.common._HISTORICAL_PUBLICATIONS, {}, clear=True)
+    def test_unpinned_public_identity_binds_publisher_bytes(self):
         original = stage.validate(BUNDLE).report_id
         with tempfile.TemporaryDirectory() as temporary:
             fake = Path(temporary)
