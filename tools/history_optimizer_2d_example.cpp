@@ -25,7 +25,11 @@ optimization::HistoryOptimizationRequest make_request() {
         {take(numeric::snapshot(inequalities)),take(numeric::snapshot_vector(Vector{1,0,1,0})),
          take(numeric::snapshot(equalities)),take(numeric::snapshot_vector(Vector(6,0)))}));
     synthesis::JointHistoryRelation histories{{{2,1,0},2},std::move(set)};
-    TerminalObjective terminal=ResidualNormTerminal{{2,2,{1,0,0,1}},{1,1},{1,1}};
+    Matrix terminal_map{2,2,{1,0,0,1}};
+    Vector terminal_target{1,1};
+    Vector terminal_weights{1,1};
+    TerminalObjective terminal=ResidualNormTerminal{std::move(terminal_map),
+        std::move(terminal_target),std::move(terminal_weights)};
     optimization::RunningControlCost running{"half-l1-control",2,{
         {0,{optimization::EuclideanControlPenalty{{1,1,{1}},{0},0.5}}},
         {1,{optimization::EuclideanControlPenalty{{1,1,{1}},{0},0.5}}}}};
