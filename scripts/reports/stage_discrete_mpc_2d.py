@@ -13,7 +13,7 @@ from pathlib import Path
 import report_data
 import site_design
 
-SOURCE = "c60f4223cf71cb21b042aff20fd913d15fdac886"
+SOURCE = "27922d674f0c341517fc5c8b99d1bb2cd2597ab7"
 SOURCE_URL = "https://github.com/butahlecoq/controlled-systems-lab/tree/" + SOURCE
 CPP_SOURCE = (
     "https://github.com/butahlecoq/controlled-systems-lab/blob/"
@@ -25,7 +25,7 @@ API_SOURCE = (
     + SOURCE
     + "/include/csl/controllers/discrete_mpc.hpp"
 )
-CPP_BINARY_SHA256 = "14f367221a62e434c81945a6c68d5dc4dbaa6144c9bd7e4beee6eda85e591695"
+CPP_BINARY_SHA256 = "7816899ee75c59a5db1b0aaf47751ef8b6b829e57c6a80d99591e3a93d64b20b"
 CSV_SHA256 = "1d5b20418ea1ee532fadd1c3f265a2b8c31e52b513ef769a0dcd05fe002b10c9"
 STDOUT_SHA256 = "7bd083c126514c692c72c7a48e6a6a3497cd26c0cec2a35ef4cc4660a6e2ca91"
 
