@@ -225,9 +225,9 @@ def read_freeze(path: Path, bridge: Path) -> dict:
     return record
 
 
-def attempted_graphs(output_root: Path, freeze_record: dict) -> set[tuple[str, str]]:
-    attempted: set[tuple[str, str]] = set()
-    planned = {(graph["task_name"], graph["graph_id"]): graph for graph in freeze_record["graphs"]}
+def iter_verified_attempts(output_root: Path, record: dict):
+    """Yield attempts whose request and runner manifest match this frozen plan."""
+    planned = {(graph["task_name"], graph["graph_id"]): graph for graph in record["graphs"]}
     for path in output_root.glob("*/attempts/*/request.json"):
         try:
             request = json.loads(path.read_text(encoding="utf-8"))
@@ -238,9 +238,8 @@ def attempted_graphs(output_root: Path, freeze_record: dict) -> set[tuple[str, s
             item = planned.get(key)
             if (
                 item is None
-                or request.get("source_commit") != freeze_record["source_commit"]
-                or requested.get("resource_profile_id")
-                != freeze_record["resource_profile"]["profile_id"]
+                or request.get("source_commit") != record["source_commit"]
+                or requested.get("resource_profile_id") != record["resource_profile"]["profile_id"]
             ):
                 continue
             attempt_path = path.parent / "attempt.json"
@@ -251,21 +250,27 @@ def attempted_graphs(output_root: Path, freeze_record: dict) -> set[tuple[str, s
                 continue
             run_manifest = json.loads(run_manifest_path.read_text(encoding="utf-8"))
             if (
-                run_manifest.get("source_commit") != freeze_record["source_commit"]
+                run_manifest.get("source_commit") != record["source_commit"]
                 or run_manifest.get("task_sha256") != item["task_sha256"]
                 or run_manifest.get("graph_id") != item["graph_id"]
                 or run_manifest.get("graph_fingerprint") != item["graph_fingerprint"]
                 or run_manifest.get("capability_manifest_sha256")
                 != item["capability_manifest_sha256"]
-                or run_manifest.get("bridge_sha256") != freeze_record["bridge"]["sha256"]
+                or run_manifest.get("bridge_sha256") != record["bridge"]["sha256"]
                 or run_manifest.get("resource_profile_id")
-                != freeze_record["resource_profile"]["profile_id"]
+                != record["resource_profile"]["profile_id"]
             ):
                 continue
-            attempted.add(key)
+            yield item, path, attempt_path
         except (OSError, KeyError, json.JSONDecodeError):
             continue
-    return attempted
+
+
+def attempted_graphs(output_root: Path, freeze_record: dict) -> set[tuple[str, str]]:
+    return {
+        (item["task_name"], item["graph_id"])
+        for item, _, _ in iter_verified_attempts(output_root, freeze_record)
+    }
 
 
 def append_event(path: Path, event: dict) -> None:
@@ -400,47 +405,15 @@ def classify_attempt(record: dict, attempt_path: Path) -> tuple[str, str | None]
 
 def build_campaign_coverage(record: dict, output_root: Path) -> dict:
     attempts_by_graph: dict[tuple[str, str], list[dict]] = {}
-    planned = {(graph["task_name"], graph["graph_id"]): graph for graph in record["graphs"]}
-    for request_path in output_root.glob("*/attempts/*/request.json"):
+    for item, _, attempt_path in iter_verified_attempts(output_root, record):
         try:
-            request = json.loads(request_path.read_text(encoding="utf-8"))
-            if request.get("source_commit") != record["source_commit"]:
-                continue
-            requested = request["requested"]
-            graph_id = requested.get("graph_id")
-            task_name = request_path.parents[2].name
-            item = planned.get((task_name, graph_id))
-            if (
-                item is None
-                or requested.get("resource_profile_id") != record["resource_profile"]["profile_id"]
-            ):
-                continue
-            attempt_path = request_path.parent / "attempt.json"
-            if not attempt_path.is_file():
-                continue
-            run_manifest_path = request_path.parent / "run-manifest.json"
-            if not run_manifest_path.is_file():
-                continue
-            run_manifest = json.loads(run_manifest_path.read_text(encoding="utf-8"))
-            if (
-                run_manifest.get("source_commit") != record["source_commit"]
-                or run_manifest.get("task_sha256") != item["task_sha256"]
-                or run_manifest.get("graph_id") != item["graph_id"]
-                or run_manifest.get("graph_fingerprint") != item["graph_fingerprint"]
-                or run_manifest.get("capability_manifest_sha256")
-                != item["capability_manifest_sha256"]
-                or run_manifest.get("bridge_sha256") != record["bridge"]["sha256"]
-                or run_manifest.get("resource_profile_id")
-                != record["resource_profile"]["profile_id"]
-            ):
-                continue
             try:
                 attempt, _ = run_closed_loop.read_attempt(attempt_path)
                 category, reason = classify_attempt(attempt, attempt_path)
             except (OSError, ValueError, json.JSONDecodeError) as error:
                 attempt = {"status": "invalid_record"}
                 category, reason = "invalid_record", str(error)
-            attempts_by_graph.setdefault((task_name, graph_id), []).append(
+            attempts_by_graph.setdefault((item["task_name"], item["graph_id"]), []).append(
                 {
                     "attempt_id": attempt.get("attempt_id"),
                     "path": str(attempt_path.relative_to(output_root)),
