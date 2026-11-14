@@ -85,8 +85,14 @@ public:
                 }
                 const auto residual=MX::mtimes(dense(weighted),z)-DM(target);
                 const auto epigraph=opti.variable();
-                opti.subject_to(epigraph>=0);
-                opti.subject_to(MX::dot(residual,residual)<=epigraph*epigraph);
+                if(term.map.rows==1) {
+                    // |r| <= t is exactly linear and implies t >= 0.
+                    opti.subject_to(residual(0)<=epigraph);
+                    opti.subject_to(-residual(0)<=epigraph);
+                } else {
+                    opti.subject_to(epigraph>=0);
+                    opti.subject_to(MX::dot(residual,residual)<=epigraph*epigraph);
+                }
                 double squared=0;
                 for(std::size_t i=0;i<weighted.rows;++i) {
                     double value=-target[i];
