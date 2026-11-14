@@ -1,0 +1,97 @@
+{
+  "schema": "csl.history-membership-zonotope-2d/1",
+  "source_commit": "dc1155cb700f4ec0e5cce7d45106258be10f18ed",
+  "source_files": {
+    "CMakeLists.txt": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1",
+    "include/csl/optimization/history_domain.hpp": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640",
+    "include/csl/optimization/history_optimizer.hpp": "0c270ee4bf0bdb6770d0e4d836d63264d2ffc9c4ec5ac86f22c0b0b564c55b74",
+    "src/optimization/history_domain.cpp": "3c95e11ae46868cc0a310f5eac245e00d85ebda936e8fc90116332d3295a1d3e",
+    "src/optimization/history_optimizer.cpp": "11d63f77b14060ed642b11b6f63b6d5cb4ef7d32a90f471c543e9a00c8bbebf9",
+    "include/csl/adapters/nlp/casadi_history_optimizer.hpp": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7",
+    "src/adapters/nlp/casadi_history_optimizer.cpp": "27a061edc3d8d7238a8e16219437d80f121849e55c0e085ddb066bac354b930a",
+    "src/synthesis/Module.cmake": "68cae27ffb359df0ea8e90ffa1daaaa5f6081cfea02ca43adbe2fe49831b0504",
+    "tools/history_membership_2d_example.cpp": "19b51228e2541326f3f33c108667241271e0ed05970e6cca7978ced5ebba271c",
+    "scripts/reports/capture_history_membership_2d.py": "b7ee7b18298d6b608db9b8d058537cc94aad4f42684c362488e2677c0037cfee",
+    "scripts/reports/stage_history_membership_2d.py": "9e12541e894db19c7bf1f937bf53fb586dc0b3993aaad52aba16c2eb85a67dca"
+  },
+  "binary_sha256": "5ee684f67f4dbd9bcc22d55634dcf8e061a3956c1715a19bc875450c37985f88",
+  "provider": "csl.nlp.casadi-ipopt.history-cost@1",
+  "build_identity": {
+    "schema": "csl.history-membership-build-identity/1",
+    "source_root_matches_checkout": true,
+    "source_commit": "dc1155cb700f4ec0e5cce7d45106258be10f18ed",
+    "build_type": "Release",
+    "generator": "Ninja",
+    "casadi_enabled": true,
+    "casadi_version": "3.8.0",
+    "example_enabled": true,
+    "cmake_version": "3.31.6",
+    "compiler": {
+      "executable": "c++",
+      "id": "GNU",
+      "version": "16.2.1"
+    }
+  },
+  "source_objective": "||x2-(1,1)||_2 + 0.5(|u0|+|u1|)",
+  "selected_membership": {
+    "stage": 1,
+    "family": "zonotope",
+    "center": [
+      0.4,
+      0.0
+    ],
+    "generator_matrix_rows": [
+      [
+        0.2
+      ],
+      [
+        0.0
+      ]
+    ],
+    "coefficient_bounds": [
+      -1.0,
+      1.0
+    ],
+    "source_geometry_identity": "source-stage-1-zonotope"
+  },
+  "initialization": {
+    "start_mode": "supplied_start",
+    "primal_readback_matches": true,
+    "membership_witness": [
+      0.0
+    ]
+  },
+  "result": {
+    "source_J": 1.1464101615146844,
+    "u0": 0.5999999999975165,
+    "u1": 0.7690598923205352,
+    "x1": [
+      0.5999999999975165,
+      -3.05740684278141e-20
+    ],
+    "x2": [
+      0.5999999999975165,
+      0.7690598923205352
+    ],
+    "membership_coefficients": [
+      0.9999999999875823
+    ],
+    "maximum_history_violation": 1.9471421948006453e-20,
+    "diagnostics": "native C++ CasADi 3.8.0; IPOPT; Solve_Succeeded; all history coordinates free; local numerical"
+  },
+  "analytic_reference": {
+    "u0": 0.6,
+    "u1": 0.7690598923241496,
+    "source_J": 1.1464101615137754,
+    "derivation": "The zonotope forces u0 in [0.2,0.6]. For a=1-u0 and b=1-u1, J=1+sqrt(a^2+b^2)-(a+b)/2; its minimum has a=0.4 and b=a/sqrt(3)."
+  },
+  "reproduction_command": "cmake -S . -B build/history-membership-2d -DCSL_ENABLE_CASADI=ON -DCSL_BUILD_HISTORY_MEMBERSHIP_2D_EXAMPLE=ON -DCMAKE_BUILD_TYPE=Release\ncmake --build build/history-membership-2d --target history_membership_2d_example -j1\nbuild/history-membership-2d/history_membership_2d_example build/history-membership-2d/output",
+  "artifacts": {
+    "history.csv": "7cf161ac4f12b1baaf2697c3ec9d378e5c433b907d3ca8422e09ec879018858e",
+    "history.svg": "7be407e2aeeba1a1718b4320cbfce77f3c39b9ffc22516d082b50273170a0fbf",
+    "records/stdout.txt": "ad24301c00db37a2e093d4948855ddc8aded1aa610e2fc747e350c6f7781fd8e",
+    "records/build.log": "93f450f84871719ef2a400290a108dd0865c888690006776e2553927ee9ef1d5",
+    "records/build-configuration.json": "4b3dec3a798cfd7293cabcb6722eebd8b3129eed998401dcff252c852021f06b",
+    "records/native-output.html": "4213b05551caeb137b223a9bae41c47445c166e9b514a03cd1ccc3617f5ff9fc"
+  }
+}

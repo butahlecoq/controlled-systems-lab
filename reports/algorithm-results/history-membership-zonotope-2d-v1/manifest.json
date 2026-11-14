@@ -1,0 +1,15 @@
+{
+  "schema": "csl.history-membership-zonotope-2d/1",
+  "source_commit": "dc1155cb700f4ec0e5cce7d45106258be10f18ed",
+  "binary_sha256": "5ee684f67f4dbd9bcc22d55634dcf8e061a3956c1715a19bc875450c37985f88",
+  "files": {
+    "history.csv": "7cf161ac4f12b1baaf2697c3ec9d378e5c433b907d3ca8422e09ec879018858e",
+    "history.svg": "7be407e2aeeba1a1718b4320cbfce77f3c39b9ffc22516d082b50273170a0fbf",
+    "index.html": "b9c3d2bcb398da09181b7de4f94402657787e0b6d745064c0ea2f2ce69a6921c",
+    "records/build-configuration.json": "4b3dec3a798cfd7293cabcb6722eebd8b3129eed998401dcff252c852021f06b",
+    "records/build.log": "93f450f84871719ef2a400290a108dd0865c888690006776e2553927ee9ef1d5",
+    "records/native-output.html": "4213b05551caeb137b223a9bae41c47445c166e9b514a03cd1ccc3617f5ff9fc",
+    "records/receipt.json": "94f7e962d7cd7a2361103e083c371237e380c34b6eddd189f2c759e953f7ac78",
+    "records/stdout.txt": "ad24301c00db37a2e093d4948855ddc8aded1aa610e2fc747e350c6f7781fd8e"
+  }
+}

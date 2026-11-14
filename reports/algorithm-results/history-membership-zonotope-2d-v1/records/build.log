@@ -1,0 +1,12 @@
+Normalized source-matched build record
+source_commit=dc1155cb700f4ec0e5cce7d45106258be10f18ed
+compiler=GNU-16.2.1
+casadi_version=3.8.0
+cmake=3.31.6
+configuration=Release
+generator=Ninja
+target=history_membership_2d_example
+configure=cmake -S . -B build/history-membership-2d -DCSL_ENABLE_CASADI=ON -DCSL_BUILD_HISTORY_MEMBERSHIP_2D_EXAMPLE=ON -DCMAKE_BUILD_TYPE=Release
+command=cmake --build build/history-membership-2d --target history_membership_2d_example -j1
+input_build_log_sha256=d673713505c4f7e776f70eae1f97a54cbfcd42fa7b45e73e4484589827b091e8
+status=source commit and configured target identity verified by capture
