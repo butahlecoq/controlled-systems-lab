@@ -3497,6 +3497,26 @@
       "follow_up_issue": 669
     },
     {
+      "route": "history-membership-zonotope-2d-v1",
+      "source_bundle": "history-membership-zonotope-2d-v1",
+      "assets": [
+        "history.svg"
+      ],
+      "index_sha256": "b9c3d2bcb398da09181b7de4f94402657787e0b6d745064c0ea2f2ce69a6921c",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "history-optimizer-native-2d-v1",
+      "source_bundle": "history-optimizer-native-2d-v1",
+      "assets": [
+        "history.svg"
+      ],
+      "index_sha256": "a4d94265d6c69b3e5a38305d47d5c0d27283ae668f517bb20f936796ee076196",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
       "route": "issue3-finite-catalogue-b4632ce76510aa4f",
       "source_bundle": "issue3-finite-catalogue-b4632ce76510aa4f",
       "assets": [
