@@ -784,7 +784,8 @@ compile_mpc_decision(const NominalMpcTask &task, StageIndex start_stage,
         {},
         std::nullopt,
         {},
-        task.terminal_cost};
+        task.terminal_cost,
+        {}};
     history.dynamics.reserve(remaining);
     history.running_costs.reserve(remaining);
     history.control_positive_part_budgets.reserve(remaining);
