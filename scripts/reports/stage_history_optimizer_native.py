@@ -343,6 +343,7 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
         "<p>A native CasADi/SuperSCS solve over all state and control coordinates, with "
         "separate source-norm epigraphs and an independent source-J and full-H readback.</p>"
         f'<p><a href="{ROUTE}">Read the inputs and checked answer →</a> · '
-        f'<a href="{ARCHIVE}">Offline evidence bundle</a></p></article>'
+        f'<a href="{ARCHIVE}">Offline evidence bundle</a> · '
+        f'<a href="{RECORD}">Raw source and result receipt</a></p></article>'
     )
     return outputs, inventory, card
