@@ -96,8 +96,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "495275b70bedd0700a54078b563978770ccfc7614ad2a12d1b02ccb26039425c",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-exact-polytope-backward-graph/1/cfg-495275b70bedd070",
+      "graph_fingerprint": "7b82df9fc1a7db585c0cf1bed023a70f9950590f1864d0c32832667d10f8913a",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-exact-polytope-backward-graph/1/cfg-7b82df9fc1a7db58",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -164,7 +164,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -325,8 +325,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "0802799fe9e7a6a41e1ec9cbf7bf0edbce9905e1a5a4bcdbfb926ffe1e7339d9",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-box-mpc/1/cfg-0802799fe9e7a6a4",
+      "graph_fingerprint": "f86733ef90d0f57deea7a2f28f36d07bbe514829a705ab186c5e10fb1ef924c4",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-box-mpc/1/cfg-f86733ef90d0f57d",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -394,7 +394,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -575,8 +575,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "a802d57dd5a05b5a0badd0ef30cf59e5e76fc9baf6fbcc6ba21c8faa1cd9dd39",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-zonotope-mpc/1/cfg-a802d57dd5a05b5a",
+      "graph_fingerprint": "6d1edcd5693da5c453a7e385141dfaea4413f1f705f6f1195c7bf1937ef8b450",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-zonotope-mpc/1/cfg-6d1edcd5693da5c4",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -644,7 +644,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -825,8 +825,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "6a60a57f8da7228c57f972a341f61fe0a9183ac41d96f3bbbc849d36b3343f00",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-mpc/1/cfg-6a60a57f8da7228c",
+      "graph_fingerprint": "0015b0829c62899c39b603917d908a7da8805a74bd1d9656675a2d8e203e8427",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-mpc/1/cfg-0015b0829c62899c",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -894,7 +894,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -1075,8 +1075,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "8fba6e09dfcfd59de85fa0b412f37b04d3e6c436322e7a6810cec840199bb832",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-ellipsoid-mpc/1/cfg-8fba6e09dfcfd59d",
+      "graph_fingerprint": "464f78728f0623e00920e51ff0f65dc601befc1e24be339b55f713174b4dc58d",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-ellipsoid-mpc/1/cfg-464f78728f0623e0",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1144,7 +1144,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -1297,8 +1297,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "b4589bf39d7799dd69425a3f0f4b1f77fb4b67974deab90dd19e5eda93b2a238",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-exact-polytope-fixed-plan-mpc/1/cfg-b4589bf39d7799dd",
+      "graph_fingerprint": "51d0947ac3dee07e192288fd293bd6cd8e46e87dac490fc3cc95762635d885f8",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-exact-polytope-fixed-plan-mpc/1/cfg-51d0947ac3dee07e",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1349,7 +1349,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
@@ -1477,8 +1477,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "51ff71e39528b49c9c4ab655c577c41cfe952030ffb47a943affa7d621f52784",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-box-fixed-plan-mpc/1/cfg-51ff71e39528b49c",
+      "graph_fingerprint": "eb5f5b71d125092b7947bd65f0a521995819d25999743f16bda0196f666d9b0d",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-box-fixed-plan-mpc/1/cfg-eb5f5b71d125092b",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1529,7 +1529,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/optimization/finite_action_box_minimax.hpp",
@@ -1673,8 +1673,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "bfca82cb3894649a3ac1f913ab1404287dcc1a6c87e9ec869040d996ef2edce8",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-zonotope-fixed-plan-mpc/1/cfg-bfca82cb3894649a",
+      "graph_fingerprint": "6645dfc3825d32521054eacaa062fbb3044e00b65bf0b400516eabb1239193d1",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-zonotope-fixed-plan-mpc/1/cfg-6645dfc3825d3252",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1725,7 +1725,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
@@ -1869,8 +1869,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "4fc1987c898dff156c681af8d92359850abb3772a22f9dd607546ac728d3dd5a",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-fixed-plan-mpc/1/cfg-4fc1987c898dff15",
+      "graph_fingerprint": "3d18d5464d23902ffbb3e008cdc026ce3ee0d1c7a7d780a46e5b5e268baafd29",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-fixed-plan-mpc/1/cfg-3d18d5464d23902f",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1921,7 +1921,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
@@ -2065,8 +2065,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "4a69c1910ae9f4ff9896a43b4accbe060581087f9d971f369015f3d9b02ef262",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-ellipsoid-fixed-plan-mpc/1/cfg-4a69c1910ae9f4ff",
+      "graph_fingerprint": "29da9cdff31fbaf63c74d63250dec670e2b693cb5ebf45c2cc1490ad8551c1ae",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-ellipsoid-fixed-plan-mpc/1/cfg-29da9cdff31fbaf6",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -2117,7 +2117,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/optimization/finite_action_ellipsoid_minimax.hpp",
@@ -2281,8 +2281,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "7971f355388f2f85f696c0369cd91e6b6099f2899263aa59f6a1254f7b8f9dfd",
-      "graph_id": "closed-loop/earth-orbit/native-exact-polytope-backward-graph/1/cfg-7971f355388f2f85",
+      "graph_fingerprint": "b83f1fcdfb5d95474fbc725e285c66ef6d94edb6aad039be62ba40e034238dda",
+      "graph_id": "closed-loop/earth-orbit/native-exact-polytope-backward-graph/1/cfg-b83f1fcdfb5d9547",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2349,7 +2349,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -2510,8 +2510,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "98e73fa16e5b8c2d68f4b3d44ee625c08bd4e69a72b57eb545a642eb892037c7",
-      "graph_id": "closed-loop/earth-orbit/native-box-mpc/1/cfg-98e73fa16e5b8c2d",
+      "graph_fingerprint": "19fd6459b7acf9d505198cc786623e5dd088d1e77759b165260d9b9be3d71127",
+      "graph_id": "closed-loop/earth-orbit/native-box-mpc/1/cfg-19fd6459b7acf9d5",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2579,7 +2579,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -2760,8 +2760,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "4ca3a65963c52743a898e7a20a34c59650bb4601f9285ce1b86a280ff28e9172",
-      "graph_id": "closed-loop/earth-orbit/native-zonotope-mpc/1/cfg-4ca3a65963c52743",
+      "graph_fingerprint": "90f5de124eac5f22c885b23463247ce425650357c7d1be3bf80ad1c781e2c2b1",
+      "graph_id": "closed-loop/earth-orbit/native-zonotope-mpc/1/cfg-90f5de124eac5f22",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2829,7 +2829,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -3010,8 +3010,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "aade90a317438e9b2839bc3c1cb6484a403bf3718f9e6cc8ed15edec18679b6f",
-      "graph_id": "closed-loop/earth-orbit/native-parallelotope-mpc/1/cfg-aade90a317438e9b",
+      "graph_fingerprint": "782b24ccd2cff967d91cdf6108003460f03293091f64774a852183d998962afc",
+      "graph_id": "closed-loop/earth-orbit/native-parallelotope-mpc/1/cfg-782b24ccd2cff967",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3079,7 +3079,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -3260,8 +3260,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "8f68f10f380f0523bf237cc16a0635e11dc47abc39a60f91241c5aa13ec1e4c5",
-      "graph_id": "closed-loop/earth-orbit/native-ellipsoid-mpc/1/cfg-8f68f10f380f0523",
+      "graph_fingerprint": "75c0d7c4719ea077a1145dd935861c0815550581741725f2ee9b00a91f9aabdb",
+      "graph_id": "closed-loop/earth-orbit/native-ellipsoid-mpc/1/cfg-75c0d7c4719ea077",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3329,7 +3329,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -3482,8 +3482,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "2806dd2d65efed93d2ff04d448554d81c0e64b0439cb54e6093de54ac231a6a5",
-      "graph_id": "closed-loop/earth-orbit/native-exact-polytope-fixed-plan-mpc/1/cfg-2806dd2d65efed93",
+      "graph_fingerprint": "7bd70816ef1fb0b4d9b5d157c747ea49df6fa5b56e246a057d8b59efe2fcaab8",
+      "graph_id": "closed-loop/earth-orbit/native-exact-polytope-fixed-plan-mpc/1/cfg-7bd70816ef1fb0b4",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3534,7 +3534,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
@@ -3662,8 +3662,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "1910267f650284fe1529c6ef554a03b7e49c596bef95e6d39dc5e9cf4586d1a9",
-      "graph_id": "closed-loop/earth-orbit/native-box-fixed-plan-mpc/1/cfg-1910267f650284fe",
+      "graph_fingerprint": "ff78378adbd05a1c0ba99b6649a3133f5b72823c362b4258735ebdd809341397",
+      "graph_id": "closed-loop/earth-orbit/native-box-fixed-plan-mpc/1/cfg-ff78378adbd05a1c",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3714,7 +3714,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/optimization/finite_action_box_minimax.hpp",
@@ -3858,8 +3858,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "f8ca2edc407875d86f135e9440308dc00d9b80282f9e60c8c0b1191b8cb0c3db",
-      "graph_id": "closed-loop/earth-orbit/native-zonotope-fixed-plan-mpc/1/cfg-f8ca2edc407875d8",
+      "graph_fingerprint": "c1ca43a47494de9efa481d061941b78090a72c89d921d8a73bcdbaf6d7c850fa",
+      "graph_id": "closed-loop/earth-orbit/native-zonotope-fixed-plan-mpc/1/cfg-c1ca43a47494de9e",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3910,7 +3910,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
@@ -4054,8 +4054,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "4e0476ffc9230c880c05a2d1c7855dd07a441f8f0ad5936723a9d9cc4b4a1e27",
-      "graph_id": "closed-loop/earth-orbit/native-parallelotope-fixed-plan-mpc/1/cfg-4e0476ffc9230c88",
+      "graph_fingerprint": "29405bf62dcfaf93d7672d37a9361cc03b28e3b136c054ad043a24a346e19163",
+      "graph_id": "closed-loop/earth-orbit/native-parallelotope-fixed-plan-mpc/1/cfg-29405bf62dcfaf93",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -4106,7 +4106,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
@@ -4250,8 +4250,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "1e68d6a079cceac0ad21fa7d16fe66227e3efbaeef360cf4c22372c5206f1362",
-      "graph_id": "closed-loop/earth-orbit/native-ellipsoid-fixed-plan-mpc/1/cfg-1e68d6a079cceac0",
+      "graph_fingerprint": "eff22a6b252a4fd0c40779d98ac2e3536e358dd4654f0b8b28adfb6c00dfe7fa",
+      "graph_id": "closed-loop/earth-orbit/native-ellipsoid-fixed-plan-mpc/1/cfg-eff22a6b252a4fd0",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -4302,7 +4302,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/optimization/finite_action_ellipsoid_minimax.hpp",
@@ -4466,8 +4466,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "04f0cfa3bab9bf3e26baf63acb5291847d634143270f40be9a31bf51d9ce1642",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-exact-polytope-backward-graph/1/cfg-04f0cfa3bab9bf3e",
+      "graph_fingerprint": "74974ca6c259cd498c152e69421e6ba581656a1f83d9b2067cdf48da620e8b65",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-exact-polytope-backward-graph/1/cfg-74974ca6c259cd49",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4534,7 +4534,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -4695,8 +4695,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "5897769064603a9b1e75fbf23a193eed473c1d8607bca6b2771ab0de1326356e",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-box-mpc/1/cfg-5897769064603a9b",
+      "graph_fingerprint": "9a08b0980ed92e78e9f6e3428b3962238b042662921f20891e9f181959150f4f",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-box-mpc/1/cfg-9a08b0980ed92e78",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4764,7 +4764,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -4945,8 +4945,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "97c170ed6a250c376f493918ce236abb3f30764e63c38e8d8ca23280b4ed00cc",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-zonotope-mpc/1/cfg-97c170ed6a250c37",
+      "graph_fingerprint": "59f35658ee3b500984d87b75c95952c3bfabec72d26c29d7632c93d9067b46e0",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-zonotope-mpc/1/cfg-59f35658ee3b5009",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -5014,7 +5014,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -5195,8 +5195,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "629fceb0eafd3038bcef9e012251f4bce55824d4948c5135db36a57b1a280386",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-mpc/1/cfg-629fceb0eafd3038",
+      "graph_fingerprint": "361599f340fa628b3ea034926689672d9891bb298d4ff5e4db4cb0e37c71a74b",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-mpc/1/cfg-361599f340fa628b",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -5264,7 +5264,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -5445,8 +5445,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "3827647e3d4f5f91f2af3b794cf1d3b674b89744a9b1b5fc70ac7b944d2f4937",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-ellipsoid-mpc/1/cfg-3827647e3d4f5f91",
+      "graph_fingerprint": "2286cba5e41dbcb017120e78057b5970b90bdc7efe383574bbfbc9625f84c14f",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-ellipsoid-mpc/1/cfg-2286cba5e41dbcb0",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -5514,7 +5514,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -5667,8 +5667,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "50f8ee4f098a5995dcd21c40bf12d354992edcfcbb2e943201686f4043e1236d",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-exact-polytope-fixed-plan-mpc/1/cfg-50f8ee4f098a5995",
+      "graph_fingerprint": "84ed3c1b2375abaff58b1da81197cb5b252da4b6a7f1e5dae1da385154d60714",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-exact-polytope-fixed-plan-mpc/1/cfg-84ed3c1b2375abaf",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -5719,7 +5719,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
@@ -5847,8 +5847,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "deb5fc9b60a079647467df52e99a5203f98abe7be21340c47615a0297c57de7a",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-box-fixed-plan-mpc/1/cfg-deb5fc9b60a07964",
+      "graph_fingerprint": "c948b6f23dae833995dbc0d1a5e573eeaf5f6f63f5c3c99fcf9fc87a08295a4c",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-box-fixed-plan-mpc/1/cfg-c948b6f23dae8339",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -5899,7 +5899,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/optimization/finite_action_box_minimax.hpp",
@@ -6043,8 +6043,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "5442d81bf8c0df956c0e98cd8a293080c8a3b0e5a3094cc0bb01c375fcea2ae7",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-zonotope-fixed-plan-mpc/1/cfg-5442d81bf8c0df95",
+      "graph_fingerprint": "b539d172d1ec0d7725c13c6881684fd3bde43bbfcff07230c08d8e224a686eb5",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-zonotope-fixed-plan-mpc/1/cfg-b539d172d1ec0d77",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -6095,7 +6095,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
@@ -6239,8 +6239,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "669c013208c824adf3694445811abc3d5c0bff7af8ef5730d89de70c9aae9eb0",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-fixed-plan-mpc/1/cfg-669c013208c824ad",
+      "graph_fingerprint": "6d735a0927b2afc19ce97d89a467c13bff9c168336788b6b4f3c71bb7b66046d",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-fixed-plan-mpc/1/cfg-6d735a0927b2afc1",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -6291,7 +6291,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
@@ -6435,8 +6435,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "fd16c703268ecc88be99ea14b8bc95c0aa08096e3be6a2fe1ed5b140dc4ce1e5",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-ellipsoid-fixed-plan-mpc/1/cfg-fd16c703268ecc88",
+      "graph_fingerprint": "1eb4f69d4a7e684300354e268e9bd6f44f418a2e1e2c7b4428b3ee2bec91929c",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-ellipsoid-fixed-plan-mpc/1/cfg-1eb4f69d4a7e6843",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -6487,7 +6487,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "d2cb1af6ab6f813c4f2b6c0feee7e83cef224671b777dfb0a02d4bb1b2a80361"
+          "sha256": "43766704616a871d8ac324add92dd79b7a7b52c28e27f6130ff8a209c01cbadc"
         },
         {
           "path": "include/csl/optimization/finite_action_ellipsoid_minimax.hpp",

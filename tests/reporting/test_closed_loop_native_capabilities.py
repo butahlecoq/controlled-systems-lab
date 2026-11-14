@@ -19,6 +19,20 @@ import run_closed_loop
 
 
 class NativeCapabilityTests(unittest.TestCase):
+    def test_source_index_affine_sum_sources_resolve_selected_provider(self):
+        for hull_id in ("csl.hull.source.quickhull-2d", "csl.hull.source.btulshor-kpabep"):
+            with self.subTest(hull=hull_id):
+                options = {
+                    "reachable_set_method": {"id": "csl.geometry.affine-sum.source-index", "version": "1.0.0"},
+                    "hull_provider": {"id": hull_id, "version": "1.0.0"},
+                    "vertex_lp_provider": "not_used",
+                    "conversion_provider": "not_used",
+                }
+                paths = capabilities._catalogue_sources(options)
+                self.assertIn("src/geometry/affine_sum.cpp", paths)
+                self.assertIn("src/geometry/source_index_hull.cpp", paths)
+                self.assertEqual(len(paths), len(set(paths)))
+
     def test_selected_propagator_sources_causally_bind_profile_fingerprints(self):
         baseline = capabilities.build_native_manifest()
         propagators = {

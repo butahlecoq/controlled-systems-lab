@@ -733,18 +733,19 @@
         "version": "1.0.0"
       },
       "role": "set_operation",
-      "input": "H polyhedra",
-      "output": "H polyhedron",
+      "input": "finite polyhedral operands; H operands require the selected converter",
+      "output": "finite V polyhedron",
       "dimension": "provider budgets",
       "assurance": "numerical",
       "relation": "equivalent within request contract",
       "operations": [
-        "affine sum"
+        "affine image",
+        "Minkowski sum"
       ],
       "dependencies": [
         "selected hull",
         "selected LP",
-        "selected converter"
+        "selected converter only for operands requiring conversion"
       ],
       "build": "CSL core",
       "source": {
@@ -752,6 +753,39 @@
       },
       "model_classes": [
         "typed source-admitted operation contract"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "supporting_operations",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.geometry.affine-sum.source-index",
+        "version": "1.0.0"
+      },
+      "role": "set_operation",
+      "input": "finite V operands, or polyhedral operands admitted by the selected converter",
+      "output": "finite V polyhedron",
+      "dimension": "generated hull point cloud must be two-dimensional; concrete operation and checker budgets apply",
+      "assurance": "numerical operation evidence; bounded exact represented-binary64 2D hull check before applying provider indices",
+      "relation": "equivalent within request contract",
+      "operations": [
+        "affine image",
+        "Minkowski sum"
+      ],
+      "dependencies": [
+        "selected source-index hull",
+        "bounded exact 2D hull checker",
+        "selected converter only for operands requiring conversion; vertex LP is not_used"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "src/geometry/affine_sum.cpp"
+      },
+      "model_classes": [
+        "finite polyhedral affine images and Minkowski sums; source-index hull evidence contract"
       ],
       "action_domain": "not_applicable to this module role",
       "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
