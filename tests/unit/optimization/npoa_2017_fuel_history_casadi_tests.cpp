@@ -20,25 +20,29 @@ optimization::HistoryOptimizationRequest programmed_fuel_request() {
     constexpr std::size_t control_dimension = 1;
     constexpr std::size_t horizon = 10;
     constexpr std::size_t history_dimension = (horizon + 1) * state_dimension + horizon;
-    const Matrix transition{4, 4, {1, 0, 0, 0, -1, 1, 0, 0, 0, 0, 1, 0, 0, 0, -1, 1}};
+    constexpr std::array<std::array<double, 4>, 4> transition{
+        {{{1, 0, 0, 0}}, {{-1, 1, 0, 0}}, {{0, 0, 1, 0}}, {{0, 0, -1, 1}}}};
     const Vector input{5.0 / 12.0, 0, -1.0 / 3.0, 0};
     const Vector initial{25.14, 247, 19.915, 199.92};
 
     Matrix equalities{
         4 + horizon * state_dimension, history_dimension,
         std::vector<double>((4 + horizon * state_dimension) * history_dimension, 0.0)};
+    const auto set_equality = [&](std::size_t row, std::size_t column, double value) {
+        equalities.values[row * history_dimension + column] = value;
+    };
     Vector equality_values(4 + horizon * state_dimension, 0.0);
     for (std::size_t coordinate = 0; coordinate < state_dimension; ++coordinate) {
-        equalities(coordinate, coordinate) = 1.0;
+        set_equality(coordinate, coordinate, 1.0);
         equality_values[coordinate] = initial[coordinate];
     }
     for (std::size_t stage = 0; stage < horizon; ++stage) {
         for (std::size_t row = 0; row < state_dimension; ++row) {
             const auto equality = 4 + stage * state_dimension + row;
-            equalities(equality, (stage + 1) * state_dimension + row) = 1.0;
+            set_equality(equality, (stage + 1) * state_dimension + row, 1.0);
             for (std::size_t column = 0; column < state_dimension; ++column)
-                equalities(equality, stage * state_dimension + column) = -transition(row, column);
-            equalities(equality, (horizon + 1) * state_dimension + stage) = -input[row];
+                set_equality(equality, stage * state_dimension + column, -transition[row][column]);
+            set_equality(equality, (horizon + 1) * state_dimension + stage, -input[row]);
         }
     }
 
@@ -47,7 +51,7 @@ optimization::HistoryOptimizationRequest programmed_fuel_request() {
     std::size_t inequality = 0;
     const auto add_bound = [&](std::size_t index, double coefficient, double bound,
                                std::size_t row) {
-        inequalities(row, index) = coefficient;
+        inequalities.values[row * history_dimension + index] = coefficient;
         upper_bounds[row] = bound;
     };
     for (std::size_t stage = 0; stage <= horizon; ++stage) {
@@ -62,7 +66,7 @@ optimization::HistoryOptimizationRequest programmed_fuel_request() {
         add_bound(control, 1.0, 1.0, inequality++);
         add_bound(control, -1.0, 1.0, inequality++);
     }
-    REQUIRE(inequality == inequalities.rows());
+    REQUIRE(inequality == inequalities.rows);
 
     auto full_history = take(sets::make_h(
         {{"npoa-2017-programmed-fuel-full-history"}, history_dimension, {}},
@@ -73,10 +77,11 @@ optimization::HistoryOptimizationRequest programmed_fuel_request() {
 
     // Literal expansion of (25-x1)^2+x2^2+(20-x3)^2+x4^2+(x2-x4)^2
     // under the library convention 1/2 x'Qx + q'x + c.
-    optimization::QuadraticTerminal terminal{
+    QuadraticTerminal terminal{
         {4, 4, {2, 0, 0, 0, 0, 4, 0, -2, 0, 0, 2, 0, 0, -2, 0, 4}}, {-50, 0, -40, 0}, 1025.0};
-    optimization::RunningControlCost no_running_cost{"npoa-2017-terminal-only", horizon, {}};
-    auto cost = take(optimization::compile_history_cost(relation, terminal, no_running_cost, 0));
+    optimization::RunningControlCost no_running_cost{"", 0, {}};
+    auto cost = take(optimization::compile_history_cost(relation, TerminalObjective{terminal},
+                                                        no_running_cost, 0));
 
     Vector start(history_dimension, 0.0);
     Vector state = initial;
@@ -87,7 +92,7 @@ optimization::HistoryOptimizationRequest programmed_fuel_request() {
             Vector next(state_dimension, 0.0);
             for (std::size_t row = 0; row < state_dimension; ++row)
                 for (std::size_t column = 0; column < state_dimension; ++column)
-                    next[row] += transition(row, column) * state[column];
+                    next[row] += transition[row][column] * state[column];
             state = std::move(next);
         }
     }
