@@ -1,0 +1,30 @@
+{
+  "command": [
+    "flock",
+    "${WORK_ROOT}/native-build.lock",
+    "${WORK_ROOT}/controller-env/bin/python",
+    "-c",
+    "import json,resource,mmap; print(json.dumps({\"AS\":resource.getrlimit(resource.RLIMIT_AS),\"CPU\":resource.getrlimit(resource.RLIMIT_CPU)}));\ntry: mmap.mmap(-1,9*1024**3); raise RuntimeError(\"oversize mmap unexpectedly admitted\")\nexcept OSError as e: print(\"9GiB mapping rejected\", e.errno)"
+  ],
+  "started_utc": "2026-11-13T22:01:57.086239+00:00",
+  "finished_utc": "2026-11-13T22:01:57.122853+00:00",
+  "returncode": 0,
+  "status": "completed",
+  "wall_seconds": 0.03661342989653349,
+  "cpu_seconds_observed_child_accounting": 0.033226,
+  "limits": {
+    "wall_seconds": 300,
+    "wall_scope": "whole new process group; SIGKILL on timeout",
+    "cpu_seconds": 300,
+    "cpu_scope": "Linux RLIMIT_CPU per process; inherited by consumer, CPU threads charged to process; not aggregate descendants",
+    "address_space_bytes": 8589934592,
+    "memory_scope": "Linux RLIMIT_AS per process, inherited by consumer; virtual address space, not RSS or cgroup aggregate",
+    "requested_native_solver_threads": 1,
+    "native_request": "ResourcePolicy{1,1,1,...}; OMP/OpenBLAS/MKL env1",
+    "concurrent_attempts": 1,
+    "lock": "${WORK_ROOT}/native-build.lock"
+  },
+  "process_group_remains_after_wait": false,
+  "stdout.log_sha256": "01ad6f1439f7b39b89134c3fec5ad64f27e22be560e495d107327d4e02a3060f",
+  "stderr.log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

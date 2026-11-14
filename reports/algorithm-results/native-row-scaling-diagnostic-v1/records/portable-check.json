@@ -1,0 +1,78 @@
+{
+  "models": [
+    {
+      "model": "catalogue-2026/model-23/1",
+      "returncode": 0,
+      "transforms": [
+        {
+          "replan": "replan-0",
+          "coefficient_rows_checked": 134,
+          "power2_exponents": [
+            0,
+            54
+          ]
+        },
+        {
+          "replan": "replan-1",
+          "coefficient_rows_checked": 134,
+          "power2_exponents": [
+            0,
+            54
+          ]
+        },
+        {
+          "replan": "replan-2",
+          "coefficient_rows_checked": 134,
+          "power2_exponents": [
+            0,
+            54
+          ]
+        }
+      ],
+      "completed_plan": true,
+      "original_coordinate_check": {
+        "full_state_transitions": 9,
+        "state_dimension": 8,
+        "maximum_dynamics_residual": 0.0,
+        "maximum_objective_difference": 0.0,
+        "initial_state_zero": true,
+        "state_constraints": "none in authored task",
+        "control_constraints": "[-1,1] in recorded coordinates"
+      }
+    },
+    {
+      "model": "catalogue-2026/model-27/1",
+      "returncode": 1,
+      "transforms": [
+        {
+          "replan": "replan-0",
+          "coefficient_rows_checked": 1910,
+          "power2_exponents": [
+            0,
+            81,
+            89
+          ]
+        }
+      ],
+      "completed_plan": false
+    },
+    {
+      "model": "catalogue-2026/model-28/1",
+      "returncode": 1,
+      "transforms": [
+        {
+          "replan": "replan-0",
+          "coefficient_rows_checked": 7420,
+          "power2_exponents": [
+            0,
+            111,
+            120
+          ]
+        }
+      ],
+      "completed_plan": false
+    }
+  ],
+  "analytic_check": "passed",
+  "execution": "saved-data check only, no solver"
+}

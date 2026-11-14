@@ -66,6 +66,7 @@ FROZEN_DIAGRAM_EXCEPTIONS = {
 }
 PUBLICATION_EXPORT_ROUTES = {
     "scripts/reports/stage_native_model_tracking_first_pass.py",
+    "scripts/reports/stage_native_row_scaling_diagnostic.py",
     "scripts/reports/stage_native_extended_models.py",
     "scripts/reports/package_feedback_history.py",
     "scripts/reports/package_history_functional.py",
@@ -85,6 +86,8 @@ PUBLICATION_EXPORT_ROUTES = {
     "benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/figures.py",
 }
 VIZ10_ROLE_REASONS = {
+    "scripts/reports/stage_native_row_scaling_diagnostic.py":
+        "Authenticates a locked source-only row-scaling diagnostic with original/scaled CSR, a saved native 2D point, original-coordinate checks and complete numerical-failure logs; no optimization, native build or binary redistribution during staging.",
     "scripts/reports/stage_native_model_tracking_first_pass.py":
         "Authenticates and stages the immutable 35-model native tracking capture, independent full-state checks, matrix inputs, and saved 2D projections; it does not rerun optimization.",
     "scripts/reports/stage_buryatia_volterra.py":

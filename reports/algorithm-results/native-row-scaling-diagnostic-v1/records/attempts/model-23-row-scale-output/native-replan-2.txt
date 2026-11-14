@@ -1,0 +1,81 @@
+termination=0 outcome=0
+adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+native.downstream.hvectorbase_sha256=8ee92e023806826fded545e38d0598adacc7b08f07c395c557a1dbaa1733b00b
+native.downstream.scheduler_observation_sha256=5e81b644fad40522a62037b0dab8ae0f023a8f7db7540297030ac28de58b56cc
+program.original=catalogue-2026/model-23/1-3step-zero-target-v1/diagnostic-row-min-power2-v1
+program.solver=catalogue-2026/model-23/1-3step-zero-target-v1/diagnostic-row-min-power2-v1
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=false
+model.original_rows=38
+model.native_rows=38
+phase.feasibility.time_limit=inf
+phase.feasibility.scheduler_threads=1
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.scheduler_threads=1
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=0
+objective.original=0
+objective.solver=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=1
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 38 rows; 38 cols; 134 nonzeros
+Coefficient ranges:
+  Matrix [8e-05, 2e+16]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 38 rows; 38 cols; 134 matrix nonzeros; 38 Hessian nonzeros
+Coefficient ranges:
+  Matrix [8e-05, 2e+16]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [1e+00, 1e+00]
+  Iteration        Objective     NullspaceDim
+          0                0               38      0.00s
+          0                0               38      0.00s
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00

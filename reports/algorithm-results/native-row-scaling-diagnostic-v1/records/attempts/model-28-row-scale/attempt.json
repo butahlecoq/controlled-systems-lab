@@ -1,0 +1,31 @@
+{
+  "command": [
+    "flock",
+    "${WORK_ROOT}/native-build.lock",
+    "${DIAGNOSTIC_ROOT}/build/row_scaling_driver",
+    "row-scale",
+    "catalogue-2026/model-28/1",
+    "${DIAGNOSTIC_ROOT}/attempts/model-28-row-scale-output"
+  ],
+  "started_utc": "2026-11-13T21:59:04.142549+00:00",
+  "finished_utc": "2026-11-13T21:59:04.209807+00:00",
+  "returncode": 1,
+  "status": "failed_or_refused",
+  "wall_seconds": 0.06728947698138654,
+  "cpu_seconds_observed_child_accounting": 0.04492500000000001,
+  "limits": {
+    "wall_seconds": 300,
+    "wall_scope": "whole new process group; SIGKILL on timeout",
+    "cpu_seconds": 300,
+    "cpu_scope": "Linux RLIMIT_CPU per process; inherited by consumer, CPU threads charged to process; not aggregate descendants",
+    "address_space_bytes": 8589934592,
+    "memory_scope": "Linux RLIMIT_AS per process, inherited by consumer; virtual address space, not RSS or cgroup aggregate",
+    "requested_native_solver_threads": 1,
+    "native_request": "ResourcePolicy{1,1,1,...}; OMP/OpenBLAS/MKL env1",
+    "concurrent_attempts": 1,
+    "lock": "${WORK_ROOT}/native-build.lock"
+  },
+  "process_group_remains_after_wait": false,
+  "stdout.log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr.log_sha256": "40e27879daed30531116d735033ee687205456ce18ec259398cf909baa0f8f9d"
+}

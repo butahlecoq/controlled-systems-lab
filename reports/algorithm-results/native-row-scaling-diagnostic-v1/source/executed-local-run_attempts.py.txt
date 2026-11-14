@@ -1,0 +1,44 @@
+"""Bounded one-worker local C++ consumer attempts. Does not write SDK or repository."""
+from pathlib import Path
+import datetime, hashlib, json, os, resource, signal, subprocess, sys, time
+r=Path('${WORK_ROOT}')
+owned=r/'1012-row-scaling-diagnostic-20261114'
+assert owned.resolve().is_relative_to(r.resolve())
+attempts=owned/'attempts';attempts.mkdir(exist_ok=True)
+def run(name, arguments):
+    folder=attempts/name
+    folder.mkdir()
+    command=['flock',str(r/'native-build.lock'),*map(str,arguments)]
+    def limits():
+        resource.setrlimit(resource.RLIMIT_AS,(8*1024**3,8*1024**3))
+        resource.setrlimit(resource.RLIMIT_CPU,(300,300))
+        resource.setrlimit(resource.RLIMIT_CORE,(0,0))
+    env=dict(os.environ,TMPDIR=str(r/'test-tmp'),OMP_NUM_THREADS='1',OPENBLAS_NUM_THREADS='1',MKL_NUM_THREADS='1')
+    started=datetime.datetime.now(datetime.timezone.utc).isoformat();clock=time.monotonic()
+    before=resource.getrusage(resource.RUSAGE_CHILDREN)
+    with (folder/'stdout.log').open('wb') as out,(folder/'stderr.log').open('wb') as err:
+        process=subprocess.Popen(command,stdout=out,stderr=err,env=env,start_new_session=True,preexec_fn=limits)
+        timed_out=False
+        try:code=process.wait(timeout=300)
+        except subprocess.TimeoutExpired:
+            timed_out=True;os.killpg(process.pid,signal.SIGKILL);code=process.wait()
+    after=resource.getrusage(resource.RUSAGE_CHILDREN)
+    try:os.killpg(process.pid,0);group_remains=True
+    except ProcessLookupError:group_remains=False
+    if group_remains:os.killpg(process.pid,signal.SIGKILL)
+    receipt={'command':command,'started_utc':started,'finished_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'returncode':code,'status':'wall_timeout' if timed_out else 'completed' if code==0 else 'failed_or_refused','wall_seconds':time.monotonic()-clock,'cpu_seconds_observed_child_accounting':(after.ru_utime+after.ru_stime)-(before.ru_utime+before.ru_stime),'limits':{'wall_seconds':300,'wall_scope':'whole new process group; SIGKILL on timeout','cpu_seconds':300,'cpu_scope':'Linux RLIMIT_CPU per process; inherited by consumer, CPU threads charged to process; not aggregate descendants','address_space_bytes':8*1024**3,'memory_scope':'Linux RLIMIT_AS per process, inherited by consumer; virtual address space, not RSS or cgroup aggregate','requested_native_solver_threads':1,'native_request':'ResourcePolicy{1,1,1,...}; OMP/OpenBLAS/MKL env1','concurrent_attempts':1,'lock':str(r/'native-build.lock')},'process_group_remains_after_wait':group_remains}
+    for filename in ('stdout.log','stderr.log'):receipt[filename+'_sha256']=hashlib.sha256((folder/filename).read_bytes()).hexdigest()
+    (folder/'attempt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+    print(name,receipt['status'],code,flush=True)
+    return receipt
+if __name__=='__main__':
+    mode=sys.argv[1]
+    if mode=='analytic':
+        result=run('analytic-normalized', [owned/'build/analytic',attempts/'analytic-normalized-output'])
+        if result['returncode']!=0:sys.exit(1)
+    elif mode=='export':
+        for number in (23,27,28):run(f'model-{number}-original-export',[owned/'build/row_scaling_driver','export',f'catalogue-2026/model-{number}/1',attempts/f'model-{number}-original-export-output'])
+    elif mode=='scale':
+        assert json.loads((attempts/'analytic-normalized/attempt.json').read_text())['returncode']==0
+        for number in (23,27,28):run(f'model-{number}-row-scale',[owned/'build/row_scaling_driver','row-scale',f'catalogue-2026/model-{number}/1',attempts/f'model-{number}-row-scale-output'])
+    else:raise ValueError(mode)

@@ -1,0 +1,50 @@
+termination=4 outcome=4
+adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+native.downstream.hvectorbase_sha256=8ee92e023806826fded545e38d0598adacc7b08f07c395c557a1dbaa1733b00b
+native.downstream.scheduler_observation_sha256=5e81b644fad40522a62037b0dab8ae0f023a8f7db7540297030ac28de58b56cc
+program.original=catalogue-2026/model-28/1-3step-zero-target-v1/diagnostic-row-min-power2-v1
+program.solver=catalogue-2026/model-28/1-3step-zero-target-v1/diagnostic-row-min-power2-v1
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=false
+model.original_rows=220
+model.native_rows=220
+phase.feasibility.time_limit=inf
+phase.feasibility.scheduler_threads=1
+phase.feasibility.api_status=-1
+phase.feasibility.model_status=0
+phase.feasibility.info=unavailable
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 220 rows; 220 cols; 7420 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+36]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [1e+00, 2e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     0.0000000000e+00 Pr: 40(6.29146e+07); Du: 219(2.8077e+13) 0s
+ERROR:   Dual simplex detected excessive primal values: consider scaling down the LP bounds
+Model status        : Not Set
+HiGHS run time      :          0.00
