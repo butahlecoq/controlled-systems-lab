@@ -12,6 +12,7 @@ namespace {
 using namespace csl;
 using namespace csl::controllers;
 using csl::model::catalogue::DiscreteModelData;
+using csl::optimization::CompiledNominalQuadraticHistory;
 using csl::optimization::QuadraticHistoryStageCost;
 
 std::variant<DiscreteModelData, Diagnostics> load_model(std::size_t number) {
@@ -94,7 +95,6 @@ TEST_CASE("source profile factory records an explicit admission for every catalo
     const auto models = csl::model::catalogue::discrete_models();
     REQUIRE(models.size() == 35);
     std::size_t runnable = 0;
-    std::size_t deferred = 0;
     for (std::size_t i = 1; i <= models.size(); ++i) {
         const auto expected_model_id = "catalogue-2026/model-" + std::to_string(i) + "/1";
         CHECK(models[i - 1].id == expected_model_id);
@@ -114,19 +114,18 @@ TEST_CASE("source profile factory records an explicit admission for every catalo
         if (i == 3 || i == 11 || i == 18 || i == 31)
             choices.arrival_availability = ArrivalAvailability::before_decision;
         auto admission = make_source_task_profile(data.info.id, choices);
+        REQUIRE(std::holds_alternative<NominalMpcTask>(admission));
+        CHECK(std::get<NominalMpcTask>(admission).provenance.model_id == data.info.id);
         if (i == 30) {
-            REQUIRE(std::holds_alternative<DeferredTask>(admission));
-            CHECK(std::get<DeferredTask>(admission).reason.find("positive-part") !=
-                  std::string::npos);
-            ++deferred;
-        } else {
-            REQUIRE(std::holds_alternative<NominalMpcTask>(admission));
-            CHECK(std::get<NominalMpcTask>(admission).provenance.model_id == data.info.id);
-            ++runnable;
+            const auto &task = std::get<NominalMpcTask>(admission);
+            REQUIRE(task.control_positive_part_budgets.size() == task.final_stage);
+            REQUIRE(task.control_positive_part_budgets[0].size() == 1);
+            CHECK(task.control_positive_part_budgets[0][0].upper_bound == 1.0);
+            CHECK(task.control_positive_part_budgets[0][0].control_indices.size() == 30);
         }
+        ++runnable;
     }
-    CHECK(runnable == 34);
-    CHECK(deferred == 1);
+    CHECK(runnable == 35);
 }
 
 TEST_CASE("profile choices do not silently relax integer or source-availability semantics") {
@@ -175,8 +174,8 @@ TEST_CASE("model 26 source headway is a coupled transition and terminal state co
     CHECK(task.terminal_state_constraints.front().state_map.values[4] == -1.2);
 
     auto compiled = compile_mpc_decision(task, {0}, task.initial.point);
-    REQUIRE(std::holds_alternative<ConvexProgram>(compiled));
-    const auto &program = std::get<ConvexProgram>(compiled);
+    REQUIRE(std::holds_alternative<CompiledNominalQuadraticHistory>(compiled));
+    const auto &program = std::get<CompiledNominalQuadraticHistory>(compiled).program;
     const auto &qp = program.quadratic_program();
     CHECK(qp.constraints().rows() ==
           137); // initial/dynamics, control bounds, stage + terminal rows
@@ -204,8 +203,9 @@ TEST_CASE("interleaved model 34 and 35 resource budgets use their source control
         CHECK(row.bounds.front().upper == budget_upper);
 
         auto compiled = compile_mpc_decision(task, {0}, task.initial.point);
-        REQUIRE(std::holds_alternative<ConvexProgram>(compiled));
-        const auto &qp = std::get<ConvexProgram>(compiled).quadratic_program();
+        REQUIRE(std::holds_alternative<CompiledNominalQuadraticHistory>(compiled));
+        const auto &qp =
+            std::get<CompiledNominalQuadraticHistory>(compiled).program.quadratic_program();
         const auto state_count = 2 * data.coefficients.A.rows;
         const auto budget_row =
             find_control_budget_row(qp, state_count, resource_controls, budget_upper);
@@ -270,21 +270,27 @@ TEST_CASE(
     CHECK(availability.state_map.values[0] == -1.0);
     CHECK(availability.external_map.values[0] == -1.0);
     auto compiled = compile_mpc_decision(task, {0}, task.initial.point);
-    REQUIRE(std::holds_alternative<ConvexProgram>(compiled));
-    const auto &full_qp = std::get<ConvexProgram>(compiled).quadratic_program();
+    REQUIRE(std::holds_alternative<CompiledNominalQuadraticHistory>(compiled));
+    const auto &full_qp =
+        std::get<CompiledNominalQuadraticHistory>(compiled).program.quadratic_program();
     CHECK(full_qp.rows()[132].upper == 2.0); // state/control bounds precede availability rows
 
     const auto suffix = compile_mpc_decision(task, {1}, task.initial.point);
-    REQUIRE(std::holds_alternative<ConvexProgram>(suffix));
-    CHECK(std::get<ConvexProgram>(suffix).quadratic_program().constraints().rows() == 96);
+    REQUIRE(std::holds_alternative<CompiledNominalQuadraticHistory>(suffix));
+    CHECK(std::get<CompiledNominalQuadraticHistory>(suffix)
+              .program.quadratic_program()
+              .constraints()
+              .rows() == 96);
 
     auto two_state = std::get<DiscreteModelData>(load_model(7));
     auto cross_choices = choices_for(two_state, 1);
     cross_choices.running_costs[0].state_control_hessian.values[0] = 0.25;
     auto cross_task = task_for(7, std::move(cross_choices));
     auto cross_program = compile_mpc_decision(cross_task, {0}, cross_task.initial.point);
-    REQUIRE(std::holds_alternative<ConvexProgram>(cross_program));
-    const auto &hessian = std::get<ConvexProgram>(cross_program).quadratic_program().hessian();
+    REQUIRE(std::holds_alternative<CompiledNominalQuadraticHistory>(cross_program));
+    const auto &hessian = std::get<CompiledNominalQuadraticHistory>(cross_program)
+                              .program.quadratic_program()
+                              .hessian();
     const std::size_t state_count = 4;
     CHECK(hessian(0, state_count) == doctest::Approx(0.25));
     CHECK(hessian(state_count, 0) == doctest::Approx(0.25));
@@ -296,8 +302,9 @@ TEST_CASE("authored terminal constraints cannot encode a control at the terminal
     choices.terminal_state_constraints.push_back({Matrix{1, 2, {1.0, 0.0}}, {{0.0, 2.0}}});
     auto task = task_for(7, std::move(choices));
     auto compiled = compile_mpc_decision(task, {0}, task.initial.point);
-    REQUIRE(std::holds_alternative<ConvexProgram>(compiled));
-    const auto &qp = std::get<ConvexProgram>(compiled).quadratic_program();
+    REQUIRE(std::holds_alternative<CompiledNominalQuadraticHistory>(compiled));
+    const auto &qp =
+        std::get<CompiledNominalQuadraticHistory>(compiled).program.quadratic_program();
     CHECK(qp.constraints().rows() == 11);  // initial, dynamics, state/control bounds, one terminal
     CHECK(qp.constraints()(10, 2) == 1.0); // terminal x1 first state
 }

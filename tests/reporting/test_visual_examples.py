@@ -21,6 +21,7 @@ import control_witness_companions
 import stage_mpc06_tube
 import stage_syn03_nominal_exact_example as nominal_exact_example
 import stage_nominal_quadratic_history
+import stage_positive_part_budget_2d
 
 
 class Links(HTMLParser):
@@ -647,6 +648,83 @@ class GalleryTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "rounded output table changed"):
                 stage_nominal_quadratic_history.build(copied_root)
 
+    def test_positive_part_budget_stager_uses_shared_theme_and_native_capture(self):
+        files, entries, card = stage_positive_part_budget_2d.build(ROOT)
+        page = files[stage_positive_part_budget_2d.PAGE].decode("utf-8")
+        record = json.loads(files[stage_positive_part_budget_2d.RECORD])
+        figure = ET.fromstring(files[stage_positive_part_budget_2d.FIGURE])
+        self.assertEqual(record["source_commit"], stage_positive_part_budget_2d.SOURCE)
+        self.assertIn('href="examples.css"', page)
+        self.assertNotIn("<style", page)
+        self.assertIn("max(u₀,0)+max(u₁,0)≤0.1", page)
+        self.assertIn("pᵢ≥uᵢ", page)
+        self.assertIn("(0.2,−0.2)", page)
+        self.assertIn("(0.1,−0.2)", page)
+        self.assertIn("git worktree add --detach", page)
+        self.assertIn("-DCSL_ENABLE_HIGHS=ON", page)
+        self.assertIn("--target positive_part_budget_2d", page)
+        self.assertIn("-DCMAKE_PREFIX_PATH=$task_repro_root/install", page)
+        self.assertIn("task_repro_root/output", page)
+        self.assertEqual(record["answer"]["native_solution"], "(0.1,-0.2)")
+        self.assertEqual(record["answer"]["literal_objective"], 0.005)
+        self.assertEqual(record["evidence"]["assurance"],
+                         "numerical feasibility and objective check; no robustness or policy claim")
+        self.assertEqual(entries[0]["status"], "saved-data-illustration")
+        self.assertIn(stage_positive_part_budget_2d.PAGE, card)
+        self.assertEqual(figure.tag, "{http://www.w3.org/2000/svg}svg")
+        self.assertTrue(figure.find("{http://www.w3.org/2000/svg}desc").text)
+        self.assertEqual(files[stage_positive_part_budget_2d.VERTICES],
+                         (ROOT / "examples/positive_part_budget_2d/vertices.csv").read_bytes())
+        self.assertEqual(files[stage_positive_part_budget_2d.SOLUTION],
+                         (ROOT / "examples/positive_part_budget_2d/native-solution.csv").read_bytes())
+
+    def test_positive_part_stager_rejects_native_output_that_fails_the_literal_task(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            fixture = Path(temporary)
+            output = fixture / "examples/positive_part_budget_2d"
+            output.mkdir(parents=True)
+            (output / "feasible-set.svg").write_bytes(
+                (ROOT / "examples/positive_part_budget_2d/feasible-set.svg").read_bytes()
+            )
+            (output / "vertices.csv").write_bytes(stage_positive_part_budget_2d.EXPECTED_VERTICES)
+            (output / "native-solution.csv").write_text(
+                "coordinate,target,solution,lower,upper\n"
+                "u0,0.2,0.10000000000000001,-0.2,0.2\n"
+                "u1,-0.2,-0.20000000000000001,-0.2,0.2\n"
+                "positive_part_budget,0.1,0.10000000000000001,0,0.1\n",
+                encoding="ascii",
+            )
+            (output / "run.txt").write_text(
+                "source_constraint=sum(max(u_i,0))<=0.1\n"
+                "net_sum_surrogate_admits_target=true\n",
+                encoding="ascii",
+            )
+            (output / "native-example.stdout").write_text(
+                "Positive-part budget QP: u=(0.1,-0.2); sum(max(u,0))=0.1; "
+                "literal objective=0.005\n",
+                encoding="ascii",
+            )
+            (output / "binary.sha256").write_text("a" * 64 + "\n", encoding="ascii")
+            files, _, _ = stage_positive_part_budget_2d.build(fixture)
+            self.assertIn(stage_positive_part_budget_2d.PAGE, files)
+            from scripts.reports import audit_mathematical_presentation
+
+            self.assertEqual(
+                audit_mathematical_presentation.inspect_html(
+                    files[stage_positive_part_budget_2d.PAGE].decode("utf-8")
+                ),
+                [],
+            )
+            (output / "native-solution.csv").write_text(
+                "coordinate,target,solution,lower,upper\n"
+                "u0,0.2,0.2,-0.2,0.2\n"
+                "u1,-0.2,-0.2,-0.2,0.2\n"
+                "positive_part_budget,0.1,0.2,0,0.1\n",
+                encoding="ascii",
+            )
+            with self.assertRaisesRegex(ValueError, "independently recomputed task"):
+                stage_positive_part_budget_2d.build(fixture)
+
     def test_build_preserves_reports_and_has_resolvable_links(self):
         before = {p.relative_to(self.site): hashlib.sha256(p.read_bytes()).hexdigest()
                   for p in self.site.rglob("*") if p.is_file() and p.name != "index.html"}
@@ -668,6 +746,14 @@ class GalleryTests(unittest.TestCase):
                              if entry["anchor"] == "nominal-quadratic-history-2d")
         self.assertEqual(history_entry["status"], "analytic-illustration")
         self.assertEqual(history_entry["raw_record"], "nominal-quadratic-history-2d.json")
+        budget_page = self.site / "examples/positive-part-budget-2d.html"
+        self.assertTrue(budget_page.is_file())
+        self.assertTrue((self.site / "examples/positive-part-budget-2d.svg").is_file())
+        self.assertTrue((self.site / "examples/positive-part-budget-2d.json").is_file())
+        budget_html = budget_page.read_text(encoding="utf-8")
+        self.assertIn('href="examples.css"', budget_html)
+        self.assertIn('id="positive-part-budget-2d"', gallery_html)
+        self.assertIn("positive_part_budget_2d_native-solution.csv", budget_html)
         mpc_page = self.site / "examples/discrete-mpc-2d.html"
         self.assertTrue(mpc_page.is_file())
         self.assertTrue((self.site / "examples/discrete-mpc-2d.svg").is_file())
@@ -688,14 +774,18 @@ class GalleryTests(unittest.TestCase):
             guard_site = Path(temporary)
             (guard_site / "examples").mkdir()
             shutil.copyfile(mpc_page, guard_site / "examples/discrete-mpc-2d.html")
+            shutil.copyfile(budget_page, guard_site / "examples/positive-part-budget-2d.html")
             shutil.copyfile(self.site / "examples/index.html", guard_site / "examples/index.html")
             (guard_site / "examples/visual-coverage.json").write_text(json.dumps({
-                "entries": [{"page": "discrete-mpc-2d.html"}]}))
+                "entries": [{"page": "discrete-mpc-2d.html"},
+                            {"page": "positive-part-budget-2d.html"}]}))
             presentation = audit_mathematical_presentation.audit_site(
                 guard_site,
                 {"routes": [route_entry, next(
                     entry for entry in route_registry["routes"]
-                    if entry["route"] == "examples/index.html")],
+                    if entry["route"] == "examples/index.html"), next(
+                    entry for entry in route_registry["routes"]
+                    if entry["route"] == "examples/positive-part-budget-2d.html")],
                  "required_inventories": []})
         self.assertTrue(presentation["passed"], presentation["findings"][:8])
         cost_page = self.site / "examples/history-cost-2d-v1/index.html"
@@ -877,7 +967,7 @@ class GalleryTests(unittest.TestCase):
             if not urlsplit(link).scheme and not link.startswith("#"):
                 self.assertTrue((self.site / "examples" / link.split("#")[0]).is_file(), link)
         figures = list((self.site / "examples").glob("*.svg"))
-        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 31)
+        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 32)
         self.assertIn('id="saved-feedback-geometry-2d"', page)
         self.assertIn('id="native-fixed-tail-2d"', page)
         self.assertTrue((self.site / "examples/native-fixed-tail-2d.html").is_file())

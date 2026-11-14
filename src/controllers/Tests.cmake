@@ -14,3 +14,11 @@ add_executable(discrete_mpc_tests tests/unit/controllers/discrete_mpc_tests.cpp)
 target_link_libraries(discrete_mpc_tests PRIVATE CSL::controllers doctest::doctest)
 add_test(NAME discrete_mpc_tests COMMAND discrete_mpc_tests)
 csl_test_target(discrete_mpc_tests controllers)
+if(TARGET CSL::highs_convex)
+  add_executable(model30_positive_part_budget_tests
+    tests/unit/controllers/model30_positive_part_budget_tests.cpp)
+  target_link_libraries(model30_positive_part_budget_tests PRIVATE CSL::controllers
+    CSL::highs_convex doctest::doctest)
+  add_test(NAME model30_positive_part_budget_tests COMMAND model30_positive_part_budget_tests)
+  csl_test_target(model30_positive_part_budget_tests controllers)
+endif()
