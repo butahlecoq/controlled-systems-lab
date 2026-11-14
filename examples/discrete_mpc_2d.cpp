@@ -93,12 +93,44 @@ MpcEpisodeEvidence run(const NominalMpcTask &task, EpisodePolicy policy,
     auto evidence = execute_nominal_episode(task, policy, *workspace, context);
     if (evidence.stop != EpisodeStop::completed || !evidence.realized_objective ||
         evidence.realized_states.size() != task.final_stage + 1 ||
-        evidence.applied_controls.size() != task.final_stage)
+        evidence.applied_controls.size() != task.final_stage ||
+        evidence.decisions.size() != task.final_stage)
         throw std::runtime_error("Native episode did not complete with a realized objective");
+    for (std::size_t stage = 0; stage < task.final_stage; ++stage) {
+        const auto &decision = evidence.decisions[stage];
+        const bool should_solve = policy == EpisodePolicy::observed_state_mpc || stage == 0;
+        if (should_solve &&
+            (!decision.solve || !std::holds_alternative<ProgramResult>(*decision.solve) ||
+             !decision.program_identity || !decision.workspace_identity || !decision.attempt ||
+             decision.attempt->state != SolveAttemptState::returned_result))
+            throw std::runtime_error(
+                "Native episode omitted checked provider or solve-attempt evidence");
+        if (!decision.applied_control)
+            throw std::runtime_error("Native episode omitted an applied control");
+    }
     return evidence;
 }
 
 bool close(double left, double right) { return std::abs(left - right) <= 1e-7; }
+
+double literal_episode_objective(const MpcEpisodeEvidence &episode) {
+    double objective = 0.0;
+    for (std::size_t stage = 0; stage < episode.applied_controls.size(); ++stage) {
+        const auto &state = episode.realized_states[stage];
+        const auto &control = episode.applied_controls[stage];
+        objective +=
+            state[0] * state[0] + 0.5 * state[1] * state[1] + 0.25 * control[0] * control[0];
+    }
+    const auto &terminal = episode.realized_states.back();
+    return objective + 2.0 * terminal[0] * terminal[0] + terminal[1] * terminal[1];
+}
+
+void require_realized_objective(const MpcEpisodeEvidence &episode) {
+    if (!episode.realized_objective ||
+        !close(*episode.realized_objective, literal_episode_objective(episode)))
+        throw std::runtime_error(
+            "Episode objective differs from the independent executed-path cost calculation");
+}
 
 void require_matching(const MpcEpisodeEvidence &left, const MpcEpisodeEvidence &right) {
     if (left.realized_states.size() != right.realized_states.size() ||
@@ -160,6 +192,8 @@ int main(int argc, char **argv) try {
     const auto matched_mpc =
         run(matched_task, EpisodePolicy::observed_state_mpc, matched_probe, registration);
     require_matching(open_loop, matched_mpc);
+    require_realized_objective(open_loop);
+    require_realized_objective(matched_mpc);
 
     const auto replay_task = make_task(true);
     const auto replay_probe = std::get<ConvexProgram>(
@@ -168,6 +202,8 @@ int main(int argc, char **argv) try {
         run(replay_task, EpisodePolicy::nominal_open_loop, replay_probe, registration);
     const auto observed_mpc_replay =
         run(replay_task, EpisodePolicy::observed_state_mpc, replay_probe, registration);
+    require_realized_objective(open_loop_replay);
+    require_realized_objective(observed_mpc_replay);
     std::optional<std::size_t> first_divergence;
     for (std::size_t stage = 1; stage < replay_task.final_stage; ++stage)
         if (!first_divergence && !close(open_loop_replay.applied_controls[stage][0],
