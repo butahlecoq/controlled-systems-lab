@@ -98,11 +98,14 @@ int main(int argc, char **argv) try {
             }
             for (std::size_t i = 0; i < nx; ++i)
                 warm_start[*layout.state_index(0, i)] = observed_state[i];
+            const auto terminal_control_start = previous_layout->control_index(horizon - 1, 0);
+            if (!terminal_control_start || *terminal_control_start > previous_primal.size() ||
+                nu > previous_primal.size() - *terminal_control_start)
+                throw std::runtime_error("Source21 layout has no complete terminal control block");
             auto warm_terminal = take<Vector>(system.step(
                 {0},
                 std::span(previous_primal).subspan(previous_layout->state_variable_count - nx, nx),
-                std::span(previous_primal)
-                    .subspan(previous_layout->control_variable_count - nu, nu),
+                std::span(previous_primal).subspan(*terminal_control_start, nu),
                 Vector(model.external.size(), 0)));
             for (std::size_t i = 0; i < nx; ++i)
                 warm_start[*layout.state_index(horizon, i)] = warm_terminal[i];
