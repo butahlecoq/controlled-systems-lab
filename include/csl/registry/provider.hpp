@@ -87,9 +87,9 @@ struct ProviderAccess {
     static std::variant<CheckedProviders<Ports...>, Rejection>
     check_all(const ProviderSelection<Ports> &...selections) {
         auto entries = std::tuple{check(selections)...};
-        std::optional<Rejection> rejected;
-        std::apply(
-            [&](const auto &...entry) {
+        return std::apply(
+            [](auto &...entry) -> std::variant<CheckedProviders<Ports...>, Rejection> {
+                std::optional<Rejection> rejected;
                 (
                     [&] {
                         if (!rejected)
@@ -97,17 +97,14 @@ struct ProviderAccess {
                                 rejected = *r;
                     }(),
                     ...);
-            },
-            entries);
-        if (rejected)
-            return *rejected;
-        return std::apply(
-            [](auto &...entry) {
+                if (rejected)
+                    return *rejected;
                 return CheckedProviders<Ports...>{std::tuple<CheckedProviderEntry<Ports>...>{
                     std::get<CheckedProviderEntry<Ports>>(std::move(entry))...}};
             },
             entries);
     }
+
     template <class Port>
     static PreparedProvider<Port> snapshot(const CheckedProviderEntry<Port> &checked) {
         using Storage = typename PreparedProvider<Port>::Storage;
