@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/optimization/nominal_quadratic_history.hpp>
+#include <csl/optimization/objectives.hpp>
 
 #include <limits>
 
@@ -137,9 +138,12 @@ TEST_CASE("positive-part budgets use private epigraph columns after the canonica
     CHECK(layout.control_index(0, 0) == 2);
     CHECK(layout.control_index(1, 0) == std::nullopt);
     REQUIRE(qp.hessian().rows() == 8);
+    const auto objective_coefficients = qp.objective().coefficients();
+    REQUIRE(std::holds_alternative<QuadraticCoefficients>(objective_coefficients));
+    const auto &objective_linear = std::get<QuadraticCoefficients>(objective_coefficients).linear;
     for (std::size_t auxiliary = 5; auxiliary < 8; ++auxiliary) {
         CHECK(qp.hessian()(auxiliary, auxiliary) == 0.0);
-        CHECK(qp.linear()[auxiliary] == 0.0);
+        CHECK(objective_linear[auxiliary] == 0.0);
         CHECK(qp.variables()[auxiliary].lower == 0.0);
     }
     REQUIRE(qp.constraints().rows() == 6); // x0, dynamics, 3 epigraph rows, budget
