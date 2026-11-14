@@ -113,10 +113,9 @@ if(BUILD_TESTING)
 endif()
 endif()
 
-if(CSL_BUILD_MPC01_REPORT)
-include(cmake/JsonDependencies.cmake)
-include(cmake/Mpc01Dependencies.cmake)
-include(cmake/Mpc01Provenance.cmake)
+# The model/mapping contract is solver-independent. Keep its existing unit test
+# available to normal native testing without configuring measurement backends.
+if(CSL_BUILD_MPC01_REPORT OR BUILD_TESTING)
 add_library(csl_mpc01_model STATIC
   benchmarks/reporting/mpc01/model.cpp
   benchmarks/reporting/mpc01/fixtures.cpp
@@ -132,6 +131,21 @@ else()
 target_compile_options(csl_mpc01_model PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
 set_target_properties(csl_mpc01_model PROPERTIES POSITION_INDEPENDENT_CODE ON)
+if(BUILD_TESTING)
+add_executable(mpc01_model_tests tests/benchmarks/mpc01_model_tests.cpp)
+target_link_libraries(mpc01_model_tests PRIVATE csl_mpc01_model)
+target_compile_features(mpc01_model_tests PRIVATE cxx_std_20)
+add_test(NAME mpc01_model_contract COMMAND mpc01_model_tests
+  ${PROJECT_SOURCE_DIR}/examples/scenarios/double-integrator-generality.json
+  ${PROJECT_SOURCE_DIR}/docs/research/evidence/b04-reference-v1/canonical-case.json)
+set_tests_properties(mpc01_model_contract PROPERTIES LABELS "mpc01;contract")
+endif()
+endif()
+
+if(CSL_BUILD_MPC01_REPORT)
+include(cmake/JsonDependencies.cmake)
+include(cmake/Mpc01Dependencies.cmake)
+include(cmake/Mpc01Provenance.cmake)
 add_library(csl_mpc01_evidence STATIC
   benchmarks/reporting/mpc01/trajectory_evidence.cpp)
 target_include_directories(csl_mpc01_evidence PUBLIC
@@ -161,13 +175,6 @@ endif()
 csl_mpc01_attach_provenance(csl_mpc01_report)
 if(BUILD_TESTING)
 find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
-add_executable(mpc01_model_tests tests/benchmarks/mpc01_model_tests.cpp)
-target_link_libraries(mpc01_model_tests PRIVATE csl_mpc01_model)
-target_compile_features(mpc01_model_tests PRIVATE cxx_std_20)
-add_test(NAME mpc01_model_contract COMMAND mpc01_model_tests
-  ${PROJECT_SOURCE_DIR}/examples/scenarios/double-integrator-generality.json
-  ${PROJECT_SOURCE_DIR}/docs/research/evidence/b04-reference-v1/canonical-case.json)
-set_tests_properties(mpc01_model_contract PROPERTIES LABELS reporting)
 add_test(NAME mpc01_native_smoke COMMAND Python3::Interpreter
   ${PROJECT_SOURCE_DIR}/scripts/reports/mpc01/check_native_smoke.py
   $<TARGET_FILE:csl_mpc01_report> ${PROJECT_SOURCE_DIR})
