@@ -486,6 +486,7 @@ class StrategyAExecutionRunner final : public SynthesisWorkspace,
                 FamilyIdentity{problem.identity(), request, history.coordinates,
                                strategy,           version, proposal_lineage};
             auto exact_candidate_coordinates = history.coordinates;
+            const auto exact_candidate_metadata = history.relation.metadata();
             if ((exact_ts01 || exact_ts03) && result.termination == Termination::completed) {
                 receipt_ = registry::detail::StrategyARuntimeLineageReceipt{
                     prepared_request_,
@@ -589,8 +590,7 @@ class StrategyAExecutionRunner final : public SynthesisWorkspace,
                 result.complete_proposal =
                     CompleteFamilyProposal{proposal_identity, std::move(family)};
             }
-            if (nominal_exact && result.termination == Termination::completed &&
-                minimized.optimization) {
+            if (nominal_exact && result.termination == Termination::completed) {
                 const SymbolicArgument statement{
                     "bounded nominal linear exact-H profile",
                     "The selected compiled verifier reconstructs the complete nominal feasible-history relation and checks the exact minimizing face over the stored binary64 dyadic values."};
@@ -601,7 +601,7 @@ class StrategyAExecutionRunner final : public SynthesisWorkspace,
                     return result;
                 auto exact_relation = registry::detail::nominal_linear_exact_optimal_relation(
                     problem, {{"strategy-a/nominal-linear-exact-optimal-face"}},
-                    history.relation.metadata()->coordinate_labels,
+                    exact_candidate_metadata->coordinate_labels,
                     request.materialization_limit.value_or(
                         std::numeric_limits<std::size_t>::max()));
                 if (const auto *stopped = std::get_if<OperationStopped>(&exact_relation)) {
