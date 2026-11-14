@@ -63,6 +63,12 @@ def _fixture(bundle: Path) -> None:
         "source_tree": "controlled-systems-lab",
         "binary_sha256": "1" * 64,
         "provider": "csl.conic.superscs.history-cost@1",
+        "initialization": {
+            "start_mode": "cold_start",
+            "backend_identity": "csl.conic.superscs.history-cost@1",
+            "start_policy": "fresh SuperSCS conic function",
+            "readback_unavailable_reason": "interface does not expose internal start readbacks",
+        },
         "source_objective": "||x2-(1,1)||_2 + 0.5(|u0|+|u1|)",
         "result": {
             "source_J": 1,

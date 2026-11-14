@@ -113,7 +113,8 @@ def capture(source_root: Path, build_root: Path, output_root: Path, build_log: P
     line = stdout.decode("utf-8").strip()
     match = re.search(
         r"provider=([^;]+); source J=([^;]+); u0=([^;]+); u1=([^;]+); "
-        r"max H violation=([^;]+); (.+)$",
+        r"max H violation=([^;]+); start=cold; start policy=([^;]+); "
+        r"readback unavailable=([^;]+); (.+)$",
         line,
     )
     if match is None or match.group(1) != "csl.conic.superscs.history-cost@1":
@@ -136,12 +137,18 @@ def capture(source_root: Path, build_root: Path, output_root: Path, build_log: P
         "binary_sha256": _sha256(binary.read_bytes()),
         "provider": match.group(1),
         "source_objective": "||x2-(1,1)||_2 + 0.5(|u0|+|u1|)",
+        "initialization": {
+            "start_mode": "cold_start",
+            "backend_identity": match.group(1),
+            "start_policy": match.group(6),
+            "readback_unavailable_reason": match.group(7),
+        },
         "result": {
             "source_J": source_j,
             "u0": u0,
             "u1": u1,
             "maximum_history_violation": violation,
-            "diagnostics": match.group(6),
+            "diagnostics": match.group(8),
         },
         "reproduction_command": "\n".join(
             (

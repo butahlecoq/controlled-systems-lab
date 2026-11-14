@@ -87,6 +87,14 @@ def _receipt(bundle: Path) -> dict:
         receipt.get("provider") == "csl.conic.superscs.history-cost@1",
         "history optimizer provider identity differs",
     )
+    initialization = receipt.get("initialization", {})
+    report_data.require(
+        initialization.get("start_mode") == "cold_start"
+        and initialization.get("backend_identity") == receipt.get("provider")
+        and bool(initialization.get("start_policy"))
+        and bool(initialization.get("readback_unavailable_reason")),
+        "history optimizer cold-start evidence is incomplete",
+    )
     report_data.require(
         receipt.get("source_objective") == "||x2-(1,1)||_2 + 0.5(|u0|+|u1|)",
         "history optimizer authored source objective differs",
@@ -165,7 +173,8 @@ def _page(receipt: dict) -> bytes:
         "reevaluates the authored <code>J</code> and the full H-relation.</p>",
         "<p>This provider uses an explicit cold start: it creates a fresh conic function "
         "without primal or dual warm-start inputs. CasADi's conic result does not expose "
-        "internal initialization readbacks, so the receipt records that limitation. The "
+        "internal initialization readbacks; the native receipt records the policy and reason: "
+        f"<code>{escape(receipt['initialization']['readback_unavailable_reason'])}</code>. The "
         "core still checks the returned complete history against H and recomputes source J.</p>",
         "<h2>Saved native result</h2>",
         f"<p>Provider: <code>{escape(receipt['provider'])}</code>; binary SHA-256: "

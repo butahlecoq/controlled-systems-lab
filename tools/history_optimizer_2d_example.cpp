@@ -104,10 +104,12 @@ int main(int argc,char** argv) {
             throw std::runtime_error("whole-history solve failed");
         const auto& solved=std::get<optimization::HistoryOptimizationResult>(result);
         write_outputs(argv[1],solved);
+        const auto& cold=std::get<optimization::BackendColdStartEvidence>(solved.initialization);
         std::cout<<std::setprecision(17);
         std::cout<<"provider="<<method.id.value<<'@'<<*method.version<<"; source J="<<solved.source_cost.total
             <<"; u0="<<solved.history[6]<<"; u1="<<solved.history[7]<<"; max H violation="
-            <<solved.maximum_history_violation<<"; "<<solved.diagnostics<<"\n";
+            <<solved.maximum_history_violation<<"; start=cold; start policy="<<cold.start_policy
+            <<"; readback unavailable="<<cold.readback_unavailable_reason<<"; "<<solved.diagnostics<<"\n";
         return 0;
     } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;}
 }
