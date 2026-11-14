@@ -49,7 +49,9 @@ include = [
     "benchmarks/reporting/closed_loop/capabilities.py",
     "benchmarks/reporting/closed_loop/native_compositions.py",
     "benchmarks/reporting/closed_loop/run_closed_loop.py",
+    "benchmarks/reporting/closed_loop/run_campaign.py",
     "tests/reporting/test_native_compositions.py",
+    "tests/reporting/test_closed_loop_campaign.py",
     "tests/reporting/test_closed_loop_tracing.py",
     "scripts/reports/stage_positive_part_budget_2d.py",
 ]
@@ -109,7 +111,9 @@ include = [
     "benchmarks/reporting/closed_loop/capabilities.py",
     "benchmarks/reporting/closed_loop/native_compositions.py",
     "benchmarks/reporting/closed_loop/run_closed_loop.py",
+    "benchmarks/reporting/closed_loop/run_campaign.py",
     "tests/reporting/test_native_compositions.py",
+    "tests/reporting/test_closed_loop_campaign.py",
     "tests/reporting/test_closed_loop_tracing.py",
     "scripts/reports/stage_positive_part_budget_2d.py",
 ]
