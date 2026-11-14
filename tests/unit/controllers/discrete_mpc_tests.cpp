@@ -1,0 +1,224 @@
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include <csl/controllers/discrete_mpc.hpp>
+#include <doctest/doctest.h>
+
+#include <algorithm>
+#include <limits>
+#include <stdexcept>
+#include <string>
+
+namespace {
+using namespace csl;
+using namespace csl::controllers;
+using csl::model::catalogue::DiscreteModelData;
+using csl::optimization::QuadraticHistoryStageCost;
+
+std::variant<DiscreteModelData, Diagnostics> load_model(std::size_t number) {
+    return csl::model::catalogue::make_discrete_model("catalogue-2026/model-" +
+                                                      std::to_string(number) + "/1");
+}
+
+AuthoredTaskChoices choices_for(const DiscreteModelData &data, std::size_t horizon = 2) {
+    const auto nx = data.coefficients.A.rows;
+    const auto nu = data.coefficients.B.cols;
+    const auto nw = data.coefficients.E.cols;
+    Matrix q{nx, nx, Vector(nx * nx, 0.0)};
+    Matrix r{nu, nu, Vector(nu * nu, 0.0)};
+    for (std::size_t i = 0; i < nx; ++i)
+        q.values[i * nx + i] = 2.0;
+    for (std::size_t i = 0; i < nu; ++i)
+        r.values[i * nu + i] = 2.0;
+    std::vector<QuadraticHistoryStageCost> running;
+    for (std::size_t stage = 0; stage < horizon; ++stage)
+        running.push_back(
+            {q, Matrix{nx, nu, Vector(nx * nu, 0.0)}, r, Vector(nx, 0.0), Vector(nu, 0.0), 0.0});
+    return {{"authored-task-" + std::string(data.info.id)},
+            {"authored-program-" + std::string(data.info.id)},
+            "authored-profile",
+            "raw-identity-quadratic-v1",
+            "two-stage-test-v1",
+            horizon,
+            running,
+            QuadraticTerminal{q, Vector(nx, 0.0), 0.0},
+            std::vector<Vector>(horizon, Vector(nw, 0.0)),
+            "zero-forecast-test",
+            std::vector<Vector>(horizon, Vector(nw, 0.0)),
+            "zero-replay-test"};
+}
+
+NominalMpcTask task_for(std::size_t number, AuthoredTaskChoices choices) {
+    auto loaded = load_model(number);
+    if (!std::holds_alternative<DiscreteModelData>(loaded))
+        throw std::runtime_error("catalogue model not found");
+    const auto &data = std::get<DiscreteModelData>(loaded);
+    if (number == 4 || number == 9 || number == 10)
+        choices.domain_choice = DomainChoice::explicit_continuous_relaxation;
+    if (number == 24 || number == 25 || number == 27) {
+        choices.domain_choice = DomainChoice::authored_continuous_domain;
+        choices.authored_state_bounds =
+            std::vector<Interval>(data.coefficients.A.rows, Interval{-100.0, 100.0});
+        choices.authored_control_bounds =
+            std::vector<Interval>(data.coefficients.B.cols, Interval{-100.0, 100.0});
+    }
+    if (number == 3 || number == 11 || number == 18 || number == 31)
+        choices.arrival_availability = ArrivalAvailability::before_decision;
+    auto admission = make_source_task_profile(data.info.id, choices);
+    if (!std::holds_alternative<NominalMpcTask>(admission))
+        throw std::runtime_error("model profile was not admitted");
+    return std::get<NominalMpcTask>(std::move(admission));
+}
+} // namespace
+
+TEST_CASE("source profile factory records an explicit admission for every catalogue model") {
+    const auto models = csl::model::catalogue::discrete_models();
+    REQUIRE(models.size() == 35);
+    std::size_t runnable = 0;
+    std::size_t deferred = 0;
+    for (std::size_t i = 1; i <= models.size(); ++i) {
+        auto loaded = load_model(i);
+        REQUIRE(std::holds_alternative<DiscreteModelData>(loaded));
+        auto data = std::get<DiscreteModelData>(std::move(loaded));
+        auto choices = choices_for(data, 1);
+        if (i == 4 || i == 9 || i == 10)
+            choices.domain_choice = DomainChoice::explicit_continuous_relaxation;
+        if (i == 24 || i == 25 || i == 27) {
+            choices.domain_choice = DomainChoice::authored_continuous_domain;
+            choices.authored_state_bounds =
+                std::vector<Interval>(data.coefficients.A.rows, Interval{-100.0, 100.0});
+            choices.authored_control_bounds =
+                std::vector<Interval>(data.coefficients.B.cols, Interval{-100.0, 100.0});
+        }
+        if (i == 3 || i == 11 || i == 18 || i == 31)
+            choices.arrival_availability = ArrivalAvailability::before_decision;
+        auto admission = make_source_task_profile(data.info.id, choices);
+        if (i == 30) {
+            REQUIRE(std::holds_alternative<DeferredTask>(admission));
+            CHECK(std::get<DeferredTask>(admission).reason.find("positive-part") !=
+                  std::string::npos);
+            ++deferred;
+        } else {
+            REQUIRE(std::holds_alternative<NominalMpcTask>(admission));
+            CHECK(std::get<NominalMpcTask>(admission).provenance.model_id == data.info.id);
+            ++runnable;
+        }
+    }
+    CHECK(runnable == 34);
+    CHECK(deferred == 1);
+}
+
+TEST_CASE("profile choices do not silently relax integer or source-availability semantics") {
+    auto integer_model = std::get<DiscreteModelData>(load_model(9));
+    auto integer_choices = choices_for(integer_model, 1);
+    auto integer_admission = make_source_task_profile(integer_model.info.id, integer_choices);
+    REQUIRE(std::holds_alternative<DeferredTask>(integer_admission));
+    CHECK(std::get<DeferredTask>(integer_admission).reason.find("integer") != std::string::npos);
+
+    auto arrival_model = std::get<DiscreteModelData>(load_model(31));
+    auto arrival_choices = choices_for(arrival_model, 1);
+    auto arrival_admission = make_source_task_profile(arrival_model.info.id, arrival_choices);
+    REQUIRE(std::holds_alternative<DeferredTask>(arrival_admission));
+    CHECK(std::get<DeferredTask>(arrival_admission).reason.find("before-decision") !=
+          std::string::npos);
+}
+
+TEST_CASE("model 26 source headway is a coupled transition and terminal state constraint") {
+    auto task = task_for(26, choices_for(std::get<DiscreteModelData>(load_model(26)), 2));
+    REQUIRE(task.stage_constraints.size() == 2);
+    REQUIRE(task.stage_constraints.front().bounds.size() == 9);
+    REQUIRE(task.terminal_state_constraints.size() == 1);
+    CHECK(task.terminal_state_constraints.front().bounds.size() == 9);
+    CHECK(task.terminal_state_constraints.front().state_map.values[0] == 1.0);
+    CHECK(task.terminal_state_constraints.front().state_map.values[3] == -1.0);
+    CHECK(task.terminal_state_constraints.front().state_map.values[4] == -1.2);
+
+    auto compiled = compile_mpc_decision(task, {0}, task.initial.point);
+    REQUIRE(std::holds_alternative<ConvexProgram>(compiled));
+    const auto &program = std::get<ConvexProgram>(compiled);
+    const auto &qp = program.quadratic_program();
+    CHECK(qp.constraints().rows() ==
+          137); // initial/dynamics, control bounds, stage + terminal rows
+    CHECK(qp.rows()[110].lower == 2.0);
+    CHECK(qp.constraints()(110, 0) == 1.0);
+    CHECK(qp.constraints()(110, 3) == -1.0);
+    CHECK(qp.constraints()(110, 4) == -1.2);
+    CHECK(qp.rows()[128].lower == 2.0);
+    CHECK(qp.constraints()(128, 60) == 1.0); // terminal x[T], no terminal control column
+    CHECK(qp.constraints()(128, 63) == -1.0);
+    CHECK(qp.constraints()(128, 64) == -1.2);
+}
+
+TEST_CASE(
+    "remaining-horizon compiler shifts forecast rows and preserves cross-Hessian convention") {
+    auto data = std::get<DiscreteModelData>(load_model(31));
+    auto choices = choices_for(data, 2);
+    choices.forecast_external[0][0] = 2.0;
+    auto task = task_for(31, choices);
+    REQUIRE(task.stage_constraints.size() == 2);
+    const auto &availability = task.stage_constraints.front();
+    CHECK(availability.control_map.values[0] == 1.0);
+    CHECK(availability.state_map.values[0] == -1.0);
+    CHECK(availability.external_map.values[0] == -1.0);
+    auto compiled = compile_mpc_decision(task, {0}, task.initial.point);
+    REQUIRE(std::holds_alternative<ConvexProgram>(compiled));
+    const auto &full_qp = std::get<ConvexProgram>(compiled).quadratic_program();
+    CHECK(full_qp.rows()[132].upper == 2.0); // state/control bounds precede availability rows
+
+    const auto suffix = compile_mpc_decision(task, {1}, task.initial.point);
+    REQUIRE(std::holds_alternative<ConvexProgram>(suffix));
+    CHECK(std::get<ConvexProgram>(suffix).quadratic_program().constraints().rows() == 96);
+
+    auto two_state = std::get<DiscreteModelData>(load_model(7));
+    auto cross_choices = choices_for(two_state, 1);
+    cross_choices.running_costs[0].state_control_hessian.values[0] = 0.25;
+    auto cross_task = task_for(7, std::move(cross_choices));
+    auto cross_program = compile_mpc_decision(cross_task, {0}, cross_task.initial.point);
+    REQUIRE(std::holds_alternative<ConvexProgram>(cross_program));
+    const auto &hessian = std::get<ConvexProgram>(cross_program).quadratic_program().hessian();
+    const std::size_t state_count = 4;
+    CHECK(hessian(0, state_count) == doctest::Approx(0.25));
+    CHECK(hessian(state_count, 0) == doctest::Approx(0.25));
+}
+
+TEST_CASE("authored terminal constraints cannot encode a control at the terminal stage") {
+    auto data = std::get<DiscreteModelData>(load_model(7));
+    auto choices = choices_for(data, 1);
+    choices.terminal_state_constraints.push_back({Matrix{1, 2, {1.0, 0.0}}, {{0.0, 2.0}}});
+    auto task = task_for(7, std::move(choices));
+    auto compiled = compile_mpc_decision(task, {0}, task.initial.point);
+    REQUIRE(std::holds_alternative<ConvexProgram>(compiled));
+    const auto &qp = std::get<ConvexProgram>(compiled).quadratic_program();
+    CHECK(qp.constraints().rows() == 11);  // initial, dynamics, state/control bounds, one terminal
+    CHECK(qp.constraints()(10, 2) == 1.0); // terminal x1 first state
+}
+
+TEST_CASE("profile admission rejects malformed authored schedules and bounds") {
+    const auto data = std::get<DiscreteModelData>(load_model(7));
+    auto wrong_forecast = choices_for(data, 2);
+    wrong_forecast.forecast_external[1].push_back(1.0);
+    auto forecast_admission = make_source_task_profile(data.info.id, wrong_forecast);
+    REQUIRE(std::holds_alternative<Diagnostics>(forecast_admission));
+    CHECK(std::get<Diagnostics>(forecast_admission).front().field ==
+          "task.choices.forecast_external");
+
+    auto nonfinite_replay = choices_for(data, 2);
+    nonfinite_replay.replay_external[0][0] = std::numeric_limits<double>::infinity();
+    auto replay_admission = make_source_task_profile(data.info.id, nonfinite_replay);
+    REQUIRE(std::holds_alternative<Diagnostics>(replay_admission));
+    CHECK(std::get<Diagnostics>(replay_admission).front().field == "task.choices.replay_external");
+
+    auto empty_intersection = choices_for(data, 2);
+    empty_intersection.authored_control_bounds =
+        std::vector<Interval>(data.coefficients.B.cols, Interval{11.0, 30.0});
+    auto bound_admission = make_source_task_profile(data.info.id, empty_intersection);
+    REQUIRE(std::holds_alternative<Diagnostics>(bound_admission));
+    CHECK(std::get<Diagnostics>(bound_admission).front().field == "task.bounds.intersection");
+
+    auto malformed_terminal = choices_for(data, 2);
+    malformed_terminal.terminal_state_constraints.push_back(
+        {Matrix{1, data.coefficients.A.rows + 1, Vector(data.coefficients.A.rows + 1, 1.0)},
+         {{0.0, 1.0}}});
+    auto terminal_admission = make_source_task_profile(data.info.id, malformed_terminal);
+    REQUIRE(std::holds_alternative<Diagnostics>(terminal_admission));
+    CHECK(std::get<Diagnostics>(terminal_admission).front().field ==
+          "task.choices.terminal_state_constraints");
+}
