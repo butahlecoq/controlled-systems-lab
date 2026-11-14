@@ -341,6 +341,8 @@ int main(int argc, char **argv) try {
         if (std::abs(terminal[coordinate] - oracle.terminal[coordinate]) > 1e-8)
             throw std::runtime_error("Feasible witness differs from affine-hull optimum");
     const auto oracle_objective = terminal_objective(oracle.terminal);
+    constexpr std::array<double, 4> article_terminal{25.013, -1.4669, 20.016, -1.5798};
+    const auto article_point_objective = terminal_objective(article_terminal);
     if (std::abs(recomputed - oracle_objective) > 1e-7 * (1 + std::abs(oracle_objective)))
         throw std::runtime_error(
             "Feasible control witness does not attain the independent lower bound");
@@ -364,6 +366,7 @@ int main(int argc, char **argv) try {
         std::cout << (coordinate ? "," : "")
                   << primal.at(*history.layout.state_index(10, coordinate));
     std::cout << " oracle_objective=" << oracle_objective
+              << " article_point_objective=" << article_point_objective
               << " article_reported_objective=4.6608 article_minus_oracle="
               << (4.6608 - oracle_objective)
               << " oracle=terminal-affine-hull-lower-bound-attained-by-feasible-witness\n";
