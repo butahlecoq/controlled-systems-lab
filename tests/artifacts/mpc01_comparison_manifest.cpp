@@ -15,12 +15,14 @@ TEST_CASE("MPC-01 comparison records pass artifact manifest validation") {
     std::string line;
     while (std::getline(input, line)) {
         // Treat CRLF as JSONL framing; the carriage return is not record content.
-        if (!line.empty() && line.back() == '\r') line.pop_back();
-        if (line.empty()) continue;
+        if (!line.empty() && line.back() == '\r')
+            line.pop_back();
+        if (line.empty())
+            continue;
         const auto decoded = csl::artifacts::decode_recorded_comparison(line);
-        if (const auto* error = std::get_if<csl::artifacts::ArtifactError>(&decoded)) {
-            FAIL("MPC-01 comparison record " << records << " rejected at " << error->path
-                << ": " << error->message);
+        if (const auto *error = std::get_if<csl::artifacts::ArtifactError>(&decoded)) {
+            FAIL("MPC-01 comparison record " << records << " rejected at " << error->path << ": "
+                                             << error->message);
         }
         CHECK(std::holds_alternative<csl::artifacts::RecordedComparisonArtifact>(decoded));
         ++records;
@@ -29,7 +31,7 @@ TEST_CASE("MPC-01 comparison records pass artifact manifest validation") {
     CHECK(records == 7);
 }
 
-void check_strategy_ab_record(const char* path) {
+void check_strategy_ab_record(const char *path) {
     std::ifstream input(path, std::ios::binary);
     REQUIRE(input.good());
     const std::string wire{std::istreambuf_iterator<char>{input}, std::istreambuf_iterator<char>{}};
@@ -38,8 +40,9 @@ void check_strategy_ab_record(const char* path) {
     CHECK(wire.back() != '\n');
 
     const auto decoded = csl::artifacts::decode_recorded_comparison(wire);
-    if (const auto* error = std::get_if<csl::artifacts::ArtifactError>(&decoded)) {
-        FAIL("MPC-01 Strategy A/B comparison rejected at " << error->path << ": " << error->message);
+    if (const auto *error = std::get_if<csl::artifacts::ArtifactError>(&decoded)) {
+        FAIL("MPC-01 Strategy A/B comparison rejected at " << error->path << ": "
+                                                           << error->message);
     }
     CHECK(std::holds_alternative<csl::artifacts::RecordedComparisonArtifact>(decoded));
 }

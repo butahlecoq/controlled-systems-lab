@@ -30,8 +30,9 @@ struct PlanCheck {
     Diagnostics diagnostics;
 };
 
-PlanCheck check_inner_state_plan(const problem::ResolvedProblem&,const StageSetReference&,
-    const registry::Registry<registry::ApproximationPort>&,registry::Method,
-    const ApproximationRequest&,const Witness&,const ExecutionContext& = {});
+PlanCheck check_inner_state_plan(const problem::ResolvedProblem &, const StageSetReference &,
+                                 const registry::Registry<registry::ApproximationPort> &,
+                                 registry::Method, const ApproximationRequest &, const Witness &,
+                                 const ExecutionContext & = {});
 
 } // namespace csl::geometry::approximation

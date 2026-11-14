@@ -4,7 +4,7 @@
 
 int main() {
     using Expected = csl::synthesis::ControlRecoveryOutcome (*)(
-        const csl::problem::ResolvedProblem&, const csl::sets::SetData&);
+        const csl::problem::ResolvedProblem &, const csl::sets::SetData &);
     static_assert(std::is_same_v<decltype(&csl::synthesis::recover_joint_history), Expected>);
     return 0;
 }

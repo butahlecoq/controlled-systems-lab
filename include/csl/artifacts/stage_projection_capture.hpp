@@ -33,16 +33,16 @@ struct StageProjectionSuccess {
         std::optional<registry::Provenance> provider;
         std::optional<StopReason> stop_reason;
     };
-    using MaterializationOutcome = std::variant<std::monostate, Materialization,
-        MaterializationFailure>;
+    using MaterializationOutcome =
+        std::variant<std::monostate, Materialization, MaterializationFailure>;
     // Optional equivalent finite-point representation used by saved figures.
     // The projection itself remains the original 2D relation and evidence.
     // A failed optional figure conversion does not invalidate the projection.
     MaterializationOutcome materialization_outcome;
 };
 
-using StageProjectionOutcome = std::variant<StageProjectionSuccess, StageProjectionUnavailable,
-    StageProjectionFailure>;
+using StageProjectionOutcome =
+    std::variant<StageProjectionSuccess, StageProjectionUnavailable, StageProjectionFailure>;
 
 struct StageProjectionRecord {
     StageIndex stage;
@@ -61,12 +61,12 @@ struct StageProjectionBatchCapture {
     std::vector<StageProjectionRecord> records;
 };
 
-using StageProjectionCaptureOutcome = std::variant<StageProjectionBatchCapture,
-    Unsupported, ArtifactError>;
+using StageProjectionCaptureOutcome =
+    std::variant<StageProjectionBatchCapture, Unsupported, ArtifactError>;
 
-StageProjectionCaptureOutcome capture_stage_projections(
-    const StageProjectionCaptureRequest&,
-    const registry::PreparedProvider<registry::GeometryPort>&,
-    const ExecutionContext& = {});
+StageProjectionCaptureOutcome
+capture_stage_projections(const StageProjectionCaptureRequest &,
+                          const registry::PreparedProvider<registry::GeometryPort> &,
+                          const ExecutionContext & = {});
 
 } // namespace csl::artifacts

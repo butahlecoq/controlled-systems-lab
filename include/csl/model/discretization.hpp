@@ -10,8 +10,10 @@ namespace csl::model {
 
 enum class HoldConvention { zero_order_hold };
 enum class CoefficientVariation { constant_lti, piecewise_linear_ltv };
-struct CoefficientEndpoints { LinearStage start, end; };
-using ContinuousCoefficients = std::variant<LinearStage,std::vector<CoefficientEndpoints>>;
+struct CoefficientEndpoints {
+    LinearStage start, end;
+};
+using ContinuousCoefficients = std::variant<LinearStage, std::vector<CoefficientEndpoints>>;
 
 // Coefficients are rates per physical time. Indexed endpoints interpolate
 // linearly within each interval; neighboring intervals may be discontinuous.
@@ -45,9 +47,8 @@ struct DiscretizedModel {
     Vector times;
     DiscretizationReceipt receipt;
 };
-using DiscretizationResult = std::variant<DiscretizedModel,Diagnostic,OperationStopped>;
+using DiscretizationResult = std::variant<DiscretizedModel, Diagnostic, OperationStopped>;
 
-DiscretizationResult discretize(const ContinuousAffineModel&,
-                                const IntegrationOptions& = {});
+DiscretizationResult discretize(const ContinuousAffineModel &, const IntegrationOptions & = {});
 
 } // namespace csl::model

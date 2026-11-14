@@ -113,9 +113,8 @@ compile_nominal_quadratic_history(const NominalQuadraticHistoryTask &task) {
                 "history_qp.running_costs",
                 "Every running quadratic must have dimension-matched finite blocks and coefficients."));
     }
-    if (!valid_matrix(task.terminal_cost.Q, nx, nx) ||
-        task.terminal_cost.linear.size() != nx || !finite(task.terminal_cost.linear) ||
-        !std::isfinite(task.terminal_cost.offset))
+    if (!valid_matrix(task.terminal_cost.Q, nx, nx) || task.terminal_cost.linear.size() != nx ||
+        !finite(task.terminal_cost.linear) || !std::isfinite(task.terminal_cost.offset))
         return fail(
             invalid("history_qp.terminal_cost",
                     "The terminal quadratic must have dimension-matched finite coefficients."));

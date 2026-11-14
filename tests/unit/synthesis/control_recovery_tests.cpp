@@ -6,24 +6,20 @@
 using namespace csl;
 
 namespace {
-template<class T, class... E>
-T take(std::variant<T, E...> value) {
+template <class T, class... E> T take(std::variant<T, E...> value) {
     REQUIRE(std::holds_alternative<T>(value));
     return std::get<T>(std::move(value));
 }
 
-numeric::MatrixView matrix(Matrix value) {
-    return take(numeric::snapshot(value));
-}
+numeric::MatrixView matrix(Matrix value) { return take(numeric::snapshot(value)); }
 
-numeric::VectorView vector(Vector value) {
-    return take(numeric::snapshot_vector(value));
-}
+numeric::VectorView vector(Vector value) { return take(numeric::snapshot_vector(value)); }
 
 SetHandle interval(std::string id, double lower, double upper, std::string label) {
     return take(sets::make_h({{std::move(id)}, 1, {std::move(label)}},
-        {matrix({2, 1, {1, -1}}), vector({upper, -lower}),
-         matrix({0, 1, {}}), vector({})})).as_handle();
+                             {matrix({2, 1, {1, -1}}), vector({upper, -lower}), matrix({0, 1, {}}),
+                              vector({})}))
+        .as_handle();
 }
 
 sets::SetData interval_data(std::string id, double lower, double upper) {
@@ -33,125 +29,159 @@ sets::SetData interval_data(std::string id, double lower, double upper) {
 problem::ResolvedProblem integrator(std::optional<double> stage_one_upper = std::nullopt,
                                     bool finite_controls = false) {
     const auto model = std::make_shared<const SystemModel>(SystemModel{
-        {{1, 1, 0}, TimeDomain::discrete,
-         LinearStage{{1, 1, {1}}, {1, 1, {1}}, {1, 0, {}}, {0}}}, {}});
-    ControlDomain controls = ContinuousDomain{{
-        interval("u0", 0, 1, "u0"), interval("u1", 0, 1, "u1")}};
-    if (finite_controls) controls = FiniteDomain{1, {{0}, {1}}};
-    std::vector<AdmissibleSet> states{
-        Singleton{{0}}, UniversalSet{1}, UniversalSet{1}};
-    if (stage_one_upper) states[1] = interval("x1", 0, *stage_one_upper, "x1");
-    Problem source{{"control-recovery-integrator"}, model, {0, 1, 2},
-        KnownInitial{{0}}, std::move(controls), std::move(states), {}, {},
-        InformationPattern::nominal_open_loop, LinearTerminal{{0}, 0}};
-    return take(problem::resolve(source,
-        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}));
+        {{1, 1, 0}, TimeDomain::discrete, LinearStage{{1, 1, {1}}, {1, 1, {1}}, {1, 0, {}}, {0}}},
+        {}});
+    ControlDomain controls =
+        ContinuousDomain{{interval("u0", 0, 1, "u0"), interval("u1", 0, 1, "u1")}};
+    if (finite_controls)
+        controls = FiniteDomain{1, {{0}, {1}}};
+    std::vector<AdmissibleSet> states{Singleton{{0}}, UniversalSet{1}, UniversalSet{1}};
+    if (stage_one_upper)
+        states[1] = interval("x1", 0, *stage_one_upper, "x1");
+    Problem source{{"control-recovery-integrator"},
+                   model,
+                   {0, 1, 2},
+                   KnownInitial{{0}},
+                   std::move(controls),
+                   std::move(states),
+                   {},
+                   {},
+                   InformationPattern::nominal_open_loop,
+                   LinearTerminal{{0}, 0}};
+    return take(
+        problem::resolve(source, {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}));
 }
 
 problem::ResolvedProblem singular_integrator() {
-    const auto model = std::make_shared<const SystemModel>(SystemModel{
-        {{1, 1, 0}, TimeDomain::discrete,
-         std::vector<LinearStage>{
-             {{1, 1, {0}}, {1, 1, {1}}, {1, 0, {}}, {0}},
-             {{1, 1, {0}}, {1, 1, {1}}, {1, 0, {}}, {0}}}}, {}});
-    Problem source{{"control-recovery-singular-integrator"}, model, {0, 1, 2},
-        KnownInitial{{0}}, ContinuousDomain{{
-            interval("singular-u0", 0, 1, "u0"), interval("singular-u1", 0, 1, "u1")}},
-        {Singleton{{0}}, UniversalSet{1}, UniversalSet{1}}, {}, {},
-        InformationPattern::nominal_open_loop, LinearTerminal{{0}, 0}};
-    return take(problem::resolve(source,
-        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}));
+    const auto model = std::make_shared<const SystemModel>(
+        SystemModel{{{1, 1, 0},
+                     TimeDomain::discrete,
+                     std::vector<LinearStage>{{{1, 1, {0}}, {1, 1, {1}}, {1, 0, {}}, {0}},
+                                              {{1, 1, {0}}, {1, 1, {1}}, {1, 0, {}}, {0}}}},
+                    {}});
+    Problem source{{"control-recovery-singular-integrator"},
+                   model,
+                   {0, 1, 2},
+                   KnownInitial{{0}},
+                   ContinuousDomain{
+                       {interval("singular-u0", 0, 1, "u0"), interval("singular-u1", 0, 1, "u1")}},
+                   {Singleton{{0}}, UniversalSet{1}, UniversalSet{1}},
+                   {},
+                   {},
+                   InformationPattern::nominal_open_loop,
+                   LinearTerminal{{0}, 0}};
+    return take(
+        problem::resolve(source, {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}));
 }
 
 problem::ResolvedProblem zero_state_integrator() {
     const auto model = std::make_shared<const SystemModel>(SystemModel{
-        {{0, 1, 0}, TimeDomain::discrete,
-         LinearStage{{0, 0, {}}, {0, 1, {}}, {0, 0, {}}, {}}}, {}});
-    Problem source{{"control-recovery-zero-state"}, model, {0, 1, 2},
-        KnownInitial{{}}, ContinuousDomain{{
-            interval("zero-state-u0", -1, 1, "u0"),
-            interval("zero-state-u1", -1, 1, "u1")}},
-        {UniversalSet{0}, UniversalSet{0}, UniversalSet{0}}, {}, {},
-        InformationPattern::nominal_open_loop, LinearTerminal{{}, 0}};
-    return take(problem::resolve(source,
-        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}));
+        {{0, 1, 0}, TimeDomain::discrete, LinearStage{{0, 0, {}}, {0, 1, {}}, {0, 0, {}}, {}}},
+        {}});
+    Problem source{{"control-recovery-zero-state"},
+                   model,
+                   {0, 1, 2},
+                   KnownInitial{{}},
+                   ContinuousDomain{{interval("zero-state-u0", -1, 1, "u0"),
+                                     interval("zero-state-u1", -1, 1, "u1")}},
+                   {UniversalSet{0}, UniversalSet{0}, UniversalSet{0}},
+                   {},
+                   {},
+                   InformationPattern::nominal_open_loop,
+                   LinearTerminal{{}, 0}};
+    return take(
+        problem::resolve(source, {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}));
 }
 
 problem::ResolvedProblem two_state_two_stage_system() {
     const auto model = std::make_shared<const SystemModel>(SystemModel{
-        {{2, 1, 0}, TimeDomain::discrete,
-         std::vector<LinearStage>{
-             {{2, 2, {1, 0, 0, 1}}, {2, 1, {1, 0}}, {2, 0, {}}, {0, 0}},
-             {{2, 2, {1, 0, 0, 1}}, {2, 1, {0, 1}}, {2, 0, {}}, {0, 0}}}}, {}});
-    Problem source{{"control-recovery-stage-map"}, model, {0, 1, 2},
-        KnownInitial{{1, -1}}, ContinuousDomain{{
-            interval("stage-map-u0", -1, 1, "u0"),
-            interval("stage-map-u1", -1, 1, "u1")}},
-        {UniversalSet{2}, UniversalSet{2}, UniversalSet{2}}, {}, {},
-        InformationPattern::nominal_open_loop, LinearTerminal{{0, 0}, 0}};
-    return take(problem::resolve(source,
-        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}));
+        {{2, 1, 0},
+         TimeDomain::discrete,
+         std::vector<LinearStage>{{{2, 2, {1, 0, 0, 1}}, {2, 1, {1, 0}}, {2, 0, {}}, {0, 0}},
+                                  {{2, 2, {1, 0, 0, 1}}, {2, 1, {0, 1}}, {2, 0, {}}, {0, 0}}}},
+        {}});
+    Problem source{{"control-recovery-stage-map"},
+                   model,
+                   {0, 1, 2},
+                   KnownInitial{{1, -1}},
+                   ContinuousDomain{{interval("stage-map-u0", -1, 1, "u0"),
+                                     interval("stage-map-u1", -1, 1, "u1")}},
+                   {UniversalSet{2}, UniversalSet{2}, UniversalSet{2}},
+                   {},
+                   {},
+                   InformationPattern::nominal_open_loop,
+                   LinearTerminal{{0, 0}, 0}};
+    return take(
+        problem::resolve(source, {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}));
 }
 
-bool contains(const sets::SetData& set, const Vector& point) {
+bool contains(const sets::SetData &set, const Vector &point) {
     const auto representation = set.representation();
-    if (const auto* h = std::get_if<sets::HRepresentation>(&representation)) {
-        if (point.size() != h->inequalities.cols()) return false;
+    if (const auto *h = std::get_if<sets::HRepresentation>(&representation)) {
+        if (point.size() != h->inequalities.cols())
+            return false;
         for (std::size_t row = 0; row < h->inequalities.rows(); ++row) {
             double lhs = 0;
             for (std::size_t col = 0; col < point.size(); ++col)
                 lhs += h->inequalities(row, col) * point[col];
-            if (lhs > h->upper_bounds[row] + 1e-8) return false;
+            if (lhs > h->upper_bounds[row] + 1e-8)
+                return false;
         }
         for (std::size_t row = 0; row < h->equalities.rows(); ++row) {
             double lhs = 0;
             for (std::size_t col = 0; col < point.size(); ++col)
                 lhs += h->equalities(row, col) * point[col];
-            if (std::abs(lhs - h->equality_values[row]) > 1e-8) return false;
+            if (std::abs(lhs - h->equality_values[row]) > 1e-8)
+                return false;
         }
         return true;
     }
-    if (const auto* singleton = std::get_if<sets::SingletonRepresentation>(&representation)) {
-        if (point.size() != singleton->point.size()) return false;
+    if (const auto *singleton = std::get_if<sets::SingletonRepresentation>(&representation)) {
+        if (point.size() != singleton->point.size())
+            return false;
         for (std::size_t i = 0; i < point.size(); ++i)
-            if (std::abs(point[i] - singleton->point[i]) > 1e-8) return false;
+            if (std::abs(point[i] - singleton->point[i]) > 1e-8)
+                return false;
         return true;
     }
-    if (std::holds_alternative<sets::UniversalRepresentation>(representation)) return true;
+    if (std::holds_alternative<sets::UniversalRepresentation>(representation))
+        return true;
     return std::holds_alternative<sets::EmptyRepresentation>(representation) && false;
 }
 
-bool sparse_h(const sets::SetData& set) {
+bool sparse_h(const sets::SetData &set) {
     const auto representation = set.representation();
-    const auto* h = std::get_if<sets::HRepresentation>(&representation);
+    const auto *h = std::get_if<sets::HRepresentation>(&representation);
     return h && std::holds_alternative<numeric::CsrInput>(h->inequalities.descriptor()) &&
-        std::holds_alternative<numeric::CsrInput>(h->equalities.descriptor());
+           std::holds_alternative<numeric::CsrInput>(h->equalities.descriptor());
 }
 
 Vector history(double u0, double u1) {
     return {0, u0, u0 + u1, u0, u1}; // canonical [x0,x1,x2,u0,u1]
 }
 
-const sets::SetData& recovered(const synthesis::ControlRecoveryOutcome& outcome) {
+const sets::SetData &recovered(const synthesis::ControlRecoveryOutcome &outcome) {
     REQUIRE(std::holds_alternative<synthesis::JointHistoryRelation>(outcome));
     return std::get<synthesis::JointHistoryRelation>(outcome).relation;
 }
 }
 
-TEST_CASE("backward recovery retains the two-step terminal fiber and rejects infeasible control histories") {
-    const auto result = synthesis::recover_joint_history(integrator(), interval_data("terminal-one", 1, 1));
-    const auto& relation = recovered(result);
+TEST_CASE(
+    "backward recovery retains the two-step terminal fiber and rejects infeasible control histories") {
+    const auto result =
+        synthesis::recover_joint_history(integrator(), interval_data("terminal-one", 1, 1));
+    const auto &relation = recovered(result);
     CHECK(sparse_h(relation));
 
     // Every returned point is checked against the public meaning of a history:
     // x0=0, x1=u0, x2=u0+u1, 0<=u0,u1<=1, and x2=1.
-    for (const Vector point : {history(0, 1), history(0.25, 0.75), history(0.5, 0.5),
-                               history(1, 0)})
+    for (const Vector point :
+         {history(0, 1), history(0.25, 0.75), history(0.5, 0.5), history(1, 0)})
         CHECK(contains(relation, point));
     CHECK_FALSE(contains(relation, history(1, 1)));
-    CHECK_FALSE(contains(relation, {0, 0.5, 1, 0.75, 0.25})); // inconsistent x1
+    CHECK_FALSE(contains(relation, {0, 0.5, 1, 0.75, 0.25}));  // inconsistent x1
     CHECK_FALSE(contains(relation, {0, 0.5, 1.25, 0.5, 0.5})); // inconsistent x2
-    CHECK_FALSE(contains(relation, history(0.25, 0.5))); // misses terminal slice
+    CHECK_FALSE(contains(relation, history(0.25, 0.5)));       // misses terminal slice
 }
 
 TEST_CASE("recovery stores empty terminal contradictions as sparse zero rows") {
@@ -171,9 +201,10 @@ TEST_CASE("recovery stores empty terminal contradictions as sparse zero rows") {
 }
 
 TEST_CASE("recovery embeds CSR terminal rows at the terminal-state coordinates") {
-    const auto terminal = take(sets::make_h({{"csr-terminal-one"}, 1, {"x"}},
-        {take(numeric::snapshot(SparseMatrix{2, 1, {0, 1, 2}, {0, 0}, {1, -1}})),
-         vector({1, -1}), take(numeric::snapshot(SparseMatrix{0, 1, {0}, {}, {}})), vector({})}));
+    const auto terminal = take(sets::make_h(
+        {{"csr-terminal-one"}, 1, {"x"}},
+        {take(numeric::snapshot(SparseMatrix{2, 1, {0, 1, 2}, {0, 0}, {1, -1}})), vector({1, -1}),
+         take(numeric::snapshot(SparseMatrix{0, 1, {0}, {}, {}})), vector({})}));
     const auto relation = recovered(synthesis::recover_joint_history(integrator(), terminal));
 
     CHECK(sparse_h(relation));
@@ -184,7 +215,7 @@ TEST_CASE("recovery embeds CSR terminal rows at the terminal-state coordinates")
 TEST_CASE("recovery handles singular transitions without inverting A") {
     const auto result = synthesis::recover_joint_history(
         singular_integrator(), interval_data("singular-terminal-one", 1, 1));
-    const auto& relation = recovered(result);
+    const auto &relation = recovered(result);
     CHECK(sparse_h(relation));
 
     // x1=u0 and x2=u1 when A=0. The terminal slice fixes u1=1 while
@@ -195,11 +226,13 @@ TEST_CASE("recovery handles singular transitions without inverting A") {
     CHECK_FALSE(contains(relation, {0, 0.5, 1, 0.5, 0.99}));
 }
 
-TEST_CASE("recovery preserves the full feasible history when the supplied terminal slice is the full minimizer relation") {
+TEST_CASE(
+    "recovery preserves the full feasible history when the supplied terminal slice is the full minimizer relation") {
     // The helper receives no objective. This interval is already the entire
     // terminal minimizer relation for a constant terminal criterion.
-    const auto result = synthesis::recover_joint_history(integrator(), interval_data("terminal-full", 0, 2));
-    const auto& relation = recovered(result);
+    const auto result =
+        synthesis::recover_joint_history(integrator(), interval_data("terminal-full", 0, 2));
+    const auto &relation = recovered(result);
     CHECK(sparse_h(relation));
 
     for (double u0 : {0.0, 0.2, 0.5, 1.0})
@@ -211,7 +244,7 @@ TEST_CASE("recovery preserves the full feasible history when the supplied termin
 TEST_CASE("recovered histories respect intermediate state constraints") {
     const auto result = synthesis::recover_joint_history(
         integrator(0.5), interval_data("terminal-full-with-stage-bound", 0, 2));
-    const auto& relation = recovered(result);
+    const auto &relation = recovered(result);
 
     CHECK(contains(relation, history(0.5, 0)));
     CHECK(contains(relation, history(0.5, 1)));
@@ -219,7 +252,8 @@ TEST_CASE("recovered histories respect intermediate state constraints") {
     CHECK_FALSE(contains(relation, {0, 0.75, 0.75, 0.5, 0.25})); // x1 violates bound
 }
 
-TEST_CASE("recovery rejects finite control catalogues when only continuous controls are supported") {
+TEST_CASE(
+    "recovery rejects finite control catalogues when only continuous controls are supported") {
     const auto result = synthesis::recover_joint_history(
         integrator(std::nullopt, true), interval_data("terminal-finite-controls", 1, 1));
     CHECK(std::holds_alternative<Diagnostics>(result));
@@ -228,25 +262,26 @@ TEST_CASE("recovery rejects finite control catalogues when only continuous contr
 
 TEST_CASE("joint history identity binds the supplied terminal relation identity") {
     const auto problem = integrator();
-    const auto first = synthesis::recover_joint_history(problem,
-        interval_data("terminal-first", 1, 1));
-    const auto second = synthesis::recover_joint_history(problem,
-        interval_data("terminal-second", 1, 1));
+    const auto first =
+        synthesis::recover_joint_history(problem, interval_data("terminal-first", 1, 1));
+    const auto second =
+        synthesis::recover_joint_history(problem, interval_data("terminal-second", 1, 1));
     REQUIRE(std::holds_alternative<synthesis::JointHistoryRelation>(first));
     REQUIRE(std::holds_alternative<synthesis::JointHistoryRelation>(second));
     CHECK(std::get<synthesis::JointHistoryRelation>(first).relation.metadata()->id !=
-        std::get<synthesis::JointHistoryRelation>(second).relation.metadata()->id);
+          std::get<synthesis::JointHistoryRelation>(second).relation.metadata()->id);
 }
 
-TEST_CASE("zero-dimensional states preserve every staged control coordinate in canonical history order") {
+TEST_CASE(
+    "zero-dimensional states preserve every staged control coordinate in canonical history order") {
     const auto source = zero_state_integrator();
     const auto terminal = take(sets::make_universal({{"zero-state-terminal"}, 0, {}}));
     const auto outcome = synthesis::recover_joint_history(source, terminal);
-    const auto& relation = recovered(outcome);
+    const auto &relation = recovered(outcome);
 
     // x0,x1,x2 have zero coordinates, leaving [u0,u1] as the entire joint vector.
     CHECK(std::get<synthesis::JointHistoryRelation>(outcome).coordinates ==
-        (JointCoordinates{{0, 1, 0}, 2}));
+          (JointCoordinates{{0, 1, 0}, 2}));
     CHECK(relation.metadata()->set.dimension == 2);
     CHECK(contains(relation, {0.25, -0.75}));
     CHECK(contains(relation, {-1, 1}));
@@ -254,12 +289,13 @@ TEST_CASE("zero-dimensional states preserve every staged control coordinate in c
     CHECK_FALSE(contains(relation, {0.25}));
 }
 
-TEST_CASE("stage-labelled recovery preserves the coordinate map and complete multivariable history") {
+TEST_CASE(
+    "stage-labelled recovery preserves the coordinate map and complete multivariable history") {
     const auto source = two_state_two_stage_system();
-    const auto terminal = take(sets::make_singleton({{"stage-map-terminal"}, 2, {}},
-        vector({1.5, -1.25})));
+    const auto terminal =
+        take(sets::make_singleton({{"stage-map-terminal"}, 2, {}}, vector({1.5, -1.25})));
     const auto outcome = synthesis::recover_joint_history(source, terminal);
-    const auto& joint = std::get<synthesis::JointHistoryRelation>(outcome);
+    const auto &joint = std::get<synthesis::JointHistoryRelation>(outcome);
 
     // Hand-evaluated dynamics give x1=(1.5,-1), x2=(1.5,-1.25) for
     // controls (0.5,-0.25); the public coordinate contract is [x0,x1,x2,u0,u1].

@@ -10,21 +10,24 @@ struct GeometryAdmissionRejection {
     GeometryReference reference;
     registry::Rejection provider;
 };
-using GeometryAdmission = std::variant<registry::PreparedPipeline<registry::GeometryPort>,
-    GeometryAdmissionRejection>;
+using GeometryAdmission =
+    std::variant<registry::PreparedPipeline<registry::GeometryPort>, GeometryAdmissionRejection>;
 
-inline GeometryAdmission prepare_geometry_operation(const OperationRequest& request,
-        const registry::PreparedProvider<registry::GeometryPort>& provider) {
-    auto result=provider.prepare(request);
-    if(auto* rejected=std::get_if<registry::Rejection>(&result))
-        return GeometryAdmissionRejection{geometry_reference(request),std::move(*rejected)};
+inline GeometryAdmission
+prepare_geometry_operation(const OperationRequest &request,
+                           const registry::PreparedProvider<registry::GeometryPort> &provider) {
+    auto result = provider.prepare(request);
+    if (auto *rejected = std::get_if<registry::Rejection>(&result))
+        return GeometryAdmissionRejection{geometry_reference(request), std::move(*rejected)};
     return std::get<registry::PreparedPipeline<registry::GeometryPort>>(std::move(result));
 }
 
-inline GeometryAdmission prepare_geometry_operation(const registry::Selection<registry::GeometryPort>& selection) {
-    auto result=registry::prepare_pipeline(selection);
-    if(auto* rejected=std::get_if<registry::Rejection>(&result))
-        return GeometryAdmissionRejection{geometry_reference(selection.request),std::move(*rejected)};
+inline GeometryAdmission
+prepare_geometry_operation(const registry::Selection<registry::GeometryPort> &selection) {
+    auto result = registry::prepare_pipeline(selection);
+    if (auto *rejected = std::get_if<registry::Rejection>(&result))
+        return GeometryAdmissionRejection{geometry_reference(selection.request),
+                                          std::move(*rejected)};
     return std::get<registry::PreparedPipeline<registry::GeometryPort>>(std::move(result));
 }
 

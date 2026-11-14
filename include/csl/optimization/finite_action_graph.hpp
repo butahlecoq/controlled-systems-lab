@@ -71,12 +71,23 @@ struct FiniteGraphCloudActionWitness {
     std::string containment_basis;
 };
 
-struct FiniteGraphBoxShape { Vector lower, upper; };
-struct FiniteGraphZonotopeShape { Vector center; Matrix generators; };
-struct FiniteGraphParallelotopeShape { Matrix frame; Vector lower, upper; };
-struct FiniteGraphEllipsoidShape { Vector center, radii; };
-using FiniteGraphActionCloudShape=std::variant<FiniteGraphBoxShape,
-    FiniteGraphZonotopeShape,FiniteGraphParallelotopeShape,FiniteGraphEllipsoidShape>;
+struct FiniteGraphBoxShape {
+    Vector lower, upper;
+};
+struct FiniteGraphZonotopeShape {
+    Vector center;
+    Matrix generators;
+};
+struct FiniteGraphParallelotopeShape {
+    Matrix frame;
+    Vector lower, upper;
+};
+struct FiniteGraphEllipsoidShape {
+    Vector center, radii;
+};
+using FiniteGraphActionCloudShape =
+    std::variant<FiniteGraphBoxShape, FiniteGraphZonotopeShape, FiniteGraphParallelotopeShape,
+                 FiniteGraphEllipsoidShape>;
 
 struct FiniteGraphCloudMembership {
     bool supported{};
@@ -138,7 +149,7 @@ struct FiniteGraphGeometryInvocation {
     std::vector<std::string> evidence_assumptions;
     std::string diagnostics;
 };
-using FiniteGraphGeometryObserver = std::function<void(const FiniteGraphGeometryInvocation&)>;
+using FiniteGraphGeometryObserver = std::function<void(const FiniteGraphGeometryInvocation &)>;
 
 struct FiniteActionGraphLimits {
     std::size_t beam_width;
@@ -174,7 +185,8 @@ struct FiniteActionGraphResult {
     double total_objective{};
 };
 
-using FiniteActionGraphOutcome = std::variant<FiniteActionGraphResult, Unsupported, OperationStopped>;
+using FiniteActionGraphOutcome =
+    std::variant<FiniteActionGraphResult, Unsupported, OperationStopped>;
 
 // Builds a deterministic, beam-bounded tree over every remaining authored
 // stage. Stage H intersections and numerical predecessor membership filter
@@ -182,21 +194,22 @@ using FiniteActionGraphOutcome = std::variant<FiniteActionGraphResult, Unsupport
 // authored action index and recomputed parent-to-child transition witness.
 // This reports optimality only over the retained tree and the supplied model.
 FiniteActionGraphOutcome finite_action_stage_layered_graph(
-    const FiniteActionNominalRequest&, FiniteActionGraphLimits,
-    const registry::PreparedProvider<registry::GeometryPort>& projection_provider,
-    const ExecutionContext& = {});
+    const FiniteActionNominalRequest &, FiniteActionGraphLimits,
+    const registry::PreparedProvider<registry::GeometryPort> &projection_provider,
+    const ExecutionContext & = {});
 
 // Optional registered forward-set operation. It is applied to each retained
 // parent before any of that parent's discrete action edges are admitted.
 FiniteActionGraphOutcome finite_action_stage_layered_graph(
-    const FiniteActionNominalRequest&, FiniteActionGraphLimits,
-    const registry::PreparedProvider<registry::GeometryPort>& projection_provider,
-    const registry::PreparedProvider<registry::GeometryPort>& reachable_set_provider,
-    const ExecutionContext& = {}, FiniteGraphGeometryObserver = {});
+    const FiniteActionNominalRequest &, FiniteActionGraphLimits,
+    const registry::PreparedProvider<registry::GeometryPort> &projection_provider,
+    const registry::PreparedProvider<registry::GeometryPort> &reachable_set_provider,
+    const ExecutionContext & = {}, FiniteGraphGeometryObserver = {});
 
 // Shape-specific numerical membership witness, separate from the coordinate-
 // box outer relaxation retained for plots and diagnostics.
-FiniteGraphCloudMembership finite_graph_action_cloud_membership(
-    const FiniteGraphActionCloudEnvelope&, std::span<const double> point);
+FiniteGraphCloudMembership
+finite_graph_action_cloud_membership(const FiniteGraphActionCloudEnvelope &,
+                                     std::span<const double> point);
 
 } // namespace csl::optimization

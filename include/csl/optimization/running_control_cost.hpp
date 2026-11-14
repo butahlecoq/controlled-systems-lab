@@ -33,12 +33,15 @@ struct RunningControlCost {
     std::vector<AbsoluteStageControlCost> stages;
 };
 
-Diagnostics validate_running_control_cost(const RunningControlCost&,
-    std::size_t absolute_stage_offset, std::size_t horizon, std::size_t control_dimension);
+Diagnostics validate_running_control_cost(const RunningControlCost &,
+                                          std::size_t absolute_stage_offset, std::size_t horizon,
+                                          std::size_t control_dimension);
 
 using RunningCostEvaluation = std::variant<double, Diagnostics, OperationStopped>;
-RunningCostEvaluation evaluate_running_control_cost(const RunningControlCost&,
-    std::size_t absolute_stage_offset, std::size_t horizon,
-    std::span<const Vector> controls, std::size_t control_dimension);
+RunningCostEvaluation evaluate_running_control_cost(const RunningControlCost &,
+                                                    std::size_t absolute_stage_offset,
+                                                    std::size_t horizon,
+                                                    std::span<const Vector> controls,
+                                                    std::size_t control_dimension);
 
 } // namespace csl::optimization

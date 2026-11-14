@@ -20,10 +20,10 @@ struct SpatialFlightCase {
     ReferenceIntegrationReceipt reference_integration;
 };
 
-template<class T> using SpatialFlightResult = std::variant<T, Diagnostics, OperationStopped>;
+template <class T> using SpatialFlightResult = std::variant<T, Diagnostics, OperationStopped>;
 
 std::span<const CaseInfo> spatial_flight_cases() noexcept;
-SpatialFlightResult<SpatialFlightCase> make_spatial_flight_case(
-    std::string_view id, const IntegrationOptions& options = {});
+SpatialFlightResult<SpatialFlightCase>
+make_spatial_flight_case(std::string_view id, const IntegrationOptions &options = {});
 
 } // namespace csl::model::catalogue

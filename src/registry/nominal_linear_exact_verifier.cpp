@@ -35,72 +35,83 @@ struct CheckResult {
 };
 
 struct ConstructionCancellation {
-    const ExecutionContext* context{};
+    const ExecutionContext *context{};
     bool stop_requested() const {
-        return context && (context->cancellation.stop_requested() ||
-            (context->deadline && std::chrono::steady_clock::now() >= *context->deadline));
+        return context &&
+               (context->cancellation.stop_requested() ||
+                (context->deadline && std::chrono::steady_clock::now() >= *context->deadline));
     }
     OperationStopped stopped() const {
-        return {context && context->cancellation.stop_requested() ? StopReason::cancelled : StopReason::deadline_expired,
-            "Stopped during bounded exact-H family construction."};
+        return {context && context->cancellation.stop_requested() ? StopReason::cancelled
+                                                                  : StopReason::deadline_expired,
+                "Stopped during bounded exact-H family construction."};
     }
 };
 
 bool finite(double value) { return std::isfinite(value); }
 
-std::optional<sets::SetData> set_data(const AdmissibleSet& input, SetId id) {
-    return std::visit([&](const auto& value) -> std::optional<sets::SetData> {
-        using T = std::decay_t<decltype(value)>;
-        if constexpr (std::is_same_v<T, SetHandle>) {
-            auto imported = sets::from_handle(value);
-            if (const auto* data = std::get_if<sets::SetData>(&imported)) return *data;
-            return {};
-        } else if constexpr (std::is_same_v<T, EmptySet>) {
-            auto result = sets::make_empty({std::move(id), value.dimension, {}});
-            if (const auto* data = std::get_if<sets::SetData>(&result)) return *data;
-            return {};
-        } else if constexpr (std::is_same_v<T, UniversalSet>) {
-            auto result = sets::make_universal({std::move(id), value.dimension, {}});
-            if (const auto* data = std::get_if<sets::SetData>(&result)) return *data;
-            return {};
-        } else {
-            auto point = numeric::snapshot_vector(value.point);
-            if (!std::holds_alternative<numeric::VectorView>(point)) return {};
-            auto result = sets::make_singleton({std::move(id), value.point.size(), {}},
-                std::get<numeric::VectorView>(std::move(point)));
-            if (const auto* data = std::get_if<sets::SetData>(&result)) return *data;
-            return {};
-        }
-    }, input);
+std::optional<sets::SetData> set_data(const AdmissibleSet &input, SetId id) {
+    return std::visit(
+        [&](const auto &value) -> std::optional<sets::SetData> {
+            using T = std::decay_t<decltype(value)>;
+            if constexpr (std::is_same_v<T, SetHandle>) {
+                auto imported = sets::from_handle(value);
+                if (const auto *data = std::get_if<sets::SetData>(&imported))
+                    return *data;
+                return {};
+            } else if constexpr (std::is_same_v<T, EmptySet>) {
+                auto result = sets::make_empty({std::move(id), value.dimension, {}});
+                if (const auto *data = std::get_if<sets::SetData>(&result))
+                    return *data;
+                return {};
+            } else if constexpr (std::is_same_v<T, UniversalSet>) {
+                auto result = sets::make_universal({std::move(id), value.dimension, {}});
+                if (const auto *data = std::get_if<sets::SetData>(&result))
+                    return *data;
+                return {};
+            } else {
+                auto point = numeric::snapshot_vector(value.point);
+                if (!std::holds_alternative<numeric::VectorView>(point))
+                    return {};
+                auto result = sets::make_singleton({std::move(id), value.point.size(), {}},
+                                                   std::get<numeric::VectorView>(std::move(point)));
+                if (const auto *data = std::get_if<sets::SetData>(&result))
+                    return *data;
+                return {};
+            }
+        },
+        input);
 }
 
-bool append_inequality(std::span<const double> coefficients, double bound,
-    exact_h::Limits limits, std::vector<exact_h::Row>& rows) {
-    return rows.size() < limits.max_rows && exact_h::append_inequality(
-        coefficients, bound, false, limits.max_integer_bits, rows);
+bool append_inequality(std::span<const double> coefficients, double bound, exact_h::Limits limits,
+                       std::vector<exact_h::Row> &rows) {
+    return rows.size() < limits.max_rows &&
+           exact_h::append_inequality(coefficients, bound, false, limits.max_integer_bits, rows);
 }
 
-bool append_equality(std::span<const double> coefficients, double value,
-    exact_h::Limits limits, std::vector<exact_h::Row>& rows) {
+bool append_equality(std::span<const double> coefficients, double value, exact_h::Limits limits,
+                     std::vector<exact_h::Row> &rows) {
     return rows.size() <= limits.max_rows && limits.max_rows - rows.size() >= 2 &&
-        exact_h::append_equality(coefficients, value, limits.max_integer_bits, rows);
+           exact_h::append_equality(coefficients, value, limits.max_integer_bits, rows);
 }
 
-CheckResult append_set(const sets::SetData& set, std::size_t width,
-    std::size_t offset, exact_h::Limits limits, std::vector<exact_h::Row>& rows) {
+CheckResult append_set(const sets::SetData &set, std::size_t width, std::size_t offset,
+                       exact_h::Limits limits, std::vector<exact_h::Row> &rows) {
     if (set.metadata()->set.dimension > width || offset > width ||
         set.metadata()->set.dimension > width - offset)
-        return {CheckState::unsupported, "Constraint set has an invalid dimension or coordinate offset"};
+        return {CheckState::unsupported,
+                "Constraint set has an invalid dimension or coordinate offset"};
     const auto dimension = set.metadata()->set.dimension;
     const auto representation = set.representation();
     if (std::holds_alternative<sets::UniversalRepresentation>(representation))
         return {CheckState::established, {}};
     if (std::holds_alternative<sets::EmptyRepresentation>(representation)) {
         std::vector<double> zero(width, 0.0);
-        if (append_inequality(zero, -1.0, limits, rows)) return {CheckState::established, {}};
+        if (append_inequality(zero, -1.0, limits, rows))
+            return {CheckState::established, {}};
         return {CheckState::unsupported, "Empty-set row exceeds exact resource limits"};
     }
-    if (const auto* singleton = std::get_if<sets::SingletonRepresentation>(&representation)) {
+    if (const auto *singleton = std::get_if<sets::SingletonRepresentation>(&representation)) {
         if (singleton->point.size() != dimension)
             return {CheckState::unsupported, "Singleton point has a malformed dimension"};
         std::vector<double> row(width, 0.0);
@@ -108,12 +119,15 @@ CheckResult append_set(const sets::SetData& set, std::size_t width,
             row[offset + column] = 1.0;
             const bool added = append_equality(row, singleton->point[column], limits, rows);
             row[offset + column] = 0.0;
-            if (!added) return {CheckState::unsupported, "Singleton rows exceed exact resource limits"};
+            if (!added)
+                return {CheckState::unsupported, "Singleton rows exceed exact resource limits"};
         }
         return {CheckState::established, {}};
     }
-    const auto* h = std::get_if<sets::HRepresentation>(&representation);
-    if (!h) return {CheckState::unsupported, "Only native H, singleton, empty and universal sets are admitted"};
+    const auto *h = std::get_if<sets::HRepresentation>(&representation);
+    if (!h)
+        return {CheckState::unsupported,
+                "Only native H, singleton, empty and universal sets are admitted"};
     if (h->inequalities.cols() != dimension || h->upper_bounds.size() != h->inequalities.rows() ||
         h->equalities.cols() != dimension || h->equality_values.size() != h->equalities.rows())
         return {CheckState::unsupported, "H-representation dimensions are malformed"};
@@ -125,83 +139,96 @@ CheckResult append_set(const sets::SetData& set, std::size_t width,
             row[offset + column] = h->inequalities(index, column);
         const bool added = append_inequality(row, h->upper_bounds[index], limits, rows);
         std::fill(row.begin(), row.end(), 0.0);
-        if (!added) return {CheckState::unsupported, "H inequalities exceed exact row or integer limits"};
+        if (!added)
+            return {CheckState::unsupported, "H inequalities exceed exact row or integer limits"};
     }
     for (std::size_t index = 0; index < h->equalities.rows(); ++index) {
         for (std::size_t column = 0; column < dimension; ++column)
             row[offset + column] = h->equalities(index, column);
         const bool added = append_equality(row, h->equality_values[index], limits, rows);
         std::fill(row.begin(), row.end(), 0.0);
-        if (!added) return {CheckState::unsupported, "H equalities exceed exact row or integer limits"};
+        if (!added)
+            return {CheckState::unsupported, "H equalities exceed exact row or integer limits"};
     }
     return {CheckState::established, {}};
 }
 
-CheckResult append_admissible(const AdmissibleSet& input, std::size_t width,
-    std::size_t offset, exact_h::Limits limits, std::vector<exact_h::Row>& rows,
-    std::string id) {
+CheckResult append_admissible(const AdmissibleSet &input, std::size_t width, std::size_t offset,
+                              exact_h::Limits limits, std::vector<exact_h::Row> &rows,
+                              std::string id) {
     auto data = set_data(input, {std::move(id)});
-    if (!data) return {CheckState::unsupported, "Could not import a resolved state or control set"};
+    if (!data)
+        return {CheckState::unsupported, "Could not import a resolved state or control set"};
     return append_set(*data, width, offset, limits, rows);
 }
 
 std::optional<std::size_t> joint_width(std::size_t horizon, std::size_t states,
-    std::size_t controls) {
+                                       std::size_t controls) {
     const auto maximum = std::numeric_limits<std::size_t>::max();
     if (horizon == maximum || (states && horizon + 1 > maximum / states) ||
-        (controls && horizon > maximum / controls)) return {};
+        (controls && horizon > maximum / controls))
+        return {};
     const auto state_width = (horizon + 1) * states;
     const auto control_width = horizon * controls;
-    if (state_width > maximum - control_width) return {};
+    if (state_width > maximum - control_width)
+        return {};
     return state_width + control_width;
 }
 
-CheckResult reconstruct(const problem::ResolvedProblem& resolved, exact_h::Limits limits,
-    std::vector<exact_h::Row>& rows, std::vector<double>& objective) {
+CheckResult reconstruct(const problem::ResolvedProblem &resolved, exact_h::Limits limits,
+                        std::vector<exact_h::Row> &rows, std::vector<double> &objective) {
     const auto source = resolved.description();
     const auto system = resolved.model();
     const auto dimensions = system.dimensions();
     const auto horizon = system.horizon();
     if (source->model->dynamics.time_domain != TimeDomain::discrete ||
-        source->information != InformationPattern::nominal_open_loop ||
-        dimensions.external != 0 || source->external ||
-        (source->temporal && source->temporal->joint_map.rows != 0))
-        return {CheckState::unsupported, "Profile requires discrete nominal dynamics without external or temporal coupling"};
-    const auto* initial = std::get_if<KnownInitial>(&source->initial);
-    const auto* controls = std::get_if<ContinuousDomain>(&source->controls);
+        source->information != InformationPattern::nominal_open_loop || dimensions.external != 0 ||
+        source->external || (source->temporal && source->temporal->joint_map.rows != 0))
+        return {CheckState::unsupported,
+                "Profile requires discrete nominal dynamics without external or temporal coupling"};
+    const auto *initial = std::get_if<KnownInitial>(&source->initial);
+    const auto *controls = std::get_if<ContinuousDomain>(&source->controls);
     if (!initial || !controls || controls->stages.size() != horizon ||
         source->states.size() != horizon + 1 || horizon > limits.max_stages)
-        return {CheckState::unsupported, "Profile requires a known point and continuous stage controls"};
+        return {CheckState::unsupported,
+                "Profile requires a known point and continuous stage controls"};
     const auto width_opt = joint_width(horizon, dimensions.state, dimensions.control);
     if (!width_opt || *width_opt >= limits.max_variables || *width_opt > 31)
-        return {CheckState::unsupported, "Joint history width or objective-augmented width exceeds the exact variable cap"};
+        return {CheckState::unsupported,
+                "Joint history width or objective-augmented width exceeds the exact variable cap"};
     const auto width = *width_opt;
     const auto state_width = (horizon + 1) * dimensions.state;
     if (initial->point.size() != dimensions.state ||
-        std::any_of(initial->point.begin(), initial->point.end(), [](double x) { return !finite(x); }))
-        return {CheckState::unsupported, "Known initial point has malformed or nonfinite coordinates"};
+        std::any_of(initial->point.begin(), initial->point.end(),
+                    [](double x) { return !finite(x); }))
+        return {CheckState::unsupported,
+                "Known initial point has malformed or nonfinite coordinates"};
     for (std::size_t coordinate = 0; coordinate < dimensions.state; ++coordinate) {
         std::vector<double> row(width, 0.0);
         row[coordinate] = 1.0;
         if (!append_equality(row, initial->point[coordinate], limits, rows))
-            return {CheckState::unsupported, "Known initial point exceeds exact row or integer limits"};
+            return {CheckState::unsupported,
+                    "Known initial point exceeds exact row or integer limits"};
     }
     for (std::size_t stage = 0; stage <= horizon; ++stage) {
-        auto added = append_admissible(source->states[stage], width, stage * dimensions.state,
-            limits, rows, "nominal-exact/state/" + std::to_string(stage));
-        if (added.state != CheckState::established) return added;
+        auto added =
+            append_admissible(source->states[stage], width, stage * dimensions.state, limits, rows,
+                              "nominal-exact/state/" + std::to_string(stage));
+        if (added.state != CheckState::established)
+            return added;
     }
     for (std::size_t stage = 0; stage < horizon; ++stage) {
         auto added = append_admissible(controls->stages[stage], width,
-            state_width + stage * dimensions.control, limits, rows,
-            "nominal-exact/control/" + std::to_string(stage));
-        if (added.state != CheckState::established) return added;
+                                       state_width + stage * dimensions.control, limits, rows,
+                                       "nominal-exact/control/" + std::to_string(stage));
+        if (added.state != CheckState::established)
+            return added;
     }
     for (std::size_t stage = 0; stage < horizon; ++stage) {
         auto dynamics = system.stage({stage});
         if (!std::holds_alternative<model::DynamicsStage>(dynamics))
             return {CheckState::unsupported, "Resolved dynamics stage could not be read"};
-        const auto& step = std::get<model::DynamicsStage>(dynamics);
+        const auto &step = std::get<model::DynamicsStage>(dynamics);
         if (step.A.rows() != dimensions.state || step.A.cols() != dimensions.state ||
             step.B.rows() != dimensions.state || step.B.cols() != dimensions.control ||
             step.E.cols() != 0 || step.offset.size() != dimensions.state)
@@ -215,17 +242,19 @@ CheckResult reconstruct(const problem::ResolvedProblem& resolved, exact_h::Limit
             for (std::size_t control = 0; control < dimensions.control; ++control)
                 row[state_width + stage * dimensions.control + control] = -step.B(output, control);
             if (!append_equality(row, step.offset[output], limits, rows))
-                return {CheckState::unsupported, "Dynamics equality exceeds exact row or integer limits"};
+                return {CheckState::unsupported,
+                        "Dynamics equality exceeds exact row or integer limits"};
         }
     }
     const auto coefficients = resolved.objective().coefficients();
-    const auto* linear = std::get_if<optimization::LinearCoefficients>(&coefficients);
+    const auto *linear = std::get_if<optimization::LinearCoefficients>(&coefficients);
     if (!linear || linear->coefficients.size() != dimensions.state || !finite(linear->offset))
         return {CheckState::unsupported, "Profile requires a finite linear terminal objective"};
     objective.assign(width, 0.0);
     for (std::size_t coordinate = 0; coordinate < dimensions.state; ++coordinate) {
         const auto value = linear->coefficients[coordinate];
-        if (!finite(value)) return {CheckState::unsupported, "Terminal objective has nonfinite coefficients"};
+        if (!finite(value))
+            return {CheckState::unsupported, "Terminal objective has nonfinite coefficients"};
         objective[horizon * dimensions.state + coordinate] = value;
     }
     if (rows.size() > limits.max_rows)
@@ -234,51 +263,65 @@ CheckResult reconstruct(const problem::ResolvedProblem& resolved, exact_h::Limit
 }
 
 bool append_objective_face(std::span<const double> objective, double offset,
-    const exact_h::ExactRational& optimum, exact_h::Limits limits,
-    std::vector<exact_h::Row>& rows) {
+                           const exact_h::ExactRational &optimum, exact_h::Limits limits,
+                           std::vector<exact_h::Row> &rows) {
     exact_h::Row scaled;
     int exponent = 0;
     if (!exact_h::make_row(objective, offset, false, limits.max_integer_bits, scaled, &exponent))
         return false;
-    if (std::all_of(scaled.coefficients.begin(), scaled.coefficients.end(), exact_h::exact_detail::is_zero))
+    if (std::all_of(scaled.coefficients.begin(), scaled.coefficients.end(),
+                    exact_h::exact_detail::is_zero))
         return true;
     auto denominator = optimum.denominator;
-    if (denominator.negative || exact_h::exact_detail::is_zero(denominator)) return false;
+    if (denominator.negative || exact_h::exact_detail::is_zero(denominator))
+        return false;
     const auto delta = static_cast<std::int64_t>(optimum.binary_exponent) - exponent;
     exact_h::Row equality;
     equality.coefficients.resize(objective.size());
     exact_h::Integer right = optimum.numerator;
     if (delta >= 0) {
         if (static_cast<std::uint64_t>(delta) > limits.max_integer_bits ||
-            !exact_h::exact_detail::shift_left(right, static_cast<std::size_t>(delta), limits.max_integer_bits))
+            !exact_h::exact_detail::shift_left(right, static_cast<std::size_t>(delta),
+                                               limits.max_integer_bits))
             return false;
     } else {
         const auto shift = static_cast<std::uint64_t>(-delta);
-        if (shift > limits.max_integer_bits || !exact_h::exact_detail::shift_left(denominator,
-                static_cast<std::size_t>(shift), limits.max_integer_bits)) return false;
+        if (shift > limits.max_integer_bits ||
+            !exact_h::exact_detail::shift_left(denominator, static_cast<std::size_t>(shift),
+                                               limits.max_integer_bits))
+            return false;
     }
     for (std::size_t i = 0; i < objective.size(); ++i)
-        if (!exact_h::exact_detail::multiply(denominator, scaled.coefficients[i], limits.max_integer_bits,
-                equality.coefficients[i])) return false;
+        if (!exact_h::exact_detail::multiply(denominator, scaled.coefficients[i],
+                                             limits.max_integer_bits, equality.coefficients[i]))
+            return false;
     exact_h::Integer offset_term;
-    if (!exact_h::exact_detail::multiply(denominator, scaled.bound, limits.max_integer_bits, offset_term)) return false;
+    if (!exact_h::exact_detail::multiply(denominator, scaled.bound, limits.max_integer_bits,
+                                         offset_term))
+        return false;
     offset_term.negative = !exact_h::exact_detail::is_zero(offset_term) && !offset_term.negative;
-    if (!exact_h::exact_detail::add(right, offset_term, limits.max_integer_bits)) return false;
+    if (!exact_h::exact_detail::add(right, offset_term, limits.max_integer_bits))
+        return false;
     equality.bound = std::move(right);
     equality.strict = false;
-    if (rows.size() > limits.max_rows || limits.max_rows - rows.size() < 2) return false;
+    if (rows.size() > limits.max_rows || limits.max_rows - rows.size() < 2)
+        return false;
     rows.push_back(equality);
-    for (auto& coefficient : equality.coefficients)
-        coefficient.negative = !exact_h::exact_detail::is_zero(coefficient) && !coefficient.negative;
-    equality.bound.negative = !exact_h::exact_detail::is_zero(equality.bound) && !equality.bound.negative;
+    for (auto &coefficient : equality.coefficients)
+        coefficient.negative =
+            !exact_h::exact_detail::is_zero(coefficient) && !coefficient.negative;
+    equality.bound.negative =
+        !exact_h::exact_detail::is_zero(equality.bound) && !equality.bound.negative;
     rows.push_back(std::move(equality));
     return true;
 }
 
-std::optional<std::pair<double, double>> rational_to_outward_doubles(
-    const exact_h::ExactRational& rational, std::size_t max_bits) {
-    if (exact_h::exact_detail::is_zero(rational.numerator)) return std::pair{0.0, 0.0};
-    if (rational.denominator.negative || exact_h::exact_detail::is_zero(rational.denominator)) return {};
+std::optional<std::pair<double, double>>
+rational_to_outward_doubles(const exact_h::ExactRational &rational, std::size_t max_bits) {
+    if (exact_h::exact_detail::is_zero(rational.numerator))
+        return std::pair{0.0, 0.0};
+    if (rational.denominator.negative || exact_h::exact_detail::is_zero(rational.denominator))
+        return {};
     exact_h::ExactRational magnitude = rational;
     const bool negative = magnitude.numerator.negative;
     magnitude.numerator.negative = false;
@@ -292,7 +335,8 @@ std::optional<std::pair<double, double>> rational_to_outward_doubles(
         candidate.numerator = exact_h::exact_detail::from_u64(dyadic.significand);
         candidate.binary_exponent = dyadic.exponent;
         int order = 0;
-        if (!exact_h::compare_scaled_rationals(magnitude, candidate, max_bits, order)) return {};
+        if (!exact_h::compare_scaled_rationals(magnitude, candidate, max_bits, order))
+            return {};
         if (order == 0) {
             const auto signed_bits = bits | (negative ? (std::uint64_t{1} << 63) : 0);
             const auto exact = std::bit_cast<double>(signed_bits);
@@ -312,45 +356,64 @@ std::optional<std::pair<double, double>> rational_to_outward_doubles(
             high = bits - 1;
         }
     }
-    if (low > max_finite_bits) return {};
+    if (low > max_finite_bits)
+        return {};
     const double floor_magnitude = std::bit_cast<double>(high);
     const double ceil_magnitude = std::bit_cast<double>(low);
-    if (negative) return std::pair{-ceil_magnitude, -floor_magnitude};
+    if (negative)
+        return std::pair{-ceil_magnitude, -floor_magnitude};
     return std::pair{floor_magnitude, ceil_magnitude};
 }
 
-CheckResult verify_proposal(const StrategyRequest& request, const CompleteFamilyProposal& proposal, bool strategy_b) {
-    const auto& identity = proposal.identity;
-    const auto& family = proposal.family;
-    const auto& strategy = request.configuration.strategy;
-    const auto expected_lineage = strategy_b ? strategy_b_nominal_linear_exact_lineage(request.problem.identity()) :
-        strategy_a_nominal_linear_exact_lineage(request.problem.identity(), request.problem.model().horizon());
-    if (strategy.value != (strategy_b ? "csl.synthesis.strategy-b" : "csl.synthesis.reach-back") || request.strategy_version != "1" ||
-        !(strategy_b ? strategy_b_nominal_linear_exact_profile_valid : strategy_a_nominal_linear_exact_profile_valid)(request.problem, request.family,
-            request.configuration.representation))
-        return {CheckState::unsupported, "Verifier only admits its bound nominal linear strategy profile"};
+CheckResult verify_proposal(const StrategyRequest &request, const CompleteFamilyProposal &proposal,
+                            bool strategy_b) {
+    const auto &identity = proposal.identity;
+    const auto &family = proposal.family;
+    const auto &strategy = request.configuration.strategy;
+    const auto expected_lineage =
+        strategy_b ? strategy_b_nominal_linear_exact_lineage(request.problem.identity())
+                   : strategy_a_nominal_linear_exact_lineage(request.problem.identity(),
+                                                             request.problem.model().horizon());
+    if (strategy.value != (strategy_b ? "csl.synthesis.strategy-b" : "csl.synthesis.reach-back") ||
+        request.strategy_version != "1" ||
+        !(strategy_b ? strategy_b_nominal_linear_exact_profile_valid
+                     : strategy_a_nominal_linear_exact_profile_valid)(
+            request.problem, request.family, request.configuration.representation))
+        return {CheckState::unsupported,
+                "Verifier only admits its bound nominal linear strategy profile"};
     if (identity.problem != request.problem.identity() || identity.request != request.family ||
         identity.coordinates != request.problem.constraints().coordinates() ||
         identity.strategy != strategy || identity.strategy_version != request.strategy_version ||
         identity.lineage != expected_lineage || request.lineage != expected_lineage ||
-        family.completeness.binding != identity || family.relation.coordinates != identity.coordinates ||
-        family.relation.representation != request.family.representation || family.assurance != Assurance::numerical)
-        return {CheckState::refuted, "Complete-family request, identity, coordinates, lineage or assurance do not match"};
-    const auto* proof = std::get_if<RegisteredCompletenessEvidence>(&family.completeness.support);
-    if (!proof || proof->verifier.value != (strategy_b ? synthesis::strategy_b::nominal_linear_exact_verifier : verifier_id) || proof->verifier_version != verifier_version ||
-        proof->proof != (strategy_b ? synthesis::strategy_b::nominal_linear_exact_proof : "nominal-linear-exact-v1"))
+        family.completeness.binding != identity ||
+        family.relation.coordinates != identity.coordinates ||
+        family.relation.representation != request.family.representation ||
+        family.assurance != Assurance::numerical)
+        return {
+            CheckState::refuted,
+            "Complete-family request, identity, coordinates, lineage or assurance do not match"};
+    const auto *proof = std::get_if<RegisteredCompletenessEvidence>(&family.completeness.support);
+    if (!proof ||
+        proof->verifier.value !=
+            (strategy_b ? synthesis::strategy_b::nominal_linear_exact_verifier : verifier_id) ||
+        proof->verifier_version != verifier_version ||
+        proof->proof != (strategy_b ? synthesis::strategy_b::nominal_linear_exact_proof
+                                    : "nominal-linear-exact-v1"))
         return {CheckState::refuted, "Complete-family proof payload does not select this verifier"};
     if (std::holds_alternative<Unestablished>(family.optimum.optimum.support) ||
         family.optimum.optimum.problem != identity.problem || !family.optimum.bounds.lower ||
-        !family.optimum.bounds.upper || family.optimum.bounds.lower->evidence.problem != identity.problem ||
+        !family.optimum.bounds.upper ||
+        family.optimum.bounds.lower->evidence.problem != identity.problem ||
         family.optimum.bounds.upper->evidence.problem != identity.problem)
-        return {CheckState::refuted, "Exact optimality claim and matching lower/upper objective evidence are required"};
+        return {CheckState::refuted,
+                "Exact optimality claim and matching lower/upper objective evidence are required"};
 
     exact_h::Limits limits;
     std::vector<exact_h::Row> feasible_rows;
     std::vector<double> objective;
     auto built = reconstruct(request.problem, limits, feasible_rows, objective);
-    if (built.state != CheckState::established) return built;
+    if (built.state != CheckState::established)
+        return built;
     const auto feasible = exact_h::feasible(feasible_rows, objective.size(), limits);
     if (feasible.state == exact_h::FeasibilityState::unsupported)
         return {CheckState::unsupported, feasible.reason};
@@ -362,48 +425,65 @@ CheckResult verify_proposal(const StrategyRequest& request, const CompleteFamily
     std::vector<double> direction(objective.size(), 0.0);
     for (std::size_t coordinate = 0; coordinate < direction.size(); ++coordinate) {
         direction[coordinate] = 1.0;
-        const auto lower = exact_h::minimize_linear(feasible_rows, direction.size(), direction, 0.0, limits);
+        const auto lower =
+            exact_h::minimize_linear(feasible_rows, direction.size(), direction, 0.0, limits);
         direction[coordinate] = -1.0;
-        const auto upper = exact_h::minimize_linear(feasible_rows, direction.size(), direction, 0.0, limits);
+        const auto upper =
+            exact_h::minimize_linear(feasible_rows, direction.size(), direction, 0.0, limits);
         direction[coordinate] = 0.0;
         if (lower.state == exact_h::LinearMinimumState::unsupported ||
             upper.state == exact_h::LinearMinimumState::unsupported)
-            return {CheckState::unsupported, "Exact boundedness check exceeded the arithmetic or operation limits"};
+            return {CheckState::unsupported,
+                    "Exact boundedness check exceeded the arithmetic or operation limits"};
         if (lower.state != exact_h::LinearMinimumState::minimum ||
-            upper.state != exact_h::LinearMinimumState::minimum || !lower.attained || !upper.attained)
+            upper.state != exact_h::LinearMinimumState::minimum || !lower.attained ||
+            !upper.attained)
             return {CheckState::unsupported, "Feasible joint history must be bounded and nonempty"};
     }
     const auto objective_data = request.problem.objective().coefficients();
-    const auto& linear = std::get<optimization::LinearCoefficients>(objective_data);
-    const auto optimum = exact_h::minimize_linear(feasible_rows, objective.size(), objective,
-        linear.offset, limits);
+    const auto &linear = std::get<optimization::LinearCoefficients>(objective_data);
+    const auto optimum =
+        exact_h::minimize_linear(feasible_rows, objective.size(), objective, linear.offset, limits);
     if (optimum.state == exact_h::LinearMinimumState::unsupported)
-        return {CheckState::unsupported, "Exact objective minimization exceeded the arithmetic or operation limits"};
+        return {CheckState::unsupported,
+                "Exact objective minimization exceeded the arithmetic or operation limits"};
     if (optimum.state != exact_h::LinearMinimumState::minimum || !optimum.attained)
         return {CheckState::unsupported, "Objective must have a finite attained minimum"};
     const auto exact_bounds = rational_to_outward_doubles(optimum.value, limits.max_integer_bits);
     if (!exact_bounds || family.optimum.bounds.lower->value != exact_bounds->first ||
         family.optimum.bounds.upper->value != exact_bounds->second)
-        return {CheckState::refuted,
+        return {
+            CheckState::refuted,
             "Published objective bounds must be the tight outward binary64 enclosure of the exact rational optimum"};
 
     auto optimal_rows = feasible_rows;
     if (!append_objective_face(objective, linear.offset, optimum.value, limits, optimal_rows))
-        return {CheckState::unsupported, "Exact objective face exceeds the arithmetic or row limits"};
-    const auto* candidate = family.relation.payload ? family.relation.payload->h_relation_for_recording() : nullptr;
+        return {CheckState::unsupported,
+                "Exact objective face exceeds the arithmetic or row limits"};
+    const auto *candidate =
+        family.relation.payload ? family.relation.payload->h_relation_for_recording() : nullptr;
     if (!candidate || !std::holds_alternative<sets::HRepresentation>(candidate->representation()))
-        return {CheckState::unsupported, "Nominal exact profile requires a recorded native H relation"};
+        return {CheckState::unsupported,
+                "Nominal exact profile requires a recorded native H relation"};
     std::vector<exact_h::Row> candidate_rows;
     auto candidate_check = append_set(*candidate, objective.size(), 0, limits, candidate_rows);
-    if (candidate_check.state != CheckState::established) return candidate_check;
-    const auto forward = exact_h::included_in(candidate_rows, optimal_rows, objective.size(), limits);
-    if (forward.state == exact_h::InclusionState::unsupported || forward.state == exact_h::InclusionState::cancelled)
-        return {CheckState::unsupported, "Candidate-to-optimal-face inclusion could not be decided within exact limits"};
+    if (candidate_check.state != CheckState::established)
+        return candidate_check;
+    const auto forward =
+        exact_h::included_in(candidate_rows, optimal_rows, objective.size(), limits);
+    if (forward.state == exact_h::InclusionState::unsupported ||
+        forward.state == exact_h::InclusionState::cancelled)
+        return {CheckState::unsupported,
+                "Candidate-to-optimal-face inclusion could not be decided within exact limits"};
     if (forward.state != exact_h::InclusionState::included)
-        return {CheckState::refuted, "Candidate relation contains a history outside the exact optimal face"};
-    const auto reverse = exact_h::included_in(optimal_rows, candidate_rows, objective.size(), limits);
-    if (reverse.state == exact_h::InclusionState::unsupported || reverse.state == exact_h::InclusionState::cancelled)
-        return {CheckState::unsupported, "Optimal-face-to-candidate inclusion could not be decided within exact limits"};
+        return {CheckState::refuted,
+                "Candidate relation contains a history outside the exact optimal face"};
+    const auto reverse =
+        exact_h::included_in(optimal_rows, candidate_rows, objective.size(), limits);
+    if (reverse.state == exact_h::InclusionState::unsupported ||
+        reverse.state == exact_h::InclusionState::cancelled)
+        return {CheckState::unsupported,
+                "Optimal-face-to-candidate inclusion could not be decided within exact limits"};
     if (reverse.state != exact_h::InclusionState::included)
         return {CheckState::refuted, "Candidate relation omits a feasible optimal history"};
     return {CheckState::established, {}};
@@ -411,32 +491,46 @@ CheckResult verify_proposal(const StrategyRequest& request, const CompleteFamily
 
 class NominalLinearExactVerifier final : public CompiledCompleteFamilyVerifier {
     bool strategy_b_;
-public:
+
+  public:
     explicit NominalLinearExactVerifier(bool strategy_b = false) : strategy_b_(strategy_b) {}
-    const ModuleId& id() const noexcept override { static const ModuleId value{verifier_id}; static const ModuleId b{synthesis::strategy_b::nominal_linear_exact_verifier}; return strategy_b_ ? b : value; }
-    const std::string& version() const noexcept override { static const std::string value{verifier_version}; return value; }
-    Diagnostics verify(const StrategyRequest& request, const CompleteFamilyProposal& proposal) const override {
+    const ModuleId &id() const noexcept override {
+        static const ModuleId value{verifier_id};
+        static const ModuleId b{synthesis::strategy_b::nominal_linear_exact_verifier};
+        return strategy_b_ ? b : value;
+    }
+    const std::string &version() const noexcept override {
+        static const std::string value{verifier_version};
+        return value;
+    }
+    Diagnostics verify(const StrategyRequest &request,
+                       const CompleteFamilyProposal &proposal) const override {
         const auto result = verify_proposal(request, proposal, strategy_b_);
-        if (result.state == CheckState::established) return {};
-        const auto code = result.state == CheckState::unsupported ? DiagnosticCode::unsupported :
-            DiagnosticCode::evidence_mismatch;
+        if (result.state == CheckState::established)
+            return {};
+        const auto code = result.state == CheckState::unsupported
+                              ? DiagnosticCode::unsupported
+                              : DiagnosticCode::evidence_mismatch;
         return {{code, "nominal-linear-exact.verifier", result.reason}};
     }
 };
 
-bool supported_set(const AdmissibleSet& input, std::size_t dimension) {
+bool supported_set(const AdmissibleSet &input, std::size_t dimension) {
     auto data = set_data(input, {"nominal-exact/admission"});
-    if (!data || data->metadata()->set.dimension != dimension) return false;
+    if (!data || data->metadata()->set.dimension != dimension)
+        return false;
     return !std::holds_alternative<sets::VRepresentation>(data->representation());
 }
 } // namespace
 
-bool nominal_linear_exact_profile_valid(const problem::ResolvedProblem& problem,
-    const FamilyRequest& family, const RepresentationId& representation, const std::string& profile) {
-    if (family.profile != profile ||
-        family.target != FamilyTarget::exact_optimal_relation || family.assurance != Assurance::numerical ||
-        representation.value != "csl.polyhedron.h" ||
-        (family.materialization_limit && *family.materialization_limit == 0)) return false;
+bool nominal_linear_exact_profile_valid(const problem::ResolvedProblem &problem,
+                                        const FamilyRequest &family,
+                                        const RepresentationId &representation,
+                                        const std::string &profile) {
+    if (family.profile != profile || family.target != FamilyTarget::exact_optimal_relation ||
+        family.assurance != Assurance::numerical || representation.value != "csl.polyhedron.h" ||
+        (family.materialization_limit && *family.materialization_limit == 0))
+        return false;
     const auto source = problem.description();
     const auto model = problem.model();
     const auto dimensions = model.dimensions();
@@ -444,157 +538,194 @@ bool nominal_linear_exact_profile_valid(const problem::ResolvedProblem& problem,
     if (source->model->dynamics.time_domain != TimeDomain::discrete ||
         source->information != InformationPattern::nominal_open_loop || dimensions.external != 0 ||
         source->external || (source->temporal && source->temporal->joint_map.rows != 0) ||
-        !std::holds_alternative<KnownInitial>(source->initial) || horizon > exact_h::default_max_stages ||
+        !std::holds_alternative<KnownInitial>(source->initial) ||
+        horizon > exact_h::default_max_stages ||
         !joint_width(horizon, dimensions.state, dimensions.control) ||
-        *joint_width(horizon, dimensions.state, dimensions.control) >= exact_h::default_max_variables) return false;
-    const auto* controls = std::get_if<ContinuousDomain>(&source->controls);
-    if (!controls || controls->stages.size() != horizon || source->states.size() != horizon + 1) return false;
-    for (const auto& state : source->states)
-        if (!supported_set(state, dimensions.state)) return false;
-    for (const auto& control : controls->stages)
-        if (!supported_set(control, dimensions.control)) return false;
+        *joint_width(horizon, dimensions.state, dimensions.control) >=
+            exact_h::default_max_variables)
+        return false;
+    const auto *controls = std::get_if<ContinuousDomain>(&source->controls);
+    if (!controls || controls->stages.size() != horizon || source->states.size() != horizon + 1)
+        return false;
+    for (const auto &state : source->states)
+        if (!supported_set(state, dimensions.state))
+            return false;
+    for (const auto &control : controls->stages)
+        if (!supported_set(control, dimensions.control))
+            return false;
     const auto objective = problem.objective().coefficients();
-    const auto* linear = std::get_if<optimization::LinearCoefficients>(&objective);
-    if (!linear || linear->coefficients.size() != dimensions.state || !finite(linear->offset)) return false;
+    const auto *linear = std::get_if<optimization::LinearCoefficients>(&objective);
+    if (!linear || linear->coefficients.size() != dimensions.state || !finite(linear->offset))
+        return false;
     for (std::size_t index = 0; index < linear->coefficients.size(); ++index)
-        if (!finite(linear->coefficients[index])) return false;
+        if (!finite(linear->coefficients[index]))
+            return false;
     return true;
 }
 
-bool strategy_a_nominal_linear_exact_profile_valid(const problem::ResolvedProblem& problem,
-    const FamilyRequest& family, const RepresentationId& representation) {
-    return nominal_linear_exact_profile_valid(problem, family, representation, synthesis::strategy_a::nominal_linear_exact_profile);
+bool strategy_a_nominal_linear_exact_profile_valid(const problem::ResolvedProblem &problem,
+                                                   const FamilyRequest &family,
+                                                   const RepresentationId &representation) {
+    return nominal_linear_exact_profile_valid(problem, family, representation,
+                                              synthesis::strategy_a::nominal_linear_exact_profile);
 }
-bool strategy_b_nominal_linear_exact_profile_valid(const problem::ResolvedProblem& problem,
-    const FamilyRequest& family, const RepresentationId& representation) {
-    return nominal_linear_exact_profile_valid(problem, family, representation, synthesis::strategy_b::nominal_linear_exact_profile);
+bool strategy_b_nominal_linear_exact_profile_valid(const problem::ResolvedProblem &problem,
+                                                   const FamilyRequest &family,
+                                                   const RepresentationId &representation) {
+    return nominal_linear_exact_profile_valid(problem, family, representation,
+                                              synthesis::strategy_b::nominal_linear_exact_profile);
 }
-std::vector<TransformStepIdentity> strategy_b_nominal_linear_exact_lineage(const ProblemId& problem) {
+std::vector<TransformStepIdentity>
+strategy_b_nominal_linear_exact_lineage(const ProblemId &problem) {
     const ModuleId strategy{"csl.synthesis.strategy-b"};
-    const SetId feasible{"syn04-feasible:"+problem.value};
-    return {{{"syn04-build:"+problem.value},{problem.value},feasible,strategy,"1"},
-        {{"syn04-exact-face:"+problem.value},feasible,{"syn04-exact-optimal:"+problem.value},strategy,"1"}};
+    const SetId feasible{"syn04-feasible:" + problem.value};
+    return {{{"syn04-build:" + problem.value}, {problem.value}, feasible, strategy, "1"},
+            {{"syn04-exact-face:" + problem.value},
+             feasible,
+             {"syn04-exact-optimal:" + problem.value},
+             strategy,
+             "1"}};
 }
-std::shared_ptr<const CompiledCompleteFamilyVerifier> make_strategy_b_nominal_linear_exact_verifier() {
+std::shared_ptr<const CompiledCompleteFamilyVerifier>
+make_strategy_b_nominal_linear_exact_verifier() {
     return std::make_shared<const NominalLinearExactVerifier>(true);
 }
 
-std::optional<std::pair<double, double>> nominal_linear_exact_optimum_bounds(
-    const problem::ResolvedProblem& problem, const ExecutionContext* context) {
+std::optional<std::pair<double, double>>
+nominal_linear_exact_optimum_bounds(const problem::ResolvedProblem &problem,
+                                    const ExecutionContext *context) {
     const ConstructionCancellation cancellation{context};
-    if(cancellation.stop_requested())return {};
+    if (cancellation.stop_requested())
+        return {};
     std::vector<exact_h::Row> rows;
     std::vector<double> objective;
     const auto reconstructed = reconstruct(problem, {}, rows, objective);
-    if (reconstructed.state != CheckState::established) return {};
+    if (reconstructed.state != CheckState::established)
+        return {};
     const auto objective_data = problem.objective().coefficients();
-    const auto* linear = std::get_if<optimization::LinearCoefficients>(&objective_data);
-    if (!linear) return {};
-    const auto optimum = exact_h::minimize_linear(rows, objective.size(), objective,
-        linear->offset, {}, cancellation);
+    const auto *linear = std::get_if<optimization::LinearCoefficients>(&objective_data);
+    if (!linear)
+        return {};
+    const auto optimum = exact_h::minimize_linear(rows, objective.size(), objective, linear->offset,
+                                                  {}, cancellation);
     if (optimum.state != exact_h::LinearMinimumState::minimum || !optimum.attained)
         return {};
     return rational_to_outward_doubles(optimum.value, exact_h::default_max_integer_bits);
 }
 
 std::variant<sets::SetData, OperationStopped> nominal_linear_exact_optimal_relation(
-    const problem::ResolvedProblem& problem, SetId id, std::vector<std::string> labels,
-    std::size_t max_relation_rows, const ExecutionContext* context) {
+    const problem::ResolvedProblem &problem, SetId id, std::vector<std::string> labels,
+    std::size_t max_relation_rows, const ExecutionContext *context) {
     const ConstructionCancellation cancellation{context};
-    if(cancellation.stop_requested())return cancellation.stopped();
+    if (cancellation.stop_requested())
+        return cancellation.stopped();
     exact_h::Limits limits;
     limits.max_rows = std::min(limits.max_rows, max_relation_rows);
     std::vector<exact_h::Row> rows;
     std::vector<double> objective;
     const auto built = reconstruct(problem, limits, rows, objective);
     if (built.state != CheckState::established)
-        return OperationStopped{StopReason::resource_limit,
-            "Nominal exact-H family construction exhausted its row or arithmetic budget: " + built.reason};
+        return OperationStopped{
+            StopReason::resource_limit,
+            "Nominal exact-H family construction exhausted its row or arithmetic budget: " +
+                built.reason};
     const auto coefficients = problem.objective().coefficients();
-    const auto& linear = std::get<optimization::LinearCoefficients>(coefficients);
-    const auto optimum = exact_h::minimize_linear(rows, objective.size(), objective, linear.offset, limits, cancellation);
-    if(cancellation.stop_requested())return cancellation.stopped();
+    const auto &linear = std::get<optimization::LinearCoefficients>(coefficients);
+    const auto optimum = exact_h::minimize_linear(rows, objective.size(), objective, linear.offset,
+                                                  limits, cancellation);
+    if (cancellation.stop_requested())
+        return cancellation.stopped();
     if (optimum.state != exact_h::LinearMinimumState::minimum || !optimum.attained ||
         !append_objective_face(objective, linear.offset, optimum.value, limits, rows))
-        return OperationStopped{StopReason::resource_limit,
+        return OperationStopped{
+            StopReason::resource_limit,
             "Nominal exact-H optimum-face construction exhausted its row or arithmetic budget."};
     constexpr std::size_t max_binary64_search_steps = 63;
     if (objective.size() == std::numeric_limits<std::size_t>::max() ||
         rows.size() > limits.max_operations / max_binary64_search_steps / (objective.size() + 1))
-        return OperationStopped{StopReason::resource_limit,
+        return OperationStopped{
+            StopReason::resource_limit,
             "Nominal exact-H family construction exhausted its arithmetic operation budget."};
 
     std::vector<double> inequalities;
     std::vector<double> upper_bounds;
     std::vector<double> equalities;
     std::vector<double> equality_values;
-    if (objective.size() && rows.size() > std::numeric_limits<std::size_t>::max() / objective.size())
-        return OperationStopped{StopReason::resource_limit,
+    if (objective.size() &&
+        rows.size() > std::numeric_limits<std::size_t>::max() / objective.size())
+        return OperationStopped{
+            StopReason::resource_limit,
             "Nominal exact-H relation scalar count overflows the materialization budget."};
     inequalities.reserve(rows.size() * objective.size());
     upper_bounds.reserve(rows.size());
-    auto opposites = [](const exact_h::Integer& lhs, const exact_h::Integer& rhs) {
-        return lhs.words == rhs.words && (exact_h::exact_detail::is_zero(lhs) || lhs.negative != rhs.negative);
+    auto opposites = [](const exact_h::Integer &lhs, const exact_h::Integer &rhs) {
+        return lhs.words == rhs.words &&
+               (exact_h::exact_detail::is_zero(lhs) || lhs.negative != rhs.negative);
     };
-    auto as_exact_double = [&](const exact_h::Integer& integer, double& value) {
+    auto as_exact_double = [&](const exact_h::Integer &integer, double &value) {
         exact_h::ExactRational rational;
         rational.numerator = integer;
         rational.denominator = exact_h::exact_detail::from_u64(1);
         return exact_h::exact_rational_to_double(rational, limits.max_integer_bits, value);
     };
     for (std::size_t row_index = 0; row_index < rows.size(); ++row_index) {
-        const auto& row = rows[row_index];
+        const auto &row = rows[row_index];
         if (row.strict || row.coefficients.size() != objective.size())
             return OperationStopped{StopReason::numerical_failure,
-                "Nominal exact-H relation contains a malformed dyadic row."};
-        const bool paired_equality = row_index + 1 < rows.size() && !rows[row_index + 1].strict &&
+                                    "Nominal exact-H relation contains a malformed dyadic row."};
+        const bool paired_equality =
+            row_index + 1 < rows.size() && !rows[row_index + 1].strict &&
             rows[row_index + 1].coefficients.size() == objective.size() &&
             opposites(row.bound, rows[row_index + 1].bound) &&
             std::equal(row.coefficients.begin(), row.coefficients.end(),
-                rows[row_index + 1].coefficients.begin(), opposites);
-        auto& target = paired_equality ? equalities : inequalities;
-        auto& target_bounds = paired_equality ? equality_values : upper_bounds;
-        for (const auto& coefficient : row.coefficients) {
+                       rows[row_index + 1].coefficients.begin(), opposites);
+        auto &target = paired_equality ? equalities : inequalities;
+        auto &target_bounds = paired_equality ? equality_values : upper_bounds;
+        for (const auto &coefficient : row.coefficients) {
             double value{};
             if (!as_exact_double(coefficient, value))
-                return OperationStopped{StopReason::resource_limit,
+                return OperationStopped{
+                    StopReason::resource_limit,
                     "Nominal exact-H coefficient exceeds the binary64 materialization budget."};
             target.push_back(value);
         }
         double bound{};
         if (!as_exact_double(row.bound, bound))
-            return OperationStopped{StopReason::resource_limit,
+            return OperationStopped{
+                StopReason::resource_limit,
                 "Nominal exact-H bound exceeds the binary64 materialization budget."};
         target_bounds.push_back(bound);
         if (paired_equality) {
             ++row_index;
         }
     }
-    auto inequality_matrix = numeric::snapshot(Matrix{
-        upper_bounds.size(), objective.size(), std::move(inequalities)});
+    auto inequality_matrix =
+        numeric::snapshot(Matrix{upper_bounds.size(), objective.size(), std::move(inequalities)});
     auto upper_vector = numeric::snapshot_vector(Vector(std::move(upper_bounds)));
-    auto equality_matrix = numeric::snapshot(Matrix{
-        equality_values.size(), objective.size(), std::move(equalities)});
+    auto equality_matrix =
+        numeric::snapshot(Matrix{equality_values.size(), objective.size(), std::move(equalities)});
     auto equality_vector = numeric::snapshot_vector(Vector(std::move(equality_values)));
     if (!std::holds_alternative<numeric::MatrixView>(inequality_matrix) ||
         !std::holds_alternative<numeric::VectorView>(upper_vector) ||
         !std::holds_alternative<numeric::MatrixView>(equality_matrix) ||
         !std::holds_alternative<numeric::VectorView>(equality_vector))
-        return OperationStopped{StopReason::resource_limit,
+        return OperationStopped{
+            StopReason::resource_limit,
             "Nominal exact-H relation buffer allocation exceeded the materialization budget."};
     auto made = sets::make_h({std::move(id), objective.size(), std::move(labels)},
-        {std::get<numeric::MatrixView>(std::move(inequality_matrix)),
-         std::get<numeric::VectorView>(std::move(upper_vector)),
-         std::get<numeric::MatrixView>(std::move(equality_matrix)),
-         std::get<numeric::VectorView>(std::move(equality_vector))});
+                             {std::get<numeric::MatrixView>(std::move(inequality_matrix)),
+                              std::get<numeric::VectorView>(std::move(upper_vector)),
+                              std::get<numeric::MatrixView>(std::move(equality_matrix)),
+                              std::get<numeric::VectorView>(std::move(equality_vector))});
     if (!std::holds_alternative<sets::SetData>(made))
-        return OperationStopped{StopReason::resource_limit,
+        return OperationStopped{
+            StopReason::resource_limit,
             "Nominal exact-H relation construction exceeded the materialization budget."};
     return std::get<sets::SetData>(std::move(made));
 }
 
-std::vector<TransformStepIdentity> strategy_a_nominal_linear_exact_lineage(const ProblemId& problem,
-    std::size_t horizon) {
+std::vector<TransformStepIdentity> strategy_a_nominal_linear_exact_lineage(const ProblemId &problem,
+                                                                           std::size_t horizon) {
     return synthesis::strategy_a::detail::expected_nominal_lineage(problem, horizon);
 }
 

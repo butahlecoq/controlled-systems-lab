@@ -31,31 +31,31 @@ struct FamilySourceEvidence {
 class PlotProjectionSource;
 using PlotSourceResult = std::variant<std::shared_ptr<const PlotProjectionSource>, Diagnostics>;
 
-PlotSourceResult make_reachable_set_source(
-    SetHandle, ProblemId, StateRelationCoordinates);
-PlotSourceResult make_optimal_family_source(
-    const OptimalFamily&, StateRelationCoordinates);
+PlotSourceResult make_reachable_set_source(SetHandle, ProblemId, StateRelationCoordinates);
+PlotSourceResult make_optimal_family_source(const OptimalFamily &, StateRelationCoordinates);
 
 class PlotProjectionSource {
-public:
-    const SetHandle& relation() const noexcept { return relation_; }
-    const PlotSourceOwner& owner() const noexcept { return owner_; }
-    const StateRelationCoordinates& coordinates() const noexcept { return coordinates_; }
-    const std::optional<FamilySourceEvidence>& family_evidence() const noexcept { return family_evidence_; }
+  public:
+    const SetHandle &relation() const noexcept { return relation_; }
+    const PlotSourceOwner &owner() const noexcept { return owner_; }
+    const StateRelationCoordinates &coordinates() const noexcept { return coordinates_; }
+    const std::optional<FamilySourceEvidence> &family_evidence() const noexcept {
+        return family_evidence_;
+    }
 
-private:
+  private:
     PlotProjectionSource(SetHandle, PlotSourceOwner, StateRelationCoordinates,
-        std::optional<FamilySourceEvidence>);
+                         std::optional<FamilySourceEvidence>);
 
     SetHandle relation_;
     PlotSourceOwner owner_;
     StateRelationCoordinates coordinates_;
     std::optional<FamilySourceEvidence> family_evidence_;
 
-    friend PlotSourceResult make_reachable_set_source(
-        SetHandle, ProblemId, StateRelationCoordinates);
-    friend PlotSourceResult make_optimal_family_source(
-        const OptimalFamily&, StateRelationCoordinates);
+    friend PlotSourceResult make_reachable_set_source(SetHandle, ProblemId,
+                                                      StateRelationCoordinates);
+    friend PlotSourceResult make_optimal_family_source(const OptimalFamily &,
+                                                       StateRelationCoordinates);
 };
 
 struct TrajectoryPairRequest {
@@ -91,9 +91,11 @@ struct PlotRequest {
 
     static PlotRequest trajectory_pair(CoordinatePair);
     static PlotRequest set_projection(std::shared_ptr<const PlotProjectionSource>, StageIndex,
-        CoordinatePair, SetRelation, Assurance, RequestId, ReferenceId);
+                                      CoordinatePair, SetRelation, Assurance, RequestId,
+                                      ReferenceId);
     static PlotRequest support_samples(std::shared_ptr<const PlotProjectionSource>, StageIndex,
-        CoordinatePair, std::vector<SupportSampleDirection>, Assurance);
+                                       CoordinatePair, std::vector<SupportSampleDirection>,
+                                       Assurance);
 };
 
 enum class PlotSampleKind { selected_witnesses, support_samples };
@@ -170,12 +172,12 @@ struct PlotRequestFailure {
     std::variant<registry::Rejection, Unsupported, OperationStopped, ArtifactError> cause;
 };
 
-using PlotOutcome = std::variant<PlotTrajectoryPair, PlotSetProjection, PlotSupportSamples,
-    PlotRequestFailure>;
+using PlotOutcome =
+    std::variant<PlotTrajectoryPair, PlotSetProjection, PlotSupportSamples, PlotRequestFailure>;
 
-PlotOutcome make_plot(const PlotData&, const PlotRequest&);
-PlotOutcome make_plot(const PlotData&, const PlotRequest&,
-    const registry::PreparedProvider<registry::GeometryPort>&,
-    const ExecutionContext& = {});
+PlotOutcome make_plot(const PlotData &, const PlotRequest &);
+PlotOutcome make_plot(const PlotData &, const PlotRequest &,
+                      const registry::PreparedProvider<registry::GeometryPort> &,
+                      const ExecutionContext & = {});
 
 }

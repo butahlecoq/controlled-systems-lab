@@ -8,14 +8,15 @@ using namespace csl;
 using namespace csl::sets;
 
 static_assert(!std::is_default_constructible_v<SetData>);
-static_assert(std::is_same_v<decltype(std::declval<SetData>().metadata()), std::shared_ptr<const Metadata>>);
+static_assert(
+    std::is_same_v<decltype(std::declval<SetData>().metadata()), std::shared_ptr<const Metadata>>);
 
 namespace {
-template<class T> T accepted(std::variant<T, Diagnostic> result) {
+template <class T> T accepted(std::variant<T, Diagnostic> result) {
     REQUIRE(std::holds_alternative<T>(result));
     return std::get<T>(std::move(result));
 }
-void rejected(const Result<SetData>& result, const char* field) {
+void rejected(const Result<SetData> &result, const char *field) {
     REQUIRE(std::holds_alternative<Diagnostic>(result));
     CHECK(std::get<Diagnostic>(result).code == DiagnosticCode::invalid_input);
     CHECK(std::get<Diagnostic>(result).field == field);
@@ -29,7 +30,9 @@ HRepresentation segment_h() {
     return {matrix(2, 2, {-1, 0, 1, 0}), vector({1, 2}), matrix(1, 2, {0, 1}), vector({0})};
 }
 VRepresentation segment_v() { return {matrix(2, 2, {-1, 0, 2, 0}), matrix(0, 2, {})}; }
-AffineDimensionClaim dimension(std::size_t value) { return {DimensionValue{value}, Unestablished{}}; }
+AffineDimensionClaim dimension(std::size_t value) {
+    return {DimensionValue{value}, Unestablished{}};
+}
 }
 
 // Losing an equality, transposing rows, or confusing ambient and affine dimension breaks this.
@@ -70,14 +73,16 @@ TEST_CASE("supplied equivalent V segment keeps endpoints and a different represe
     CHECK(data.rays.cols() == 2);
 }
 
-TEST_CASE("rays and opposite rays preserve unbounded and lineality descriptions without rank inference") {
+TEST_CASE(
+    "rays and opposite rays preserve unbounded and lineality descriptions without rank inference") {
     auto ray = accepted(make_v(plane(), {matrix(1, 2, {0, 0}), matrix(1, 2, {1, 0})}));
     CHECK_FALSE(ray.metadata()->affine_dimension.has_value());
     CHECK(ray.metadata()->set.bounded == SetProperty::unknown);
     auto r = std::get<VRepresentation>(ray.representation());
     CHECK(r.rays(0, 0) == 1);
     CHECK(r.rays(0, 1) == 0);
-    auto line = accepted(make_v(plane(), {matrix(1, 2, {0, 0}), matrix(2, 2, {1, 0, -1, 0})}, dimension(1)));
+    auto line = accepted(
+        make_v(plane(), {matrix(1, 2, {0, 0}), matrix(2, 2, {1, 0, -1, 0})}, dimension(1)));
     CHECK(std::get<VRepresentation>(line.representation()).rays(1, 0) == -1);
 }
 
@@ -90,24 +95,30 @@ TEST_CASE("elementary cases remain distinct in zero and positive ambient dimensi
         CHECK(std::holds_alternative<EmptyRepresentation>(empty.representation()));
         CHECK(std::holds_alternative<UniversalRepresentation>(universe.representation()));
         CHECK(std::holds_alternative<SingletonRepresentation>(point.representation()));
-        CHECK(std::holds_alternative<EmptyAffineDimension>(empty.metadata()->affine_dimension->claim.value));
-        CHECK(std::get<DimensionValue>(universe.metadata()->affine_dimension->claim.value).value == n);
+        CHECK(std::holds_alternative<EmptyAffineDimension>(
+            empty.metadata()->affine_dimension->claim.value));
+        CHECK(std::get<DimensionValue>(universe.metadata()->affine_dimension->claim.value).value ==
+              n);
         CHECK(std::get<DimensionValue>(point.metadata()->affine_dimension->claim.value).value == 0);
         CHECK(universe.metadata()->set.bounded == (n == 0 ? SetProperty::yes : SetProperty::no));
         CHECK(point.metadata()->set.bounded == SetProperty::yes);
         CHECK(empty.metadata()->affine_dimension->origin == DimensionOrigin::definition);
-        CHECK(std::holds_alternative<SymbolicArgument>(point.metadata()->affine_dimension->claim.support));
+        CHECK(std::holds_alternative<SymbolicArgument>(
+            point.metadata()->affine_dimension->claim.support));
     }
 }
 
 TEST_CASE("zero row and zero column H V data retain authored dimensions") {
-    auto h = accepted(make_h({{"H0"}, 0, {}}, {matrix(1, 0, {}), vector({-1}), matrix(0, 0, {}), vector({})}));
+    auto h = accepted(
+        make_h({{"H0"}, 0, {}}, {matrix(1, 0, {}), vector({-1}), matrix(0, 0, {}), vector({})}));
     CHECK(std::get<HRepresentation>(h.representation()).inequalities.rows() == 1);
-    CHECK_FALSE(h.metadata()->affine_dimension.has_value()); // 0 <= -1 is infeasible, but no feasibility solver here.
-    auto point = accepted(make_v({{"V0"}, 0, {}}, {matrix(1, 0, {}), matrix(0, 0, {})}, dimension(0)));
+    CHECK_FALSE(h.metadata()->affine_dimension.has_value()); // 0 <= -1 is infeasible, but no
+                                                             // feasibility solver here.
+    auto point =
+        accepted(make_v({{"V0"}, 0, {}}, {matrix(1, 0, {}), matrix(0, 0, {})}, dimension(0)));
     CHECK(std::get<VRepresentation>(point.representation()).vertices.rows() == 1);
     auto empty = accepted(make_v(plane(), {matrix(0, 2, {}), matrix(1, 2, {1, 0})},
-        AffineDimensionClaim{EmptyAffineDimension{}, Unestablished{}}));
+                                 AffineDimensionClaim{EmptyAffineDimension{}, Unestablished{}}));
     CHECK(empty.metadata()->set.bounded == SetProperty::yes);
     CHECK(std::get<VRepresentation>(empty.representation()).rays.rows() == 1);
 }
@@ -134,10 +145,13 @@ TEST_CASE("metadata and typed numeric data survive producer and set destruction"
 }
 
 TEST_CASE("supplied numerical symbolic and unchecked certificate evidence stays supplied") {
-    std::vector<EvidenceSupport> supports{NumericalCheck{1e-8, 2e-8, 3e-9, {"rank-check"}},
-        SymbolicArgument{"user-proof", "exact input coefficients"}, CertificateReference{"rank.cert", "external"}};
-    for (const auto& support : supports) {
-        auto set = accepted(make_h(plane(), segment_h(), AffineDimensionClaim{DimensionValue{1}, support}));
+    std::vector<EvidenceSupport> supports{
+        NumericalCheck{1e-8, 2e-8, 3e-9, {"rank-check"}},
+        SymbolicArgument{"user-proof", "exact input coefficients"},
+        CertificateReference{"rank.cert", "external"}};
+    for (const auto &support : supports) {
+        auto set = accepted(
+            make_h(plane(), segment_h(), AffineDimensionClaim{DimensionValue{1}, support}));
         auto info = set.metadata();
         CHECK(info->affine_dimension->origin == DimensionOrigin::supplied);
         CHECK(info->affine_dimension->claim.support.index() == support.index());
@@ -147,18 +161,20 @@ TEST_CASE("supplied numerical symbolic and unchecked certificate evidence stays 
         }
         if (auto symbolic = std::get_if<SymbolicArgument>(&info->affine_dimension->claim.support))
             CHECK(symbolic->reference == "user-proof");
-        if (auto certificate = std::get_if<CertificateReference>(&info->affine_dimension->claim.support))
+        if (auto certificate =
+                std::get_if<CertificateReference>(&info->affine_dimension->claim.support))
             CHECK(certificate->artifact == "rank.cert");
     }
 }
 
 TEST_CASE("moved authored metadata cannot retain mutable producer aliases") {
     auto desc = plane();
-    char& id_alias = desc.id.value[0];
-    char& label_alias = desc.coordinate_labels[0][0];
-    std::optional<AffineDimensionClaim> claim{AffineDimensionClaim{DimensionValue{1},
+    char &id_alias = desc.id.value[0];
+    char &label_alias = desc.coordinate_labels[0][0];
+    std::optional<AffineDimensionClaim> claim{AffineDimensionClaim{
+        DimensionValue{1},
         SymbolicArgument{"a long user proof reference with heap storage", "exact data"}}};
-    char& proof_alias = std::get<SymbolicArgument>(claim->support).reference[0];
+    char &proof_alias = std::get<SymbolicArgument>(claim->support).reference[0];
     auto set = accepted(make_h(std::move(desc), segment_h(), std::move(claim)));
     id_alias = 'X';
     label_alias = 'X';
@@ -166,22 +182,57 @@ TEST_CASE("moved authored metadata cannot retain mutable producer aliases") {
     CHECK(set.metadata()->id.value == "segment");
     CHECK(set.metadata()->coordinate_labels[0] == "x");
     CHECK(std::get<SymbolicArgument>(set.metadata()->affine_dimension->claim.support).reference ==
-        "a long user proof reference with heap storage");
+          "a long user proof reference with heap storage");
 }
 
 TEST_CASE("structural errors are rejected at set creation") {
     auto desc = plane();
-    SUBCASE("H columns") { auto h = segment_h(); h.equalities = matrix(1, 1, {1}); rejected(make_h(desc, h), "sets.h.shape"); }
-    SUBCASE("H bound rows") { auto h = segment_h(); h.upper_bounds = vector({1}); rejected(make_h(desc, h), "sets.h.shape"); }
-    SUBCASE("V columns") { auto v = segment_v(); v.rays = matrix(0, 1, {}); rejected(make_v(desc, v), "sets.v.shape"); }
-    SUBCASE("label count") { desc.coordinate_labels = {"x"}; rejected(make_empty(desc), "sets.labels"); }
-    SUBCASE("duplicate labels") { desc.coordinate_labels = {"x", "x"}; rejected(make_empty(desc), "sets.labels"); }
-    SUBCASE("empty label") { desc.coordinate_labels = {"x", ""}; rejected(make_empty(desc), "sets.labels"); }
-    SUBCASE("empty identity") { desc.id.value.clear(); rejected(make_empty(desc), "sets.id"); }
-    SUBCASE("affine exceeds ambient") { rejected(make_h(desc, segment_h(), dimension(3)), "sets.affine_dimension"); }
-    SUBCASE("nonempty V claimed empty") { rejected(make_v(desc, segment_v(), AffineDimensionClaim{EmptyAffineDimension{}, Unestablished{}}), "sets.affine_dimension"); }
-    SUBCASE("empty V claimed nonempty") { rejected(make_v(desc, {matrix(0, 2, {}), matrix(0, 2, {})}, dimension(0)), "sets.affine_dimension"); }
-    SUBCASE("singleton dimension") { rejected(make_singleton(desc, vector({1})), "sets.singleton.shape"); }
+    SUBCASE("H columns") {
+        auto h = segment_h();
+        h.equalities = matrix(1, 1, {1});
+        rejected(make_h(desc, h), "sets.h.shape");
+    }
+    SUBCASE("H bound rows") {
+        auto h = segment_h();
+        h.upper_bounds = vector({1});
+        rejected(make_h(desc, h), "sets.h.shape");
+    }
+    SUBCASE("V columns") {
+        auto v = segment_v();
+        v.rays = matrix(0, 1, {});
+        rejected(make_v(desc, v), "sets.v.shape");
+    }
+    SUBCASE("label count") {
+        desc.coordinate_labels = {"x"};
+        rejected(make_empty(desc), "sets.labels");
+    }
+    SUBCASE("duplicate labels") {
+        desc.coordinate_labels = {"x", "x"};
+        rejected(make_empty(desc), "sets.labels");
+    }
+    SUBCASE("empty label") {
+        desc.coordinate_labels = {"x", ""};
+        rejected(make_empty(desc), "sets.labels");
+    }
+    SUBCASE("empty identity") {
+        desc.id.value.clear();
+        rejected(make_empty(desc), "sets.id");
+    }
+    SUBCASE("affine exceeds ambient") {
+        rejected(make_h(desc, segment_h(), dimension(3)), "sets.affine_dimension");
+    }
+    SUBCASE("nonempty V claimed empty") {
+        rejected(make_v(desc, segment_v(),
+                        AffineDimensionClaim{EmptyAffineDimension{}, Unestablished{}}),
+                 "sets.affine_dimension");
+    }
+    SUBCASE("empty V claimed nonempty") {
+        rejected(make_v(desc, {matrix(0, 2, {}), matrix(0, 2, {})}, dimension(0)),
+                 "sets.affine_dimension");
+    }
+    SUBCASE("singleton dimension") {
+        rejected(make_singleton(desc, vector({1})), "sets.singleton.shape");
+    }
 }
 
 TEST_CASE("SetHandle roundtrip retains data and rejects a changed envelope") {

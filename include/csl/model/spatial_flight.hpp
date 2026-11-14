@@ -15,7 +15,9 @@ struct State {
 };
 // Synthetic allocation is zero-based: u0 acts through moments; u1 and u2 act
 // through both Cy/Cz and moments. These are not recovered hardware controls.
-struct Control { double u0, u1, u2; };
+struct Control {
+    double u0, u1, u2;
+};
 
 // Authored synthetic coefficients. Angular quantities are numerically radians.
 struct Parameters {
@@ -37,13 +39,13 @@ struct Linearization {
 };
 
 class Model {
-public:
+  public:
     static std::variant<Model, Diagnostics> make(Parameters parameters);
-    std::variant<State, Diagnostics> rhs(const State&, const Control&) const;
-    std::variant<Linearization, Diagnostics> linearize(const State&, const Control&) const;
-    const Parameters& parameters() const noexcept { return parameters_; }
+    std::variant<State, Diagnostics> rhs(const State &, const Control &) const;
+    std::variant<Linearization, Diagnostics> linearize(const State &, const Control &) const;
+    const Parameters &parameters() const noexcept { return parameters_; }
 
-private:
+  private:
     explicit Model(Parameters parameters) : parameters_(std::move(parameters)) {}
     Parameters parameters_;
 };

@@ -6,10 +6,9 @@ using namespace csl::optimization;
 using ParallelotopeMinimax = FiniteActionParallelotopeMinimaxOutcome (*)(
     const FiniteActionMinimaxRequest &, FiniteActionParallelotopeMinimaxLimits,
     const csl::ExecutionContext &);
-static_assert(std::is_same_v<decltype(&finite_action_parallelotope_minimax),
-                             ParallelotopeMinimax>);
+static_assert(std::is_same_v<decltype(&finite_action_parallelotope_minimax), ParallelotopeMinimax>);
 
 int main() {
-  auto operation = &finite_action_parallelotope_minimax;
-  return operation == nullptr;
+    auto operation = &finite_action_parallelotope_minimax;
+    return operation == nullptr;
 }

@@ -84,19 +84,18 @@ struct FiniteMinimaxInfeasible {
 struct FiniteMinimaxEmptyCatalogue {};
 // An empty initial/disturbance set leaves no adversarial trajectory to score.
 struct FiniteMinimaxNoScenarios {};
-using FiniteActionMinimaxOutcome = std::variant<FiniteMinimaxOptimal,
-    FiniteMinimaxInfeasible, FiniteMinimaxEmptyCatalogue, FiniteMinimaxNoScenarios,
-    Unsupported, OperationStopped>;
+using FiniteActionMinimaxOutcome =
+    std::variant<FiniteMinimaxOptimal, FiniteMinimaxInfeasible, FiniteMinimaxEmptyCatalogue,
+                 FiniteMinimaxNoScenarios, Unsupported, OperationStopped>;
 
 // Evaluates every selected fixed action history and every generated terminal
 // V row. With no candidate catalogue this is the complete action product; a
 // supplied subset is not a full-product optimality claim. Only numerical
 // assurance is available; records are replay witnesses, not validated rounding
 // certificates or an independently proved H/V conversion.
-FiniteActionMinimaxOutcome finite_action_minimax(
-    const FiniteActionMinimaxRequest& request,
-    FiniteActionMinimaxLimits limits,
-    const ExecutionContext& context = {},
-    const FiniteMinimaxTimingSpans* timing_spans = nullptr);
+FiniteActionMinimaxOutcome
+finite_action_minimax(const FiniteActionMinimaxRequest &request, FiniteActionMinimaxLimits limits,
+                      const ExecutionContext &context = {},
+                      const FiniteMinimaxTimingSpans *timing_spans = nullptr);
 
 } // namespace csl::optimization

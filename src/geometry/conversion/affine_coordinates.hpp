@@ -20,7 +20,7 @@ struct AffineCoordinates {
 
 // Builds a numerically resolved affine coordinate map for points stored by row.
 // Ambiguous rank is reported to the caller and must never be rounded down.
-bool affine_coordinates(const Eigen::MatrixXd& points, AffineCoordinates& output,
-                        std::string& reason);
+bool affine_coordinates(const Eigen::MatrixXd &points, AffineCoordinates &output,
+                        std::string &reason);
 
 } // namespace csl::geometry::conversion::detail

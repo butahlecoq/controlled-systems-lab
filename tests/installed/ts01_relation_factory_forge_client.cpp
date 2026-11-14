@@ -2,7 +2,7 @@
 
 namespace csl::synthesis::strategy_ts01 {
 class RelationFactory {
-public:
+  public:
     static std::shared_ptr<const ExactJointRelation> fabricate(sets::SetData data) {
         return std::shared_ptr<const ExactJointRelation>(new ExactJointRelation(std::move(data)));
     }

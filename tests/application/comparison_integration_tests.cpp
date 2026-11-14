@@ -36,63 +36,84 @@
 using namespace csl;
 
 namespace {
-template<class T, class... Rest> T take(std::variant<T, Rest...> value) {
+template <class T, class... Rest> T take(std::variant<T, Rest...> value) {
     REQUIRE(std::holds_alternative<T>(value));
     return std::get<T>(std::move(value));
 }
 
-template<class T> T take_artifact(artifacts::ArtifactResult<T> value, const char* operation) {
-    if (const auto* error = std::get_if<artifacts::ArtifactError>(&value))
-        throw std::runtime_error(std::string(operation) + " failed at " + error->path + ": " + error->message);
+template <class T> T take_artifact(artifacts::ArtifactResult<T> value, const char *operation) {
+    if (const auto *error = std::get_if<artifacts::ArtifactError>(&value))
+        throw std::runtime_error(std::string(operation) + " failed at " + error->path + ": " +
+                                 error->message);
     if (!std::holds_alternative<T>(value))
-        throw std::runtime_error(std::string(operation) + " returned an unexpected artifact result");
+        throw std::runtime_error(std::string(operation) +
+                                 " returned an unexpected artifact result");
     return std::get<T>(std::move(value));
 }
 
 nlohmann::json sample_obs04_environment() {
-    const auto digest=std::string(64,'a');
-    return {
-        {"schema","csl.obs04-environment/1"},
-        {"build",{{"schema","csl.obs04-build/1"},{"source_revision",std::string(40,'b')},
-            {"source_tree_sha256",digest},{"source_snapshot_method","git-head-tracked-diff-untracked-content-sha256/1"},
-            {"source_dirty",false},{"compiler_id","GNU"},
-            {"compiler_version","13.3.0"},{"generator","Unix Makefiles"},{"architecture","x86_64"},
-            {"build_type","Release"},{"cxx_standard","20"},{"c_flags_sha256",digest},
-            {"cxx_flags_sha256",digest},{"executable_link_flags_sha256",digest},{"target_flags_sha256",digest},
-            {"backends",{{"highs",{{"version","1.11.0"},{"archive_sha256",digest}}},
-                {"qhull",{{"version","8.0.2"},{"archive_sha256",digest}}}}}}},
-        {"runtime",{{"schema","csl.obs04-runtime/1"},
-            {"binary_sha256",{{"status","available"},{"value",digest}}},{"os_family","Linux"},
-            {"os_version",{{"status","available"},{"value","Ubuntu 24.04"}}},
-            {"kernel",{{"status","available"},{"value","6.8.0"}}},{"architecture","x86_64"},
-            {"cpu_model",{{"status","unavailable"},{"reason","not exposed by the platform adapter"}}},
-            {"logical_cpus",{{"status","available"},{"value",8}}}}},
-        {"execution",{{"requested_workers",1},{"observed_driver_workers",1},
-            {"requested_backend_threads",1},
-            {"observed_backend_threads",{{"status","unavailable"},{"reason","backend thread count is not observable"}}},
-            {"workspace_policy","fresh-workspace-per-attempt"},
-            {"cache_policy","one warm-up per arm; caches are not flushed"},{"warmup_repetitions",1},
-            {"seed_policy",{{"kind","not_applicable"},{"reason","fixed analytic fixture uses no random generator"}}},
-            {"tolerances",{{"absolute",1e-8},{"relative",1e-8}}}}}
-    };
+    const auto digest = std::string(64, 'a');
+    return {{"schema", "csl.obs04-environment/1"},
+            {"build",
+             {{"schema", "csl.obs04-build/1"},
+              {"source_revision", std::string(40, 'b')},
+              {"source_tree_sha256", digest},
+              {"source_snapshot_method", "git-head-tracked-diff-untracked-content-sha256/1"},
+              {"source_dirty", false},
+              {"compiler_id", "GNU"},
+              {"compiler_version", "13.3.0"},
+              {"generator", "Unix Makefiles"},
+              {"architecture", "x86_64"},
+              {"build_type", "Release"},
+              {"cxx_standard", "20"},
+              {"c_flags_sha256", digest},
+              {"cxx_flags_sha256", digest},
+              {"executable_link_flags_sha256", digest},
+              {"target_flags_sha256", digest},
+              {"backends",
+               {{"highs", {{"version", "1.11.0"}, {"archive_sha256", digest}}},
+                {"qhull", {{"version", "8.0.2"}, {"archive_sha256", digest}}}}}}},
+            {"runtime",
+             {{"schema", "csl.obs04-runtime/1"},
+              {"binary_sha256", {{"status", "available"}, {"value", digest}}},
+              {"os_family", "Linux"},
+              {"os_version", {{"status", "available"}, {"value", "Ubuntu 24.04"}}},
+              {"kernel", {{"status", "available"}, {"value", "6.8.0"}}},
+              {"architecture", "x86_64"},
+              {"cpu_model",
+               {{"status", "unavailable"}, {"reason", "not exposed by the platform adapter"}}},
+              {"logical_cpus", {{"status", "available"}, {"value", 8}}}}},
+            {"execution",
+             {{"requested_workers", 1},
+              {"observed_driver_workers", 1},
+              {"requested_backend_threads", 1},
+              {"observed_backend_threads",
+               {{"status", "unavailable"}, {"reason", "backend thread count is not observable"}}},
+              {"workspace_policy", "fresh-workspace-per-attempt"},
+              {"cache_policy", "one warm-up per arm; caches are not flushed"},
+              {"warmup_repetitions", 1},
+              {"seed_policy",
+               {{"kind", "not_applicable"},
+                {"reason", "fixed analytic fixture uses no random generator"}}},
+              {"tolerances", {{"absolute", 1e-8}, {"relative", 1e-8}}}}}};
 }
 
 SetHandle interval(std::string id) {
     const sets::Description description{SetId{std::move(id)}, 1, {"u"}};
-    const sets::HRepresentation representation{
-        take(numeric::snapshot(Matrix{2, 1, {1, -1}})),
-        take(numeric::snapshot_vector(Vector{1, 0})),
-        take(numeric::snapshot(Matrix{0, 1, {}})),
-        take(numeric::snapshot_vector(Vector{}))};
+    const sets::HRepresentation representation{take(numeric::snapshot(Matrix{2, 1, {1, -1}})),
+                                               take(numeric::snapshot_vector(Vector{1, 0})),
+                                               take(numeric::snapshot(Matrix{0, 1, {}})),
+                                               take(numeric::snapshot_vector(Vector{}))};
     return take(sets::make_h(description, representation)).as_handle();
 }
 
 problem::ResolvedProblem source(std::string profile) {
     Matrix a{1, 1, {1}}, b{1, 1, {1}}, e{1, 0, {}};
-    if (profile == "ts03_singular_integrator") a.values = {0};
+    if (profile == "ts03_singular_integrator")
+        a.values = {0};
     const LinearStage transition{std::move(a), std::move(b), std::move(e), {0}};
-    const auto model = std::make_shared<const SystemModel>(SystemModel{
-        Dynamics{{1, 1, 0}, TimeDomain::discrete, transition}, {}});
+    const auto model = std::make_shared<const SystemModel>(
+        SystemModel{Dynamics{{1, 1, 0}, TimeDomain::discrete, transition}, {}});
     Problem authored;
     authored.id = {"application-paired-" + profile};
     authored.model = model;
@@ -111,17 +132,18 @@ problem::ResolvedProblem source(std::string profile) {
         authored.objective = LinearTerminal{{0}, 3};
     }
     return take(problem::resolve(authored,
-        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}));
+                                 {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}));
 }
 
-void check_full_dynamics(const problem::ResolvedProblem& problem, const Witness& witness) {
+void check_full_dynamics(const problem::ResolvedProblem &problem, const Witness &witness) {
     REQUIRE(witness.states.size() == witness.controls.size() + 1);
     const auto model = problem.model();
-    REQUIRE(witness.states.front() == std::get<KnownInitial>(*problem.initial().description()).point);
+    REQUIRE(witness.states.front() ==
+            std::get<KnownInitial>(*problem.initial().description()).point);
     for (std::size_t k = 0; k < witness.controls.size(); ++k) {
         const auto stages = take(model.stage({k}));
-        const auto& state = witness.states[k];
-        const auto& control = witness.controls[k];
+        const auto &state = witness.states[k];
+        const auto &control = witness.controls[k];
         Vector next(stages.offset.values().begin(), stages.offset.values().end());
         REQUIRE(next.size() == state.size());
         for (std::size_t row = 0; row < next.size(); ++row) {
@@ -136,39 +158,48 @@ void check_full_dynamics(const problem::ResolvedProblem& problem, const Witness&
     }
 }
 
-bool family_contains_history(const OptimalFamily& family, const Vector& history, double tolerance = 1e-9) {
-    const auto* complete = std::get_if<CompleteOptimalFamily>(&family.outcome());
-    if (!complete || !complete->relation.payload) return false;
-    const auto* relation = complete->relation.payload->h_relation_for_recording();
-    if (!relation) return false;
+bool family_contains_history(const OptimalFamily &family, const Vector &history,
+                             double tolerance = 1e-9) {
+    const auto *complete = std::get_if<CompleteOptimalFamily>(&family.outcome());
+    if (!complete || !complete->relation.payload)
+        return false;
+    const auto *relation = complete->relation.payload->h_relation_for_recording();
+    if (!relation)
+        return false;
     const auto representation = relation->representation();
-    const auto* h = std::get_if<sets::HRepresentation>(&representation);
-    if (!h || history.size() != h->inequalities.cols() || history.size() != h->equalities.cols()) return false;
+    const auto *h = std::get_if<sets::HRepresentation>(&representation);
+    if (!h || history.size() != h->inequalities.cols() || history.size() != h->equalities.cols())
+        return false;
     for (std::size_t row = 0; row < h->inequalities.rows(); ++row) {
         double value = 0.0;
-        for (std::size_t col = 0; col < history.size(); ++col) value += h->inequalities(row, col) * history[col];
-        if (value > h->upper_bounds[row] + tolerance) return false;
+        for (std::size_t col = 0; col < history.size(); ++col)
+            value += h->inequalities(row, col) * history[col];
+        if (value > h->upper_bounds[row] + tolerance)
+            return false;
     }
     for (std::size_t row = 0; row < h->equalities.rows(); ++row) {
         double value = 0.0;
-        for (std::size_t col = 0; col < history.size(); ++col) value += h->equalities(row, col) * history[col];
-        if (std::abs(value - h->equality_values[row]) > tolerance) return false;
+        for (std::size_t col = 0; col < history.size(); ++col)
+            value += h->equalities(row, col) * history[col];
+        if (std::abs(value - h->equality_values[row]) > tolerance)
+            return false;
     }
     return true;
 }
 
-template<class Port> registry::PreparedProvider<Port> selected(
-    registry::Registration<Port> entry, std::string representation) {
+template <class Port>
+registry::PreparedProvider<Port> selected(registry::Registration<Port> entry,
+                                          std::string representation) {
     registry::Registry<Port> providers;
     const registry::Method method{entry.identity.id, entry.identity.version};
     REQUIRE_FALSE(providers.add(std::move(entry)));
     registry::Requirements requirements;
     requirements.output.representation = {std::move(representation)};
     if constexpr (std::is_same_v<Port, registry::GeometryPort> ||
-        std::is_same_v<Port, registry::ConversionPort>)
+                  std::is_same_v<Port, registry::ConversionPort>)
         requirements.output.relation = SetRelation::equivalent;
-    return take(registry::prepare_provider(
-        registry::select_provider(providers, method, requirements)));
+    return take(
+        registry::prepare_provider(registry::select_provider(providers, method, requirements)));
 }
 
 struct Modules {
@@ -182,11 +213,11 @@ struct Modules {
     registry::PreparedProvider<registry::LPPort> membership;
 
     Modules(std::shared_ptr<registry::Registry<registry::GeometryPort>> projection_registry,
-        std::shared_ptr<registry::Registry<registry::GeometryPort>> affine_registry,
-        std::shared_ptr<registry::Registry<registry::ConversionPort>> conversion_registry,
-        std::shared_ptr<registry::Registry<registry::LPPort>> lp_registry,
-        std::shared_ptr<registry::Registry<registry::ConvexPort>> convex_registry,
-        registry::PreparedProvider<registry::LPPort> prepared_membership)
+            std::shared_ptr<registry::Registry<registry::GeometryPort>> affine_registry,
+            std::shared_ptr<registry::Registry<registry::ConversionPort>> conversion_registry,
+            std::shared_ptr<registry::Registry<registry::LPPort>> lp_registry,
+            std::shared_ptr<registry::Registry<registry::ConvexPort>> convex_registry,
+            registry::PreparedProvider<registry::LPPort> prepared_membership)
         : projections(std::move(projection_registry)), affines(std::move(affine_registry)),
           conversions(std::move(conversion_registry)), lps(std::move(lp_registry)),
           convexes(std::move(convex_registry)), membership(std::move(prepared_membership)) {}
@@ -197,9 +228,9 @@ Modules modules() {
     auto convex = take(adapters::convex::make_highs_registration());
     auto converter = take(adapters::polyhedral::make_qhull_registration(lp));
     auto projection = geometry::polyhedral::make_projection_registration();
-    auto affine = geometry::make_affine_sum_registration({
-        selected(geometry::make_lp_hull_reducer_registration(), ""),
-        selected(lp, "csl.program-result.v1"), selected(converter, "csl.polyhedron.v")});
+    auto affine = geometry::make_affine_sum_registration(
+        {selected(geometry::make_lp_hull_reducer_registration(), ""),
+         selected(lp, "csl.program-result.v1"), selected(converter, "csl.polyhedron.v")});
     auto projections = std::make_shared<registry::Registry<registry::GeometryPort>>();
     auto affines = std::make_shared<registry::Registry<registry::GeometryPort>>();
     auto conversions = std::make_shared<registry::Registry<registry::ConversionPort>>();
@@ -220,20 +251,24 @@ Modules modules() {
     program.output.representation = {"csl.program-result.v1"};
     auto providers = take(registry::check_providers(
         registry::select_provider(*projections, pm, h), registry::select_provider(*affines, am, v),
-        registry::select_provider(*conversions, cm, h), registry::select_provider(*lps, lm, program),
+        registry::select_provider(*conversions, cm, h),
+        registry::select_provider(*lps, lm, program),
         registry::select_provider(*convexes, qm, program)));
-    auto membership = take(registry::prepare_provider(registry::select_provider(*lps, lm, program)));
-    Modules result{std::move(projections), std::move(affines), std::move(conversions),
-        std::move(lps), std::move(convexes), std::move(membership)};
-    REQUIRE_FALSE(result.strategies.add(synthesis::strategy_a::make_registration(std::move(providers))));
-    REQUIRE_FALSE(result.strategies.add(synthesis::strategy_b::make_registration(*result.lps, *result.convexes)));
+    auto membership =
+        take(registry::prepare_provider(registry::select_provider(*lps, lm, program)));
+    Modules result{std::move(projections), std::move(affines),  std::move(conversions),
+                   std::move(lps),         std::move(convexes), std::move(membership)};
+    REQUIRE_FALSE(
+        result.strategies.add(synthesis::strategy_a::make_registration(std::move(providers))));
+    REQUIRE_FALSE(result.strategies.add(
+        synthesis::strategy_b::make_registration(*result.lps, *result.convexes)));
     auto selector = synthesis::witness_selector::make_registration(result.membership);
     REQUIRE_FALSE(result.selectors.add(std::move(selector)));
     return result;
 }
 
-application::ComparisonRequest request_for(const problem::ResolvedProblem& problem,
-    std::string profile) {
+application::ComparisonRequest request_for(const problem::ResolvedProblem &problem,
+                                           std::string profile) {
     FamilyRequest family;
     family.profile = std::move(profile);
     family.objective = problem.identity();
@@ -255,58 +290,62 @@ struct EncoderBoundaryRuns {
     csl::artifacts::RecordedRunArtifact partial_selection;
 };
 
-EncoderBoundaryRuns check_complete_family_encoder_boundary(const problem::ResolvedProblem& problem,
-    const application::PreparedComparison& prepared, const application::StrategyExecution& strategy_execution,
-    std::size_t strategy_index, const WitnessRequest& witnesses, bool instrumentation_enabled=false,
-    std::size_t repetition=0) {
+EncoderBoundaryRuns check_complete_family_encoder_boundary(
+    const problem::ResolvedProblem &problem, const application::PreparedComparison &prepared,
+    const application::StrategyExecution &strategy_execution, std::size_t strategy_index,
+    const WitnessRequest &witnesses, bool instrumentation_enabled = false,
+    std::size_t repetition = 0) {
     namespace ar = artifacts;
     namespace ob = csl::execution::observability;
-    const auto& synthesis_result = std::get<SynthesisResult>(strategy_execution.outcome);
+    const auto &synthesis_result = std::get<SynthesisResult>(strategy_execution.outcome);
     REQUIRE(synthesis_result.family);
     const auto expected = prepared.expected_synthesis_identity(strategy_index);
     const ar::Unavailable uninstrumented{ar::MissingReason::not_instrumented, {}};
     const ar::PinAvailability pin = uninstrumented;
     ar::ConfigurationInput input;
     input.collection = {instrumentation_enabled, ar::CollectionMode::detail, 5, 10000, 0, 0};
-    input.modules = {
-        {"strategy", {expected.strategy, expected.strategy_version, pin}, {}},
-        {"lp", {prepared.strategies()[strategy_index].lp, "1", pin}, {}},
-        {"convex", {prepared.strategies()[strategy_index].convex, "1", pin}, {}}};
+    input.modules = {{"strategy", {expected.strategy, expected.strategy_version, pin}, {}},
+                     {"lp", {prepared.strategies()[strategy_index].lp, "1", pin}, {}},
+                     {"convex", {prepared.strategies()[strategy_index].convex, "1", pin}, {}}};
     input.numerical = prepared.family().numerical;
     input.resources = {1, 1, 1, {}};
     input.output = {ar::OutputKind::synthesis, prepared.family().assurance,
-        prepared.family().target, prepared.family().representation, witnesses};
+                    prepared.family().target, prepared.family().representation, witnesses};
     input.selector = {{csl::synthesis::witness_selector::selector_id}, "1", {}};
     input.strategy = prepared.strategies()[strategy_index];
     input.strategy.selector = input.selector.id;
-    const auto configuration = take_artifact(ar::resolve_configuration(std::move(input)),
-        "resolve_configuration");
+    const auto configuration =
+        take_artifact(ar::resolve_configuration(std::move(input)), "resolve_configuration");
     CHECK(configuration.description().strategy.selector == configuration.description().selector.id);
-    const auto run_suffix=repetition==0?std::string{}:"-rep"+std::to_string(repetition);
-    const ar::RunId run{"application-comparison-encoder-"+std::to_string(strategy_index)+
-        (instrumentation_enabled?"-instrumented":"-uninstrumented")+run_suffix};
-    const auto plan = take_artifact(ob::make_collection_plan({problem, configuration, run, {}, {}, 0}),
-        "make_collection_plan");
+    const auto run_suffix = repetition == 0 ? std::string{} : "-rep" + std::to_string(repetition);
+    const ar::RunId run{"application-comparison-encoder-" + std::to_string(strategy_index) +
+                        (instrumentation_enabled ? "-instrumented" : "-uninstrumented") +
+                        run_suffix};
+    const auto plan = take_artifact(
+        ob::make_collection_plan({problem, configuration, run, {}, {}, 0}), "make_collection_plan");
     const auto statistics = take_artifact(ob::merge_observations(plan, {}), "merge_observations");
-    const auto encoded = application::encode_strategy_run(problem, strategy_execution,
-        configuration, run, statistics,
+    const auto encoded = application::encode_strategy_run(
+        problem, strategy_execution, configuration, run, statistics,
         {uninstrumented, uninstrumented, uninstrumented, uninstrumented, true,
-            ar::MemoryAccounting::unlimited});
+         ar::MemoryAccounting::unlimited});
     REQUIRE(std::holds_alternative<std::string>(encoded));
-    const auto& wire=std::get<std::string>(encoded);
-    CHECK(wire.find("csl.run-statistics/7")!=std::string::npos);
-    CHECK(wire.find("unverified_recorded_data")!=std::string::npos);
-    CHECK(wire.find("csl.h-relation-attachment/1")!=std::string::npos);
+    const auto &wire = std::get<std::string>(encoded);
+    CHECK(wire.find("csl.run-statistics/7") != std::string::npos);
+    CHECK(wire.find("unverified_recorded_data") != std::string::npos);
+    CHECK(wire.find("csl.h-relation-attachment/1") != std::string::npos);
     const auto outer = nlohmann::json::parse(wire);
-    const auto attachment = std::find_if(outer.at("attachments").begin(), outer.at("attachments").end(),
-        [](const auto& value) { return value.at("schema") == "csl.trajectory-verification-reports/1"; });
+    const auto attachment = std::find_if(
+        outer.at("attachments").begin(), outer.at("attachments").end(), [](const auto &value) {
+            return value.at("schema") == "csl.trajectory-verification-reports/1";
+        });
     REQUIRE(attachment != outer.at("attachments").end());
-    const auto& hex = attachment->at("content").get_ref<const std::string&>();
+    const auto &hex = attachment->at("content").get_ref<const std::string &>();
     REQUIRE(hex.size() % 2 == 0);
     std::string report_text;
     report_text.reserve(hex.size() / 2);
     const auto digit = [](char value) -> unsigned {
-        if (value >= '0' && value <= '9') return static_cast<unsigned>(value - '0');
+        if (value >= '0' && value <= '9')
+            return static_cast<unsigned>(value - '0');
         return static_cast<unsigned>(value - 'a' + 10);
     };
     for (std::size_t i = 0; i < hex.size(); i += 2)
@@ -319,114 +358,125 @@ EncoderBoundaryRuns check_complete_family_encoder_boundary(const problem::Resolv
     CHECK(report_document.at("reports").at(0).at("objective") == "numerical_pass");
     CHECK(report_document.at("reports").at(0).at("optimality") == "unsupported");
     CHECK(report_document.at("reports").at(0).at("witness_index") == 0);
-    const auto& saved_request = report_document.at("reports").at(0).at("request");
+    const auto &saved_request = report_document.at("reports").at(0).at("request");
     CHECK(saved_request.at("outcome").at("value") == "optimal");
     CHECK(saved_request.at("family_identity").at("strategy") ==
-        strategy_execution.verification.at(0).input.expected_synthesis->strategy.value);
+          strategy_execution.verification.at(0).input.expected_synthesis->strategy.value);
     CHECK(saved_request.at("expected_synthesis").at("lineage").size() > 0);
     CHECK(saved_request.at("bounds").contains("lower"));
     CHECK(saved_request.at("bounds").contains("upper"));
     auto mismatched_execution = strategy_execution;
     REQUIRE(mismatched_execution.verification.at(0).input.expected_synthesis);
-    mismatched_execution.verification.at(0).input.expected_synthesis->request.profile = "wrong-family-profile";
-    const auto mismatched_artifact = application::encode_strategy_run(problem, mismatched_execution,
-        configuration, run, statistics,
+    mismatched_execution.verification.at(0).input.expected_synthesis->request.profile =
+        "wrong-family-profile";
+    const auto mismatched_artifact = application::encode_strategy_run(
+        problem, mismatched_execution, configuration, run, statistics,
         {uninstrumented, uninstrumented, uninstrumented, uninstrumented, true,
-            ar::MemoryAccounting::unlimited});
+         ar::MemoryAccounting::unlimited});
     REQUIRE(std::holds_alternative<ar::ArtifactError>(mismatched_artifact));
     CHECK(std::get<ar::ArtifactError>(mismatched_artifact).path == "run.verification[0].context");
-    auto partial_execution=strategy_execution;
-    auto partial_selection=std::get<WitnessSelection>(partial_execution.selection);
+    auto partial_execution = strategy_execution;
+    auto partial_selection = std::get<WitnessSelection>(partial_execution.selection);
     partial_selection.batch.witnesses.resize(1);
-    partial_selection.termination=Termination::operation_rejected;
-    partial_selection.diagnostics="The second direction query failed; this is a partial batch.";
-    partial_execution.selection=std::move(partial_selection);
+    partial_selection.termination = Termination::operation_rejected;
+    partial_selection.diagnostics = "The second direction query failed; this is a partial batch.";
+    partial_execution.selection = std::move(partial_selection);
     partial_execution.verification.clear();
-    const ar::RunId partial_run{"application-comparison-encoder-"+std::to_string(strategy_index)+
-        (instrumentation_enabled?"-instrumented":"-uninstrumented")+run_suffix+"-partial"};
-    const auto partial_plan=take_artifact(ob::make_collection_plan(
-        {problem,configuration,partial_run,{},{},0}),"make partial selection statistics plan");
-    const auto partial_statistics=take_artifact(ob::merge_observations(partial_plan,{}),
-        "merge partial selection statistics");
-    const auto partial_encoded=application::encode_strategy_run(problem,partial_execution,
-        configuration,partial_run,partial_statistics,
-        {uninstrumented,uninstrumented,uninstrumented,uninstrumented,true,
-            ar::MemoryAccounting::unlimited});
+    const ar::RunId partial_run{"application-comparison-encoder-" + std::to_string(strategy_index) +
+                                (instrumentation_enabled ? "-instrumented" : "-uninstrumented") +
+                                run_suffix + "-partial"};
+    const auto partial_plan =
+        take_artifact(ob::make_collection_plan({problem, configuration, partial_run, {}, {}, 0}),
+                      "make partial selection statistics plan");
+    const auto partial_statistics = take_artifact(ob::merge_observations(partial_plan, {}),
+                                                  "merge partial selection statistics");
+    const auto partial_encoded = application::encode_strategy_run(
+        problem, partial_execution, configuration, partial_run, partial_statistics,
+        {uninstrumented, uninstrumented, uninstrumented, uninstrumented, true,
+         ar::MemoryAccounting::unlimited});
     REQUIRE(std::holds_alternative<std::string>(partial_encoded));
-    const auto partial_document=nlohmann::json::parse(std::get<std::string>(partial_encoded));
-    REQUIRE(partial_document.at("selection").at("batch").at("witnesses").size()==1);
-    CHECK(partial_document.at("selection").at("termination")=="operation_rejected");
-    CHECK(partial_document.at("selection").at("diagnostics")==
-        "The second direction query failed; this is a partial batch.");
-    const auto partial_archived=take_artifact(ar::decode_recorded_run(
-        std::get<std::string>(partial_encoded),problem),"decode partial selection run");
-    CHECK(wire.find("registered_verifier")!=std::string::npos);
-    static_assert(!std::is_convertible_v<ar::RecordedRunArtifact,ar::RunStatistics>);
-    const auto imported=take_artifact(ar::decode_recorded_run(wire,problem),"decode_recorded_run");
-    CHECK(imported.content().bytes().size()==wire.size());
+    const auto partial_document = nlohmann::json::parse(std::get<std::string>(partial_encoded));
+    REQUIRE(partial_document.at("selection").at("batch").at("witnesses").size() == 1);
+    CHECK(partial_document.at("selection").at("termination") == "operation_rejected");
+    CHECK(partial_document.at("selection").at("diagnostics") ==
+          "The second direction query failed; this is a partial batch.");
+    const auto partial_archived =
+        take_artifact(ar::decode_recorded_run(std::get<std::string>(partial_encoded), problem),
+                      "decode partial selection run");
+    CHECK(wire.find("registered_verifier") != std::string::npos);
+    static_assert(!std::is_convertible_v<ar::RecordedRunArtifact, ar::RunStatistics>);
+    const auto imported =
+        take_artifact(ar::decode_recorded_run(wire, problem), "decode_recorded_run");
+    CHECK(imported.content().bytes().size() == wire.size());
     CHECK(std::equal(imported.content().bytes().begin(), imported.content().bytes().end(),
-        reinterpret_cast<const std::byte*>(wire.data())));
-    const auto other_profile=prepared.family().profile=="ts01_exact_integrator"
-        ?"ts02_constant_integrator":"ts01_exact_integrator";
-    const auto problem_mismatch=ar::decode_recorded_run(wire,source(other_profile));
+                     reinterpret_cast<const std::byte *>(wire.data())));
+    const auto other_profile = prepared.family().profile == "ts01_exact_integrator"
+                                   ? "ts02_constant_integrator"
+                                   : "ts01_exact_integrator";
+    const auto problem_mismatch = ar::decode_recorded_run(wire, source(other_profile));
     REQUIRE(std::holds_alternative<ar::ArtifactError>(problem_mismatch));
-    CHECK(std::get<ar::ArtifactError>(problem_mismatch).path=="run.problem");
+    CHECK(std::get<ar::ArtifactError>(problem_mismatch).path == "run.problem");
     CHECK(std::holds_alternative<ar::ArtifactError>(ar::decode_run(wire)));
-    auto trailing=wire+" ";
-    const auto trailing_result=ar::decode_recorded_run(trailing);
+    auto trailing = wire + " ";
+    const auto trailing_result = ar::decode_recorded_run(trailing);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(trailing_result));
-    CHECK(std::get<ar::ArtifactError>(trailing_result).path=="recorded.canonical");
-    auto self_asserted=wire;
-    const auto state=self_asserted.find("unverified_recorded_data");
-    REQUIRE(state!=std::string::npos);
-    self_asserted.replace(state,std::string_view("unverified_recorded_data").size(),"registry_verified");
-    const auto state_result=ar::decode_recorded_run(self_asserted);
+    CHECK(std::get<ar::ArtifactError>(trailing_result).path == "recorded.canonical");
+    auto self_asserted = wire;
+    const auto state = self_asserted.find("unverified_recorded_data");
+    REQUIRE(state != std::string::npos);
+    self_asserted.replace(state, std::string_view("unverified_recorded_data").size(),
+                          "registry_verified");
+    const auto state_result = ar::decode_recorded_run(self_asserted);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(state_result));
-    CHECK(std::get<ar::ArtifactError>(state_result).path=="recorded_state");
-    return {imported,partial_archived};
+    CHECK(std::get<ar::ArtifactError>(state_result).path == "recorded_state");
+    return {imported, partial_archived};
 }
 
-void compare_profile(const std::string& profile) {
-    namespace ar=artifacts;
-    namespace ob=execution::observability;
+void compare_profile(const std::string &profile) {
+    namespace ar = artifacts;
+    namespace ob = execution::observability;
     const auto problem = source(profile);
     const auto request = request_for(problem, profile);
     auto registered = modules();
     auto admission = application::prepare_comparison(request, registered.strategies);
     REQUIRE(std::holds_alternative<application::PreparedComparison>(admission));
-    const auto& prepared = std::get<application::PreparedComparison>(admission);
+    const auto &prepared = std::get<application::PreparedComparison>(admission);
     registry::Requirements selection_requirements;
     selection_requirements.output.representation = {"csl.witness-batch.v1"};
     const WitnessRequest witness_request{2, 0, {{1, -1}, {-1, 1}}, 31};
     ExecutionContext context;
     context.numerical = request.family.numerical;
     context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
-    const auto execution = application::run_comparison(prepared, registered.selectors,
-        {synthesis::witness_selector::selector_id, {}}, witness_request, selection_requirements,
-        context, registered.membership);
+    const auto execution = application::run_comparison(
+        prepared, registered.selectors, {synthesis::witness_selector::selector_id, {}},
+        witness_request, selection_requirements, context, registered.membership);
 
     for (std::size_t i = 0; i < execution.strategies.size(); ++i) {
-        const auto& strategy = execution.strategies[i];
+        const auto &strategy = execution.strategies[i];
         REQUIRE(std::holds_alternative<SynthesisResult>(strategy.outcome));
-        const auto& result = std::get<SynthesisResult>(strategy.outcome);
+        const auto &result = std::get<SynthesisResult>(strategy.outcome);
         REQUIRE(result.family);
         CHECK(result.family->registry_verified());
         REQUIRE(std::holds_alternative<CompleteOptimalFamily>(result.family->outcome()));
         REQUIRE(std::holds_alternative<WitnessSelection>(strategy.selection));
-        const auto& selected = std::get<WitnessSelection>(strategy.selection);
+        const auto &selected = std::get<WitnessSelection>(strategy.selection);
         REQUIRE(selected.batch.returned_count() == 2);
         REQUIRE(selected.batch.source_family == result.family->identity());
         const double expected_objective = profile == "ts02_constant_integrator" ? 3.0 : 0.0;
-        for (const auto& witness : selected.batch.witnesses) {
+        for (const auto &witness : selected.batch.witnesses) {
             check_full_dynamics(problem, witness);
             REQUIRE(witness.controls.size() == 2);
             REQUIRE(witness.states.size() == 3);
             const auto u0 = witness.controls[0][0];
             const auto u1 = witness.controls[1][0];
-            CHECK(u0 >= -1e-9); CHECK(u0 <= 1.0 + 1e-9);
-            CHECK(u1 >= -1e-9); CHECK(u1 <= 1.0 + 1e-9);
-            if (profile == "ts01_exact_integrator") CHECK(u0 + u1 == doctest::Approx(1.0));
-            if (profile == "ts03_singular_integrator") CHECK(u1 == doctest::Approx(1.0));
+            CHECK(u0 >= -1e-9);
+            CHECK(u0 <= 1.0 + 1e-9);
+            CHECK(u1 >= -1e-9);
+            CHECK(u1 <= 1.0 + 1e-9);
+            if (profile == "ts01_exact_integrator")
+                CHECK(u0 + u1 == doctest::Approx(1.0));
+            if (profile == "ts03_singular_integrator")
+                CHECK(u1 == doctest::Approx(1.0));
             if (profile != "ts02_constant_integrator")
                 CHECK(witness.states[2][0] == doctest::Approx(1.0));
             CHECK(witness.original_objective == doctest::Approx(expected_objective));
@@ -435,7 +485,7 @@ void compare_profile(const std::string& profile) {
         const auto expected = prepared.expected_synthesis_identity(i);
         REQUIRE(expected.lineage);
         for (std::size_t j = 0; j < strategy.verification.size(); ++j) {
-            const auto& report = strategy.verification[j];
+            const auto &report = strategy.verification[j];
             CHECK(report.input.expected_synthesis);
             CHECK(report.input.expected_synthesis->request == expected.request);
             CHECK(report.input.expected_synthesis->strategy == expected.strategy);
@@ -455,592 +505,760 @@ void compare_profile(const std::string& profile) {
         // which requires x2=1 and u0+u1=1. Both paired strategies must retain
         // the coupled history set rather than a Cartesian product of stages.
         const Vector cross_stage_cartesian_history{0, 0.75, 1.5, 0.75, 0.75};
-        for (const auto& strategy : execution.strategies) {
-            const auto& synthesis = std::get<SynthesisResult>(strategy.outcome);
+        for (const auto &strategy : execution.strategies) {
+            const auto &synthesis = std::get<SynthesisResult>(strategy.outcome);
             REQUIRE(synthesis.family);
             CHECK(family_contains_history(*synthesis.family, {0, 0, 1, 0, 1}));
             CHECK(family_contains_history(*synthesis.family, {0, 1, 1, 1, 0}));
             CHECK_FALSE(family_contains_history(*synthesis.family, cross_stage_cartesian_history));
         }
     }
-    auto run_a_boundary=check_complete_family_encoder_boundary(problem, prepared, execution.strategies[0],
-        0, witness_request);
-    auto run_b_boundary=check_complete_family_encoder_boundary(problem, prepared, execution.strategies[1],
-        1, witness_request);
-    auto run_a=run_a_boundary.complete;
-    auto run_b=run_b_boundary.complete;
-    const auto request_a=take_artifact(ar::comparison_request_digest(run_a),"comparison_request_digest A");
-    const auto request_b=take_artifact(ar::comparison_request_digest(run_b),"comparison_request_digest B");
-    REQUIRE(request_a==request_b);
-    const auto config_a=take_artifact(ar::comparison_configuration_id(run_a),"comparison_configuration_id A");
-    const auto config_b=take_artifact(ar::comparison_configuration_id(run_b),"comparison_configuration_id B");
-    const auto request_digest=csl::problem::hex(request_a);
-    std::string spec_text="{\"problem_id\":\"";
-    spec_text+=problem.identity().value;
-    spec_text+="\",\"repetitions\":1,\"request_digest\":\"";
-    spec_text+=request_digest;
-    spec_text+="\",\"schema\":\"csl.comparison-spec/1\",\"strategies\":[\"";
-    spec_text+=config_a.value;
-    spec_text+="\",\"";
-    spec_text+=config_b.value;
-    spec_text+="\"]}";
-    const auto spec_result=csl::problem::snapshot_content(
-        std::span<const std::byte>{reinterpret_cast<const std::byte*>(spec_text.data()),spec_text.size()});
+    auto run_a_boundary = check_complete_family_encoder_boundary(
+        problem, prepared, execution.strategies[0], 0, witness_request);
+    auto run_b_boundary = check_complete_family_encoder_boundary(
+        problem, prepared, execution.strategies[1], 1, witness_request);
+    auto run_a = run_a_boundary.complete;
+    auto run_b = run_b_boundary.complete;
+    const auto request_a =
+        take_artifact(ar::comparison_request_digest(run_a), "comparison_request_digest A");
+    const auto request_b =
+        take_artifact(ar::comparison_request_digest(run_b), "comparison_request_digest B");
+    REQUIRE(request_a == request_b);
+    const auto config_a =
+        take_artifact(ar::comparison_configuration_id(run_a), "comparison_configuration_id A");
+    const auto config_b =
+        take_artifact(ar::comparison_configuration_id(run_b), "comparison_configuration_id B");
+    const auto request_digest = csl::problem::hex(request_a);
+    std::string spec_text = "{\"problem_id\":\"";
+    spec_text += problem.identity().value;
+    spec_text += "\",\"repetitions\":1,\"request_digest\":\"";
+    spec_text += request_digest;
+    spec_text += "\",\"schema\":\"csl.comparison-spec/1\",\"strategies\":[\"";
+    spec_text += config_a.value;
+    spec_text += "\",\"";
+    spec_text += config_b.value;
+    spec_text += "\"]}";
+    const auto spec_result = csl::problem::snapshot_content(std::span<const std::byte>{
+        reinterpret_cast<const std::byte *>(spec_text.data()), spec_text.size()});
     REQUIRE_MESSAGE(std::holds_alternative<csl::problem::ResolvedContent>(spec_result),
-        std::get<csl::Diagnostic>(spec_result).explanation);
-    const auto spec=std::get<csl::problem::ResolvedContent>(spec_result);
+                    std::get<csl::Diagnostic>(spec_result).explanation);
+    const auto spec = std::get<csl::problem::ResolvedContent>(spec_result);
     const std::vector<ar::ComparisonAttempt> attempts{
-        {0,0,ar::AttemptStatus::completed,{ar::RunId{"application-comparison-encoder-0-uninstrumented"},run_a.content().digest()},run_a},
-        {1,0,ar::AttemptStatus::completed,{ar::RunId{"application-comparison-encoder-1-uninstrumented"},run_b.content().digest()},run_b}};
-    const auto bundle=take_artifact(ar::encode_recorded_comparison(spec,attempts),"encode_recorded_comparison");
-    auto mislabeled=attempts;
-    mislabeled.front().reported_status=ar::AttemptStatus::failed;
-    const auto status_mismatch=ar::encode_recorded_comparison(spec,mislabeled);
+        {0,
+         0,
+         ar::AttemptStatus::completed,
+         {ar::RunId{"application-comparison-encoder-0-uninstrumented"}, run_a.content().digest()},
+         run_a},
+        {1,
+         0,
+         ar::AttemptStatus::completed,
+         {ar::RunId{"application-comparison-encoder-1-uninstrumented"}, run_b.content().digest()},
+         run_b}};
+    const auto bundle =
+        take_artifact(ar::encode_recorded_comparison(spec, attempts), "encode_recorded_comparison");
+    auto mislabeled = attempts;
+    mislabeled.front().reported_status = ar::AttemptStatus::failed;
+    const auto status_mismatch = ar::encode_recorded_comparison(spec, mislabeled);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(status_mismatch));
-    CHECK(std::get<ar::ArtifactError>(status_mismatch).code==ar::ArtifactErrorCode::identity);
-    mislabeled.front().reported_status=ar::AttemptStatus::unsupported;
-    const auto unsupported_mismatch=ar::encode_recorded_comparison(spec,mislabeled);
+    CHECK(std::get<ar::ArtifactError>(status_mismatch).code == ar::ArtifactErrorCode::identity);
+    mislabeled.front().reported_status = ar::AttemptStatus::unsupported;
+    const auto unsupported_mismatch = ar::encode_recorded_comparison(spec, mislabeled);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(unsupported_mismatch));
-    CHECK(std::get<ar::ArtifactError>(unsupported_mismatch).code==ar::ArtifactErrorCode::identity);
-    const auto bundle_wire=std::string(reinterpret_cast<const char*>(bundle.content().bytes().data()),bundle.content().bytes().size());
-    const auto restored_bundle=take_artifact(ar::decode_recorded_comparison(bundle_wire),"decode_recorded_comparison");
-    CHECK(restored_bundle.content().digest()==bundle.content().digest());
-    CHECK(restored_bundle.spec_id().digest==spec.digest());
-    CHECK(restored_bundle.identity().digest==bundle.content().digest());
-    CHECK(bundle_wire.find("csl.comparison/1")!=std::string::npos);
-    CHECK(bundle_wire.find("csl.run-statistics/7")!=std::string::npos);
+    CHECK(std::get<ar::ArtifactError>(unsupported_mismatch).code ==
+          ar::ArtifactErrorCode::identity);
+    const auto bundle_wire =
+        std::string(reinterpret_cast<const char *>(bundle.content().bytes().data()),
+                    bundle.content().bytes().size());
+    const auto restored_bundle =
+        take_artifact(ar::decode_recorded_comparison(bundle_wire), "decode_recorded_comparison");
+    CHECK(restored_bundle.content().digest() == bundle.content().digest());
+    CHECK(restored_bundle.spec_id().digest == spec.digest());
+    CHECK(restored_bundle.identity().digest == bundle.content().digest());
+    CHECK(bundle_wire.find("csl.comparison/1") != std::string::npos);
+    CHECK(bundle_wire.find("csl.run-statistics/7") != std::string::npos);
 
-    auto run_a_enabled_boundary=check_complete_family_encoder_boundary(problem,prepared,execution.strategies[0],
-        0,witness_request,true);
-    auto run_a_enabled=run_a_enabled_boundary.complete;
-    const auto config_a_enabled=take_artifact(ar::comparison_configuration_id(run_a_enabled),
-        "comparison_configuration_id enabled A");
-    const auto request_a_enabled=take_artifact(ar::comparison_request_digest(run_a_enabled),
-        "comparison_request_digest enabled A");
-    REQUIRE(request_a_enabled==request_a);
-    const auto canonical_problem=problem.canonical_bytes();
-    const auto manifest_bytes=std::span<const std::byte>{canonical_problem};
-    const auto input_manifest_hash=csl::problem::hex(take(csl::problem::snapshot_content(manifest_bytes)).digest());
-    const std::string record_spec_text="{\"arms\":[{\"configuration_id\":\""+config_a.value+
-        "\",\"instrumentation\":\"disabled\",\"strategy\":\"csl.synthesis.reach-back\"},{\"configuration_id\":\""+
-        config_a_enabled.value+"\",\"instrumentation\":\"enabled\",\"strategy\":\"csl.synthesis.reach-back\"}],\"input_manifest_hash\":\""+input_manifest_hash+
-        "\",\"input_manifest_source\":\"resolved-problem-canonical-bytes\""+
-        ",\"problem_id\":\""+problem.identity().value+"\",\"repetitions\":1,\"request_digest\":\""+request_digest+
+    auto run_a_enabled_boundary = check_complete_family_encoder_boundary(
+        problem, prepared, execution.strategies[0], 0, witness_request, true);
+    auto run_a_enabled = run_a_enabled_boundary.complete;
+    const auto config_a_enabled = take_artifact(ar::comparison_configuration_id(run_a_enabled),
+                                                "comparison_configuration_id enabled A");
+    const auto request_a_enabled = take_artifact(ar::comparison_request_digest(run_a_enabled),
+                                                 "comparison_request_digest enabled A");
+    REQUIRE(request_a_enabled == request_a);
+    const auto canonical_problem = problem.canonical_bytes();
+    const auto manifest_bytes = std::span<const std::byte>{canonical_problem};
+    const auto input_manifest_hash =
+        csl::problem::hex(take(csl::problem::snapshot_content(manifest_bytes)).digest());
+    const std::string record_spec_text =
+        "{\"arms\":[{\"configuration_id\":\"" + config_a.value +
+        "\",\"instrumentation\":\"disabled\",\"strategy\":\"csl.synthesis.reach-back\"},{\"configuration_id\":\"" +
+        config_a_enabled.value +
+        "\",\"instrumentation\":\"enabled\",\"strategy\":\"csl.synthesis.reach-back\"}],\"input_manifest_hash\":\"" +
+        input_manifest_hash + "\",\"input_manifest_source\":\"resolved-problem-canonical-bytes\"" +
+        ",\"problem_id\":\"" + problem.identity().value +
+        "\",\"repetitions\":1,\"request_digest\":\"" + request_digest +
         "\",\"schema\":\"csl.comparison-spec/2\"}";
-    const auto record_spec_result=csl::problem::snapshot_content(
-        std::span<const std::byte>{reinterpret_cast<const std::byte*>(record_spec_text.data()),record_spec_text.size()});
+    const auto record_spec_result = csl::problem::snapshot_content(std::span<const std::byte>{
+        reinterpret_cast<const std::byte *>(record_spec_text.data()), record_spec_text.size()});
     REQUIRE(std::holds_alternative<csl::problem::ResolvedContent>(record_spec_result));
-    const auto record_spec=std::get<csl::problem::ResolvedContent>(record_spec_result);
+    const auto record_spec = std::get<csl::problem::ResolvedContent>(record_spec_result);
     const std::vector<ar::ComparisonAttempt> measured_attempts{
-        {0,0,ar::AttemptStatus::completed,{ar::RunId{"application-comparison-encoder-0-uninstrumented"},run_a.content().digest()},run_a,
-            "{\"schema\":\"csl.obs04-instrumentation-comparison-event/2\",\"repetition\":0,\"warmup\":true,\"status\":\"passed\",\"strategy\":\"csl.synthesis.reach-back\",\"instrumentation\":\"disabled\"}"},
-        {1,0,ar::AttemptStatus::completed,{ar::RunId{"application-comparison-encoder-0-instrumented"},run_a_enabled.content().digest()},run_a_enabled,
-            "{\"schema\":\"csl.obs04-instrumentation-comparison-event/2\",\"repetition\":0,\"warmup\":true,\"status\":\"passed\",\"strategy\":\"csl.synthesis.reach-back\",\"instrumentation\":\"enabled\"}"}};
-    const auto recorded=take_artifact(ar::encode_recorded_comparison(record_spec,measured_attempts),
-        "encode_recorded_comparison comparison-record/1");
-    const auto record_wire=std::string(reinterpret_cast<const char*>(recorded.content().bytes().data()),
-        recorded.content().bytes().size());
-    CHECK(record_wire.find("csl.comparison-record/1")!=std::string::npos);
-    const auto restored_record=take_artifact(ar::decode_recorded_comparison(record_wire),
-        "decode_recorded_comparison comparison-record/1");
-    CHECK(restored_record.content().digest()==recorded.content().digest());
-    CHECK(restored_record.identity().digest==recorded.identity().digest);
-    CHECK(record_wire.find(csl::problem::hex(recorded.identity().digest))!=std::string::npos);
+        {0,
+         0,
+         ar::AttemptStatus::completed,
+         {ar::RunId{"application-comparison-encoder-0-uninstrumented"}, run_a.content().digest()},
+         run_a,
+         "{\"schema\":\"csl.obs04-instrumentation-comparison-event/2\",\"repetition\":0,\"warmup\":true,\"status\":\"passed\",\"strategy\":\"csl.synthesis.reach-back\",\"instrumentation\":\"disabled\"}"},
+        {1,
+         0,
+         ar::AttemptStatus::completed,
+         {ar::RunId{"application-comparison-encoder-0-instrumented"},
+          run_a_enabled.content().digest()},
+         run_a_enabled,
+         "{\"schema\":\"csl.obs04-instrumentation-comparison-event/2\",\"repetition\":0,\"warmup\":true,\"status\":\"passed\",\"strategy\":\"csl.synthesis.reach-back\",\"instrumentation\":\"enabled\"}"}};
+    const auto recorded =
+        take_artifact(ar::encode_recorded_comparison(record_spec, measured_attempts),
+                      "encode_recorded_comparison comparison-record/1");
+    const auto record_wire =
+        std::string(reinterpret_cast<const char *>(recorded.content().bytes().data()),
+                    recorded.content().bytes().size());
+    CHECK(record_wire.find("csl.comparison-record/1") != std::string::npos);
+    const auto restored_record = take_artifact(ar::decode_recorded_comparison(record_wire),
+                                               "decode_recorded_comparison comparison-record/1");
+    CHECK(restored_record.content().digest() == recorded.content().digest());
+    CHECK(restored_record.identity().digest == recorded.identity().digest);
+    CHECK(record_wire.find(csl::problem::hex(recorded.identity().digest)) != std::string::npos);
     std::string escaped_measurement;
-    for(const char character:measured_attempts.front().measurement_payload) {
-        if(character=='"'||character=='\\')escaped_measurement.push_back('\\');
+    for (const char character : measured_attempts.front().measurement_payload) {
+        if (character == '"' || character == '\\')
+            escaped_measurement.push_back('\\');
         escaped_measurement.push_back(character);
     }
-    CHECK(record_wire.find(escaped_measurement)!=std::string::npos);
-    auto version_three_spec_json=nlohmann::json::parse(record_spec_text);
-    version_three_spec_json["environment"]=sample_obs04_environment();
-    version_three_spec_json["schema"]="csl.comparison-spec/3";
-    const auto version_three_spec_text=version_three_spec_json.dump();
-    const auto version_three_spec_owner=csl::problem::snapshot_content(
-        std::span<const std::byte>{reinterpret_cast<const std::byte*>(version_three_spec_text.data()),
-            version_three_spec_text.size()});
+    CHECK(record_wire.find(escaped_measurement) != std::string::npos);
+    auto version_three_spec_json = nlohmann::json::parse(record_spec_text);
+    version_three_spec_json["environment"] = sample_obs04_environment();
+    version_three_spec_json["schema"] = "csl.comparison-spec/3";
+    const auto version_three_spec_text = version_three_spec_json.dump();
+    const auto version_three_spec_owner = csl::problem::snapshot_content(std::span<const std::byte>{
+        reinterpret_cast<const std::byte *>(version_three_spec_text.data()),
+        version_three_spec_text.size()});
     REQUIRE(std::holds_alternative<csl::problem::ResolvedContent>(version_three_spec_owner));
-    const auto version_three_spec=std::get<csl::problem::ResolvedContent>(version_three_spec_owner);
-    const auto version_three=take_artifact(ar::encode_recorded_comparison(version_three_spec,measured_attempts),
-        "encode_recorded_comparison comparison-spec/3");
-    const auto version_three_wire=std::string(reinterpret_cast<const char*>(version_three.content().bytes().data()),
-        version_three.content().bytes().size());
-    const auto version_three_replay=take_artifact(ar::decode_recorded_comparison(version_three_wire),
-        "decode_recorded_comparison comparison-spec/3");
-    CHECK(version_three_replay.content().digest()==version_three.content().digest());
-    CHECK(version_three_replay.spec_id().digest==version_three_spec.digest());
-    CHECK(version_three_replay.identity().digest==version_three.identity().digest);
-    const auto& witness_batch=std::get<WitnessSelection>(execution.strategies[0].selection).batch;
-    CHECK(witness_batch.distinct_count()==2);
-    const auto v3_measurement=[&](std::string instrumentation) {
-        return nlohmann::json{{"schema","csl.obs04-instrumentation-comparison-event/3"},
-            {"repetition",0},{"warmup",true},{"status","passed"},
-            {"strategy","csl.synthesis.reach-back"},{"instrumentation",std::move(instrumentation)},
-            {"selection_setup_ns",1},{"selection_run_ns",2},{"verification_ns",3},
-            {"requested_witness_count",witness_batch.requested},
-            {"returned_witness_count",witness_batch.returned_count()},
-            {"distinct_witness_count",witness_batch.distinct_count()}}.dump();
+    const auto version_three_spec =
+        std::get<csl::problem::ResolvedContent>(version_three_spec_owner);
+    const auto version_three =
+        take_artifact(ar::encode_recorded_comparison(version_three_spec, measured_attempts),
+                      "encode_recorded_comparison comparison-spec/3");
+    const auto version_three_wire =
+        std::string(reinterpret_cast<const char *>(version_three.content().bytes().data()),
+                    version_three.content().bytes().size());
+    const auto version_three_replay =
+        take_artifact(ar::decode_recorded_comparison(version_three_wire),
+                      "decode_recorded_comparison comparison-spec/3");
+    CHECK(version_three_replay.content().digest() == version_three.content().digest());
+    CHECK(version_three_replay.spec_id().digest == version_three_spec.digest());
+    CHECK(version_three_replay.identity().digest == version_three.identity().digest);
+    const auto &witness_batch = std::get<WitnessSelection>(execution.strategies[0].selection).batch;
+    CHECK(witness_batch.distinct_count() == 2);
+    const auto v3_measurement = [&](std::string instrumentation) {
+        return nlohmann::json{{"schema", "csl.obs04-instrumentation-comparison-event/3"},
+                              {"repetition", 0},
+                              {"warmup", true},
+                              {"status", "passed"},
+                              {"strategy", "csl.synthesis.reach-back"},
+                              {"instrumentation", std::move(instrumentation)},
+                              {"selection_setup_ns", 1},
+                              {"selection_run_ns", 2},
+                              {"verification_ns", 3},
+                              {"requested_witness_count", witness_batch.requested},
+                              {"returned_witness_count", witness_batch.returned_count()},
+                              {"distinct_witness_count", witness_batch.distinct_count()}}
+            .dump();
     };
     std::vector<ar::ComparisonAttempt> measured_attempts_v3{
-        {0,0,ar::AttemptStatus::completed,
-            {ar::RunId{"application-comparison-encoder-0-uninstrumented"},run_a.content().digest()},
-            run_a,v3_measurement("disabled")},
-        {1,0,ar::AttemptStatus::completed,
-            {ar::RunId{"application-comparison-encoder-0-instrumented"},run_a_enabled.content().digest()},
-            run_a_enabled,v3_measurement("enabled")}};
-    const auto recorded_v3=take_artifact(ar::encode_recorded_comparison(
-        version_three_spec,measured_attempts_v3),"encode_recorded_comparison event/3");
-    const auto recorded_v3_wire=std::string(
-        reinterpret_cast<const char*>(recorded_v3.content().bytes().data()),
-        recorded_v3.content().bytes().size());
-    const auto restored_v3=take_artifact(ar::decode_recorded_comparison(recorded_v3_wire),
-        "decode_recorded_comparison event/3");
-    CHECK(restored_v3.content().digest()==recorded_v3.content().digest());
-    auto bad_witness_counts=measured_attempts_v3;
-    auto bad_measurement=nlohmann::json::parse(bad_witness_counts.front().measurement_payload);
-    bad_measurement["returned_witness_count"]=1;
-    bad_witness_counts.front().measurement_payload=bad_measurement.dump();
-    const auto count_mismatch=ar::encode_recorded_comparison(version_three_spec,bad_witness_counts);
+        {0,
+         0,
+         ar::AttemptStatus::completed,
+         {ar::RunId{"application-comparison-encoder-0-uninstrumented"}, run_a.content().digest()},
+         run_a,
+         v3_measurement("disabled")},
+        {1,
+         0,
+         ar::AttemptStatus::completed,
+         {ar::RunId{"application-comparison-encoder-0-instrumented"},
+          run_a_enabled.content().digest()},
+         run_a_enabled,
+         v3_measurement("enabled")}};
+    const auto recorded_v3 =
+        take_artifact(ar::encode_recorded_comparison(version_three_spec, measured_attempts_v3),
+                      "encode_recorded_comparison event/3");
+    const auto recorded_v3_wire =
+        std::string(reinterpret_cast<const char *>(recorded_v3.content().bytes().data()),
+                    recorded_v3.content().bytes().size());
+    const auto restored_v3 = take_artifact(ar::decode_recorded_comparison(recorded_v3_wire),
+                                           "decode_recorded_comparison event/3");
+    CHECK(restored_v3.content().digest() == recorded_v3.content().digest());
+    auto bad_witness_counts = measured_attempts_v3;
+    auto bad_measurement = nlohmann::json::parse(bad_witness_counts.front().measurement_payload);
+    bad_measurement["returned_witness_count"] = 1;
+    bad_witness_counts.front().measurement_payload = bad_measurement.dump();
+    const auto count_mismatch =
+        ar::encode_recorded_comparison(version_three_spec, bad_witness_counts);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(count_mismatch));
-    CHECK(std::get<ar::ArtifactError>(count_mismatch).path=="attempts[0].measurement_payload.status");
-    auto measured_attempts_v4=measured_attempts_v3;
-    for(auto& attempt:measured_attempts_v4) {
-        auto measurement=nlohmann::json::parse(attempt.measurement_payload);
-        measurement["schema"]="csl.obs04-instrumentation-comparison-event/4";
-        measurement["strategy_run_ns"]=2;
-        measurement["family_construction_ns"]=2;
-        measurement["end_to_end_ns"]=30;
-        measurement["selection_run_ns"]=20;
-        measurement["first_witness_query_ns"]=3;
-        measurement["additional_witness_query_ns"]=4;
-        attempt.measurement_payload=measurement.dump();
+    CHECK(std::get<ar::ArtifactError>(count_mismatch).path ==
+          "attempts[0].measurement_payload.status");
+    auto measured_attempts_v4 = measured_attempts_v3;
+    for (auto &attempt : measured_attempts_v4) {
+        auto measurement = nlohmann::json::parse(attempt.measurement_payload);
+        measurement["schema"] = "csl.obs04-instrumentation-comparison-event/4";
+        measurement["strategy_run_ns"] = 2;
+        measurement["family_construction_ns"] = 2;
+        measurement["end_to_end_ns"] = 30;
+        measurement["selection_run_ns"] = 20;
+        measurement["first_witness_query_ns"] = 3;
+        measurement["additional_witness_query_ns"] = 4;
+        attempt.measurement_payload = measurement.dump();
     }
-    const auto recorded_v4=take_artifact(ar::encode_recorded_comparison(
-        version_three_spec,measured_attempts_v4),"encode_recorded_comparison event/4");
-    const auto recorded_v4_wire=std::string(
-        reinterpret_cast<const char*>(recorded_v4.content().bytes().data()),
-        recorded_v4.content().bytes().size());
-    const auto restored_v4=take_artifact(ar::decode_recorded_comparison(recorded_v4_wire),
-        "decode_recorded_comparison event/4");
-    CHECK(restored_v4.content().digest()==recorded_v4.content().digest());
-    auto measured_attempts_v5=measured_attempts_v3;
-    for(auto& attempt:measured_attempts_v5) {
-        auto measurement=nlohmann::json::parse(attempt.measurement_payload);
-        measurement["schema"]="csl.obs04-instrumentation-comparison-event/5";
-        measurement["setup_ns"]=1;
-        measurement["strategy_run_ns"]=2;
-        measurement["family_construction_ns"]=nullptr;
-        measurement["end_to_end_ns"]=30;
-        measurement["selection_setup_ns"]=1;
-        measurement["selection_run_ns"]=20;
-        measurement["verification_ns"]=3;
-        measurement["first_witness_query_ns"]=3;
-        measurement["additional_witness_query_ns"]=4;
-        attempt.measurement_payload=measurement.dump();
+    const auto recorded_v4 =
+        take_artifact(ar::encode_recorded_comparison(version_three_spec, measured_attempts_v4),
+                      "encode_recorded_comparison event/4");
+    const auto recorded_v4_wire =
+        std::string(reinterpret_cast<const char *>(recorded_v4.content().bytes().data()),
+                    recorded_v4.content().bytes().size());
+    const auto restored_v4 = take_artifact(ar::decode_recorded_comparison(recorded_v4_wire),
+                                           "decode_recorded_comparison event/4");
+    CHECK(restored_v4.content().digest() == recorded_v4.content().digest());
+    auto measured_attempts_v5 = measured_attempts_v3;
+    for (auto &attempt : measured_attempts_v5) {
+        auto measurement = nlohmann::json::parse(attempt.measurement_payload);
+        measurement["schema"] = "csl.obs04-instrumentation-comparison-event/5";
+        measurement["setup_ns"] = 1;
+        measurement["strategy_run_ns"] = 2;
+        measurement["family_construction_ns"] = nullptr;
+        measurement["end_to_end_ns"] = 30;
+        measurement["selection_setup_ns"] = 1;
+        measurement["selection_run_ns"] = 20;
+        measurement["verification_ns"] = 3;
+        measurement["first_witness_query_ns"] = 3;
+        measurement["additional_witness_query_ns"] = 4;
+        attempt.measurement_payload = measurement.dump();
     }
-    const auto recorded_v5=take_artifact(ar::encode_recorded_comparison(
-        version_three_spec,measured_attempts_v5),"encode_recorded_comparison event/5");
-    const auto recorded_v5_wire=std::string(
-        reinterpret_cast<const char*>(recorded_v5.content().bytes().data()),
-        recorded_v5.content().bytes().size());
-    const auto restored_v5=take_artifact(ar::decode_recorded_comparison(recorded_v5_wire),
-        "decode_recorded_comparison event/5");
-    CHECK(restored_v5.content().digest()==recorded_v5.content().digest());
-    auto measured_attempts_v6=measured_attempts_v5;
-    for(auto& attempt:measured_attempts_v6) {
-        auto measurement=nlohmann::json::parse(attempt.measurement_payload);
-        measurement["schema"]="csl.obs04-instrumentation-comparison-event/6";
-        measurement["phase_status"]="failed";
-        attempt.measurement_payload=measurement.dump();
+    const auto recorded_v5 =
+        take_artifact(ar::encode_recorded_comparison(version_three_spec, measured_attempts_v5),
+                      "encode_recorded_comparison event/5");
+    const auto recorded_v5_wire =
+        std::string(reinterpret_cast<const char *>(recorded_v5.content().bytes().data()),
+                    recorded_v5.content().bytes().size());
+    const auto restored_v5 = take_artifact(ar::decode_recorded_comparison(recorded_v5_wire),
+                                           "decode_recorded_comparison event/5");
+    CHECK(restored_v5.content().digest() == recorded_v5.content().digest());
+    auto measured_attempts_v6 = measured_attempts_v5;
+    for (auto &attempt : measured_attempts_v6) {
+        auto measurement = nlohmann::json::parse(attempt.measurement_payload);
+        measurement["schema"] = "csl.obs04-instrumentation-comparison-event/6";
+        measurement["phase_status"] = "failed";
+        attempt.measurement_payload = measurement.dump();
     }
-    const auto recorded_v6=take_artifact(ar::encode_recorded_comparison(
-        version_three_spec,measured_attempts_v6),"encode_recorded_comparison event/6");
-    const auto recorded_v6_wire=std::string(
-        reinterpret_cast<const char*>(recorded_v6.content().bytes().data()),
-        recorded_v6.content().bytes().size());
-    const auto restored_v6=take_artifact(ar::decode_recorded_comparison(recorded_v6_wire),
-        "decode_recorded_comparison event/6");
-    CHECK(restored_v6.content().digest()==recorded_v6.content().digest());
-    auto measured_attempts_v7=measured_attempts_v6;
-    for(auto& attempt:measured_attempts_v7) {
-        auto measurement=nlohmann::json::parse(attempt.measurement_payload);
-        measurement["schema"]="csl.obs04-instrumentation-comparison-event/7";
-        if(measurement["instrumentation"]=="enabled")measurement["family_construction_ns"]=5;
-        else measurement["family_construction_ns"]=nullptr;
-        attempt.measurement_payload=measurement.dump();
+    const auto recorded_v6 =
+        take_artifact(ar::encode_recorded_comparison(version_three_spec, measured_attempts_v6),
+                      "encode_recorded_comparison event/6");
+    const auto recorded_v6_wire =
+        std::string(reinterpret_cast<const char *>(recorded_v6.content().bytes().data()),
+                    recorded_v6.content().bytes().size());
+    const auto restored_v6 = take_artifact(ar::decode_recorded_comparison(recorded_v6_wire),
+                                           "decode_recorded_comparison event/6");
+    CHECK(restored_v6.content().digest() == recorded_v6.content().digest());
+    auto measured_attempts_v7 = measured_attempts_v6;
+    for (auto &attempt : measured_attempts_v7) {
+        auto measurement = nlohmann::json::parse(attempt.measurement_payload);
+        measurement["schema"] = "csl.obs04-instrumentation-comparison-event/7";
+        if (measurement["instrumentation"] == "enabled")
+            measurement["family_construction_ns"] = 5;
+        else
+            measurement["family_construction_ns"] = nullptr;
+        attempt.measurement_payload = measurement.dump();
     }
-    const auto recorded_v7=take_artifact(ar::encode_recorded_comparison(
-        version_three_spec,measured_attempts_v7),"encode_recorded_comparison event/7");
-    const auto recorded_v7_wire=std::string(
-        reinterpret_cast<const char*>(recorded_v7.content().bytes().data()),
-        recorded_v7.content().bytes().size());
-    const auto restored_v7=take_artifact(ar::decode_recorded_comparison(recorded_v7_wire),
-        "decode_recorded_comparison event/7");
-    CHECK(restored_v7.content().digest()==recorded_v7.content().digest());
-    auto measured_attempts_v8=measured_attempts_v7;
-    for(auto& attempt:measured_attempts_v8) {
-        auto measurement=nlohmann::json::parse(attempt.measurement_payload);
-        measurement["schema"]="csl.obs04-instrumentation-comparison-event/8";
-        measurement["strategy_run_cpu_ns"]=1;
-        measurement["observed_backend_scheduler_width"]=1;
-        attempt.measurement_payload=measurement.dump();
+    const auto recorded_v7 =
+        take_artifact(ar::encode_recorded_comparison(version_three_spec, measured_attempts_v7),
+                      "encode_recorded_comparison event/7");
+    const auto recorded_v7_wire =
+        std::string(reinterpret_cast<const char *>(recorded_v7.content().bytes().data()),
+                    recorded_v7.content().bytes().size());
+    const auto restored_v7 = take_artifact(ar::decode_recorded_comparison(recorded_v7_wire),
+                                           "decode_recorded_comparison event/7");
+    CHECK(restored_v7.content().digest() == recorded_v7.content().digest());
+    auto measured_attempts_v8 = measured_attempts_v7;
+    for (auto &attempt : measured_attempts_v8) {
+        auto measurement = nlohmann::json::parse(attempt.measurement_payload);
+        measurement["schema"] = "csl.obs04-instrumentation-comparison-event/8";
+        measurement["strategy_run_cpu_ns"] = 1;
+        measurement["observed_backend_scheduler_width"] = 1;
+        attempt.measurement_payload = measurement.dump();
     }
-    const auto recorded_v8=take_artifact(ar::encode_recorded_comparison(
-        version_three_spec,measured_attempts_v8),"encode_recorded_comparison event/8");
-    const auto recorded_v8_wire=std::string(
-        reinterpret_cast<const char*>(recorded_v8.content().bytes().data()),
-        recorded_v8.content().bytes().size());
-    const auto restored_v8=take_artifact(ar::decode_recorded_comparison(recorded_v8_wire),
-        "decode_recorded_comparison event/8");
-    CHECK(restored_v8.content().digest()==recorded_v8.content().digest());
-    auto measured_attempts_v9=measured_attempts_v8;
-    for(auto& attempt:measured_attempts_v9) {
-        auto measurement=nlohmann::json::parse(attempt.measurement_payload);
-        measurement["schema"]="csl.obs04-instrumentation-comparison-event/9";
-        measurement["strategy_run_peak_rss"]={{"status","available"},
-            {"metric","process_peak_rss_bytes"},
-            {"scope","process_vm_hwm_reset_before_and_read_after_strategy_run"},
-            {"value_bytes",123456}, {"reason",nullptr}};
-        attempt.measurement_payload=measurement.dump();
+    const auto recorded_v8 =
+        take_artifact(ar::encode_recorded_comparison(version_three_spec, measured_attempts_v8),
+                      "encode_recorded_comparison event/8");
+    const auto recorded_v8_wire =
+        std::string(reinterpret_cast<const char *>(recorded_v8.content().bytes().data()),
+                    recorded_v8.content().bytes().size());
+    const auto restored_v8 = take_artifact(ar::decode_recorded_comparison(recorded_v8_wire),
+                                           "decode_recorded_comparison event/8");
+    CHECK(restored_v8.content().digest() == recorded_v8.content().digest());
+    auto measured_attempts_v9 = measured_attempts_v8;
+    for (auto &attempt : measured_attempts_v9) {
+        auto measurement = nlohmann::json::parse(attempt.measurement_payload);
+        measurement["schema"] = "csl.obs04-instrumentation-comparison-event/9";
+        measurement["strategy_run_peak_rss"] = {
+            {"status", "available"},
+            {"metric", "process_peak_rss_bytes"},
+            {"scope", "process_vm_hwm_reset_before_and_read_after_strategy_run"},
+            {"value_bytes", 123456},
+            {"reason", nullptr}};
+        attempt.measurement_payload = measurement.dump();
     }
-    const auto recorded_v9=take_artifact(ar::encode_recorded_comparison(
-        version_three_spec,measured_attempts_v9),"encode_recorded_comparison event/9");
-    const auto recorded_v9_wire=std::string(
-        reinterpret_cast<const char*>(recorded_v9.content().bytes().data()),
-        recorded_v9.content().bytes().size());
-    const auto restored_v9=take_artifact(ar::decode_recorded_comparison(recorded_v9_wire),
-        "decode_recorded_comparison event/9");
-    CHECK(restored_v9.content().digest()==recorded_v9.content().digest());
-    auto malformed_peak_rss=measured_attempts_v9;
-    auto missing_reason=nlohmann::json::parse(malformed_peak_rss.front().measurement_payload);
+    const auto recorded_v9 =
+        take_artifact(ar::encode_recorded_comparison(version_three_spec, measured_attempts_v9),
+                      "encode_recorded_comparison event/9");
+    const auto recorded_v9_wire =
+        std::string(reinterpret_cast<const char *>(recorded_v9.content().bytes().data()),
+                    recorded_v9.content().bytes().size());
+    const auto restored_v9 = take_artifact(ar::decode_recorded_comparison(recorded_v9_wire),
+                                           "decode_recorded_comparison event/9");
+    CHECK(restored_v9.content().digest() == recorded_v9.content().digest());
+    auto malformed_peak_rss = measured_attempts_v9;
+    auto missing_reason = nlohmann::json::parse(malformed_peak_rss.front().measurement_payload);
     missing_reason["strategy_run_peak_rss"].erase("reason");
-    malformed_peak_rss.front().measurement_payload=missing_reason.dump();
-    CHECK(std::holds_alternative<ar::ArtifactError>(ar::encode_recorded_comparison(
-        version_three_spec,malformed_peak_rss)));
-    malformed_peak_rss=measured_attempts_v9;
-    auto invalid_value=nlohmann::json::parse(malformed_peak_rss.front().measurement_payload);
-    invalid_value["strategy_run_peak_rss"]["value_bytes"]=true;
-    malformed_peak_rss.front().measurement_payload=invalid_value.dump();
-    CHECK(std::holds_alternative<ar::ArtifactError>(ar::encode_recorded_comparison(
-        version_three_spec,malformed_peak_rss)));
-    malformed_peak_rss=measured_attempts_v9;
-    auto inconsistent_status=nlohmann::json::parse(malformed_peak_rss.front().measurement_payload);
-    inconsistent_status["strategy_run_peak_rss"]["status"]="unavailable";
-    malformed_peak_rss.front().measurement_payload=inconsistent_status.dump();
-    CHECK(std::holds_alternative<ar::ArtifactError>(ar::encode_recorded_comparison(
-        version_three_spec,malformed_peak_rss)));
-    auto zero_scheduler_width=measured_attempts_v8;
-    auto zero_width_measurement=nlohmann::json::parse(
-        zero_scheduler_width.front().measurement_payload);
-    zero_width_measurement["observed_backend_scheduler_width"]=0;
-    zero_scheduler_width.front().measurement_payload=zero_width_measurement.dump();
-    const auto zero_width=ar::encode_recorded_comparison(version_three_spec,zero_scheduler_width);
+    malformed_peak_rss.front().measurement_payload = missing_reason.dump();
+    CHECK(std::holds_alternative<ar::ArtifactError>(
+        ar::encode_recorded_comparison(version_three_spec, malformed_peak_rss)));
+    malformed_peak_rss = measured_attempts_v9;
+    auto invalid_value = nlohmann::json::parse(malformed_peak_rss.front().measurement_payload);
+    invalid_value["strategy_run_peak_rss"]["value_bytes"] = true;
+    malformed_peak_rss.front().measurement_payload = invalid_value.dump();
+    CHECK(std::holds_alternative<ar::ArtifactError>(
+        ar::encode_recorded_comparison(version_three_spec, malformed_peak_rss)));
+    malformed_peak_rss = measured_attempts_v9;
+    auto inconsistent_status =
+        nlohmann::json::parse(malformed_peak_rss.front().measurement_payload);
+    inconsistent_status["strategy_run_peak_rss"]["status"] = "unavailable";
+    malformed_peak_rss.front().measurement_payload = inconsistent_status.dump();
+    CHECK(std::holds_alternative<ar::ArtifactError>(
+        ar::encode_recorded_comparison(version_three_spec, malformed_peak_rss)));
+    auto zero_scheduler_width = measured_attempts_v8;
+    auto zero_width_measurement =
+        nlohmann::json::parse(zero_scheduler_width.front().measurement_payload);
+    zero_width_measurement["observed_backend_scheduler_width"] = 0;
+    zero_scheduler_width.front().measurement_payload = zero_width_measurement.dump();
+    const auto zero_width =
+        ar::encode_recorded_comparison(version_three_spec, zero_scheduler_width);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(zero_width));
-    auto negative_family_timing=measured_attempts_v7;
-    auto negative_family_measurement=nlohmann::json::parse(
-        negative_family_timing.front().measurement_payload);
-    negative_family_measurement["family_construction_ns"]=-1;
-    negative_family_timing.front().measurement_payload=negative_family_measurement.dump();
-    const auto negative_family=ar::encode_recorded_comparison(version_three_spec,negative_family_timing);
+    auto negative_family_timing = measured_attempts_v7;
+    auto negative_family_measurement =
+        nlohmann::json::parse(negative_family_timing.front().measurement_payload);
+    negative_family_measurement["family_construction_ns"] = -1;
+    negative_family_timing.front().measurement_payload = negative_family_measurement.dump();
+    const auto negative_family =
+        ar::encode_recorded_comparison(version_three_spec, negative_family_timing);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(negative_family));
-    auto missing_family_timing=measured_attempts_v7;
-    auto missing_family_measurement=nlohmann::json::parse(
-        missing_family_timing.at(1).measurement_payload);
-    missing_family_measurement["family_construction_ns"]=nullptr;
-    missing_family_timing.at(1).measurement_payload=missing_family_measurement.dump();
-    const auto missing_family=ar::encode_recorded_comparison(version_three_spec,missing_family_timing);
+    auto missing_family_timing = measured_attempts_v7;
+    auto missing_family_measurement =
+        nlohmann::json::parse(missing_family_timing.at(1).measurement_payload);
+    missing_family_measurement["family_construction_ns"] = nullptr;
+    missing_family_timing.at(1).measurement_payload = missing_family_measurement.dump();
+    const auto missing_family =
+        ar::encode_recorded_comparison(version_three_spec, missing_family_timing);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(missing_family));
-    auto missing_query_timing=measured_attempts_v4;
-    auto missing_query_measurement=nlohmann::json::parse(missing_query_timing.front().measurement_payload);
-    missing_query_measurement["additional_witness_query_ns"]=nullptr;
-    missing_query_timing.front().measurement_payload=missing_query_measurement.dump();
-    const auto missing_query=ar::encode_recorded_comparison(version_three_spec,missing_query_timing);
+    auto missing_query_timing = measured_attempts_v4;
+    auto missing_query_measurement =
+        nlohmann::json::parse(missing_query_timing.front().measurement_payload);
+    missing_query_measurement["additional_witness_query_ns"] = nullptr;
+    missing_query_timing.front().measurement_payload = missing_query_measurement.dump();
+    const auto missing_query =
+        ar::encode_recorded_comparison(version_three_spec, missing_query_timing);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(missing_query));
-    CHECK(std::get<ar::ArtifactError>(missing_query).path=="attempts[0].measurement_payload.status");
-    auto missing_v5_query_timing=measured_attempts_v6;
-    auto missing_v5_query_measurement=nlohmann::json::parse(
-        missing_v5_query_timing.front().measurement_payload);
-    missing_v5_query_measurement["first_witness_query_ns"]=nullptr;
-    missing_v5_query_timing.front().measurement_payload=missing_v5_query_measurement.dump();
-    const auto missing_v5_query=ar::encode_recorded_comparison(
-        version_three_spec,missing_v5_query_timing);
+    CHECK(std::get<ar::ArtifactError>(missing_query).path ==
+          "attempts[0].measurement_payload.status");
+    auto missing_v5_query_timing = measured_attempts_v6;
+    auto missing_v5_query_measurement =
+        nlohmann::json::parse(missing_v5_query_timing.front().measurement_payload);
+    missing_v5_query_measurement["first_witness_query_ns"] = nullptr;
+    missing_v5_query_timing.front().measurement_payload = missing_v5_query_measurement.dump();
+    const auto missing_v5_query =
+        ar::encode_recorded_comparison(version_three_spec, missing_v5_query_timing);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(missing_v5_query));
-    CHECK(std::get<ar::ArtifactError>(missing_v5_query).path==
-        "attempts[0].measurement_payload.status");
-    auto impossible_query_timing=measured_attempts_v6;
-    auto impossible_query=nlohmann::json::parse(impossible_query_timing.front().measurement_payload);
-    impossible_query["selection_run_ns"]=6;
-    impossible_query_timing.front().measurement_payload=impossible_query.dump();
-    const auto impossible_query_result=ar::encode_recorded_comparison(
-        version_three_spec,impossible_query_timing);
+    CHECK(std::get<ar::ArtifactError>(missing_v5_query).path ==
+          "attempts[0].measurement_payload.status");
+    auto impossible_query_timing = measured_attempts_v6;
+    auto impossible_query =
+        nlohmann::json::parse(impossible_query_timing.front().measurement_payload);
+    impossible_query["selection_run_ns"] = 6;
+    impossible_query_timing.front().measurement_payload = impossible_query.dump();
+    const auto impossible_query_result =
+        ar::encode_recorded_comparison(version_three_spec, impossible_query_timing);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(impossible_query_result));
-    CHECK(std::get<ar::ArtifactError>(impossible_query_result).path==
-        "attempts[0].measurement_payload.status");
-    auto impossible_end_to_end=measured_attempts_v6;
-    auto impossible_end_to_end_measurement=nlohmann::json::parse(
-        impossible_end_to_end.front().measurement_payload);
-    impossible_end_to_end_measurement["end_to_end_ns"]=26;
-    impossible_end_to_end.front().measurement_payload=impossible_end_to_end_measurement.dump();
-    const auto impossible_end_to_end_result=ar::encode_recorded_comparison(
-        version_three_spec,impossible_end_to_end);
+    CHECK(std::get<ar::ArtifactError>(impossible_query_result).path ==
+          "attempts[0].measurement_payload.status");
+    auto impossible_end_to_end = measured_attempts_v6;
+    auto impossible_end_to_end_measurement =
+        nlohmann::json::parse(impossible_end_to_end.front().measurement_payload);
+    impossible_end_to_end_measurement["end_to_end_ns"] = 26;
+    impossible_end_to_end.front().measurement_payload = impossible_end_to_end_measurement.dump();
+    const auto impossible_end_to_end_result =
+        ar::encode_recorded_comparison(version_three_spec, impossible_end_to_end);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(impossible_end_to_end_result));
-    CHECK(std::get<ar::ArtifactError>(impossible_end_to_end_result).path==
-        "attempts[0].measurement_payload.status");
-    auto bad_distinct_count=measured_attempts_v3;
-    auto bad_distinct_measurement=nlohmann::json::parse(bad_distinct_count.front().measurement_payload);
-    bad_distinct_measurement["distinct_witness_count"]=1;
-    bad_distinct_count.front().measurement_payload=bad_distinct_measurement.dump();
-    const auto distinct_mismatch=ar::encode_recorded_comparison(version_three_spec,bad_distinct_count);
+    CHECK(std::get<ar::ArtifactError>(impossible_end_to_end_result).path ==
+          "attempts[0].measurement_payload.status");
+    auto bad_distinct_count = measured_attempts_v3;
+    auto bad_distinct_measurement =
+        nlohmann::json::parse(bad_distinct_count.front().measurement_payload);
+    bad_distinct_measurement["distinct_witness_count"] = 1;
+    bad_distinct_count.front().measurement_payload = bad_distinct_measurement.dump();
+    const auto distinct_mismatch =
+        ar::encode_recorded_comparison(version_three_spec, bad_distinct_count);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(distinct_mismatch));
-    CHECK(std::get<ar::ArtifactError>(distinct_mismatch).path=="attempts[0].measurement_payload.status");
-    auto missing_selection_timing=measured_attempts_v3;
-    auto missing_timing_measurement=nlohmann::json::parse(missing_selection_timing.front().measurement_payload);
-    missing_timing_measurement["verification_ns"]=nullptr;
-    missing_selection_timing.front().measurement_payload=missing_timing_measurement.dump();
-    const auto timing_mismatch=ar::encode_recorded_comparison(version_three_spec,missing_selection_timing);
+    CHECK(std::get<ar::ArtifactError>(distinct_mismatch).path ==
+          "attempts[0].measurement_payload.status");
+    auto missing_selection_timing = measured_attempts_v3;
+    auto missing_timing_measurement =
+        nlohmann::json::parse(missing_selection_timing.front().measurement_payload);
+    missing_timing_measurement["verification_ns"] = nullptr;
+    missing_selection_timing.front().measurement_payload = missing_timing_measurement.dump();
+    const auto timing_mismatch =
+        ar::encode_recorded_comparison(version_three_spec, missing_selection_timing);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(timing_mismatch));
-    CHECK(std::get<ar::ArtifactError>(timing_mismatch).path=="attempts[0].measurement_payload.status");
-    auto changed_environment_spec_json=version_three_spec_json;
-    changed_environment_spec_json["environment"]["build"]["compiler_version"]="13.3.1";
-    const auto changed_environment_text=changed_environment_spec_json.dump();
-    const auto changed_environment_owner=csl::problem::snapshot_content(
-        std::span<const std::byte>{reinterpret_cast<const std::byte*>(changed_environment_text.data()),
+    CHECK(std::get<ar::ArtifactError>(timing_mismatch).path ==
+          "attempts[0].measurement_payload.status");
+    auto changed_environment_spec_json = version_three_spec_json;
+    changed_environment_spec_json["environment"]["build"]["compiler_version"] = "13.3.1";
+    const auto changed_environment_text = changed_environment_spec_json.dump();
+    const auto changed_environment_owner =
+        csl::problem::snapshot_content(std::span<const std::byte>{
+            reinterpret_cast<const std::byte *>(changed_environment_text.data()),
             changed_environment_text.size()});
     REQUIRE(std::holds_alternative<csl::problem::ResolvedContent>(changed_environment_owner));
-    const auto changed_environment=take_artifact(ar::encode_recorded_comparison(
-        std::get<csl::problem::ResolvedContent>(changed_environment_owner),measured_attempts),
+    const auto changed_environment = take_artifact(
+        ar::encode_recorded_comparison(
+            std::get<csl::problem::ResolvedContent>(changed_environment_owner), measured_attempts),
         "encode changed comparison environment");
-    CHECK(changed_environment.spec_id().digest!=version_three.spec_id().digest);
-    CHECK(changed_environment.identity().digest!=version_three.identity().digest);
-    auto tampered_version_three=nlohmann::json::parse(version_three_wire);
-    auto tampered_version_three_spec=nlohmann::json::parse(tampered_version_three.at("spec").get<std::string>());
-    tampered_version_three_spec["environment"]["build"]["compiler_version"]="tampered";
-    tampered_version_three["spec"]=tampered_version_three_spec.dump();
-    const auto tampered_version_three_result=ar::decode_recorded_comparison(tampered_version_three.dump());
+    CHECK(changed_environment.spec_id().digest != version_three.spec_id().digest);
+    CHECK(changed_environment.identity().digest != version_three.identity().digest);
+    auto tampered_version_three = nlohmann::json::parse(version_three_wire);
+    auto tampered_version_three_spec =
+        nlohmann::json::parse(tampered_version_three.at("spec").get<std::string>());
+    tampered_version_three_spec["environment"]["build"]["compiler_version"] = "tampered";
+    tampered_version_three["spec"] = tampered_version_three_spec.dump();
+    const auto tampered_version_three_result =
+        ar::decode_recorded_comparison(tampered_version_three.dump());
     REQUIRE(std::holds_alternative<ar::ArtifactError>(tampered_version_three_result));
-    auto malformed_environment_spec_json=version_three_spec_json;
-    malformed_environment_spec_json["environment"]["runtime"]["cpu_model"]=
-        {{"status","unavailable"}};
-    const auto malformed_environment_text=malformed_environment_spec_json.dump();
-    const auto malformed_environment_owner=csl::problem::snapshot_content(
-        std::span<const std::byte>{reinterpret_cast<const std::byte*>(malformed_environment_text.data()),
+    auto malformed_environment_spec_json = version_three_spec_json;
+    malformed_environment_spec_json["environment"]["runtime"]["cpu_model"] = {
+        {"status", "unavailable"}};
+    const auto malformed_environment_text = malformed_environment_spec_json.dump();
+    const auto malformed_environment_owner =
+        csl::problem::snapshot_content(std::span<const std::byte>{
+            reinterpret_cast<const std::byte *>(malformed_environment_text.data()),
             malformed_environment_text.size()});
     REQUIRE(std::holds_alternative<csl::problem::ResolvedContent>(malformed_environment_owner));
-    const auto malformed_environment_result=ar::encode_recorded_comparison(
-        std::get<csl::problem::ResolvedContent>(malformed_environment_owner),measured_attempts);
+    const auto malformed_environment_result = ar::encode_recorded_comparison(
+        std::get<csl::problem::ResolvedContent>(malformed_environment_owner), measured_attempts);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(malformed_environment_result));
-    auto wrong_measurement=measured_attempts;
-    wrong_measurement.front().measurement_payload="{\"status\":\"failed\"}";
-    const auto wrong_measurement_result=ar::encode_recorded_comparison(record_spec,wrong_measurement);
+    auto wrong_measurement = measured_attempts;
+    wrong_measurement.front().measurement_payload = "{\"status\":\"failed\"}";
+    const auto wrong_measurement_result =
+        ar::encode_recorded_comparison(record_spec, wrong_measurement);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(wrong_measurement_result));
-    CHECK(std::get<ar::ArtifactError>(wrong_measurement_result).code==ar::ArtifactErrorCode::identity);
-    const auto expected_identity=prepared.expected_synthesis_identity(0);
-    const ar::Unavailable uninstrumented{ar::MissingReason::not_instrumented,{}};
+    CHECK(std::get<ar::ArtifactError>(wrong_measurement_result).code ==
+          ar::ArtifactErrorCode::identity);
+    const auto expected_identity = prepared.expected_synthesis_identity(0);
+    const ar::Unavailable uninstrumented{ar::MissingReason::not_instrumented, {}};
     ar::ConfigurationInput non_success_configuration_input;
-    non_success_configuration_input.collection={false,ar::CollectionMode::detail,5,10000,0,0};
-    non_success_configuration_input.modules={
-        {"strategy",{expected_identity.strategy,expected_identity.strategy_version,uninstrumented},{}},
-        {"lp",{prepared.strategies()[0].lp,"1",uninstrumented},{}},
-        {"convex",{prepared.strategies()[0].convex,"1",uninstrumented},{}}};
-    non_success_configuration_input.numerical=prepared.family().numerical;
-    non_success_configuration_input.resources={1,1,1,{}};
-    non_success_configuration_input.output={ar::OutputKind::synthesis,prepared.family().assurance,
-        prepared.family().target,prepared.family().representation,witness_request};
-    non_success_configuration_input.selector={{synthesis::witness_selector::selector_id},"1",{}};
-    non_success_configuration_input.strategy=prepared.strategies()[0];
-    non_success_configuration_input.strategy.selector=non_success_configuration_input.selector.id;
-    const auto non_success_configuration=take_artifact(ar::resolve_configuration(
-        std::move(non_success_configuration_input)),"resolve non-success run configuration");
-    const auto rejected_synthesis=[&](Termination termination) -> ar::FinalOutcome {
+    non_success_configuration_input.collection = {false, ar::CollectionMode::detail, 5, 10000, 0,
+                                                  0};
+    non_success_configuration_input.modules = {
+        {"strategy",
+         {expected_identity.strategy, expected_identity.strategy_version, uninstrumented},
+         {}},
+        {"lp", {prepared.strategies()[0].lp, "1", uninstrumented}, {}},
+        {"convex", {prepared.strategies()[0].convex, "1", uninstrumented}, {}}};
+    non_success_configuration_input.numerical = prepared.family().numerical;
+    non_success_configuration_input.resources = {1, 1, 1, {}};
+    non_success_configuration_input.output = {ar::OutputKind::synthesis,
+                                              prepared.family().assurance, prepared.family().target,
+                                              prepared.family().representation, witness_request};
+    non_success_configuration_input.selector = {
+        {synthesis::witness_selector::selector_id}, "1", {}};
+    non_success_configuration_input.strategy = prepared.strategies()[0];
+    non_success_configuration_input.strategy.selector = non_success_configuration_input.selector.id;
+    const auto non_success_configuration =
+        take_artifact(ar::resolve_configuration(std::move(non_success_configuration_input)),
+                      "resolve non-success run configuration");
+    const auto rejected_synthesis = [&](Termination termination) -> ar::FinalOutcome {
         const RetainedEvidenceScope retained{};
-        const RequestProvenance provenance{{"generated-query"},"strategy",
-            prepared.strategies()[0].strategy,std::optional<std::string>{"1"},
-            prepared.strategies()[0].strategy,std::optional<std::string>{"1"}};
+        const RequestProvenance provenance{{"generated-query"},
+                                           "strategy",
+                                           prepared.strategies()[0].strategy,
+                                           std::optional<std::string>{"1"},
+                                           prepared.strategies()[0].strategy,
+                                           std::optional<std::string>{"1"}};
         SynthesisStopEvidence stop;
-        if(termination==Termination::operation_rejected) {
-            stop=ScopedRequestRejection{provenance,
-                {{DiagnosticCode::unsupported,"strategy","provider rejected the generated request"}},
-                {},retained};
+        if (termination == Termination::operation_rejected) {
+            stop = ScopedRequestRejection{provenance,
+                                          {{DiagnosticCode::unsupported, "strategy",
+                                            "provider rejected the generated request"}},
+                                          {},
+                                          retained};
         } else {
-            stop=ContractValidationFailure{
-                {{DiagnosticCode::invalid_claim,"result.family","publisher rejected the result"}},
-                retained,std::monostate{}};
+            stop = ContractValidationFailure{
+                {{DiagnosticCode::invalid_claim, "result.family", "publisher rejected the result"}},
+                retained,
+                std::monostate{}};
         }
-        return ar::SynthesisFinal{termination,
-            {problem.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},
-            {},std::nullopt,{},std::move(stop)};
+        return ar::SynthesisFinal{
+            termination,
+            {problem.identity(), MathematicalOutcome::undetermined, Unestablished{}, {}},
+            {},
+            std::nullopt,
+            {},
+            std::move(stop)};
     };
-    const auto stopped_program=[&](Termination termination,std::string id) -> ar::FinalOutcome {
-        const ProgramIdentity subject{problem.identity(),ProgramId{std::move(id)}};
-        return ar::ProgramFinal{ProgramResult{termination,
-            {subject,MathematicalOutcome::undetermined,Unestablished{},{}},
-            {},{},"saved stopped program attempt",{}},{}};
+    const auto stopped_program = [&](Termination termination, std::string id) -> ar::FinalOutcome {
+        const ProgramIdentity subject{problem.identity(), ProgramId{std::move(id)}};
+        return ar::ProgramFinal{
+            ProgramResult{termination,
+                          {subject, MathematicalOutcome::undetermined, Unestablished{}, {}},
+                          {},
+                          {},
+                          "saved stopped program attempt",
+                          {}},
+            {}};
     };
-    const std::vector<std::tuple<ar::AttemptStatus,ar::FinalOutcome,std::string>> non_success_outcomes{
-        {ar::AttemptStatus::failed,
-            ar::FailedFinal{ar::FailurePhase::invoke,ar::FailureReason::adapter_exception,"saved adapter failure"},
-            "failed"},
-        {ar::AttemptStatus::unsupported,
-            ar::UnsupportedFinal{{{DiagnosticCode::unsupported,"capability","saved unsupported request"}}},
-            "unsupported"},
-        {ar::AttemptStatus::refused,
-            ar::ProgramFinal{ProgramResult{Termination::operation_rejected,
-                {ProgramIdentity{problem.identity(),ProgramId{"saved-provider-refusal"}},MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
-                "saved provider refusal",{}},{}},
-            "refused"},
-        {ar::AttemptStatus::refused,
-            ar::MinimaxFinal{Termination::operation_rejected,MinimaxOutcome::undetermined,
-                Assurance::numerical,ProgramIdentity{problem.identity(),ProgramId{"saved-refusal"}},{},{}},
-            "refused"},
-        {ar::AttemptStatus::cancelled,ar::SkippedFinal{ar::SkippedReason::cancelled},"cancelled"},
-        {ar::AttemptStatus::timed_out,
-            stopped_program(Termination::deadline_expired,"saved-deadline-expired"),"timed_out"},
-        {ar::AttemptStatus::resource_limited,
-            stopped_program(Termination::resource_limit,"saved-resource-limited"),"resource_limited"},
-        {ar::AttemptStatus::resource_limited,ar::SkippedFinal{ar::SkippedReason::task_limit},"resource_limited"},
-        {ar::AttemptStatus::incomplete,ar::SkippedFinal{ar::SkippedReason::batch_failed},"incomplete"},
-        {ar::AttemptStatus::unsupported,rejected_synthesis(Termination::operation_rejected),"unsupported"},
-        {ar::AttemptStatus::failed,rejected_synthesis(Termination::contract_rejected),"failed"}};
+    const std::vector<std::tuple<ar::AttemptStatus, ar::FinalOutcome, std::string>>
+        non_success_outcomes{
+            {ar::AttemptStatus::failed,
+             ar::FailedFinal{ar::FailurePhase::invoke, ar::FailureReason::adapter_exception,
+                             "saved adapter failure"},
+             "failed"},
+            {ar::AttemptStatus::unsupported,
+             ar::UnsupportedFinal{
+                 {{DiagnosticCode::unsupported, "capability", "saved unsupported request"}}},
+             "unsupported"},
+            {ar::AttemptStatus::refused,
+             ar::ProgramFinal{ProgramResult{Termination::operation_rejected,
+                                            {ProgramIdentity{problem.identity(),
+                                                             ProgramId{"saved-provider-refusal"}},
+                                             MathematicalOutcome::undetermined,
+                                             Unestablished{},
+                                             {}},
+                                            {},
+                                            {},
+                                            "saved provider refusal",
+                                            {}},
+                              {}},
+             "refused"},
+            {ar::AttemptStatus::refused,
+             ar::MinimaxFinal{Termination::operation_rejected,
+                              MinimaxOutcome::undetermined,
+                              Assurance::numerical,
+                              ProgramIdentity{problem.identity(), ProgramId{"saved-refusal"}},
+                              {},
+                              {}},
+             "refused"},
+            {ar::AttemptStatus::cancelled, ar::SkippedFinal{ar::SkippedReason::cancelled},
+             "cancelled"},
+            {ar::AttemptStatus::timed_out,
+             stopped_program(Termination::deadline_expired, "saved-deadline-expired"), "timed_out"},
+            {ar::AttemptStatus::resource_limited,
+             stopped_program(Termination::resource_limit, "saved-resource-limited"),
+             "resource_limited"},
+            {ar::AttemptStatus::resource_limited, ar::SkippedFinal{ar::SkippedReason::task_limit},
+             "resource_limited"},
+            {ar::AttemptStatus::incomplete, ar::SkippedFinal{ar::SkippedReason::batch_failed},
+             "incomplete"},
+            {ar::AttemptStatus::unsupported, rejected_synthesis(Termination::operation_rejected),
+             "unsupported"},
+            {ar::AttemptStatus::failed, rejected_synthesis(Termination::contract_rejected),
+             "failed"}};
     std::vector<ar::ComparisonAttempt> first_arm_status_attempts;
     std::vector<ar::ComparisonAttempt> second_arm_successful_attempts;
-    first_arm_status_attempts.reserve(non_success_outcomes.size()+1);
-    second_arm_successful_attempts.reserve(non_success_outcomes.size()+1);
-    first_arm_status_attempts.push_back({0,0,ar::AttemptStatus::completed,
-        {ar::RunId{"application-comparison-encoder-0-uninstrumented-partial"},
-            run_a_boundary.partial_selection.content().digest()},run_a_boundary.partial_selection,
-        "{\"schema\":\"csl.obs04-instrumentation-comparison-event/2\",\"repetition\":0,\"warmup\":true,\"status\":\"passed\",\"strategy\":\"csl.synthesis.reach-back\",\"instrumentation\":\"disabled\"}"});
-    second_arm_successful_attempts.push_back({1,0,ar::AttemptStatus::completed,
-        {ar::RunId{"application-comparison-encoder-0-instrumented-partial"},
-            run_a_enabled_boundary.partial_selection.content().digest()},run_a_enabled_boundary.partial_selection,
-        "{\"schema\":\"csl.obs04-instrumentation-comparison-event/2\",\"repetition\":0,\"warmup\":true,\"status\":\"passed\",\"strategy\":\"csl.synthesis.reach-back\",\"instrumentation\":\"enabled\"}"});
-    for(std::size_t index=0;index<non_success_outcomes.size();++index) {
-        const auto& [status,final,reported_status]=non_success_outcomes[index];
-        const ar::RunId non_success_run{"saved-non-success-"+std::to_string(index)};
-        auto statistics=take_artifact(ob::merge_observations(take_artifact(
-            ob::make_collection_plan({problem,non_success_configuration,non_success_run,{},{},0}),
-            "plan non-success run statistics"),{}),"merge non-success run statistics");
-        const auto description=problem.description();
-        ar::RunRecord run_record{problem.identity(),description->model->dynamics.dimensions,
-            static_cast<std::uint64_t>(description->times.size()-1),non_success_configuration,non_success_run,
-            final,std::move(statistics),{uninstrumented,uninstrumented,uninstrumented,uninstrumented,true,
-                ar::MemoryAccounting::unlimited},{},{},ar::ProblemProvenance::problem_revalidated};
-        const auto run_statistics=take_artifact(ar::publish_run({problem,std::move(run_record)}),
-            "publish non-success run");
-        const auto archived_run=take_artifact(ar::encode_recorded_run(run_statistics),
-            "encode non-success run");
-        auto measurement=nlohmann::json::parse(measured_attempts.front().measurement_payload);
-        measurement["status"]=reported_status;
-        const auto repeated_success=check_complete_family_encoder_boundary(problem,prepared,
-            execution.strategies[0],0,witness_request,true,index+1).complete;
-        const auto repeated_success_wire=std::string(
-            reinterpret_cast<const char*>(repeated_success.content().bytes().data()),
-            repeated_success.content().bytes().size());
-        const auto repeated_success_json=nlohmann::json::parse(repeated_success_wire);
+    first_arm_status_attempts.reserve(non_success_outcomes.size() + 1);
+    second_arm_successful_attempts.reserve(non_success_outcomes.size() + 1);
+    first_arm_status_attempts.push_back(
+        {0,
+         0,
+         ar::AttemptStatus::completed,
+         {ar::RunId{"application-comparison-encoder-0-uninstrumented-partial"},
+          run_a_boundary.partial_selection.content().digest()},
+         run_a_boundary.partial_selection,
+         "{\"schema\":\"csl.obs04-instrumentation-comparison-event/2\",\"repetition\":0,\"warmup\":true,\"status\":\"passed\",\"strategy\":\"csl.synthesis.reach-back\",\"instrumentation\":\"disabled\"}"});
+    second_arm_successful_attempts.push_back(
+        {1,
+         0,
+         ar::AttemptStatus::completed,
+         {ar::RunId{"application-comparison-encoder-0-instrumented-partial"},
+          run_a_enabled_boundary.partial_selection.content().digest()},
+         run_a_enabled_boundary.partial_selection,
+         "{\"schema\":\"csl.obs04-instrumentation-comparison-event/2\",\"repetition\":0,\"warmup\":true,\"status\":\"passed\",\"strategy\":\"csl.synthesis.reach-back\",\"instrumentation\":\"enabled\"}"});
+    for (std::size_t index = 0; index < non_success_outcomes.size(); ++index) {
+        const auto &[status, final, reported_status] = non_success_outcomes[index];
+        const ar::RunId non_success_run{"saved-non-success-" + std::to_string(index)};
+        auto statistics = take_artifact(
+            ob::merge_observations(
+                take_artifact(ob::make_collection_plan(
+                                  {problem, non_success_configuration, non_success_run, {}, {}, 0}),
+                              "plan non-success run statistics"),
+                {}),
+            "merge non-success run statistics");
+        const auto description = problem.description();
+        ar::RunRecord run_record{problem.identity(),
+                                 description->model->dynamics.dimensions,
+                                 static_cast<std::uint64_t>(description->times.size() - 1),
+                                 non_success_configuration,
+                                 non_success_run,
+                                 final,
+                                 std::move(statistics),
+                                 {uninstrumented, uninstrumented, uninstrumented, uninstrumented,
+                                  true, ar::MemoryAccounting::unlimited},
+                                 {},
+                                 {},
+                                 ar::ProblemProvenance::problem_revalidated};
+        const auto run_statistics = take_artifact(ar::publish_run({problem, std::move(run_record)}),
+                                                  "publish non-success run");
+        const auto archived_run =
+            take_artifact(ar::encode_recorded_run(run_statistics), "encode non-success run");
+        auto measurement = nlohmann::json::parse(measured_attempts.front().measurement_payload);
+        measurement["status"] = reported_status;
+        const auto repeated_success =
+            check_complete_family_encoder_boundary(problem, prepared, execution.strategies[0], 0,
+                                                   witness_request, true, index + 1)
+                .complete;
+        const auto repeated_success_wire =
+            std::string(reinterpret_cast<const char *>(repeated_success.content().bytes().data()),
+                        repeated_success.content().bytes().size());
+        const auto repeated_success_json = nlohmann::json::parse(repeated_success_wire);
         std::vector<ar::ComparisonAttempt> attempts_with_non_success{
-            {0,0,status,{ar::RunId{"saved-non-success-"+std::to_string(index)},archived_run.content().digest()},
-                archived_run,measurement.dump()},
-            {1,0,ar::AttemptStatus::completed,
-                {ar::RunId{repeated_success_json.at("run").get<std::string>()},
-                    repeated_success.content().digest()},repeated_success,
-                measured_attempts[1].measurement_payload}};
-        const auto archive=take_artifact(ar::encode_recorded_comparison(record_spec,attempts_with_non_success),
-            "encode non-success comparison attempt");
-        const auto archive_wire=std::string(reinterpret_cast<const char*>(archive.content().bytes().data()),
-            archive.content().bytes().size());
-        const auto archive_json=nlohmann::json::parse(archive_wire);
-        CHECK(archive_json["attempts"][0]["reported_status"]==reported_status);
-        CHECK(archive_json["attempts"][0]["measurement_payload"]==measurement.dump());
-        const auto restored=take_artifact(ar::decode_recorded_comparison(archive_wire),
-            "decode non-success comparison attempt");
-        CHECK(restored.content().digest()==archive.content().digest());
-        attempts_with_non_success[0].repetition_index=static_cast<std::uint32_t>(index+1);
-        measurement["repetition"]=index+1;
-        measurement["warmup"]=false;
-        attempts_with_non_success[0].measurement_payload=measurement.dump();
-        auto successful_measurement=nlohmann::json::parse(
-            attempts_with_non_success[1].measurement_payload);
-        successful_measurement["repetition"]=index+1;
-        successful_measurement["warmup"]=false;
-        attempts_with_non_success[1].repetition_index=static_cast<std::uint32_t>(index+1);
-        attempts_with_non_success[1].measurement_payload=successful_measurement.dump();
+            {0,
+             0,
+             status,
+             {ar::RunId{"saved-non-success-" + std::to_string(index)},
+              archived_run.content().digest()},
+             archived_run,
+             measurement.dump()},
+            {1,
+             0,
+             ar::AttemptStatus::completed,
+             {ar::RunId{repeated_success_json.at("run").get<std::string>()},
+              repeated_success.content().digest()},
+             repeated_success,
+             measured_attempts[1].measurement_payload}};
+        const auto archive =
+            take_artifact(ar::encode_recorded_comparison(record_spec, attempts_with_non_success),
+                          "encode non-success comparison attempt");
+        const auto archive_wire =
+            std::string(reinterpret_cast<const char *>(archive.content().bytes().data()),
+                        archive.content().bytes().size());
+        const auto archive_json = nlohmann::json::parse(archive_wire);
+        CHECK(archive_json["attempts"][0]["reported_status"] == reported_status);
+        CHECK(archive_json["attempts"][0]["measurement_payload"] == measurement.dump());
+        const auto restored = take_artifact(ar::decode_recorded_comparison(archive_wire),
+                                            "decode non-success comparison attempt");
+        CHECK(restored.content().digest() == archive.content().digest());
+        attempts_with_non_success[0].repetition_index = static_cast<std::uint32_t>(index + 1);
+        measurement["repetition"] = index + 1;
+        measurement["warmup"] = false;
+        attempts_with_non_success[0].measurement_payload = measurement.dump();
+        auto successful_measurement =
+            nlohmann::json::parse(attempts_with_non_success[1].measurement_payload);
+        successful_measurement["repetition"] = index + 1;
+        successful_measurement["warmup"] = false;
+        attempts_with_non_success[1].repetition_index = static_cast<std::uint32_t>(index + 1);
+        attempts_with_non_success[1].measurement_payload = successful_measurement.dump();
         first_arm_status_attempts.push_back(std::move(attempts_with_non_success[0]));
         second_arm_successful_attempts.push_back(std::move(attempts_with_non_success[1]));
     }
-    auto all_status_attempts=std::move(first_arm_status_attempts);
+    auto all_status_attempts = std::move(first_arm_status_attempts);
     all_status_attempts.insert(all_status_attempts.end(),
-        std::make_move_iterator(second_arm_successful_attempts.begin()),
-        std::make_move_iterator(second_arm_successful_attempts.end()));
-    auto all_status_spec_json=nlohmann::json::parse(record_spec_text);
-    const auto total_repetitions=non_success_outcomes.size()+1;
-    all_status_spec_json["repetitions"]=total_repetitions;
-    const auto all_status_spec_text=all_status_spec_json.dump();
-    const auto all_status_spec_owner=csl::problem::snapshot_content(
-        std::span<const std::byte>{reinterpret_cast<const std::byte*>(all_status_spec_text.data()),
-            all_status_spec_text.size()});
+                               std::make_move_iterator(second_arm_successful_attempts.begin()),
+                               std::make_move_iterator(second_arm_successful_attempts.end()));
+    auto all_status_spec_json = nlohmann::json::parse(record_spec_text);
+    const auto total_repetitions = non_success_outcomes.size() + 1;
+    all_status_spec_json["repetitions"] = total_repetitions;
+    const auto all_status_spec_text = all_status_spec_json.dump();
+    const auto all_status_spec_owner = csl::problem::snapshot_content(
+        std::span<const std::byte>{reinterpret_cast<const std::byte *>(all_status_spec_text.data()),
+                                   all_status_spec_text.size()});
     REQUIRE(std::holds_alternative<csl::problem::ResolvedContent>(all_status_spec_owner));
-    const auto all_status_archive=take_artifact(ar::encode_recorded_comparison(
-        std::get<csl::problem::ResolvedContent>(all_status_spec_owner),all_status_attempts),
+    const auto all_status_archive = take_artifact(
+        ar::encode_recorded_comparison(
+            std::get<csl::problem::ResolvedContent>(all_status_spec_owner), all_status_attempts),
         "encode comparison with every saved attempt status");
-    const auto all_status_wire=std::string(
-        reinterpret_cast<const char*>(all_status_archive.content().bytes().data()),
-        all_status_archive.content().bytes().size());
-    const auto all_status_restored=take_artifact(ar::decode_recorded_comparison(all_status_wire),
-        "decode comparison with every saved attempt status");
-    CHECK(all_status_restored.content().digest()==all_status_archive.content().digest());
-    const auto all_status_json=nlohmann::json::parse(all_status_wire);
-    REQUIRE(all_status_json.at("attempts").size()==all_status_attempts.size());
-    CHECK(all_status_json.at("attempts").at(0).at("reported_status")=="completed");
-    for(std::size_t index=0;index<non_success_outcomes.size();++index) {
-        const auto& status=std::get<2>(non_success_outcomes[index]);
-        CHECK(all_status_json.at("attempts").at(index+1).at("reported_status")==status);
-        CHECK(all_status_json.at("attempts").at(total_repetitions+index)
-            .at("reported_status")=="completed");
+    const auto all_status_wire =
+        std::string(reinterpret_cast<const char *>(all_status_archive.content().bytes().data()),
+                    all_status_archive.content().bytes().size());
+    const auto all_status_restored =
+        take_artifact(ar::decode_recorded_comparison(all_status_wire),
+                      "decode comparison with every saved attempt status");
+    CHECK(all_status_restored.content().digest() == all_status_archive.content().digest());
+    const auto all_status_json = nlohmann::json::parse(all_status_wire);
+    REQUIRE(all_status_json.at("attempts").size() == all_status_attempts.size());
+    CHECK(all_status_json.at("attempts").at(0).at("reported_status") == "completed");
+    for (std::size_t index = 0; index < non_success_outcomes.size(); ++index) {
+        const auto &status = std::get<2>(non_success_outcomes[index]);
+        CHECK(all_status_json.at("attempts").at(index + 1).at("reported_status") == status);
+        CHECK(all_status_json.at("attempts").at(total_repetitions + index).at("reported_status") ==
+              "completed");
     }
-    CHECK(all_status_json.at("attempts").at(total_repetitions).at("reported_status")=="completed");
-    for(std::size_t index=0;index<all_status_attempts.size();++index) {
-        const auto& saved=all_status_json.at("attempts").at(index);
-        const auto& literal=all_status_attempts[index];
-        const auto run_json=nlohmann::json::parse(saved.at("run").get<std::string>());
-        CHECK(saved.at("arm_index")==literal.strategy_index);
-        CHECK(saved.at("repetition_index")==literal.repetition_index);
-        CHECK(saved.at("run_id")==literal.reference.run.value);
-        CHECK(saved.at("run_digest")==csl::problem::hex(literal.reference.content_digest));
-        CHECK(saved.at("run_id")==run_json.at("run"));
-        CHECK(saved.at("run_digest")==csl::problem::hex(literal.run.content().digest()));
-        CHECK(run_json.at("problem")==problem.identity().value);
-        CHECK(run_json.at("configuration").at("id")==
-            all_status_spec_json.at("arms").at(saved.at("arm_index").get<std::size_t>()).at("configuration_id"));
-        CHECK(run_json.at("configuration").at("value").at("strategy").at("strategy")==
-            all_status_spec_json.at("arms").at(saved.at("arm_index").get<std::size_t>()).at("strategy"));
-        const auto strategy_module=std::find_if(run_json.at("configuration").at("value").at("modules").begin(),
-            run_json.at("configuration").at("value").at("modules").end(),
-            [](const auto& module){return module.at("role")=="strategy";});
-        REQUIRE(strategy_module!=run_json.at("configuration").at("value").at("modules").end());
-        CHECK(strategy_module->at("id")==expected_identity.strategy.value);
-        CHECK(strategy_module->at("version")==expected_identity.strategy_version);
-        CHECK(csl::problem::hex(take_artifact(ar::comparison_request_digest(
-            literal.run),"saved comparison request digest"))==request_digest);
-        const auto& saved_final=run_json.at("final");
-        if(saved_final.at("kind")=="synthesis"&&
+    CHECK(all_status_json.at("attempts").at(total_repetitions).at("reported_status") ==
+          "completed");
+    for (std::size_t index = 0; index < all_status_attempts.size(); ++index) {
+        const auto &saved = all_status_json.at("attempts").at(index);
+        const auto &literal = all_status_attempts[index];
+        const auto run_json = nlohmann::json::parse(saved.at("run").get<std::string>());
+        CHECK(saved.at("arm_index") == literal.strategy_index);
+        CHECK(saved.at("repetition_index") == literal.repetition_index);
+        CHECK(saved.at("run_id") == literal.reference.run.value);
+        CHECK(saved.at("run_digest") == csl::problem::hex(literal.reference.content_digest));
+        CHECK(saved.at("run_id") == run_json.at("run"));
+        CHECK(saved.at("run_digest") == csl::problem::hex(literal.run.content().digest()));
+        CHECK(run_json.at("problem") == problem.identity().value);
+        CHECK(run_json.at("configuration").at("id") ==
+              all_status_spec_json.at("arms")
+                  .at(saved.at("arm_index").get<std::size_t>())
+                  .at("configuration_id"));
+        CHECK(run_json.at("configuration").at("value").at("strategy").at("strategy") ==
+              all_status_spec_json.at("arms")
+                  .at(saved.at("arm_index").get<std::size_t>())
+                  .at("strategy"));
+        const auto strategy_module =
+            std::find_if(run_json.at("configuration").at("value").at("modules").begin(),
+                         run_json.at("configuration").at("value").at("modules").end(),
+                         [](const auto &module) { return module.at("role") == "strategy"; });
+        REQUIRE(strategy_module != run_json.at("configuration").at("value").at("modules").end());
+        CHECK(strategy_module->at("id") == expected_identity.strategy.value);
+        CHECK(strategy_module->at("version") == expected_identity.strategy_version);
+        CHECK(csl::problem::hex(take_artifact(ar::comparison_request_digest(literal.run),
+                                              "saved comparison request digest")) ==
+              request_digest);
+        const auto &saved_final = run_json.at("final");
+        if (saved_final.at("kind") == "synthesis" &&
             !saved_final.at("value").at("family").is_null()) {
-            const auto& source_family=saved_final.at("value").at("family").at("family").at("identity");
-            CHECK(source_family.at("problem")==problem.identity().value);
-            CHECK(source_family.at("request").at("profile")==profile);
-            CHECK(source_family.at("strategy")==expected_identity.strategy.value);
-            CHECK(source_family.at("strategy_version")==expected_identity.strategy_version);
+            const auto &source_family =
+                saved_final.at("value").at("family").at("family").at("identity");
+            CHECK(source_family.at("problem") == problem.identity().value);
+            CHECK(source_family.at("request").at("profile") == profile);
+            CHECK(source_family.at("strategy") == expected_identity.strategy.value);
+            CHECK(source_family.at("strategy_version") == expected_identity.strategy_version);
         }
     }
-    auto wrong_arm_text=record_spec_text;
-    const auto disabled_label=wrong_arm_text.find("disabled");
-    REQUIRE(disabled_label!=std::string::npos);
-    wrong_arm_text.replace(disabled_label,std::string_view("disabled").size(),"enabled");
-    const auto wrong_arm_owner=csl::problem::snapshot_content(std::span<const std::byte>{
-        reinterpret_cast<const std::byte*>(wrong_arm_text.data()),wrong_arm_text.size()});
+    auto wrong_arm_text = record_spec_text;
+    const auto disabled_label = wrong_arm_text.find("disabled");
+    REQUIRE(disabled_label != std::string::npos);
+    wrong_arm_text.replace(disabled_label, std::string_view("disabled").size(), "enabled");
+    const auto wrong_arm_owner = csl::problem::snapshot_content(std::span<const std::byte>{
+        reinterpret_cast<const std::byte *>(wrong_arm_text.data()), wrong_arm_text.size()});
     REQUIRE(std::holds_alternative<csl::problem::ResolvedContent>(wrong_arm_owner));
-    const auto wrong_arm_result=ar::encode_recorded_comparison(
-        std::get<csl::problem::ResolvedContent>(wrong_arm_owner),measured_attempts);
+    const auto wrong_arm_result = ar::encode_recorded_comparison(
+        std::get<csl::problem::ResolvedContent>(wrong_arm_owner), measured_attempts);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(wrong_arm_result));
-    CHECK(std::get<ar::ArtifactError>(wrong_arm_result).code==ar::ArtifactErrorCode::identity);
+    CHECK(std::get<ar::ArtifactError>(wrong_arm_result).code == ar::ArtifactErrorCode::identity);
 }
 }
 
@@ -1050,7 +1268,7 @@ TEST_CASE("application preparation retains provider registries after module asse
     auto registered = modules();
     auto admission = application::prepare_comparison(request, registered.strategies);
     REQUIRE(std::holds_alternative<application::PreparedComparison>(admission));
-    const auto& prepared = std::get<application::PreparedComparison>(admission);
+    const auto &prepared = std::get<application::PreparedComparison>(admission);
     CHECK(prepared.problem().identity() == problem.identity());
     CHECK(prepared.strategies().size() == 2);
     const auto workspaces = prepared.create();
@@ -1058,66 +1276,74 @@ TEST_CASE("application preparation retains provider registries after module asse
     CHECK(workspaces[1] != nullptr);
 }
 
-TEST_CASE("strategy catalogue canonicalizes inactive Strategy B axes from its real prepared route") {
+TEST_CASE(
+    "strategy catalogue canonicalizes inactive Strategy B axes from its real prepared route") {
     const auto problem = source("ts01_exact_integrator");
-    const auto comparison = request_for(problem,"ts01_exact_integrator");
+    const auto comparison = request_for(problem, "ts01_exact_integrator");
     auto registered = modules();
-    registry::StrategyRequest concrete{problem,comparison.strategies[1],comparison.family,"1",{}};
+    registry::StrategyRequest concrete{
+        problem, comparison.strategies[1], comparison.family, "1", {}};
     registry::Requirements requirements;
     requirements.output.representation = concrete.family.representation;
     requirements.output.assurance = concrete.family.assurance;
-    const auto rows = registry::enumerate_strategy_candidates(registered.strategies,concrete,requirements);
-    const auto strategy_a = std::find_if(rows.begin(),rows.end(),[](const auto& row) {
+    const auto rows =
+        registry::enumerate_strategy_candidates(registered.strategies, concrete, requirements);
+    const auto strategy_a = std::find_if(rows.begin(), rows.end(), [](const auto &row) {
         return row.graph.strategy.id.value == "csl.synthesis.reach-back";
     });
     REQUIRE(strategy_a != rows.end());
     if (strategy_a->rejection && !strategy_a->rejection->diagnostics.empty()) {
-        INFO(strategy_a->rejection->diagnostics.front().field << ": " <<
-            strategy_a->rejection->diagnostics.front().explanation);
+        INFO(strategy_a->rejection->diagnostics.front().field
+             << ": " << strategy_a->rejection->diagnostics.front().explanation);
     }
     REQUIRE(strategy_a->status == registry::CandidateStatus::admitted);
     REQUIRE(strategy_a->provenance.size() > 1);
-    CHECK(std::all_of(strategy_a->provenance.begin() + 1,strategy_a->provenance.end(),
-        [](const auto& provider) { return provider.actual.has_value(); }));
+    CHECK(std::all_of(strategy_a->provenance.begin() + 1, strategy_a->provenance.end(),
+                      [](const auto &provider) { return provider.actual.has_value(); }));
     auto strategy_a_request = concrete;
     strategy_a_request.configuration.strategy = strategy_a->graph.strategy.id;
     CHECK(std::holds_alternative<registry::PreparedStrategyCandidate>(
-        registry::prepare_strategy_candidate(registered.strategies,strategy_a->graph,
-            strategy_a_request,requirements)));
-    const auto found = std::find_if(rows.begin(),rows.end(),[](const auto& row) {
+        registry::prepare_strategy_candidate(registered.strategies, strategy_a->graph,
+                                             strategy_a_request, requirements)));
+    const auto found = std::find_if(rows.begin(), rows.end(), [](const auto &row) {
         return row.graph.strategy.id.value == "csl.synthesis.strategy-b";
     });
     REQUIRE(found != rows.end());
     if (found->rejection && !found->rejection->diagnostics.empty()) {
-        INFO(found->rejection->diagnostics.front().field << ": " <<
-            found->rejection->diagnostics.front().explanation);
+        INFO(found->rejection->diagnostics.front().field
+             << ": " << found->rejection->diagnostics.front().explanation);
     }
     REQUIRE(found->status == registry::CandidateStatus::admitted);
-    CHECK((found->graph.module_slots[3] == std::pair<std::string,std::string>{"hull","not_used"}));
-    CHECK((found->graph.module_slots[4] == std::pair<std::string,std::string>{"geometry","not_used"}));
-    CHECK((found->graph.module_slots[5] == std::pair<std::string,std::string>{"converter","not_used"}));
-    CHECK((found->graph.module_slots[6] == std::pair<std::string,std::string>{"approximation","not_used"}));
-    CHECK((found->graph.module_slots[7] == std::pair<std::string,std::string>{"selector","not_used"}));
+    CHECK(
+        (found->graph.module_slots[3] == std::pair<std::string, std::string>{"hull", "not_used"}));
+    CHECK((found->graph.module_slots[4] ==
+           std::pair<std::string, std::string>{"geometry", "not_used"}));
+    CHECK((found->graph.module_slots[5] ==
+           std::pair<std::string, std::string>{"converter", "not_used"}));
+    CHECK((found->graph.module_slots[6] ==
+           std::pair<std::string, std::string>{"approximation", "not_used"}));
+    CHECK((found->graph.module_slots[7] ==
+           std::pair<std::string, std::string>{"selector", "not_used"}));
 
     auto inactive_changed = concrete;
     inactive_changed.configuration.hull = {"unused-by-strategy-b"};
     inactive_changed.configuration.converter = {"unused-converter-by-strategy-b"};
-    const auto alias = registry::prepare_strategy_candidate(registered.strategies,
-        found->graph,inactive_changed,requirements);
+    const auto alias = registry::prepare_strategy_candidate(registered.strategies, found->graph,
+                                                            inactive_changed, requirements);
     REQUIRE(std::holds_alternative<registry::PreparedStrategyCandidate>(alias));
 
     auto active_changed = concrete;
     active_changed.configuration.lp = {"csl.lp.unregistered"};
     CHECK(std::holds_alternative<registry::Rejection>(registry::prepare_strategy_candidate(
-        registered.strategies,found->graph,active_changed,requirements)));
+        registered.strategies, found->graph, active_changed, requirements)));
     active_changed = concrete;
     active_changed.configuration.convex = {"csl.convex.unregistered"};
     CHECK(std::holds_alternative<registry::Rejection>(registry::prepare_strategy_candidate(
-        registered.strategies,found->graph,active_changed,requirements)));
+        registered.strategies, found->graph, active_changed, requirements)));
     active_changed = concrete;
     active_changed.strategy_version = "substituted-version";
     CHECK(std::holds_alternative<registry::Rejection>(registry::prepare_strategy_candidate(
-        registered.strategies,found->graph,active_changed,requirements)));
+        registered.strategies, found->graph, active_changed, requirements)));
 }
 
 TEST_CASE("application selected methods preserve versions and share verification") {
@@ -1129,10 +1355,12 @@ TEST_CASE("application selected methods preserve versions and share verification
         {paired_request.strategies[1], std::string{"1"}}};
     auto selection = application::SelectedMethods::make(std::move(methods));
     REQUIRE(std::holds_alternative<application::SelectedMethods>(selection));
-    auto admission = application::prepare_selected_run({problem, paired_request.family,
-        std::get<application::SelectedMethods>(std::move(selection))}, registered.strategies);
+    auto admission = application::prepare_selected_run(
+        {problem, paired_request.family,
+         std::get<application::SelectedMethods>(std::move(selection))},
+        registered.strategies);
     REQUIRE(std::holds_alternative<application::PreparedSelection>(admission));
-    const auto& prepared = std::get<application::PreparedSelection>(admission);
+    const auto &prepared = std::get<application::PreparedSelection>(admission);
     REQUIRE(prepared.methods().size() == 2);
     CHECK(prepared.expected_synthesis_identity(0).strategy_version == "1");
     CHECK(prepared.expected_synthesis_identity(1).strategy_version == "1");
@@ -1142,16 +1370,16 @@ TEST_CASE("application selected methods preserve versions and share verification
     ExecutionContext context;
     context.numerical = paired_request.family.numerical;
     context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
-    const auto execution = application::run_selected(prepared, registered.selectors,
-        {synthesis::witness_selector::selector_id, {}}, {2, 0, {{1, -1}, {-1, 1}}, 31},
-        selection_requirements, context, registered.membership);
+    const auto execution = application::run_selected(
+        prepared, registered.selectors, {synthesis::witness_selector::selector_id, {}},
+        {2, 0, {{1, -1}, {-1, 1}}, 31}, selection_requirements, context, registered.membership);
     REQUIRE(execution.methods.size() == 2);
-    for (const auto& method : execution.methods) {
+    for (const auto &method : execution.methods) {
         REQUIRE(std::holds_alternative<SynthesisResult>(method.execution.outcome));
         REQUIRE(std::holds_alternative<WitnessSelection>(method.execution.selection));
-        const auto& selected = std::get<WitnessSelection>(method.execution.selection);
+        const auto &selected = std::get<WitnessSelection>(method.execution.selection);
         REQUIRE(method.execution.verification.size() == selected.batch.witnesses.size());
-        for (const auto& report : method.execution.verification)
+        for (const auto &report : method.execution.verification)
             CHECK(report.bindings == verification::CheckStatus::numerical_pass);
     }
 }
@@ -1160,14 +1388,15 @@ TEST_CASE("selected method admission retains the rejected input index") {
     const auto problem = source("ts01_exact_integrator");
     auto request = request_for(problem, "ts01_exact_integrator");
     auto registered = modules();
-    auto methods = application::SelectedMethods::make({
-        {request.strategies[0], std::string{"1"}},
-        {request.strategies[1], std::string{"not-registered"}}});
+    auto methods = application::SelectedMethods::make(
+        {{request.strategies[0], std::string{"1"}},
+         {request.strategies[1], std::string{"not-registered"}}});
     REQUIRE(std::holds_alternative<application::SelectedMethods>(methods));
-    auto admission = application::prepare_selected_run({problem, request.family,
-        std::get<application::SelectedMethods>(std::move(methods))}, registered.strategies);
+    auto admission = application::prepare_selected_run(
+        {problem, request.family, std::get<application::SelectedMethods>(std::move(methods))},
+        registered.strategies);
     REQUIRE(std::holds_alternative<application::RejectedSelection>(admission));
-    const auto& rejected = std::get<application::RejectedSelection>(admission);
+    const auto &rejected = std::get<application::RejectedSelection>(admission);
     REQUIRE(rejected.methods.size() == 1);
     CHECK(rejected.methods[0].index == 1);
 
@@ -1182,7 +1411,8 @@ TEST_CASE("application composes and verifies paired T-S02 complete families") {
     compare_profile("ts02_constant_integrator");
 }
 
-TEST_CASE("application compares T-S03 families by the analytic relation and verifies each full history") {
+TEST_CASE(
+    "application compares T-S03 families by the analytic relation and verifies each full history") {
     compare_profile("ts03_singular_integrator");
 }
 
@@ -1193,15 +1423,15 @@ TEST_CASE("external geometry method runs retain provenance in paired comparison 
     const std::string manifest_text =
         R"({"points":[[0,0],[0,1],[0.5,0.5],[0.5,0],[1,0],[1,1],[1,0.5],[0,0.5],[0.5,1]],"schema":"csl.geometry-hull-input/1"})";
     const auto manifest_result = problem::snapshot_content(std::span<const std::byte>{
-        reinterpret_cast<const std::byte*>(manifest_text.data()), manifest_text.size()});
+        reinterpret_cast<const std::byte *>(manifest_text.data()), manifest_text.size()});
     REQUIRE(std::holds_alternative<problem::ResolvedContent>(manifest_result));
     const auto manifest = std::get<problem::ResolvedContent>(manifest_result);
     const auto manifest_digest = problem::hex(manifest.digest());
     problem::ContentDigest request_digest{};
     request_digest.bytes.fill(std::byte{0x0c});
 
-    const auto make_run = [&](const std::string& method_id, char config_char,
-                              const std::string& run_id, const std::string& result) {
+    const auto make_run = [&](const std::string &method_id, char config_char,
+                              const std::string &run_id, const std::string &result) {
         ar::ExternalMethodRunInput input;
         input.run = {run_id};
         input.problem = {"csl.problem.v1.sha256:" + manifest_digest};
@@ -1212,46 +1442,56 @@ TEST_CASE("external geometry method runs retain provenance in paired comparison 
         input.method_id = method_id;
         input.method_version = "1";
         input.sources = {{method_id + ".cpp", std::string(64, 'e')}};
-        input.runtime = {"C++", method_id, "1", std::string(64, 'f'), "Linux", "x86_64",
-            "GCC", "16.2.1", "Release"};
+        input.runtime = {"C++", method_id, "1",      std::string(64, 'f'), "Linux", "x86_64",
+                         "GCC", "16.2.1",  "Release"};
         input.status = ar::AttemptStatus::completed;
         input.result_payload = result;
         return take_artifact(ar::encode_external_method_run(input), "encode external geometry run");
     };
     const auto run_a = make_run("geometry.a29", 'a', "geometry-a29-0", "{\"vertices\":[0,1,2,3]}");
-    const auto run_b = make_run("geometry.modern", 'b', "geometry-modern-0", "{\"vertices\":[0,1,2,3]}");
+    const auto run_b =
+        make_run("geometry.modern", 'b', "geometry-modern-0", "{\"vertices\":[0,1,2,3]}");
 
     const std::string config_a = "csl.config.v1.sha256:" + std::string(64, 'a');
     const std::string config_b = "csl.config.v1.sha256:" + std::string(64, 'b');
     const Json spec_json{{"schema", "csl.comparison-spec/2"},
-        {"problem_id", "csl.problem.v1.sha256:" + manifest_digest},
-        {"request_digest", problem::hex(request_digest)}, {"repetitions", 1},
-        {"input_manifest_hash", manifest_digest},
-        {"input_manifest_source", "csl.geometry-hull-input/1"},
-        {"arms", Json::array({
-            Json{{"configuration_id", config_a}, {"strategy", "geometry.a29"}, {"instrumentation", "disabled"}},
-            Json{{"configuration_id", config_b}, {"strategy", "geometry.modern"}, {"instrumentation", "disabled"}}})}};
+                         {"problem_id", "csl.problem.v1.sha256:" + manifest_digest},
+                         {"request_digest", problem::hex(request_digest)},
+                         {"repetitions", 1},
+                         {"input_manifest_hash", manifest_digest},
+                         {"input_manifest_source", "csl.geometry-hull-input/1"},
+                         {"arms", Json::array({Json{{"configuration_id", config_a},
+                                                    {"strategy", "geometry.a29"},
+                                                    {"instrumentation", "disabled"}},
+                                               Json{{"configuration_id", config_b},
+                                                    {"strategy", "geometry.modern"},
+                                                    {"instrumentation", "disabled"}}})}};
     const auto spec_text = spec_json.dump();
     const auto spec_result = problem::snapshot_content(std::span<const std::byte>{
-        reinterpret_cast<const std::byte*>(spec_text.data()), spec_text.size()});
+        reinterpret_cast<const std::byte *>(spec_text.data()), spec_text.size()});
     REQUIRE(std::holds_alternative<problem::ResolvedContent>(spec_result));
     const auto spec = std::get<problem::ResolvedContent>(spec_result);
-    const auto attempt = [](std::uint32_t arm, const std::string& method_id,
-                            const ar::RecordedExternalMethodRunArtifact& run) {
-        const auto event = Json{{"schema", "csl.external-method-event/1"}, {"status", "passed"},
-            {"method_id", method_id}, {"instrumentation", "disabled"}, {"repetition", 0},
+    const auto attempt = [](std::uint32_t arm, const std::string &method_id,
+                            const ar::RecordedExternalMethodRunArtifact &run) {
+        const auto event = Json{
+            {"schema", "csl.external-method-event/1"},
+            {"status", "passed"},
+            {"method_id", method_id},
+            {"instrumentation", "disabled"},
+            {"repetition", 0},
             {"warmup", true}}.dump();
-        return ar::ComparisonAttempt{arm, 0, ar::AttemptStatus::completed,
-            {run.run_id(), run.content().digest()}, run, event};
+        return ar::ComparisonAttempt{
+            arm, 0,    ar::AttemptStatus::completed, {run.run_id(), run.content().digest()},
+            run, event};
     };
-    const std::vector<ar::ComparisonAttempt> attempts{
-        attempt(0, "geometry.a29", run_a), attempt(1, "geometry.modern", run_b)};
+    const std::vector<ar::ComparisonAttempt> attempts{attempt(0, "geometry.a29", run_a),
+                                                      attempt(1, "geometry.modern", run_b)};
     const auto recorded = take_artifact(ar::encode_recorded_comparison(spec, attempts),
-        "encode external geometry comparison");
-    const auto wire = std::string(reinterpret_cast<const char*>(recorded.content().bytes().data()),
-        recorded.content().bytes().size());
-    const auto restored = take_artifact(ar::decode_recorded_comparison(wire),
-        "decode external geometry comparison");
+                                        "encode external geometry comparison");
+    const auto wire = std::string(reinterpret_cast<const char *>(recorded.content().bytes().data()),
+                                  recorded.content().bytes().size());
+    const auto restored =
+        take_artifact(ar::decode_recorded_comparison(wire), "decode external geometry comparison");
     CHECK(restored.content().digest() == recorded.content().digest());
     CHECK(wire.find("unverified_recorded_data") != std::string::npos);
     CHECK(wire.find("geometry-hull-input/1") != std::string::npos);
@@ -1260,7 +1500,8 @@ TEST_CASE("external geometry method runs retain provenance in paired comparison 
     auto wrong_event = attempts;
     wrong_event[0].measurement_payload =
         R"({"schema":"csl.external-method-event/1","status":"passed","method_id":"geometry.modern","instrumentation":"disabled","repetition":0,"warmup":true})";
-    CHECK(std::holds_alternative<ar::ArtifactError>(ar::encode_recorded_comparison(spec, wrong_event)));
+    CHECK(std::holds_alternative<ar::ArtifactError>(
+        ar::encode_recorded_comparison(spec, wrong_event)));
 }
 
 TEST_CASE("MPC Strategy A/B input manifests retain scenario and capture identity") {
@@ -1270,14 +1511,15 @@ TEST_CASE("MPC Strategy A/B input manifests retain scenario and capture identity
     const std::string manifest_text =
         R"({"profile":"ts01_exact_integrator","scenario_sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","schema":"csl.mpc01-strategy-ab-input/1","resolved_problem_id":"csl.problem.v1.sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"})";
     const auto manifest_result = problem::snapshot_content(std::span<const std::byte>{
-        reinterpret_cast<const std::byte*>(manifest_text.data()), manifest_text.size()});
+        reinterpret_cast<const std::byte *>(manifest_text.data()), manifest_text.size()});
     REQUIRE(std::holds_alternative<problem::ResolvedContent>(manifest_result));
     const auto manifest = std::get<problem::ResolvedContent>(manifest_result);
     const auto manifest_digest = problem::hex(manifest.digest());
     problem::ContentDigest request_digest{};
     request_digest.bytes.fill(std::byte{0x1a});
 
-    const auto make_run = [&](const std::string& strategy, char config_char, const std::string& run_id) {
+    const auto make_run = [&](const std::string &strategy, char config_char,
+                              const std::string &run_id) {
         ar::ExternalMethodRunInput input;
         input.run = {run_id};
         input.problem = {"csl.problem.v1.sha256:" + manifest_digest};
@@ -1288,8 +1530,11 @@ TEST_CASE("MPC Strategy A/B input manifests retain scenario and capture identity
         input.method_id = strategy;
         input.method_version = "1";
         input.sources = {{"examples/registered_synthesis_comparison.cpp", std::string(64, 'c')}};
-        input.runtime = {"C++", "registered-synthesis-strategy", "GNU 16.2.1",
-            std::string(64, 'd'), "Linux", "x86_64", "GNU", "16.2.1", "Release"};
+        input.runtime = {"C++",        "registered-synthesis-strategy",
+                         "GNU 16.2.1", std::string(64, 'd'),
+                         "Linux",      "x86_64",
+                         "GNU",        "16.2.1",
+                         "Release"};
         input.status = ar::AttemptStatus::completed;
         input.result_payload = R"({"schema":"csl.mpc01-strategy-ab-attempt/1"})";
         return take_artifact(ar::encode_external_method_run(input), "encode MPC Strategy A/B run");
@@ -1298,37 +1543,46 @@ TEST_CASE("MPC Strategy A/B input manifests retain scenario and capture identity
     const auto strategy_b = std::string("csl.synthesis.strategy-b");
     const auto run_a = make_run(strategy_a, 'a', "mpc01-strategy-a-r0");
     const auto run_b = make_run(strategy_b, 'b', "mpc01-strategy-b-r0");
-    const Json spec_json{{"schema", "csl.comparison-spec/2"},
+    const Json spec_json{
+        {"schema", "csl.comparison-spec/2"},
         {"problem_id", "csl.problem.v1.sha256:" + manifest_digest},
-        {"request_digest", problem::hex(request_digest)}, {"repetitions", 1},
+        {"request_digest", problem::hex(request_digest)},
+        {"repetitions", 1},
         {"input_manifest_hash", manifest_digest},
         {"input_manifest_source", "csl.mpc01-strategy-ab-input/1"},
-        {"arms", Json::array({
-            Json{{"configuration_id", "csl.config.v1.sha256:" + std::string(64, 'a')},
-                {"strategy", strategy_a}, {"instrumentation", "disabled"}},
-            Json{{"configuration_id", "csl.config.v1.sha256:" + std::string(64, 'b')},
-                {"strategy", strategy_b}, {"instrumentation", "disabled"}}})}};
+        {"arms",
+         Json::array({Json{{"configuration_id", "csl.config.v1.sha256:" + std::string(64, 'a')},
+                           {"strategy", strategy_a},
+                           {"instrumentation", "disabled"}},
+                      Json{{"configuration_id", "csl.config.v1.sha256:" + std::string(64, 'b')},
+                           {"strategy", strategy_b},
+                           {"instrumentation", "disabled"}}})}};
     const auto spec_text = spec_json.dump();
     const auto spec_result = problem::snapshot_content(std::span<const std::byte>{
-        reinterpret_cast<const std::byte*>(spec_text.data()), spec_text.size()});
+        reinterpret_cast<const std::byte *>(spec_text.data()), spec_text.size()});
     REQUIRE(std::holds_alternative<problem::ResolvedContent>(spec_result));
     const auto spec = std::get<problem::ResolvedContent>(spec_result);
-    const auto attempt = [](std::uint32_t arm, const std::string& strategy,
-                            const ar::RecordedExternalMethodRunArtifact& run) {
-        const auto event = Json{{"schema", "csl.external-method-event/1"}, {"status", "passed"},
-            {"method_id", strategy}, {"instrumentation", "disabled"}, {"repetition", 0},
+    const auto attempt = [](std::uint32_t arm, const std::string &strategy,
+                            const ar::RecordedExternalMethodRunArtifact &run) {
+        const auto event = Json{
+            {"schema", "csl.external-method-event/1"},
+            {"status", "passed"},
+            {"method_id", strategy},
+            {"instrumentation", "disabled"},
+            {"repetition", 0},
             {"warmup", true}}.dump();
-        return ar::ComparisonAttempt{arm, 0, ar::AttemptStatus::completed,
-            {run.run_id(), run.content().digest()}, run, event};
+        return ar::ComparisonAttempt{
+            arm, 0,    ar::AttemptStatus::completed, {run.run_id(), run.content().digest()},
+            run, event};
     };
-    const std::vector<ar::ComparisonAttempt> attempts{
-        attempt(0, strategy_a, run_a), attempt(1, strategy_b, run_b)};
+    const std::vector<ar::ComparisonAttempt> attempts{attempt(0, strategy_a, run_a),
+                                                      attempt(1, strategy_b, run_b)};
     const auto record = take_artifact(ar::encode_recorded_comparison(spec, attempts),
-        "encode MPC Strategy A/B comparison");
-    const auto wire = std::string(reinterpret_cast<const char*>(record.content().bytes().data()),
-        record.content().bytes().size());
-    const auto restored = take_artifact(ar::decode_recorded_comparison(wire),
-        "decode MPC Strategy A/B comparison");
+                                      "encode MPC Strategy A/B comparison");
+    const auto wire = std::string(reinterpret_cast<const char *>(record.content().bytes().data()),
+                                  record.content().bytes().size());
+    const auto restored =
+        take_artifact(ar::decode_recorded_comparison(wire), "decode MPC Strategy A/B comparison");
     CHECK(restored.content().digest() == record.content().digest());
     CHECK(wire.find("csl.mpc01-strategy-ab-input/1") != std::string::npos);
 }
@@ -1336,383 +1590,507 @@ TEST_CASE("MPC Strategy A/B input manifests retain scenario and capture identity
 TEST_CASE("approximation checker events preserve profile, evidence, resources and outcomes") {
     namespace ar = artifacts;
     using Json = nlohmann::json;
-    const std::string manifest_text=R"({"points":[[0,0],[1,0],[0,1]],"schema":"csl.geometry-hull-input/1"})";
-    const auto resolved=[](const std::string& text) {
-        const auto value=problem::snapshot_content(std::span<const std::byte>{
-            reinterpret_cast<const std::byte*>(text.data()),text.size()});
-        if(const auto* failure=std::get_if<Diagnostic>(&value))throw std::runtime_error(failure->explanation);
+    const std::string manifest_text =
+        R"({"points":[[0,0],[1,0],[0,1]],"schema":"csl.geometry-hull-input/1"})";
+    const auto resolved = [](const std::string &text) {
+        const auto value = problem::snapshot_content(std::span<const std::byte>{
+            reinterpret_cast<const std::byte *>(text.data()), text.size()});
+        if (const auto *failure = std::get_if<Diagnostic>(&value))
+            throw std::runtime_error(failure->explanation);
         return std::get<problem::ResolvedContent>(value);
     };
-    const auto manifest=resolved(manifest_text);
-    const auto manifest_digest=problem::hex(manifest.digest());
+    const auto manifest = resolved(manifest_text);
+    const auto manifest_digest = problem::hex(manifest.digest());
     problem::ContentDigest request_digest{};
     request_digest.bytes.fill(std::byte{0x0d});
-    const std::string method="csl.approximation.box";
-    const std::string config="csl.config.v1.sha256:"+std::string(64,'c');
-    const std::string problem_id="csl.problem.v1.sha256:"+manifest_digest;
-    const auto spec_for=[&](std::uint32_t repetitions) {
-        const Json value{{"schema","csl.comparison-spec/2"},{"problem_id",problem_id},
-            {"request_digest",problem::hex(request_digest)},{"repetitions",repetitions},
-            {"input_manifest_hash",manifest_digest},{"input_manifest_source","csl.geometry-hull-input/1"},
-            {"arms",Json::array({Json{{"configuration_id",config},{"strategy",method},
-                {"instrumentation","disabled"}}})}};
-        const auto text=value.dump();
+    const std::string method = "csl.approximation.box";
+    const std::string config = "csl.config.v1.sha256:" + std::string(64, 'c');
+    const std::string problem_id = "csl.problem.v1.sha256:" + manifest_digest;
+    const auto spec_for = [&](std::uint32_t repetitions) {
+        const Json value{{"schema", "csl.comparison-spec/2"},
+                         {"problem_id", problem_id},
+                         {"request_digest", problem::hex(request_digest)},
+                         {"repetitions", repetitions},
+                         {"input_manifest_hash", manifest_digest},
+                         {"input_manifest_source", "csl.geometry-hull-input/1"},
+                         {"arms", Json::array({Json{{"configuration_id", config},
+                                                    {"strategy", method},
+                                                    {"instrumentation", "disabled"}}})}};
+        const auto text = value.dump();
         return resolved(text);
     };
-    const auto run_for=[&](std::string run_id,ar::AttemptStatus status=ar::AttemptStatus::completed) {
+    const auto run_for = [&](std::string run_id,
+                             ar::AttemptStatus status = ar::AttemptStatus::completed) {
         ar::ExternalMethodRunInput input;
-        input.run={std::move(run_id)};
-        input.problem={problem_id};
-        input.configuration={config};
-        input.request_digest=request_digest;
-        input.input_manifest_schema="csl.geometry-hull-input/1";
-        input.input_manifest.assign(manifest.bytes().begin(),manifest.bytes().end());
-        input.method_id=method;
-        input.method_version="1";
-        input.sources={{"approximation.cpp",std::string(64,'e')}};
-        input.runtime={"C++",method,"1",std::string(64,'f'),"Linux","x86_64","GCC","16.2.1","Release"};
-        input.status=status;
-        const auto result_status=status==ar::AttemptStatus::completed?"completed":"failed";
-        input.result_payload=Json{{"input_set_id","source-stage-3"},{"output_set_id","box-output"},
-            {"request_id","approximation-request-7"},{"status",result_status}}.dump();
-        return take_artifact(ar::encode_external_method_run(input),"checker method run");
+        input.run = {std::move(run_id)};
+        input.problem = {problem_id};
+        input.configuration = {config};
+        input.request_digest = request_digest;
+        input.input_manifest_schema = "csl.geometry-hull-input/1";
+        input.input_manifest.assign(manifest.bytes().begin(), manifest.bytes().end());
+        input.method_id = method;
+        input.method_version = "1";
+        input.sources = {{"approximation.cpp", std::string(64, 'e')}};
+        input.runtime = {"C++", method,   "1",      std::string(64, 'f'), "Linux", "x86_64",
+                         "GCC", "16.2.1", "Release"};
+        input.status = status;
+        const auto result_status = status == ar::AttemptStatus::completed ? "completed" : "failed";
+        input.result_payload = Json{
+            {"input_set_id", "source-stage-3"},
+            {"output_set_id", "box-output"},
+            {"request_id", "approximation-request-7"},
+            {"status",
+             result_status}}.dump();
+        return take_artifact(ar::encode_external_method_run(input), "checker method run");
     };
-    const auto resource=[](Json requested,Json enforced,Json observed,std::string mechanism,
-                           std::string scope,std::string unavailable) {
-        return Json{{"requested",std::move(requested)},{"enforced",std::move(enforced)},
-            {"observed",std::move(observed)},{"mechanism",mechanism.empty()?Json(nullptr):Json(mechanism)},
-            {"scope",scope.empty()?Json(nullptr):Json(scope)},
-            {"unavailable_reason",unavailable.empty()?Json(nullptr):Json(unavailable)}};
+    const auto resource = [](Json requested, Json enforced, Json observed, std::string mechanism,
+                             std::string scope, std::string unavailable) {
+        return Json{
+            {"requested", std::move(requested)},
+            {"enforced", std::move(enforced)},
+            {"observed", std::move(observed)},
+            {"mechanism", mechanism.empty() ? Json(nullptr) : Json(mechanism)},
+            {"scope", scope.empty() ? Json(nullptr) : Json(scope)},
+            {"unavailable_reason", unavailable.empty() ? Json(nullptr) : Json(unavailable)}};
     };
-    const auto event_for=[&](std::string profile,std::string checker_status,std::string outcome,
-        std::uint32_t repetition=0,std::string algorithm_status="completed") {
-        const std::uint64_t default_wall=profile=="comparison"?5'000'000'000ULL:30'000'000'000ULL;
-        const std::uint64_t wall_budget=default_wall+1'000'000'000ULL;
-        const std::uint64_t attempt_memory=profile=="comparison"?8ULL*1024*1024*1024:12ULL*1024*1024*1024;
-        const bool complete=checker_status!="inconclusive";
-        const bool incorrect=checker_status=="incorrect";
-        const auto checker_elapsed=outcome=="timed_out"?wall_budget:2'300'000ULL;
-        const Json counterexample=incorrect?Json{{"kind","point_membership"},
-            {"point",Json::array({0.25,0.25})},{"contained_in","source-stage-3"},
-            {"excluded_from","box-output"}}:Json(nullptr);
-        Json value{{"schema","csl.approximation-check-event/1"},
-            {"status",algorithm_status=="completed"?"passed":algorithm_status},
-            {"strategy",method},{"instrumentation","disabled"},{"repetition",repetition},
-            {"warmup",repetition==0},{"problem_id",problem_id},{"input_set_id","source-stage-3"},
-            {"output_set_id","box-output"},{"request_id","approximation-request-7"},
-            {"relation","outer"},{"structural_basis","v_h_containment"},
-            {"algorithm",Json{{"status",algorithm_status},{"elapsed_ns",1'200'000}}},
-            {"checker",Json{{"profile",profile},{"status",checker_status},{"outcome",outcome},
-                {"elapsed_ns",checker_elapsed},
-                {"budget",Json{{"default_wall_time_ns",default_wall},{"wall_time_ns",wall_budget}}},
-                {"resources",Json{
-                    {"wall_time",resource(wall_budget,wall_budget,checker_elapsed,"process_tree_deadline","checker_process_tree","")},
-                    {"memory_bytes",resource(attempt_memory,Json(nullptr),Json(nullptr),"",
-                        "shared_comparison_attempt",
-                        "this is the shared per-attempt request; checker-local enforcement and observation are not separately attributed")}}},
-                {"oracle",Json{{"kind","exact_dyadic_all_vertices"},{"scope","inclusion"},
-                    {"claim","outer"},
-                    {"independent",true},{"complete",complete},{"sound",complete},
-                    {"counterexample",counterexample}}}}}};
+    const auto event_for = [&](std::string profile, std::string checker_status, std::string outcome,
+                               std::uint32_t repetition = 0,
+                               std::string algorithm_status = "completed") {
+        const std::uint64_t default_wall =
+            profile == "comparison" ? 5'000'000'000ULL : 30'000'000'000ULL;
+        const std::uint64_t wall_budget = default_wall + 1'000'000'000ULL;
+        const std::uint64_t attempt_memory =
+            profile == "comparison" ? 8ULL * 1024 * 1024 * 1024 : 12ULL * 1024 * 1024 * 1024;
+        const bool complete = checker_status != "inconclusive";
+        const bool incorrect = checker_status == "incorrect";
+        const auto checker_elapsed = outcome == "timed_out" ? wall_budget : 2'300'000ULL;
+        const Json counterexample = incorrect ? Json{{"kind", "point_membership"},
+                                                     {"point", Json::array({0.25, 0.25})},
+                                                     {"contained_in", "source-stage-3"},
+                                                     {"excluded_from", "box-output"}}
+                                              : Json(nullptr);
+        Json value{
+            {"schema", "csl.approximation-check-event/1"},
+            {"status", algorithm_status == "completed" ? "passed" : algorithm_status},
+            {"strategy", method},
+            {"instrumentation", "disabled"},
+            {"repetition", repetition},
+            {"warmup", repetition == 0},
+            {"problem_id", problem_id},
+            {"input_set_id", "source-stage-3"},
+            {"output_set_id", "box-output"},
+            {"request_id", "approximation-request-7"},
+            {"relation", "outer"},
+            {"structural_basis", "v_h_containment"},
+            {"algorithm", Json{{"status", algorithm_status}, {"elapsed_ns", 1'200'000}}},
+            {"checker",
+             Json{
+                 {"profile", profile},
+                 {"status", checker_status},
+                 {"outcome", outcome},
+                 {"elapsed_ns", checker_elapsed},
+                 {"budget",
+                  Json{{"default_wall_time_ns", default_wall}, {"wall_time_ns", wall_budget}}},
+                 {"resources",
+                  Json{
+                      {"wall_time", resource(wall_budget, wall_budget, checker_elapsed,
+                                             "process_tree_deadline", "checker_process_tree", "")},
+                      {"memory_bytes",
+                       resource(
+                           attempt_memory, Json(nullptr), Json(nullptr), "",
+                           "shared_comparison_attempt",
+                           "this is the shared per-attempt request; checker-local enforcement and observation are not separately attributed")}}},
+                 {"oracle", Json{{"kind", "exact_dyadic_all_vertices"},
+                                 {"scope", "inclusion"},
+                                 {"claim", "outer"},
+                                 {"independent", true},
+                                 {"complete", complete},
+                                 {"sound", complete},
+                                 {"counterexample", counterexample}}}}}};
         return value.dump();
     };
-    const auto attempt_for=[&](std::uint32_t repetition,std::string checker_status,
-        std::string outcome,std::string profile="comparison",std::string algorithm_status="completed") {
-        const auto attempt_status=algorithm_status=="completed"?
-            ar::AttemptStatus::completed:ar::AttemptStatus::failed;
-        auto run=run_for("approximation-check-"+std::to_string(repetition),attempt_status);
-        auto measurement=event_for(std::move(profile),std::move(checker_status),std::move(outcome),
-            repetition,algorithm_status);
-        return std::pair{ar::ComparisonAttempt{0,repetition,attempt_status,
-            {run.run_id(),run.content().digest()},ar::ComparisonRunArtifact{run},std::move(measurement)},run};
+    const auto attempt_for = [&](std::uint32_t repetition, std::string checker_status,
+                                 std::string outcome, std::string profile = "comparison",
+                                 std::string algorithm_status = "completed") {
+        const auto attempt_status = algorithm_status == "completed" ? ar::AttemptStatus::completed
+                                                                    : ar::AttemptStatus::failed;
+        auto run = run_for("approximation-check-" + std::to_string(repetition), attempt_status);
+        auto measurement = event_for(std::move(profile), std::move(checker_status),
+                                     std::move(outcome), repetition, algorithm_status);
+        return std::pair{ar::ComparisonAttempt{0,
+                                               repetition,
+                                               attempt_status,
+                                               {run.run_id(), run.content().digest()},
+                                               ar::ComparisonRunArtifact{run},
+                                               std::move(measurement)},
+                         run};
     };
 
-    for(const auto& [profile,default_budget]:std::vector<std::pair<std::string,std::uint64_t>>{
-        {"comparison",5'000'000'000ULL},{"local_exploration",30'000'000'000ULL}}) {
-        auto attempt_pair=attempt_for(0,"verified","completed",profile);
-        auto attempt=std::move(attempt_pair.first);
-        const auto spec=spec_for(1);
-        const auto bundle=take_artifact(ar::encode_recorded_comparison(spec,{attempt}),
-            "encode approximation checker profile");
-        const auto wire=std::string(reinterpret_cast<const char*>(bundle.content().bytes().data()),
-            bundle.content().bytes().size());
-        const auto restored=take_artifact(ar::decode_recorded_comparison(wire),"decode checker profile");
-        const auto decoded=Json::parse(std::string(reinterpret_cast<const char*>(restored.content().bytes().data()),
-            restored.content().bytes().size()));
-        const auto measurement=Json::parse(decoded.at("attempts").at(0).at("measurement_payload").get<std::string>());
-        CHECK(measurement.at("checker").at("profile")==profile);
-        CHECK(measurement.at("checker").at("budget").at("default_wall_time_ns")==default_budget);
-        CHECK(measurement.at("checker").at("budget").at("wall_time_ns")==default_budget+1'000'000'000ULL);
-        CHECK(measurement.at("algorithm").at("elapsed_ns")==1'200'000);
-        CHECK(measurement.at("checker").at("elapsed_ns")==2'300'000);
-        CHECK(measurement.at("input_set_id")=="source-stage-3");
-        CHECK(measurement.at("request_id")=="approximation-request-7");
-        CHECK(measurement.at("structural_basis")=="v_h_containment");
-        CHECK(measurement.at("checker").at("resources").at("memory_bytes").at("enforced").is_null());
-        CHECK(measurement.at("checker").at("resources").at("memory_bytes").at("requested")==
-            (profile=="comparison"?8ULL*1024*1024*1024:12ULL*1024*1024*1024));
-        CHECK(measurement.at("checker").at("resources").at("memory_bytes").at("scope")==
-            "shared_comparison_attempt");
-        CHECK_FALSE(measurement.at("checker").at("resources").at("memory_bytes").at("unavailable_reason").is_null());
+    for (const auto &[profile, default_budget] : std::vector<std::pair<std::string, std::uint64_t>>{
+             {"comparison", 5'000'000'000ULL}, {"local_exploration", 30'000'000'000ULL}}) {
+        auto attempt_pair = attempt_for(0, "verified", "completed", profile);
+        auto attempt = std::move(attempt_pair.first);
+        const auto spec = spec_for(1);
+        const auto bundle = take_artifact(ar::encode_recorded_comparison(spec, {attempt}),
+                                          "encode approximation checker profile");
+        const auto wire =
+            std::string(reinterpret_cast<const char *>(bundle.content().bytes().data()),
+                        bundle.content().bytes().size());
+        const auto restored =
+            take_artifact(ar::decode_recorded_comparison(wire), "decode checker profile");
+        const auto decoded = Json::parse(
+            std::string(reinterpret_cast<const char *>(restored.content().bytes().data()),
+                        restored.content().bytes().size()));
+        const auto measurement =
+            Json::parse(decoded.at("attempts").at(0).at("measurement_payload").get<std::string>());
+        CHECK(measurement.at("checker").at("profile") == profile);
+        CHECK(measurement.at("checker").at("budget").at("default_wall_time_ns") == default_budget);
+        CHECK(measurement.at("checker").at("budget").at("wall_time_ns") ==
+              default_budget + 1'000'000'000ULL);
+        CHECK(measurement.at("algorithm").at("elapsed_ns") == 1'200'000);
+        CHECK(measurement.at("checker").at("elapsed_ns") == 2'300'000);
+        CHECK(measurement.at("input_set_id") == "source-stage-3");
+        CHECK(measurement.at("request_id") == "approximation-request-7");
+        CHECK(measurement.at("structural_basis") == "v_h_containment");
+        CHECK(
+            measurement.at("checker").at("resources").at("memory_bytes").at("enforced").is_null());
+        CHECK(measurement.at("checker").at("resources").at("memory_bytes").at("requested") ==
+              (profile == "comparison" ? 8ULL * 1024 * 1024 * 1024 : 12ULL * 1024 * 1024 * 1024));
+        CHECK(measurement.at("checker").at("resources").at("memory_bytes").at("scope") ==
+              "shared_comparison_attempt");
+        CHECK_FALSE(measurement.at("checker")
+                        .at("resources")
+                        .at("memory_bytes")
+                        .at("unavailable_reason")
+                        .is_null());
     }
 
-    auto incorrect_pair=attempt_for(0,"incorrect","completed");
-    const auto incorrect_bundle=take_artifact(ar::encode_recorded_comparison(spec_for(1),
-        {incorrect_pair.first}),"encode concrete counterexample");
-    const auto incorrect_wire=std::string(reinterpret_cast<const char*>(incorrect_bundle.content().bytes().data()),
-        incorrect_bundle.content().bytes().size());
-    const auto incorrect_record=take_artifact(ar::decode_recorded_comparison(incorrect_wire),
-        "decode concrete counterexample");
-    const auto incorrect_json=Json::parse(std::string(reinterpret_cast<const char*>(
-        incorrect_record.content().bytes().data()),incorrect_record.content().bytes().size()));
-    const auto incorrect_payload=Json::parse(
+    auto incorrect_pair = attempt_for(0, "incorrect", "completed");
+    const auto incorrect_bundle =
+        take_artifact(ar::encode_recorded_comparison(spec_for(1), {incorrect_pair.first}),
+                      "encode concrete counterexample");
+    const auto incorrect_wire =
+        std::string(reinterpret_cast<const char *>(incorrect_bundle.content().bytes().data()),
+                    incorrect_bundle.content().bytes().size());
+    const auto incorrect_record = take_artifact(ar::decode_recorded_comparison(incorrect_wire),
+                                                "decode concrete counterexample");
+    const auto incorrect_json = Json::parse(
+        std::string(reinterpret_cast<const char *>(incorrect_record.content().bytes().data()),
+                    incorrect_record.content().bytes().size()));
+    const auto incorrect_payload = Json::parse(
         incorrect_json.at("attempts").at(0).at("measurement_payload").get<std::string>());
-    CHECK(incorrect_payload.at("checker").at("oracle").at("counterexample").at("kind")=="point_membership");
-    CHECK(incorrect_payload.at("checker").at("oracle").at("counterexample").at("contained_in")=="source-stage-3");
-    auto wrong_membership=incorrect_pair.first;
-    auto malformed=Json::parse(wrong_membership.measurement_payload);
-    malformed["checker"]["oracle"]["counterexample"]["contained_in"]="box-output";
-    wrong_membership.measurement_payload=malformed.dump();
-    CHECK(std::holds_alternative<ar::ArtifactError>(ar::encode_recorded_comparison(
-        spec_for(1),{wrong_membership})));
+    CHECK(incorrect_payload.at("checker").at("oracle").at("counterexample").at("kind") ==
+          "point_membership");
+    CHECK(incorrect_payload.at("checker").at("oracle").at("counterexample").at("contained_in") ==
+          "source-stage-3");
+    auto wrong_membership = incorrect_pair.first;
+    auto malformed = Json::parse(wrong_membership.measurement_payload);
+    malformed["checker"]["oracle"]["counterexample"]["contained_in"] = "box-output";
+    wrong_membership.measurement_payload = malformed.dump();
+    CHECK(std::holds_alternative<ar::ArtifactError>(
+        ar::encode_recorded_comparison(spec_for(1), {wrong_membership})));
 
-    auto base_pair=attempt_for(0,"inconclusive","timed_out");
-    auto base=std::move(base_pair.first);
+    auto base_pair = attempt_for(0, "inconclusive", "timed_out");
+    auto base = std::move(base_pair.first);
     std::vector<ar::ComparisonAttempt> outcomes;
     outcomes.push_back(base);
-    for(const auto& [status,outcome]:std::vector<std::pair<std::string,std::string>>{
-        {"inconclusive","refused"},{"inconclusive","resource_limited"},{"inconclusive","incomplete"}}) {
-        auto attempt_pair=attempt_for(static_cast<std::uint32_t>(outcomes.size()),status,outcome);
+    for (const auto &[status, outcome] :
+         std::vector<std::pair<std::string, std::string>>{{"inconclusive", "refused"},
+                                                          {"inconclusive", "resource_limited"},
+                                                          {"inconclusive", "incomplete"}}) {
+        auto attempt_pair =
+            attempt_for(static_cast<std::uint32_t>(outcomes.size()), status, outcome);
         outcomes.push_back(std::move(attempt_pair.first));
     }
-    const auto outcomes_spec=spec_for(static_cast<std::uint32_t>(outcomes.size()));
-    const auto outcomes_bundle=take_artifact(ar::encode_recorded_comparison(outcomes_spec,outcomes),
-        "encode checker terminal outcomes");
-    const auto outcomes_wire=std::string(reinterpret_cast<const char*>(outcomes_bundle.content().bytes().data()),
-        outcomes_bundle.content().bytes().size());
-    const auto decoded_outcomes=take_artifact(ar::decode_recorded_comparison(outcomes_wire),
-        "decode checker terminal outcomes");
-    const auto outcomes_json=Json::parse(std::string(reinterpret_cast<const char*>(
-        decoded_outcomes.content().bytes().data()),decoded_outcomes.content().bytes().size()));
-    const std::vector<std::string> expected_outcomes{"timed_out","refused","resource_limited","incomplete"};
-    for(std::size_t i=0;i<expected_outcomes.size();++i) {
-        const auto payload=outcomes_json.at("attempts").at(i).at("measurement_payload").get<std::string>();
-        const auto measurement=Json::parse(payload);
-        CHECK(measurement.at("checker").at("outcome")==expected_outcomes[i]);
+    const auto outcomes_spec = spec_for(static_cast<std::uint32_t>(outcomes.size()));
+    const auto outcomes_bundle =
+        take_artifact(ar::encode_recorded_comparison(outcomes_spec, outcomes),
+                      "encode checker terminal outcomes");
+    const auto outcomes_wire =
+        std::string(reinterpret_cast<const char *>(outcomes_bundle.content().bytes().data()),
+                    outcomes_bundle.content().bytes().size());
+    const auto decoded_outcomes = take_artifact(ar::decode_recorded_comparison(outcomes_wire),
+                                                "decode checker terminal outcomes");
+    const auto outcomes_json = Json::parse(
+        std::string(reinterpret_cast<const char *>(decoded_outcomes.content().bytes().data()),
+                    decoded_outcomes.content().bytes().size()));
+    const std::vector<std::string> expected_outcomes{"timed_out", "refused", "resource_limited",
+                                                     "incomplete"};
+    for (std::size_t i = 0; i < expected_outcomes.size(); ++i) {
+        const auto payload =
+            outcomes_json.at("attempts").at(i).at("measurement_payload").get<std::string>();
+        const auto measurement = Json::parse(payload);
+        CHECK(measurement.at("checker").at("outcome") == expected_outcomes[i]);
     }
 
-    auto verified_pair=attempt_for(0,"verified","completed");
-    auto false_verified=verified_pair.first;
-    malformed=Json::parse(false_verified.measurement_payload);
-    malformed["checker"]["oracle"]["complete"]=false;
-    false_verified.measurement_payload=malformed.dump();
-    const auto bad_verified=ar::encode_recorded_comparison(spec_for(1),{false_verified});
+    auto verified_pair = attempt_for(0, "verified", "completed");
+    auto false_verified = verified_pair.first;
+    malformed = Json::parse(false_verified.measurement_payload);
+    malformed["checker"]["oracle"]["complete"] = false;
+    false_verified.measurement_payload = malformed.dump();
+    const auto bad_verified = ar::encode_recorded_comparison(spec_for(1), {false_verified});
     CHECK(std::holds_alternative<ar::ArtifactError>(bad_verified));
-    auto failed_algorithm=attempt_for(0,"verified","completed","comparison","failed");
-    CHECK(std::holds_alternative<ar::ArtifactError>(ar::encode_recorded_comparison(
-        spec_for(1),{failed_algorithm.first})));
-    auto missing_enforcement=base;
-    malformed=Json::parse(missing_enforcement.measurement_payload);
-    malformed["checker"]["resources"]["wall_time"]["enforced"]=1;
-    malformed["checker"]["resources"]["wall_time"]["mechanism"]=nullptr;
-    missing_enforcement.measurement_payload=malformed.dump();
-    const auto bad_resource=ar::encode_recorded_comparison(spec_for(1),{missing_enforcement});
+    auto failed_algorithm = attempt_for(0, "verified", "completed", "comparison", "failed");
+    CHECK(std::holds_alternative<ar::ArtifactError>(
+        ar::encode_recorded_comparison(spec_for(1), {failed_algorithm.first})));
+    auto missing_enforcement = base;
+    malformed = Json::parse(missing_enforcement.measurement_payload);
+    malformed["checker"]["resources"]["wall_time"]["enforced"] = 1;
+    malformed["checker"]["resources"]["wall_time"]["mechanism"] = nullptr;
+    missing_enforcement.measurement_payload = malformed.dump();
+    const auto bad_resource = ar::encode_recorded_comparison(spec_for(1), {missing_enforcement});
     CHECK(std::holds_alternative<ar::ArtifactError>(bad_resource));
-    auto mismatched_time=base;
-    malformed=Json::parse(mismatched_time.measurement_payload);
-    malformed["checker"]["resources"]["wall_time"]["observed"]=7;
-    mismatched_time.measurement_payload=malformed.dump();
-    CHECK(std::holds_alternative<ar::ArtifactError>(ar::encode_recorded_comparison(
-        spec_for(1),{mismatched_time})));
-    auto mismatched_identity=verified_pair.first;
-    malformed=Json::parse(mismatched_identity.measurement_payload);
-    malformed["request_id"]="different-operation-request";
-    mismatched_identity.measurement_payload=malformed.dump();
-    const auto bad_identity=ar::encode_recorded_comparison(spec_for(1),{mismatched_identity});
+    auto mismatched_time = base;
+    malformed = Json::parse(mismatched_time.measurement_payload);
+    malformed["checker"]["resources"]["wall_time"]["observed"] = 7;
+    mismatched_time.measurement_payload = malformed.dump();
+    CHECK(std::holds_alternative<ar::ArtifactError>(
+        ar::encode_recorded_comparison(spec_for(1), {mismatched_time})));
+    auto mismatched_identity = verified_pair.first;
+    malformed = Json::parse(mismatched_identity.measurement_payload);
+    malformed["request_id"] = "different-operation-request";
+    mismatched_identity.measurement_payload = malformed.dump();
+    const auto bad_identity = ar::encode_recorded_comparison(spec_for(1), {mismatched_identity});
     CHECK(std::holds_alternative<ar::ArtifactError>(bad_identity));
-    auto sampled_oracle=verified_pair.first;
-    malformed=Json::parse(sampled_oracle.measurement_payload);
-    malformed["checker"]["oracle"]["kind"]="sampled_support_directions";
-    malformed["checker"]["oracle"]["independent"]=true;
-    malformed["checker"]["oracle"]["complete"]=true;
-    malformed["checker"]["oracle"]["sound"]=true;
-    sampled_oracle.measurement_payload=malformed.dump();
-    const auto bad_sampled_claim=ar::encode_recorded_comparison(spec_for(1),{sampled_oracle});
+    auto sampled_oracle = verified_pair.first;
+    malformed = Json::parse(sampled_oracle.measurement_payload);
+    malformed["checker"]["oracle"]["kind"] = "sampled_support_directions";
+    malformed["checker"]["oracle"]["independent"] = true;
+    malformed["checker"]["oracle"]["complete"] = true;
+    malformed["checker"]["oracle"]["sound"] = true;
+    sampled_oracle.measurement_payload = malformed.dump();
+    const auto bad_sampled_claim = ar::encode_recorded_comparison(spec_for(1), {sampled_oracle});
     CHECK(std::holds_alternative<ar::ArtifactError>(bad_sampled_claim));
-    auto mismatched_basis=verified_pair.first;
-    malformed=Json::parse(mismatched_basis.measurement_payload);
-    malformed["structural_basis"]="made_up_proof";
-    mismatched_basis.measurement_payload=malformed.dump();
-    const auto bad_basis=ar::encode_recorded_comparison(spec_for(1),{mismatched_basis});
+    auto mismatched_basis = verified_pair.first;
+    malformed = Json::parse(mismatched_basis.measurement_payload);
+    malformed["structural_basis"] = "made_up_proof";
+    mismatched_basis.measurement_payload = malformed.dump();
+    const auto bad_basis = ar::encode_recorded_comparison(spec_for(1), {mismatched_basis});
     CHECK(std::holds_alternative<ar::ArtifactError>(bad_basis));
-    auto unsupported_incorrect=verified_pair.first;
-    malformed=Json::parse(unsupported_incorrect.measurement_payload);
-    malformed["checker"]["status"]="incorrect";
-    malformed["checker"]["oracle"]["counterexample"]=nullptr;
-    unsupported_incorrect.measurement_payload=malformed.dump();
-    const auto bad_incorrect=ar::encode_recorded_comparison(spec_for(1),{unsupported_incorrect});
+    auto unsupported_incorrect = verified_pair.first;
+    malformed = Json::parse(unsupported_incorrect.measurement_payload);
+    malformed["checker"]["status"] = "incorrect";
+    malformed["checker"]["oracle"]["counterexample"] = nullptr;
+    unsupported_incorrect.measurement_payload = malformed.dump();
+    const auto bad_incorrect = ar::encode_recorded_comparison(spec_for(1), {unsupported_incorrect});
     CHECK(std::holds_alternative<ar::ArtifactError>(bad_incorrect));
 }
 
-TEST_CASE("a registered approximation and independent vertex oracle survive comparison serialization") {
+TEST_CASE(
+    "a registered approximation and independent vertex oracle survive comparison serialization") {
     namespace ar = artifacts;
     namespace approx = geometry::approximation;
     using Json = nlohmann::json;
     const std::string input_manifest_text =
         R"({"schema":"csl.geometry-hull-input/1","points":[[0,0],[2,0],[0,2]]})";
-    const auto manifest_result = problem::snapshot_content(std::span<const std::byte>{
-        reinterpret_cast<const std::byte*>(input_manifest_text.data()), input_manifest_text.size()});
+    const auto manifest_result = problem::snapshot_content(
+        std::span<const std::byte>{reinterpret_cast<const std::byte *>(input_manifest_text.data()),
+                                   input_manifest_text.size()});
     const auto manifest = take(manifest_result);
     const auto input_manifest = Json::parse(input_manifest_text);
-    REQUIRE(input_manifest.at("schema")=="csl.geometry-hull-input/1");
-    const auto manifest_points=input_manifest.at("points");
-    REQUIRE(manifest_points.size()==3);
+    REQUIRE(input_manifest.at("schema") == "csl.geometry-hull-input/1");
+    const auto manifest_points = input_manifest.at("points");
+    REQUIRE(manifest_points.size() == 3);
     const auto manifest_hash = problem::hex(manifest.digest());
     const auto problem_id = std::string("csl.problem.v1.sha256:") + manifest_hash;
 
     std::vector<double> source_coordinates;
-    for(const auto& point:manifest_points) {
-        REQUIRE(point.size()==2);
-        for(const auto& coordinate:point) {
+    for (const auto &point : manifest_points) {
+        REQUIRE(point.size() == 2);
+        for (const auto &coordinate : point) {
             REQUIRE(coordinate.is_number_integer());
             source_coordinates.push_back(coordinate.get<double>());
         }
     }
-    const Matrix source_points{manifest_points.size(),2,std::move(source_coordinates)};
+    const Matrix source_points{manifest_points.size(), 2, std::move(source_coordinates)};
     const auto vertices = numeric::snapshot(source_points);
-    const auto rays = numeric::snapshot(Matrix{0,2,{}});
+    const auto rays = numeric::snapshot(Matrix{0, 2, {}});
     REQUIRE(std::holds_alternative<numeric::MatrixView>(vertices));
     REQUIRE(std::holds_alternative<numeric::MatrixView>(rays));
-    const auto source = take(sets::make_v({{"source-triangle"},2,{"x","y"}},
-        {std::get<numeric::MatrixView>(vertices),std::get<numeric::MatrixView>(rays)})).as_handle();
+    const auto source = take(sets::make_v({{"source-triangle"}, 2, {"x", "y"}},
+                                          {std::get<numeric::MatrixView>(vertices),
+                                           std::get<numeric::MatrixView>(rays)}))
+                            .as_handle();
     const ApproximationRequest request{
-        {ProblemId{problem_id},RequestId{"box-request"},ReferenceId{"exact-triangle"}},
-        source,{"csl.polyhedron.h"},SetRelation::outer,4,Assurance::numerical};
+        {ProblemId{problem_id}, RequestId{"box-request"}, ReferenceId{"exact-triangle"}},
+        source,
+        {"csl.polyhedron.h"},
+        SetRelation::outer,
+        4,
+        Assurance::numerical};
 
     registry::Registry<registry::ApproximationPort> providers;
     REQUIRE_FALSE(providers.add(approx::make_box_registration({"box-output"})).has_value());
     const auto algorithm_start = std::chrono::steady_clock::now();
-    const auto outcome = approx::run_registered(providers,{{"csl.approximation.box"},std::nullopt},
-        request,ExecutionContext{});
+    const auto outcome = approx::run_registered(
+        providers, {{"csl.approximation.box"}, std::nullopt}, request, ExecutionContext{});
     const auto algorithm_elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(
-        std::chrono::steady_clock::now()-algorithm_start).count();
+                                       std::chrono::steady_clock::now() - algorithm_start)
+                                       .count();
     REQUIRE(std::holds_alternative<approx::EnclosedApproximation>(outcome));
-    const auto& enclosed = std::get<approx::EnclosedApproximation>(outcome);
-    CHECK(enclosed.result.relation==SetRelation::outer);
-    CHECK(enclosed.basis==approx::StructuralBasis::v_h_containment);
+    const auto &enclosed = std::get<approx::EnclosedApproximation>(outcome);
+    CHECK(enclosed.result.relation == SetRelation::outer);
+    CHECK(enclosed.basis == approx::StructuralBasis::v_h_containment);
 
     const auto output = take(sets::from_handle(enclosed.result.output));
     const auto representation = output.representation();
     REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
-    const auto& h = std::get<sets::HRepresentation>(representation);
-    REQUIRE(h.inequalities.rows()==4);
-    REQUIRE(h.inequalities.cols()==2);
-    REQUIRE(h.upper_bounds.size()==4);
-    const std::array<std::array<int,2>,4> expected_rows{{{1,0},{-1,0},{0,1},{0,-1}}};
-    const std::array<int,4> expected_bounds{{2,0,2,0}};
-    for(std::size_t row=0;row<expected_rows.size();++row) {
-        CHECK(h.inequalities(row,0)==expected_rows[row][0]);
-        CHECK(h.inequalities(row,1)==expected_rows[row][1]);
-        CHECK(h.upper_bounds[row]==expected_bounds[row]);
+    const auto &h = std::get<sets::HRepresentation>(representation);
+    REQUIRE(h.inequalities.rows() == 4);
+    REQUIRE(h.inequalities.cols() == 2);
+    REQUIRE(h.upper_bounds.size() == 4);
+    const std::array<std::array<int, 2>, 4> expected_rows{{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}};
+    const std::array<int, 4> expected_bounds{{2, 0, 2, 0}};
+    for (std::size_t row = 0; row < expected_rows.size(); ++row) {
+        CHECK(h.inequalities(row, 0) == expected_rows[row][0]);
+        CHECK(h.inequalities(row, 1) == expected_rows[row][1]);
+        CHECK(h.upper_bounds[row] == expected_bounds[row]);
     }
 
-    constexpr std::uint64_t checker_budget_ns=5'000'000'000ULL;
+    constexpr std::uint64_t checker_budget_ns = 5'000'000'000ULL;
     const auto checker_start = std::chrono::steady_clock::now();
     // Exact integer arithmetic independently checks all source vertices against
     // the literal H rows. Convexity then covers their complete triangular hull.
-    std::array<std::array<int,2>,3> points{};
-    for(std::size_t vertex=0;vertex<points.size();++vertex)
-        for(std::size_t coordinate=0;coordinate<points[vertex].size();++coordinate)
-            points[vertex][coordinate]=manifest_points.at(vertex).at(coordinate).get<int>();
+    std::array<std::array<int, 2>, 3> points{};
+    for (std::size_t vertex = 0; vertex < points.size(); ++vertex)
+        for (std::size_t coordinate = 0; coordinate < points[vertex].size(); ++coordinate)
+            points[vertex][coordinate] = manifest_points.at(vertex).at(coordinate).get<int>();
     bool all_vertices_contained = true;
     Json h_rows = Json::array();
     Json h_bounds = Json::array();
-    for (std::size_t row=0; row<h.inequalities.rows(); ++row) {
-        h_rows.push_back(Json::array({static_cast<double>(h.inequalities(row,0)),
-            static_cast<double>(h.inequalities(row,1))}));
+    for (std::size_t row = 0; row < h.inequalities.rows(); ++row) {
+        h_rows.push_back(Json::array({static_cast<double>(h.inequalities(row, 0)),
+                                      static_cast<double>(h.inequalities(row, 1))}));
         h_bounds.push_back(static_cast<double>(h.upper_bounds[row]));
-        for (const auto& point : points) {
-            const auto lhs = static_cast<int>(h.inequalities(row,0))*point[0] +
-                static_cast<int>(h.inequalities(row,1))*point[1];
-            if (lhs > static_cast<int>(h.upper_bounds[row])) all_vertices_contained=false;
+        for (const auto &point : points) {
+            const auto lhs = static_cast<int>(h.inequalities(row, 0)) * point[0] +
+                             static_cast<int>(h.inequalities(row, 1)) * point[1];
+            if (lhs > static_cast<int>(h.upper_bounds[row]))
+                all_vertices_contained = false;
         }
     }
     REQUIRE(all_vertices_contained);
-    const auto checker_elapsed = static_cast<std::uint64_t>(std::max<std::int64_t>(1,
-        std::chrono::duration_cast<std::chrono::nanoseconds>(
-            std::chrono::steady_clock::now()-checker_start).count()));
-    REQUIRE(checker_elapsed<=checker_budget_ns);
-    const std::string method="csl.approximation.box";
-    const std::string configuration="csl.config.v1.sha256:"+std::string(64,'c');
+    const auto checker_elapsed = static_cast<std::uint64_t>(
+        std::max<std::int64_t>(1, std::chrono::duration_cast<std::chrono::nanoseconds>(
+                                      std::chrono::steady_clock::now() - checker_start)
+                                      .count()));
+    REQUIRE(checker_elapsed <= checker_budget_ns);
+    const std::string method = "csl.approximation.box";
+    const std::string configuration = "csl.config.v1.sha256:" + std::string(64, 'c');
     problem::ContentDigest request_digest{};
     request_digest.bytes.fill(std::byte{0x0d});
-    Json result_payload{{"input_set_id",request.input.id.value},
-        {"output_set_id",enclosed.result.output.id.value},
-        {"request_id",request.identity.request.value},{"status","completed"},
-        {"relation","outer"},{"structural_basis","v_h_containment"},
-        {"output",Json{{"representation","H"},{"inequalities",h_rows},{"upper_bounds",h_bounds}}}};
+    Json result_payload{
+        {"input_set_id", request.input.id.value},
+        {"output_set_id", enclosed.result.output.id.value},
+        {"request_id", request.identity.request.value},
+        {"status", "completed"},
+        {"relation", "outer"},
+        {"structural_basis", "v_h_containment"},
+        {"output",
+         Json{{"representation", "H"}, {"inequalities", h_rows}, {"upper_bounds", h_bounds}}}};
     ar::ExternalMethodRunInput run_input;
-    run_input.run={"registered-box-triangle"};
-    run_input.problem={problem_id};
-    run_input.configuration={configuration};
-    run_input.request_digest=request_digest;
-    run_input.input_manifest_schema="csl.geometry-hull-input/1";
-    run_input.input_manifest.assign(manifest.bytes().begin(),manifest.bytes().end());
-    run_input.method_id=method;
-    run_input.method_version="1";
-    run_input.sources={{"src/geometry/approximation/box_parallelotope.cpp",std::string(64,'e')}};
-    run_input.runtime={"C++",method,"1",std::string(64,'f'),"Linux","x86_64","GCC","16.2.1","Release"};
-    run_input.status=ar::AttemptStatus::completed;
-    run_input.result_payload=result_payload.dump();
-    const auto recorded_run=take_artifact(ar::encode_external_method_run(run_input),
-        "encode registered approximation result");
+    run_input.run = {"registered-box-triangle"};
+    run_input.problem = {problem_id};
+    run_input.configuration = {configuration};
+    run_input.request_digest = request_digest;
+    run_input.input_manifest_schema = "csl.geometry-hull-input/1";
+    run_input.input_manifest.assign(manifest.bytes().begin(), manifest.bytes().end());
+    run_input.method_id = method;
+    run_input.method_version = "1";
+    run_input.sources = {
+        {"src/geometry/approximation/box_parallelotope.cpp", std::string(64, 'e')}};
+    run_input.runtime = {"C++", method,   "1",      std::string(64, 'f'), "Linux", "x86_64",
+                         "GCC", "16.2.1", "Release"};
+    run_input.status = ar::AttemptStatus::completed;
+    run_input.result_payload = result_payload.dump();
+    const auto recorded_run = take_artifact(ar::encode_external_method_run(run_input),
+                                            "encode registered approximation result");
 
-    const auto event=Json{{"schema","csl.approximation-check-event/1"},{"status","passed"},
-        {"strategy",method},{"instrumentation","disabled"},{"repetition",0},{"warmup",true},
-        {"problem_id",problem_id},{"input_set_id",request.input.id.value},
-        {"output_set_id",enclosed.result.output.id.value},{"request_id",request.identity.request.value},
-        {"relation","outer"},{"structural_basis","v_h_containment"},
-        {"algorithm",Json{{"status","completed"},{"elapsed_ns",algorithm_elapsed}}},
-        {"checker",Json{{"profile","comparison"},{"status","verified"},{"outcome","completed"},
-            {"elapsed_ns",checker_elapsed},
-            {"budget",Json{{"default_wall_time_ns",checker_budget_ns},{"wall_time_ns",checker_budget_ns}}},
-            {"resources",Json{
-                {"wall_time",Json{{"requested",checker_budget_ns},{"enforced",nullptr},
-                    {"observed",checker_elapsed},{"mechanism",nullptr},{"scope","test_process"},
-                    {"unavailable_reason",nullptr}}},
-                {"memory_bytes",Json{{"requested",8ULL*1024*1024*1024},{"enforced",nullptr},
-                    {"observed",nullptr},{"mechanism",nullptr},{"scope","shared_comparison_attempt"},
-                    {"unavailable_reason","test uses no memory-isolated checker process"}}}}},
-            {"oracle",Json{{"kind","exact_dyadic_all_vertices"},{"scope","inclusion"},
-                {"claim","outer"},{"independent",true},{"complete",true},{"sound",true},
-                {"counterexample",nullptr}}}}}}.dump();
+    const auto event =
+        Json{{"schema", "csl.approximation-check-event/1"},
+             {"status", "passed"},
+             {"strategy", method},
+             {"instrumentation", "disabled"},
+             {"repetition", 0},
+             {"warmup", true},
+             {"problem_id", problem_id},
+             {"input_set_id", request.input.id.value},
+             {"output_set_id", enclosed.result.output.id.value},
+             {"request_id", request.identity.request.value},
+             {"relation", "outer"},
+             {"structural_basis", "v_h_containment"},
+             {"algorithm", Json{{"status", "completed"}, {"elapsed_ns", algorithm_elapsed}}},
+             {"checker",
+              Json{{"profile", "comparison"},
+                   {"status", "verified"},
+                   {"outcome", "completed"},
+                   {"elapsed_ns", checker_elapsed},
+                   {"budget", Json{{"default_wall_time_ns", checker_budget_ns},
+                                   {"wall_time_ns", checker_budget_ns}}},
+                   {"resources",
+                    Json{{"wall_time", Json{{"requested", checker_budget_ns},
+                                            {"enforced", nullptr},
+                                            {"observed", checker_elapsed},
+                                            {"mechanism", nullptr},
+                                            {"scope", "test_process"},
+                                            {"unavailable_reason", nullptr}}},
+                         {"memory_bytes", Json{{"requested", 8ULL * 1024 * 1024 * 1024},
+                                               {"enforced", nullptr},
+                                               {"observed", nullptr},
+                                               {"mechanism", nullptr},
+                                               {"scope", "shared_comparison_attempt"},
+                                               {"unavailable_reason",
+                                                "test uses no memory-isolated checker process"}}}}},
+                   {"oracle", Json{{"kind", "exact_dyadic_all_vertices"},
+                                   {"scope", "inclusion"},
+                                   {"claim", "outer"},
+                                   {"independent", true},
+                                   {"complete", true},
+                                   {"sound", true},
+                                   {"counterexample", nullptr}}}}}}
+            .dump();
 
-    const std::string spec_text=Json{{"schema","csl.comparison-spec/2"},{"problem_id",problem_id},
-        {"request_digest",problem::hex(request_digest)},{"repetitions",1},
-        {"input_manifest_hash",manifest_hash},{"input_manifest_source","csl.geometry-hull-input/1"},
-        {"arms",Json::array({Json{{"configuration_id",configuration},{"strategy",method},
-            {"instrumentation","disabled"}}})}}.dump();
-    const auto spec=problem::snapshot_content(std::span<const std::byte>{
-        reinterpret_cast<const std::byte*>(spec_text.data()),spec_text.size()});
-    const auto attempt=ar::ComparisonAttempt{0,0,ar::AttemptStatus::completed,
-        {recorded_run.run_id(),recorded_run.content().digest()},ar::ComparisonRunArtifact{recorded_run},event};
-    const auto comparison=take_artifact(ar::encode_recorded_comparison(take(spec),{attempt}),
-        "encode registered approximation comparison");
-    const auto bytes=comparison.content().bytes();
-    const auto restored=take_artifact(ar::decode_recorded_comparison(std::string_view(
-        reinterpret_cast<const char*>(bytes.data()),bytes.size())),"decode registered approximation comparison");
-    const auto decoded=Json::parse(std::string(reinterpret_cast<const char*>(restored.content().bytes().data()),
-        restored.content().bytes().size()));
-    const auto saved_event=Json::parse(decoded.at("attempts").at(0).at("measurement_payload").get<std::string>());
-    const auto saved_run=Json::parse(decoded.at("attempts").at(0).at("run").get<std::string>());
-    const auto saved_result=saved_run.at("result");
-    CHECK(saved_run.at("problem")==problem_id);
-    CHECK(saved_event.at("problem_id")==saved_run.at("problem"));
-    CHECK(saved_event.at("input_set_id")==request.input.id.value);
-    CHECK(saved_event.at("output_set_id")==enclosed.result.output.id.value);
-    CHECK(saved_event.at("request_id")==request.identity.request.value);
-    CHECK(saved_event.at("checker").at("status")=="verified");
-    CHECK(saved_event.at("structural_basis")==saved_result.at("structural_basis"));
-    CHECK(saved_result.at("output").at("inequalities")==h_rows);
-    CHECK(saved_result.at("output").at("upper_bounds")==h_bounds);
+    const std::string spec_text =
+        Json{{"schema", "csl.comparison-spec/2"},
+             {"problem_id", problem_id},
+             {"request_digest", problem::hex(request_digest)},
+             {"repetitions", 1},
+             {"input_manifest_hash", manifest_hash},
+             {"input_manifest_source", "csl.geometry-hull-input/1"},
+             {"arms", Json::array({Json{{"configuration_id", configuration},
+                                        {"strategy", method},
+                                        {"instrumentation", "disabled"}}})}}
+            .dump();
+    const auto spec = problem::snapshot_content(std::span<const std::byte>{
+        reinterpret_cast<const std::byte *>(spec_text.data()), spec_text.size()});
+    const auto attempt =
+        ar::ComparisonAttempt{0,
+                              0,
+                              ar::AttemptStatus::completed,
+                              {recorded_run.run_id(), recorded_run.content().digest()},
+                              ar::ComparisonRunArtifact{recorded_run},
+                              event};
+    const auto comparison = take_artifact(ar::encode_recorded_comparison(take(spec), {attempt}),
+                                          "encode registered approximation comparison");
+    const auto bytes = comparison.content().bytes();
+    const auto restored =
+        take_artifact(ar::decode_recorded_comparison(std::string_view(
+                          reinterpret_cast<const char *>(bytes.data()), bytes.size())),
+                      "decode registered approximation comparison");
+    const auto decoded =
+        Json::parse(std::string(reinterpret_cast<const char *>(restored.content().bytes().data()),
+                                restored.content().bytes().size()));
+    const auto saved_event =
+        Json::parse(decoded.at("attempts").at(0).at("measurement_payload").get<std::string>());
+    const auto saved_run = Json::parse(decoded.at("attempts").at(0).at("run").get<std::string>());
+    const auto saved_result = saved_run.at("result");
+    CHECK(saved_run.at("problem") == problem_id);
+    CHECK(saved_event.at("problem_id") == saved_run.at("problem"));
+    CHECK(saved_event.at("input_set_id") == request.input.id.value);
+    CHECK(saved_event.at("output_set_id") == enclosed.result.output.id.value);
+    CHECK(saved_event.at("request_id") == request.identity.request.value);
+    CHECK(saved_event.at("checker").at("status") == "verified");
+    CHECK(saved_event.at("structural_basis") == saved_result.at("structural_basis"));
+    CHECK(saved_result.at("output").at("inequalities") == h_rows);
+    CHECK(saved_result.at("output").at("upper_bounds") == h_bounds);
 }

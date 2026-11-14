@@ -8,7 +8,7 @@ namespace csl::execution::detail {
 // slots have one worker. Never request_stop while holding this mutex.
 class Batch {
     std::span<Job> jobs_;
-    const ExecutionContext& caller_;
+    const ExecutionContext &caller_;
     AdmissionLimit limit_;
     std::mutex mutex_;
     std::condition_variable changed_;
@@ -23,9 +23,10 @@ class Batch {
     std::optional<std::size_t> take();
     std::optional<SkipReason> before_invoke();
     void failure(BatchStopCause);
-    void release(Job&);
-public:
-    Batch(std::span<Job>,const ExecutionContext&,AdmissionLimit);
+    void release(Job &);
+
+  public:
+    Batch(std::span<Job>, const ExecutionContext &, AdmissionLimit);
     void external_cancel() noexcept;
     void worker() noexcept;
     void launch_failure(std::exception_ptr);

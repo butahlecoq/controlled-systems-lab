@@ -19,8 +19,8 @@ struct FinitePlanZonotopeTrace {
     Assurance assurance{Assurance::numerical};
 };
 
-using FinitePlanZonotopeOutcome = std::variant<FinitePlanZonotopeTrace,
-    Unsupported, OperationStopped>;
+using FinitePlanZonotopeOutcome =
+    std::variant<FinitePlanZonotopeTrace, Unsupported, OperationStopped>;
 
 struct FinitePlanZonotopeLimits {
     std::size_t max_generators_per_stage;
@@ -35,16 +35,18 @@ struct FinitePlanZonotopeLimits {
 // Unsupported. The trace is a numerical outer enclosure, not a control-feasibility
 // or optimizer-completeness certificate. The caller
 // supplies a maximum generator count per stage; exceeding it returns Unsupported.
-FinitePlanZonotopeOutcome finite_plan_zonotope(const FixedPlanRequest& request,
-    FinitePlanZonotopeLimits limits, const ExecutionContext& context = {});
+FinitePlanZonotopeOutcome finite_plan_zonotope(const FixedPlanRequest &request,
+                                               FinitePlanZonotopeLimits limits,
+                                               const ExecutionContext &context = {});
 
 // One-step all-control affine image. The entire control zonotope is mapped
 // through B as an independent existential geometric input, not a disturbance
 // policy or finite action catalogue. A fresh stage index is required per step.
 std::variant<FinitePlanZonotopeTrace::Stage, Unsupported, OperationStopped>
-propagate_existential_control_zonotope(const model::DynamicsStage&,
-    const FinitePlanZonotopeTrace::Stage& current,
-    const FinitePlanZonotopeTrace::Stage& controls, std::size_t generator_limit,
-    const ExecutionContext&, std::size_t stage);
+propagate_existential_control_zonotope(const model::DynamicsStage &,
+                                       const FinitePlanZonotopeTrace::Stage &current,
+                                       const FinitePlanZonotopeTrace::Stage &controls,
+                                       std::size_t generator_limit, const ExecutionContext &,
+                                       std::size_t stage);
 
 } // namespace csl::reachability

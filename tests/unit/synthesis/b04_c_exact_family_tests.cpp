@@ -28,9 +28,9 @@ ExactFamilyPayload trivial_family() {
         family.terminal_fiber.push_back(std::move(equality));
         family.unique_terminal[coordinate] = zero;
     }
-    for (auto& stage : family.history_lift) {
+    for (auto &stage : family.history_lift) {
         stage.offset.fill(zero);
-        for (auto& row : stage.controls)
+        for (auto &row : stage.controls)
             row.fill(zero);
     }
     return family;
@@ -77,47 +77,46 @@ TEST_CASE("public B04 query parses exact rational full histories") {
     exact_history[state_dimension * (horizon + 1)] = one_third;
     Budget query_budget;
     const auto exact_result = candidate.contains(exact_history, query_budget);
-    INFO("query operations=" << query_budget.operations << " max bits=" <<
-        query_budget.maximum_integer_bits);
+    INFO("query operations=" << query_budget.operations
+                             << " max bits=" << query_budget.maximum_integer_bits);
     CHECK(exact_result == Membership::member);
     auto family = std::make_shared<const ExactFamilyPayload>(std::move(candidate));
-    const csl::JointRelation relation{
-        {{state_dimension, 1, 0}, horizon},
-        {csl::synthesis::b04_c::exact_family_representation}, family};
-    std::vector<csl::synthesis::b04_c::RationalCoordinate> history(
-        history_dimension, {"0", "1", 0});
+    const csl::JointRelation relation{{{state_dimension, 1, 0}, horizon},
+                                      {csl::synthesis::b04_c::exact_family_representation},
+                                      family};
+    std::vector<csl::synthesis::b04_c::RationalCoordinate> history(history_dimension,
+                                                                   {"0", "1", 0});
     history[horizon * state_dimension] = {"1", "3", 0};
     history[state_dimension * (horizon + 1)] = {"1", "3", 0};
     CHECK(csl::synthesis::b04_c::contains_exact_history(relation, history) ==
-        csl::synthesis::b04_c::HistoryMembership::member);
+          csl::synthesis::b04_c::HistoryMembership::member);
 
     history[horizon * state_dimension] = {"1", "2", 0};
     CHECK(csl::synthesis::b04_c::contains_exact_history(relation, history) ==
-        csl::synthesis::b04_c::HistoryMembership::not_member);
-    const csl::JointRelation unsupported{relation.coordinates,
-        relation.representation, {}};
+          csl::synthesis::b04_c::HistoryMembership::not_member);
+    const csl::JointRelation unsupported{relation.coordinates, relation.representation, {}};
     CHECK(csl::synthesis::b04_c::contains_exact_history(unsupported, history) ==
-        csl::synthesis::b04_c::HistoryMembership::unsupported_relation);
+          csl::synthesis::b04_c::HistoryMembership::unsupported_relation);
 
-    const csl::JointRelation wrong_representation{relation.coordinates,
-        {"csl.polyhedron.h"}, relation.payload};
+    const csl::JointRelation wrong_representation{
+        relation.coordinates, {"csl.polyhedron.h"}, relation.payload};
     CHECK(csl::synthesis::b04_c::contains_exact_history(wrong_representation, history) ==
-        csl::synthesis::b04_c::HistoryMembership::unsupported_relation);
-    const csl::JointRelation wrong_horizon{{{state_dimension, 1, 0}, horizon - 1},
-        relation.representation, relation.payload};
+          csl::synthesis::b04_c::HistoryMembership::unsupported_relation);
+    const csl::JointRelation wrong_horizon{
+        {{state_dimension, 1, 0}, horizon - 1}, relation.representation, relation.payload};
     CHECK(csl::synthesis::b04_c::contains_exact_history(wrong_horizon, history) ==
-        csl::synthesis::b04_c::HistoryMembership::invalid_input);
+          csl::synthesis::b04_c::HistoryMembership::invalid_input);
 
     history.pop_back();
     CHECK(csl::synthesis::b04_c::contains_exact_history(relation, history) ==
-        csl::synthesis::b04_c::HistoryMembership::invalid_input);
+          csl::synthesis::b04_c::HistoryMembership::invalid_input);
     history.resize(history_dimension, {"0", "1", 0});
     history[0] = {"malformed", "1", 0};
     CHECK(csl::synthesis::b04_c::contains_exact_history(relation, history) ==
-        csl::synthesis::b04_c::HistoryMembership::invalid_input);
+          csl::synthesis::b04_c::HistoryMembership::invalid_input);
 
     const std::string oversized(2467, '9');
     history[0] = {oversized, "1", 0};
     CHECK(csl::synthesis::b04_c::contains_exact_history(relation, history) ==
-        csl::synthesis::b04_c::HistoryMembership::resource_limit);
+          csl::synthesis::b04_c::HistoryMembership::resource_limit);
 }

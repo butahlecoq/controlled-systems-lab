@@ -17,12 +17,12 @@ struct FinitePolicyRule {
 };
 
 class FiniteObservationPolicy {
-public:
-    FiniteObservationPolicy(const FiniteObservationPolicy&) = default;
-    FiniteObservationPolicy& operator=(const FiniteObservationPolicy&) = default;
+  public:
+    FiniteObservationPolicy(const FiniteObservationPolicy &) = default;
+    FiniteObservationPolicy &operator=(const FiniteObservationPolicy &) = default;
     std::span<const FinitePolicyRule> rules() const noexcept { return rules_; }
 
-private:
+  private:
     explicit FiniteObservationPolicy(std::vector<FinitePolicyRule> rules);
     std::vector<FinitePolicyRule> rules_;
     friend std::variant<FiniteObservationPolicy, Diagnostic>
@@ -66,7 +66,8 @@ using FinitePolicyFamilyResult =
 // Equal released histories at a stage have one table entry and therefore one action. The
 // evidence covers only these authored scenarios; it proves no constraint,
 // optimality, continuous-set, or unlisted-disturbance claim.
-FinitePolicyFamilyResult replay_finite_policy_family(const model::LinearSystem&,
-    const FinitePolicyFamilyRequest&, const FiniteObservationPolicy&);
+FinitePolicyFamilyResult replay_finite_policy_family(const model::LinearSystem &,
+                                                     const FinitePolicyFamilyRequest &,
+                                                     const FiniteObservationPolicy &);
 
 } // namespace csl::controllers

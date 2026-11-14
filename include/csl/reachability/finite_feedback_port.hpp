@@ -11,10 +11,10 @@ struct Request {
     Game game;
 };
 
-using PortResult = std::variant<Policy,Diagnostic,OperationStopped>;
+using PortResult = std::variant<Policy, Diagnostic, OperationStopped>;
 class Workspace : public ExclusiveWorkspace {
-public:
-    virtual PortResult compute(const Request&,const ExecutionContext&) = 0;
+  public:
+    virtual PortResult compute(const Request &, const ExecutionContext &) = 0;
 };
 
 struct RegisteredPolicy {
@@ -35,7 +35,7 @@ struct RegisteredStopped {
     registry::Provenance provider;
     OperationStopped stop;
 };
-using RegisteredOutcome = std::variant<RegisteredPolicy,RegisteredFailure,RegisteredStopped>;
+using RegisteredOutcome = std::variant<RegisteredPolicy, RegisteredFailure, RegisteredStopped>;
 
 } // namespace csl::reachability::finite_feedback
 
@@ -43,10 +43,10 @@ namespace csl::registry {
 struct FiniteFeedbackPort {
     using Request = reachability::finite_feedback::Request;
     using Workspace = reachability::finite_feedback::Workspace;
-    static constexpr const char* name = "finite-feedback";
-    static Request snapshot(const Request& request) { return request; }
-    static reachability::finite_feedback::PortResult run(Workspace&,const Request&,
-        const ExecutionContext&);
+    static constexpr const char *name = "finite-feedback";
+    static Request snapshot(const Request &request) { return request; }
+    static reachability::finite_feedback::PortResult run(Workspace &, const Request &,
+                                                         const ExecutionContext &);
 };
 } // namespace csl::registry
 
@@ -56,8 +56,8 @@ namespace csl::reachability::finite_feedback {
 // this table algorithm performs no floating-point arithmetic.
 registry::Requirements finite_table_requirements();
 registry::Registration<registry::FiniteFeedbackPort> make_registration();
-RegisteredOutcome run_registered(const registry::Registry<registry::FiniteFeedbackPort>&,
-    registry::Method,const Request&,const registry::Requirements&,
-    const ExecutionContext&);
+RegisteredOutcome run_registered(const registry::Registry<registry::FiniteFeedbackPort> &,
+                                 registry::Method, const Request &, const registry::Requirements &,
+                                 const ExecutionContext &);
 
 } // namespace csl::reachability::finite_feedback
