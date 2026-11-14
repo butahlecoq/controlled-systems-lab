@@ -629,6 +629,11 @@
       "owner": "scripts/reports/stage_nominal_quadratic_history.py"
     },
     {
+      "route": "examples/positive-part-budget-2d.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_positive_part_budget_2d.py"
+    },
+    {
       "route": "examples/discrete-mpc-2d.html",
       "disposition": "maintained",
       "owner": "scripts/reports/stage_discrete_mpc_2d.py"

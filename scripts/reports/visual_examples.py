@@ -37,6 +37,7 @@ import stage_native_model_catalogue
 import stage_native_model_tracking_first_pass
 import stage_native_row_scaling_diagnostic
 import stage_nominal_quadratic_history
+import stage_positive_part_budget_2d
 import visual_example_fuel_layers
 import visual_example_geometry as geometry_examples
 import visual_example_hybrid as hybrid_examples
@@ -1396,6 +1397,10 @@ def build(catalog, site):
         Path(__file__).resolve().parents[2]
     )
     saved_figures += history_card
+    positive_part_files, positive_part_inventory, positive_part_card = (
+        stage_positive_part_budget_2d.build(Path(__file__).resolve().parents[2])
+    )
+    saved_figures += positive_part_card
     mpc_files, mpc_inventory, mpc_card = stage_discrete_mpc_2d.build(
         Path(__file__).resolve().parents[2]
     )
@@ -1466,6 +1471,7 @@ def build(catalog, site):
     outputs.update(tracking_files)
     outputs.update(row_scaling_files)
     outputs.update(history_files)
+    outputs.update(positive_part_files)
     outputs.update(mpc_files)
     outputs.update(extended_files)
     repository_root = Path(__file__).resolve().parents[2]
@@ -1663,6 +1669,7 @@ def build(catalog, site):
     gallery_inventory.extend(tracking_inventory)
     gallery_inventory.extend(row_scaling_inventory)
     gallery_inventory.extend(history_inventory)
+    gallery_inventory.extend(positive_part_inventory)
     gallery_inventory.extend(mpc_inventory)
     gallery_inventory.extend(extended_inventory)
     geometry_first = geometry_inventory[0]

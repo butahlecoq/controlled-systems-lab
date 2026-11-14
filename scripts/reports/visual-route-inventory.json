@@ -1987,6 +1987,15 @@
       "role_and_disposition_reason": "Stages an analytic two-state reachable-line diagram, rounded values transcribed from the committed native example output, and a source-bound binary check record using the shared Omarchy page template and stylesheet. It runs no solver and does not present the diagram or CSV as raw solver data."
     },
     {
+      "source": "scripts/reports/stage_positive_part_budget_2d.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "feasible-set.svg"
+      ],
+      "disposition": "saved-data-illustration-renderer",
+      "role_and_disposition_reason": "Stages the analytically derived exact positive-part feasible polygon and captured output from a source-bound native HiGHS example, using the shared Omarchy page template and stylesheet. It runs no solver and distinguishes the authored 2D illustration from the source model episode test."
+    },
+    {
       "source": "scripts/reports/stage_projection_figures.py",
       "signal_count": 4,
       "asset_name_literals": [],
@@ -4207,6 +4216,13 @@
         "nominal_quadratic_history_2d.csv",
         "nominal_quadratic_history_2d-output.txt",
         "nominal-quadratic-history-2d.json",
+        "positive-part-budget-2d.html",
+        "positive-part-budget-2d.svg",
+        "positive-part-budget-2d.json",
+        "positive_part_budget_2d_vertices.csv",
+        "positive_part_budget_2d_native-solution.csv",
+        "positive_part_budget_2d_run.txt",
+        "positive_part_budget_2d_native-example.stdout",
         "discrete-mpc-2d.html",
         "discrete-mpc-2d.svg",
         "discrete-mpc-2d.json",

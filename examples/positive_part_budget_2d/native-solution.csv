@@ -1,0 +1,4 @@
+coordinate,target,solution,lower,upper
+u0,0.2,0.10000000000000001,-0.2,0.2
+u1,-0.2,-0.20000000000000001,-0.2,0.2
+positive_part_budget,0.1,0.10000000000000001,0,0.1
