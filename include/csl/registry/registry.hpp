@@ -399,8 +399,17 @@ template<class... Ports,class Builder> StrategyPlan compose_strategy(CheckedPipe
     },std::move(provenance)};
 }
 struct StrategyRegistration {
-    enum class ConfigurationSlot { lp, convex, hull, geometry, converter,
-        approximation, selector, representation };
+    enum class ConfigurationSlot {
+        lp,
+        convex,
+        hull,
+        geometry,
+        converter,
+        approximation,
+        selector,
+        representation,
+        history_optimizer
+    };
     Identity identity;
     std::function<Capability(const StrategyRequest&,const Requirements&)> capabilities;
     // Pure planning only: declare every required typed dependency with

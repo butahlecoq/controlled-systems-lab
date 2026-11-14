@@ -390,21 +390,30 @@ namespace detail {
 class DirectJointExecutionRunner final : public SynthesisWorkspace, public registry::detail::RuntimeReceiptSource {
     registry::PreparedProvider<registry::LPPort> lp_;
     registry::PreparedProvider<registry::ConvexPort> convex_;
+    std::optional<registry::PreparedProvider<registry::HistoryOptimizerPort>> history_optimizer_;
     std::optional<registry::StrategyRequest> prepared_request_;
     std::optional<registry::StrategyRegistration::CompleteFamilyVerifierKey> verifier_binding_;
     std::optional<registry::detail::StrategyBRuntimeLineageReceipt> receipt_;
     SynthesisResult solve_impl(const problem::ResolvedProblem&,const FamilyRequest&,const ExecutionContext&);
 public:
-    DirectJointExecutionRunner(registry::PreparedProvider<registry::LPPort> lp,
-        registry::PreparedProvider<registry::ConvexPort> convex,
-        std::optional<registry::StrategyRequest> prepared_request={},
-        std::optional<registry::StrategyRegistration::CompleteFamilyVerifierKey> verifier_binding={})
-        :lp_(std::move(lp)),convex_(std::move(convex)),prepared_request_(std::move(prepared_request)),
-         verifier_binding_(std::move(verifier_binding)){}
-    SynthesisResult solve(const problem::ResolvedProblem&,const FamilyRequest&,const ExecutionContext&) override;
-    std::optional<registry::detail::StrategyBRuntimeLineageReceipt> take_runtime_receipt() noexcept override {
-        return std::exchange(receipt_,std::nullopt);
-    }
+  DirectJointExecutionRunner(
+      registry::PreparedProvider<registry::LPPort> lp,
+      registry::PreparedProvider<registry::ConvexPort> convex,
+      std::optional<registry::StrategyRequest> prepared_request = {},
+      std::optional<registry::StrategyRegistration::CompleteFamilyVerifierKey> verifier_binding =
+          {},
+      std::optional<registry::PreparedProvider<registry::HistoryOptimizerPort>> history_optimizer =
+          {})
+      : lp_(std::move(lp)), convex_(std::move(convex)),
+        history_optimizer_(std::move(history_optimizer)),
+        prepared_request_(std::move(prepared_request)),
+        verifier_binding_(std::move(verifier_binding)) {}
+  SynthesisResult solve(const problem::ResolvedProblem &, const FamilyRequest &,
+                        const ExecutionContext &) override;
+  std::optional<registry::detail::StrategyBRuntimeLineageReceipt>
+  take_runtime_receipt() noexcept override {
+      return std::exchange(receipt_, std::nullopt);
+  }
 };
 }
 SynthesisResult DirectJointWorkspace::solve(const problem::ResolvedProblem& p,const FamilyRequest& request,const ExecutionContext& context) {
@@ -515,6 +524,141 @@ SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::Re
         result.family=std::get<OptimalFamily>(std::move(family));
     };
     publish();
+    if (prepared_request_ && prepared_request_->history_optimization) {
+        if (!history_optimizer_) {
+            reject({unsupported("joint.history_optimizer",
+                                "No history-optimizer provider was frozen for this request.")},
+                   Termination::operation_rejected);
+            return result;
+        }
+        const synthesis::JointHistoryRelation full_history{build_artifact->coordinates,
+                                                           *feasible_artifact};
+        auto optimized = optimization::run_strategy_history_optimization(
+            *history_optimizer_, prepared_request_->configuration.history_optimizer, p,
+            full_history, *prepared_request_->history_optimization, context);
+        if (const auto *rejection = std::get_if<registry::Rejection>(&optimized)) {
+            result.termination = Termination::operation_rejected;
+            result.stop = ScopedRequestRejection{
+                scope({p.identity(), prepared_request_->history_optimization->program},
+                      rejection->provenance),
+                rejection->diagnostics, lineage, retained(result)};
+            data->diagnostics = rejection->diagnostics;
+            return result;
+        }
+        if (const auto *errors = std::get_if<Diagnostics>(&optimized)) {
+            result.termination = Termination::contract_rejected;
+            result.stop = ContractValidationFailure{*errors, retained(result), std::monostate{}};
+            data->diagnostics = *errors;
+            return result;
+        }
+        if (const auto *diagnostic = std::get_if<Diagnostic>(&optimized)) {
+            result.termination = Termination::contract_rejected;
+            result.stop =
+                ContractValidationFailure{{*diagnostic}, retained(result), std::monostate{}};
+            data->diagnostics = {*diagnostic};
+            return result;
+        }
+        if (const auto *stopped = std::get_if<OperationStopped>(&optimized)) {
+            result.termination = stopped_termination(stopped->reason);
+            result.stop = ScopedOperationStopped{
+                *stopped,
+                {{"syn04-history:" + p.identity().value},
+                 registry::HistoryOptimizerPort::name,
+                 history_optimizer_->provenance().requested.id,
+                 history_optimizer_->provenance().requested.version,
+                 history_optimizer_->provenance().actual
+                     ? std::optional<ModuleId>{history_optimizer_->provenance().actual->id}
+                     : std::nullopt,
+                 history_optimizer_->provenance().actual
+                     ? std::optional<std::string>{history_optimizer_->provenance().actual->version}
+                     : std::nullopt},
+                retained(result)};
+            return result;
+        }
+        auto call = std::get<optimization::HistoryOptimizationCall>(std::move(optimized));
+        auto optimized_result =
+            std::make_shared<const optimization::HistoryOptimizationResult>(std::move(call.result));
+        result.history_optimization = HistoryOptimizationExecution{
+            scope(optimized_result->identity, call.provider), optimized_result->identity.problem,
+            optimized_result->identity.program, optimized_result};
+        const auto coordinates = build_artifact->coordinates;
+        const auto n = coordinates.dimensions.state, m = coordinates.dimensions.control,
+                   T = coordinates.horizon;
+        const auto expected = (T + 1) * n + T * m;
+        if (optimized_result->history.size() != expected) {
+            const Diagnostics errors{
+                {DiagnosticCode::evidence_mismatch, "joint.history_optimizer.history",
+                 "Checked optimizer result does not match Strategy B canonical history coordinates."}};
+            result.termination = Termination::contract_rejected;
+            result.stop = ContractValidationFailure{errors, retained(result), std::monostate{}};
+            data->diagnostics = errors;
+            return result;
+        }
+        Witness witness{p.identity(), {}, {}, 0};
+        for (std::size_t stage = 0; stage <= T; ++stage)
+            witness.states.emplace_back(
+                optimized_result->history.begin() + static_cast<std::ptrdiff_t>(stage * n),
+                optimized_result->history.begin() + static_cast<std::ptrdiff_t>((stage + 1) * n));
+        for (std::size_t stage = 0; stage < T; ++stage) {
+            const auto offset = (T + 1) * n + stage * m;
+            witness.controls.emplace_back(
+                optimized_result->history.begin() + static_cast<std::ptrdiff_t>(offset),
+                optimized_result->history.begin() + static_cast<std::ptrdiff_t>(offset + m));
+        }
+        const auto objective = optimization::evaluate(p.objective(), witness.states.back());
+        if (const auto *value = std::get_if<double>(&objective)) {
+            witness.original_objective = *value;
+            verification::TrajectoryRequest query;
+            query.witness = witness;
+            const auto checked = verification::verify_trajectory(p, query, context);
+            if (checked.termination != Termination::completed) {
+                const StopReason reason = checked.termination == Termination::deadline_expired
+                                              ? StopReason::deadline_expired
+                                          : checked.termination == Termination::resource_limit
+                                              ? StopReason::resource_limit
+                                              : StopReason::numerical_failure;
+                const OperationStopped stopped{
+                    reason,
+                    "Independent source trajectory check of whole-history optimizer output stopped."};
+                result.termination = stopped_termination(reason);
+                result.stop = ScopedOperationStopped{
+                    stopped, scope(optimized_result->identity, call.provider), retained(result)};
+                return result;
+            }
+            if (checked.bindings != verification::CheckStatus::numerical_pass ||
+                checked.feasibility != verification::CheckStatus::numerical_pass ||
+                checked.objective != verification::CheckStatus::numerical_pass) {
+                const Diagnostics errors =
+                    checked.diagnostics.empty()
+                        ? Diagnostics{{DiagnosticCode::evidence_mismatch,
+                                       "joint.history_optimizer.trajectory",
+                                       "Independent source trajectory verification rejected the optimizer history."}}
+                        : checked.diagnostics;
+                result.termination = Termination::contract_rejected;
+                result.stop = ContractValidationFailure{errors, retained(result), std::monostate{}};
+                return result;
+            }
+            double residual = 0;
+            for (const auto &item : checked.residuals)
+                residual = std::max(residual, item.measure.violation);
+            const ClaimEvidence feasibility{p.identity(),
+                                            NumericalCheck{request.numerical.absolute_tolerance,
+                                                           request.numerical.relative_tolerance,
+                                                           residual, checked.verifier.id}};
+            result.incumbents.push_back({std::move(witness), feasibility});
+        } else if (const auto *errors = std::get_if<Diagnostic>(&objective)) {
+            result.termination = Termination::contract_rejected;
+            result.stop = ContractValidationFailure{{*errors}, retained(result), std::monostate{}};
+            data->diagnostics = {*errors};
+            return result;
+        } else {
+            const auto stopped = std::get<OperationStopped>(objective);
+            result.termination = stopped_termination(stopped.reason);
+            result.stop = ScopedOperationStopped{
+                stopped, scope(optimized_result->identity, call.provider), retained(result)};
+            return result;
+        }
+    }
     std::shared_ptr<const sets::SetData> extracted_artifact;
     auto run_program=[&]<class Program,class Port>(const Program& program,const registry::PreparedProvider<Port>& provider) {
         data->provider=provider.provenance();const auto provenance=scope(program.identity(),provider.provenance());
@@ -776,45 +920,158 @@ SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::Re
     }
     return result;
 }
-registry::StrategyRegistration make_registration(const registry::Registry<registry::LPPort>& lp,const registry::Registry<registry::ConvexPort>& convex) {
+registry::StrategyRegistration make_registration(
+    const registry::Registry<registry::LPPort> &lp,
+    const registry::Registry<registry::ConvexPort> &convex,
+    std::optional<registry::PreparedProvider<registry::HistoryOptimizerPort>> history_optimizer) {
     const registry::StrategyRegistration::CompleteFamilyVerifierKey verifier_binding{{complete_verifier_id},complete_verifier_version};
-    registry::StrategyRegistration registration{{{strategy_id},strategy_version},[](const registry::StrategyRequest& request,const registry::Requirements& requirements)->registry::Capability {
-        auto d=capabilities(request.problem,request.family);
-        if(request.configuration.representation!=request.family.representation)
-            d.push_back({DiagnosticCode::evidence_mismatch,"joint.configuration.representation","Strategy representation must equal the effective family representation."});
-        if(requirements.scalar!=registry::Scalar::binary64)d.push_back(unsupported("joint.scalar","Only binary64 construction is available."));
-        if(!d.empty())return d;
-        const bool complete=request.family.target==FamilyTarget::exact_optimal_relation;
-        return registry::Offer{{request.family.representation,Assurance::numerical,
-            complete?SetRelation::equivalent:SetRelation::heuristic,request.family.target,
-            complete?registry::Completeness::established:registry::Completeness::unestablished}};
-    },[&lp,&convex,verifier_binding](const registry::StrategyRequest& request,const registry::Requirements&)->std::variant<registry::StrategyPlan,registry::Rejection> {
-        auto selected_verifier=verifier_binding;
-        if(request.family.profile==nominal_linear_exact_profile)
-            selected_verifier={{nominal_linear_exact_verifier},"1"};
-        if(request.family.profile==synthesis::ts02_constant_integrator_profile&&
-            request.family.target==FamilyTarget::exact_optimal_relation)
-            selected_verifier={{synthesis::ts02_constant_integrator_verifier},"1"};
-        if(request.family.profile==synthesis::ts03_singular_integrator_profile&&
-            request.family.target==FamilyTarget::exact_optimal_relation)
-            selected_verifier={{synthesis::ts03_singular_integrator_verifier},"1"};
-        registry::Requirements program_requirements;program_requirements.output.representation={"csl.program-result.v1"};
-        program_requirements.output.assurance=request.family.assurance;
-        auto generated=registry::check_providers(registry::select_provider(lp,registry::Method{request.configuration.lp,{}},program_requirements),
-            registry::select_provider(convex,registry::Method{request.configuration.convex,{}},program_requirements));
-        if(const auto* failure=std::get_if<registry::Rejection>(&generated))return *failure;
-        auto fixed=registry::check_pipeline();
-        return registry::compose_strategy(std::get<registry::CheckedPipeline<>>(std::move(fixed)),
-            std::get<registry::CheckedProviders<registry::LPPort,registry::ConvexPort>>(std::move(generated)),
-            [selected_verifier](auto,auto providers,const registry::StrategyRequest& prepared,const registry::Requirements&)->std::unique_ptr<SynthesisWorkspace> {
-                return std::make_unique<detail::DirectJointExecutionRunner>(std::get<0>(std::move(providers)),
-                    std::get<1>(std::move(providers)),prepared,selected_verifier);
-            });
-    },verifier_binding};
-    registration.active_configuration_slots = std::vector{
-        registry::StrategyRegistration::ConfigurationSlot::lp,
-        registry::StrategyRegistration::ConfigurationSlot::convex,
-        registry::StrategyRegistration::ConfigurationSlot::representation};
+    registry::StrategyRegistration
+        registration{{{strategy_id}, strategy_version},
+                     [history_optimizer](const registry::StrategyRequest &request,
+                                         const registry::Requirements &requirements) -> registry::
+                                                                                         Capability {
+                                                                                             auto d = capabilities(
+                                                                                                 request
+                                                                                                     .problem,
+                                                                                                 request
+                                                                                                     .family);
+                                                                                             if (request
+                                                                                                     .configuration
+                                                                                                     .representation !=
+                                                                                                 request
+                                                                                                     .family
+                                                                                                     .representation)
+                                                                                                 d.push_back(
+                                                                                                     {DiagnosticCode::
+                                                                                                          evidence_mismatch,
+                                                                                                      "joint.configuration.representation",
+                                                                                                      "Strategy representation must equal the effective family representation."});
+                                                                                             if (requirements
+                                                                                                     .scalar !=
+                                                                                                 registry::
+                                                                                                     Scalar::
+                                                                                                         binary64)
+                                                                                                 d.push_back(unsupported(
+                                                                                                     "joint.scalar",
+                                                                                                     "Only binary64 construction is available."));
+                                                                                             if (request
+                                                                                                     .history_optimization) {
+                                                                                                 if (request
+                                                                                                         .family
+                                                                                                         .target !=
+                                                                                                     FamilyTarget::
+                                                                                                         candidate_relaxation)
+                                                                                                     d.push_back(unsupported(
+                                                                                                         "joint.history_optimizer.target",
+                                                                                                         "Strategy B history optimization currently supports candidate-relaxation requests only."));
+                                                                                                 if (!history_optimizer)
+                                                                                                     d.push_back(unsupported(
+                                                                                                         "joint.history_optimizer",
+                                                                                                         "A source-cost profile requires a prepared history-optimizer provider."));
+                                                                                                 else if (
+                                                                                                     history_optimizer
+                                                                                                         ->provenance()
+                                                                                                         .requested
+                                                                                                         .id !=
+                                                                                                     request
+                                                                                                         .configuration
+                                                                                                         .history_optimizer)
+                                                                                                     d.push_back(
+                                                                                                         {DiagnosticCode::
+                                                                                                              evidence_mismatch,
+                                                                                                          "joint.history_optimizer",
+                                                                                                          "Configured history-optimizer module differs from the prepared provider."});
+                                                                                             } else if (
+                                                                                                 !request
+                                                                                                      .configuration
+                                                                                                      .history_optimizer
+                                                                                                      .value
+                                                                                                      .empty()) {
+                                                                                                 d.push_back(
+                                                                                                     {DiagnosticCode::
+                                                                                                          invalid_input,
+                                                                                                      "joint.history_optimizer",
+                                                                                                      "A history-optimizer provider cannot be selected without a source-cost profile."});
+                                                                                             }
+                                                                                             if (!d.empty())
+                                                                                                 return d;
+                                                                                             const bool complete =
+                                                                                                 request
+                                                                                                     .family
+                                                                                                     .target ==
+                                                                                                 FamilyTarget::
+                                                                                                     exact_optimal_relation;
+                                                                                             return registry::Offer{
+                                                                                                 {request
+                                                                                                      .family
+                                                                                                      .representation,
+                                                                                                  Assurance::
+                                                                                                      numerical,
+                                                                                                  complete
+                                                                                                      ? SetRelation::
+                                                                                                            equivalent
+                                                                                                      : SetRelation::
+                                                                                                            heuristic,
+                                                                                                  request
+                                                                                                      .family
+                                                                                                      .target,
+                                                                                                  complete
+                                                                                                      ? registry::
+                                                                                                            Completeness::
+                                                                                                                established
+                                                                                                      : registry::Completeness::
+                                                                                                            unestablished}};
+                                                                                         },
+                     [&lp, &convex, verifier_binding, history_optimizer](
+                         const registry::StrategyRequest &request, const registry::Requirements &)
+                         -> std::variant<registry::StrategyPlan, registry::Rejection> {
+                         auto selected_verifier = verifier_binding;
+                         if (request.family.profile == nominal_linear_exact_profile)
+                             selected_verifier = {{nominal_linear_exact_verifier}, "1"};
+                         if (request.family.profile ==
+                                 synthesis::ts02_constant_integrator_profile &&
+                             request.family.target == FamilyTarget::exact_optimal_relation)
+                             selected_verifier = {{synthesis::ts02_constant_integrator_verifier},
+                                                  "1"};
+                         if (request.family.profile ==
+                                 synthesis::ts03_singular_integrator_profile &&
+                             request.family.target == FamilyTarget::exact_optimal_relation)
+                             selected_verifier = {{synthesis::ts03_singular_integrator_verifier},
+                                                  "1"};
+                         registry::Requirements program_requirements;
+                         program_requirements.output.representation = {"csl.program-result.v1"};
+                         program_requirements.output.assurance = request.family.assurance;
+                         auto generated = registry::check_providers(
+                             registry::select_provider(
+                                 lp, registry::Method{request.configuration.lp, {}},
+                                 program_requirements),
+                             registry::select_provider(
+                                 convex, registry::Method{request.configuration.convex, {}},
+                                 program_requirements));
+                         if (const auto *failure = std::get_if<registry::Rejection>(&generated))
+                             return *failure;
+                         auto fixed = registry::check_pipeline();
+                         return registry::compose_strategy(
+                             std::get<registry::CheckedPipeline<>>(std::move(fixed)),
+                             std::get<registry::CheckedProviders<registry::LPPort,
+                                                                 registry::ConvexPort>>(
+                                 std::move(generated)),
+                             [selected_verifier, history_optimizer](
+                                 auto, auto providers, const registry::StrategyRequest &prepared,
+                                 const registry::Requirements &)
+                                 -> std::unique_ptr<SynthesisWorkspace> {
+                                 return std::make_unique<detail::DirectJointExecutionRunner>(
+                                     std::get<0>(std::move(providers)),
+                                     std::get<1>(std::move(providers)), prepared, selected_verifier,
+                                     history_optimizer);
+                             });
+                     },
+                     verifier_binding};
+    registration.active_configuration_slots =
+        std::vector{registry::StrategyRegistration::ConfigurationSlot::lp,
+                    registry::StrategyRegistration::ConfigurationSlot::convex,
+                    registry::StrategyRegistration::ConfigurationSlot::representation,
+                    registry::StrategyRegistration::ConfigurationSlot::history_optimizer};
     registration.complete_family_verifier_selector=[](const registry::StrategyRequest& request)
         ->std::optional<registry::StrategyRegistration::CompleteFamilyVerifierKey> {
         if(request.family.target!=FamilyTarget::exact_optimal_relation)return std::nullopt;

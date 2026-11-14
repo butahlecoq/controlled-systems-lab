@@ -4,6 +4,7 @@
 #include <csl/artifacts/run_statistics.hpp>
 
 #include <csl/registry/provider.hpp>
+#include <csl/optimization/history_optimizer.hpp>
 #include <csl/sets/data.hpp>
 
 namespace csl::synthesis::strategy_b {
@@ -53,6 +54,8 @@ public:
 };
 // Composes injected registries into the existing StrategyRegistry admission
 // path; no owned or fallback registries are created.
-registry::StrategyRegistration make_registration(const registry::Registry<registry::LPPort>&,
-    const registry::Registry<registry::ConvexPort>&);
+registry::StrategyRegistration make_registration(
+    const registry::Registry<registry::LPPort> &, const registry::Registry<registry::ConvexPort> &,
+    std::optional<registry::PreparedProvider<registry::HistoryOptimizerPort>> history_optimizer =
+        {});
 } // namespace csl::synthesis::strategy_b
