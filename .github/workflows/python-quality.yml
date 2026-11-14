@@ -20,6 +20,8 @@ on:
       - 'reports/algorithm-results/native-row-scaling-diagnostic-v1/**'
       - 'tests/reporting/test_syn03_strategy_a_report.py'
       - 'tests/reporting/test_syn03_ts02_report.py'
+      - 'tests/reporting/test_opt07_*.py'
+      - 'tests/reporting/test_opt11_publication.py'
       - 'pyproject.toml'
       - 'requirements-quality.txt'
       - '.github/workflows/python-quality.yml'
@@ -43,6 +45,8 @@ on:
       - 'reports/algorithm-results/native-row-scaling-diagnostic-v1/**'
       - 'tests/reporting/test_syn03_strategy_a_report.py'
       - 'tests/reporting/test_syn03_ts02_report.py'
+      - 'tests/reporting/test_opt07_*.py'
+      - 'tests/reporting/test_opt11_publication.py'
       - 'pyproject.toml'
       - 'requirements-quality.txt'
       - '.github/workflows/python-quality.yml'
@@ -81,3 +85,8 @@ jobs:
           python -m unittest discover -s tests/reporting -p 'test_syn03_ts02_report.py'
       - name: Check the locked source-only native row-scaling publication
         run: python -m unittest discover -s tests/reporting -p 'test_stage_native_row_scaling_diagnostic.py'
+      - name: Exercise OPT07 and OPT11 collectors, oracles and saved reports
+        run: |
+          python -m unittest discover -s tests/reporting -p 'test_opt07_*.py'
+          python -m unittest discover -s tests/reporting -p 'test_opt11_publication.py'
+          python -m unittest discover -s reports/algorithm-results/tooling/opt11 -p 'test_collect.py'
