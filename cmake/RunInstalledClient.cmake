@@ -164,6 +164,7 @@ foreach(example_file CMakeLists.txt registered_lp.cpp registered_convex.cpp
     quadcopter_mpc_check.cmake native_flexible_pitch.cpp
     nominal_quadratic_history_2d.cpp positive_part_budget_2d.cpp
     positive_part_budget_2d_check.cmake native_spatial_flight.cpp
+    npoa_2017_programmed_fuel.cpp npoa_2017_programmed_fuel_check.cmake
     scenario_backend_artifact_check.cpp)
   file(COPY "${CSL_SOURCE_DIR}/examples/${example_file}" DESTINATION "${example_source}")
 endforeach()
@@ -177,6 +178,8 @@ file(COPY "${CSL_SOURCE_DIR}/examples/scenarios/two-stage-integrator.json"
   "${CSL_SOURCE_DIR}/examples/scenarios/two-stage-integrator-phase-one.json"
   DESTINATION "${example_source}/scenarios")
 file(COPY "${CSL_SOURCE_DIR}/examples/scenarios/double-integrator-generality.json"
+  DESTINATION "${example_source}/scenarios")
+file(COPY "${CSL_SOURCE_DIR}/examples/scenarios/npoa-2017-programmed-fuel-v1.json"
   DESTINATION "${example_source}/scenarios")
 execute_process(COMMAND "${CMAKE_COMMAND}" -S "${example_source}" -B "${work}/examples-build"
   ${generator_args} "-DCMAKE_PREFIX_PATH=${prefix}" "-DCMAKE_BUILD_TYPE=${CSL_CONFIG}"
