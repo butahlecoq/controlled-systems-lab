@@ -601,6 +601,7 @@ set(installed_contract_headers
   model/contracts.hpp
   sets/contracts.hpp
   optimization/objective_contracts.hpp
+  optimization/history_optimizer.hpp
   problem/contracts.hpp
   execution/contracts.hpp
   optimization/contracts.hpp
@@ -643,4 +644,25 @@ if(TARGET CSL::casadi_fixed_tail)
   add_test(NAME installed_fixed_tail_policy_client COMMAND installed_fixed_tail_policy_client)
   set_tests_properties(installed_fixed_tail_policy_client PROPERTIES
     PASS_REGULAR_EXPRESSION "Native fixed-tail policy: all five physical families")
+endif()
+
+if(TARGET CSL::history_optimizer)
+  add_executable(installed_history_optimizer_client history_optimizer_client.cpp)
+  target_link_libraries(installed_history_optimizer_client PRIVATE CSL::history_optimizer)
+  set_target_properties(installed_history_optimizer_client PROPERTIES CXX_EXTENSIONS OFF)
+  add_test(NAME installed_history_optimizer_client COMMAND installed_history_optimizer_client)
+endif()
+
+if(TARGET CSL::casadi_history_optimizer)
+  add_executable(installed_casadi_history_optimizer_client casadi_history_optimizer_client.cpp)
+  target_link_libraries(installed_casadi_history_optimizer_client PRIVATE CSL::casadi_history_optimizer)
+  set_target_properties(installed_casadi_history_optimizer_client PROPERTIES CXX_EXTENSIONS OFF)
+  add_test(NAME installed_casadi_history_optimizer_client COMMAND installed_casadi_history_optimizer_client)
+endif()
+
+if(TARGET CSL::casadi_superscs_history_optimizer)
+  add_executable(installed_casadi_superscs_history_optimizer_client casadi_superscs_history_optimizer_client.cpp)
+  target_link_libraries(installed_casadi_superscs_history_optimizer_client PRIVATE CSL::casadi_superscs_history_optimizer)
+  set_target_properties(installed_casadi_superscs_history_optimizer_client PROPERTIES CXX_EXTENSIONS OFF)
+  add_test(NAME installed_casadi_superscs_history_optimizer_client COMMAND installed_casadi_superscs_history_optimizer_client)
 endif()

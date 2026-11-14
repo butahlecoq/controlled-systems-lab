@@ -11,6 +11,10 @@
 #include <type_traits>
 #include <utility>
 
+namespace csl::optimization {
+struct StrategyHistoryOptimizationProfile;
+}
+
 namespace csl::registry {
 // Compatible-toolchain source interface. Checked registrations validate
 // callback results and freeze borrowed preparation state before execution.
@@ -65,6 +69,10 @@ struct StrategyRequest {
     FamilyRequest family;
     std::string strategy_version; // selected registration, frozen at preparation
     std::vector<TransformStepIdentity> lineage;
+    // Optional authored source-cost and selected-region constraints for the
+    // whole-history optimizer. Shared ownership freezes this profile with the
+    // prepared strategy request.
+    std::shared_ptr<const optimization::StrategyHistoryOptimizationProfile> history_optimization{};
 };
 using CompleteFamilyVerifier = std::function<Diagnostics(const StrategyRequest&,const CompleteFamilyProposal&)>;
 
@@ -391,8 +399,17 @@ template<class... Ports,class Builder> StrategyPlan compose_strategy(CheckedPipe
     },std::move(provenance)};
 }
 struct StrategyRegistration {
-    enum class ConfigurationSlot { lp, convex, hull, geometry, converter,
-        approximation, selector, representation };
+    enum class ConfigurationSlot {
+        lp,
+        convex,
+        hull,
+        geometry,
+        converter,
+        approximation,
+        selector,
+        representation,
+        history_optimizer
+    };
     Identity identity;
     std::function<Capability(const StrategyRequest&,const Requirements&)> capabilities;
     // Pure planning only: declare every required typed dependency with
