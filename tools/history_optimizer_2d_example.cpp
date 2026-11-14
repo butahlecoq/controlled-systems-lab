@@ -40,7 +40,7 @@ void write_outputs(const std::filesystem::path& directory,const optimization::Hi
     std::filesystem::create_directories(directory);
     std::ofstream csv(directory/"history.csv");
     csv<<std::setprecision(17);
-    csv<<"series,stage,position,velocity,u0,u1,source_J\n";
+    csv<<"series,stage,state_x,state_y,u0,u1,source_J\n";
     csv<<"whole-history-source-J,0,0,0,"<<result.history[6]<<','<<result.history[7]<<','<<result.source_cost.total
        <<"\nwhole-history-source-J,1,"<<result.history[2]<<','<<result.history[3]<<','<<result.history[6]<<','<<result.history[7]<<','<<result.source_cost.total
        <<"\nwhole-history-source-J,2,"<<result.history[4]<<','<<result.history[5]<<','<<result.history[6]<<','<<result.history[7]<<','<<result.source_cost.total<<'\n';
@@ -55,12 +55,12 @@ void write_outputs(const std::filesystem::path& directory,const optimization::Hi
     svg<<"<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"800\" height=\"740\" viewBox=\"0 0 800 740\">"
        <<"<rect width=\"800\" height=\"740\" fill=\"white\"/><text x=\"400\" y=\"30\" text-anchor=\"middle\" font-size=\"18\">2D integrator: full-history source-cost optimization</text>"
        <<"<text x=\"400\" y=\"58\" text-anchor=\"middle\" font-size=\"14\">J = ||x₂ − (1,1)||₂ + 0.5(|u₀| + |u₁|)</text>"
-       <<"<path d=\"M100 650 H700 M100 650 V150\" stroke=\"#444\" fill=\"none\"/><text x=\"400\" y=\"700\" text-anchor=\"middle\">position</text><text x=\"32\" y=\"400\" transform=\"rotate(-90 32 400)\" text-anchor=\"middle\">velocity</text>";
+       <<"<path d=\"M100 650 H700 M100 650 V150\" stroke=\"#444\" fill=\"none\"/><text x=\"400\" y=\"700\" text-anchor=\"middle\">state x</text><text x=\"32\" y=\"400\" transform=\"rotate(-90 32 400)\" text-anchor=\"middle\">state y</text>";
     svg<<"<polyline points=\""<<x(0)<<','<<y(0)<<' '<<x(result.history[6])<<','<<y(0)<<' '<<x(result.history[6])<<','<<y(result.history[7])<<"\" fill=\"none\" stroke=\"#0072B2\" stroke-width=\"4\"/>";
     svg<<"<polyline points=\""<<x(0)<<','<<y(0)<<' '<<x(0.75)<<','<<y(0)<<' '<<x(0.75)<<','<<y(0.75)<<"\" fill=\"none\" stroke=\"#D55E00\" stroke-width=\"3\" stroke-dasharray=\"8 6\"/>";
     svg<<"<circle cx=\""<<x(1)<<"\" cy=\""<<y(1)<<"\" r=\"8\" fill=\"#009E73\"/><text x=\"520\" y=\"95\" fill=\"#0072B2\">full source J: "<<result.source_cost.total<<" (blue)</text>"
        <<"<text x=\"520\" y=\"120\" fill=\"#D55E00\">squared-terminal candidate: source J = 1.104 (dashed)</text>"
-       <<"<text x=\"400\" y=\"728\" text-anchor=\"middle\" font-size=\"12\">u₀ changes position; u₁ changes velocity. Green point is target (1,1).</text></svg>";
+       <<"<text x=\"400\" y=\"728\" text-anchor=\"middle\" font-size=\"12\">u₀ changes state x; u₁ changes state y. Green point is target (1,1).</text></svg>";
     svg.close();
     if(!svg)throw std::runtime_error("failed to write history.svg");
     std::ofstream html(directory/"index.html");
@@ -69,7 +69,7 @@ void write_outputs(const std::filesystem::path& directory,const optimization::Hi
         <<"<style>body{font:16px system-ui;max-width:900px;margin:2rem auto;padding:0 1rem;color:#202124}figure{margin:1rem 0}img{max-width:100%;height:auto}table{border-collapse:collapse}td,th{border:1px solid #bbb;padding:.45rem .7rem;text-align:left}code{background:#f2f2f2;padding:.1rem .2rem}</style>"
         <<"<main><h1>Native whole-history source-cost example</h1><p>Two-step integrator: <code>x₀=(0,0)</code>, <code>x₁=x₀+(u₀,0)</code>, <code>x₂=x₁+(0,u₁)</code>, with <code>u₀,u₁∈[0,1]</code>.</p>"
         <<"<p>Authored objective: <code>J=||x₂−(1,1)||₂ + 0.5(|u₀|+|u₁|)</code>. The native CasADi/IPOPT provider optimized all state and control history coordinates and the checked core recomputed this source objective. Squaring only the terminal norm gives the distinct surrogate <code>J_sq=||x₂−(1,1)||₂² + 0.5(|u₀|+|u₁|)</code>, whose minimizer is (3/4,3/4); its original source cost is about 1.104.</p>"
-        <<"<figure><img src=\"history.svg\" alt=\"Actual whole-history source-cost trajectory and squared-terminal surrogate trajectory plotted in position-velocity coordinates\"><figcaption>Blue is the actual whole-history source-J result; dashed orange is the minimizer of the squared-terminal surrogate; green marks the target.</figcaption></figure>"
+        <<"<figure><img src=\"history.svg\" alt=\"Actual whole-history source-cost trajectory and squared-terminal surrogate trajectory plotted in state x and state y coordinates\"><figcaption>Blue is the actual whole-history source-J result; dashed orange is the minimizer of the squared-terminal surrogate; green marks the target.</figcaption></figure>"
         <<"<table><tr><th>Candidate</th><th>u₀</th><th>u₁</th><th>Original source J</th></tr><tr><td>Whole-history solve</td><td>"<<result.history[6]<<"</td><td>"<<result.history[7]<<"</td><td>"<<result.source_cost.total<<"</td></tr><tr><td>Squared-terminal surrogate</td><td>3/4</td><td>3/4</td><td>1.1035533906</td></tr></table>"
         <<"<p>Independent full-H residual: "<<result.maximum_history_violation<<". Backend: <code>"<<result.diagnostics<<"</code>.</p>"
         <<"<p><a href=\"history.csv\">Download the trajectory and source-cost data (CSV)</a>.</p><h2>Evidence boundary</h2><p>This is one functional 2D demonstration of a local numerical candidate and independent binary64 checks. It is not a benchmark, global-optimality proof, nonlinear plant guarantee or validated completeness result.</p></main></html>";
