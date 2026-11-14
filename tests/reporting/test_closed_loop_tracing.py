@@ -2,25 +2,28 @@ from __future__ import annotations
 
 import json
 import os
-from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import tracemalloc
 import unittest
+from pathlib import Path
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "benchmarks/reporting/closed_loop"))
-import capabilities
-import run_closed_loop
+import capabilities  # noqa: E402
+import run_closed_loop  # noqa: E402
 
 
 def probe_worker_exit(mode: str, caller_owned: bool) -> None:
     assert not tracemalloc.is_tracing()
-    graph = next(row for row in capabilities.build_native_manifest()["graphs"]
+    graph = next(
+        row
+        for row in capabilities.build_native_manifest()["graphs"]
         if row["task_id"].startswith("syn-nl-lv-01/")
-        and row["controller"]["id"] == "native-exact-polytope-backward-graph/1")
+        and row["controller"]["id"] == "native-exact-polytope-backward-graph/1"
+    )
     with tempfile.TemporaryDirectory() as raw:
         folder = Path(raw)
         attempt = folder / "attempt"
@@ -44,12 +47,26 @@ def probe_worker_exit(mode: str, caller_owned: bool) -> None:
                     raise AssertionError("Expected graph validation failure")
                 assert not (attempt / "attempt.json").exists()
             elif mode == "terminal":
-                with mock.patch.object(run_closed_loop, "prepare_graph", return_value=(None, {})), \
-                     mock.patch.object(run_closed_loop, "controller_query", return_value={
-                         "status": "rejected", "policy_id": graph["controller"]["id"],
-                         "invocations": []}):
-                    result = run_closed_loop.worker("syn-nl-lv-01", attempt, bridge,
-                        graph_path=graph_path)
+
+                class RejectingPolicy:
+                    def query(self, task_id, state, stage):
+                        return {
+                            "status": "rejected",
+                            "policy_id": graph["controller"]["id"],
+                            "task_sha256": graph["task_sha256"],
+                            "action_profile_id": graph["action_profile_id"],
+                            "invocations": [],
+                        }
+
+                    def close(self):
+                        pass
+
+                with mock.patch.object(
+                    run_closed_loop, "prepare_graph", return_value=(RejectingPolicy(), {})
+                ):
+                    result = run_closed_loop.worker(
+                        "syn-nl-lv-01", attempt, bridge, graph_path=graph_path
+                    )
                 record = json.loads((attempt / "attempt.json").read_text())
                 assert result == 2
                 assert record["status"] == "incomplete"
@@ -58,8 +75,9 @@ def probe_worker_exit(mode: str, caller_owned: bool) -> None:
                 assert ("caller-owned" in scope) == caller_owned, scope
             else:
                 with mock.patch.dict(os.environ, {"CSL_NATIVE_POLICY_BRIDGE": ""}):
-                    result = run_closed_loop.worker("syn-nl-lv-01", attempt, bridge,
-                        graph_path=graph_path)
+                    result = run_closed_loop.worker(
+                        "syn-nl-lv-01", attempt, bridge, graph_path=graph_path
+                    )
                 record = json.loads((attempt / "attempt.json").read_text())
                 assert result == 2
                 assert record["status"] == "preparation_failed"
@@ -84,7 +102,8 @@ def probe_reader_with_caller_trace() -> None:
     marker_traceback = tracemalloc.get_object_traceback(marker)
     try:
         case = ClosedLoopAttemptRecordTests(
-            "test_v1_reader_skips_large_embedded_stage_field_without_allocating_it")
+            "test_v1_reader_skips_large_embedded_stage_field_without_allocating_it"
+        )
         result = unittest.TestResult()
         case.run(result)
         assert result.wasSuccessful(), result.errors + result.failures
@@ -106,16 +125,32 @@ class ClosedLoopTracingTests(unittest.TestCase):
         self._check_exit("terminal")
 
     def test_reader_allocation_check_preserves_caller_trace(self):
-        result = subprocess.run([sys.executable, "-E", str(Path(__file__).resolve()),
-            "reader-probe"], cwd=ROOT, capture_output=True, text=True, timeout=30)
+        result = subprocess.run(
+            [sys.executable, "-E", str(Path(__file__).resolve()), "reader-probe"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def _check_exit(self, mode: str) -> None:
         for caller_owned in (False, True):
             with self.subTest(caller_owned=caller_owned):
-                result = subprocess.run([sys.executable, "-E", str(Path(__file__).resolve()),
-                    "probe", mode, str(int(caller_owned))], cwd=ROOT,
-                    capture_output=True, text=True, timeout=30)
+                result = subprocess.run(
+                    [
+                        sys.executable,
+                        "-E",
+                        str(Path(__file__).resolve()),
+                        "probe",
+                        mode,
+                        str(int(caller_owned)),
+                    ],
+                    cwd=ROOT,
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                )
                 self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
 
