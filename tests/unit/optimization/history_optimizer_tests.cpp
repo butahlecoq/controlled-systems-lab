@@ -7,6 +7,7 @@
 #include <limits>
 
 using namespace csl;
+using namespace csl::registry;
 
 namespace {
 problem::ResolvedProblem source_problem() {
@@ -144,6 +145,50 @@ TEST_CASE("strategy preparation snapshots the authored history profile") {
     REQUIRE(snapshot.history_optimization);
     CHECK(snapshot.history_optimization.get() != authored.get());
     CHECK(snapshot.history_optimization->running_cost.objective_id == "running");
+}
+
+TEST_CASE("shared strategy history seam prepares and reports the selected optimizer provider") {
+    Registry<registry::HistoryOptimizerPort> providers;
+    const auto offer = [](const optimization::HistoryOptimizationRequest &,
+                          const Requirements &requirements) -> Capability {
+        return Offer{requirements.output};
+    };
+    REQUIRE_FALSE(providers.add({{{"profile-history-provider"}, "1"},
+                                 offer,
+                                 [](const optimization::HistoryOptimizationRequest &) {
+                                     return std::make_unique<Candidate>();
+                                 }}));
+    Requirements requirements;
+    requirements.output.representation = {"csl.history-optimization-result.v1"};
+    const auto provider = registry::prepare_provider(registry::select_provider(
+        providers, Method{{"profile-history-provider"}, "1"}, requirements));
+    REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::HistoryOptimizerPort>>(
+        provider));
+
+    const auto resolved = source_problem();
+    const auto existing = request();
+    const optimization::StrategyHistoryOptimizationProfile profile{
+        ProgramId{"profile-provider-run"},
+        {"running", 1, {{0, {optimization::QuadraticControlPenalty{{0.0}, {1.0}, {1.0}, 1.0, 1}}}}},
+        0,
+        "state",
+        {},
+        optimization::ColdStart{}};
+    const auto outcome = optimization::run_strategy_history_optimization(
+        std::get<registry::PreparedProvider<registry::HistoryOptimizerPort>>(provider),
+        {"profile-history-provider"}, resolved, existing.domain.original, profile,
+        ExecutionContext{});
+    REQUIRE(std::holds_alternative<optimization::HistoryOptimizationCall>(outcome));
+    const auto &call = std::get<optimization::HistoryOptimizationCall>(outcome);
+    REQUIRE(call.provider.actual);
+    CHECK(call.provider.actual->id.value == "profile-history-provider");
+    CHECK(call.result.identity.program.value == "profile-provider-run");
+
+    const auto mismatch = optimization::run_strategy_history_optimization(
+        std::get<registry::PreparedProvider<registry::HistoryOptimizerPort>>(provider),
+        {"different-provider"}, resolved, existing.domain.original, profile, ExecutionContext{});
+    REQUIRE(std::holds_alternative<Rejection>(mismatch));
+    CHECK(std::get<Rejection>(mismatch).diagnostics.front().field == "history.optimizer.provider");
 }
 
 TEST_CASE("whole-history port checks backend output against the original cost") {

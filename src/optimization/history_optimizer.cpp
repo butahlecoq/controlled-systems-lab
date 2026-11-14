@@ -133,6 +133,38 @@ compile_strategy_history_optimization_request(const problem::ResolvedProblem &pr
                                       profile.start};
 }
 
+StrategyHistoryOptimizationOutcome run_strategy_history_optimization(
+    const registry::PreparedProvider<registry::HistoryOptimizerPort> &provider,
+    const ModuleId &requested_provider, const problem::ResolvedProblem &problem,
+    const synthesis::JointHistoryRelation &history,
+    const StrategyHistoryOptimizationProfile &profile, const ExecutionContext &context) {
+    const auto provenance = provider.provenance();
+    if (requested_provider.value.empty() || provenance.requested.id != requested_provider)
+        return registry::Rejection{
+            provenance,
+            {{DiagnosticCode::evidence_mismatch, "history.optimizer.provider",
+              "Prepared history optimizer does not match the strategy request."}}};
+    auto compiled = compile_strategy_history_optimization_request(problem, history, profile);
+    if (const auto *errors = std::get_if<Diagnostics>(&compiled))
+        return *errors;
+    if (const auto *stopped = std::get_if<OperationStopped>(&compiled))
+        return *stopped;
+    const auto &request = std::get<HistoryOptimizationRequest>(compiled);
+    auto prepared = provider.prepare(request);
+    if (const auto *rejection = std::get_if<registry::Rejection>(&prepared))
+        return *rejection;
+    auto workers =
+        std::get<registry::PreparedPipeline<registry::HistoryOptimizerPort>>(std::move(prepared))
+            .create();
+    auto outcome = std::get<0>(workers)->run(context);
+    if (std::holds_alternative<HistoryOptimizationResult>(outcome))
+        return HistoryOptimizationCall{provenance,
+                                       std::move(std::get<HistoryOptimizationResult>(outcome))};
+    if (const auto *diagnostic = std::get_if<Diagnostic>(&outcome))
+        return *diagnostic;
+    return std::get<OperationStopped>(std::move(outcome));
+}
+
 Diagnostics check_history_optimization_request(const HistoryOptimizationRequest& r) {
     Diagnostics out;
     const auto& c=r.domain.original.coordinates;

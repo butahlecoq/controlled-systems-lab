@@ -96,6 +96,14 @@ struct HistoryOptimizationResult {
 };
 using HistoryOptimizationOutcome=std::variant<HistoryOptimizationResult,Diagnostic,OperationStopped>;
 
+struct HistoryOptimizationCall {
+    registry::Provenance provider;
+    HistoryOptimizationResult result;
+};
+using StrategyHistoryOptimizationOutcome =
+    std::variant<HistoryOptimizationCall, registry::Rejection, Diagnostics, Diagnostic,
+                 OperationStopped>;
+
 Diagnostics check_history_optimization_request(const HistoryOptimizationRequest&);
 
 } // namespace csl::optimization
@@ -110,3 +118,11 @@ struct HistoryOptimizerPort {
         const ExecutionContext& context);
 };
 } // namespace csl::registry
+
+namespace csl::optimization {
+StrategyHistoryOptimizationOutcome run_strategy_history_optimization(
+    const registry::PreparedProvider<registry::HistoryOptimizerPort> &,
+    const ModuleId &requested_provider, const problem::ResolvedProblem &,
+    const synthesis::JointHistoryRelation &, const StrategyHistoryOptimizationProfile &,
+    const ExecutionContext &);
+} // namespace csl::optimization
