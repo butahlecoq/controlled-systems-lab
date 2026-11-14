@@ -1,46 +1,49 @@
 """Stage educational 2D illustrations from reviewed native records, without solving."""
+
 from __future__ import annotations
 
 import argparse
 import hashlib
-from html import escape
 import json
 import math
-from pathlib import Path
 import re
 import shutil
 import tempfile
 import zipfile
+from html import escape
+from pathlib import Path
 from urllib.parse import urlsplit
 
-import audit_visual_routes
 import approx_extension_companions
+import audit_visual_routes
 import control_witness_companions
 import feedback_geometry_example
 import fixed_tail_example
+import geometry_opt_companions
 import native_fixed_tail_episode_report
 import native_fixed_tail_geometry
-import geometry_opt_companions
+import qhull_highs_strategy_a_example
 import report_data
 import site_additions
 import site_design
-import stage_ext07 as ext07_reports
 import stage_buryatia_dim4
 import stage_buryatia_volterra
-import stage_native_extended_models
-import stage_native_model_catalogue
+import stage_discrete_mpc_2d
+import stage_ext07
 import stage_native_discrete_models
+import stage_native_extended_models
+import stage_native_flexible_pitch
+import stage_native_model_catalogue
 import stage_native_model_tracking_first_pass
 import stage_native_row_scaling_diagnostic
 import stage_nominal_quadratic_history
-import stage_discrete_mpc_2d
-import stage_native_flexible_pitch
-import visual_illustrations
-import visual_example_geometry as geometry_examples
 import visual_example_fuel_layers
+import visual_example_geometry as geometry_examples
 import visual_example_hybrid as hybrid_examples
-import qhull_highs_strategy_a_example
+import visual_illustrations
 from mathematical_notation import matrix_html
+
+ext07_reports = stage_ext07
 
 CASE_OWNERS = {
     "hull": geometry_examples,
@@ -51,169 +54,332 @@ CASE_OWNERS = {
 }
 
 SAVED_FIGURES = (
-    dict(route="ext04-affine-synthesis-7eadf7c7ecbb2bbd", image="synthesis-2d.svg", page="index.html",
-         family="Continuous feedback · EXT-04", title="Synthesize a noisy-observation policy",
-         alt="Initial state vertices map to terminal states under a synthesized affine action based on noisy x1 observations.",
-         summary="One transition and eight vertices of a caller-authored joint initial/error hull. The linked report retains the numerical evidence limits and raw trials."),
-    dict(route="ext04-continuous-ebcf879d07ee9157", image="example-2d.svg", page="index.html",
-         family="Continuous feedback · EXT-04", title="A partial observation policy over an initial set",
-         alt="Four initial state generators map to four terminal states under a position-only affine policy.",
-         summary="A numerical all-joint check over a four-vertex two-state set, with its raw records and reproduction details in the linked report."),
-    dict(route="app02-box-8ff979de60ea9d22", image="polygons.svg", page="index.html",
-         family="Box approximation", title="Box outer approximation",
-         alt="Planar reachable-set polygons and their box approximation."),
-    dict(route="app03-zonotope-4522855018fa9b0b", image="zonotope-2d.svg", page="example-2d.html",
-         family="Zonotopes", title="A planar zonotope", alt="A planar zonotope and its generator geometry."),
-    dict(route="app04-ellipsoid-fd302c34092f8b19", image="ellipsoid-2d.svg", page="example-2d.html",
-         family="Ellipsoidal approximation", title="A planar ellipsoid", alt="A planar ellipsoidal approximation."),
-    dict(route="exp04-replay-93fe3b87795e1d3a", image="trajectory.svg", page="index.html",
-         family="Sampled replay", title="Replay a sampled trajectory",
-         alt="Saved sampled nonlinear replay trajectory."),
-    dict(route="ext05-discretization-a40ba9647cc023dc", image="trajectory-2d.svg", page="example-2d.html",
-         family="Discretization", title="A two-dimensional discretized model",
-         alt="Saved two-dimensional discretization example."),
-    dict(route="ext07-hybrid-51d9ee2e89d240eb", image="joint-relation-2d.svg", page="example-2d.html",
-         family="Hybrid reachability", title="A hybrid joint relation",
-         alt="Saved two-dimensional hybrid joint-relation example."),
-    dict(route="geo08-lazy-6dbdd6b2f9235837", image="lazy-2d.svg", page="example-2d.html",
-         family="Lazy geometry", title="Evaluate a lazy planar set",
-         alt="Planar set expression shown before and after materialization."),
-    dict(route="opt10-smooth-188130d94d7bf2de", image="feasible-box-2d.svg", page="example-2d.html",
-         family="Smooth convex optimization", title="Feasible directions in a box",
-         alt="A planar feasible box, objective direction, and selected point."),
-    dict(source_report_id="syn04-strategy-b-ts03-20261022-2c0c9210", image="control-projection.svg",
-         page="index.html", family="Strategy B control synthesis",
-         title="Strategy B on the T-S03 control projection",
-         alt="Saved T-S03 control projection from Strategy B.",
-         summary="T-S03 has a one-dimensional state, two stages and one scalar control per stage. The plotted axes are u₀ and u₁, showing a projection of the complete optimal relation. The report records exact-profile completeness with numerical assurance; it does not establish generic Strategy B completeness."),
-    dict(route="lotka-volterra-sampled-20261023", image="geometry.svg", page="index.html",
-         family="Lotka–Volterra reachability samples", title="A sampled Lotka–Volterra orbit",
-         alt="Seeded two-state Lotka–Volterra control samples trace an orbit; local panels show sample hulls.",
-         summary="512 deterministic control histories illustrate the discrete recurrence. Dots and sample hulls do not certify the full reachable sets or reproduce the historical figure."),
-    dict(route="exp03-two-points-approx-publication-v1", source_bundle="exp03-two-points-approx-pilot-v1",
-         image="reachability-and-approximations.svg", page="index.html",
-         records="run.json", family="Differential-game reachability", title="TwoPoints reachable sets and approximations",
-         alt="Two player phase planes overlay forward reachable sets, backward-winning nodes, open-loop and feedback worst-case paths, and five terminal projected-set methods.",
-         summary="The panels show player 1 position/velocity (x₁,x₂) and player 2 position/velocity (x₃,x₄), independently scaled with numeric ticks and grids. This is a three-stage finite-action adaptation of the RL game, not its continuous-action 10-second task. The approximation comparison is for terminal 2D projected hulls only; it makes no 4D or recursive-containment claim."),
-    dict(route="exp03-two-points-approx-publication-v2", source_bundle="exp03-two-points-approx-pilot-v2",
-         image="reachability-and-approximations.svg", page="index.html",
-         records="run.json", family="Differential-game reachability", title="TwoPoints reachability with minimax objective bounds",
-         alt="Two player phase planes overlay forward reachable sets, backward-winning nodes, open-loop and feedback worst-case paths, and five terminal projected-set methods.",
-         summary="The panels show player 1 position/velocity (x₁,x₂) and player 2 position/velocity (x₃,x₄). An exact finite-catalogue minimax reference and objective intervals are checked using exact integer and rational arithmetic. Bounds are inconclusive when a projected approximation omits source-lattice states; this remains a finite-action adaptation, not the upstream continuous-action RL task."),
-    dict(route="syn03-nominal-exact-2d-8b94095", image="optimal-face.svg", page="index.html",
-         family="Strategy A · nominal linear exact profile", title="A complete 2D optimal face",
-         alt="The feasible upper triangle in the unit square and its full optimal diagonal segment from (0,1) to (1,0).",
-         summary="The installed Strategy A example returned objective 1 and a registry-verified complete face x+y=1, 0<=x,y<=1. The page retains inputs, raw result and the numerical assurance limits."),
-    dict(source_report_id="b04-c-exact-dyadic-v1",
-         image="trajectory.svg", page="index.html", records="record.json",
-         family="B04-C research evidence", title="B04-C corrected-track mathematical dossier",
-         alt="One representative sixteen-stage B04-C history in oxidizer and fuel phase-plane projections, with initial state and published rounded terminal point.",
-         summary="An external Python exact-arithmetic audit records the represented-dyadic optimum and a derived 16D history fiber. The compiled Strategy A verifier has not admitted this as a complete family; the plotted curve is one representative, and no historical reproduction claim is made."),
-    dict(source_report_id="b06-owner-confirmed-7df01ba3af5e4c46", image="terminal-projections.svg",
-         page="index.html", family="Fuel minimax reference", title="B06 fuel terminal set: two projections",
-         alt="Numerical projections of the four-state terminal reachable set onto flow and stock-balance coordinates; the stock target is outside the projected set.",
-         summary="The figure uses all 1,024 disturbance-corner histories for the unique winning fixed plan. The owner-confirmed disturbance box is not printed in L09, so this is a distinct reference case rather than a historical reproduction."),
-    dict(source_report_id="b09-a08-source-reference-4818ddde", image="projections-lambda0.svg",
-         page="index.html", family="Fuel minimax reference", title="B09 fuel reachable set: lambda = 0",
-         alt="The four-state fuel model's terminal reachable set projected into flow and stock coordinates, with open-loop and receding-horizon replay paths.",
-         summary="The shaded polygons project the uncertain four-dimensional terminal set into oxidizer/fuel flow and stock planes. Red and blue paths are separate nonlinear replays; they are not set boundaries or globally optimal feedback claims."),
-    dict(source_report_id="b09-a08-source-reference-4818ddde", image="projections-lambda1.svg",
-         page="index.html", family="Fuel minimax reference", title="B09 fuel reachable set: lambda = 1",
-         alt="The four-state fuel model's terminal reachable set projected into flow and stock coordinates for the coupled objective, with open-loop and receding-horizon replay paths.",
-         summary="The shaded polygons project the uncertain four-dimensional terminal set into oxidizer/fuel flow and stock planes. Red and blue paths are separate nonlinear replays; they are not set boundaries or globally optimal feedback claims."),
-    dict(route="issue824-two-points-box-pilot-v4", image="projections.svg",
-         page="index.html", records="result.json",
-         family="Fixed-plan minimax · Box candidates",
-         title="Trace a fixed-plan box minimax search",
-         alt="Two player phase planes show stagewise box enclosures, exact forward and backward geometry, intersections, and the selected worst-history path.",
-         summary="The saved three-stage TwoPoints adaptation scores all 27 fixed control plans with a stagewise outer box, checks every finite-history state in the selected trace, and independently replays the selected plan. The terminal objective score is numerical diagnostic evidence, not a validated bound."),
-    dict(route="issue824-two-points-zonotope-pilot-v2", image="planar-example.svg",
-         page="planar-example.html", records="result.json",
-         family="Finite-horizon reachability · Zonotopes",
-         title="A planar linear image enclosed by zonotope propagation",
-         alt="The square [-1,1] by [-1,1] maps under diag(2,1) to an axis-aligned rectangle; all four exact reachable corners lie in the saved outer zonotope.",
-         summary="A one-stage two-state fixture shows the propagated zonotope, all input vertices, exact image corners, reproduction command and source commit. Inclusion is complete for this axis-aligned fixture; the separate four-state TwoPoints projection has coordinate-bound checks only."),
-    dict(route="issue824-two-points-zonotope-minimax-v1", image="planar-example.svg",
-         page="planar-example.html", records="result.json",
-         family="Fixed-plan minimax · Zonotope candidates",
-         title="Choose a fixed control by zonotope factor-corner scores",
-         alt="Three planar fixed-control candidates show their finite terminal points, outer zonotopes, numerical factor-corner scores, and the selected plan's worst-history replay.",
-         summary="A one-stage two-state fixture scores every terminal factor corner for three fixed controls, then replays the selected control over every finite disturbance. All finite terminal points lie in the checked axis-aligned zonotopes; the score remains numerical candidate evidence."),
-    dict(route="issue824-two-points-zonotope-minimax-v2", image="planar-example.svg",
-         page="planar-example.html", records="result.json",
-         family="Fixed-plan minimax · Zonotope candidates",
-         title="Check exact finite-state inclusion in a zonotope",
-         alt="Three planar fixed-control candidates show finite terminal points, outer zonotopes, numerical corner scores, and the selected worst-history replay.",
-         summary="This refreshed TwoPoints report checks each exact finite-history state against every facet of the stored dyadic zonotope at every stage. Objective candidate scores remain numerical estimates, not certified bounds."),
-    dict(route="issue824-two-points-ellipsoid-minimax-v1", image="ellipsoid-planar-example.svg",
-         page="ellipsoid-planar-example.html", records="result.json",
-         family="Fixed-plan minimax · Ellipsoid candidates",
-         title="Enclose a planar linear image with an ellipsoid",
-         alt="The square [-1,1] by [-1,1] maps under diag(2,1) to a rectangle enclosed by a stagewise outer ellipse.",
-         summary="The minimal two-state example is generated from the saved report record, with exact-rational corner membership checked independently. The separate four-state TwoPoints selection is finite-catalogue and its ellipsoid scores are numerical candidate estimates, not validated objective bounds."),
-    dict(route="issue824-two-points-ellipsoid-minimax-v2", image="ellipsoid-planar-example.svg",
-         page="ellipsoid-planar-example.html", records="result.json",
-         family="Fixed-plan minimax · Ellipsoid candidates",
-         title="Compare ellipsoid and zonotope enclosures",
-         alt="A planar image is enclosed by an outer ellipse, alongside saved TwoPoints projections and minimax path evidence.",
-         summary="The refreshed report preserves the ellipsoid candidate estimates and adds exact-rational full-zonotope membership checks for every finite history state in the shared comparison."),
-    dict(route="issue824-two-points-nominal-v1", image="projections.svg",
-         page="index.html", records="result.json",
-         family="Classic nominal · Finite minimax",
-         title="Compare nominal and minimax control on TwoPoints",
-         alt="Two player phase planes show reachable sets, backward-winning intersections and representation projections, overlaid with the fixed-input nominal and finite minimax trajectories.",
-         summary="Five set-representation tracks score all 27 nominal action plans under the declared opponent signal v=+1. An independent rational checker also verifies the separate 27-by-27 finite minimax reference. The upstream continuous-action RL task is not reproduced."),
-    dict(route="issue824-two-points-nominal-v2", image="projections.svg",
-         page="index.html", records="result.json",
-         family="Classic nominal · Finite minimax",
-         title="Profile the combined nominal comparison path",
-         alt="Two player phase planes show reachable sets, backward-winning intersections and representation projections, overlaid with the fixed-input nominal and finite minimax trajectories.",
-         summary="Five end-to-end report trials and a separate gprof limiter profile are recorded. The profile describes a combined five-track API call and makes no per-representation winner or speedup claim."),
-    dict(route="issue824-two-points-matched-minimax-v1", image="geometry-reference-ellipsoid.svg",
-         page="index.html", records="result.json", check="check.json",
-         family="Fixed-plan minimax · Matched set representations",
-         title="Compare five minimax set tracks on TwoPoints",
-         alt="The two player phase planes show forward and backward reachable geometry, intersections, and replayed finite-game paths.",
-         summary="Five matched Release tracks (exact polytope, box, zonotope, fixed-frame parallelotope, ellipsoid) each score all 27 plans and replay the selected plan over 27 disturbance histories. A rational checker verifies all measured outcomes. This three-stage finite adaptation is not the upstream continuous-action RL task; timings are fixture-specific and make no general winner claim."),
-    dict(route="issue824-two-points-matched-minimax-resource-v1", image="geometry-reference-ellipsoid.svg",
-         page="index.html", records="result.json", check="check.json",
-         family="Fixed-plan minimax · Resource-limited comparison",
-         title="Compare five minimax set tracks under shared resource limits",
-         alt="The two player phase planes show saved forward and backward reachable geometry, intersections, and replayed finite-game paths.",
-         summary="Five order-rotated Release repetitions per method ran inside an enforced 300-second and 8 GiB process-tree profile. The report records cgroup peak memory, exact-rational replay checks, and the separate zonotope limiter profile. This finite adaptation makes no general winner claim."),
-    dict(route="issue944-strategy-a-each-choice-v1", image="pipeline-2d.svg", page="index.html",
-         records="records.json", family="Strategy A · Nominal one-step control",
-         title="Exercise each admitted Strategy A pipeline choice",
-         alt="Returned unit-square terminal family with public recovered linear and quadratic histories.",
-         summary="A saved 128-tuple run records 64 structural contract exclusions, 62 complete admitted attempts, and two retained KPABEP-to-HiGHS numerical refusals. The one-step open-loop case makes no feedback, complete-family, or performance claim."),
-    dict(route="issue944-strategy-a-each-choice-postfix-v1", image="pipeline-2d.svg", page="index.html",
-         records="records.json", family="Strategy A · Nominal one-step control",
-         title="Exercise the admitted Strategy A choices after the Qhull fix",
-         alt="Returned unit-square terminal candidate family and public recovered linear and quadratic histories.",
-         summary="A source-qualified 128-tuple follow-up records 64 Phase-I contract exclusions and 64 completed admitted attempts after the Qhull affine-basis correction. This is one-step open-loop candidate evidence, with no feedback, complete-family, global-optimality, or performance claim."),
+    dict(
+        route="ext04-affine-synthesis-7eadf7c7ecbb2bbd",
+        image="synthesis-2d.svg",
+        page="index.html",
+        family="Continuous feedback · EXT-04",
+        title="Synthesize a noisy-observation policy",
+        alt="Initial state vertices map to terminal states under a synthesized affine action based on noisy x1 observations.",
+        summary="One transition and eight vertices of a caller-authored joint initial/error hull. The linked report retains the numerical evidence limits and raw trials.",
+    ),
+    dict(
+        route="ext04-continuous-ebcf879d07ee9157",
+        image="example-2d.svg",
+        page="index.html",
+        family="Continuous feedback · EXT-04",
+        title="A partial observation policy over an initial set",
+        alt="Four initial state generators map to four terminal states under a position-only affine policy.",
+        summary="A numerical all-joint check over a four-vertex two-state set, with its raw records and reproduction details in the linked report.",
+    ),
+    dict(
+        route="app02-box-8ff979de60ea9d22",
+        image="polygons.svg",
+        page="index.html",
+        family="Box approximation",
+        title="Box outer approximation",
+        alt="Planar reachable-set polygons and their box approximation.",
+    ),
+    dict(
+        route="app03-zonotope-4522855018fa9b0b",
+        image="zonotope-2d.svg",
+        page="example-2d.html",
+        family="Zonotopes",
+        title="A planar zonotope",
+        alt="A planar zonotope and its generator geometry.",
+    ),
+    dict(
+        route="app04-ellipsoid-fd302c34092f8b19",
+        image="ellipsoid-2d.svg",
+        page="example-2d.html",
+        family="Ellipsoidal approximation",
+        title="A planar ellipsoid",
+        alt="A planar ellipsoidal approximation.",
+    ),
+    dict(
+        route="exp04-replay-93fe3b87795e1d3a",
+        image="trajectory.svg",
+        page="index.html",
+        family="Sampled replay",
+        title="Replay a sampled trajectory",
+        alt="Saved sampled nonlinear replay trajectory.",
+    ),
+    dict(
+        route="ext05-discretization-a40ba9647cc023dc",
+        image="trajectory-2d.svg",
+        page="example-2d.html",
+        family="Discretization",
+        title="A two-dimensional discretized model",
+        alt="Saved two-dimensional discretization example.",
+    ),
+    dict(
+        route="ext07-hybrid-51d9ee2e89d240eb",
+        image="joint-relation-2d.svg",
+        page="example-2d.html",
+        family="Hybrid reachability",
+        title="A hybrid joint relation",
+        alt="Saved two-dimensional hybrid joint-relation example.",
+    ),
+    dict(
+        route="geo08-lazy-6dbdd6b2f9235837",
+        image="lazy-2d.svg",
+        page="example-2d.html",
+        family="Lazy geometry",
+        title="Evaluate a lazy planar set",
+        alt="Planar set expression shown before and after materialization.",
+    ),
+    dict(
+        route="opt10-smooth-188130d94d7bf2de",
+        image="feasible-box-2d.svg",
+        page="example-2d.html",
+        family="Smooth convex optimization",
+        title="Feasible directions in a box",
+        alt="A planar feasible box, objective direction, and selected point.",
+    ),
+    dict(
+        source_report_id="syn04-strategy-b-ts03-20261022-2c0c9210",
+        image="control-projection.svg",
+        page="index.html",
+        family="Strategy B control synthesis",
+        title="Strategy B on the T-S03 control projection",
+        alt="Saved T-S03 control projection from Strategy B.",
+        summary="T-S03 has a one-dimensional state, two stages and one scalar control per stage. The plotted axes are u₀ and u₁, showing a projection of the complete optimal relation. The report records exact-profile completeness with numerical assurance; it does not establish generic Strategy B completeness.",
+    ),
+    dict(
+        route="lotka-volterra-sampled-20261023",
+        image="geometry.svg",
+        page="index.html",
+        family="Lotka–Volterra reachability samples",
+        title="A sampled Lotka–Volterra orbit",
+        alt="Seeded two-state Lotka–Volterra control samples trace an orbit; local panels show sample hulls.",
+        summary="512 deterministic control histories illustrate the discrete recurrence. Dots and sample hulls do not certify the full reachable sets or reproduce the historical figure.",
+    ),
+    dict(
+        route="exp03-two-points-approx-publication-v1",
+        source_bundle="exp03-two-points-approx-pilot-v1",
+        image="reachability-and-approximations.svg",
+        page="index.html",
+        records="run.json",
+        family="Differential-game reachability",
+        title="TwoPoints reachable sets and approximations",
+        alt="Two player phase planes overlay forward reachable sets, backward-winning nodes, open-loop and feedback worst-case paths, and five terminal projected-set methods.",
+        summary="The panels show player 1 position/velocity (x₁,x₂) and player 2 position/velocity (x₃,x₄), independently scaled with numeric ticks and grids. This is a three-stage finite-action adaptation of the RL game, not its continuous-action 10-second task. The approximation comparison is for terminal 2D projected hulls only; it makes no 4D or recursive-containment claim.",
+    ),
+    dict(
+        route="exp03-two-points-approx-publication-v2",
+        source_bundle="exp03-two-points-approx-pilot-v2",
+        image="reachability-and-approximations.svg",
+        page="index.html",
+        records="run.json",
+        family="Differential-game reachability",
+        title="TwoPoints reachability with minimax objective bounds",
+        alt="Two player phase planes overlay forward reachable sets, backward-winning nodes, open-loop and feedback worst-case paths, and five terminal projected-set methods.",
+        summary="The panels show player 1 position/velocity (x₁,x₂) and player 2 position/velocity (x₃,x₄). An exact finite-catalogue minimax reference and objective intervals are checked using exact integer and rational arithmetic. Bounds are inconclusive when a projected approximation omits source-lattice states; this remains a finite-action adaptation, not the upstream continuous-action RL task.",
+    ),
+    dict(
+        route="syn03-nominal-exact-2d-8b94095",
+        image="optimal-face.svg",
+        page="index.html",
+        family="Strategy A · nominal linear exact profile",
+        title="A complete 2D optimal face",
+        alt="The feasible upper triangle in the unit square and its full optimal diagonal segment from (0,1) to (1,0).",
+        summary="The installed Strategy A example returned objective 1 and a registry-verified complete face x+y=1, 0<=x,y<=1. The page retains inputs, raw result and the numerical assurance limits.",
+    ),
+    dict(
+        source_report_id="b04-c-exact-dyadic-v1",
+        image="trajectory.svg",
+        page="index.html",
+        records="record.json",
+        family="B04-C research evidence",
+        title="B04-C corrected-track mathematical dossier",
+        alt="One representative sixteen-stage B04-C history in oxidizer and fuel phase-plane projections, with initial state and published rounded terminal point.",
+        summary="An external Python exact-arithmetic audit records the represented-dyadic optimum and a derived 16D history fiber. The compiled Strategy A verifier has not admitted this as a complete family; the plotted curve is one representative, and no historical reproduction claim is made.",
+    ),
+    dict(
+        source_report_id="b06-owner-confirmed-7df01ba3af5e4c46",
+        image="terminal-projections.svg",
+        page="index.html",
+        family="Fuel minimax reference",
+        title="B06 fuel terminal set: two projections",
+        alt="Numerical projections of the four-state terminal reachable set onto flow and stock-balance coordinates; the stock target is outside the projected set.",
+        summary="The figure uses all 1,024 disturbance-corner histories for the unique winning fixed plan. The owner-confirmed disturbance box is not printed in L09, so this is a distinct reference case rather than a historical reproduction.",
+    ),
+    dict(
+        source_report_id="b09-a08-source-reference-4818ddde",
+        image="projections-lambda0.svg",
+        page="index.html",
+        family="Fuel minimax reference",
+        title="B09 fuel reachable set: lambda = 0",
+        alt="The four-state fuel model's terminal reachable set projected into flow and stock coordinates, with open-loop and receding-horizon replay paths.",
+        summary="The shaded polygons project the uncertain four-dimensional terminal set into oxidizer/fuel flow and stock planes. Red and blue paths are separate nonlinear replays; they are not set boundaries or globally optimal feedback claims.",
+    ),
+    dict(
+        source_report_id="b09-a08-source-reference-4818ddde",
+        image="projections-lambda1.svg",
+        page="index.html",
+        family="Fuel minimax reference",
+        title="B09 fuel reachable set: lambda = 1",
+        alt="The four-state fuel model's terminal reachable set projected into flow and stock coordinates for the coupled objective, with open-loop and receding-horizon replay paths.",
+        summary="The shaded polygons project the uncertain four-dimensional terminal set into oxidizer/fuel flow and stock planes. Red and blue paths are separate nonlinear replays; they are not set boundaries or globally optimal feedback claims.",
+    ),
+    dict(
+        route="issue824-two-points-box-pilot-v4",
+        image="projections.svg",
+        page="index.html",
+        records="result.json",
+        family="Fixed-plan minimax · Box candidates",
+        title="Trace a fixed-plan box minimax search",
+        alt="Two player phase planes show stagewise box enclosures, exact forward and backward geometry, intersections, and the selected worst-history path.",
+        summary="The saved three-stage TwoPoints adaptation scores all 27 fixed control plans with a stagewise outer box, checks every finite-history state in the selected trace, and independently replays the selected plan. The terminal objective score is numerical diagnostic evidence, not a validated bound.",
+    ),
+    dict(
+        route="issue824-two-points-zonotope-pilot-v2",
+        image="planar-example.svg",
+        page="planar-example.html",
+        records="result.json",
+        family="Finite-horizon reachability · Zonotopes",
+        title="A planar linear image enclosed by zonotope propagation",
+        alt="The square [-1,1] by [-1,1] maps under diag(2,1) to an axis-aligned rectangle; all four exact reachable corners lie in the saved outer zonotope.",
+        summary="A one-stage two-state fixture shows the propagated zonotope, all input vertices, exact image corners, reproduction command and source commit. Inclusion is complete for this axis-aligned fixture; the separate four-state TwoPoints projection has coordinate-bound checks only.",
+    ),
+    dict(
+        route="issue824-two-points-zonotope-minimax-v1",
+        image="planar-example.svg",
+        page="planar-example.html",
+        records="result.json",
+        family="Fixed-plan minimax · Zonotope candidates",
+        title="Choose a fixed control by zonotope factor-corner scores",
+        alt="Three planar fixed-control candidates show their finite terminal points, outer zonotopes, numerical factor-corner scores, and the selected plan's worst-history replay.",
+        summary="A one-stage two-state fixture scores every terminal factor corner for three fixed controls, then replays the selected control over every finite disturbance. All finite terminal points lie in the checked axis-aligned zonotopes; the score remains numerical candidate evidence.",
+    ),
+    dict(
+        route="issue824-two-points-zonotope-minimax-v2",
+        image="planar-example.svg",
+        page="planar-example.html",
+        records="result.json",
+        family="Fixed-plan minimax · Zonotope candidates",
+        title="Check exact finite-state inclusion in a zonotope",
+        alt="Three planar fixed-control candidates show finite terminal points, outer zonotopes, numerical corner scores, and the selected worst-history replay.",
+        summary="This refreshed TwoPoints report checks each exact finite-history state against every facet of the stored dyadic zonotope at every stage. Objective candidate scores remain numerical estimates, not certified bounds.",
+    ),
+    dict(
+        route="issue824-two-points-ellipsoid-minimax-v1",
+        image="ellipsoid-planar-example.svg",
+        page="ellipsoid-planar-example.html",
+        records="result.json",
+        family="Fixed-plan minimax · Ellipsoid candidates",
+        title="Enclose a planar linear image with an ellipsoid",
+        alt="The square [-1,1] by [-1,1] maps under diag(2,1) to a rectangle enclosed by a stagewise outer ellipse.",
+        summary="The minimal two-state example is generated from the saved report record, with exact-rational corner membership checked independently. The separate four-state TwoPoints selection is finite-catalogue and its ellipsoid scores are numerical candidate estimates, not validated objective bounds.",
+    ),
+    dict(
+        route="issue824-two-points-ellipsoid-minimax-v2",
+        image="ellipsoid-planar-example.svg",
+        page="ellipsoid-planar-example.html",
+        records="result.json",
+        family="Fixed-plan minimax · Ellipsoid candidates",
+        title="Compare ellipsoid and zonotope enclosures",
+        alt="A planar image is enclosed by an outer ellipse, alongside saved TwoPoints projections and minimax path evidence.",
+        summary="The refreshed report preserves the ellipsoid candidate estimates and adds exact-rational full-zonotope membership checks for every finite history state in the shared comparison.",
+    ),
+    dict(
+        route="issue824-two-points-nominal-v1",
+        image="projections.svg",
+        page="index.html",
+        records="result.json",
+        family="Classic nominal · Finite minimax",
+        title="Compare nominal and minimax control on TwoPoints",
+        alt="Two player phase planes show reachable sets, backward-winning intersections and representation projections, overlaid with the fixed-input nominal and finite minimax trajectories.",
+        summary="Five set-representation tracks score all 27 nominal action plans under the declared opponent signal v=+1. An independent rational checker also verifies the separate 27-by-27 finite minimax reference. The upstream continuous-action RL task is not reproduced.",
+    ),
+    dict(
+        route="issue824-two-points-nominal-v2",
+        image="projections.svg",
+        page="index.html",
+        records="result.json",
+        family="Classic nominal · Finite minimax",
+        title="Profile the combined nominal comparison path",
+        alt="Two player phase planes show reachable sets, backward-winning intersections and representation projections, overlaid with the fixed-input nominal and finite minimax trajectories.",
+        summary="Five end-to-end report trials and a separate gprof limiter profile are recorded. The profile describes a combined five-track API call and makes no per-representation winner or speedup claim.",
+    ),
+    dict(
+        route="issue824-two-points-matched-minimax-v1",
+        image="geometry-reference-ellipsoid.svg",
+        page="index.html",
+        records="result.json",
+        check="check.json",
+        family="Fixed-plan minimax · Matched set representations",
+        title="Compare five minimax set tracks on TwoPoints",
+        alt="The two player phase planes show forward and backward reachable geometry, intersections, and replayed finite-game paths.",
+        summary="Five matched Release tracks (exact polytope, box, zonotope, fixed-frame parallelotope, ellipsoid) each score all 27 plans and replay the selected plan over 27 disturbance histories. A rational checker verifies all measured outcomes. This three-stage finite adaptation is not the upstream continuous-action RL task; timings are fixture-specific and make no general winner claim.",
+    ),
+    dict(
+        route="issue824-two-points-matched-minimax-resource-v1",
+        image="geometry-reference-ellipsoid.svg",
+        page="index.html",
+        records="result.json",
+        check="check.json",
+        family="Fixed-plan minimax · Resource-limited comparison",
+        title="Compare five minimax set tracks under shared resource limits",
+        alt="The two player phase planes show saved forward and backward reachable geometry, intersections, and replayed finite-game paths.",
+        summary="Five order-rotated Release repetitions per method ran inside an enforced 300-second and 8 GiB process-tree profile. The report records cgroup peak memory, exact-rational replay checks, and the separate zonotope limiter profile. This finite adaptation makes no general winner claim.",
+    ),
+    dict(
+        route="issue944-strategy-a-each-choice-v1",
+        image="pipeline-2d.svg",
+        page="index.html",
+        records="records.json",
+        family="Strategy A · Nominal one-step control",
+        title="Exercise each admitted Strategy A pipeline choice",
+        alt="Returned unit-square terminal family with public recovered linear and quadratic histories.",
+        summary="A saved 128-tuple run records 64 structural contract exclusions, 62 complete admitted attempts, and two retained KPABEP-to-HiGHS numerical refusals. The one-step open-loop case makes no feedback, complete-family, or performance claim.",
+    ),
+    dict(
+        route="issue944-strategy-a-each-choice-postfix-v1",
+        image="pipeline-2d.svg",
+        page="index.html",
+        records="records.json",
+        family="Strategy A · Nominal one-step control",
+        title="Exercise the admitted Strategy A choices after the Qhull fix",
+        alt="Returned unit-square terminal candidate family and public recovered linear and quadratic histories.",
+        summary="A source-qualified 128-tuple follow-up records 64 Phase-I contract exclusions and 64 completed admitted attempts after the Qhull affine-basis correction. This is one-step open-loop candidate evidence, with no feedback, complete-family, global-optimality, or performance claim.",
+    ),
 )
 
 _BTULSHOR_FIGURE = dict(
     anchor="saved-figure-btulshor-source-faithful",
-    source_report_id="btulshor-source-faithful-20261110-v1", image="point-projections.svg",
-    page="index.html", records="raw/summary.json", family="Convex hulls · source comparison",
+    source_report_id="btulshor-source-faithful-20261110-v1",
+    image="point-projections.svg",
+    page="index.html",
+    records="raw/summary.json",
+    family="Convex hulls · source comparison",
     title="Inspect saved BTULSHOR hull projections",
     alt="Saved two-dimensional input points and method hull projections for the BTULSHOR comparison.",
-    summary="The figure uses saved input and output coordinates from the measured source-faithful comparison. The linked report preserves exact-check statuses, including any near-tolerance failure.")
+    summary="The figure uses saved input and output coordinates from the measured source-faithful comparison. The linked report preserves exact-check statuses, including any near-tolerance failure.",
+)
 _catalog_path = Path(__file__).parents[2] / "reports/algorithm-results/catalog.json"
 if _catalog_path.is_file():
     _catalog = json.loads(_catalog_path.read_text(encoding="utf-8"))
-    if any(row.get("source_report_id") == _BTULSHOR_FIGURE["source_report_id"]
-           for row in _catalog.get("reports", [])):
+    if any(
+        row.get("source_report_id") == _BTULSHOR_FIGURE["source_report_id"]
+        for row in _catalog.get("reports", [])
+    ):
         SAVED_FIGURES = (*SAVED_FIGURES, _BTULSHOR_FIGURE)
 
 
-SAVED_FIGURES = (*SAVED_FIGURES, dict(
-    route="native-terminal-cost-33f907a0", image="cost-contours.svg", page="index.html",
-    records="after/record.json", family="Optimization · source-cost correction",
-    title="Match the source terminal cost",
-    alt="Lotka source minimum and previous adapter minimum with quadratic cost contours",
-    summary="Two saved native diagnostic queries and an analytic 2D illustration of the quadratic coefficient correction; no full episode or benchmark claim."))
+SAVED_FIGURES = (
+    *SAVED_FIGURES,
+    dict(
+        route="native-terminal-cost-33f907a0",
+        image="cost-contours.svg",
+        page="index.html",
+        records="after/record.json",
+        family="Optimization · source-cost correction",
+        title="Match the source terminal cost",
+        alt="Lotka source minimum and previous adapter minimum with quadratic cost contours",
+        summary="Two saved native diagnostic queries and an analytic 2D illustration of the quadratic coefficient correction; no full episode or benchmark claim.",
+    ),
+)
 
 
 require = report_data.require
@@ -226,42 +392,58 @@ def load_examples(catalog):
 
 def plot(example):
     if example["kind"] == "two_parameter":
+
         def point(p):
             return (80 + p[0] * 400, 440 - p[1] * 400)
 
         def polygon(points, color, fill, dashed=False):
             coords = " ".join(f"{x:.6f},{y:.6f}" for x, y in map(point, points))
             dash = ' stroke-dasharray="8 6"' if dashed else ""
-            return (f'<polygon points="{coords}" fill="{fill}" stroke="{color}" '
-                    f'stroke-width="3"{dash}/>')
+            return (
+                f'<polygon points="{coords}" fill="{fill}" stroke="{color}" '
+                f'stroke-width="3"{dash}/>'
+            )
 
         elements = []
         for value in (0, 0.5, 1):
             x, y = point((value, value))
-            elements += [f'<line x1="{x}" y1="40" x2="{x}" y2="440" stroke="#3c493d"/>',
-                         f'<line x1="80" y1="{y}" x2="480" y2="{y}" stroke="#3c493d"/>',
-                         f'<text x="{x}" y="470" text-anchor="middle">{value:g}</text>',
-                         f'<text x="68" y="{y+5}" text-anchor="end">{value:g}</text>']
+            elements += [
+                f'<line x1="{x}" y1="40" x2="{x}" y2="440" stroke="#3c493d"/>',
+                f'<line x1="80" y1="{y}" x2="480" y2="{y}" stroke="#3c493d"/>',
+                f'<text x="{x}" y="470" text-anchor="middle">{value:g}</text>',
+                f'<text x="68" y="{y + 5}" text-anchor="end">{value:g}</text>',
+            ]
         full, half = example["polygons"][1], example["polygons"][0]
-        elements += [polygon(full["feasible_polygon_in_control_coordinates"], "#d6af75", "#d6af7518", True),
-                     polygon(half["feasible_polygon_in_control_coordinates"], "#b4cda3", "#b4cda333"),
-                     '<text x="92" y="132">enter-half path</text>',
-                     '<text x="335" y="388">enter-full only</text>',
-                     '<text x="290" y="72" text-anchor="middle">objective = 0 everywhere</text>']
-        description = ("The amber dashed triangle is the enter-full path. The green quadrilateral is the "
-                       "enter-half path and lies within it. Every point on both labelled paths is optimal "
-                       "for the constant zero objective.")
-        return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 510" role="img" '
-                'aria-labelledby="title desc"><title id="title">' + escape(example["title"]) + '</title>'
-                '<desc id="desc">' + description + '</desc><rect width="580" height="510" fill="#172019"/>'
-                '<g font-family="monospace" font-size="14" fill="#d1d9cc">' + "".join(elements) +
-                '<text x="285" y="502" text-anchor="middle">u₀ (first free control)</text>'
-                '<text x="18" y="245" transform="rotate(-90 18 245)" text-anchor="middle">u₁ (second free control)</text>'
-                '</g></svg>')
+        elements += [
+            polygon(full["feasible_polygon_in_control_coordinates"], "#d6af75", "#d6af7518", True),
+            polygon(half["feasible_polygon_in_control_coordinates"], "#b4cda3", "#b4cda333"),
+            '<text x="92" y="132">enter-half path</text>',
+            '<text x="335" y="388">enter-full only</text>',
+            '<text x="290" y="72" text-anchor="middle">objective = 0 everywhere</text>',
+        ]
+        description = (
+            "The amber dashed triangle is the enter-full path. The green quadrilateral is the "
+            "enter-half path and lies within it. Every point on both labelled paths is optimal "
+            "for the constant zero objective."
+        )
+        return (
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 510" role="img" '
+            'aria-labelledby="title desc"><title id="title">'
+            + escape(example["title"])
+            + "</title>"
+            '<desc id="desc">'
+            + description
+            + '</desc><rect width="580" height="510" fill="#172019"/>'
+            '<g font-family="monospace" font-size="14" fill="#d1d9cc">'
+            + "".join(elements)
+            + '<text x="285" y="502" text-anchor="middle">u₀ (first free control)</text>'
+            '<text x="18" y="245" transform="rotate(-90 18 245)" text-anchor="middle">u₁ (second free control)</text>'
+            "</g></svg>"
+        )
     low, high = example["domain"]
 
     def point(p):
-        return (80 + (p[0]-low)*400/(high-low), 440 - (p[1]-low)*400/(high-low))
+        return (80 + (p[0] - low) * 400 / (high - low), 440 - (p[1] - low) * 400 / (high - low))
 
     def coordinates(points):
         return " ".join(f"{x:.6f},{y:.6f}" for x, y in map(point, points))
@@ -269,33 +451,40 @@ def plot(example):
     def boundary(points, color, fill="none", dashed=False):
         tag = "polygon" if len(points) > 2 else "polyline"
         dash = ' stroke-dasharray="8 6"' if dashed else ""
-        return (f'<{tag} points="{coordinates(points)}" fill="{fill}" '
-                f'stroke="{color}" stroke-width="2.5"{dash}/>')
+        return (
+            f'<{tag} points="{coordinates(points)}" fill="{fill}" '
+            f'stroke="{color}" stroke-width="2.5"{dash}/>'
+        )
 
     elements = []
     for value in sorted({low, 0, high}):
         x, y = point((value, value))
-        elements += [f'<line x1="{x}" y1="40" x2="{x}" y2="440" stroke="#3c493d"/>',
-                     f'<line x1="80" y1="{y}" x2="480" y2="{y}" stroke="#3c493d"/>',
-                     f'<text x="{x}" y="470" text-anchor="middle">{value:g}</text>',
-                     f'<text x="68" y="{y+5}" text-anchor="end">{value:g}</text>']
+        elements += [
+            f'<line x1="{x}" y1="40" x2="{x}" y2="440" stroke="#3c493d"/>',
+            f'<line x1="80" y1="{y}" x2="480" y2="{y}" stroke="#3c493d"/>',
+            f'<text x="{x}" y="470" text-anchor="middle">{value:g}</text>',
+            f'<text x="68" y="{y + 5}" text-anchor="end">{value:g}</text>',
+        ]
     if example["kind"] == "intersection":
-        elements.append(boundary([[-1,-1],[1,-1],[1,1],[-1,1]], "#91a9c7", dashed=True))
-        elements.append(boundary([[-1.5,0],[0,-1.5],[1.5,0],[0,1.5]], "#d6af75", dashed=True))
+        elements.append(boundary([[-1, -1], [1, -1], [1, 1], [-1, 1]], "#91a9c7", dashed=True))
+        elements.append(
+            boundary([[-1.5, 0], [0, -1.5], [1.5, 0], [0, 1.5]], "#d6af75", dashed=True)
+        )
         vertices = sorted(example["vertices"], key=lambda p: math.atan2(p[1], p[0]))
     else:
         vertices = example["vertices"]
     elements.append(boundary(vertices, "#b4cda3", "#b4cda31c" if len(vertices) > 2 else "none"))
     if example["kind"] in {"hybrid", "projected_reachability"}:
-        labels = (("unique minimum", "feasible endpoint") if example["kind"] == "hybrid"
-                  else ("projected endpoint", "projected endpoint"))
-        colors = (("#d6af75", "#b4cda3") if example["kind"] == "hybrid"
-                  else ("#b4cda3", "#b4cda3"))
-        for index, (p, label, color) in enumerate(zip(example["points"],
-                labels, colors)):
+        labels = (
+            ("unique minimum", "feasible endpoint")
+            if example["kind"] == "hybrid"
+            else ("projected endpoint", "projected endpoint")
+        )
+        colors = ("#d6af75", "#b4cda3") if example["kind"] == "hybrid" else ("#b4cda3", "#b4cda3")
+        for p, label, color in zip(example["points"], labels, colors, strict=True):
             x, y = point(p)
             elements.append(f'<circle cx="{x}" cy="{y}" r="6" fill="{color}"/>')
-            elements.append(f'<text x="{x+9}" y="{y-10}">{label}</text>')
+            elements.append(f'<text x="{x + 9}" y="{y - 10}">{label}</text>')
     else:
         groups = {}
         for index, p in enumerate(example["points"]):
@@ -306,38 +495,52 @@ def plot(example):
             color = "#b4cda3" if retained else "#d6af75"
             label = "/".join(str(index) for index in ids)
             elements.append(f'<circle cx="{x}" cy="{y}" r="5" fill="{color}"/>')
-            elements.append(f'<text x="{x+9}" y="{y-10}">{label}</text>')
-    description = ("Original point IDs label each location; slash-separated IDs coincide. Green points are hull vertices."
-                   if example["kind"] == "hull" else
-                   "Blue dashed square and amber dashed diamond overlap in the green eight-vertex intersection. Labels are saved output row IDs."
-                   if example["kind"] == "intersection" else
-                   "The green segment is the projected terminal state set x1 in [0, 0.5]; the axes show the feasible control and terminal-state relation."
-                   if example["kind"] == "projected_reachability" else
-                   "The feasible two-stage relation is the green segment x2 equals u0 from zero to one half; the gold point is its unique minimum.")
-    x_label, y_label = (("u₀ (free control)", "x₂ (terminal state)") if example["kind"] == "hybrid"
-                        else ("u₀ (free control)", "x₁ (terminal state)") if example["kind"] == "projected_reachability"
-                        else ("x (dimensionless)", "y (dimensionless)"))
-    return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 510" role="img" '
-            'aria-labelledby="title desc"><title id="title">' + escape(example["title"]) + '</title>'
-            '<desc id="desc">' + description + '</desc><rect width="580" height="510" fill="#172019"/>'
-            '<g font-family="monospace" font-size="14" fill="#d1d9cc">' + "".join(elements) +
-            '<text x="285" y="502" text-anchor="middle">' + escape(x_label) + '</text>'
-            '<text x="18" y="245" transform="rotate(-90 18 245)" text-anchor="middle">' + escape(y_label) + '</text>'
-            '</g></svg>')
+            elements.append(f'<text x="{x + 9}" y="{y - 10}">{label}</text>')
+    description = (
+        "Original point IDs label each location; slash-separated IDs coincide. Green points are hull vertices."
+        if example["kind"] == "hull"
+        else "Blue dashed square and amber dashed diamond overlap in the green eight-vertex intersection. Labels are saved output row IDs."
+        if example["kind"] == "intersection"
+        else "The green segment is the projected terminal state set x1 in [0, 0.5]; the axes show the feasible control and terminal-state relation."
+        if example["kind"] == "projected_reachability"
+        else "The feasible two-stage relation is the green segment x2 equals u0 from zero to one half; the gold point is its unique minimum."
+    )
+    x_label, y_label = (
+        ("u₀ (free control)", "x₂ (terminal state)")
+        if example["kind"] == "hybrid"
+        else ("u₀ (free control)", "x₁ (terminal state)")
+        if example["kind"] == "projected_reachability"
+        else ("x (dimensionless)", "y (dimensionless)")
+    )
+    return (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 510" role="img" '
+        'aria-labelledby="title desc"><title id="title">' + escape(example["title"]) + "</title>"
+        '<desc id="desc">' + description + '</desc><rect width="580" height="510" fill="#172019"/>'
+        '<g font-family="monospace" font-size="14" fill="#d1d9cc">'
+        + "".join(elements)
+        + '<text x="285" y="502" text-anchor="middle">'
+        + escape(x_label)
+        + "</text>"
+        '<text x="18" y="245" transform="rotate(-90 18 245)" text-anchor="middle">'
+        + escape(y_label)
+        + "</text>"
+        "</g></svg>"
+    )
 
 
 def data_details(example):
     """Keep input and output coordinates available without crowding the lesson view."""
     if example["kind"] == "hull":
         summary = f"Data · {len(example['points'])} source points · copyable JSON"
-        content = site_design.code_block(site_design.compact_json(example["inputs"]),
-                                         "Complete minimal input JSON")
+        content = site_design.code_block(
+            site_design.compact_json(example["inputs"]), "Complete minimal input JSON"
+        )
     else:
         role = {
-        "hybrid": "feasible interval endpoints",
-        "projected_reachability": "projected terminal endpoints",
-        "two_parameter": "feasible polygon vertices",
-        "intersection": "intersection vertices",
+            "hybrid": "feasible interval endpoints",
+            "projected_reachability": "projected terminal endpoints",
+            "two_parameter": "feasible polygon vertices",
+            "intersection": "intersection vertices",
         }[example["kind"]]
         points = example["points"]
         dimensions = len(points[0])
@@ -353,26 +556,37 @@ def data_details(example):
         output_matrix = matrix_html(
             matrix,
             f"Output coordinate matrix W, {dimensions} coordinate rows by {len(points)} stored-output columns, displayed to six significant digits; coordinates {spoken_rows}",
-            display_significant_digits=6)
-        columns = ", ".join(f'w<sub>{i}</sub>' for i in range(len(points)))
+            display_significant_digits=6,
+        )
+        columns = ", ".join(f"w<sub>{i}</sub>" for i in range(len(points)))
         rows = math_rows
         summary = f"Data · {len(points)} {role} · output matrix and copyable JSON"
-        content = ('<p><var>W</var> ≈ [<var>w</var><sub>0</sub> … '
-                   f'<var>w</var><sub>{len(points) - 1}</sub>] ∈ ℝ<sup>{dimensions}×{len(points)}</sup></p>'
-                   + '<p class="limits">Displayed matrix values are rounded to 6 significant digits (≈); '
-                   'full precision is in Copy JSON. Matrix columns are output rows in stored order: '
-                   + columns + '; coordinates are rows: ' + rows
-                   + '. Repeated coordinates remain in place.</p>'
-                   + '<div class="scroll" tabindex="0" role="region" aria-label="Output coordinate matrix W">'
-                   + output_matrix + '</div>'
-                   + '<details><summary>Copy JSON for reproduction</summary>'
-                   + '<p class="limits">Output coordinates · ' + escape(role) + '</p>'
-                   + site_design.code_block(site_design.compact_json(points), "Output coordinates · " + role)
-                   + '<p class="limits">Complete minimal input JSON</p>'
-                   + site_design.code_block(site_design.compact_json(example["inputs"]),
-                                            "Complete minimal input JSON")
-                   + '</details>')
-    return '<details><summary>' + summary + '</summary>' + content + '</details>'
+        content = (
+            "<p><var>W</var> ≈ [<var>w</var><sub>0</sub> … "
+            f"<var>w</var><sub>{len(points) - 1}</sub>] ∈ ℝ<sup>{dimensions}×{len(points)}</sup></p>"
+            + '<p class="limits">Displayed matrix values are rounded to 6 significant digits (≈); '
+            "full precision is in Copy JSON. Matrix columns are output rows in stored order: "
+            + columns
+            + "; coordinates are rows: "
+            + rows
+            + ". Repeated coordinates remain in place.</p>"
+            + '<div class="scroll" tabindex="0" role="region" aria-label="Output coordinate matrix W">'
+            + output_matrix
+            + "</div>"
+            + "<details><summary>Copy JSON for reproduction</summary>"
+            + '<p class="limits">Output coordinates · '
+            + escape(role)
+            + "</p>"
+            + site_design.code_block(
+                site_design.compact_json(points), "Output coordinates · " + role
+            )
+            + '<p class="limits">Complete minimal input JSON</p>'
+            + site_design.code_block(
+                site_design.compact_json(example["inputs"]), "Complete minimal input JSON"
+            )
+            + "</details>"
+        )
+    return "<details><summary>" + summary + "</summary>" + content + "</details>"
 
 
 def lesson_input_math(example):
@@ -381,346 +595,559 @@ def lesson_input_math(example):
         points = example["inputs"]["points"]
         dimensions = len(points[0])
         matrix = [[point[coordinate] for point in points] for coordinate in range(dimensions)]
-        values = matrix_html(matrix,
-                              f"Point matrix V, {dimensions} coordinate rows by {len(points)} source-point columns")
-        return ('<div class="math-input"><p><var>V</var> = [<var>v</var><sub>0</sub> … '
-                f'<var>v</var><sub>{len(points) - 1}</sub>] ∈ ℝ<sup>{dimensions}×{len(points)}</sup></p>'
-                + '<p class="limits">Matrix columns, in order: source points '
-                + ", ".join(f'v<sub>{i}</sub>' for i in range(len(points)))
-                + "; rows: " + ", ".join(f'x<sub>{i + 1}</sub>' for i in range(dimensions))
-                + '. Duplicate source points remain separate.</p>'
-                + '<div class="scroll" tabindex="0" role="region" aria-label="Input point matrix V">'
-                + values + '</div></div>')
+        values = matrix_html(
+            matrix,
+            f"Point matrix V, {dimensions} coordinate rows by {len(points)} source-point columns",
+        )
+        return (
+            '<div class="math-input"><p><var>V</var> = [<var>v</var><sub>0</sub> … '
+            f"<var>v</var><sub>{len(points) - 1}</sub>] ∈ ℝ<sup>{dimensions}×{len(points)}</sup></p>"
+            + '<p class="limits">Matrix columns, in order: source points '
+            + ", ".join(f"v<sub>{i}</sub>" for i in range(len(points)))
+            + "; rows: "
+            + ", ".join(f"x<sub>{i + 1}</sub>" for i in range(dimensions))
+            + ". Duplicate source points remain separate.</p>"
+            + '<div class="scroll" tabindex="0" role="region" aria-label="Input point matrix V">'
+            + values
+            + "</div></div>"
+        )
     if example["kind"] == "intersection":
         source = example["inputs"]
 
         def halfspace(name, symbol, set_symbol, title):
             matrix = source[name + "_A"]
             bounds = source[name + "_b"]
-            matrix_table = matrix_html(matrix, f"Matrix A_{symbol}, {len(matrix)} rows by 2 columns")
-            vector_table = matrix_html([[value] for value in bounds],
-                                        f"Column vector b_{symbol}, {len(bounds)} entries")
-            return ('<section class="math-system"><h3>' + title + '</h3>'
-                    f'<p><var>{set_symbol}</var> = {{<var>x</var> ∈ ℝ<sup>2</sup> : '
-                    f'<var>A</var><sub>{symbol}</sub><var>x</var> ≤ <var>b</var><sub>{symbol}</sub>}}</p>'
-                    '<p class="limits">Columns of A: x₁, x₂. Rows are paired in order with entries of b.</p>'
-                    '<div class="math-expression"><span><var>A</var><sub>' + symbol + '</sub> = </span>'
-                    + matrix_table + '<span><var>b</var><sub>' + symbol + '</sub> = </span>'
-                    + vector_table + '</div></section>')
+            matrix_table = matrix_html(
+                matrix, f"Matrix A_{symbol}, {len(matrix)} rows by 2 columns"
+            )
+            vector_table = matrix_html(
+                [[value] for value in bounds], f"Column vector b_{symbol}, {len(bounds)} entries"
+            )
+            return (
+                '<section class="math-system"><h3>' + title + "</h3>"
+                f"<p><var>{set_symbol}</var> = {{<var>x</var> ∈ ℝ<sup>2</sup> : "
+                f"<var>A</var><sub>{symbol}</sub><var>x</var> ≤ <var>b</var><sub>{symbol}</sub>}}</p>"
+                '<p class="limits">Columns of A: x₁, x₂. Rows are paired in order with entries of b.</p>'
+                '<div class="math-expression"><span><var>A</var><sub>'
+                + symbol
+                + "</sub> = </span>"
+                + matrix_table
+                + "<span><var>b</var><sub>"
+                + symbol
+                + "</sub> = </span>"
+                + vector_table
+                + "</div></section>"
+            )
 
-        return ('<div class="math-input"><p>Input sets:</p><div class="math-systems">'
-                + halfspace("left", "L", "P", "Left set P")
-                + halfspace("right", "R", "Q", "Right set Q") + '</div></div>')
+        return (
+            '<div class="math-input"><p>Input sets:</p><div class="math-systems">'
+            + halfspace("left", "L", "P", "Left set P")
+            + halfspace("right", "R", "Q", "Right set Q")
+            + "</div></div>"
+        )
     return ""
 
 
 def section(example, number, previous=None, following=None):
     owner = CASE_OWNERS[example["kind"]]
     content = owner.presentation(example)
-    markup = (f'<section id="{example["slug"]}"><p class="eyebrow">Example {number:02d} / {content["example_type"]}</p>'
-            f'<h2>{example["title"]}</h2><p>{content["explanation"]}</p>'
-            + lesson_input_math(example)
-            + f'<figure><img src="{example["slug"]}.svg" alt="{escape(content["explanation"], quote=True)}">'
-            f'<figcaption>{content["caption"]}</figcaption></figure>'
-            f'<p class="answer">{content["result"]}</p>{data_details(example)}'
-            + content["extra"] + '<details><summary>Reproduce the functional example</summary>' + content["reproduction"] +
-            site_design.code_block(content["command"], "Functional example reproduction commands")
-            + '<p>' + content["platform_note"] + '</p>'
-            f'<p><a href="{content["source_url"]}">Complete native fixture/driver ↗</a></p></details>'
-            f'<p class="limits">{content["notes"]}</p>' + content["source_provenance"] +
-            content["raw_record_link"] + content["report_links"] +
-            site_design.lesson_neighbors(previous, following) + '</section>')
+    markup = (
+        f'<section id="{example["slug"]}"><p class="eyebrow">Example {number:02d} / {content["example_type"]}</p>'
+        f"<h2>{example['title']}</h2><p>{content['explanation']}</p>"
+        + lesson_input_math(example)
+        + f'<figure><img src="{example["slug"]}.svg" alt="{escape(content["explanation"], quote=True)}">'
+        f"<figcaption>{content['caption']}</figcaption></figure>"
+        f'<p class="answer">{content["result"]}</p>{data_details(example)}'
+        + content["extra"]
+        + "<details><summary>Reproduce the functional example</summary>"
+        + content["reproduction"]
+        + site_design.code_block(content["command"], "Functional example reproduction commands")
+        + "<p>"
+        + content["platform_note"]
+        + "</p>"
+        f'<p><a href="{content["source_url"]}">Complete native fixture/driver ↗</a></p></details>'
+        f'<p class="limits">{content["notes"]}</p>'
+        + content["source_provenance"]
+        + content["raw_record_link"]
+        + content["report_links"]
+        + site_design.lesson_neighbors(previous, following)
+        + "</section>"
+    )
     return site_design.focusable_code_blocks(markup, "Scrollable example code")
 
 
 def saved_figure_sections(catalog, site):
     entries = json.loads(Path(catalog).read_text(encoding="utf-8"))["reports"]
-    by_source = {entry["source_report_id"]: entry for entry in entries if "source_report_id" in entry}
+    by_source = {
+        entry["source_report_id"]: entry for entry in entries if "source_report_id" in entry
+    }
     cards = []
     inventory = []
     for number, entry in enumerate(SAVED_FIGURES, start=1):
         report_id = entry.get("route")
         if "source_report_id" in entry:
             published = by_source.get(entry["source_report_id"])
-            require(published is not None, "missing catalogued visual report: " + entry["source_report_id"])
+            if published is None:
+                raise ValueError("missing catalogued visual report: " + entry["source_report_id"])
             report_id = published["report_id"]
-        require(re.fullmatch(r"[A-Za-z0-9-]+", report_id or "") is not None, "unsafe visual report route")
+        if not isinstance(report_id, str) or re.fullmatch(r"[A-Za-z0-9-]+", report_id) is None:
+            raise ValueError("unsafe visual report route")
         route = Path(site) / report_id
         image_path = route / entry["image"]
-        require(not route.is_symlink() and image_path.is_file() and not image_path.is_symlink(),
-                "missing staged visual figure: " + report_id + "/" + entry["image"])
+        require(
+            not route.is_symlink() and image_path.is_file() and not image_path.is_symlink(),
+            "missing staged visual figure: " + report_id + "/" + entry["image"],
+        )
         records_name = entry.get("records", "records.json")
-        require((route / entry["page"]).is_file() and (route / records_name).is_file(),
-                "saved visual needs a report page and raw records: " + report_id)
-        summary = entry.get("summary", "Figure from the immutable saved report; no solver was rerun for this gallery.")
+        require(
+            (route / entry["page"]).is_file() and (route / records_name).is_file(),
+            "saved visual needs a report page and raw records: " + report_id,
+        )
+        summary = entry.get(
+            "summary",
+            "Figure from the immutable saved report; no solver was rerun for this gallery.",
+        )
         check_name = entry.get("check")
         if check_name:
             check_path = route / check_name
-            require(check_path.is_file() and not check_path.is_symlink(),
-                    "saved visual needs its independent check record: " + report_id + "/" + check_name)
+            require(
+                check_path.is_file() and not check_path.is_symlink(),
+                "saved visual needs its independent check record: " + report_id + "/" + check_name,
+            )
             check = json.loads(check_path.read_text(encoding="utf-8"))
-            require(check.get("schema") == "csl.issue824.matched-minimax-check/1" and
-                    check.get("status") in ("verified", "incomplete"),
-                    "saved visual has an unknown independent-check status: " + report_id)
+            require(
+                check.get("schema") == "csl.issue824.matched-minimax-check/1"
+                and check.get("status") in ("verified", "incomplete"),
+                "saved visual has an unknown independent-check status: " + report_id,
+            )
             if check["status"] == "incomplete":
                 observed = check.get("attempts_observed", 0)
                 expected = check.get("attempts_expected", 25)
                 verified = check.get("measurement_samples_verified", 0)
                 failures = check.get("failures", 0)
-                summary = (f"Incomplete evidence: {verified} completed outcomes checked across "
+                summary = (
+                    f"Incomplete evidence: {verified} completed outcomes checked across "
                     f"{observed}/{expected} attempts; {failures} failed calls are retained in the report. "
-                    "Only completed outcomes were verified. See the linked records for details.")
+                    "Only completed outcomes were verified. See the linked records for details."
+                )
             else:
-                require(check.get("failures") == 0 and
-                        check.get("measurement_samples_verified") == check.get("attempts_expected"),
-                        "verified gallery entry has incomplete counts: " + report_id)
+                require(
+                    check.get("failures") == 0
+                    and check.get("measurement_samples_verified") == check.get("attempts_expected"),
+                    "verified gallery entry has incomplete counts: " + report_id,
+                )
         image = f"../{report_id}/{entry['image']}"
         page = f"../{report_id}/{entry['page']}"
         records = f"../{report_id}/{records_name}"
         cards.append(
-            f'<article id="{escape(entry.get("anchor", f"saved-figure-{number}"), quote=True)}" class="saved-figure"><p class="eyebrow">' + escape(entry["family"]) +
-            '</p><h3><a href="' + escape(page, quote=True) + '">' + escape(entry["title"]) +
-            '</a></h3><a href="' + escape(page, quote=True) + '"><img src="' +
-            escape(image, quote=True) + '" alt="' + escape(entry["alt"], quote=True) +
-            '"></a><p>' + escape(summary) + '</p>'
-            '<p><a href="' + escape(page, quote=True) + '">Inputs, answer and reproduction details ↗</a> · '
-            '<a href="' + escape(records, quote=True) + '">Raw record ↗</a></p></article>')
-        inventory_item = {"family": entry["family"], "title": entry["title"], "report_id": report_id,
-                          "figure": entry["image"], "page": entry["page"], "records": records_name,
-                          "anchor": entry.get("anchor", f"saved-figure-{number}")}
+            f'<article id="{escape(entry.get("anchor", f"saved-figure-{number}"), quote=True)}" class="saved-figure"><p class="eyebrow">'
+            + escape(entry["family"])
+            + '</p><h3><a href="'
+            + escape(page, quote=True)
+            + '">'
+            + escape(entry["title"])
+            + '</a></h3><a href="'
+            + escape(page, quote=True)
+            + '"><img src="'
+            + escape(image, quote=True)
+            + '" alt="'
+            + escape(entry["alt"], quote=True)
+            + '"></a><p>'
+            + escape(summary)
+            + "</p>"
+            '<p><a href="'
+            + escape(page, quote=True)
+            + '">Inputs, answer and reproduction details ↗</a> · '
+            '<a href="' + escape(records, quote=True) + '">Raw record ↗</a></p></article>'
+        )
+        inventory_item = {
+            "family": entry["family"],
+            "title": entry["title"],
+            "report_id": report_id,
+            "figure": entry["image"],
+            "page": entry["page"],
+            "records": records_name,
+            "anchor": entry.get("anchor", f"saved-figure-{number}"),
+        }
         if check_name:
             inventory_item["check"] = check_name
         inventory.append(inventory_item)
-    return ''.join(cards), inventory
+    return "".join(cards), inventory
 
 
 def validate_gallery_inventory(out, entries):
     page = (out / "index.html").read_text(encoding="utf-8")
     site_root = out.parent.resolve()
-    require(page.count('id="saved-report-figures"') == 1,
-            "saved report figures need one gallery section")
+    require(
+        page.count('id="saved-report-figures"') == 1,
+        "saved report figures need one gallery section",
+    )
     anchors = set(re.findall(r'\bid="([A-Za-z0-9_-]+)"', page))
     require(len(anchors) == len(re.findall(r'\bid="', page)), "duplicate/unsafe gallery anchor")
-    require(len({entry["anchor"] for entry in entries}) == len(entries),
-            "visual inventory anchors must be unique")
+    require(
+        len({entry["anchor"] for entry in entries}) == len(entries),
+        "visual inventory anchors must be unique",
+    )
     rendered = set(re.findall(r'<section id="([A-Za-z0-9_-]+)"', page)) - {
-        "saved-report-figures", "analytic-illustrations", "algorithm-coverage"}
+        "saved-report-figures",
+        "analytic-illustrations",
+        "algorithm-coverage",
+    }
     rendered.update(re.findall(r'<article\b[^>]*\bid="(saved-figure-[A-Za-z0-9_-]+)"', page))
     rendered.update(re.findall(r'<article class="saved-figure" id="([A-Za-z0-9_-]+)"', page))
     listed = {entry["anchor"] for entry in entries}
-    require(rendered == listed,
-            "every rendered gallery example must appear in the visual inventory; missing=" +
-            repr(sorted(rendered - listed)) + ", stale=" + repr(sorted(listed - rendered)))
+    require(
+        rendered == listed,
+        "every rendered gallery example must appear in the visual inventory; missing="
+        + repr(sorted(rendered - listed))
+        + ", stale="
+        + repr(sorted(listed - rendered)),
+    )
     for entry in entries:
-        required = ("family", "title", "status", "anchor", "page", "figure", "source_page", "raw_record")
-        require(all(isinstance(entry.get(field), str) and entry[field] for field in required),
-                "visual inventory entry is missing required metadata or provenance")
-        require(entry["status"] in {"educational-example", "saved-report-figure",
-                                    "saved-data-companion", "saved-data-illustration",
-                                    "analytic-illustration"},
-                "unknown visual inventory status")
+        required = (
+            "family",
+            "title",
+            "status",
+            "anchor",
+            "page",
+            "figure",
+            "source_page",
+            "raw_record",
+        )
+        require(
+            all(isinstance(entry.get(field), str) and entry[field] for field in required),
+            "visual inventory entry is missing required metadata or provenance",
+        )
+        require(
+            entry["status"]
+            in {
+                "educational-example",
+                "saved-report-figure",
+                "saved-data-companion",
+                "saved-data-illustration",
+                "analytic-illustration",
+            },
+            "unknown visual inventory status",
+        )
         require(entry["anchor"] in anchors, "visual inventory target is missing from gallery")
         page_ref, _, page_anchor = entry["page"].partition("#")
         page_target = (out / page_ref).resolve()
-        require(page_target.is_relative_to(site_root) and page_target.is_file() and
-                (not page_anchor or page_anchor in anchors),
-                "visual inventory page or anchor is missing or escaping")
+        require(
+            page_target.is_relative_to(site_root)
+            and page_target.is_file()
+            and (not page_anchor or page_anchor in anchors),
+            "visual inventory page or anchor is missing or escaping",
+        )
         if "walkthrough_page" in entry:
             walkthrough = (out / entry["walkthrough_page"]).resolve()
-            require(walkthrough.is_relative_to(site_root) and walkthrough.is_file(),
-                    "visual inventory walkthrough page is missing or escaping")
+            require(
+                walkthrough.is_relative_to(site_root) and walkthrough.is_file(),
+                "visual inventory walkthrough page is missing or escaping",
+            )
         raw_path = (out / entry["raw_record"]).resolve()
-        require(raw_path.is_relative_to(site_root) and raw_path.is_file(),
-                "visual inventory raw record is missing or escaping")
+        require(
+            raw_path.is_relative_to(site_root) and raw_path.is_file(),
+            "visual inventory raw record is missing or escaping",
+        )
         try:
             raw_data = json.loads(raw_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             raise ValueError("visual inventory raw record must be readable JSON") from None
         require(isinstance(raw_data, dict), "visual inventory raw record must be a JSON object")
         if entry["status"] == "analytic-illustration":
-            require(all(field in raw_data for field in
-                        ("inputs", "answer", "reproduction_command", "evidence")) and
-                    ("related_saved_report" in raw_data or "source_path" in raw_data),
-                    "analytic visual record needs inputs, answer, reproduction and source provenance")
+            require(
+                all(
+                    field in raw_data
+                    for field in ("inputs", "answer", "reproduction_command", "evidence")
+                )
+                and ("related_saved_report" in raw_data or "source_path" in raw_data),
+                "analytic visual record needs inputs, answer, reproduction and source provenance",
+            )
         for field in ("figure", "source_page", "raw_record", "report_records"):
             if field not in entry:
                 continue
             if field == "source_page" and urlsplit(entry[field]).scheme:
                 continue
             target = (out / entry[field]).resolve()
-            require(target.is_relative_to(site_root) and target.is_file(),
-                    "visual inventory links to a missing or escaping file: " + field)
+            require(
+                target.is_relative_to(site_root) and target.is_file(),
+                "visual inventory links to a missing or escaping file: " + field,
+            )
 
 
 def algorithm_coverage(catalog, site, gallery_inventory):
     source = Path(__file__).with_name("algorithm_visual_coverage.json")
     result = json.loads(source.read_text(encoding="utf-8"))
-    require(result.get("schema") == "csl.algorithm-visual-coverage/1",
-            "unsupported algorithm coverage schema")
+    require(
+        result.get("schema") == "csl.algorithm-visual-coverage/1",
+        "unsupported algorithm coverage schema",
+    )
     reports = json.loads(Path(catalog).read_text(encoding="utf-8"))["reports"]
-    require(Path(catalog).resolve() == Path(__file__).parents[2] / result["catalog_source"],
-            "algorithm coverage was built from an unexpected report catalog")
+    require(
+        Path(catalog).resolve() == Path(__file__).parents[2] / result["catalog_source"],
+        "algorithm coverage was built from an unexpected report catalog",
+    )
     kinds = {entry["report_kind"] for entry in reports}
     mapped_kinds = {kind for family in result["families"] for kind in family["catalog_kinds"]}
     evidence_only = result.get("evidence_only_kinds", {})
-    require(isinstance(evidence_only, dict) and all(isinstance(key, str) and isinstance(value, str) and value
-            for key, value in evidence_only.items()), "invalid evidence-only catalog kinds")
-    require(not (mapped_kinds & set(evidence_only)), "catalog kind cannot be both algorithm and research evidence")
+    require(
+        isinstance(evidence_only, dict)
+        and all(
+            isinstance(key, str) and isinstance(value, str) and value
+            for key, value in evidence_only.items()
+        ),
+        "invalid evidence-only catalog kinds",
+    )
+    require(
+        not (mapped_kinds & set(evidence_only)),
+        "catalog kind cannot be both algorithm and research evidence",
+    )
     covered_kinds = mapped_kinds | set(evidence_only)
-    require(kinds <= covered_kinds, "algorithm coverage omits catalog report kinds: " +
-            ", ".join(sorted(kinds - covered_kinds)))
-    require(all(kind in kinds for family in result["families"] for kind in family["catalog_kinds"]),
-            "algorithm coverage refers to an unknown catalog report kind")
+    require(
+        kinds <= covered_kinds,
+        "algorithm coverage omits catalog report kinds: "
+        + ", ".join(sorted(kinds - covered_kinds)),
+    )
+    require(
+        all(kind in kinds for family in result["families"] for kind in family["catalog_kinds"]),
+        "algorithm coverage refers to an unknown catalog report kind",
+    )
     for report in reports:
         route = Path(site) / report["report_id"]
-        raw_name = ("record.json" if report["report_kind"] in evidence_only else
-                    "results.jsonl" if report["report_kind"] == "issue6-b07-reference" else
-                    "manifest-correction.json" if report["report_kind"] == "issue6-b06-manifest-correction" else
-                    "raw/summary.json" if report["report_kind"] == "btulshor-source-faithful" else
-                    "records.json")
-        require((route / "index.html").is_file() and (route / raw_name).is_file(),
-                "algorithm coverage catalog report is not staged: " + report["report_id"])
+        raw_name = (
+            "record.json"
+            if report["report_kind"] in evidence_only
+            else "results.jsonl"
+            if report["report_kind"] == "issue6-b07-reference"
+            else "manifest-correction.json"
+            if report["report_kind"] == "issue6-b06-manifest-correction"
+            else "raw/summary.json"
+            if report["report_kind"] == "btulshor-source-faithful"
+            else "records.json"
+        )
+        require(
+            (route / "index.html").is_file() and (route / raw_name).is_file(),
+            "algorithm coverage catalog report is not staged: " + report["report_id"],
+        )
     gallery = {entry["anchor"]: entry for entry in gallery_inventory}
     for family in result["families"]:
-        require(isinstance(family.get("modules"), list) and family["modules"] and
-                all(isinstance(module, str) and module for module in family["modules"]),
-                "algorithm family needs structured module metadata: " + family["id"])
-        require(family["implementation_issues"],
-                "algorithm family needs a linked implementation issue: " + family["id"])
-        require(family["support"].startswith("supported-") or family["limit"],
-                "unsupported 2D family needs a support limit: " + family["id"])
-        require(not family["support"].startswith("supported-") or family["examples"],
-                "supported 2D family needs a gallery example: " + family["id"])
+        require(
+            isinstance(family.get("modules"), list)
+            and family["modules"]
+            and all(isinstance(module, str) and module for module in family["modules"]),
+            "algorithm family needs structured module metadata: " + family["id"],
+        )
+        require(
+            family["implementation_issues"],
+            "algorithm family needs a linked implementation issue: " + family["id"],
+        )
+        require(
+            family["support"].startswith("supported-") or family["limit"],
+            "unsupported 2D family needs a support limit: " + family["id"],
+        )
+        require(
+            not family["support"].startswith("supported-") or family["examples"],
+            "supported 2D family needs a gallery example: " + family["id"],
+        )
         for example in family["examples"]:
-            require(example in gallery, "algorithm coverage points to a missing gallery example: " + example)
+            require(
+                example in gallery,
+                "algorithm coverage points to a missing gallery example: " + example,
+            )
         family["gallery_examples"] = [gallery[name] for name in family["examples"]]
         family["catalog_reports"] = [
-            {"report_kind": entry["report_kind"], "report_id": entry["report_id"],
-             "page": "../" + entry["report_id"] + "/index.html",
-             "raw_record": "../" + entry["report_id"] + "/" +
-                           ("raw/summary.json" if entry["report_kind"] == "btulshor-source-faithful" else
-                            "results.jsonl" if entry["report_kind"] == "issue6-b07-reference" else
-                            "manifest-correction.json" if entry["report_kind"] == "issue6-b06-manifest-correction" else
-                            "records.json")}
-            for entry in reports if entry["report_kind"] in family["catalog_kinds"]]
+            {
+                "report_kind": entry["report_kind"],
+                "report_id": entry["report_id"],
+                "page": "../" + entry["report_id"] + "/index.html",
+                "raw_record": "../"
+                + entry["report_id"]
+                + "/"
+                + (
+                    "raw/summary.json"
+                    if entry["report_kind"] == "btulshor-source-faithful"
+                    else "results.jsonl"
+                    if entry["report_kind"] == "issue6-b07-reference"
+                    else "manifest-correction.json"
+                    if entry["report_kind"] == "issue6-b06-manifest-correction"
+                    else "records.json"
+                ),
+            }
+            for entry in reports
+            if entry["report_kind"] in family["catalog_kinds"]
+        ]
         for route in family["report_routes"]:
             target = Path(site) / route
-            require((target / "index.html").is_file() and (target / "records.json").is_file(),
-                    "algorithm coverage report route is not staged: " + route)
+            require(
+                (target / "index.html").is_file() and (target / "records.json").is_file(),
+                "algorithm coverage report route is not staged: " + route,
+            )
         family["additional_reports"] = [
-            {"report_id": route, "page": "../" + route + "/index.html",
-             "raw_record": "../" + route + "/records.json"}
-            for route in family["report_routes"]]
+            {
+                "report_id": route,
+                "page": "../" + route + "/index.html",
+                "raw_record": "../" + route + "/records.json",
+            }
+            for route in family["report_routes"]
+        ]
         family["implementation_issues"] = [
-            {"number": number,
-             "url": f"https://github.com/butahlecoq/controlled-systems-lab/issues/{number}"}
-            for number in family["implementation_issues"]]
+            {
+                "number": number,
+                "url": f"https://github.com/butahlecoq/controlled-systems-lab/issues/{number}",
+            }
+            for number in family["implementation_issues"]
+        ]
     return result
 
 
 def coverage_html(coverage):
     rows = []
     for family in coverage["families"]:
-        examples = " · ".join(
-            f'<a href="#{escape(entry["anchor"], quote=True)}">{escape(entry["title"])}</a>' +
-            (f' · <a href="{escape(entry["walkthrough_page"], quote=True)}">End-to-end walkthrough</a>'
-             if entry.get("walkthrough_page") else "")
-            for entry in family["gallery_examples"]) or "No 2D example currently published"
+        examples = (
+            " · ".join(
+                f'<a href="#{escape(entry["anchor"], quote=True)}">{escape(entry["title"])}</a>'
+                + (
+                    f' · <a href="{escape(entry["walkthrough_page"], quote=True)}">End-to-end walkthrough</a>'
+                    if entry.get("walkthrough_page")
+                    else ""
+                )
+                for entry in family["gallery_examples"]
+            )
+            or "No 2D example currently published"
+        )
         issues = " · ".join(
             f'<a href="{escape(issue["url"], quote=True)}">Issue #{issue["number"]}</a>'
-            for issue in family["implementation_issues"])
+            for issue in family["implementation_issues"]
+        )
         reports = family["catalog_reports"] + family["additional_reports"]
         report_links = " · ".join(
             f'<a href="{escape(report["page"], quote=True)}">{escape(report["report_id"])}</a>'
-            for report in reports)
-        rows.append('<article class="coverage-row"><h3>' + escape(family["name"]) + '</h3>'
-                    '<p class="eyebrow">' + escape(family["composition"]) + ' · ' +
-                    escape(family["support"]) + '</p><p>' + escape(family["limit"]) +
-                    '</p><p>Examples: ' + examples + '</p><p>Saved reports: ' +
-                    (report_links or "No saved report") + '</p><p>Related work: ' + issues + '</p></article>')
-    return ''.join(rows)
+            for report in reports
+        )
+        rows.append(
+            '<article class="coverage-row"><h3>' + escape(family["name"]) + "</h3>"
+            '<p class="eyebrow">'
+            + escape(family["composition"])
+            + " · "
+            + escape(family["support"])
+            + "</p><p>"
+            + escape(family["limit"])
+            + "</p><p>Examples: "
+            + examples
+            + "</p><p>Saved reports: "
+            + (report_links or "No saved report")
+            + "</p><p>Related work: "
+            + issues
+            + "</p></article>"
+        )
+    return "".join(rows)
 
 
 def issue3_control_walkthrough(record_path, report_id):
     """Create a saved-data-only end-to-end view of the two-plan analytic run."""
     document = json.loads(Path(record_path).read_text(encoding="utf-8"))
     rows = document["rows"]
-    saved = next((row for row in rows if row.get("fixture") == "analytic_2d"
-                  and not row.get("warmup")), None)
-    require(saved is not None, "issue3 walkthrough needs a measured saved analytic_2d record")
+    saved = next(
+        (row for row in rows if row.get("fixture") == "analytic_2d" and not row.get("warmup")), None
+    )
+    if saved is None:
+        raise ValueError("issue3 walkthrough needs a measured saved analytic_2d record")
     request = json.loads(saved["input_canonical"])
     identity = [["0x1p+0", "0x0p+0"], ["0x0p+0", "0x1p+0"]]
-    require(request["system"]["horizon"] == 1 and request["initial"] == ["0x0p+0", "0x0p+0"]
-            and request["system"]["A"] == identity and request["system"]["B"] == identity
-            and request["system"]["E"] == identity and request["system"]["c"] == ["0x0p+0", "0x0p+0"]
-            and request["actions"] == [["0x0p+0", "0x0p+0"], ["0x1p+0", "0x0p+0"]]
-            and request["disturbance_vertices"] == [["0x0p+0", "0x0p+0"]]
-            and request["safe_sets"] == "universal"
-            and request["objective"] == {"type": "residual_norm_terminal", "C": identity,
-                                          "target": ["0x1p+0", "0x0p+0"]},
-            "issue3 walkthrough saved fixture changed; review the geometry before publishing")
+    require(
+        request["system"]["horizon"] == 1
+        and request["initial"] == ["0x0p+0", "0x0p+0"]
+        and request["system"]["A"] == identity
+        and request["system"]["B"] == identity
+        and request["system"]["E"] == identity
+        and request["system"]["c"] == ["0x0p+0", "0x0p+0"]
+        and request["actions"] == [["0x0p+0", "0x0p+0"], ["0x1p+0", "0x0p+0"]]
+        and request["disturbance_vertices"] == [["0x0p+0", "0x0p+0"]]
+        and request["safe_sets"] == "universal"
+        and request["objective"]
+        == {"type": "residual_norm_terminal", "C": identity, "target": ["0x1p+0", "0x0p+0"]},
+        "issue3 walkthrough saved fixture changed; review the geometry before publishing",
+    )
     result = saved["result"]
-    require(result["status"] == "validated_bounds" and result["lower"] == 0
-            and result["upper"] == 0 and result["plans"] == 2
-            and result["histories_examined"] == 2,
-            "issue3 walkthrough saved result changed; review the explanation before publishing")
+    require(
+        result["status"] == "validated_bounds"
+        and result["lower"] == 0
+        and result["upper"] == 0
+        and result["plans"] == 2
+        and result["histories_examined"] == 2,
+        "issue3 walkthrough saved result changed; review the explanation before publishing",
+    )
     source_commit = saved["source_commit"]
     harness_commit = saved["harness_commit"]
-    figure = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-labelledby="title desc">'
-              '<title id="title">Issue 3 one-step terminal states and target</title>'
-              '<desc id="desc">The two finite actions end at (0,0) and (1,0). The target is (1,0), so the second action attains zero residual.</desc>'
-              '<rect width="640" height="420" fill="#172019"/>')
+    figure = (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-labelledby="title desc">'
+        '<title id="title">Issue 3 one-step terminal states and target</title>'
+        '<desc id="desc">The two finite actions end at (0,0) and (1,0). The target is (1,0), so the second action attains zero residual.</desc>'
+        '<rect width="640" height="420" fill="#172019"/>'
+    )
     for x, label in ((120, "0"), (240, "0.5"), (360, "1"), (480, "1.5")):
         figure += f'<line x1="{x}" y1="60" x2="{x}" y2="310" stroke="#354337"/><text x="{x}" y="338" text-anchor="middle" fill="#dce5d5">{label}</text>'
     for y, label in ((310, "−0.5"), (230, "0"), (150, "0.5")):
-        figure += f'<line x1="80" y1="{y}" x2="530" y2="{y}" stroke="#354337"/><text x="65" y="{y+5}" text-anchor="end" fill="#dce5d5">{label}</text>'
-    figure += ('<line x1="80" y1="230" x2="530" y2="230" stroke="#b4cda3" stroke-width="2"/>'
-               '<circle cx="360" cy="230" r="12" fill="#f0c674"/><text x="377" y="210" fill="#f0c674">target (1,0)</text>'
-               '<circle cx="120" cy="230" r="10" fill="#72b7b2"/><text x="95" y="198" fill="#72b7b2">action 0: (0,0), cost 1</text>'
-               '<circle cx="360" cy="230" r="7" fill="#b4cda3" stroke="#fff" stroke-width="2"/><text x="370" y="262" fill="#b4cda3">action 1: (1,0), cost 0</text>'
-               '<text x="300" y="385" text-anchor="middle" fill="#dce5d5">terminal state x₁ coordinate (dimensionless)</text>'
-               '<text transform="translate(20 210) rotate(-90)" text-anchor="middle" fill="#dce5d5">terminal state y₁ coordinate (dimensionless)</text></svg>')
-    page = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
-            '<meta name="viewport" content="width=device-width,initial-scale=1">'
-            '<meta name="color-scheme" content="dark light">'
-            '<title>One saved control task from input to verified result</title>'
-            '<link rel="stylesheet" href="examples.css"></head><body><a class="skip" href="#main">Skip to walkthrough</a>'
-            '<main id="main" class="walkthrough page-content">'
-            + site_design.breadcrumbs([("Learn", "../index.html"),
-                                       ("Examples", "index.html"),
-                                       ("Algorithm coverage", "index.html#algorithm-coverage"),
-                                       ("One finite-action task", "issue3-control-walkthrough.html")])
-            + '<p class="eyebrow">Saved validated API run · Issue #3</p>'
-            '<h1>One finite-action control task, end to end</h1>'
-            '<p>This walkthrough reads the saved <code>analytic_2d</code> input and result. It does not rerun the solver. '
-            'The plotted terminal points are independently calculated from the saved matrices and actions.</p>'
-            '<h2>1. Define the problem</h2><p>One transition: <code>x₁ = x₀ + u₀ + w₀</code>, '
-            '<code>x₀=(0,0)</code>, zero disturbance, universal safety sets, and terminal objective '
-            '<code>||x₁−(1,0)||₂</code>. The ordered finite action catalogue is <code>[(0,0),(1,0)]</code>.</p>'
-            '<h2>2. Run the supported profile</h2><p>The recorded profile is the validated finite-action minimax API, with horizon 1, '
-            '2 plans, 2 histories total, and a 100,000 interval-operation limit. The raw record reports '
-            '<code>validated_bounds [0,0]</code>. This is a small analytic fixture of the implemented validated profile.</p>'
-            '<h2>3. Select from the complete finite family</h2><p>Both catalogue plans were examined. Direct substitution gives terminal states '
-            '<code>(0,0)</code> and <code>(1,0)</code>; their terminal residual norms are 1 and 0. The selected witness is action index 1, '
-            '<code>u₀=(1,0)</code>. The API driver checks that plan index 1 is feasible and has exact bounds [0,0].</p>'
-            '<figure><img src="issue3-control-walkthrough.svg" alt="The two terminal states and target in 2D state coordinates">'
-            '<figcaption>Independent arithmetic from the saved system, initial state, action catalogue, disturbance and target. '
-            'This figure is not an emitted solver trace.</figcaption></figure>'
-            '<h2>4. Independently verify the answer</h2><p>Using the saved identity matrices and zero disturbance, '
-            '<code>x₁=x₀+u₀</code>. Evaluating the objective at both possible states gives a minimum of exactly zero. '
-            'That agrees with the saved validated interval [0,0] and the driver’s assertions that both plans were returned '
-            'and action index 1 was feasible. Safety is universal in this fixture, so there are no state inequalities to test.</p>'
-            '<h2>5. Inspect the saved export and provenance</h2><ul><li><a href="../' + escape(report_id, quote=True) +
-            '/records.json">Raw records and exact hexadecimal input ↗</a></li><li><a href="../' + escape(report_id, quote=True) +
-            '/index.html">Saved run report ↗</a></li><li><a href="https://github.com/butahlecoq/controlled-systems-lab/blob/' +
-            escape(harness_commit, quote=True) + '/benchmarks/reporting/issue3/validated_driver.cpp">Validated-run harness at its recorded commit ↗</a></li>'
-            '<li><a href="https://github.com/butahlecoq/controlled-systems-lab/blob/' +
-            escape(source_commit, quote=True) + '/include/csl/optimization/validated_finite_action_minimax.hpp">Validated API header at its recorded source commit ↗</a></li></ul>'
-            '<p>Evidence boundary: this explains the saved analytic fixture only. It does not generalize to continuous action sets '
-            'or claim correctness beyond the recorded API result and the direct finite calculation above.</p>'
-            '<p>Rebuild the gallery from the repository root with '
-            '<code>python scripts/reports/visual_examples.py --catalog reports/algorithm-results/catalog.json --site build/report-site</code>.</p>'
-            '</main></body></html>')
+        figure += f'<line x1="80" y1="{y}" x2="530" y2="{y}" stroke="#354337"/><text x="65" y="{y + 5}" text-anchor="end" fill="#dce5d5">{label}</text>'
+    figure += (
+        '<line x1="80" y1="230" x2="530" y2="230" stroke="#b4cda3" stroke-width="2"/>'
+        '<circle cx="360" cy="230" r="12" fill="#f0c674"/><text x="377" y="210" fill="#f0c674">target (1,0)</text>'
+        '<circle cx="120" cy="230" r="10" fill="#72b7b2"/><text x="95" y="198" fill="#72b7b2">action 0: (0,0), cost 1</text>'
+        '<circle cx="360" cy="230" r="7" fill="#b4cda3" stroke="#fff" stroke-width="2"/><text x="370" y="262" fill="#b4cda3">action 1: (1,0), cost 0</text>'
+        '<text x="300" y="385" text-anchor="middle" fill="#dce5d5">terminal state x₁ coordinate (dimensionless)</text>'
+        '<text transform="translate(20 210) rotate(-90)" text-anchor="middle" fill="#dce5d5">terminal state y₁ coordinate (dimensionless)</text></svg>'
+    )
+    page = (
+        '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+        '<meta name="viewport" content="width=device-width,initial-scale=1">'
+        '<meta name="color-scheme" content="dark light">'
+        "<title>One saved control task from input to verified result</title>"
+        '<link rel="stylesheet" href="examples.css"></head><body><a class="skip" href="#main">Skip to walkthrough</a>'
+        '<main id="main" class="walkthrough page-content">'
+        + site_design.breadcrumbs(
+            [
+                ("Learn", "../index.html"),
+                ("Examples", "index.html"),
+                ("Algorithm coverage", "index.html#algorithm-coverage"),
+                ("One finite-action task", "issue3-control-walkthrough.html"),
+            ]
+        )
+        + '<p class="eyebrow">Saved validated API run · Issue #3</p>'
+        "<h1>One finite-action control task, end to end</h1>"
+        "<p>This walkthrough reads the saved <code>analytic_2d</code> input and result. It does not rerun the solver. "
+        "The plotted terminal points are independently calculated from the saved matrices and actions.</p>"
+        "<h2>1. Define the problem</h2><p>One transition: <code>x₁ = x₀ + u₀ + w₀</code>, "
+        "<code>x₀=(0,0)</code>, zero disturbance, universal safety sets, and terminal objective "
+        "<code>||x₁−(1,0)||₂</code>. The ordered finite action catalogue is <code>[(0,0),(1,0)]</code>.</p>"
+        "<h2>2. Run the supported profile</h2><p>The recorded profile is the validated finite-action minimax API, with horizon 1, "
+        "2 plans, 2 histories total, and a 100,000 interval-operation limit. The raw record reports "
+        "<code>validated_bounds [0,0]</code>. This is a small analytic fixture of the implemented validated profile.</p>"
+        "<h2>3. Select from the complete finite family</h2><p>Both catalogue plans were examined. Direct substitution gives terminal states "
+        "<code>(0,0)</code> and <code>(1,0)</code>; their terminal residual norms are 1 and 0. The selected witness is action index 1, "
+        "<code>u₀=(1,0)</code>. The API driver checks that plan index 1 is feasible and has exact bounds [0,0].</p>"
+        '<figure><img src="issue3-control-walkthrough.svg" alt="The two terminal states and target in 2D state coordinates">'
+        "<figcaption>Independent arithmetic from the saved system, initial state, action catalogue, disturbance and target. "
+        "This figure is not an emitted solver trace.</figcaption></figure>"
+        "<h2>4. Independently verify the answer</h2><p>Using the saved identity matrices and zero disturbance, "
+        "<code>x₁=x₀+u₀</code>. Evaluating the objective at both possible states gives a minimum of exactly zero. "
+        "That agrees with the saved validated interval [0,0] and the driver’s assertions that both plans were returned "
+        "and action index 1 was feasible. Safety is universal in this fixture, so there are no state inequalities to test.</p>"
+        '<h2>5. Inspect the saved export and provenance</h2><ul><li><a href="../'
+        + escape(report_id, quote=True)
+        + '/records.json">Raw records and exact hexadecimal input ↗</a></li><li><a href="../'
+        + escape(report_id, quote=True)
+        + '/index.html">Saved run report ↗</a></li><li><a href="https://github.com/butahlecoq/controlled-systems-lab/blob/'
+        + escape(harness_commit, quote=True)
+        + '/benchmarks/reporting/issue3/validated_driver.cpp">Validated-run harness at its recorded commit ↗</a></li>'
+        '<li><a href="https://github.com/butahlecoq/controlled-systems-lab/blob/'
+        + escape(source_commit, quote=True)
+        + '/include/csl/optimization/validated_finite_action_minimax.hpp">Validated API header at its recorded source commit ↗</a></li></ul>'
+        "<p>Evidence boundary: this explains the saved analytic fixture only. It does not generalize to continuous action sets "
+        "or claim correctness beyond the recorded API result and the direct finite calculation above.</p>"
+        "<p>Rebuild the gallery from the repository root with "
+        "<code>python scripts/reports/visual_examples.py --catalog reports/algorithm-results/catalog.json --site build/report-site</code>.</p>"
+        "</main></body></html>"
+    )
     return figure, page
 
 
@@ -745,9 +1172,12 @@ def validate_history_cost_bundle(bundle: Path, repository_root: Path) -> dict:
     if manifest_path.is_symlink() or not manifest_path.is_file():
         raise ValueError("full-history example manifest is missing or symlinked")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if (manifest.get("schema") != "csl.history-cost-2d/1" or
-            manifest.get("source_commit") != "f4e73e08908c472801aef6637d94b1a03cb0b2a7" or
-            manifest.get("native_binary_sha256") != "2d336a436220fdc59cf2c2c5a00defceadc5fb330450b16693fd0637a5cded17"):
+    if (
+        manifest.get("schema") != "csl.history-cost-2d/1"
+        or manifest.get("source_commit") != "f4e73e08908c472801aef6637d94b1a03cb0b2a7"
+        or manifest.get("native_binary_sha256")
+        != "2d336a436220fdc59cf2c2c5a00defceadc5fb330450b16693fd0637a5cded17"
+    ):
         raise ValueError("full-history example provenance differs")
     files = manifest.get("files")
     if not isinstance(files, dict) or not files:
@@ -772,16 +1202,25 @@ def validate_history_cost_bundle(bundle: Path, repository_root: Path) -> dict:
             if cursor.is_symlink():
                 raise ValueError("full-history example contains a symlink: " + relative)
         if not path.is_file() or not path.resolve().is_relative_to(path_root):
-            raise ValueError("full-history example file is missing or escapes its root: " + relative)
+            raise ValueError(
+                "full-history example file is missing or escapes its root: " + relative
+            )
         actual = hashlib.sha256(path.read_bytes()).hexdigest()
         if actual != expected:
             raise ValueError("full-history example digest differs: " + relative)
     receipt_path = root / "records/capture-receipt.json"
     receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
-    if receipt.get("source_commit") != manifest["source_commit"] or receipt.get("native_binary_sha256") != manifest["native_binary_sha256"]:
+    if (
+        receipt.get("source_commit") != manifest["source_commit"]
+        or receipt.get("native_binary_sha256") != manifest["native_binary_sha256"]
+    ):
         raise ValueError("full-history raw capture provenance differs from its manifest")
     for case in ("total-cost", "terminal-only"):
-        for kind, suffix in (("request", "request.jsonl"), ("stdout", "stdout.jsonl"), ("stderr", "stderr.txt")):
+        for kind, suffix in (
+            ("request", "request.jsonl"),
+            ("stdout", "stdout.jsonl"),
+            ("stderr", "stderr.txt"),
+        ):
             relative = f"records/{case}-{suffix}"
             if receipt["cases"][case][kind + "_sha256"] != files[relative]:
                 raise ValueError("full-history capture receipt digest differs: " + relative)
@@ -820,17 +1259,26 @@ def validate_current_history_cost_bundle(bundle: Path, repository_root: Path) ->
     if manifest_path.is_symlink() or not manifest_path.is_file():
         raise ValueError("current-source history-cost manifest is missing or symlinked")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if (manifest.get("schema") != "csl.history-cost-2d-current-source/1" or
-            manifest.get("source_commit") != "536a5a9f81b49a164847d36ebef96501b0925312" or
-            manifest.get("native_binary_sha256") != "5ec2cf4411e1f183de4dcbf74398ae4acae2a5179d59ba5fa83b3ff651c08d62"):
+    if (
+        manifest.get("schema") != "csl.history-cost-2d-current-source/1"
+        or manifest.get("source_commit") != "536a5a9f81b49a164847d36ebef96501b0925312"
+        or manifest.get("native_binary_sha256")
+        != "5ec2cf4411e1f183de4dcbf74398ae4acae2a5179d59ba5fa83b3ff651c08d62"
+    ):
         raise ValueError("current-source history-cost provenance differs")
     files = manifest.get("files")
     if not isinstance(files, dict) or set(files) != {
-            "records/CMakeCache.txt", "records/build.log", "records/receipt-first-write-invalid.txt",
-            "records/receipt.json", "records/terminal-only-request.jsonl",
-            "records/terminal-only-stdout.jsonl", "records/terminal-only-stderr.txt",
-            "records/total-cost-request.jsonl", "records/total-cost-stdout.jsonl",
-            "records/total-cost-stderr.txt"}:
+        "records/CMakeCache.txt",
+        "records/build.log",
+        "records/receipt-first-write-invalid.txt",
+        "records/receipt.json",
+        "records/terminal-only-request.jsonl",
+        "records/terminal-only-stdout.jsonl",
+        "records/terminal-only-stderr.txt",
+        "records/total-cost-request.jsonl",
+        "records/total-cost-stdout.jsonl",
+        "records/total-cost-stderr.txt",
+    }:
         raise ValueError("current-source history-cost evidence file set differs")
     for relative, expected in files.items():
         path = root / relative
@@ -846,11 +1294,17 @@ def validate_current_history_cost_bundle(bundle: Path, repository_root: Path) ->
         if hashlib.sha256(path.read_bytes()).hexdigest() != expected:
             raise ValueError("current-source evidence digest differs: " + relative)
     receipt = json.loads((root / "records/receipt.json").read_text(encoding="utf-8"))
-    if (receipt.get("source_commit") != manifest["source_commit"] or
-            receipt.get("binary_sha256") != manifest["native_binary_sha256"]):
+    if (
+        receipt.get("source_commit") != manifest["source_commit"]
+        or receipt.get("binary_sha256") != manifest["native_binary_sha256"]
+    ):
         raise ValueError("current-source capture receipt provenance differs")
     for case in ("total-cost", "terminal-only"):
-        for kind, suffix in (("request", "request.jsonl"), ("stdout", "stdout.jsonl"), ("stderr", "stderr.txt")):
+        for kind, suffix in (
+            ("request", "request.jsonl"),
+            ("stdout", "stdout.jsonl"),
+            ("stderr", "stderr.txt"),
+        ):
             if receipt["cases"][case][kind + "_sha256"] != files[f"records/{case}-{suffix}"]:
                 raise ValueError("current-source receipt digest differs for " + case + " " + kind)
     archive_path = root / "history-cost-2d-v1-current-source.zip"
@@ -861,11 +1315,19 @@ def validate_current_history_cost_bundle(bundle: Path, repository_root: Path) ->
         if set(archive.namelist()) != expected_names or archive.testzip() is not None:
             raise ValueError("current-source archive entries differ")
         for name in expected_names:
-            expected_bytes = manifest_path.read_bytes() if name == "manifest.json" else (root / name).read_bytes()
+            expected_bytes = (
+                manifest_path.read_bytes()
+                if name == "manifest.json"
+                else (root / name).read_bytes()
+            )
             if archive.read(name) != expected_bytes:
                 raise ValueError("current-source archive content differs: " + name)
     sidecar = archive_path.with_suffix(archive_path.suffix + ".sha256")
-    if sidecar.is_symlink() or not sidecar.is_file() or sidecar.read_text().split()[0] != hashlib.sha256(archive_path.read_bytes()).hexdigest():
+    if (
+        sidecar.is_symlink()
+        or not sidecar.is_file()
+        or sidecar.read_text().split()[0] != hashlib.sha256(archive_path.read_bytes()).hexdigest()
+    ):
         raise ValueError("current-source archive checksum differs")
     return manifest
 
@@ -874,85 +1336,114 @@ def build(catalog, site):
     examples = load_examples(catalog)
     site = Path(site).resolve(strict=True)
     saved_figures, saved_inventory = saved_figure_sections(catalog, site)
-    saved_figures += ('<article class="saved-figure" id="adaptive-ode-rk4"><p class="eyebrow">Numerical integration · Saved example</p>'
+    saved_figures += (
+        '<article class="saved-figure" id="adaptive-ode-rk4"><p class="eyebrow">Numerical integration · Saved example</p>'
         '<h3><a href="adaptive-ode-replay.html">Adaptive RK4 replay of a two-state oscillator</a></h3>'
         '<a href="adaptive-ode-replay.html"><img src="adaptive-ode-replay.svg" alt="Adaptive numerical trajectory follows an analytic unit circle in the x-y phase plane"></a>'
-        '<p>The installed CSL replay client integrates a two-state harmonic oscillator and compares its recorded path with the analytic solution.</p>'
+        "<p>The installed CSL replay client integrates a two-state harmonic oscillator and compares its recorded path with the analytic solution.</p>"
         '<p><a href="adaptive-ode-replay.html">Inputs, answer and reproduction details ↗</a> · '
-        '<a href="adaptive-ode-replay.json">Raw record ↗</a></p></article>')
-    saved_figures += ('<article class="saved-figure" id="source-index-geometry-2d"><p class="eyebrow">Geometry · Public-interface example</p>'
+        '<a href="adaptive-ode-replay.json">Raw record ↗</a></p></article>'
+    )
+    saved_figures += (
+        '<article class="saved-figure" id="source-index-geometry-2d"><p class="eyebrow">Geometry · Public-interface example</p>'
         '<h3><a href="source-index-geometry-2d.html">Source-index hulls in a 2D geometry pipeline</a></h3>'
         '<a href="source-index-geometry-2d.html"><img src="source-index-geometry-2d.svg" alt="A square point cloud with edge, duplicate and interior points, followed by its affine image and one-step control sum"></a>'
-        '<p>QuickHull2D and the recovered BTULSHOR KPABEP/MODIF profile propose original point IDs; an independent exact checker validates each generated cloud before the affine or control sum applies those IDs.</p>'
+        "<p>QuickHull2D and the recovered BTULSHOR KPABEP/MODIF profile propose original point IDs; an independent exact checker validates each generated cloud before the affine or control sum applies those IDs.</p>"
         '<p><a href="source-index-geometry-2d.html">Inputs, answer and reproduction details ↗</a> · '
-        '<a href="source-index-geometry-2d-records.json">Raw records ↗</a></p></article>')
-    saved_figures += ('<article class="saved-figure" id="qhull-highs-strategy-a-2d"><p class="eyebrow">Geometry and control · Public-interface example</p>'
+        '<a href="source-index-geometry-2d-records.json">Raw records ↗</a></p></article>'
+    )
+    saved_figures += (
+        '<article class="saved-figure" id="qhull-highs-strategy-a-2d"><p class="eyebrow">Geometry and control · Public-interface example</p>'
         '<h3><a href="qhull-highs-strategy-a-2d.html">Qhull and Strategy A on a 2D control problem</a></h3>'
         '<a href="qhull-highs-strategy-a-2d.html"><img src="qhull-highs-strategy-a-2d.svg" alt="Unit square H constraints with LP and QP terminal state points"></a>'
-        '<p>The saved example runs the faithful source hull path, Qhull conversion, and both HiGHS terminal optimizer paths on one two-state, two-control fixture.</p>'
+        "<p>The saved example runs the faithful source hull path, Qhull conversion, and both HiGHS terminal optimizer paths on one two-state, two-control fixture.</p>"
         '<p><a href="qhull-highs-strategy-a-2d.html">Inputs, answers, and reproduction details ↗</a> · '
-        '<a href="qhull-highs-strategy-a-2d-record.json">Raw inputs and outputs ↗</a></p></article>')
+        '<a href="qhull-highs-strategy-a-2d-record.json">Raw inputs and outputs ↗</a></p></article>'
+    )
     fuel_layer_files, fuel_layer_inventory, fuel_layer_card = visual_example_fuel_layers.build(
-        Path(__file__).resolve().parents[2])
+        Path(__file__).resolve().parents[2]
+    )
     saved_figures += fuel_layer_card
     native_files, native_inventory, native_cards = stage_native_model_catalogue.build(
-        Path(__file__).resolve().parents[2])
+        Path(__file__).resolve().parents[2]
+    )
     saved_figures += native_cards
     buryatia_files, buryatia_inventory, buryatia_card = stage_buryatia_dim4.build(
-        Path(__file__).resolve().parents[2])
+        Path(__file__).resolve().parents[2]
+    )
     saved_figures += buryatia_card
     volterra_files, volterra_inventory, volterra_card = stage_buryatia_volterra.build(
-        Path(__file__).resolve().parents[2])
+        Path(__file__).resolve().parents[2]
+    )
     saved_figures += volterra_card
     pitch_files, pitch_inventory, pitch_cards = stage_native_flexible_pitch.build(
-        Path(__file__).resolve().parents[2])
+        Path(__file__).resolve().parents[2]
+    )
     saved_figures += pitch_cards
     discrete_files, discrete_inventory, discrete_cards = stage_native_discrete_models.build(
-        Path(__file__).resolve().parents[2])
+        Path(__file__).resolve().parents[2]
+    )
     saved_figures += discrete_cards
-    tracking_files, tracking_inventory, tracking_card = stage_native_model_tracking_first_pass.build(
-        Path(__file__).resolve().parents[2])
+    tracking_files, tracking_inventory, tracking_card = (
+        stage_native_model_tracking_first_pass.build(Path(__file__).resolve().parents[2])
+    )
     saved_figures += tracking_card
-    row_scaling_files, row_scaling_inventory, row_scaling_card = stage_native_row_scaling_diagnostic.build(
-        Path(__file__).resolve().parents[2])
+    row_scaling_files, row_scaling_inventory, row_scaling_card = (
+        stage_native_row_scaling_diagnostic.build(Path(__file__).resolve().parents[2])
+    )
     saved_figures += row_scaling_card
     history_files, history_inventory, history_card = stage_nominal_quadratic_history.build(
-        Path(__file__).resolve().parents[2])
+        Path(__file__).resolve().parents[2]
+    )
     saved_figures += history_card
     mpc_files, mpc_inventory, mpc_card = stage_discrete_mpc_2d.build(
-        Path(__file__).resolve().parents[2])
+        Path(__file__).resolve().parents[2]
+    )
     saved_figures += mpc_card
     extended_files, extended_inventory, extended_cards = stage_native_extended_models.build(
-        Path(__file__).resolve().parents[2])
+        Path(__file__).resolve().parents[2]
+    )
     saved_figures += extended_cards
-    saved_figures += ('<article class="saved-figure" id="history-cost-2d-v1"><p class="eyebrow">Nominal optimization · Saved-data illustration</p>'
+    saved_figures += (
+        '<article class="saved-figure" id="history-cost-2d-v1"><p class="eyebrow">Nominal optimization · Saved-data illustration</p>'
         '<h3><a href="history-cost-2d-v1/index.html">Full-history cost moves the 2D optimum</a></h3>'
         '<a href="history-cost-2d-v1/index.html"><img src="history-cost-2d-v1/history-cost-2d.svg" alt="Feasible control square, terminal-only optimum at (1,0), and full-cost HiGHS optimum at (1/3,0) with both objective contours"></a>'
-        '<p>A one-step supported 2D QP from the full-history cost compiler. The saved HiGHS point is compared with a separate terminal-only solve; the page preserves raw requests and responses.</p>'
+        "<p>A one-step supported 2D QP from the full-history cost compiler. The saved HiGHS point is compared with a separate terminal-only solve; the page preserves raw requests and responses.</p>"
         '<p><a href="history-cost-2d-v1/index.html">Open the full-history cost example →</a> · '
         '<a href="history-cost-2d-v1-reproduction.html">Build and reproduction commands</a> · '
-        '<a href="history-cost-2d-v1/history-cost-2d-v1.zip">Offline evidence bundle</a></p></article>')
-    saved_figures += ('<article class="saved-figure" id="history-cost-2d-v1-current-source"><p class="eyebrow">Nominal optimization · Current-source replay</p>'
+        '<a href="history-cost-2d-v1/history-cost-2d-v1.zip">Offline evidence bundle</a></p></article>'
+    )
+    saved_figures += (
+        '<article class="saved-figure" id="history-cost-2d-v1-current-source"><p class="eyebrow">Nominal optimization · Current-source replay</p>'
         '<h3><a href="history-cost-2d-v1-current-source.html">Current-source replay preserves the 2D optimum</a></h3>'
         '<a href="history-cost-2d-v1-current-source.html"><img src="history-cost-2d-v1/history-cost-2d.svg" alt="Feasible control square, terminal-only optimum at (1,0), and full-cost HiGHS optimum at (1/3,0)"></a>'
-        '<p>The post-fix merged source again returns (1/3,0) for full cost and (1,0) for terminal only. The record bundle preserves the two raw solver replies and incremental build profile.</p>'
+        "<p>The post-fix merged source again returns (1/3,0) for full cost and (1,0) for terminal only. The record bundle preserves the two raw solver replies and incremental build profile.</p>"
         '<p><a href="history-cost-2d-v1-current-source.html">Open current-source record →</a> · '
-        '<a href="history-cost-2d-v1-current-source/history-cost-2d-v1-current-source.zip">Offline raw evidence</a></p></article>')
+        '<a href="history-cost-2d-v1-current-source/history-cost-2d-v1-current-source.zip">Offline raw evidence</a></p></article>'
+    )
     last_topic_anchor = "visual-fuel-b06-viz03"
     last_topic_title = "B06 fuel terminal set: readable 4D-to-2D projections"
     analytic_files, analytic_inventory = visual_illustrations.build(Path(catalog))
     index = report_data.local_file(site, "index.html")
     original = index.read_text(encoding="utf-8")
-    require(original.count("</body>") == 1 and len(re.findall(r"<body\b[^>]*>", original)) == 1,
-            "staged report index has no unique body")
+    require(
+        original.count("</body>") == 1 and len(re.findall(r"<body\b[^>]*>", original)) == 1,
+        "staged report index has no unique body",
+    )
     # Validate every input/link before making any output visible. The publisher
     # already validated full report artifacts; never rewrite those artifacts here.
     for example in examples:
         route = site / example["report_id"]
-        require(not route.is_symlink() and (route / "index.html").is_file(), "missing staged report route")
+        require(
+            not route.is_symlink() and (route / "index.html").is_file(),
+            "missing staged report route",
+        )
         report_data.local_file(route, "index.html")
-        require(report_data.local_file(route, "records.json").read_bytes() == example["records_path"].read_bytes(),
-                "staged records differ from reviewed source")
+        require(
+            report_data.local_file(route, "records.json").read_bytes()
+            == example["records_path"].read_bytes(),
+            "staged records differ from reviewed source",
+        )
     out = site / "examples"
     require(not out.is_symlink(), "gallery output must not be a symlink")
     outputs = {e["slug"] + ".svg": plot(e) for e in examples}
@@ -962,7 +1453,9 @@ def build(catalog, site):
     outputs.update(fixed_tail_assets)
     episode_assets, episode_entry, episode_card = native_fixed_tail_episode_report.build()
     outputs.update(episode_assets)
-    episode_geometry_assets, episode_geometry_entry, episode_geometry_card = native_fixed_tail_geometry.build(episode_assets)
+    episode_geometry_assets, episode_geometry_entry, episode_geometry_card = (
+        native_fixed_tail_geometry.build(episode_assets)
+    )
     outputs.update(episode_geometry_assets)
     outputs.update(analytic_files)
     outputs.update(native_files)
@@ -981,14 +1474,19 @@ def build(catalog, site):
     validate_history_cost_bundle(cost_evidence_root, repository_root)
     for name in ("index.html", "history-cost-2d.svg"):
         path = cost_page_root / name
-        require(path.is_file() and not path.is_symlink(), "saved full-history page asset is missing or symlinked")
+        require(
+            path.is_file() and not path.is_symlink(),
+            "saved full-history page asset is missing or symlinked",
+        )
         outputs["history-cost-2d-v1/" + name] = path.read_bytes()
     for path in sorted(cost_evidence_root.rglob("*")):
         if path.is_file():
             require(not path.is_symlink(), "saved full-history evidence file is a symlink")
             relative = path.relative_to(cost_evidence_root).as_posix()
             outputs["history-cost-2d-v1/" + relative] = path.read_bytes()
-    current_cost_root = repository_root / "reports/algorithm-results/history-cost-2d-v1-current-source"
+    current_cost_root = (
+        repository_root / "reports/algorithm-results/history-cost-2d-v1-current-source"
+    )
     validate_current_history_cost_bundle(current_cost_root, repository_root)
     for path in sorted(current_cost_root.rglob("*")):
         if path.is_file():
@@ -996,85 +1494,162 @@ def build(catalog, site):
             relative = path.relative_to(current_cost_root).as_posix()
             outputs["history-cost-2d-v1-current-source/" + relative] = path.read_bytes()
     current_cost_page = repository_root / "docs/examples/history-cost-2d-v1-current-source.html"
-    require(current_cost_page.is_file() and not current_cost_page.is_symlink(),
-            "current-source history-cost page is missing or symlinked")
-    outputs["history-cost-2d-v1-current-source.html"] = current_cost_page.read_text(encoding="utf-8")
+    require(
+        current_cost_page.is_file() and not current_cost_page.is_symlink(),
+        "current-source history-cost page is missing or symlinked",
+    )
+    outputs["history-cost-2d-v1-current-source.html"] = current_cost_page.read_text(
+        encoding="utf-8"
+    )
     reproduction_page = repository_root / "docs/examples/history-cost-2d-v1-reproduction.html"
-    require(reproduction_page.is_file() and not reproduction_page.is_symlink(),
-            "full-history reproduction commands page is missing or symlinked")
+    require(
+        reproduction_page.is_file() and not reproduction_page.is_symlink(),
+        "full-history reproduction commands page is missing or symlinked",
+    )
     outputs["history-cost-2d-v1-reproduction.html"] = reproduction_page.read_text(encoding="utf-8")
     outputs.update(qhull_highs_strategy_a_example.build())
     adaptive_assets = Path(__file__).parents[2] / "docs/examples"
-    for name in ("adaptive-ode-replay.html", "adaptive-ode-replay.csv",
-                 "adaptive-ode-replay.svg", "adaptive-ode-replay.json"):
+    for name in (
+        "adaptive-ode-replay.html",
+        "adaptive-ode-replay.csv",
+        "adaptive-ode-replay.svg",
+        "adaptive-ode-replay.json",
+    ):
         source = adaptive_assets / name
-        require(source.is_file() and not source.is_symlink(), "missing adaptive ODE example asset: " + name)
-        outputs[name] = source.read_bytes() if source.suffix != ".html" else source.read_text(encoding="utf-8")
-    for name in ("source-index-geometry-2d.html", "source-index-geometry-2d.svg",
-                 "source-index-geometry-2d-records.json"):
+        require(
+            source.is_file() and not source.is_symlink(),
+            "missing adaptive ODE example asset: " + name,
+        )
+        outputs[name] = (
+            source.read_bytes() if source.suffix != ".html" else source.read_text(encoding="utf-8")
+        )
+    for name in (
+        "source-index-geometry-2d.html",
+        "source-index-geometry-2d.svg",
+        "source-index-geometry-2d-records.json",
+    ):
         source = adaptive_assets / name
-        require(source.is_file() and not source.is_symlink(),
-                "missing source-index geometry example asset: " + name)
-        outputs[name] = source.read_bytes() if source.suffix != ".html" else source.read_text(encoding="utf-8")
+        require(
+            source.is_file() and not source.is_symlink(),
+            "missing source-index geometry example asset: " + name,
+        )
+        outputs[name] = (
+            source.read_bytes() if source.suffix != ".html" else source.read_text(encoding="utf-8")
+        )
     with tempfile.TemporaryDirectory(prefix="csl-gallery-geometry-") as temporary:
         geometry_root = Path(temporary) / "examples"
         _, geometry_inventory, geometry_assets = geometry_opt_companions.build(geometry_root)
         for asset in geometry_assets:
             outputs[asset] = (geometry_root / asset).read_bytes()
-    gallery_inventory = [feedback_entry, fixed_tail_entry, episode_entry, episode_geometry_entry, {"family": "Nominal optimization · saved-data illustration",
-        "title": "Full-history cost moves the 2D optimum",
-        "status": "saved-data-illustration", "anchor": "history-cost-2d-v1",
-        "page": "history-cost-2d-v1/index.html", "figure": "history-cost-2d-v1/history-cost-2d.svg",
-        "source_page": "history-cost-2d-v1/index.html",
-        "walkthrough_page": "history-cost-2d-v1-reproduction.html",
-        "raw_record": "history-cost-2d-v1/records/capture-receipt.json"}]
-    gallery_inventory.append({"family": "Nominal optimization · saved-data companion",
-        "title": "Current-source replay of the full-history 2D optimum",
-        "status": "saved-data-companion", "anchor": "history-cost-2d-v1-current-source",
-        "page": "history-cost-2d-v1-current-source.html",
-        "figure": "history-cost-2d-v1/history-cost-2d.svg",
-        "source_page": "https://github.com/butahlecoq/controlled-systems-lab/tree/evidence/full-history-source-536a5a9f-20261112",
-        "raw_record": "history-cost-2d-v1-current-source/records/receipt.json"})
-    gallery_inventory.append({"family": "Numerical integration",
-        "title": "Adaptive RK4 replay of a two-state oscillator",
-        "status": "saved-data-companion", "anchor": "adaptive-ode-rk4",
-        "page": "adaptive-ode-replay.html", "figure": "adaptive-ode-replay.svg",
-        "source_page": "https://github.com/butahlecoq/controlled-systems-lab/blob/main/examples/adaptive_ode_replay.cpp",
-        "raw_record": "adaptive-ode-replay.json"})
-    gallery_inventory.append({"family": "Geometry and control reachability",
-        "title": "Source-index hulls in a 2D geometry pipeline",
-        "status": "educational-example", "anchor": "source-index-geometry-2d",
-        "page": "source-index-geometry-2d.html", "figure": "source-index-geometry-2d.svg",
-        "source_page": "https://github.com/butahlecoq/controlled-systems-lab/blob/main/examples/source_index_geometry_2d.cpp",
-        "raw_record": "source-index-geometry-2d-records.json"})
+    gallery_inventory = [
+        feedback_entry,
+        fixed_tail_entry,
+        episode_entry,
+        episode_geometry_entry,
+        {
+            "family": "Nominal optimization · saved-data illustration",
+            "title": "Full-history cost moves the 2D optimum",
+            "status": "saved-data-illustration",
+            "anchor": "history-cost-2d-v1",
+            "page": "history-cost-2d-v1/index.html",
+            "figure": "history-cost-2d-v1/history-cost-2d.svg",
+            "source_page": "history-cost-2d-v1/index.html",
+            "walkthrough_page": "history-cost-2d-v1-reproduction.html",
+            "raw_record": "history-cost-2d-v1/records/capture-receipt.json",
+        },
+    ]
+    gallery_inventory.append(
+        {
+            "family": "Nominal optimization · saved-data companion",
+            "title": "Current-source replay of the full-history 2D optimum",
+            "status": "saved-data-companion",
+            "anchor": "history-cost-2d-v1-current-source",
+            "page": "history-cost-2d-v1-current-source.html",
+            "figure": "history-cost-2d-v1/history-cost-2d.svg",
+            "source_page": "https://github.com/butahlecoq/controlled-systems-lab/tree/evidence/full-history-source-536a5a9f-20261112",
+            "raw_record": "history-cost-2d-v1-current-source/records/receipt.json",
+        }
+    )
+    gallery_inventory.append(
+        {
+            "family": "Numerical integration",
+            "title": "Adaptive RK4 replay of a two-state oscillator",
+            "status": "saved-data-companion",
+            "anchor": "adaptive-ode-rk4",
+            "page": "adaptive-ode-replay.html",
+            "figure": "adaptive-ode-replay.svg",
+            "source_page": "https://github.com/butahlecoq/controlled-systems-lab/blob/main/examples/adaptive_ode_replay.cpp",
+            "raw_record": "adaptive-ode-replay.json",
+        }
+    )
+    gallery_inventory.append(
+        {
+            "family": "Geometry and control reachability",
+            "title": "Source-index hulls in a 2D geometry pipeline",
+            "status": "educational-example",
+            "anchor": "source-index-geometry-2d",
+            "page": "source-index-geometry-2d.html",
+            "figure": "source-index-geometry-2d.svg",
+            "source_page": "https://github.com/butahlecoq/controlled-systems-lab/blob/main/examples/source_index_geometry_2d.cpp",
+            "raw_record": "source-index-geometry-2d-records.json",
+        }
+    )
     qhull_example_source = qhull_highs_strategy_a_example.load_record()["source_commit"]
-    gallery_inventory.append({"family": "Geometry and control reachability",
-        "title": "Qhull and Strategy A on a 2D control problem",
-        "status": "educational-example", "anchor": "qhull-highs-strategy-a-2d",
-        "page": "qhull-highs-strategy-a-2d.html", "figure": "qhull-highs-strategy-a-2d.svg",
-        "source_page": f"https://github.com/butahlecoq/controlled-systems-lab/blob/{qhull_example_source}/tests/synthesis/strategy_a/strategy_tests.cpp",
-        "raw_record": "qhull-highs-strategy-a-2d-record.json"})
+    gallery_inventory.append(
+        {
+            "family": "Geometry and control reachability",
+            "title": "Qhull and Strategy A on a 2D control problem",
+            "status": "educational-example",
+            "anchor": "qhull-highs-strategy-a-2d",
+            "page": "qhull-highs-strategy-a-2d.html",
+            "figure": "qhull-highs-strategy-a-2d.svg",
+            "source_page": f"https://github.com/butahlecoq/controlled-systems-lab/blob/{qhull_example_source}/tests/synthesis/strategy_a/strategy_tests.cpp",
+            "raw_record": "qhull-highs-strategy-a-2d-record.json",
+        }
+    )
     control_witness = control_witness_companions.build(site, catalog)
     outputs.update(control_witness.files)
     gallery_inventory.extend(control_witness.gallery_entries)
     fuel_assets = Path(__file__).parents[2] / "docs/examples"
-    fuel_files = ("fuel-b06-viz03.html", "fuel-b06-viz03-source.json", "fuel-b06-viz03-export.json",
-                  "fuel-b06-flow-projection.svg", "fuel-b06-flow-projection.png", "fuel-b06-stock-projection.svg",
-                  "fuel-b06-stock-projection.png", "fuel-b06-trajectory.svg", "fuel-b06-trajectory.png", "fuel-b06-timing.svg", "fuel-b06-timing.png",
-                  "fuel-b06-viz06.html", "fuel-b06-viz06-source.json", "fuel-b06-viz06-export.json",
-                  "fuel-b06-viz06-before.svg",
-                  "fuel-b06-viz06-flow.svg", "fuel-b06-viz06-flow.png", "fuel-b06-viz06-stock.svg", "fuel-b06-viz06-stock.png",
-                  "fuel-b06-viz06-trajectory.svg", "fuel-b06-viz06-trajectory.png", "fuel-b06-viz06-timing.svg", "fuel-b06-viz06-timing.png")
+    fuel_files = (
+        "fuel-b06-viz03.html",
+        "fuel-b06-viz03-source.json",
+        "fuel-b06-viz03-export.json",
+        "fuel-b06-flow-projection.svg",
+        "fuel-b06-flow-projection.png",
+        "fuel-b06-stock-projection.svg",
+        "fuel-b06-stock-projection.png",
+        "fuel-b06-trajectory.svg",
+        "fuel-b06-trajectory.png",
+        "fuel-b06-timing.svg",
+        "fuel-b06-timing.png",
+        "fuel-b06-viz06.html",
+        "fuel-b06-viz06-source.json",
+        "fuel-b06-viz06-export.json",
+        "fuel-b06-viz06-before.svg",
+        "fuel-b06-viz06-flow.svg",
+        "fuel-b06-viz06-flow.png",
+        "fuel-b06-viz06-stock.svg",
+        "fuel-b06-viz06-stock.png",
+        "fuel-b06-viz06-trajectory.svg",
+        "fuel-b06-viz06-trajectory.png",
+        "fuel-b06-viz06-timing.svg",
+        "fuel-b06-viz06-timing.png",
+    )
     for name in fuel_files:
         path = fuel_assets / name
         require(path.is_file(), "missing VIZ-03 fuel figure asset: " + str(path))
-        outputs[name] = path.read_text(encoding="utf-8") if path.suffix == ".html" else path.read_bytes()
+        outputs[name] = (
+            path.read_text(encoding="utf-8") if path.suffix == ".html" else path.read_bytes()
+        )
     viz10_assets = Path(__file__).parents[2] / "docs/examples/viz10"
     require((viz10_assets / "index.html").is_file(), "missing VIZ-10 saved-data plot gallery")
     for path in sorted(viz10_assets.rglob("*")):
         if path.is_file() and "mpl-config" not in path.parts:
             name = "viz10/" + path.relative_to(viz10_assets).as_posix()
-            outputs[name] = path.read_text(encoding="utf-8") if path.suffix == ".html" else path.read_bytes()
+            outputs[name] = (
+                path.read_text(encoding="utf-8") if path.suffix == ".html" else path.read_bytes()
+            )
     for example in examples:
         owner = CASE_OWNERS[example["kind"]]
         gallery_inventory.append(owner.inventory_entry(example))
@@ -1091,13 +1666,18 @@ def build(catalog, site):
     gallery_inventory.extend(mpc_inventory)
     gallery_inventory.extend(extended_inventory)
     geometry_first = geometry_inventory[0]
-    gallery_inventory.append({"family": "Geometry and optimization",
-                              "title": "Readable geometry and timing figures",
-                              "status": "saved-data-companion", "anchor": "geometry-optimization-companions",
-                              "page": "index.html#geometry-optimization-companions",
-                              "figure": geometry_first["figure"],
-                              "source_page": "geometry-optimization-v1.html",
-                              "raw_record": geometry_first["records"]})
+    gallery_inventory.append(
+        {
+            "family": "Geometry and optimization",
+            "title": "Readable geometry and timing figures",
+            "status": "saved-data-companion",
+            "anchor": "geometry-optimization-companions",
+            "page": "index.html#geometry-optimization-companions",
+            "figure": geometry_first["figure"],
+            "source_page": "geometry-optimization-v1.html",
+            "raw_record": geometry_first["records"],
+        }
+    )
     for entry in gallery_inventory:
         if entry["anchor"] == "visual-issue3-validated-minimax-2d":
             entry["walkthrough_page"] = "issue3-control-walkthrough.html"
@@ -1105,7 +1685,7 @@ def build(catalog, site):
         report_page = entry["page"]
         report_figure = entry["figure"]
         report_record = entry["records"]
-        entry.setdefault("anchor", f"saved-figure-{figure_index+1}")
+        entry.setdefault("anchor", f"saved-figure-{figure_index + 1}")
         entry["page"] = "index.html#saved-report-figures"
         entry["figure"] = f"../{entry['report_id']}/{report_figure}"
         entry["source_page"] = f"../{entry['report_id']}/{report_page}"
@@ -1113,308 +1693,477 @@ def build(catalog, site):
         entry["status"] = "saved-report-figure"
         gallery_inventory.append(entry)
     fuel_anchor = "visual-fuel-b06-viz03"
-    fuel_entry = {"family":"Fuel minimax reference", "title":"B06 fuel terminal set: readable 4D-to-2D projections",
-                  "status":"saved-data-companion", "anchor":fuel_anchor, "page":"fuel-b06-viz06.html",
-                  "figure":"fuel-b06-viz06-flow.svg", "source_page":"https://github.com/butahlecoq/controlled-systems-lab/blob/main/reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/index.html",
-                  "raw_record":"fuel-b06-viz06-source.json"}
+    fuel_entry = {
+        "family": "Fuel minimax reference",
+        "title": "B06 fuel terminal set: readable 4D-to-2D projections",
+        "status": "saved-data-companion",
+        "anchor": fuel_anchor,
+        "page": "fuel-b06-viz06.html",
+        "figure": "fuel-b06-viz06-flow.svg",
+        "source_page": "https://github.com/butahlecoq/controlled-systems-lab/blob/main/reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/index.html",
+        "raw_record": "fuel-b06-viz06-source.json",
+    }
     gallery_inventory.append(fuel_entry)
-    viz10_entry = {"family": "Historical and benchmark reports",
-                   "title": "VIZ-10 saved-data plots, including B07 and B09 fuel projections",
-                   "status": "saved-data-companion", "anchor": "saved-figure-viz10-plots",
-                   "page": "viz10/index.html",
-                   "figure": "viz10/b07-b07-reconstruction-s0-l0-d0.png",
-                   "source_page": "../issue6-b07-reference-a394915af10636430cdcd757d95a9d987eaa6c4c0b742bef7ba1aa04638a2cdd/index.html",
-                   "raw_record": "viz10/manifest.json"}
+    viz10_entry = {
+        "family": "Historical and benchmark reports",
+        "title": "VIZ-10 saved-data plots, including B07 and B09 fuel projections",
+        "status": "saved-data-companion",
+        "anchor": "saved-figure-viz10-plots",
+        "page": "viz10/index.html",
+        "figure": "viz10/b07-b07-reconstruction-s0-l0-d0.png",
+        "source_page": "../issue6-b07-reference-a394915af10636430cdcd757d95a9d987eaa6c4c0b742bef7ba1aa04638a2cdd/index.html",
+        "raw_record": "viz10/manifest.json",
+    }
     gallery_inventory.append(viz10_entry)
     lotka_route = "lotka-volterra-sampled-20261023"
     lotka_anchor = "saved-figure-lotka-quantitative"
-    gallery_inventory.append({"family": "Lotka–Volterra reachability samples",
-                              "title": "Stage-banded Lotka–Volterra samples · shared quantitative axes",
-                              "status": "saved-data-companion", "anchor": lotka_anchor,
-                              "page": "index.html#" + lotka_anchor,
-                              "figure": "lotka-volterra-sampled-v1.svg",
-                              "source_page": "../" + lotka_route + "/index.html",
-                              "raw_record": "../" + lotka_route + "/records.json"})
+    gallery_inventory.append(
+        {
+            "family": "Lotka–Volterra reachability samples",
+            "title": "Stage-banded Lotka–Volterra samples · shared quantitative axes",
+            "status": "saved-data-companion",
+            "anchor": lotka_anchor,
+            "page": "index.html#" + lotka_anchor,
+            "figure": "lotka-volterra-sampled-v1.svg",
+            "source_page": "../" + lotka_route + "/index.html",
+            "raw_record": "../" + lotka_route + "/records.json",
+        }
+    )
     lotka_companion = approx_extension_companions.lotka_volterra_companion(
-        site / lotka_route / "records.json", Path(__file__).parent / "styles/control-v1.json")
+        site / lotka_route / "records.json", Path(__file__).parent / "styles/control-v1.json"
+    )
     frozen_records = Path(__file__).resolve().parents[2] / "reports/algorithm-results"
     ext04_companion = approx_extension_companions.ext04_observed_replay_companion(
-        frozen_records / "ext04-df62c7c6d295e135" / "records.json", Path(__file__).parent / "styles/control-v1.json")
+        frozen_records / "ext04-df62c7c6d295e135" / "records.json",
+        Path(__file__).parent / "styles/control-v1.json",
+    )
     ext04_affine_synthesis_companion = approx_extension_companions.ext04_affine_synthesis_companion(
-        frozen_records / "ext04-affine-synthesis-7eadf7c7ecbb2bbd", Path(__file__).parent / "styles/control-v1.json")
+        frozen_records / "ext04-affine-synthesis-7eadf7c7ecbb2bbd",
+        Path(__file__).parent / "styles/control-v1.json",
+    )
     ext07_relation_companion = approx_extension_companions.ext07_hybrid_relation_companion(
-        frozen_records / "ext07-hybrid-51d9ee2e89d240eb" / "records.json", Path(__file__).parent / "styles/control-v1.json")
+        frozen_records / "ext07-hybrid-51d9ee2e89d240eb" / "records.json",
+        Path(__file__).parent / "styles/control-v1.json",
+    )
     ext07_two_parameter_companion = approx_extension_companions.ext07_two_parameter_companion(
         frozen_records / "ext07-hybrid-two-parameter-26f402289a309403" / "records.json",
-        Path(__file__).parent / "styles/control-v1.json")
+        Path(__file__).parent / "styles/control-v1.json",
+    )
     finite_feedback_companion = approx_extension_companions.finite_feedback_timing_companion(
         frozen_records / "finite-feedback-a6e96fd96c7ac7cc" / "records.json",
-        Path(__file__).parent / "styles/control-v1.json")
+        Path(__file__).parent / "styles/control-v1.json",
+    )
     extension_companion_cards = ""
     for family, title, stem, report_route, alt in (
-            ("Continuous feedback", "EXT-04 robust one-step synthesis", "ext04-affine-synthesis-v1",
-             "ext04-affine-synthesis-7eadf7c7ecbb2bbd",
-             "Four initial state vertices, the terminal target, and eight saved terminal vertices."),
-            ("Observed control", "EXT-04 observed-replay batch times", "ext04-observed-replay-v1",
-             "ext04-observed-replay-eb0b06e560360611d2f2a16fba9b1204e0415b4ba5cd0d5210427c6349963b34",
-             "Seven measured 5,000-call batch durations for three observation fixtures."),
-            ("Hybrid reachability", "EXT-07 feasible control relation", "ext07-feasible-relation-v1",
-             "ext07-hybrid-51d9ee2e89d240eb",
-             "The saved one-control feasible relation and its unique terminal minimum."),
-            ("Hybrid optimization", "EXT-07 feasible control regions", "ext07-two-control-family-v1",
-             "ext07-hybrid-two-parameter-8ad871b5ea29fc7b",
-             "Two saved feasible control regions and their shared complete minimizing face."),
-            ("Finite-feedback minimax", "Finite-feedback saved timings", "finite-feedback-timing-v1",
-             "finite-feedback-registered-f874133e442eb0fb884b8813a06591cc0f077063ee75ddf627de74656fc11c0f",
-             "Median timings and observed ranges for four finite-feedback scenarios.")):
-        gallery_inventory.append({"family": family, "title": title,
-                                  "status": "saved-data-companion", "anchor": stem,
-                                  "page": stem + ".html", "figure": stem + ".svg",
-                                  "source_page": "../" + report_route + "/index.html",
-                                  "raw_record": "../" + report_route + "/records.json"})
+        (
+            "Continuous feedback",
+            "EXT-04 robust one-step synthesis",
+            "ext04-affine-synthesis-v1",
+            "ext04-affine-synthesis-7eadf7c7ecbb2bbd",
+            "Four initial state vertices, the terminal target, and eight saved terminal vertices.",
+        ),
+        (
+            "Observed control",
+            "EXT-04 observed-replay batch times",
+            "ext04-observed-replay-v1",
+            "ext04-observed-replay-eb0b06e560360611d2f2a16fba9b1204e0415b4ba5cd0d5210427c6349963b34",
+            "Seven measured 5,000-call batch durations for three observation fixtures.",
+        ),
+        (
+            "Hybrid reachability",
+            "EXT-07 feasible control relation",
+            "ext07-feasible-relation-v1",
+            "ext07-hybrid-51d9ee2e89d240eb",
+            "The saved one-control feasible relation and its unique terminal minimum.",
+        ),
+        (
+            "Hybrid optimization",
+            "EXT-07 feasible control regions",
+            "ext07-two-control-family-v1",
+            "ext07-hybrid-two-parameter-8ad871b5ea29fc7b",
+            "Two saved feasible control regions and their shared complete minimizing face.",
+        ),
+        (
+            "Finite-feedback minimax",
+            "Finite-feedback saved timings",
+            "finite-feedback-timing-v1",
+            "finite-feedback-registered-f874133e442eb0fb884b8813a06591cc0f077063ee75ddf627de74656fc11c0f",
+            "Median timings and observed ranges for four finite-feedback scenarios.",
+        ),
+    ):
+        gallery_inventory.append(
+            {
+                "family": family,
+                "title": title,
+                "status": "saved-data-companion",
+                "anchor": stem,
+                "page": stem + ".html",
+                "figure": stem + ".svg",
+                "source_page": "../" + report_route + "/index.html",
+                "raw_record": "../" + report_route + "/records.json",
+            }
+        )
         extension_companion_cards += (
             f'<article class="saved-figure" id="{stem}"><p class="eyebrow">{escape(family)} · Saved-data companion</p>'
             f'<h3><a href="{stem}.html">{escape(title)}</a></h3>'
             f'<a href="{stem}.html"><img src="{stem}.svg" alt="{escape(alt, quote=True)}"></a>'
-            '<p>Replots frozen values with the shared quantitative axes and no solver rerun.</p>'
+            "<p>Replots frozen values with the shared quantitative axes and no solver rerun.</p>"
             f'<p><a href="{stem}.html">Open the saved-data companion →</a> · '
-            f'<a href="../{report_route}/records.json">Frozen values ↗</a></p></article>')
+            f'<a href="../{report_route}/records.json">Frozen values ↗</a></p></article>'
+        )
     ext02_card = ""
     ext02_route = site / "ext02-two-state-mixed-v1"
     if (ext02_route / "index.html").is_file() and (ext02_route / "figure.svg").is_file():
         ext02_anchor = "ext02-portfolio-v1"
-        ext02_entry = {"family": "Finite/mixed-control portfolio",
-                       "title": "EXT-02 analytic branch portfolio",
-                       "status": "saved-data-companion", "anchor": ext02_anchor,
-                       "page": "../ext02-two-state-mixed-v1/index.html",
-                       "figure": "../ext02-two-state-mixed-v1/figure.svg",
-                       "source_page": "../ext02-two-state-mixed-v1/index.html",
-                       "raw_record": "../ext02-two-state-mixed-v1/measurement.json"}
+        ext02_entry = {
+            "family": "Finite/mixed-control portfolio",
+            "title": "EXT-02 analytic branch portfolio",
+            "status": "saved-data-companion",
+            "anchor": ext02_anchor,
+            "page": "../ext02-two-state-mixed-v1/index.html",
+            "figure": "../ext02-two-state-mixed-v1/figure.svg",
+            "source_page": "../ext02-two-state-mixed-v1/index.html",
+            "raw_record": "../ext02-two-state-mixed-v1/measurement.json",
+        }
         gallery_inventory.append(ext02_entry)
         ext02_card = (
             f'<article class="saved-figure" id="{ext02_anchor}"><p class="eyebrow">'
-            'Finite/mixed-control portfolio · Saved-data companion</p>'
+            "Finite/mixed-control portfolio · Saved-data companion</p>"
             f'<h3><a href="{ext02_entry["page"]}">{escape(ext02_entry["title"])}</a></h3>'
             f'<a href="{ext02_entry["page"]}"><img src="{ext02_entry["figure"]}" '
             'alt="Three optimal finite-catalogue branches at their terminal states"></a>'
-            '<p>One analytic nominal fixture; the saved report records all branch outcomes and measurement limits.</p>'
-            f'<p><a href="{ext02_entry["page"]}">Open the saved EXT-02 report →</a></p></article>')
+            "<p>One analytic nominal fixture; the saved report records all branch outcomes and measurement limits.</p>"
+            f'<p><a href="{ext02_entry["page"]}">Open the saved EXT-02 report →</a></p></article>'
+        )
     app02_companion = approx_extension_companions.app02_companion(
-        site / "app02-box-8ff979de60ea9d22" / "records.json", Path(__file__).parent / "styles/control-v1.json")
+        site / "app02-box-8ff979de60ea9d22" / "records.json",
+        Path(__file__).parent / "styles/control-v1.json",
+    )
     app03_companion = approx_extension_companions.app03_companion(
-        site / "app03-zonotope-4522855018fa9b0b" / "records.json", Path(__file__).parent / "styles/control-v1.json")
+        site / "app03-zonotope-4522855018fa9b0b" / "records.json",
+        Path(__file__).parent / "styles/control-v1.json",
+    )
     app04_companion = approx_extension_companions.app04_companion(
-        site / "app04-ellipsoid-fd302c34092f8b19" / "records.json", Path(__file__).parent / "styles/control-v1.json")
+        site / "app04-ellipsoid-fd302c34092f8b19" / "records.json",
+        Path(__file__).parent / "styles/control-v1.json",
+    )
     ext05_companion = approx_extension_companions.ext05_companion(
-        site / "ext05-discretization-a40ba9647cc023dc" / "records.json", Path(__file__).parent / "styles/control-v1.json")
+        site / "ext05-discretization-a40ba9647cc023dc" / "records.json",
+        Path(__file__).parent / "styles/control-v1.json",
+    )
     ext01_companion = approx_extension_companions.ext01_companion(
-        site / "ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54" / "records.json",
-        Path(__file__).parent / "styles/control-v1.json")
+        site
+        / "ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54"
+        / "records.json",
+        Path(__file__).parent / "styles/control-v1.json",
+    )
     app01_source_id = "app01-plan-20261016-22d406fd"
     app01_publication_catalog = Path(catalog).resolve().with_name("app01-publications.json")
     app01_publications = json.loads(app01_publication_catalog.read_text(encoding="utf-8"))
-    require(app01_publications.get("schema") == "csl.app01-report-extension/1" and
-            isinstance(app01_publications.get("reports"), list),
-            "APP-01 publication catalogue differs")
-    app01_matches = [entry for entry in app01_publications["reports"]
-                     if entry.get("source_report_id") == app01_source_id]
-    require(len(app01_matches) == 1, "APP-01 source identity is missing or duplicated in publication catalogue")
+    require(
+        app01_publications.get("schema") == "csl.app01-report-extension/1"
+        and isinstance(app01_publications.get("reports"), list),
+        "APP-01 publication catalogue differs",
+    )
+    app01_matches = [
+        entry
+        for entry in app01_publications["reports"]
+        if entry.get("source_report_id") == app01_source_id
+    ]
+    require(
+        len(app01_matches) == 1,
+        "APP-01 source identity is missing or duplicated in publication catalogue",
+    )
     app01_report_id = app01_matches[0].get("report_id")
-    require(isinstance(app01_report_id, str) and
-            re.fullmatch(r"app01-plan-\d{8}-[0-9a-f]{64}", app01_report_id),
-            "APP-01 publication route is invalid")
+    require(
+        isinstance(app01_report_id, str)
+        and re.fullmatch(r"app01-plan-\d{8}-[0-9a-f]{64}", app01_report_id),
+        "APP-01 publication route is invalid",
+    )
     app01_route = site / app01_report_id
-    require(not app01_route.is_symlink() and (app01_route / "index.html").is_file(),
-            "missing staged APP-01 publication route")
+    require(
+        not app01_route.is_symlink() and (app01_route / "index.html").is_file(),
+        "missing staged APP-01 publication route",
+    )
     app01_record_path = report_data.local_file(app01_route, "records.json")
     app01_source_record = app01_publication_catalog.parent / app01_source_id / "records.json"
-    require(app01_record_path.read_bytes() == app01_source_record.read_bytes(),
-            "staged APP-01 records differ from reviewed source")
+    require(
+        app01_record_path.read_bytes() == app01_source_record.read_bytes(),
+        "staged APP-01 records differ from reviewed source",
+    )
     app01_companion = approx_extension_companions.app01_companion(
-        app01_record_path,
-        Path(__file__).parent / "styles/control-v1.json", app01_report_id)
+        app01_record_path, Path(__file__).parent / "styles/control-v1.json", app01_report_id
+    )
     for family, title, stem, report_id in (
-            ("Box approximation", "APP-02 diamond approximations", "app02-diamond-v1", "app02-box-8ff979de60ea9d22"),
-            ("Ellipsoidal approximation", "APP-04 square and ellipses", "app04-square-v1", "app04-ellipsoid-fd302c34092f8b19"),
-            ("Discretization", "EXT-05 saved state samples", "ext05-states-v1", "ext05-discretization-a40ba9647cc023dc")):
-        gallery_inventory.append({"family": family, "title": title,
-                                  "status": "saved-data-companion",
-                                  "anchor": stem, "page": stem + ".html",
-                                  "figure": stem + ".svg",
-                                  "source_page": "../" + report_id + "/index.html",
-                                  "raw_record": "../" + report_id + "/records.json"})
-    gallery_inventory.append({"family": "Fixed-plan minimax", "title": "EXT-01 B08 full-catalogue timing",
-                              "status": "saved-data-companion", "anchor": "ext01-b08-timing-v1",
-                              "page": "ext01-b08-timing-v1.html", "figure": "ext01-b08-timing-v1.svg",
-                              "source_page": "../ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54/index.html",
-                              "raw_record": "../ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54/records.json"})
-    gallery_inventory.append({"family": "Zonotopes", "title": "APP-03 saved planar zonotope and outer cover",
-                              "status": "saved-data-companion", "anchor": "app03-zonotope-v1",
-                              "page": "app03-zonotope-v1.html", "figure": "app03-zonotope-v1.svg",
-                              "source_page": "../app03-zonotope-4522855018fa9b0b/index.html",
-                              "raw_record": "../app03-zonotope-4522855018fa9b0b/records.json"})
-    gallery_inventory.append({"family": "Inner state-plan checks", "title": "APP-01 saved plan-check timings",
-                              "status": "saved-data-companion", "anchor": "app01-plan-timing-v1",
-                              "page": "app01-plan-timing-v1.html", "figure": "app01-plan-timing-v1.svg",
-                              "source_page": "../" + app01_report_id + "/index.html",
-                              "raw_record": "../" + app01_report_id + "/records.json"})
+        (
+            "Box approximation",
+            "APP-02 diamond approximations",
+            "app02-diamond-v1",
+            "app02-box-8ff979de60ea9d22",
+        ),
+        (
+            "Ellipsoidal approximation",
+            "APP-04 square and ellipses",
+            "app04-square-v1",
+            "app04-ellipsoid-fd302c34092f8b19",
+        ),
+        (
+            "Discretization",
+            "EXT-05 saved state samples",
+            "ext05-states-v1",
+            "ext05-discretization-a40ba9647cc023dc",
+        ),
+    ):
+        gallery_inventory.append(
+            {
+                "family": family,
+                "title": title,
+                "status": "saved-data-companion",
+                "anchor": stem,
+                "page": stem + ".html",
+                "figure": stem + ".svg",
+                "source_page": "../" + report_id + "/index.html",
+                "raw_record": "../" + report_id + "/records.json",
+            }
+        )
+    gallery_inventory.append(
+        {
+            "family": "Fixed-plan minimax",
+            "title": "EXT-01 B08 full-catalogue timing",
+            "status": "saved-data-companion",
+            "anchor": "ext01-b08-timing-v1",
+            "page": "ext01-b08-timing-v1.html",
+            "figure": "ext01-b08-timing-v1.svg",
+            "source_page": "../ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54/index.html",
+            "raw_record": "../ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54/records.json",
+        }
+    )
+    gallery_inventory.append(
+        {
+            "family": "Zonotopes",
+            "title": "APP-03 saved planar zonotope and outer cover",
+            "status": "saved-data-companion",
+            "anchor": "app03-zonotope-v1",
+            "page": "app03-zonotope-v1.html",
+            "figure": "app03-zonotope-v1.svg",
+            "source_page": "../app03-zonotope-4522855018fa9b0b/index.html",
+            "raw_record": "../app03-zonotope-4522855018fa9b0b/records.json",
+        }
+    )
+    gallery_inventory.append(
+        {
+            "family": "Inner state-plan checks",
+            "title": "APP-01 saved plan-check timings",
+            "status": "saved-data-companion",
+            "anchor": "app01-plan-timing-v1",
+            "page": "app01-plan-timing-v1.html",
+            "figure": "app01-plan-timing-v1.svg",
+            "source_page": "../" + app01_report_id + "/index.html",
+            "raw_record": "../" + app01_report_id + "/records.json",
+        }
+    )
     coverage_data = algorithm_coverage(catalog, site, gallery_inventory)
-    issue3_report = next(entry for entry in json.loads(Path(catalog).read_text(encoding="utf-8"))["reports"]
-                         if entry["report_kind"] == "issue3-validated-minimax")
+    issue3_report = next(
+        entry
+        for entry in json.loads(Path(catalog).read_text(encoding="utf-8"))["reports"]
+        if entry["report_kind"] == "issue3-validated-minimax"
+    )
     workflow_figure, workflow_page = issue3_control_walkthrough(
         Path(catalog).resolve().parent / issue3_report["source_report_id"] / "records.json",
-        issue3_report["report_id"])
+        issue3_report["report_id"],
+    )
     navigation = "".join(f'<a href="#{e["slug"]}">{escape(e["title"])}</a>' for e in examples)
     navigation += '<a href="#analytic-illustrations">Analytic geometry and optimization</a>'
     navigation += '<a href="#algorithm-coverage">Algorithm coverage map</a>'
     navigation += '<a href="#saved-report-figures">More saved algorithm figures</a>'
-    body = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
-            '<meta name="viewport" content="width=device-width,initial-scale=1">'
-            '<title>Visual examples · Controlled Systems Lab</title><link rel="stylesheet" href="examples.css"></head>'
-            '<body><a class="skip" href="#main">Skip to examples</a><div class="shell"><aside>'
-            '<a class="brand" href="../index.html">[ csl ]<br>Controlled Systems Lab</a>'
-            '<p class="eyebrow">Learn by looking</p>'
-            f'<a class="nav-shortcut" href="#{last_topic_anchor}">Jump to final example: {escape(last_topic_title)} ↓</a>'
-            '<nav aria-label="Examples topics" tabindex="0">' + navigation +
-            '<a href="../index.html">Learn</a></nav></aside><main id="main">'
-            '<header>' + site_design.breadcrumbs([("Learn", "../index.html"), ("Examples", "index.html")])
-            + '<p class="eyebrow">Small inputs / visible answers</p><h1>Algorithms,<br><em>in two dimensions.</em></h1>'
-            '<p>See what goes in, what comes out, and why. Explore hull vertices, set intersections, hybrid control families, and projected reachability.</p>'
-            '<p class="limits">These educational pages show reviewed saved outputs or explicit analytic constructions; '
-            'they are not new performance measurements. Each page states whether it replays saved output or illustrates a literal fixture.</p>'
-            '<p><a href="minimal-inputs.json" download>Download inputs and displayed outputs (JSON)</a> · '
-            '<a href="visual-coverage.json" download>Download current gallery inventory (JSON)</a> · '
-            '<a href="visual-route-inventory.json" download>Download report figure routes and migration status (JSON)</a> · '
-            '<a href="algorithm-coverage.json" download>Download algorithm-family coverage (JSON)</a></p>'
-            '<p class="limits">This inventory describes figures currently linked here; it does not imply that every implemented algorithm already has a 2D example. '
-            'The full algorithm-coverage gap is tracked in <a href="https://github.com/butahlecoq/controlled-systems-lab/issues/563">issue #563</a>.</p></header>'
-            + "".join(section(e, i+1,
-                              (examples[i-1]["title"], "#" + examples[i-1]["slug"]) if i else None,
-                              (examples[i+1]["title"], "#" + examples[i+1]["slug"])
-                              if i + 1 < len(examples) else None)
-                      for i, e in enumerate(examples)) +
-            '<section id="analytic-illustrations"><p class="eyebrow">Hand-derived examples</p>'
-            '<h2>Analytic geometry and optimization</h2><p>These exact low-dimensional examples explain the operations with literal inputs and answers. They are not solver traces or performance evidence.</p>'
-            '<div class="saved-grid">' + visual_illustrations.cards(analytic_inventory) + '</div></section>' +
-            '<section id="algorithm-coverage"><p class="eyebrow">Implementation map</p>'
-            '<h2>Algorithm families and 2D limits</h2><p>This map follows the current framework composition document and published report catalog. '
-            'It separates the nominal synthesis path from installed modules outside that path and records where this gallery has no supported 2D case.</p>'
-            '<div class="coverage-grid">' + coverage_html(coverage_data) + '</div></section>' +
-            '<section id="saved-report-figures"><p class="eyebrow">Reviewed report figures</p>'
-            '<h2>More algorithms, from saved evidence</h2><p>Most displayed figures are published inside their original reports. '
-            'Cards marked “Saved-data companion” are generated into this gallery from frozen records; they do not change those reports. '
-            'Open a report for exact inputs, answers, reproduction commands, provenance and evidence limits.</p>'
-            '<div class="saved-grid">' + saved_figures + feedback_card + fixed_tail_card + episode_card + episode_geometry_card +
-            '<article class="saved-figure" id="geometry-optimization-companions"><p class="eyebrow">Geometry and optimization · Saved-data companion</p>'
-            '<h3>Readable geometry and timing figures</h3><p>Eleven companions replot frozen report records with the shared quantitative axis policy. '
-            'The geometry examples use saved 2D coordinates; timing charts show saved medians and observed ranges.</p>'
-            '<p><a href="geometry-optimization-v1.html">Open geometry and optimization figures →</a></p></article>' +
-            '<article class="saved-figure" id="control-witness-companions"><p class="eyebrow">Control strategy · Saved-data companion</p>'
-            '<h3>Saved control relations and tube geometry</h3>'
-            '<a href="control-witness-v1.html"><img src="control-witness/mpc06-tube.svg" '
-            'alt="Saved state box, support-tightened set, and exact RPI error tube on equal numeric axes"></a>'
-            '<p>Five figures plot saved control projections from Strategy A and B. The page also shows frozen MPC-06 tube geometry and the T-S01 Strategy A/B selected control histories with the exact minimizer family. All companions preserve the original report evidence.</p>'
-            '<p><a href="control-witness-v1.html">Open the control and tube figures →</a></p></article>' +
-            '<article class="saved-figure" id="ts01-strategy-ab"><p class="eyebrow">Control strategy · Saved-data companion</p>'
-            '<h3>T-S01 Strategy A/B selected controls</h3>'
-            '<a href="control-witness-v1.html#ts01-strategy-ab"><img src="control-witness/ts01-strategy-ab.svg" '
-            'alt="Selected two-stage control histories from Strategy A and B on the exact minimizing line"></a>'
-            '<p>Plots saved selected histories from both strategies and the exact minimizing family for the two-stage integrator. It is a control projection with equal data scaling, not a reachable-set plot or performance ranking.</p>'
-            '<p><a href="control-witness-v1.html#ts01-strategy-ab">Open the T-S01 figure and evidence →</a></p></article>' +
-            '<article class="saved-figure" id="b04-native-smoke"><p class="eyebrow">Fuel reference · Saved-data companion</p>'
-            '<h3>B04 reference variant in oxidizer and fuel phase planes</h3>'
-            '<a href="control-witness-v1.html#b04-native-smoke"><img src="control-witness/b04-native-smoke-projections.svg" '
-            'alt="Saved exact and native smoke trajectories projected onto oxidizer flow and stock, and fuel flow and stock"></a>'
-            '<p>Uses the within-species projections (x₁,x₂) and (x₃,x₄) you requested. The exact saved witness is shown with one cold attempt per native solver; their residual checks remain inconclusive. This is a trajectory illustration, not a reachable-set plot or historical B04 reconstruction.</p>'
-            '<p><a href="control-witness-v1.html#b04-native-smoke">Open the paired projections and evidence →</a></p></article>' +
-            '<article class="saved-figure" id="b04-repeated-benchmark"><p class="eyebrow">B04 reference · Saved-data companion</p>'
-            '<h3>Representative repeated-solver trajectories</h3>'
-            '<a href="control-witness-v1.html#b04-repeated-benchmark"><img src="control-witness/b04-repeated-oxidizer.svg" '
-            'alt="Exact B04 witness and representative solver paths in the oxidizer flow and stock plane"></a>'
-            '<p>Two shared-style figures use (x₁,x₂) for oxidizer and (x₃,x₄) for fuel. Each native path is one saved cold repetition selected near its backend’s median solve time; paths are not averages and residual evidence remains inconclusive.</p>'
-            '<p><a href="control-witness-v1.html#b04-repeated-benchmark">Open both projections and evidence →</a></p></article>' +
-            '<article class="saved-figure" id="exp02-paired-family"><p class="eyebrow">Exp-02 · Saved-data companion</p>'
-            '<h3>Complete paired-profile control families</h3>'
-            '<a href="control-witness-v1.html#exp02-ts02-control-family"><img src="control-witness/exp02-ts03-control-family.svg" '
-            'alt="Feasible unit control square with complete optimal edge u1 equals 1"></a>'
-            '<p>Shared-style equal-scale plots show the full control families for the constant-objective T-S02 and singular-integrator T-S03 fixtures, from frozen scenarios and saved paired strategy events.</p>'
-            '<p><a href="control-witness-v1.html#exp02-ts02-control-family">Open both projections and evidence →</a></p></article>' +
-            '<article class="saved-figure" id="control-witness-timings"><p class="eyebrow">Control reports · Saved-data companion</p>'
-            '<h3>Saved synthesis and verifier timings</h3>'
-            '<a href="control-witness-timing-v1.html"><img src="control-witness/syn01-timing.svg" '
-            'alt="Saved SYN01 phase timing observations with exact values and ranges in an adjacent table"></a>'
-            '<p>The figures replot saved observations from SYN01, SYN02, SYN06, the Strategy A/B reports and paired SYN-TS01. The failed SYN02 shifted-residual fixture remains listed as unavailable with its saved failure status.</p>'
-            '<p><a href="control-witness-timing-v1.html">Open the saved timing figures →</a></p></article>' +
-            f'<article class="saved-figure" id="{lotka_anchor}"><p class="eyebrow">Saved sample geometry · Saved-data companion</p>'
-            '<h3>Lotka–Volterra samples with shared quantitative axes</h3>'
-            '<a href="lotka-volterra-sampled-v1.html"><img src="lotka-volterra-sampled-v1.svg" '
-            'alt="Saved Lotka–Volterra state samples across four stage bands"></a>'
-            '<p>Replots the frozen sample record with numeric ticks, major grids, and disclosed independent scales; samples are not reachability bounds.</p>'
-            '<p><a href="lotka-volterra-sampled-v1.html">Open the saved-data companion →</a></p></article>' +
-            '<article class="saved-figure" id="app02-diamond-v1"><p class="eyebrow">Box approximation · Saved-data companion</p>'
-            '<h3>APP-02 diamond approximations</h3><a href="app02-diamond-v1.html"><img src="app02-diamond-v1.svg" '
-            'alt="Saved APP-02 diamond input, outer bounds, and inner box on labelled x-y axes"></a>'
-            '<p>Replots the frozen vertices with numeric ticks, major grids, and equal x-y scales.</p>'
-            '<p><a href="app02-diamond-v1.html">Open the saved-data companion →</a></p></article>' +
-            '<article class="saved-figure" id="app04-square-v1"><p class="eyebrow">Ellipsoidal approximation · Saved-data companion</p>'
-            '<h3>APP-04 square and ellipses</h3><a href="app04-square-v1.html"><img src="app04-square-v1.svg" '
-            'alt="Saved APP-04 square and two enclosing ellipses on labelled x-y axes"></a>'
-            '<p>Replots the frozen vertices and radii with numeric ticks, major grids, and equal x-y scales.</p>'
-            '<p><a href="app04-square-v1.html">Open the saved-data companion →</a></p></article>' +
-            '<article class="saved-figure" id="ext05-states-v1"><p class="eyebrow">Discretization · Saved-data companion</p>'
-            '<h3>EXT-05 saved state samples</h3><a href="ext05-states-v1.html"><img src="ext05-states-v1.svg" '
-            'alt="Three archived EXT-05 position-velocity states at times zero, one, and three"></a>'
-            '<p>Plots only the archived state samples; it does not interpolate the continuous trajectory.</p>'
-            '<p><a href="ext05-states-v1.html">Open the saved-data companion →</a></p></article>' +
-            '<article class="saved-figure" id="ext01-b08-timing-v1"><p class="eyebrow">Fixed-plan minimax · Saved-data companion</p>'
-            '<h3>EXT-01 B08 full-catalogue timing</h3><a href="ext01-b08-timing-v1.html"><img src="ext01-b08-timing-v1.svg" '
-            'alt="Seven saved EXT-01 B08 timing observations in milliseconds on labelled numeric axes"></a>'
-            '<p>Plots the seven frozen observations as separate points with numeric ticks and major grids; no speedup or winner is claimed.</p>'
-            '<p><a href="ext01-b08-timing-v1.html">Open the saved-data companion →</a></p></article>' +
-            '<article class="saved-figure" id="app03-zonotope-v1"><p class="eyebrow">Zonotopes · Saved-data companion</p>'
-            '<h3>APP-03 saved planar zonotope and outer cover</h3>'
-            '<a href="app03-zonotope-v1.html"><img src="app03-zonotope-v1.svg" '
-            'alt="Saved APP-03 planar zonotope and outer axis cover with numeric x-y axes"></a>'
-            '<p>Replots the archived generator sums and outer-cover generators with numeric ticks, major grids, and equal x-y scales.</p>'
-            '<p><a href="app03-zonotope-v1.html">Open the saved-data companion →</a></p></article>' +
-            '<article class="saved-figure" id="app01-plan-timing-v1"><p class="eyebrow">Inner state-plan checks · Saved-data companion</p>'
-            '<h3>APP-01 saved plan-check timings</h3>'
-            '<a href="app01-plan-timing-v1.html"><img src="app01-plan-timing-v1.svg" '
-            'alt="Three archived APP-01 median timings on numeric axes, one for each saved fixture"></a>'
-            '<p>Plots archived medians for valid, invalid, and empty-inner fixtures. Each point summarizes seven batches of 40,000 checks; it does not claim a performance winner.</p>'
-            '<p><a href="app01-plan-timing-v1.html">Open the saved-data companion →</a></p></article>' +
-            extension_companion_cards + ext02_card +
-            f'<article class="saved-figure" id="{fuel_anchor}"><p class="eyebrow">Fuel minimax reference · Saved-data companion</p>'
-            f'<h3>{escape(fuel_entry["title"])}</h3>'
-            f'<p>{escape("Readable, versioned SVG and PNG projections of the saved 4D B06 terminal set, with exact values, units, target, evidence limits and reproduction commands.")}</p>'
-            f'<a href="{fuel_entry["page"]}"><img src="{fuel_entry["figure"]}" alt="{escape("B06 four-state terminal set projected onto flow coordinates")}"></a>'
-            f'<p><a href="{fuel_entry["page"]}">Open the fuel projections and timing figures →</a></p></article>' +
-            f'<article class="saved-figure" id="{viz10_entry["anchor"]}"><p class="eyebrow">Historical and benchmark reports · Saved-data companion</p>'
-            f'<h3>{escape(viz10_entry["title"])}</h3>'
-            '<a href="viz10/index.html"><img src="viz10/b07-b07-reconstruction-s0-l0-d0.png" '
-            'alt="B07 terminal points projected from four state coordinates onto oxidizer/fuel flow and stock axes"></a>'
-            '<p>Plots saved B07 and B09 four-state terminal rows in labeled flow and stock coordinate pairs. The figures show points and do not reconstruct a filled enclosure.</p>'
-            '<p><a href="viz10/index.html">Open the historical and benchmark saved-data plots →</a></p></article>' +
-            '</div></section><footer>Controlled Systems Lab · Saved evidence, visible geometry.</footer></main></div>'
-            '<script>document.querySelector(".nav-shortcut").addEventListener("click",event=>{'
-            'const target=document.querySelector(event.currentTarget.hash);if(!target)return;'
-            'event.preventDefault();history.pushState(null,"",event.currentTarget.hash);'
-            'target.scrollIntoView({behavior:"instant",block:"start"});});</script></body></html>')
+    body = (
+        '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+        '<meta name="viewport" content="width=device-width,initial-scale=1">'
+        '<title>Visual examples · Controlled Systems Lab</title><link rel="stylesheet" href="examples.css"></head>'
+        '<body><a class="skip" href="#main">Skip to examples</a><div class="shell"><aside>'
+        '<a class="brand" href="../index.html">[ csl ]<br>Controlled Systems Lab</a>'
+        '<p class="eyebrow">Learn by looking</p>'
+        f'<a class="nav-shortcut" href="#{last_topic_anchor}">Jump to final example: {escape(last_topic_title)} ↓</a>'
+        '<nav aria-label="Examples topics" tabindex="0">'
+        + navigation
+        + '<a href="../index.html">Learn</a></nav></aside><main id="main">'
+        "<header>"
+        + site_design.breadcrumbs([("Learn", "../index.html"), ("Examples", "index.html")])
+        + '<p class="eyebrow">Small inputs / visible answers</p><h1>Algorithms,<br><em>in two dimensions.</em></h1>'
+        "<p>See what goes in, what comes out, and why. Explore hull vertices, set intersections, hybrid control families, and projected reachability.</p>"
+        '<p class="limits">These educational pages show reviewed saved outputs or explicit analytic constructions; '
+        "they are not new performance measurements. Each page states whether it replays saved output or illustrates a literal fixture.</p>"
+        '<p><a href="minimal-inputs.json" download>Download inputs and displayed outputs (JSON)</a> · '
+        '<a href="visual-coverage.json" download>Download current gallery inventory (JSON)</a> · '
+        '<a href="visual-route-inventory.json" download>Download report figure routes and migration status (JSON)</a> · '
+        '<a href="algorithm-coverage.json" download>Download algorithm-family coverage (JSON)</a></p>'
+        '<p class="limits">This inventory describes figures currently linked here; it does not imply that every implemented algorithm already has a 2D example. '
+        'The full algorithm-coverage gap is tracked in <a href="https://github.com/butahlecoq/controlled-systems-lab/issues/563">issue #563</a>.</p></header>'
+        + "".join(
+            section(
+                e,
+                i + 1,
+                (examples[i - 1]["title"], "#" + examples[i - 1]["slug"]) if i else None,
+                (examples[i + 1]["title"], "#" + examples[i + 1]["slug"])
+                if i + 1 < len(examples)
+                else None,
+            )
+            for i, e in enumerate(examples)
+        )
+        + '<section id="analytic-illustrations"><p class="eyebrow">Hand-derived examples</p>'
+        "<h2>Analytic geometry and optimization</h2><p>These exact low-dimensional examples explain the operations with literal inputs and answers. They are not solver traces or performance evidence.</p>"
+        '<div class="saved-grid">'
+        + visual_illustrations.cards(analytic_inventory)
+        + "</div></section>"
+        + '<section id="algorithm-coverage"><p class="eyebrow">Implementation map</p>'
+        "<h2>Algorithm families and 2D limits</h2><p>This map follows the current framework composition document and published report catalog. "
+        "It separates the nominal synthesis path from installed modules outside that path and records where this gallery has no supported 2D case.</p>"
+        '<div class="coverage-grid">'
+        + coverage_html(coverage_data)
+        + "</div></section>"
+        + '<section id="saved-report-figures"><p class="eyebrow">Reviewed report figures</p>'
+        "<h2>More algorithms, from saved evidence</h2><p>Most displayed figures are published inside their original reports. "
+        "Cards marked “Saved-data companion” are generated into this gallery from frozen records; they do not change those reports. "
+        "Open a report for exact inputs, answers, reproduction commands, provenance and evidence limits.</p>"
+        '<div class="saved-grid">'
+        + saved_figures
+        + feedback_card
+        + fixed_tail_card
+        + episode_card
+        + episode_geometry_card
+        + '<article class="saved-figure" id="geometry-optimization-companions"><p class="eyebrow">Geometry and optimization · Saved-data companion</p>'
+        "<h3>Readable geometry and timing figures</h3><p>Eleven companions replot frozen report records with the shared quantitative axis policy. "
+        "The geometry examples use saved 2D coordinates; timing charts show saved medians and observed ranges.</p>"
+        '<p><a href="geometry-optimization-v1.html">Open geometry and optimization figures →</a></p></article>'
+        + '<article class="saved-figure" id="control-witness-companions"><p class="eyebrow">Control strategy · Saved-data companion</p>'
+        "<h3>Saved control relations and tube geometry</h3>"
+        '<a href="control-witness-v1.html"><img src="control-witness/mpc06-tube.svg" '
+        'alt="Saved state box, support-tightened set, and exact RPI error tube on equal numeric axes"></a>'
+        "<p>Five figures plot saved control projections from Strategy A and B. The page also shows frozen MPC-06 tube geometry and the T-S01 Strategy A/B selected control histories with the exact minimizer family. All companions preserve the original report evidence.</p>"
+        '<p><a href="control-witness-v1.html">Open the control and tube figures →</a></p></article>'
+        + '<article class="saved-figure" id="ts01-strategy-ab"><p class="eyebrow">Control strategy · Saved-data companion</p>'
+        "<h3>T-S01 Strategy A/B selected controls</h3>"
+        '<a href="control-witness-v1.html#ts01-strategy-ab"><img src="control-witness/ts01-strategy-ab.svg" '
+        'alt="Selected two-stage control histories from Strategy A and B on the exact minimizing line"></a>'
+        "<p>Plots saved selected histories from both strategies and the exact minimizing family for the two-stage integrator. It is a control projection with equal data scaling, not a reachable-set plot or performance ranking.</p>"
+        '<p><a href="control-witness-v1.html#ts01-strategy-ab">Open the T-S01 figure and evidence →</a></p></article>'
+        + '<article class="saved-figure" id="b04-native-smoke"><p class="eyebrow">Fuel reference · Saved-data companion</p>'
+        "<h3>B04 reference variant in oxidizer and fuel phase planes</h3>"
+        '<a href="control-witness-v1.html#b04-native-smoke"><img src="control-witness/b04-native-smoke-projections.svg" '
+        'alt="Saved exact and native smoke trajectories projected onto oxidizer flow and stock, and fuel flow and stock"></a>'
+        "<p>Uses the within-species projections (x₁,x₂) and (x₃,x₄) you requested. The exact saved witness is shown with one cold attempt per native solver; their residual checks remain inconclusive. This is a trajectory illustration, not a reachable-set plot or historical B04 reconstruction.</p>"
+        '<p><a href="control-witness-v1.html#b04-native-smoke">Open the paired projections and evidence →</a></p></article>'
+        + '<article class="saved-figure" id="b04-repeated-benchmark"><p class="eyebrow">B04 reference · Saved-data companion</p>'
+        "<h3>Representative repeated-solver trajectories</h3>"
+        '<a href="control-witness-v1.html#b04-repeated-benchmark"><img src="control-witness/b04-repeated-oxidizer.svg" '
+        'alt="Exact B04 witness and representative solver paths in the oxidizer flow and stock plane"></a>'
+        "<p>Two shared-style figures use (x₁,x₂) for oxidizer and (x₃,x₄) for fuel. Each native path is one saved cold repetition selected near its backend’s median solve time; paths are not averages and residual evidence remains inconclusive.</p>"
+        '<p><a href="control-witness-v1.html#b04-repeated-benchmark">Open both projections and evidence →</a></p></article>'
+        + '<article class="saved-figure" id="exp02-paired-family"><p class="eyebrow">Exp-02 · Saved-data companion</p>'
+        "<h3>Complete paired-profile control families</h3>"
+        '<a href="control-witness-v1.html#exp02-ts02-control-family"><img src="control-witness/exp02-ts03-control-family.svg" '
+        'alt="Feasible unit control square with complete optimal edge u1 equals 1"></a>'
+        "<p>Shared-style equal-scale plots show the full control families for the constant-objective T-S02 and singular-integrator T-S03 fixtures, from frozen scenarios and saved paired strategy events.</p>"
+        '<p><a href="control-witness-v1.html#exp02-ts02-control-family">Open both projections and evidence →</a></p></article>'
+        + '<article class="saved-figure" id="control-witness-timings"><p class="eyebrow">Control reports · Saved-data companion</p>'
+        "<h3>Saved synthesis and verifier timings</h3>"
+        '<a href="control-witness-timing-v1.html"><img src="control-witness/syn01-timing.svg" '
+        'alt="Saved SYN01 phase timing observations with exact values and ranges in an adjacent table"></a>'
+        "<p>The figures replot saved observations from SYN01, SYN02, SYN06, the Strategy A/B reports and paired SYN-TS01. The failed SYN02 shifted-residual fixture remains listed as unavailable with its saved failure status.</p>"
+        '<p><a href="control-witness-timing-v1.html">Open the saved timing figures →</a></p></article>'
+        + f'<article class="saved-figure" id="{lotka_anchor}"><p class="eyebrow">Saved sample geometry · Saved-data companion</p>'
+        "<h3>Lotka–Volterra samples with shared quantitative axes</h3>"
+        '<a href="lotka-volterra-sampled-v1.html"><img src="lotka-volterra-sampled-v1.svg" '
+        'alt="Saved Lotka–Volterra state samples across four stage bands"></a>'
+        "<p>Replots the frozen sample record with numeric ticks, major grids, and disclosed independent scales; samples are not reachability bounds.</p>"
+        '<p><a href="lotka-volterra-sampled-v1.html">Open the saved-data companion →</a></p></article>'
+        + '<article class="saved-figure" id="app02-diamond-v1"><p class="eyebrow">Box approximation · Saved-data companion</p>'
+        '<h3>APP-02 diamond approximations</h3><a href="app02-diamond-v1.html"><img src="app02-diamond-v1.svg" '
+        'alt="Saved APP-02 diamond input, outer bounds, and inner box on labelled x-y axes"></a>'
+        "<p>Replots the frozen vertices with numeric ticks, major grids, and equal x-y scales.</p>"
+        '<p><a href="app02-diamond-v1.html">Open the saved-data companion →</a></p></article>'
+        + '<article class="saved-figure" id="app04-square-v1"><p class="eyebrow">Ellipsoidal approximation · Saved-data companion</p>'
+        '<h3>APP-04 square and ellipses</h3><a href="app04-square-v1.html"><img src="app04-square-v1.svg" '
+        'alt="Saved APP-04 square and two enclosing ellipses on labelled x-y axes"></a>'
+        "<p>Replots the frozen vertices and radii with numeric ticks, major grids, and equal x-y scales.</p>"
+        '<p><a href="app04-square-v1.html">Open the saved-data companion →</a></p></article>'
+        + '<article class="saved-figure" id="ext05-states-v1"><p class="eyebrow">Discretization · Saved-data companion</p>'
+        '<h3>EXT-05 saved state samples</h3><a href="ext05-states-v1.html"><img src="ext05-states-v1.svg" '
+        'alt="Three archived EXT-05 position-velocity states at times zero, one, and three"></a>'
+        "<p>Plots only the archived state samples; it does not interpolate the continuous trajectory.</p>"
+        '<p><a href="ext05-states-v1.html">Open the saved-data companion →</a></p></article>'
+        + '<article class="saved-figure" id="ext01-b08-timing-v1"><p class="eyebrow">Fixed-plan minimax · Saved-data companion</p>'
+        '<h3>EXT-01 B08 full-catalogue timing</h3><a href="ext01-b08-timing-v1.html"><img src="ext01-b08-timing-v1.svg" '
+        'alt="Seven saved EXT-01 B08 timing observations in milliseconds on labelled numeric axes"></a>'
+        "<p>Plots the seven frozen observations as separate points with numeric ticks and major grids; no speedup or winner is claimed.</p>"
+        '<p><a href="ext01-b08-timing-v1.html">Open the saved-data companion →</a></p></article>'
+        + '<article class="saved-figure" id="app03-zonotope-v1"><p class="eyebrow">Zonotopes · Saved-data companion</p>'
+        "<h3>APP-03 saved planar zonotope and outer cover</h3>"
+        '<a href="app03-zonotope-v1.html"><img src="app03-zonotope-v1.svg" '
+        'alt="Saved APP-03 planar zonotope and outer axis cover with numeric x-y axes"></a>'
+        "<p>Replots the archived generator sums and outer-cover generators with numeric ticks, major grids, and equal x-y scales.</p>"
+        '<p><a href="app03-zonotope-v1.html">Open the saved-data companion →</a></p></article>'
+        + '<article class="saved-figure" id="app01-plan-timing-v1"><p class="eyebrow">Inner state-plan checks · Saved-data companion</p>'
+        "<h3>APP-01 saved plan-check timings</h3>"
+        '<a href="app01-plan-timing-v1.html"><img src="app01-plan-timing-v1.svg" '
+        'alt="Three archived APP-01 median timings on numeric axes, one for each saved fixture"></a>'
+        "<p>Plots archived medians for valid, invalid, and empty-inner fixtures. Each point summarizes seven batches of 40,000 checks; it does not claim a performance winner.</p>"
+        '<p><a href="app01-plan-timing-v1.html">Open the saved-data companion →</a></p></article>'
+        + extension_companion_cards
+        + ext02_card
+        + f'<article class="saved-figure" id="{fuel_anchor}"><p class="eyebrow">Fuel minimax reference · Saved-data companion</p>'
+        f"<h3>{escape(fuel_entry['title'])}</h3>"
+        f"<p>{escape('Readable, versioned SVG and PNG projections of the saved 4D B06 terminal set, with exact values, units, target, evidence limits and reproduction commands.')}</p>"
+        f'<a href="{fuel_entry["page"]}"><img src="{fuel_entry["figure"]}" alt="{escape("B06 four-state terminal set projected onto flow coordinates")}"></a>'
+        f'<p><a href="{fuel_entry["page"]}">Open the fuel projections and timing figures →</a></p></article>'
+        + f'<article class="saved-figure" id="{viz10_entry["anchor"]}"><p class="eyebrow">Historical and benchmark reports · Saved-data companion</p>'
+        f"<h3>{escape(viz10_entry['title'])}</h3>"
+        '<a href="viz10/index.html"><img src="viz10/b07-b07-reconstruction-s0-l0-d0.png" '
+        'alt="B07 terminal points projected from four state coordinates onto oxidizer/fuel flow and stock axes"></a>'
+        "<p>Plots saved B07 and B09 four-state terminal rows in labeled flow and stock coordinate pairs. The figures show points and do not reconstruct a filled enclosure.</p>"
+        '<p><a href="viz10/index.html">Open the historical and benchmark saved-data plots →</a></p></article>'
+        + "</div></section><footer>Controlled Systems Lab · Saved evidence, visible geometry.</footer></main></div>"
+        '<script>document.querySelector(".nav-shortcut").addEventListener("click",event=>{'
+        "const target=document.querySelector(event.currentTarget.hash);if(!target)return;"
+        'event.preventDefault();history.pushState(null,"",event.currentTarget.hash);'
+        'target.scrollIntoView({behavior:"instant",block:"start"});});</script></body></html>'
+    )
     outputs["index.html"] = body
     fuel_example_dir = Path(__file__).parents[2] / "docs/examples"
-    for filename in ("b04-reference-trajectory-projections.html",
-                     "b04-reference-trajectory-projections.svg"):
+    for filename in (
+        "b04-reference-trajectory-projections.html",
+        "b04-reference-trajectory-projections.svg",
+    ):
         source = fuel_example_dir / filename
-        require(source.is_file() and not source.is_symlink(),
-                "missing fuel projection example asset: " + filename)
+        require(
+            source.is_file() and not source.is_symlink(),
+            "missing fuel projection example asset: " + filename,
+        )
         outputs[filename] = source.read_text(encoding="utf-8")
-    export = [{key: value for key, value in e.items() if key not in {"records_path", "domain"}} for e in examples]
-    outputs["minimal-inputs.json"] = json.dumps({"schema": "csl.visual-examples/1", "examples": export}, indent=2) + "\n"
-    outputs["visual-coverage.json"] = json.dumps(
-        {"schema": "csl.visual-gallery-inventory/1", "entries": gallery_inventory}, indent=2) + "\n"
-    outputs["visual-route-inventory.json"] = json.dumps(
-        audit_visual_routes.build(Path(__file__).resolve().parents[2]), indent=2, ensure_ascii=False) + "\n"
-    outputs["algorithm-coverage.json"] = json.dumps(coverage_data, indent=2, ensure_ascii=False) + "\n"
+    export = [
+        {key: value for key, value in e.items() if key not in {"records_path", "domain"}}
+        for e in examples
+    ]
+    outputs["minimal-inputs.json"] = (
+        json.dumps({"schema": "csl.visual-examples/1", "examples": export}, indent=2) + "\n"
+    )
+    outputs["visual-coverage.json"] = (
+        json.dumps(
+            {"schema": "csl.visual-gallery-inventory/1", "entries": gallery_inventory}, indent=2
+        )
+        + "\n"
+    )
+    outputs["visual-route-inventory.json"] = (
+        json.dumps(
+            audit_visual_routes.build(Path(__file__).resolve().parents[2]),
+            indent=2,
+            ensure_ascii=False,
+        )
+        + "\n"
+    )
+    outputs["algorithm-coverage.json"] = (
+        json.dumps(coverage_data, indent=2, ensure_ascii=False) + "\n"
+    )
     outputs.update(fuel_layer_files)
     outputs["issue3-control-walkthrough.svg"] = workflow_figure
     outputs["issue3-control-walkthrough.html"] = workflow_page
@@ -1432,35 +2181,55 @@ def build(catalog, site):
     outputs.update(app01_companion)
     outputs.update(hybrid_examples.download_records(examples))
     hybrid = next(example for example in examples if example["kind"] == "hybrid")
-    outputs["two_stage_scalar_family.json"] = json.dumps({
-        "schema": "csl.visual-example/ext07-two-stage-scalar/1",
-        "illustration_only": True,
-        "algorithm_source_commit": hybrid["source"],
-        "oracle_harness_commit": hybrid["harness"],
-        "inputs": hybrid["inputs"],
-        "analytic": hybrid["analytic"],
-    }, indent=2) + "\n"
+    outputs["two_stage_scalar_family.json"] = (
+        json.dumps(
+            {
+                "schema": "csl.visual-example/ext07-two-stage-scalar/1",
+                "illustration_only": True,
+                "algorithm_source_commit": hybrid["source"],
+                "oracle_harness_commit": hybrid["harness"],
+                "inputs": hybrid["inputs"],
+                "analytic": hybrid["analytic"],
+            },
+            indent=2,
+        )
+        + "\n"
+    )
     two_parameter = next(example for example in examples if example["kind"] == "two_parameter")
-    outputs["two_parameter_scalar_polytopes.json"] = json.dumps({
-        "schema": "csl.visual-example/ext07-two-parameter-scalar/1",
-        "illustration_only": True,
-        "algorithm_source_commit": two_parameter["source"],
-        "oracle_harness_commit": two_parameter["harness"],
-        "inputs": two_parameter["inputs"],
-        "analytic": {"paths": two_parameter["polygons"], **two_parameter["analytic"]},
-    }, indent=2) + "\n"
+    outputs["two_parameter_scalar_polytopes.json"] = (
+        json.dumps(
+            {
+                "schema": "csl.visual-example/ext07-two-parameter-scalar/1",
+                "illustration_only": True,
+                "algorithm_source_commit": two_parameter["source"],
+                "oracle_harness_commit": two_parameter["harness"],
+                "inputs": two_parameter["inputs"],
+                "analytic": {"paths": two_parameter["polygons"], **two_parameter["analytic"]},
+            },
+            indent=2,
+        )
+        + "\n"
+    )
     projected = next(example for example in examples if example["kind"] == "projected_reachability")
-    outputs["projected_hybrid_reachability.json"] = json.dumps({
-        "schema": "csl.visual-example/ext07-projected-hybrid-reachability/1",
-        "illustration_only": True,
-        "algorithm_source_commit": projected["source"],
-        "oracle_harness_commit": projected["harness"],
-        "inputs": projected["inputs"],
-        "analytic": projected["analytic"],
-    }, indent=2) + "\n"
+    outputs["projected_hybrid_reachability.json"] = (
+        json.dumps(
+            {
+                "schema": "csl.visual-example/ext07-projected-hybrid-reachability/1",
+                "illustration_only": True,
+                "algorithm_source_commit": projected["source"],
+                "oracle_harness_commit": projected["harness"],
+                "inputs": projected["inputs"],
+                "analytic": projected["analytic"],
+            },
+            indent=2,
+        )
+        + "\n"
+    )
     link = '<p id="visual-examples-link"><a href="examples/index.html">Visual examples: minimal 2D inputs, hull vertices and plots →</a></p>'
-    output_files = {name: (content if isinstance(content, bytes) else content.encode("utf-8"))
-                    for name, content in outputs.items()}
+    output_files = {
+        name: (content if isinstance(content, bytes) else content.encode("utf-8"))
+        for name, content in outputs.items()
+    }
     output_files["examples.css"] = site_design.stylesheet()
 
     with tempfile.TemporaryDirectory(prefix="csl-gallery-validation-") as temporary:
@@ -1473,7 +2242,14 @@ def build(catalog, site):
             target.write_bytes(content)
         references = []
         for entry in gallery_inventory:
-            for field in ("page", "walkthrough_page", "figure", "source_page", "raw_record", "report_records"):
+            for field in (
+                "page",
+                "walkthrough_page",
+                "figure",
+                "source_page",
+                "raw_record",
+                "report_records",
+            ):
                 value = entry.get(field)
                 references.extend(value if isinstance(value, list) else [value])
         for value in references:
@@ -1501,7 +2277,8 @@ def build(catalog, site):
     site_files = {"examples/" + name: content for name, content in output_files.items()}
     if 'id="visual-examples-link"' not in original:
         site_files["index.html"] = re.sub(
-            r"(<body\b[^>]*>)", lambda match: match[1] + link, original, count=1).encode("utf-8")
+            r"(<body\b[^>]*>)", lambda match: match[1] + link, original, count=1
+        ).encode("utf-8")
     plan = site_additions.prepare(site, site_files, replace_existing=frozenset(site_files))
     site_additions.commit(plan)
 

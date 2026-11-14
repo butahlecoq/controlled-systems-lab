@@ -1,16 +1,21 @@
 """Versioned tick and grid policy for static quantitative report figures."""
+
 from __future__ import annotations
 
 import math
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Literal
 
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 
 STYLE_ID = "csl-report-quantitative-v1"
 
 
-def format_tick(value: float, locations: list[float]) -> str:
+def format_tick(value: float, locations: Iterable[float]) -> str:
     """Format a tick with enough precision to keep neighboring ticks distinct."""
     finite = sorted({float(item) for item in locations if math.isfinite(float(item))})
-    gaps = [right - left for left, right in zip(finite, finite[1:]) if right > left]
+    gaps = [right - left for left, right in zip(finite, finite[1:], strict=False) if right > left]
     spacing = min(gaps) if gaps else 1.0
     scale = max((abs(item) for item in finite), default=abs(float(value)))
     scale = max(scale, abs(float(value)))
@@ -27,7 +32,9 @@ def format_tick(value: float, locations: list[float]) -> str:
     return label
 
 
-def configure_numeric_axis(axis, direction: str = "both", bins: int = 5) -> None:
+def configure_numeric_axis(
+    axis: Axes, direction: Literal["both", "x", "y"] = "both", bins: int = 5
+) -> None:
     """Set positioned numeric ticks, distinct labels, and quiet major grids."""
     from matplotlib.ticker import FuncFormatter, MaxNLocator
 
@@ -36,8 +43,11 @@ def configure_numeric_axis(axis, direction: str = "both", bins: int = 5) -> None
         dimension = getattr(axis, name + "axis")
         dimension.set_major_locator(MaxNLocator(nbins=bins, min_n_ticks=3))
         dimension.set_major_formatter(
-            FuncFormatter(lambda value, _position, a=axis, d=name:
-                          format_tick(value, getattr(a, d + "axis").get_majorticklocs()))
+            FuncFormatter(
+                lambda value, _position, a=axis, d=name: format_tick(
+                    value, getattr(a, d + "axis").get_majorticklocs()
+                )
+            )
         )
     axis.set_axisbelow(True)
-    axis.grid(True, which="major", axis=direction, color="#8290a3", alpha=.22, linewidth=.65)
+    axis.grid(True, which="major", axis=direction, color="#8290a3", alpha=0.22, linewidth=0.65)

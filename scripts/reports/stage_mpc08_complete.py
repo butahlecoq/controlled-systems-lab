@@ -107,9 +107,9 @@ def validate(exact_source=EXACT_SOURCE,horizon_source=HORIZON_SOURCE,*,repositor
 
 def source_export(captures):
     """Only objects needed for the two fixed source maps, never host Git config."""
-    # Ignore unrelated commits, while retaining merges that combine helper changes.
+    # Follow the parent owning these helper bytes; retain genuinely combined helper merges.
     revision=subprocess.check_output(
-        ['git','log','--first-parent','--full-history','-1','--format=%H','--',*HELPERS],
+        ['git','log','-1','--format=%H','--',*HELPERS],
         cwd=ROOT,text=True).strip()
     files={}
     require(re.fullmatch('[0-9a-f]{40}',revision),'invalid current source revision')

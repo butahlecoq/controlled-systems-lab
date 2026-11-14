@@ -1,8 +1,9 @@
 """Small registry for schema-v3 publication adapters."""
+
 from __future__ import annotations
 
-from dataclasses import dataclass
 import re
+from dataclasses import dataclass
 from types import ModuleType
 
 
@@ -29,7 +30,9 @@ class PublicationPolicy:
     extra_links: tuple[tuple[str, str], ...] = ()
 
     def accepts_source_id(self, source_id: object) -> bool:
-        return isinstance(source_id, str) and re.fullmatch(self.source_pattern, source_id) is not None
+        return (
+            isinstance(source_id, str) and re.fullmatch(self.source_pattern, source_id) is not None
+        )
 
 
 _POLICIES: dict[str, PublicationPolicy] = {}

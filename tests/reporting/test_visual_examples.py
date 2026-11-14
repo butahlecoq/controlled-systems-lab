@@ -9,6 +9,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from urllib.parse import urlsplit
 import xml.etree.ElementTree as ET
 

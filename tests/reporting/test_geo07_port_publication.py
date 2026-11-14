@@ -84,7 +84,8 @@ class Geo07PortPublicationTests(unittest.TestCase):
         self.assertIn("scripts/reports/stage_geo07_port.py", workflow)
         self.assertIn("reports/algorithm-results/geo07-port-publications.json", workflow)
 
-    def test_public_id_binds_all_byte_generating_publishers_with_lf_normalization(self):
+    @mock.patch.dict(stage.common._HISTORICAL_PUBLICATIONS, {}, clear=True)
+    def test_unpinned_public_id_binds_all_byte_generating_publishers_with_lf_normalization(self):
         originals = {name: (ROOT / "scripts/reports" / name).read_bytes() for name in stage.PUBLISHERS}
         original_id = stage.validate(BUNDLE).report_id
         with tempfile.TemporaryDirectory() as temporary:

@@ -169,6 +169,12 @@ if(BUILD_TESTING)
         ${CSL_NATIVE_FRAME_TEST_PYTHON}
         ${PROJECT_SOURCE_DIR}/tests/reporting/test_native_parallelotope_frame_serialization.py)
     set_tests_properties(native_parallelotope_frame_serialization PROPERTIES TIMEOUT 30)
+    add_test(NAME native_request_shaped_vertex_lp_priorities
+      COMMAND ${CMAKE_COMMAND} -E env
+        "CSL_NATIVE_POLICY_BRIDGE=$<TARGET_FILE:csl_closed_loop_native_policy>"
+        ${CSL_NATIVE_FRAME_TEST_PYTHON}
+        ${PROJECT_SOURCE_DIR}/tests/reporting/test_native_vertex_lp_priority_policy.py)
+    set_tests_properties(native_request_shaped_vertex_lp_priorities PROPERTIES TIMEOUT 30)
   endif()
 endif()
 include(cmake/OptionalReports.cmake)

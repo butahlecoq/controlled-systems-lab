@@ -65,6 +65,13 @@ class PublicationTests(unittest.TestCase):
         from unittest import mock
         frozen=json.loads((STAGER.EVIDENCE/STAGER.FIGURES/'receipt.json').read_text())['saved_checks']
         live_style=ROOT/'scripts/reports/figure_style.py'
+        historical=STAGER.EVIDENCE/STAGER.FIGURES
+        manifest=(historical/'SHA256SUMS').read_bytes()
+        self.assertEqual(hashlib.sha256(manifest).hexdigest(),STAGER.FIGURE_ANCHOR)
+        inventory=dict((name,checksum) for checksum,name in
+                       (line.split('  ',1) for line in manifest.decode().splitlines()))
+        expected_style=(historical/'source/figure_style.py').read_bytes()
+        self.assertEqual(hashlib.sha256(expected_style).hexdigest(),inventory['source/figure_style.py'])
         read_bytes=Path.read_bytes
         def changed_style(path):
             content=read_bytes(path)
@@ -80,7 +87,7 @@ class PublicationTests(unittest.TestCase):
                 outputs.append((route,(site/(route+'.zip')).read_bytes(),
                                 (site/route/'scripts/reports/figure_style.py').read_bytes()))
         self.assertEqual(outputs[0],outputs[1])
-        self.assertEqual(outputs[0][2],read_bytes(live_style))
+        self.assertEqual(outputs[0][2],expected_style)
 
     def test_saved_checker_failure_exposes_underlying_diagnostic(self):
         from unittest import mock
