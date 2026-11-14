@@ -668,6 +668,36 @@ class GalleryTests(unittest.TestCase):
                              if entry["anchor"] == "nominal-quadratic-history-2d")
         self.assertEqual(history_entry["status"], "analytic-illustration")
         self.assertEqual(history_entry["raw_record"], "nominal-quadratic-history-2d.json")
+        mpc_page = self.site / "examples/discrete-mpc-2d.html"
+        self.assertTrue(mpc_page.is_file())
+        self.assertTrue((self.site / "examples/discrete-mpc-2d.svg").is_file())
+        self.assertTrue((self.site / "examples/discrete-mpc-2d.json").is_file())
+        self.assertEqual((self.site / "examples/discrete_mpc_2d-output.csv").read_bytes(),
+                         (ROOT / "examples/discrete_mpc_2d-output.csv").read_bytes())
+        gallery_html = (self.site / "examples/index.html").read_text(encoding="utf-8")
+        self.assertIn('id="discrete-mpc-2d"', gallery_html)
+        mpc_html = mpc_page.read_text(encoding="utf-8")
+        self.assertIn("first changes its first control coordinate at stage 4", mpc_html)
+        self.assertIn('href="examples.css"', mpc_html)
+        from scripts.reports import audit_mathematical_presentation
+        route_registry = json.loads(
+            (ROOT / "scripts/reports/mathematical-presentation-routes.json").read_text())
+        route_entry = next(entry for entry in route_registry["routes"]
+                           if entry["route"] == "examples/discrete-mpc-2d.html")
+        with tempfile.TemporaryDirectory() as temporary:
+            guard_site = Path(temporary)
+            (guard_site / "examples").mkdir()
+            shutil.copyfile(mpc_page, guard_site / "examples/discrete-mpc-2d.html")
+            shutil.copyfile(self.site / "examples/index.html", guard_site / "examples/index.html")
+            (guard_site / "examples/visual-coverage.json").write_text(json.dumps({
+                "entries": [{"page": "discrete-mpc-2d.html"}]}))
+            presentation = audit_mathematical_presentation.audit_site(
+                guard_site,
+                {"routes": [route_entry, next(
+                    entry for entry in route_registry["routes"]
+                    if entry["route"] == "examples/index.html")],
+                 "required_inventories": []})
+        self.assertTrue(presentation["passed"], presentation["findings"][:8])
         cost_page = self.site / "examples/history-cost-2d-v1/index.html"
         self.assertTrue(cost_page.is_file())
         staged_archive = self.site / "examples/history-cost-2d-v1/history-cost-2d-v1.zip"
@@ -847,7 +877,7 @@ class GalleryTests(unittest.TestCase):
             if not urlsplit(link).scheme and not link.startswith("#"):
                 self.assertTrue((self.site / "examples" / link.split("#")[0]).is_file(), link)
         figures = list((self.site / "examples").glob("*.svg"))
-        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 30)
+        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 31)
         self.assertIn('id="saved-feedback-geometry-2d"', page)
         self.assertIn('id="native-fixed-tail-2d"', page)
         self.assertTrue((self.site / "examples/native-fixed-tail-2d.html").is_file())

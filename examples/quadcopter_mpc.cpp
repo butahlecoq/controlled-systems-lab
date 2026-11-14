@@ -23,6 +23,7 @@ template <class T, class... E> T take(std::variant<T, E...> value) {
 int main(int argc, char **argv) try {
     using namespace csl;
     using namespace csl::optimization;
+    using namespace csl::controllers;
     using namespace csl::registry;
     using namespace csl::examples::quadcopter_mpc;
     if (argc != 2)
@@ -41,9 +42,7 @@ int main(int argc, char **argv) try {
                         Matrix{nu, nu, Vector(nu * nu, 0)},
                         Vector(nx, 0),
                         Vector(nx, 0),
-                        horizon,
-                        std::vector<Interval>(nx),
-                        std::vector<Interval>(nu)};
+                        horizon};
     task.reference[2] = 1;
     for (const auto index : std::vector<std::size_t>{2, 3, 4, 5})
         task.Q.values[index * nx + index] = 10;
@@ -52,16 +51,15 @@ int main(int argc, char **argv) try {
     task.QN = task.Q;
     for (std::size_t i = 0; i < nu; ++i)
         task.R.values[i * nu + i] = .1;
-    const double pi = std::acos(-1.0);
-    task.state_bounds[0] = {-pi / 6, pi / 6};
-    task.state_bounds[1] = {-pi / 6, pi / 6};
-    task.state_bounds[5] = {-1, std::nullopt};
-    for (auto &b : task.input_bounds)
-        b = {9.6 - 10.5916, 13.0 - 10.5916};
     Vector grid(horizon + 1);
     for (std::size_t i = 0; i < grid.size(); ++i)
         grid[i] = static_cast<double>(i) * model.time_step.value;
     const auto system = take<model::LinearSystem>(model::snapshot(model.system_model(), grid));
+    auto profile =
+        make_source_task_profile(model.info.id, make_source21_choices(task, model.external.size()));
+    if (!std::holds_alternative<NominalMpcTask>(profile))
+        throw std::runtime_error("Source21 task profile rejected its explicit OSQP choices");
+    const auto mpc_task = std::get<NominalMpcTask>(std::move(profile));
     Vector previous_primal;
 
     Registry<ConvexPort> registry;
@@ -77,7 +75,7 @@ int main(int argc, char **argv) try {
     double total_realized_cost = 0;
     for (std::size_t iteration = 0; iteration < replans; ++iteration) {
         const auto observed_state = task.initial;
-        auto compiled = compile_nominal_quadratic_history(make_task(task));
+        auto compiled = compile_mpc_decision(mpc_task, {0}, observed_state);
         if (!std::holds_alternative<ConvexProgram>(compiled))
             throw std::runtime_error("MPC quadratic program rejected");
         auto program = std::get<ConvexProgram>(std::move(compiled));
@@ -106,17 +104,19 @@ int main(int argc, char **argv) try {
             for (std::size_t k = 0; k <= horizon; ++k)
                 for (std::size_t i = 0; i < nx; ++i) {
                     const double value = warm_start[k * nx + i];
-                    if ((task.state_bounds[i].lower &&
-                         value < *task.state_bounds[i].lower - 1e-7) ||
-                        (task.state_bounds[i].upper && value > *task.state_bounds[i].upper + 1e-7))
+                    if ((mpc_task.state_bounds[k][i].lower &&
+                         value < *mpc_task.state_bounds[k][i].lower - 1e-7) ||
+                        (mpc_task.state_bounds[k][i].upper &&
+                         value > *mpc_task.state_bounds[k][i].upper + 1e-7))
                         feasible = false;
                 }
             for (std::size_t k = 0; k < horizon; ++k)
                 for (std::size_t i = 0; i < nu; ++i) {
                     const double value = warm_start[control_offset + k * nu + i];
-                    if ((task.input_bounds[i].lower &&
-                         value < *task.input_bounds[i].lower - 1e-7) ||
-                        (task.input_bounds[i].upper && value > *task.input_bounds[i].upper + 1e-7))
+                    if ((mpc_task.control_bounds[k][i].lower &&
+                         value < *mpc_task.control_bounds[k][i].lower - 1e-7) ||
+                        (mpc_task.control_bounds[k][i].upper &&
+                         value > *mpc_task.control_bounds[k][i].upper + 1e-7))
                         feasible = false;
                 }
             if (feasible) {
@@ -162,8 +162,9 @@ int main(int argc, char **argv) try {
         const auto &z = *result->primal;
         previous_primal = z;
         const auto state_count = (horizon + 1) * nx, control_offset = state_count;
-        if (!source_history_feasible(task, std::span(z).first(state_count),
-                                     std::span(z).subspan(control_offset)))
+        if (!source_history_feasible(
+                task, mpc_task.state_bounds.front(), mpc_task.control_bounds.front(),
+                std::span(z).first(state_count), std::span(z).subspan(control_offset)))
             throw std::runtime_error(
                 "Independent source21 dynamics/bounds check rejected the solver history");
         const double physical_cost = evaluate_source_cost(task, std::span(z).first(state_count),
@@ -195,7 +196,7 @@ int main(int argc, char **argv) try {
         // Feedback execution advances the zero-disturbance model using only u0.
         Vector next =
             take<Vector>(system.step({0}, observed_state, std::span(z).subspan(control_offset, nu),
-                                     Vector(model.external.size(), 0)));
+                                     mpc_task.replay_external[0]));
         for (std::size_t i = 0; i < nx; ++i)
             records << iteration << ",observed_next_state,1," << i << ',' << next[i] << '\n';
         records << iteration << ",realized_running_cost,0,0,"

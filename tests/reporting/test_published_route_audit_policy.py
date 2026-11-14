@@ -151,7 +151,7 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
                     entry["chapter_id"]
                     for entry in manifest["learning_navigation_insertions_reviewed_separately"]
                 },
-                {"native-forward-models", "native-quadcopter-mpc"},
+                {"native-forward-models", "native-quadcopter-mpc", "native-model-tracking-first-pass"},
             )
             (source / "manifest.json").write_text(json.dumps(manifest))
 
@@ -194,9 +194,11 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
                         path.write_bytes(original)
 
                 wrong_identity = json.loads(json.dumps(manifest))
-                wrong_identity["learning_navigation_insertions_reviewed_separately"][-1][
-                    "chapter_sha256"
-                ] = "0" * 64
+                forward_insertion = next(
+                    row for row in wrong_identity["learning_navigation_insertions_reviewed_separately"]
+                    if row["chapter_id"] == "native-forward-models"
+                )
+                forward_insertion["chapter_sha256"] = "0" * 64
                 (source / "manifest.json").write_text(json.dumps(wrong_identity))
                 result = baseline_audit.audit(baseline, site)
                 self.assertFalse(result["passed"])

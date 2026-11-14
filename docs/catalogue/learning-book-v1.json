@@ -55,8 +55,8 @@
         },
         {
           "label": "examples/CMakeLists.txt installed package consumer",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/1d5a8118d705ed672c8c85441e84d0b063950929/examples/CMakeLists.txt",
-          "source_sha256": "3cb1e3727a2313bdda8024ab85f76aa8b39eb3c4f4dc21888324572556f43e8b"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/df6dec2cfe2d4c7f31abcad283a8e52cd3871cf6/examples/CMakeLists.txt",
+          "source_sha256": "7d5247d6d91dd3753e6050528203332551ec3271513fa0207ecc58933ef1350a"
         }
       ],
       "example_sources": [
@@ -2064,6 +2064,60 @@
               "minimize ‖Ax−b‖₂",
               "minimize (x−3)²+16",
               "0≤0x≤0, columns above are lower bound, coefficient, upper bound"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "native-model-tracking-first-pass",
+      "title": "Track all 35 native model records",
+      "group": "supporting_operations",
+      "group_label": "4. Conversions, set operations, approximations and optimization",
+      "role": "educational",
+      "status": "ready",
+      "status_label": "Ready · saved native functional evidence",
+      "prerequisites": [
+        "install-consumer"
+      ],
+      "module_ids": [],
+      "source": "native-model-tracking-first-pass.html",
+      "summary": "Inspect matrix-first records and saved native C++ closed-loop tracking outcomes for all 35 discrete models.",
+      "mathematical_input": "xₖ₊₁ = A xₖ + B uₖ + G wₖ + a; 3-stage receding-horizon quadratic tracking for 34 authored profiles, with the source21 literal task retained.",
+      "command": "python -B scripts/reports/visual_examples.py --check",
+      "expected_output": "35 attempted records; 32 completed; three retained native HiGHS refusals with full attempt logs.",
+      "intermediate_geometry": "Full-state executed paths and independent task/dynamics checks are retained; available two-dimensional projections provide views only.",
+      "support_limits": "The objectives for 34 horizon-free records are authored educational profiles. Source21 uses the literal source task. These numerical outcomes do not establish physical calibration, cross-model performance, certified optimality, or nonlinear stability.",
+      "figure_ids": [],
+      "records": [
+        {
+          "label": "Complete saved report, raw matrices, checks, refusals, and offline ZIP",
+          "href": "../examples/native-model-tracking-first-pass-v1/index.html"
+        },
+        {
+          "label": "Source commit and exact producer binding",
+          "href": "../examples/native-model-tracking-first-pass-v1/source-binding.json"
+        }
+      ],
+      "example_sources": [
+        "scripts/reports/stage_native_model_tracking_first_pass.py"
+      ],
+      "kind": "saved evidence",
+      "mathematical_tables": [
+        {
+          "label": "Task profile classes",
+          "columns": [
+            "records",
+            "task"
+          ],
+          "rows": [
+            [
+              "1 · source21",
+              "Literal source task and source constraints"
+            ],
+            [
+              "34 · horizon-free",
+              "Authored three-stage zero-target quadratic tracking"
             ]
           ]
         }

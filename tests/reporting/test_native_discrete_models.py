@@ -2,6 +2,7 @@
 import hashlib
 import importlib
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -13,6 +14,8 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'scripts/reports'))
 renderer = importlib.import_module("native_discrete_models")
 native = importlib.import_module("stage_native_discrete_models")
+tracking_bundle = importlib.import_module("stage_native_model_tracking_first_pass")
+capture_tracking = importlib.import_module("native_model_tracking_first_pass")
 
 
 class Links(HTMLParser):
@@ -118,6 +121,159 @@ class NativeDiscreteTests(unittest.TestCase):
         chapter = (site / 'learn/native-quadcopter-mpc.html').read_text()
         self.assertIn('../examples/native-quadcopter-mpc.html', chapter)
         self.assertIn('../examples/native-discrete-models-v1/phase-x3-x6-screen.svg', chapter)
+
+    def test_all_model_tracking_saved_bundle_authenticates_inputs_and_refusals(self):
+        import io
+        import json
+        import zipfile
+
+        files, entries, card = tracking_bundle.build(ROOT)
+        route = tracking_bundle.ROUTE + "/"
+        self.assertEqual(len(entries), 1)
+        page = files[route + "index.html"].decode()
+        guide = files[route + "reproducing.html"].decode()
+        self.assertIn("A (", page)
+        self.assertIn("models.csv", page)
+        self.assertIn("source-input-inventory.json", page)
+        self.assertIn("native-refusal.json", page)
+        self.assertIn("observed states only", page)
+        self.assertNotIn("against its saved per-replan prediction", page)
+        self.assertIn('href="reproducing.html"', page)
+        self.assertIn('href="examples.css"', guide)
+        self.assertIn("publication-lock.json", guide)
+        self.assertIn("--check", guide)
+        self.assertIn("--sdk-snapshot", guide)
+        self.assertIn("verify_native_model_tracking_first_pass.py", guide)
+        self.assertIn("raw/model-21/plans.csv", page)
+        self.assertIn("raw/model-01/trace.csv", page)
+        self.assertIn("Prediction plans", page)
+        self.assertIn("35 model records", card)
+        self.assertIn(route + "raw/models.csv", files)
+        self.assertIn(route + "raw/model-21/plans.csv", files)
+        archive_bytes = files[route + tracking_bundle.ROUTE + ".zip"]
+        self.assertEqual(tracking_bundle.deterministic_zip({
+            name.removeprefix(route): content
+            for name, content in files.items()
+            if name.startswith(route) and not name.endswith(".zip") and not name.endswith(".zip.sha256")
+        }), archive_bytes)
+        with zipfile.ZipFile(io.BytesIO(archive_bytes)) as archive:
+            self.assertIsNone(archive.testzip())
+            names_in_order = archive.namelist()
+            self.assertEqual(names_in_order, sorted(names_in_order))
+            self.assertTrue(all(info.date_time == (1980, 1, 1, 0, 0, 0)
+                                for info in archive.infolist()))
+            names = set(archive.namelist())
+            self.assertIn("raw/models.csv", names)
+            self.assertIn("raw/model-21/plans.csv", names)
+            self.assertIn("reproducing.html", names)
+            self.assertNotIn("REPRODUCING.md", names)
+            self.assertNotIn("README.md", names)
+            self.assertIn('href="index.html"', archive.read("reproducing.html").decode())
+            self.assertIn("portable_renderer_commit", archive.read("source-binding.json").decode())
+            self.assertIn("original native producer", archive.read("reproducing.html").decode())
+            for number in (23, 27, 28):
+                refusal = json.loads(archive.read(f"raw/model-{number:02d}/native-refusal.json"))
+                self.assertEqual(refusal["status"], "failed")
+                self.assertIn("native removal threshold 1e-12", refusal["diagnostic"])
+
+    def test_snapshot_identity_tracks_supplied_verified_contents(self):
+        first = capture_tracking.snapshot_identity("a" * 64, 240)
+        second = capture_tracking.snapshot_identity("b" * 64, 17)
+        self.assertEqual(first["inventory_sha256"], "a" * 64)
+        self.assertEqual(first["verified_inventory_file_count"], 240)
+        self.assertNotEqual(first, second)
+        self.assertFalse(first["whole_sdk_source_qualification_claimed"])
+
+    def test_tracking_publication_lock_and_read_only_cli_check(self):
+        import json
+
+        publication = ROOT / "reports/algorithm-results" / tracking_bundle.ROUTE
+        lock = json.loads((publication / "publication-lock.json").read_text(encoding="utf-8"))
+        binding = json.loads((tracking_bundle.build(ROOT)[0][
+            tracking_bundle.ROUTE + "/source-binding.json"]).decode())
+        self.assertEqual(lock["archive_sha256"], hashlib.sha256(
+            (publication / (tracking_bundle.ROUTE + ".zip")).read_bytes()).hexdigest())
+        self.assertEqual(binding["portable_renderer_commit"], lock["portable_renderer_commit"])
+        completed = subprocess.run(
+            [sys.executable, str(ROOT / "scripts/reports/stage_native_model_tracking_first_pass.py"), "--check"],
+            cwd=ROOT, capture_output=True, text=True, check=False)
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertIn("verified", completed.stdout)
+
+        archive_path = publication / (tracking_bundle.ROUTE + ".zip")
+        original_read_bytes = Path.read_bytes
+
+        def altered_archive_read(path):
+            content = original_read_bytes(path)
+            if path == archive_path:
+                return content[:-1] + bytes([content[-1] ^ 1])
+            return content
+
+        with patch.object(Path, "read_bytes", altered_archive_read):
+            with self.assertRaisesRegex(ValueError, "committed archive differs"):
+                tracking_bundle.build(ROOT)
+
+        lock_path = publication / "publication-lock.json"
+        original_read_text = Path.read_text
+
+        def altered_lock_read(path, *args, **kwargs):
+            content = original_read_text(path, *args, **kwargs)
+            if path == lock_path:
+                lock = json.loads(content)
+                lock["archive_sha256"] = "0" * 64
+                return json.dumps(lock)
+            return content
+
+        with patch.object(Path, "read_text", altered_lock_read):
+            with self.assertRaisesRegex(ValueError, "pinned publication lock"):
+                tracking_bundle.build(ROOT)
+
+    def test_tracking_gallery_requires_complete_lock_and_unchanged_css(self):
+        import json
+
+        publication = ROOT / "reports/algorithm-results" / tracking_bundle.ROUTE
+        lock_path = publication / "publication-lock.json"
+        original_is_file = Path.is_file
+
+        def lock_is_missing(path):
+            if path == lock_path:
+                return False
+            return original_is_file(path)
+
+        with patch.object(Path, "is_file", lock_is_missing):
+            with self.assertRaisesRegex(ValueError, "publication lock is missing"):
+                tracking_bundle.build(ROOT)
+
+        original_read_text = Path.read_text
+        for missing_hash in (True, False):
+            def incomplete_lock_read(path, *args, _missing_hash=missing_hash, **kwargs):
+                content = original_read_text(path, *args, **kwargs)
+                if path == lock_path:
+                    lock = json.loads(content)
+                    if _missing_hash:
+                        lock.pop("archive_sha256")
+                    else:
+                        lock["archive_sha256"] = None
+                    return json.dumps(lock)
+                return content
+
+            with self.subTest(missing_hash=missing_hash):
+                with patch.object(Path, "read_text", incomplete_lock_read):
+                    with self.assertRaisesRegex(ValueError, "complete archive SHA-256"):
+                        tracking_bundle.build(ROOT)
+
+        css_path = ROOT / "docs/examples/examples.css"
+        original_read_bytes = Path.read_bytes
+
+        def altered_css_read(path):
+            content = original_read_bytes(path)
+            if path == css_path:
+                return content + b"\n/* unpinned stylesheet mutation */\n"
+            return content
+
+        with patch.object(Path, "read_bytes", altered_css_read):
+            with self.assertRaisesRegex(ValueError, "generated archive differs"):
+                tracking_bundle.build(ROOT)
 
     def test_rewritten_manifest_unlisted_file_and_symlink_are_rejected(self):
         manifest = self.bundle / 'manifest.json'

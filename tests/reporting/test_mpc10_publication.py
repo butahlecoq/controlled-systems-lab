@@ -37,6 +37,11 @@ class MPC10PublicationTests(unittest.TestCase):
             capture={'environment.json':S.encoded(dict(source_revision=revision,source_sha256={}))}
             with patch.object(S,'ROOT',repository),patch.object(S,'HELPERS',['first.py','second.py']):
                 original=S.source_export(capture);commit('unrelated.txt','unrelated\n');self.assertEqual(S.source_export(capture),original)
+                git('checkout','-b','same-helper-tree');owner=commit('first.py','reviewed helper change\n')
+                owned=S.source_export(capture);self.assertEqual(owned[1]['helper_revision'],owner)
+                git('checkout','main');commit('wrapper-only.txt','unrelated main change\n')
+                git('merge','--no-ff','same-helper-tree','-m','wrap identical helper tree')
+                self.assertEqual(S.source_export(capture),owned)
                 git('branch','other');commit('first.py','changed first\n');git('checkout','other');commit('second.py','changed second\n');git('checkout','main');git('merge','--no-ff','other','-m','combine helpers')
                 merged=S.source_export(capture);self.assertEqual(merged[1]['helper_revision'],git('rev-parse','HEAD'));self.assertNotEqual(merged,original)
                 commit('more-unrelated.txt','unrelated after merge\n');self.assertEqual(S.source_export(capture),merged)

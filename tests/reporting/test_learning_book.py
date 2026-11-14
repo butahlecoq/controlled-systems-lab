@@ -454,6 +454,9 @@ Q subset E; E subset [-sqrt(2),sqrt(2)]^2; Q is [-1,1]^2
                 "Slide 50", "Separately authored box; historical X0 unavailable",
                 "Spatial flight", "Authored deviation set about a synthetic nonlinear reference",
             ]
+            expected["native-model-tracking-first-pass"] = [
+                "records", "34 · horizon-free", "Authored three-stage zero-target quadratic tracking",
+            ]
             self.assertEqual(set(expected), {chapter["id"] for chapter in self.manifest["chapters"]
                                              if chapter["status"] == "ready"})
             for chapter_id, values in expected.items():

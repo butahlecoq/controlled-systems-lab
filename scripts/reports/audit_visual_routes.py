@@ -65,6 +65,8 @@ FROZEN_DIAGRAM_EXCEPTIONS = {
     "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py",
 }
 PUBLICATION_EXPORT_ROUTES = {
+    "scripts/reports/stage_native_model_tracking_first_pass.py",
+    "scripts/reports/stage_native_row_scaling_diagnostic.py",
     "scripts/reports/stage_native_extended_models.py",
     "scripts/reports/package_feedback_history.py",
     "scripts/reports/package_history_functional.py",
@@ -84,6 +86,10 @@ PUBLICATION_EXPORT_ROUTES = {
     "benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/figures.py",
 }
 VIZ10_ROLE_REASONS = {
+    "scripts/reports/stage_native_row_scaling_diagnostic.py":
+        "Authenticates a locked source-only row-scaling diagnostic with original/scaled CSR, a saved native 2D point, original-coordinate checks and complete numerical-failure logs; no optimization, native build or binary redistribution during staging.",
+    "scripts/reports/stage_native_model_tracking_first_pass.py":
+        "Authenticates and stages the immutable 35-model native tracking capture, independent full-state checks, matrix inputs, and saved 2D projections; it does not rerun optimization.",
     "scripts/reports/stage_buryatia_volterra.py":
         "Authenticates the frozen v2 manifest and native 35a708df producer identity, then copies all current and superseded two-state affine lesson assets byte exactly into the Pages gallery; no numerical execution or historical relabelling.",
     "scripts/reports/stage_buryatia_dim4.py":
@@ -178,6 +184,8 @@ SAVED_COMPANION_ROUTES = {
 }
 SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
 SAVED_DATA_ILLUSTRATION_RENDERERS = {
+    "scripts/reports/render_native_model_tracking_first_pass.py": (
+        "Projects independently checked, immutable all-stage native trajectories into two-dimensional views; it reruns neither the controller nor its optimizer."),
     "scripts/reports/native_fixed_tail_geometry.py": (
         "Reads authenticated A6 native fixed-tail archives and saved full-state projection receipts. "
         "Displays matched-family carriers F, conditional inner B and the recorded full-state identity I=F∩B=B, "
@@ -194,6 +202,9 @@ SAVED_DATA_ILLUSTRATION_RENDERERS = {
         "Stages an analytic two-state reachable-line diagram, rounded values transcribed from the committed native example output, "
         "and a source-bound binary check record using the shared Omarchy page template and stylesheet. "
         "It runs no solver and does not present the diagram or CSV as raw solver data."),
+    "scripts/reports/stage_discrete_mpc_2d.py": (
+        "Checks and stages the committed actual native open-loop/MPC state and action capture, then renders its 2D state path and first-control traces using the shared Omarchy page template. "
+        "It runs no optimizer or simulated-policy code and describes the declared replay only; it makes no robustness claim."),
     "scripts/reports/buryatia/render_2d.py": (
         "Renders all saved source-qualified native affine 2D stages and a terminal overlay; the factor matrix is "
         "retained in each ellipse record and the sampled boundary is checked against that represented set. "
@@ -473,6 +484,8 @@ def build(root: Path = ROOT) -> dict:
                     "nominal-quadratic-history-2d.html", "nominal-quadratic-history-2d.svg",
                     "nominal_quadratic_history_2d.csv", "nominal_quadratic_history_2d-output.txt",
                     "nominal-quadratic-history-2d.json",
+                    "discrete-mpc-2d.html", "discrete-mpc-2d.svg", "discrete-mpc-2d.json",
+                    "discrete_mpc_2d-output.csv", "discrete_mpc_2d-output.txt",
                     "app02-diamond-v1.html", "app02-diamond-v1.svg",
                     "app02-diamond-v1.png", "app02-diamond-v1-export.json",
                     "app04-square-v1.html", "app04-square-v1.svg",
@@ -512,9 +525,28 @@ def build(root: Path = ROOT) -> dict:
                     "buryatia-dim4-literal-affine-v1/buryatia-dim4-box-trace-correction-v1.json",
                     "buryatia-dim4-literal-affine-v1/buryatia-dim4-literal-affine-v1-SHA256SUMS",
                     "buryatia-dim4-literal-affine-v1/buryatia-dim4-matlab-literal-affine-v1.json",
-                    "buryatia-dim4-literal-affine-v1/terminal-x1-x2.svg"] + stage_buryatia_volterra.asset_paths() + geometry_companion_assets() +
+                    "buryatia-dim4-literal-affine-v1/terminal-x1-x2.svg",
+                    "native-model-tracking-first-pass-v1/index.html",
+                    "native-model-tracking-first-pass-v1/reproducing.html",
+                    "native-model-tracking-first-pass-v1/figures/model-21-state-3-9.svg",
+                    "native-model-tracking-first-pass-v1/raw/models.csv",
+                    "native-model-tracking-first-pass-v1/raw/catalogue.csv",
+                    "native-model-tracking-first-pass-v1/raw/coordinates.csv",
+                    "native-model-tracking-first-pass-v1/checks/independent_results.csv",
+                    "native-model-tracking-first-pass-v1/checks/full_state_trajectory_checked.csv",
+                    "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip",
+                    "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip.sha256"] + stage_buryatia_volterra.asset_paths() + geometry_companion_assets() +
                     viz10_companion_assets() + control_witness_companions.asset_paths(),
-                 "disposition": "adopted-shared-quantitative-policy"}],
+                 "disposition": "adopted-shared-quantitative-policy"},
+                {"route": "examples/native-model-tracking-first-pass-v1/index.html",
+                 "assets": ["native-model-tracking-first-pass-v1/index.html",
+                            "native-model-tracking-first-pass-v1/reproducing.html",
+                            "native-model-tracking-first-pass-v1/capture-manifest.json",
+                            "native-model-tracking-first-pass-v1/source-binding.json",
+                            "native-model-tracking-first-pass-v1/SHA256SUMS.json",
+                            "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip",
+                            "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip.sha256"],
+                 "disposition": "source-owned saved functional bundle; no optimization is rerun"}],
             "migration_owner": "#669 owns the shared policy; deferred family renderers link to scoped follow-up issues #684–#687, while frozen report bundles remain immutable evidence"}
 
 

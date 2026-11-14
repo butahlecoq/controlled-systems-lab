@@ -1,0 +1,87 @@
+"""Independent exact transform audit and original-coordinate replay, no optimizer."""
+from pathlib import Path
+import csv, hashlib, json, math, struct, subprocess
+from fractions import Fraction
+r=Path('${WORK_ROOT}')
+owned=r/'1012-row-scaling-diagnostic-20261114';attempts=owned/'attempts'
+notes=Path('${WORKING_NOTES_ROOT}/1012-row-scaling-diagnostic-20261114')
+ref='5df7f97fbf40eb4858a8dafb7a1e74dd5318c816'
+base='reports/algorithm-results/native-model-tracking-first-pass-v1'
+raw=subprocess.check_output(['git','show',ref+':'+base+'/capture-20261113T183906Z/catalogue-data/native-output/models.csv'],text=True)
+import io
+native={}
+for row in csv.DictReader(io.StringIO(raw)):
+ native[(row['model'],row['kind'],int(row['row']),int(row['column']))]=float(row['value'])
+results=[]
+for number in (23,27,28):
+ model=f'catalogue-2026/model-{number}/1';original=attempts/f'model-{number}-original-export-output/replan-0'
+ scaled=attempts/f'model-{number}-row-scale-output';receipt=json.loads((attempts/f'model-{number}-row-scale/attempt.json').read_text())
+ summaries=[]
+ for folder in sorted(scaled.glob('replan-*')):
+  rows=list(csv.DictReader((folder/'rows.csv').open()));coefficients=list(csv.DictReader((folder/'csr.csv').open()))
+  for coefficient in coefficients:
+   exponent=int(rows[int(coefficient['row'])]['power2_exponent']);old=float(coefficient['original']);new=float(coefficient['scaled'])
+   assert Fraction(new)==Fraction(old)*2**exponent
+   assert struct.pack('d',math.ldexp(new,-exponent))==struct.pack('d',old)
+  for row in rows:
+   exp=int(row['power2_exponent'])
+   for side in ('lower','upper'):
+    old=row['original_'+side];new=row['scaled_'+side]
+    if old=='unbounded':assert new==old
+    else:assert Fraction(float(new))==Fraction(float(old))*2**exp
+  assert (folder/'objective.csv').read_bytes()==(original/'objective.csv').read_bytes()
+  offenders=[c for c in coefficients if c['offends_original_threshold']=='1']
+  nonzeros=[abs(float(c['scaled'])) for c in coefficients if float(c['scaled'])]
+  summaries.append({'replan':folder.name,'original_offending_entries':len(offenders),'min_actual_original_coefficient':min(abs(float(c['original'])) for c in coefficients if float(c['original'])),'exponents':sorted(set(int(row['power2_exponent']) for row in rows)),'scaled_matrix_range':[min(nonzeros),max(nonzeros)],'exact_transform_and_rowbound_roundtrip':True,'objective_export_unchanged':True})
+ result={'model':model,'producer_status':receipt['status'],'returncode':receipt['returncode'],'transforms':summaries,'independent_original_replay':'no accepted completed trajectory' }
+ if receipt['returncode']==0:
+  trace=list(csv.DictReader((scaled/'trace.csv').open()));values={}
+  for row in trace:
+   key=(row['kind'],int(row['replan']),int(row['stage']),int(row['coordinate']));value=float(row['value'])
+   if key in values:assert values[key]==value
+   values[key]=value
+  n=len([1 for key in native if key[0]==model and key[1]=='x0']);m=2;p=n
+  initial=[native[(model,'x0',i,0)] for i in range(n)]
+  weights=[1/max(1,abs(v))**2 for v in initial]
+  a=[[native.get((model,'A',i,j),0) for j in range(n)] for i in range(n)]
+  b=[[native.get((model,'B',i,j),0) for j in range(m)] for i in range(n)]
+  e=[[native.get((model,'G',i,j),0) for j in range(p)] for i in range(n)]
+  nominal=[native.get((model,'nominal_w',j,0),0) for j in range(p)]
+  affine=[native.get((model,'a',i,0),0)+sum(e[i][j]*nominal[j] for j in range(p)) for i in range(n)]
+  observed=initial;max_dynamic=0.;max_cost=0.;transitions=0
+  for replan in range(3):
+   x=[[values[('predicted_state',replan,k,i)] for i in range(n)] for k in range(4)]
+   u=[[values[('predicted_control',replan,k,j)] for j in range(m)] for k in range(3)]
+   assert x[0]==observed
+   assert all(-1-1e-8<=v<=1+1e-8 for control in u for v in control)
+   for k in range(3):
+    for i in range(n):
+     expected=math.fsum([affine[i],*(a[i][j]*x[k][j] for j in range(n)),*(b[i][j]*u[k][j] for j in range(m))])
+     delta=abs(expected-x[k+1][i]);max_dynamic=max(max_dynamic,delta)
+     assert delta<=1e-8*(1+abs(expected))
+    transitions+=1
+   cost=math.fsum([*(weights[i]*x[k][i]**2 for k in range(3) for i in range(n)),*(.02*v*v for control in u for v in control),*(5*weights[i]*x[3][i]**2 for i in range(n))])
+   for kind in ('independent_plan_cost','compiled_plan_cost'):
+    delta=abs(values[(kind,replan,0,0)]-cost);max_cost=max(max_cost,delta);assert delta<=1e-8*(1+abs(cost))
+   applied=[values[('applied_control',replan,0,j)] for j in range(m)];assert applied==u[0]
+   next_observed=[values[('observed_next_state',replan,1,i)] for i in range(n)]
+   for i in range(n):assert abs(next_observed[i]-x[1][i])<=1e-8*(1+abs(x[1][i]))
+   assert [values[('observed_state',replan,0,i)] for i in range(n)]==observed
+   observed=next_observed
+  result['independent_original_replay']={'replans':3,'full_state_transitions':transitions,'state_dimension':n,'control_dimension':m,'max_dynamics_residual':max_dynamic,'max_cost_difference':max_cost,'initial_state_zero':all(v==0 for v in initial),'scope':'same authored N3/3-replan profile; zero optimum is trivial, no nonzero-state/stability evidence'}
+ results.append(result)
+# Analytic expected minimizer and objective, independent of native logs.
+analytic=(attempts/'analytic-normalized/stdout.log').read_text();assert 'x=1.5 y=1.5 objective=4.5' in analytic
+# Verify the frozen SDK again, including prior qualified component/header.
+sdk=r/'1012-current-main-installed-sdk-4ec-snapshot'
+for line in (sdk/'SHA256SUMS').read_text().splitlines():
+ digest,path=line.split('  ',1);assert hashlib.sha256(Path(path).read_bytes()).hexdigest()==digest
+qualification=json.loads(Path('${WORKING_NOTES_ROOT}/1012-running-state-design-20261113/candidate-a/qualification-c16-source-binding.json').read_text())
+for kind in ('header','archive'):
+ item=qualification['installed_sdk'][kind];assert hashlib.sha256((sdk/'prefix'/item['path']).read_bytes()).hexdigest()==item['sha256']
+# Existing immutable capture bytes in baseline worktree remain identical to pinned commit.
+wt=Path('${REPOSITORY_ROOT}')
+files=subprocess.check_output(['git','ls-tree','-r','--name-only',ref,'--',base+'/capture-20261113T183906Z',base+'/capture-20261113T182620Z',base+'/capture-20261113T182201Z'],text=True).splitlines()
+for path in files:assert (wt/path).read_bytes()==subprocess.check_output(['git','show',ref+':'+path]),path
+report={'models':results,'analytic_passed':True,'sdk240_hashes_after_match':True,'original_capture_files_unchanged':len(files),'qualified_component_header_archive_match':True,'whole_sdk_requalification_claimed':False}
+(notes/'independent-checks.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report,indent=2))

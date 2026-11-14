@@ -1,13 +1,14 @@
 """Exact literal checks for the authored proof audits; no archive or solver needed.
 
-Continuous-domain maxima are proved analytically in the reports. These checks
-exercise their literal witnesses and costs, not a sampled certification.
+The historical report proofs are unavailable in this checkout. These checks
+exercise literal witnesses and costs; they do not verify continuous-domain
+maxima or provide a sampled certification.
 """
 from fractions import Fraction
 
 
 def observations():
-    """Compute the literal witnesses exposed by the public reports."""
+    """Compute the literal witnesses recorded in the historical audits."""
     candidates = (Fraction(0), Fraction(2))
     retained = candidates[:1]
     full = (min(candidates), max(candidates))
@@ -81,4 +82,5 @@ def check_counterexamples():
 if __name__ == "__main__":
     for name in check_counterexamples():
         print(f"PASS {name}")
-    print("9 exact literal checks passed; continuum claims require the report proofs.")
+    print("9 exact literal checks passed; report proofs are unavailable in this checkout; "
+          "continuum claims are not verified.")

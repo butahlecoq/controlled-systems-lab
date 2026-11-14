@@ -1,0 +1,4 @@
+original_problem=1012-authored-nominal-tracking
+original_program=catalogue-2026/model-23/1-3step-zero-target-v1
+configuration=original-export-only-v1
+dual_relation=y_original=D*y_scaled; mathematical relation only, ProgramResult has no public dual vectors

@@ -1,0 +1,9 @@
+model=catalogue-2026/model-21/1
+source=https://osqp.org/docs/examples/mpc.html
+horizon=10
+feedback_replans=15
+solver=csl.convex.highs version=1.0.0+highs.1.11.0
+fixed_external_input=zero
+nominal_grid=0.1 second per stage (native owner catalogue); coordinates=indexed, physical_units=unspecified
+outcome=numerical_optimal; no certified bounds or global feedback-policy claim
+realized_zero_disturbance_running_cost=28.0589 (15 applied stages; no terminal term)

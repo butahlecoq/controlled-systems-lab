@@ -1,0 +1,17 @@
+{
+  "record_kind": "derived from saved native stdout, not a repeated solve",
+  "native_stdout_sha256": "8b9f42e077f558aa7a5bed6d627b6168ed82ed0326873dd8dc38f49e76c3b9d2",
+  "original_equality_coefficient": 8.881784197001252e-16,
+  "original_equality_rhs": 2.6645352591003757e-15,
+  "observed_x": [
+    1.5,
+    1.5
+  ],
+  "observed_original_objective": 4.5,
+  "analytic_x": [
+    1.5,
+    1.5
+  ],
+  "analytic_original_objective": 4.5,
+  "input_arithmetic": "exact binary64 dyadic values; solver/checks numerical"
+}

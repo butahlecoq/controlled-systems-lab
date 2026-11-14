@@ -1,0 +1,3 @@
+row,column,original,scaled,offends_original_threshold,exact_roundtrip
+0,0,8.8817841970012523e-16,1,1,true
+0,1,8.8817841970012523e-16,1,1,true

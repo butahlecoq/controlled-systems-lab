@@ -31,6 +31,11 @@ LP_METHODS = (
 REPETITIONS = 5
 WARMUPS = 1
 CHECKER_MAX_POINTS = 64
+A29_SOURCE_PATHS = (
+    "tools/legacy-ports/A29/port.py",
+    "tools/legacy-ports/A29/oracle.py",
+    "tools/legacy-ports/common/exact_binary64_hull.py",
+)
 
 
 def sha256(data: bytes) -> str:
@@ -48,6 +53,11 @@ def file_hash(path: Path) -> str:
 def identity_file(relative: str) -> dict:
     path = ROOT / relative
     return {"path": relative, "sha256": file_hash(path)}
+
+
+def a29_source_closure() -> list[dict]:
+    """Return the complete active A29 port and quality-check source identity."""
+    return [identity_file(path) for path in A29_SOURCE_PATHS]
 
 
 def status_for(algorithm_status: str, quality_status: str) -> tuple[str, str]:
@@ -159,11 +169,10 @@ def main() -> int:
     manifest_hash = sha256(manifest_text.encode())
 
     sys.path.insert(0, str(PORT_ROOT))
-    from port import run as run_a29  # noqa: E402
     from oracle import check as check_hull  # noqa: E402
+    from port import run as run_a29  # noqa: E402
 
-    source_a29 = [identity_file("tools/legacy-ports/A29/port.py"),
-                  identity_file("tools/legacy-ports/A29/oracle.py")]
+    source_a29 = a29_source_closure()
     source_quickhull = [identity_file("src/geometry/hull/quickhull_2d.cpp"),
                         identity_file("benchmarks/reporting/exp06/quickhull_run.cpp")]
     deviations_hash = file_hash(PORT_ROOT / "DEVIATIONS.md")
