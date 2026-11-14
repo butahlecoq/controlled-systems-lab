@@ -1,0 +1,17 @@
+model=catalogue-2026/model-29/1
+title=32 O-RAN queues
+source_title=Owner-supplied research catalogue (2026)
+source_sha256=6c5e7c1b09331186b8cd9ddfcd1a71afbc7bddb438a103f2fd4dcfdf780c081e
+source_locator=Owner archive, card 29; model_29_A/B/G/x0 in the numerical supplement
+source_qualification=scaled test model using real-style RAN traffic as disturbances. State order: q[32] [Mbit]. Control order: PRB per interval. Synthetic service throughput. PRB integrality, no overservice, q>=0 are separate domain choices. G is a discrete per-step state-increment channel, not an identified physical force map.
+task=authored nominal quadratic tracking to zero; 3-stage horizon; 3 closed-loop replans
+task_identity=1012-authored-nominal-tracking/catalogue-2026/model-29/1-3step-zero-target-v1
+state_weight_i=1/max(1,abs(initial_i))^2; terminal_weight=5*state_weight; R=0.02*I
+recorded_coordinate_actuator_bounds=[-1,1]; state_bounds=none; units=source catalogue coordinates
+external_selection=supplied_nominal_external; source_E_channel_retained=32 coordinates
+time_step=1 second
+assurance=numerical; this is not empirical calibration, certified optimality, robust control, or nonlinear stability evidence
+solver=csl.convex.highs version=1.0.0+highs.1.11.0
+completed_replans=3
+zero-disturbance/selected-nominal realized running cost=102.697
+final_observed_state=10.45,10.9909,11.5317,12.0726,12.6135,13.1544,13.6952,14.2361,14.777,15.3178,15.8587,16.3996,16.9405,17.4813,18.0222,18.5631,19.1039,19.6448,20.1857,20.7265,21.2674,21.8083,22.3492,22.89,23.4309,23.9718,24.5126,25.0535,25.5944,26.1353,26.6761,27.217

@@ -1,0 +1,359 @@
+{
+  "capture": "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T183906Z",
+  "capture_manifest_sha256": "2ce8a1783b4a32463c2accb7c4af80d73b4f6617d8c1ffd8fba13b6c59f491a2",
+  "checker_source_sha256": "0e7572c094b256d4930166e5fdf6c336a1a7040429aee3458bdaa163f36643c5",
+  "checks": {
+    "catalogue-2026/model-1/1": {
+      "first_plan_objective": 35.9489788736654,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 79.78574594485042,
+      "max_abs_dynamics_residual": 7.105427357601002e-15,
+      "max_abs_objective_residual": 2.842170943040401e-14,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 9.19624723293309
+    },
+    "catalogue-2026/model-10/1": {
+      "first_plan_objective": 31.07902777777778,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 40.90847222222222,
+      "max_abs_dynamics_residual": 0.0,
+      "max_abs_objective_residual": 2.1316282072803006e-14,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 10.075902777777777
+    },
+    "catalogue-2026/model-11/1": {
+      "first_plan_objective": 52.348310249307474,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 99.13157451523546,
+      "max_abs_dynamics_residual": 1.4210854715202004e-14,
+      "max_abs_objective_residual": 2.842170943040401e-14,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 11.34198891966759
+    },
+    "catalogue-2026/model-12/1": {
+      "first_plan_objective": 10.195913388997447,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 18.495260998813958,
+      "max_abs_dynamics_residual": 1.1368683772161603e-13,
+      "max_abs_objective_residual": 3.552713678800501e-15,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 4.328922090320781
+    },
+    "catalogue-2026/model-13/1": {
+      "first_plan_objective": 0.18227786877291785,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 0.007076383885107206,
+      "max_abs_dynamics_residual": 5.551115123125783e-17,
+      "max_abs_objective_residual": 5.551115123125783e-17,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 0.17994903103441184
+    },
+    "catalogue-2026/model-14/1": {
+      "first_plan_objective": 24.933185916709114,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 35.093428707430256,
+      "max_abs_dynamics_residual": 1.4210854715202004e-14,
+      "max_abs_objective_residual": 2.842170943040401e-14,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 7.458660577063755
+    },
+    "catalogue-2026/model-15/1": {
+      "first_plan_objective": 13.104549809988452,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 10.763768990900594,
+      "max_abs_dynamics_residual": 1.1368683772161603e-13,
+      "max_abs_objective_residual": 3.552713678800501e-15,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 5.599091097669445
+    },
+    "catalogue-2026/model-16/1": {
+      "first_plan_objective": 13.608928583127778,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 11.714410637185797,
+      "max_abs_dynamics_residual": 1.4210854715202004e-14,
+      "max_abs_objective_residual": 5.329070518200751e-15,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 5.681392260277778
+    },
+    "catalogue-2026/model-17/1": {
+      "first_plan_objective": 5.886801716999999,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 3.743079899257707,
+      "max_abs_dynamics_residual": 1.1102230246251565e-16,
+      "max_abs_objective_residual": 1.7763568394002505e-15,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 3.0024784999999996
+    },
+    "catalogue-2026/model-18/1": {
+      "first_plan_objective": 42.210700778688974,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 73.80353115583713,
+      "max_abs_dynamics_residual": 0.0,
+      "max_abs_objective_residual": 2.842170943040401e-14,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 9.998239513084844
+    },
+    "catalogue-2026/model-19/1": {
+      "first_plan_objective": 16.08527437843343,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 16.16599807721015,
+      "max_abs_dynamics_residual": 4.547473508864641e-13,
+      "max_abs_objective_residual": 1.0658141036401503e-14,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 6.014510443072615
+    },
+    "catalogue-2026/model-2/1": {
+      "first_plan_objective": 3.9163085284235706,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 0.8127002690470544,
+      "max_abs_dynamics_residual": 1.1324274851176597e-14,
+      "max_abs_objective_residual": 4.440892098500626e-16,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 3.3452667140687646
+    },
+    "catalogue-2026/model-20/1": {
+      "first_plan_objective": 17.95927122862403,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 19.173903621024515,
+      "max_abs_dynamics_residual": 2.842170943040401e-14,
+      "max_abs_objective_residual": 3.552713678800501e-15,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 6.3627857909954475
+    },
+    "catalogue-2026/model-21/1": {
+      "first_plan_objective": 28.033028041590782,
+      "full_state_dynamics_transitions": 150,
+      "last_plan_objective": 0.00995086086026218,
+      "max_abs_dynamics_residual": 7.473970448732765e-13,
+      "max_abs_objective_residual": 3.575612028683395e-14,
+      "replans": 15,
+      "status": "passed",
+      "total_realized_running_cost": 28.0588822368079
+    },
+    "catalogue-2026/model-22/1": {
+      "first_plan_objective": 0.0,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 0.0,
+      "max_abs_dynamics_residual": 0.0,
+      "max_abs_objective_residual": 0.0,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 0.0
+    },
+    "catalogue-2026/model-23/1": {
+      "attempt_status": "failed",
+      "coefficient_scope": "source catalogue A/B/G entry; solver diagnostic independently identifies its native matrix threshold",
+      "smallest_nonzero_catalogue_matrix_coefficient": 6.855804411066206e-17,
+      "status": "failure_preserved",
+      "stderr": "HiGHS task selection failed; highs.convex.matrix: nonzero coefficient at or below native removal threshold 1e-12"
+    },
+    "catalogue-2026/model-24/1": {
+      "first_plan_objective": 0.0,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 0.0,
+      "max_abs_dynamics_residual": 0.0,
+      "max_abs_objective_residual": 0.0,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 0.0
+    },
+    "catalogue-2026/model-25/1": {
+      "first_plan_objective": 0.0,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 0.0,
+      "max_abs_dynamics_residual": 0.0,
+      "max_abs_objective_residual": 0.0,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 0.0
+    },
+    "catalogue-2026/model-26/1": {
+      "first_plan_objective": 270.86956019409166,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 508.36825122013437,
+      "max_abs_dynamics_residual": 5.684341886080802e-14,
+      "max_abs_objective_residual": 2.2737367544323206e-13,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 69.7071593809616
+    },
+    "catalogue-2026/model-27/1": {
+      "attempt_status": "failed",
+      "coefficient_scope": "source catalogue A/B/G entry; solver diagnostic independently identifies its native matrix threshold",
+      "smallest_nonzero_catalogue_matrix_coefficient": 2.1740349403908295e-27,
+      "status": "failure_preserved",
+      "stderr": "HiGHS task selection failed; highs.convex.matrix: nonzero coefficient at or below native removal threshold 1e-12"
+    },
+    "catalogue-2026/model-28/1": {
+      "attempt_status": "failed",
+      "coefficient_scope": "source catalogue A/B/G entry; solver diagnostic independently identifies its native matrix threshold",
+      "smallest_nonzero_catalogue_matrix_coefficient": 9.298585042071114e-37,
+      "status": "failure_preserved",
+      "stderr": "HiGHS task selection failed; highs.convex.matrix: nonzero coefficient at or below native removal threshold 1e-12"
+    },
+    "catalogue-2026/model-29/1": {
+      "first_plan_objective": 286.9738358384001,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 313.96721659761727,
+      "max_abs_dynamics_residual": 1.4210854715202004e-14,
+      "max_abs_objective_residual": 1.5916157281026244e-12,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 102.69740193091219
+    },
+    "catalogue-2026/model-3/1": {
+      "first_plan_objective": 84.14055555555555,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 185.45904444444446,
+      "max_abs_dynamics_residual": 0.0,
+      "max_abs_objective_residual": 8.526512829121202e-14,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 15.170055555555557
+    },
+    "catalogue-2026/model-30/1": {
+      "first_plan_objective": 0.2058193893921488,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 0.011083153792091044,
+      "max_abs_dynamics_residual": 2.2551405187698492e-17,
+      "max_abs_objective_residual": 1.6653345369377348e-16,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 0.20100689074234263
+    },
+    "catalogue-2026/model-31/1": {
+      "first_plan_objective": 142.7734255489978,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 107.89952303579761,
+      "max_abs_dynamics_residual": 7.105427357601002e-15,
+      "max_abs_objective_residual": 3.694822225952521e-13,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 63.774734302389014
+    },
+    "catalogue-2026/model-32/1": {
+      "first_plan_objective": 195.78509902271998,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 125.83048102025907,
+      "max_abs_dynamics_residual": 7.105427357601002e-15,
+      "max_abs_objective_residual": 1.7905676941154525e-12,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 107.21956704
+    },
+    "catalogue-2026/model-33/1": {
+      "first_plan_objective": 283.35999999999996,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 501.5999999999999,
+      "max_abs_dynamics_residual": 2.220446049250313e-16,
+      "max_abs_objective_residual": 9.663381206337363e-13,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 70.16
+    },
+    "catalogue-2026/model-34/1": {
+      "first_plan_objective": 105.13013658042752,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 90.82410801305534,
+      "max_abs_dynamics_residual": 3.552713678800501e-15,
+      "max_abs_objective_residual": 2.2737367544323206e-13,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 44.19472904691328
+    },
+    "catalogue-2026/model-35/1": {
+      "first_plan_objective": 11.678133021717484,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 0.9425763424998748,
+      "max_abs_dynamics_residual": 1.4224732503009818e-16,
+      "max_abs_objective_residual": 2.6645352591003757e-14,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 11.4459860445763
+    },
+    "catalogue-2026/model-4/1": {
+      "first_plan_objective": 63.5955043780086,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 112.56691268396497,
+      "max_abs_dynamics_residual": 2.2737367544323206e-13,
+      "max_abs_objective_residual": 4.263256414560601e-14,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 14.960541196521646
+    },
+    "catalogue-2026/model-5/1": {
+      "first_plan_objective": 13.068611487800455,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 10.563937172901586,
+      "max_abs_dynamics_residual": 7.105427357601002e-15,
+      "max_abs_objective_residual": 7.105427357601002e-15,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 5.693841720208616
+    },
+    "catalogue-2026/model-6/1": {
+      "first_plan_objective": 22.729314793209877,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 21.476163340864197,
+      "max_abs_dynamics_residual": 0.0,
+      "max_abs_objective_residual": 7.105427357601002e-15,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 8.936184812654322
+    },
+    "catalogue-2026/model-7/1": {
+      "first_plan_objective": 10.312242690368752,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 10.016745856831715,
+      "max_abs_dynamics_residual": 8.881784197001252e-16,
+      "max_abs_objective_residual": 3.552713678800501e-15,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 4.7983888041
+    },
+    "catalogue-2026/model-8/1": {
+      "first_plan_objective": 24.076926034409997,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 31.812907725127317,
+      "max_abs_dynamics_residual": 4.440892098500626e-16,
+      "max_abs_objective_residual": 7.105427357601002e-15,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 7.3624165
+    },
+    "catalogue-2026/model-9/1": {
+      "first_plan_objective": 39.8483950617284,
+      "full_state_dynamics_transitions": 9,
+      "last_plan_objective": 67.79901234567902,
+      "max_abs_dynamics_residual": 0.0,
+      "max_abs_objective_residual": 2.842170943040401e-14,
+      "replans": 3,
+      "status": "passed",
+      "total_realized_running_cost": 10.959506172839506
+    }
+  },
+  "counts": {
+    "checker_errors": 0,
+    "full_state_dynamics_transitions_checked": 429,
+    "independent_check_passed": 32,
+    "native_outcomes_failure_preserved": 3
+  },
+  "created_utc": "2026-11-13T19:06:26.624035+00:00",
+  "model_data_sha256": "15e5f4dc6cde65dd174f10a8b8a9280f61788074023647968fd7fccfcadf88d6",
+  "mutation_guard": "rejected unknown identity, timeout substitution, missing identity, and duplicate identity",
+  "schema": "csl.1012-native-model-tracking-independent-checks/1",
+  "verified_reported_partition": "exactly 32 completed and exactly models 23, 27, 28 failed with native coefficient-threshold refusal; attempt status and stdout/stderr hashes validated"
+}

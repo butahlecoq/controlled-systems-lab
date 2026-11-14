@@ -128,6 +128,19 @@ csl_example(native_four_state_reachability CSL::model_catalogue CSL::geometry_ge
 csl_example(native_discrete_models CSL::model_catalogue)
 
 if(TARGET CSL::highs_convex AND TARGET CSL::model_catalogue)
+  add_executable(native_model_tracking native_model_tracking.cpp)
+  target_link_libraries(native_model_tracking PRIVATE CSL::highs_convex CSL::model_catalogue
+    CSL::nominal_quadratic_history)
+  target_compile_features(native_model_tracking PRIVATE cxx_std_20)
+  set_target_properties(native_model_tracking PROPERTIES CXX_EXTENSIONS OFF)
+  if(MSVC)
+    target_compile_options(native_model_tracking PRIVATE /W4 /WX /permissive-)
+  else()
+    target_compile_options(native_model_tracking PRIVATE -Wall -Wextra -Wpedantic -Werror)
+  endif()
+endif()
+
+if(TARGET CSL::highs_convex AND TARGET CSL::model_catalogue)
   add_executable(quadcopter_mpc quadcopter_mpc.cpp quadcopter_mpc_task.cpp)
   target_link_libraries(quadcopter_mpc PRIVATE CSL::highs_convex CSL::model_catalogue
     CSL::nominal_quadratic_history)

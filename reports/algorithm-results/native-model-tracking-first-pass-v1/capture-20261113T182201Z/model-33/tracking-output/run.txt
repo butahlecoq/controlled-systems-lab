@@ -1,0 +1,17 @@
+model=catalogue-2026/model-33/1
+title=Eight-node DDoS
+source_title=Owner-supplied research catalogue (2026)
+source_sha256=6c5e7c1b09331186b8cd9ddfcd1a71afbc7bddb438a103f2fd4dcfdf780c081e
+source_locator=Owner archive, card 33; model_33_A/B/G/x0 in the numerical supplement
+source_qualification=synthetic queues; attacks and telemetry from NetsLab 5G O-RAN. State order: legitimate[8],suspect[8] queues [1000 packets]. Control order: service/filter allocation [normalized units]. Synthetic queues; adversary second disturbance block. Need queue lower bounds/no overservice and attack set/budget/timing; false positives absent. G is a discrete per-step state-increment channel, not an identified physical force map.
+task=authored nominal quadratic tracking to zero; 3-stage horizon; 3 closed-loop replans
+task_identity=1012-authored-nominal-tracking/catalogue-2026/model-33/1-3step-zero-target-v1
+state_weight_i=1/max(1,abs(initial_i))^2; terminal_weight=5*state_weight; R=0.02*I
+recorded_coordinate_actuator_bounds=[-1,1]; state_bounds=none; units=source catalogue coordinates
+external_selection=supplied_nominal_external; source_E_channel_retained=16 coordinates
+time_step=1 second
+assurance=numerical; this is not empirical calibration, certified optimality, robust control, or nonlinear stability evidence
+solver=csl.convex.highs version=1.0.0+highs.1.11.0
+completed_replans=3
+zero-disturbance/selected-nominal realized running cost=70.16
+final_observed_state=17.6,17.6,17.6,17.6,17.6,17.6,17.6,17.6,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4

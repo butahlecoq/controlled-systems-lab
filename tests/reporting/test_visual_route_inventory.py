@@ -267,6 +267,14 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertTrue(any(name.endswith("terminal-projections.svg")
                             for entry in routes.values() for name in entry["assets"]))
         self.assertEqual(inventory["gallery_routes"][0]["route"],"examples/index.html")
+        tracking_route=next(route for route in inventory["gallery_routes"]
+                            if route["route"]=="examples/native-model-tracking-first-pass-v1/index.html")
+        self.assertIn("native-model-tracking-first-pass-v1/source-binding.json",tracking_route["assets"])
+        self.assertIn("native-model-tracking-first-pass-v1/reproducing.html",tracking_route["assets"])
+        self.assertIn("native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip.sha256",
+                      tracking_route["assets"])
+        self.assertIn("scripts/reports/stage_native_model_tracking_first_pass.py",
+                      [entry["source"] for entry in inventory["producers_and_routes"]])
         gallery_assets=set(inventory["gallery_routes"][0]["assets"])
         self.assertEqual(gallery_assets,{
             "examples.css", "fuel-b06-viz06.html", "fuel-b06-viz06-source.json",
@@ -320,6 +328,16 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "buryatia-dim4-literal-affine-v1/buryatia-dim4-literal-affine-v1-SHA256SUMS",
             "buryatia-dim4-literal-affine-v1/buryatia-dim4-matlab-literal-affine-v1.json",
             "buryatia-dim4-literal-affine-v1/terminal-x1-x2.svg",
+            "native-model-tracking-first-pass-v1/index.html",
+            "native-model-tracking-first-pass-v1/reproducing.html",
+            "native-model-tracking-first-pass-v1/figures/model-21-state-3-9.svg",
+            "native-model-tracking-first-pass-v1/raw/models.csv",
+            "native-model-tracking-first-pass-v1/raw/catalogue.csv",
+            "native-model-tracking-first-pass-v1/raw/coordinates.csv",
+            "native-model-tracking-first-pass-v1/checks/independent_results.csv",
+            "native-model-tracking-first-pass-v1/checks/full_state_trajectory_checked.csv",
+            "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip",
+            "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip.sha256",
             *audit_visual_routes.stage_buryatia_volterra.asset_paths(),
             *audit_visual_routes.geometry_companion_assets(),
             *audit_visual_routes.viz10_companion_assets(),

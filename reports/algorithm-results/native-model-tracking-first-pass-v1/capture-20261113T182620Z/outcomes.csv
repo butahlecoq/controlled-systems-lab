@@ -1,0 +1,4 @@
+model,status,returncode,elapsed_seconds,timeout_seconds
+catalogue-2026/model-23/1,failed,1,0.00386860896833241,60
+catalogue-2026/model-27/1,failed,1,0.007897505071014166,60
+catalogue-2026/model-28/1,failed,1,0.007935219909995794,60

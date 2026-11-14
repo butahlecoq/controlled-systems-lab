@@ -1,0 +1,17 @@
+model=catalogue-2026/model-11/1
+title=Traffic lights
+source_title=Owner-supplied research catalogue (2026)
+source_sha256=6c5e7c1b09331186b8cd9ddfcd1a71afbc7bddb438a103f2fd4dcfdf780c081e
+source_locator=Owner archive, card 11; printed decimal matrices
+source_qualification=chosen turning fraction .6, linear queue model. State order: q1,q2 [cars]. Control order: s1,s2 [cars serviced/step]. Card omits lower queue bound numerically though physical q>=0 required; saturation, spillback, phases and availability timing need explicit extension. G is a discrete per-step state-increment channel, not an identified physical force map.
+task=authored nominal quadratic tracking to zero; 3-stage horizon; 3 closed-loop replans
+task_identity=1012-authored-nominal-tracking/catalogue-2026/model-11/1-3step-zero-target-v1
+state_weight_i=1/max(1,abs(initial_i))^2; terminal_weight=5*state_weight; R=0.02*I
+recorded_coordinate_actuator_bounds=[-1,1]; state_bounds=none; units=source catalogue coordinates
+external_selection=supplied_nominal_external; source_E_channel_retained=2 coordinates
+time_step=60 second
+assurance=numerical; this is not empirical calibration, certified optimality, robust control, or nonlinear stability evidence
+solver=csl.convex.highs version=1.0.0+highs.1.11.0
+completed_replans=3
+zero-disturbance/selected-nominal realized running cost=11.342
+final_observed_state=58,63.8

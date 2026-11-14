@@ -585,6 +585,16 @@
       "owner": "docs/examples/native-model-catalogue.html"
     },
     {
+      "route": "examples/native-model-tracking-first-pass-v1/index.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_native_model_tracking_first_pass.py"
+    },
+    {
+      "route": "examples/native-model-tracking-first-pass-v1/reproducing.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_native_model_tracking_first_pass.py"
+    },
+    {
       "route": "examples/native-quadcopter-mpc.html",
       "disposition": "maintained",
       "owner": "docs/examples/native-quadcopter-mpc.html"
@@ -1262,6 +1272,11 @@
     },
     {
       "route": "learn/native-forward-models.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
+      "route": "learn/native-model-tracking-first-pass.html",
       "disposition": "maintained",
       "owner": "scripts/reports/learning_book.py"
     },

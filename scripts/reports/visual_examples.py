@@ -30,8 +30,9 @@ import stage_buryatia_volterra
 import stage_native_extended_models
 import stage_native_model_catalogue
 import stage_native_discrete_models
-import stage_native_flexible_pitch
+import stage_native_model_tracking_first_pass
 import stage_nominal_quadratic_history
+import stage_native_flexible_pitch
 import visual_illustrations
 import visual_example_geometry as geometry_examples
 import visual_example_fuel_layers
@@ -907,6 +908,9 @@ def build(catalog, site):
     discrete_files, discrete_inventory, discrete_cards = stage_native_discrete_models.build(
         Path(__file__).resolve().parents[2])
     saved_figures += discrete_cards
+    tracking_files, tracking_inventory, tracking_card = stage_native_model_tracking_first_pass.build(
+        Path(__file__).resolve().parents[2])
+    saved_figures += tracking_card
     history_files, history_inventory, history_card = stage_nominal_quadratic_history.build(
         Path(__file__).resolve().parents[2])
     saved_figures += history_card
@@ -958,6 +962,7 @@ def build(catalog, site):
     outputs.update(volterra_files)
     outputs.update(pitch_files)
     outputs.update(discrete_files)
+    outputs.update(tracking_files)
     outputs.update(history_files)
     outputs.update(extended_files)
     repository_root = Path(__file__).resolve().parents[2]
@@ -1070,6 +1075,7 @@ def build(catalog, site):
     gallery_inventory.extend(volterra_inventory)
     gallery_inventory.extend(pitch_inventory)
     gallery_inventory.extend(discrete_inventory)
+    gallery_inventory.extend(tracking_inventory)
     gallery_inventory.extend(history_inventory)
     gallery_inventory.extend(extended_inventory)
     geometry_first = geometry_inventory[0]
