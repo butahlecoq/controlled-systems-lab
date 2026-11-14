@@ -15,6 +15,8 @@ NATIVE_MANIFEST = ROOT / "docs/catalogue/closed-loop-native-capabilities-v1.json
 NATIVE_SIDECAR = ROOT / "docs/catalogue/closed-loop-native-capabilities-v1.sha256"
 HISTORY_MANIFEST = ROOT / "docs/catalogue/closed-loop-history-capabilities-v1.json"
 HISTORY_SIDECAR = ROOT / "docs/catalogue/closed-loop-history-capabilities-v1.sha256"
+COMPOSITIONS_MANIFEST = ROOT / "docs/catalogue/closed-loop-native-compositions-v1.json"
+COMPOSITIONS_SIDECAR = ROOT / "docs/catalogue/closed-loop-native-compositions-v1.sha256"
 MODULE_INVENTORY = ROOT / "docs/catalogue/module-composition-inventory-v1.json"
 
 NATIVE_PROFILES = {
@@ -429,14 +431,22 @@ def validate_manifest(value: dict | None = None, manifest_path: Path | None = No
     manifest = value or json.loads(selected_path.read_text())
     native = selected_path.resolve() == NATIVE_MANIFEST.resolve()
     history = selected_path.resolve() == HISTORY_MANIFEST.resolve()
-    expected_schema = "csl.closed-loop-capability-manifest/2" if native or history else "csl.closed-loop-capability-manifest/1"
+    compositions = selected_path.resolve() == COMPOSITIONS_MANIFEST.resolve()
+    expected_schema = "csl.closed-loop-capability-manifest/2" if native or history or compositions else "csl.closed-loop-capability-manifest/1"
     if manifest.get("schema") != expected_schema:
         raise ValueError("unsupported closed-loop capability manifest")
-    sidecar = HISTORY_SIDECAR if history else NATIVE_SIDECAR if native else SIDECAR
+    sidecar = COMPOSITIONS_SIDECAR if compositions else HISTORY_SIDECAR if history else NATIVE_SIDECAR if native else SIDECAR
     expected = sidecar.read_text().split()[0]
     if canonical_sha256(manifest) != expected:
         raise ValueError("closed-loop capability manifest hash mismatch")
-    expected_rows = _history_definitions() if history else _native_definitions() if native else _definitions()
+    if compositions:
+        from native_compositions import build_manifest as build_compositions
+        expected_manifest = build_compositions()
+        if manifest != expected_manifest:
+            raise ValueError("native composition candidates or graphs differ from source definitions")
+        expected_rows = expected_manifest["graphs"]
+    else:
+        expected_rows = _history_definitions() if history else _native_definitions() if native else _definitions()
     expected_ids = {row["graph_id"] for row in expected_rows}
     graph_ids = [row.get("graph_id") for row in manifest["graphs"]]
     if len(graph_ids) != len(set(graph_ids)):
@@ -473,11 +483,12 @@ def validate_resolved_graph(graph: dict) -> None:
 
 
 def resolve_graph(task: dict, action_profile_id: str, controller_id: str | None = None,
-                  manifest_path: Path | None = None) -> tuple[dict, dict]:
+                  manifest_path: Path | None = None, graph_id: str | None = None) -> tuple[dict, dict]:
     manifest = validate_manifest(manifest_path=manifest_path)
     candidates = [row for row in manifest["graphs"] if row["task_id"] == task["task_id"]
         and row["task_sha256"] == manifest_sha256(task) and row["action_profile_id"] == action_profile_id
-        and (controller_id is None or row["controller"]["id"] == controller_id)]
+        and (controller_id is None or row["controller"]["id"] == controller_id)
+        and (graph_id is None or row["graph_id"] == graph_id)]
     if len(candidates) != 1:
         raise ValueError("no unique admitted capability graph matches task, action profile, and controller request")
     return manifest, candidates[0]
@@ -507,11 +518,17 @@ if __name__ == "__main__":
     parser.add_argument("--write", action="store_true")
     parser.add_argument("--write-native", action="store_true")
     parser.add_argument("--write-history", action="store_true")
+    parser.add_argument("--write-native-compositions", action="store_true")
     args = parser.parse_args()
     if args.write: write_manifest()
     if args.write_native: write_native_manifest()
     if args.write_history: write_history_manifest()
-    selected = HISTORY_MANIFEST if args.write_history else NATIVE_MANIFEST if args.write_native else MANIFEST
+    if args.write_native_compositions:
+        from native_compositions import build_manifest as build_compositions
+        compositions = build_compositions()
+        COMPOSITIONS_MANIFEST.write_text(json.dumps(compositions, sort_keys=True, indent=2) + "\n")
+        COMPOSITIONS_SIDECAR.write_text(canonical_sha256(compositions) + "  closed-loop-native-compositions-v1.json\n")
+    selected = COMPOSITIONS_MANIFEST if args.write_native_compositions else HISTORY_MANIFEST if args.write_history else NATIVE_MANIFEST if args.write_native else MANIFEST
     checked = validate_manifest(manifest_path=selected)
     print(json.dumps({"status": "pass", "manifest_id": checked["manifest_id"],
         "graphs": [{"graph_id": row["graph_id"], "task_sha256": row["task_sha256"],

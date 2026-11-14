@@ -23,6 +23,7 @@ import sys
 import time
 import tracemalloc
 import uuid
+from typing import Protocol, runtime_checkable
 
 import numpy as np
 
@@ -30,7 +31,7 @@ from contracts import ROOT, load_task, manifest_sha256
 from task_models import (make_held_step_request, make_replay_request, objective,
                          source_scenario, validate_held_step_response,
                          validate_source_binding)
-from capabilities import HISTORY_MANIFEST, MANIFEST, NATIVE_MANIFEST, resolve_graph, validate_resolved_graph, manifest_digest
+from capabilities import COMPOSITIONS_MANIFEST, HISTORY_MANIFEST, MANIFEST, NATIVE_MANIFEST, resolve_graph, validate_resolved_graph, manifest_digest
 from attempt_records import (ATTEMPT_SCHEMA_V2, IO_LOG, STAGE_INDEX, append_io_event,
     atomic_json, finalize_stage, iter_stage_references, materialize_episode_summary,
     persist_native_capture, read_attempt, register_orphan_stages, summarize_io, verify_v2_attempt,
@@ -41,6 +42,12 @@ MPC11 = ROOT / "benchmarks/reporting/mpc11"
 sys.path.insert(0, str(MPC11))
 DEFAULT_ATTEMPT_WALL_SECONDS = 300
 DEFAULT_ATTEMPT_CPU_SECONDS = 300
+
+
+@runtime_checkable
+class PolicyAdapter(Protocol):
+    def query(self, task_id: str, state: list[float], stage: int) -> dict: ...
+    def close(self) -> None: ...
 
 
 def positive_seconds(value: str | int, name: str = "seconds") -> int:
@@ -242,8 +249,13 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
         expected_action_profile = graph["action_profile_id"]
         if requested_action_profile_id and requested_action_profile_id != expected_action_profile:
             raise ValueError("requested action profile differs from the resolved capability graph")
+        policy: PolicyAdapter | None = None
         try:
             prepared_controller, preparation = prepare_graph(task, graph, bridge)
+            if graph["controller"].get("policy_factory"):
+                if not isinstance(prepared_controller, PolicyAdapter):
+                    raise TypeError("prepared policy must provide query and close methods")
+                policy = prepared_controller
         except Exception as error:
             write_attempt(attempt, attempt_format(attempt.name, **{
                 "task_id": task["task_id"], "task_sha256": task_hash,
@@ -263,7 +275,6 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
         default_controller_id = graph["controller"]["id"]
         controller_id = requested_controller_id or default_controller_id
         action_profile_id = expected_action_profile
-        policy = prepared_controller if graph["controller"].get("policy_factory") else None
         geometry_method = graph.get("role_bindings", {}).get("reachable_set_method", "not_used")
         geometry_active = geometry_method != "not_used"
         ledger = attempt_format(attempt.name, **{
@@ -311,10 +322,11 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
                     install_capture = getattr(policy, "set_query_capture_callback", None)
                     capture_payload_refs = {}
                     if callable(install_capture):
-                        def persist_native_capture(capture):
-                            row["native_query_capture"] = persist_native_capture_payload(
-                                attempt, j, capture, capture_payload_refs)
-                            persist_stage_checkpoint(attempt, j, row)
+                        def persist_native_capture(capture, *, stage_row=row, stage_index=j,
+                                                   payload_refs=capture_payload_refs):
+                            stage_row["native_query_capture"] = persist_native_capture_payload(
+                                attempt, stage_index, capture, payload_refs)
+                            persist_stage_checkpoint(attempt, stage_index, stage_row)
                         install_capture(persist_native_capture)
                 controller_query_started = time.monotonic()
                 query = (policy.query(task["task_id"], state.tolist(), j) if policy is not None
@@ -518,7 +530,8 @@ def run_limited(command: list[str], stdout_path: Path, stderr_path: Path, *, wal
 def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | None = None,
              controller_id: str | None = None, action_profile_id: str | None = None,
              attempt_wall_seconds: int = DEFAULT_ATTEMPT_WALL_SECONDS,
-             attempt_cpu_seconds: int = DEFAULT_ATTEMPT_CPU_SECONDS) -> dict:
+             attempt_cpu_seconds: int = DEFAULT_ATTEMPT_CPU_SECONDS,
+             graph_id: str | None = None) -> dict:
     resource_profile = attempt_resource_profile(attempt_wall_seconds, attempt_cpu_seconds)
     attempt_started = time.monotonic()
     attempt_id = f"{task_name}-{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}-{uuid.uuid4().hex[:8]}"
@@ -528,6 +541,8 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
         "action_profile_id": action_profile_id, "policy_adapter": policy_adapter,
         "bridge": str(bridge), "resource_profile_id": resource_profile["profile_id"],
         "resource_limits": resource_profile}
+    if graph_id is not None:
+        requested["graph_id"] = graph_id
     atomic_json(attempt / "request.json", {"schema": "csl.closed-loop.run-request/1",
         "attempt_id": attempt_id, "requested": requested,
         "source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()})
@@ -546,13 +561,13 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
             "native-continuous-affine-history-ipopt/1", *(
                 f"native-continuous-history-{family}-ipopt/1"
                 for family in ("polytope", "box", "zonotope", "parallelotope", "ellipsoid"))}
-        native_controller = bool(controller_id and controller_id.startswith("native-")) and not history_controller
+        native_controller = graph_id is not None or (bool(controller_id and controller_id.startswith("native-")) and not history_controller)
         if native_controller and action_profile_id is None:
             action_profile_id = task["control_domains"]["finite"]["problem_id"]
         action_profile_id = action_profile_id or task["control_domains"]["continuous"]["problem_id"]
-        selected_manifest_path = HISTORY_MANIFEST if history_controller else NATIVE_MANIFEST if native_controller else MANIFEST
+        selected_manifest_path = COMPOSITIONS_MANIFEST if graph_id is not None else HISTORY_MANIFEST if history_controller else NATIVE_MANIFEST if native_controller else MANIFEST
         capability_manifest, graph = resolve_graph(task, action_profile_id, controller_id,
-                                                    manifest_path=selected_manifest_path)
+                                                    manifest_path=selected_manifest_path, graph_id=graph_id)
         selected_manifest_sha256 = manifest_digest(capability_manifest)
         selected_controller_id = graph["controller"]["id"]
         if policy_adapter and policy_adapter != graph["controller"].get("policy_factory"):
@@ -644,6 +659,7 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
     (attempt / "worker-stdout.txt").write_text(stdout or "")
     (attempt / "worker-stderr.txt").write_text(stderr or "")
     final_path = attempt / "attempt.json"
+    result: dict
     if final_path.exists():
         result, read_receipt = read_attempt(final_path)
         record_read_io(attempt, read_receipt, "attempt-read")
@@ -815,7 +831,7 @@ def replay_attempt(task: dict, result: dict, attempt: Path, bridge: Path, tag: s
             path / "stderr.txt", wall_seconds=5, cpu_seconds=5, address_space_bytes=1024**3)
         try:
             stdout = (path / "stdout.json").read_text()
-            row = json.loads(stdout) if stdout else {"status": "no-output"}
+            row: dict = json.loads(stdout) if stdout else {"status": "no-output"}
             row["checker_process"] = process_record
             if process_record["return_code"] != 0 or row.get("status") != "complete":
                 row["status"] = "failed-or-incomplete"
@@ -894,7 +910,7 @@ def render_attempt(task: dict, result: dict, attempt: Path, tag: str | None = No
     dt = task["episode"]["dt"]; times = np.arange(len(states)) * dt
     fig, axes = plt.subplots(len(task["model"]["states"]), 1, figsize=(9, 2.2 * len(task["model"]["states"])), sharex=True)
     axes = np.atleast_1d(axes)
-    for index, (ax, field) in enumerate(zip(axes, task["model"]["states"])):
+    for index, (ax, field) in enumerate(zip(axes, task["model"]["states"], strict=True)):
         ax.plot(times, states[:, index], color="#2463a6", linewidth=1.8)
         ax.set_ylabel(f"{field['name']} ({field['unit']})"); ax.grid(alpha=.25)
     axes[-1].set_xlabel(f"Time ({task['episode']['time_unit']})")
@@ -938,7 +954,7 @@ def render_attempt(task: dict, result: dict, attempt: Path, tag: str | None = No
                        [field["unit"] for field in task["model"]["states"]], [0, 1]))
         target = task["objective"]["source_definition"]["terminal_target"]
     fig, axes = plt.subplots(1, len(planes), figsize=(5 * len(planes), 4), squeeze=False)
-    for ax, (names, units, indices) in zip(axes[0], planes):
+    for ax, (names, units, indices) in zip(axes[0], planes, strict=True):
         i, j = indices
         ax.plot(states[:, i], states[:, j], color="#2463a6", linewidth=1.8, label="observed trajectory")
         ax.scatter(states[0, i], states[0, j], marker="*", s=100, color="#29844a", label="start", zorder=3)
@@ -1112,7 +1128,7 @@ def write_coverage(root: Path) -> Path:
             "render_status": "not_run", "completed_holds": failure.get("completed_holds", 0),
             "failure": failure.get("failure"), "actual_solver_invocations": failure.get("actual_solver_invocations", 0),
             "attempt_record": str(path.relative_to(root))})
-    rows.sort(key=lambda row: row.get("attempt_id", ""))
+    rows.sort(key=lambda row: str(row.get("attempt_id") or ""))
     coverage = {"schema": "csl.closed-loop.coverage/1", "source_commit": subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(), "attempts": rows,
         "representation_claim": "Per-graph geometry roles and work are recorded; no representation performance is inferred from zero set work"}
@@ -1138,6 +1154,7 @@ def main() -> int:
     parser.add_argument("--worker", action="store_true"); parser.add_argument("--attempt", type=Path)
     parser.add_argument("--graph", type=Path, help="resolved, fingerprinted capability graph for worker mode")
     parser.add_argument("--policy-adapter", help="persistent in-process policy factory as module:function")
+    parser.add_argument("--graph-id", help="exact source-bound native composition graph; default profiles remain unchanged")
     parser.add_argument("--controller-id", help="selected policy identity passed to an external adapter")
     parser.add_argument("--action-profile-id", help="task-declared continuous or finite per-step action-domain identity")
     parser.add_argument("--attempt-wall-seconds", type=positive_seconds, default=DEFAULT_ATTEMPT_WALL_SECONDS,
@@ -1148,6 +1165,8 @@ def main() -> int:
     parser.add_argument("--render-only", type=Path, help="render source-defined views for a saved complete attempt without changing its record")
     parser.add_argument("--coverage-only", action="store_true", help="write a coverage index from saved append-only attempt records")
     args = parser.parse_args()
+    if args.graph_id is not None and args.task == "all":
+        parser.error("--graph-id requires a single --task")
     if args.worker:
         if args.bridge is None or args.attempt is None or args.graph is None: parser.error("worker mode requires --bridge, --attempt, and --graph")
         limited_worker(args.attempt_cpu_seconds)
@@ -1215,7 +1234,7 @@ def main() -> int:
     names = ["syn-nl-lv-01", "earth-orbit", "syn-nl-fuel-01"] if args.task == "all" else [args.task]
     rows = [run_task(name, args.output_root.resolve(), args.bridge.resolve(), args.policy_adapter,
                      args.controller_id, args.action_profile_id, args.attempt_wall_seconds,
-                     args.attempt_cpu_seconds) for name in names]
+                     args.attempt_cpu_seconds, args.graph_id) for name in names]
     coverage_path = write_coverage(args.output_root.resolve())
     print(json.dumps({"schema": "csl.closed-loop.coverage/1", "coverage_record": str(coverage_path), "attempts": rows,
         "coverage": [{"task_id": row["task_id"], "algorithm_status": row.get("algorithm_status"),
