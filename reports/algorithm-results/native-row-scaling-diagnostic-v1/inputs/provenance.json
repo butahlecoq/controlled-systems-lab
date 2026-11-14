@@ -1,0 +1,12 @@
+{
+  "source_commit": "5df7f97fbf40eb4858a8dafb7a1e74dd5318c816",
+  "source_path": "reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T183906Z/catalogue-data/native-output/models.csv",
+  "full_native_export_sha256": "15e5f4dc6cde65dd174f10a8b8a9280f61788074023647968fd7fccfcadf88d6",
+  "selected_model_ids": [
+    "catalogue-2026/model-23/1",
+    "catalogue-2026/model-27/1",
+    "catalogue-2026/model-28/1"
+  ],
+  "filtered_export_sha256": "e8e16b69d2e94c1016014f05349693662af455f060d755cd2daf9f835254591e",
+  "scope": "Exact saved native model rows for these three cases; original full export remains in the first-pass source."
+}

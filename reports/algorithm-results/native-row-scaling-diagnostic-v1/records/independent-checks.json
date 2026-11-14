@@ -1,0 +1,119 @@
+{
+  "models": [
+    {
+      "model": "catalogue-2026/model-23/1",
+      "producer_status": "completed",
+      "returncode": 0,
+      "transforms": [
+        {
+          "replan": "replan-0",
+          "original_offending_entries": 6,
+          "min_actual_original_coefficient": 6.855804411066206e-17,
+          "exponents": [
+            0,
+            54
+          ],
+          "scaled_matrix_range": [
+            7.932793262613381e-05,
+            1.8014398509481984e+16
+          ],
+          "exact_transform_and_rowbound_roundtrip": true,
+          "objective_export_unchanged": true
+        },
+        {
+          "replan": "replan-1",
+          "original_offending_entries": 6,
+          "min_actual_original_coefficient": 6.855804411066206e-17,
+          "exponents": [
+            0,
+            54
+          ],
+          "scaled_matrix_range": [
+            7.932793262613381e-05,
+            1.8014398509481984e+16
+          ],
+          "exact_transform_and_rowbound_roundtrip": true,
+          "objective_export_unchanged": true
+        },
+        {
+          "replan": "replan-2",
+          "original_offending_entries": 6,
+          "min_actual_original_coefficient": 6.855804411066206e-17,
+          "exponents": [
+            0,
+            54
+          ],
+          "scaled_matrix_range": [
+            7.932793262613381e-05,
+            1.8014398509481984e+16
+          ],
+          "exact_transform_and_rowbound_roundtrip": true,
+          "objective_export_unchanged": true
+        }
+      ],
+      "independent_original_replay": {
+        "replans": 3,
+        "full_state_transitions": 9,
+        "state_dimension": 8,
+        "control_dimension": 2,
+        "max_dynamics_residual": 0.0,
+        "max_cost_difference": 0.0,
+        "initial_state_zero": true,
+        "scope": "same authored N3/3-replan profile; zero optimum is trivial, no nonzero-state/stability evidence"
+      }
+    },
+    {
+      "model": "catalogue-2026/model-27/1",
+      "producer_status": "failed_or_refused",
+      "returncode": 1,
+      "transforms": [
+        {
+          "replan": "replan-0",
+          "original_offending_entries": 780,
+          "min_actual_original_coefficient": 2.1740349403908295e-27,
+          "exponents": [
+            0,
+            81,
+            89
+          ],
+          "scaled_matrix_range": [
+            1.0,
+            6.189700196426902e+26
+          ],
+          "exact_transform_and_rowbound_roundtrip": true,
+          "objective_export_unchanged": true
+        }
+      ],
+      "independent_original_replay": "no accepted completed trajectory"
+    },
+    {
+      "model": "catalogue-2026/model-28/1",
+      "producer_status": "failed_or_refused",
+      "returncode": 1,
+      "transforms": [
+        {
+          "replan": "replan-0",
+          "original_offending_entries": 4800,
+          "min_actual_original_coefficient": 9.298585042071114e-37,
+          "exponents": [
+            0,
+            111,
+            120
+          ],
+          "scaled_matrix_range": [
+            1.0,
+            1.329227995784916e+36
+          ],
+          "exact_transform_and_rowbound_roundtrip": true,
+          "objective_export_unchanged": true
+        }
+      ],
+      "independent_original_replay": "no accepted completed trajectory"
+    }
+  ],
+  "analytic_passed": true,
+  "sdk240_hashes_after_match": true,
+  "original_capture_files_unchanged": 381,
+  "qualified_component_header_archive_match": true,
+  "whole_sdk_requalification_claimed": false
+}

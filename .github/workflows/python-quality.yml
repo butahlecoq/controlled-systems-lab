@@ -48,6 +48,9 @@ on:
       - 'scripts/reports/stage_app02.py'
       - 'tests/reporting/test_site_additions.py'
       - 'tests/reporting/test_app02_saved.py'
+      - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
+      - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
+      - 'reports/algorithm-results/native-row-scaling-diagnostic-v1/**'
       - 'tests/reporting/test_syn03_strategy_a_report.py'
       - 'tests/reporting/test_syn03_ts02_report.py'
       - 'tests/reporting/test_opt07_*.py'
@@ -103,6 +106,9 @@ on:
       - 'scripts/reports/stage_app02.py'
       - 'tests/reporting/test_site_additions.py'
       - 'tests/reporting/test_app02_saved.py'
+      - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
+      - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
+      - 'reports/algorithm-results/native-row-scaling-diagnostic-v1/**'
       - 'tests/reporting/test_syn03_strategy_a_report.py'
       - 'tests/reporting/test_syn03_ts02_report.py'
       - 'tests/reporting/test_opt07_*.py'
@@ -154,6 +160,9 @@ jobs:
         run: |
           python -m unittest tests.reporting.test_convex_report tests.reporting.test_opt07_collector tests.reporting.test_opt12_collector tests.reporting.test_visual_examples tests.reporting.test_geo07_publication tests.reporting.test_geo07_port_publication tests.reporting.test_geo07_dependent_publication tests.reporting.test_finite_feedback_publication tests.reporting.test_ext04_publication tests.reporting.test_report_lifecycle
 
+
+      - name: Check the locked source-only native row-scaling publication
+        run: python -m unittest discover -s tests/reporting -p 'test_stage_native_row_scaling_diagnostic.py'
       - name: Exercise OPT07 and OPT11 collectors, oracles and saved reports
         run: |
           python -m unittest discover -s tests/reporting -p 'test_opt07_*.py'

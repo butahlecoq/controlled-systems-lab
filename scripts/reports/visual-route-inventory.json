@@ -1959,6 +1959,15 @@
       "role_and_disposition_reason": "Authenticates and stages the immutable 35-model native tracking capture, independent full-state checks, matrix inputs, and saved 2D projections; it does not rerun optimization."
     },
     {
+      "source": "scripts/reports/stage_native_row_scaling_diagnostic.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "toy.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route",
+      "role_and_disposition_reason": "Authenticates a locked source-only row-scaling diagnostic with original/scaled CSR, a saved native 2D point, original-coordinate checks and complete numerical-failure logs; no optimization, native build or binary redistribution during staging."
+    },
+    {
       "source": "scripts/reports/stage_nominal_quadratic_history.py",
       "signal_count": 2,
       "asset_name_literals": [
@@ -3906,6 +3915,17 @@
       "index_sha256": "5aedfc545cf114531f293321592fde3412cc56956e1495085a50e26f3d997e7b",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 605
+    },
+    {
+      "route": "native-row-scaling-diagnostic-v1",
+      "source_bundle": "native-row-scaling-diagnostic-v1",
+      "assets": [
+        "toy.png",
+        "toy.svg"
+      ],
+      "index_sha256": "2a4018585cdcc8fd65c65461eaf0834ca254b2587a2874b953018936d21fa719",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
     },
     {
       "route": "native-terminal-cost-33f907a0",
