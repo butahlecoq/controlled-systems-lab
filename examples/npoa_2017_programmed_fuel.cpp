@@ -314,9 +314,14 @@ int main(int argc, char **argv) try {
         result->termination != Termination::completed ||
         result->outcome.value != MathematicalOutcome::optimal ||
         !history.layout.accepts_primal_size(result->primal->size()) || !diagnostics.empty()) {
-        std::string message = "HiGHS did not return a checked optimum: termination=" +
-                              std::to_string(static_cast<int>(result->termination)) +
-                              " outcome=" + std::to_string(static_cast<int>(result->outcome.value));
+        std::string message =
+            "HiGHS did not return a checked optimum: termination=" +
+            std::to_string(static_cast<int>(result->termination)) +
+            " outcome=" + std::to_string(static_cast<int>(result->outcome.value)) +
+            " primal=" + std::to_string(result->primal.has_value()) +
+            " objective_lower=" + std::to_string(result->objective.lower.has_value()) +
+            " objective_upper=" + std::to_string(result->objective.upper.has_value()) +
+            " raw=" + result->raw_diagnostics;
         for (const auto &diagnostic : diagnostics)
             message += "; " + diagnostic.field + ": " + diagnostic.explanation;
         throw std::runtime_error(message);
