@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import hashlib
-from pathlib import Path, PurePosixPath
 import re
 import subprocess
+from pathlib import Path, PurePosixPath
 
 
 def source_hashes_match_commit(root: Path, commit: str, expected: dict[str, str]) -> bool:

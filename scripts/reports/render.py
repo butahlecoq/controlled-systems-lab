@@ -1,13 +1,14 @@
 """Offline HTML/CSV export from a saved, validated report view."""
 
 from __future__ import annotations
+
 import argparse
 import csv
-from html import escape
 import json
-from pathlib import Path
 import shutil
 import time
+from html import escape
+from pathlib import Path
 
 import report_data as data
 
@@ -181,7 +182,10 @@ def document(view, svg="", artifact_ref="main"):
     groups = data.aggregate(view)
     summary = csv_projection(view)[3]
     convex = view["schema"] == data.CONVEX_SCHEMA
-    e = lambda value: escape(str(value), quote=True)
+
+    def e(value: object) -> str:
+        return escape(str(value), quote=True)
+
     parts = [
         '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">',
         "<title>Reference LP algorithm report</title><style>body{max-width:1100px;margin:auto;padding:1.2rem;font:16px/1.5 system-ui;color:#172235;background:#fafbfd}h1,h2{line-height:1.2}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}th,td{padding:.45rem;border:1px solid #ccd4de;text-align:left}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#eef2f6;padding:1rem}.scroll{overflow:auto}svg{max-width:100%;height:auto}.bad{color:#9b1928;font-weight:bold}a{color:#174d8c}</style></head><body>",
@@ -213,7 +217,7 @@ def document(view, svg="", artifact_ref="main"):
             )
             for text in parts
         ]
-    for scenario, group in zip(p["scenarios"], groups):
+    for scenario, group in zip(p["scenarios"], groups, strict=True):
         ref = scenario["reference"]
         first = next((t for t in p["trials"] if t["case_id"] == scenario["case_id"]), None)
         observed = first["result"] if first else None
@@ -407,7 +411,7 @@ def render(view, out, figures=None, raw_dir=None, artifact_ref="main"):
     out = Path(out)
     out.mkdir(parents=True, exist_ok=False)
     p = view["payload"]
-    groups = data.aggregate(view)
+    data.aggregate(view)
     svg = ""
     figure_hashes = {}
     metadata = {"available": False, "reason": "no plot requested for functional export"}

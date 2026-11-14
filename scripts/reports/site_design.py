@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from html import escape
 import json
-from pathlib import Path
 import re
+from html import escape
+from pathlib import Path
 from typing import Iterable
-
 
 ROOT = Path(__file__).resolve().parents[2]
 STYLE = ROOT / "docs/examples/examples.css"
@@ -163,6 +162,7 @@ def page_start(
     current_href: str | None = None,
 ) -> str:
     """Start a responsive standalone page using the shared site appearance."""
+    crumbs = tuple(crumbs)
     escaped_title = escape(title)
     nav = breadcrumbs(crumbs, current_href=current_href) if crumbs else ""
     stylesheet_tag = (

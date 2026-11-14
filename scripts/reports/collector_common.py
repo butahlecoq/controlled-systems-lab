@@ -1,18 +1,18 @@
 """Process/provenance adapter for the fixed registered C++ LP fixture driver."""
 
 from __future__ import annotations
+
 import argparse
 import copy
 import datetime as dt
 import hashlib
 import json
 import os
-from pathlib import Path
 import platform
 import subprocess
 import sys
-import time
 from dataclasses import dataclass
+from pathlib import Path
 
 import report_data as data
 
@@ -27,7 +27,7 @@ class Profile:
     target: str
     support: str
     backend_id: str
-    required: frozenset
+    required: frozenset[str]
 
 
 LP = Profile(
@@ -78,7 +78,7 @@ BACKEND = {"id": LP.backend_id, "version": "1.1.0+highs.1.11.0"}
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def checked_profile(profile):
+def checked_profile(profile: Profile) -> Profile:
     data.require(profile is LP or profile is CONVEX, "closed collector profile required")
     return profile
 
@@ -89,17 +89,17 @@ def event_profile(event):
     return CONVEX if schema == CONVEX.event_schema else LP
 
 
-def backend(profile):
+def backend(profile: Profile) -> dict[str, str]:
     selected = checked_profile(profile)
     version = "1.1.0+highs.1.11.0" if selected is LP else "1.0.0+highs.1.11.0"
     return {"id": selected.backend_id, "version": version}
 
 
-def utc():
+def utc() -> str:
     return dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def sha_bytes(value):
+def sha_bytes(value: bytes) -> str:
     return hashlib.sha256(value).hexdigest()
 
 
@@ -159,7 +159,7 @@ def event_payload(
                 len(serialized) == len(trial_events),
                 "completed output lacks serialization observations",
             )
-        for trial, record in zip(trial_events, serialized):
+        for trial, record in zip(trial_events, serialized, strict=False):
             data.require(
                 record["sequence"] == trial["sequence"] and record["purpose"] == trial["purpose"],
                 "serialization association differs",
@@ -512,7 +512,7 @@ def profile_assessment(event):
     dominant = data.PHASES[max(range(5), key=lambda i: totals[i])] if any(totals[:5]) else None
     return {
         "dominant_measured_phase": dominant,
-        "phase_totals_ns": dict(zip(data.PHASES, totals)),
+        "phase_totals_ns": dict(zip(data.PHASES, totals, strict=True)),
         "end_to_end_total_ns": totals[5],
         "user_cpu_delta": delta("user_cpu"),
         "kernel_cpu_delta": delta("kernel_cpu"),
@@ -801,9 +801,14 @@ def capture_process(command: list[str], timeout_seconds: int = 600) -> tuple[str
     except OSError as error:
         return "", str(error), 127, False
     except subprocess.TimeoutExpired as timeout:
-        decode = lambda value: (
-            value.decode("utf-8", errors="replace") if isinstance(value, bytes) else (value or "")
-        )
+
+        def decode(value: str | bytes | None) -> str:
+            return (
+                value.decode("utf-8", errors="replace")
+                if isinstance(value, bytes)
+                else (value or "")
+            )
+
         return decode(timeout.stdout), decode(timeout.stderr), 124, True
 
 

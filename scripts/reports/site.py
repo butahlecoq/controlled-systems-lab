@@ -1,26 +1,30 @@
 """Validate allowlisted immutable report bundles and stage a static Pages site."""
 
 from __future__ import annotations
+
 import argparse
 import csv
 import hashlib
-from html import escape
-from html.parser import HTMLParser
-import json
-from pathlib import Path
 import re
 import shutil
 import zipfile
+from html import escape
+from html.parser import HTMLParser
+from pathlib import Path
 
-import report_data as data
-import render
+import issue6_b07_registered_reports
 import landing
-import opt04_registered_reports as opt04
-import opt11_registered_reports as opt11
-import issue6_b07_registered_reports as issue6_b07
-import registered_reports as registered
+import opt04_registered_reports
+import opt11_registered_reports
 import publication_policy as publication_policies
-import schema3_publication_policies
+import registered_reports as registered
+import render
+import report_data as data
+import schema3_publication_policies as schema3_publication_policies
+
+opt04 = opt04_registered_reports
+opt11 = opt11_registered_reports
+issue6_b07 = issue6_b07_registered_reports
 
 FILES = {
     "index.html",
@@ -176,10 +180,8 @@ class OfflineHTML(HTMLParser):
             data.require(not self.in_svg, "nested SVG not generated")
             self.in_svg = True
         allowed = svg_attrs if self.in_svg else html.get(tag)
-        data.require(
-            (tag in svg_tags if self.in_svg else tag in html),
-            "unsupported offline HTML element: " + tag,
-        )
+        if allowed is None or not (tag in svg_tags if self.in_svg else tag in html):
+            raise ValueError("unsupported offline HTML element: " + tag)
         keys = [key for key, _ in attrs]
         data.require(
             len(keys) == len(set(keys)) and set(keys) <= allowed,
@@ -251,12 +253,9 @@ class OfflineHTML(HTMLParser):
     def handle_decl(self, decl):
         data.require(decl.lower() == "doctype html", "unsupported HTML declaration")
 
-    def handle_data(self, value):
-        if self.in_style:
-            data.require(
-                re.search(r"@import|url\s*\(", value, re.I) is None,
-                "external HTML stylesheet resource",
-            )
+    def handle_data(self, data: str) -> None:
+        if self.in_style and re.search(r"@import|url\s*\(", data, re.I) is not None:
+            raise ValueError("external HTML stylesheet resource")
 
 
 def validate_sidecar_hashes(bundle, payload):

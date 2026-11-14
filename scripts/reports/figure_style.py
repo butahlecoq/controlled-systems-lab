@@ -3,15 +3,19 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Literal
 
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 
 STYLE_ID = "csl-report-quantitative-v1"
 
 
-def format_tick(value: float, locations: list[float]) -> str:
+def format_tick(value: float, locations: Iterable[float]) -> str:
     """Format a tick with enough precision to keep neighboring ticks distinct."""
     finite = sorted({float(item) for item in locations if math.isfinite(float(item))})
-    gaps = [right - left for left, right in zip(finite, finite[1:]) if right > left]
+    gaps = [right - left for left, right in zip(finite, finite[1:], strict=False) if right > left]
     spacing = min(gaps) if gaps else 1.0
     scale = max((abs(item) for item in finite), default=abs(float(value)))
     scale = max(scale, abs(float(value)))
@@ -28,7 +32,9 @@ def format_tick(value: float, locations: list[float]) -> str:
     return label
 
 
-def configure_numeric_axis(axis, direction: str = "both", bins: int = 5) -> None:
+def configure_numeric_axis(
+    axis: Axes, direction: Literal["both", "x", "y"] = "both", bins: int = 5
+) -> None:
     """Set positioned numeric ticks, distinct labels, and quiet major grids."""
     from matplotlib.ticker import FuncFormatter, MaxNLocator
 

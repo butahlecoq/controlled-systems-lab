@@ -1,16 +1,16 @@
 import hashlib
 import json
-from pathlib import Path
 import shutil
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
 import b04_c_exact_registered_reports as publication
 
+ROOT = Path(__file__).resolve().parents[2]
 BUNDLE = ROOT / "reports/algorithm-results/b04-c-exact-dyadic-v1"
 
 

@@ -1,16 +1,16 @@
 """Explicit boundary adapters for validated non-LP report records."""
 
-from dataclasses import dataclass, replace
 import csv
 import hashlib
-import json
-from pathlib import Path
-import re
-from html import escape
 import io
+import json
+import re
 import statistics
 import zipfile
-
+from dataclasses import dataclass, replace
+from html import escape
+from pathlib import Path
+from typing import NotRequired, TypedDict
 
 OPT_TOP_FILES = {
     "README.md",
@@ -666,7 +666,7 @@ def _compare_csv(path, fields, expected_rows):
         raise ValueError(f"invalid registered {path.name}") from error
     if len(actual_rows) != len(expected_rows):
         raise ValueError(f"{path.name} row count differs from validated records")
-    for actual, expected in zip(actual_rows, expected_rows):
+    for actual, expected in zip(actual_rows, expected_rows, strict=True):
         if set(actual) != set(fields) or any(
             actual.get(field) != str(expected[field]) for field in fields
         ):
@@ -1013,7 +1013,14 @@ def assemble_publication(bundle, publication, *, page, envelope, source_files):
 
 
 # Exact pre-#251 source and publication bytes; never applies to changed evidence.
-_HISTORICAL_PUBLICATIONS = {
+class _HistoricalPublicationPin(TypedDict):
+    inventory_sha256: str
+    report_id: str
+    zip_sha256: str
+    identity_files_sha256: NotRequired[dict[str, str]]
+
+
+_HISTORICAL_PUBLICATIONS: dict[str, _HistoricalPublicationPin] = {
     "geo02-20261012T235755Z-6b1f504ad3db": {
         "identity_files_sha256": {
             "geo02-20261012T235755Z-6b1f504ad3db.zip": "faa9ec723875f6ab9072b38aaa0f3d0d4be30eb7732b887f1c9aa99f46d00b40"

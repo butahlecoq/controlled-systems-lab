@@ -1,22 +1,22 @@
 """Pinned Matplotlib figure adapter over validated saved records."""
 
 from __future__ import annotations
+
 import argparse
-import hashlib
-import io
 import importlib.metadata
+import io
 import json
 import os
-from pathlib import Path
 import time
+from pathlib import Path
 
-import report_data as data
 import figure_style
+import report_data as data
 
 SVG_PROLOG = '<?xml version="1.0" encoding="utf-8" standalone="no"?>\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"\n  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n'
 
 
-def normalize_owned_svg(text):
+def normalize_owned_svg(text: str) -> bytes:
     """Only called on our newly generated StringIO; never repair an imported asset."""
     data.require(text.startswith(SVG_PROLOG), "pinned SVG producer prolog changed")
     final = text[len(SVG_PROLOG) :].encode("utf-8")
@@ -57,6 +57,7 @@ def plot(view, out):
                 axes,
                 ("public_run", "end_to_end"),
                 ("Public registered run", "Input-to-verified-result"),
+                strict=True,
             ):
                 for index, row in enumerate(series[phase]):
                     values = row["values"]

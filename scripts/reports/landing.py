@@ -23,11 +23,12 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
+import json
+import re
+from collections.abc import Iterable
 from html import escape
 from html.parser import HTMLParser
-import json
 from pathlib import Path
-import re
 from typing import NamedTuple
 
 try:
@@ -41,7 +42,7 @@ except ModuleNotFoundError as error:
     design_path = Path(__file__).with_name("site_design.py")
     design_spec = importlib.util.spec_from_file_location("site_design", design_path)
     if design_spec is None or design_spec.loader is None:
-        raise ImportError(f"cannot load shared page design from {design_path}")
+        raise ImportError(f"cannot load shared page design from {design_path}") from error
     site_design = importlib.util.module_from_spec(design_spec)
     design_spec.loader.exec_module(site_design)
 
@@ -886,7 +887,7 @@ def collapse(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-def links_html(links) -> str:
+def links_html(links: Iterable[tuple[str, str]]) -> str:
     """Render a list of (label, href) pairs as separated links."""
     return " &middot; ".join(
         '<a href="' + escape(href, quote=True) + '">' + escape(label) + "</a>"

@@ -4,17 +4,18 @@ from __future__ import annotations
 
 import hashlib
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+if str(Path(__file__).resolve().parents[2]) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import registered_reports as common
+
 from docs.research.tools.check_b04_c_exact_fiber import check
 from docs.research.tools.render_b04_c_exact_fiber_report import render
 
+ROOT = Path(__file__).resolve().parents[2]
 KIND = "b04-c-research-dossier"
 SOURCE_ID = "b04-c-exact-dyadic-v1"
 MANIFEST_SHA256 = "8ee378c901c36a148166fa5dd5a2bf2747352847ff1510869bd9babaaf32aee8"

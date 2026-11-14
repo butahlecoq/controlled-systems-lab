@@ -4,23 +4,23 @@ from __future__ import annotations
 
 import argparse
 import ast
-from html import escape
 import json
-from pathlib import Path
 import re
 import sys
+from html import escape
+from pathlib import Path
 
 try:
-    import site_design
-    import site_additions
     import mathematical_notation
+    import site_additions
+    import site_design
 except ModuleNotFoundError as error:
     if error.name not in {"site_design", "site_additions", "mathematical_notation"}:
         raise
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    import site_design
-    import site_additions
     import mathematical_notation
+    import site_additions
+    import site_design
 
 
 ROOT = Path(__file__).resolve().parents[2]

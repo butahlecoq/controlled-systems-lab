@@ -4,41 +4,43 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-from html import escape
 import json
 import math
-from pathlib import Path
 import re
 import shutil
 import tempfile
 import zipfile
+from html import escape
+from pathlib import Path
 from urllib.parse import urlsplit
 
-import audit_visual_routes
 import approx_extension_companions
+import audit_visual_routes
 import control_witness_companions
 import feedback_geometry_example
 import fixed_tail_example
+import geometry_opt_companions
 import native_fixed_tail_episode_report
 import native_fixed_tail_geometry
-import geometry_opt_companions
+import qhull_highs_strategy_a_example
 import report_data
 import site_additions
 import site_design
-import stage_ext07 as ext07_reports
 import stage_buryatia_dim4
 import stage_buryatia_volterra
-import stage_native_extended_models
-import stage_native_model_catalogue
+import stage_ext07
 import stage_native_discrete_models
+import stage_native_extended_models
 import stage_native_flexible_pitch
+import stage_native_model_catalogue
 import stage_nominal_quadratic_history
-import visual_illustrations
-import visual_example_geometry as geometry_examples
 import visual_example_fuel_layers
+import visual_example_geometry as geometry_examples
 import visual_example_hybrid as hybrid_examples
-import qhull_highs_strategy_a_example
+import visual_illustrations
 from mathematical_notation import matrix_html
+
+ext07_reports = stage_ext07
 
 CASE_OWNERS = {
     "hull": geometry_examples,
@@ -476,7 +478,7 @@ def plot(example):
             else ("projected endpoint", "projected endpoint")
         )
         colors = ("#d6af75", "#b4cda3") if example["kind"] == "hybrid" else ("#b4cda3", "#b4cda3")
-        for index, (p, label, color) in enumerate(zip(example["points"], labels, colors)):
+        for p, label, color in zip(example["points"], labels, colors, strict=True):
             x, y = point(p)
             elements.append(f'<circle cx="{x}" cy="{y}" r="6" fill="{color}"/>')
             elements.append(f'<text x="{x + 9}" y="{y - 10}">{label}</text>')
@@ -682,15 +684,11 @@ def saved_figure_sections(catalog, site):
         report_id = entry.get("route")
         if "source_report_id" in entry:
             published = by_source.get(entry["source_report_id"])
-            require(
-                published is not None,
-                "missing catalogued visual report: " + entry["source_report_id"],
-            )
+            if published is None:
+                raise ValueError("missing catalogued visual report: " + entry["source_report_id"])
             report_id = published["report_id"]
-        require(
-            re.fullmatch(r"[A-Za-z0-9-]+", report_id or "") is not None,
-            "unsafe visual report route",
-        )
+        if not isinstance(report_id, str) or re.fullmatch(r"[A-Za-z0-9-]+", report_id) is None:
+            raise ValueError("unsafe visual report route")
         route = Path(site) / report_id
         image_path = route / entry["image"]
         require(
@@ -1049,7 +1047,8 @@ def issue3_control_walkthrough(record_path, report_id):
     saved = next(
         (row for row in rows if row.get("fixture") == "analytic_2d" and not row.get("warmup")), None
     )
-    require(saved is not None, "issue3 walkthrough needs a measured saved analytic_2d record")
+    if saved is None:
+        raise ValueError("issue3 walkthrough needs a measured saved analytic_2d record")
     request = json.loads(saved["input_canonical"])
     identity = [["0x1p+0", "0x0p+0"], ["0x0p+0", "0x1p+0"]]
     require(

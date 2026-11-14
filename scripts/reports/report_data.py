@@ -7,10 +7,10 @@ import hashlib
 import io
 import json
 import math
-from pathlib import Path
 import re
 import statistics as _statistics
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
 SCHEMA = "csl.algorithm-report-view/1"
 EVENT_SCHEMA = "csl.lp-report-events/1"
@@ -28,7 +28,7 @@ TERMINATIONS = {"completed", "cancelled", "resource_limit", "numerical_failure"}
 HEX = re.compile(r"[0-9a-f]{64}\Z")
 
 
-def require(condition, message):
+def require(condition: object, message: str) -> None:
     if not condition:
         raise ValueError(message)
 
@@ -208,7 +208,7 @@ def validate_input(data):
         "CSR size mismatch",
     )
     require(all(type(x) is int for x in starts + indices), "CSR integer indices required")
-    require(all(a <= b for a, b in zip(starts, starts[1:])), "CSR order")
+    require(all(a <= b for a, b in zip(starts, starts[1:], strict=False)), "CSR order")
     for row in range(m):
         cols = indices[starts[row] : starts[row + 1]]
         require(all(0 <= j < n for j in cols) and cols == sorted(set(cols)), "CSR columns")
@@ -282,13 +282,18 @@ def reference_matches(trial, scenario):
     point, cost = result["primal"], result["original_objective"]
     if point is None or cost is None or len(point) != len(ref["point"]):
         return False
-    close = lambda a, b: abs(a - b) <= 1e-8 + 1e-8 * max(abs(a), abs(b))
-    if not all(close(a, b) for a, b in zip(point, ref["point"])) or not close(
+
+    def close(a: float, b: float) -> bool:
+        return abs(a - b) <= 1e-8 + 1e-8 * max(abs(a), abs(b))
+
+    if not all(close(a, b) for a, b in zip(point, ref["point"], strict=True)) or not close(
         cost, ref["objective"]
     ):
         return False
     data = scenario["input"]
-    if not close(sum(a * b for a, b in zip(data["linear"], point)) + data["offset"], cost):
+    if not close(
+        sum(a * b for a, b in zip(data["linear"], point, strict=True)) + data["offset"], cost
+    ):
         return False
     matrix = data["constraints"]
     activities = [
@@ -298,7 +303,7 @@ def reference_matches(trial, scenario):
         )
         for i in range(matrix["rows"])
     ]
-    for x, (lo, hi) in zip(point + activities, data["variables"] + data["rows"]):
+    for x, (lo, hi) in zip(point + activities, data["variables"] + data["rows"], strict=True):
         if (lo is not None and x < lo and not close(x, lo)) or (
             hi is not None and x > hi and not close(x, hi)
         ):
@@ -1032,7 +1037,6 @@ def convex_native_phases(trial, route, solver):
             )
     retry_keys = {key for key in fields if key.startswith("phase.qp.retry.")}
     if retry_keys:
-        retry_prefix = "phase.qp.retry."
         require(
             route == "qp"
             and fields.get("start.valid") == "true"
@@ -1096,7 +1100,7 @@ def convex_native_phases(trial, route, solver):
         require(
             api is not None or (count is None and info is None), "iteration without returned call"
         )
-        if api is not None:
+        if api is not None and model is not None:
             require(complete, "returned statuses require complete returned observation")
             require(
                 api in ("-1", "0", "1")
@@ -1459,7 +1463,10 @@ def convex_reference_matches(trial, scenario):
     if ref["outcome"] != "optimal":
         return True
     x = r["primal"]
-    close = lambda a, b: abs(a - b) <= 1e-8 + 1e-8 * max(abs(a), abs(b))
+
+    def close(a: float, b: float) -> bool:
+        return abs(a - b) <= 1e-8 + 1e-8 * max(abs(a), abs(b))
+
     if x is None or r["original_objective"] is None or r["solver_objective"] is None:
         return False
     if not close(r["original_objective"], ref["objective"]) or not close(
@@ -1467,12 +1474,14 @@ def convex_reference_matches(trial, scenario):
     ):
         return False
     if ref["point"] is not None:
-        if len(x) != len(ref["point"]) or not all(close(a, b) for a, b in zip(x, ref["point"])):
+        if len(x) != len(ref["point"]) or not all(
+            close(a, b) for a, b in zip(x, ref["point"], strict=True)
+        ):
             return False
     else:
         if len(x) != len(ref["coordinate_constraints"]):
             return False
-        for v, (lo, hi) in zip(x, ref["coordinate_constraints"]):
+        for v, (lo, hi) in zip(x, ref["coordinate_constraints"], strict=True):
             if (lo is not None and v < lo and not close(v, lo)) or (
                 hi is not None and v > hi and not close(v, hi)
             ):
@@ -1483,7 +1492,7 @@ def convex_reference_matches(trial, scenario):
         for i in range(a["rows"])
     ]
     for v, (lo, hi) in zip(
-        x + activities, scenario["input"]["variables"] + scenario["input"]["rows"]
+        x + activities, scenario["input"]["variables"] + scenario["input"]["rows"], strict=True
     ):
         if (lo is not None and v < lo and not close(v, lo)) or (
             hi is not None and v > hi and not close(v, hi)
@@ -1587,7 +1596,10 @@ def _validate_trial_rows(
             trial["timings"][phase] for phase in PHASES[:-1] if trial["timings"][phase]["available"]
         ]
         require(
-            all(int(a["end_tick"]) <= int(b["start_tick"]) for a, b in zip(reached, reached[1:])),
+            all(
+                int(a["end_tick"]) <= int(b["start_tick"])
+                for a, b in zip(reached, reached[1:], strict=False)
+            ),
             "sequential phases overlap or reverse",
         )
         result = trial["result"]
@@ -1789,7 +1801,7 @@ def validate_convex_result(result, scenario):
                     (text is None) == (metric is None),
                     "residual availability differs from returned evidence",
                 )
-                if text is not None:
+                if text is not None and metric is not None:
                     require(
                         finite(float(text)) == finite(metric[field]),
                         "residual differs from returned native evidence",
