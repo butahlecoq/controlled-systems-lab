@@ -93,6 +93,37 @@ class PagesRouteRetirementTests(unittest.TestCase):
                 "reports/closed-loop-history-functional/warm-gap-9540-v1/render-source.py",
                 warm_producer["files"])
 
+    def test_real_finalizer_accepts_initial_baseline_figure_routes(self) -> None:
+        repo = Path(__file__).resolve().parents[2]
+        from scripts.reports.stage_closed_loop_initial_baselines import stage
+
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary) / "site"
+            (site / "examples").mkdir(parents=True)
+            (site / "examples/index.html").write_text(
+                '<html><body><h1 id="algorithm-coverage">Examples</h1>'
+                '<section id="analytic-illustrations"></section></body></html>')
+            (site / "index.html").write_text(
+                '<html><body><a href="examples/index.html">Examples</a></body></html>')
+            stage(repo / "reports/closed-loop-initial-baselines-v1", site)
+            completed = subprocess.run(
+                [sys.executable, str(repo / "scripts/reports/pages_route_retirement.py"),
+                 "--site", str(site)], cwd=repo, capture_output=True, text=True)
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            inventory = json.loads((site / "pages-route-inventory.json").read_text())
+            expected = {
+                "closed-loop-initial-baselines-v1/figures/baseline-089075e9-earth-orbit.html",
+                "closed-loop-initial-baselines-v1/figures/baseline-089075e9-fuel-fuel-flow.html",
+                "closed-loop-initial-baselines-v1/figures/baseline-089075e9-fuel-state.html",
+                "closed-loop-initial-baselines-v1/figures/baseline-089075e9-lotka-populations.html",
+            }
+            for route in expected:
+                with self.subTest(route=route):
+                    producer = inventory["html_routes"][route]["producer"]
+                    self.assertEqual(producer["owner_status"], "exact")
+                    self.assertIn("scripts/reports/stage_closed_loop_initial_baselines.py",
+                                  producer["files"])
+
     def make_site(self, root: Path, *, gallery: str | None = None,
                   route: str | None = None) -> tuple[Path, str]:
         site = root / "site"

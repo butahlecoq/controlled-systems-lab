@@ -157,6 +157,22 @@ STANDALONE_REPORT_ROUTE_PRODUCERS = {
         "reports/closed-loop-initial-baselines-v1/index.html",
         "reports/closed-loop-initial-baselines-v1/publication-manifest.json",
         ".github/workflows/algorithm-reports.yml"],
+    "closed-loop-initial-baselines-v1/figures/baseline-089075e9-earth-orbit.html": [
+        "scripts/reports/stage_closed_loop_initial_baselines.py",
+        "reports/closed-loop-initial-baselines-v1/publication-manifest.json",
+        ".github/workflows/algorithm-reports.yml"],
+    "closed-loop-initial-baselines-v1/figures/baseline-089075e9-fuel-fuel-flow.html": [
+        "scripts/reports/stage_closed_loop_initial_baselines.py",
+        "reports/closed-loop-initial-baselines-v1/publication-manifest.json",
+        ".github/workflows/algorithm-reports.yml"],
+    "closed-loop-initial-baselines-v1/figures/baseline-089075e9-fuel-state.html": [
+        "scripts/reports/stage_closed_loop_initial_baselines.py",
+        "reports/closed-loop-initial-baselines-v1/publication-manifest.json",
+        ".github/workflows/algorithm-reports.yml"],
+    "closed-loop-initial-baselines-v1/figures/baseline-089075e9-lotka-populations.html": [
+        "scripts/reports/stage_closed_loop_initial_baselines.py",
+        "reports/closed-loop-initial-baselines-v1/publication-manifest.json",
+        ".github/workflows/algorithm-reports.yml"],
     "closed-loop-history-functional/native-parallelotope-d6fc-v1/index.html": [
         "scripts/reports/stage_history_functional.py",
         "scripts/reports/native_parallelotope_functional.py",
