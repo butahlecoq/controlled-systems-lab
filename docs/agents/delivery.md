@@ -100,6 +100,11 @@ explanatory construction as an illustration unless it replays recorded algorithm
 steps. If no supported low-dimensional case exists, record that limitation and
 the follow-up issue rather than fabricating a result.
 
+Maintained Python report publishers and their publication tests belong in the
+configured Ruff and ty scopes in `pyproject.toml`. Add their paths and the
+report payloads they validate to the Python quality workflow filters so edits run
+lint, formatting, type and focused publication checks.
+
 The [published algorithm results policy](../architecture/published-algorithm-results.md)
 governs measurements and scientific claims. Report record readers and publication
 checks live in [`scripts/reports`](../../scripts/reports/) and are exercised by

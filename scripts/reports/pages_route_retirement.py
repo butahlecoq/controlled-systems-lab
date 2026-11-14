@@ -152,6 +152,11 @@ EXAMPLE_ROUTE_PRODUCERS = {
 }
 
 STANDALONE_REPORT_ROUTE_PRODUCERS = {
+    "closed-loop-initial-baselines-v1/index.html": [
+        "scripts/reports/stage_closed_loop_initial_baselines.py",
+        "reports/closed-loop-initial-baselines-v1/index.html",
+        "reports/closed-loop-initial-baselines-v1/publication-manifest.json",
+        ".github/workflows/algorithm-reports.yml"],
     "closed-loop-history-functional/native-parallelotope-d6fc-v1/index.html": [
         "scripts/reports/stage_history_functional.py",
         "scripts/reports/native_parallelotope_functional.py",
@@ -174,6 +179,7 @@ STANDALONE_REPORT_ROUTE_PRODUCERS = {
 }
 
 GALLERY_INDEX_PRODUCERS = [
+    "scripts/reports/stage_closed_loop_initial_baselines.py",
     "scripts/reports/stage_buryatia_volterra.py",
     "scripts/reports/stage_native_extended_models.py",
     "scripts/reports/stage_native_discrete_models.py",

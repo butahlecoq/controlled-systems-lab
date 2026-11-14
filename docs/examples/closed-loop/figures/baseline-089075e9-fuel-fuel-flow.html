@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fuel flow and mass plane · Recorded closed-loop figures</title>
+<link rel="stylesheet" href="../../examples.css">
+<style>
+body{max-width:1100px;margin:2rem auto;padding:0 1rem;font-family:system-ui,sans-serif;line-height:1.5}
+.figure-actions{display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;margin:1rem 0}
+.figure-frame{overflow:auto;border:1px solid #667085;border-radius:.6rem;padding:.5rem}
+.figure-frame img,.figure-frame svg{display:block;width:100%;height:auto}
+.time-key{height:.7rem;margin:.5rem 0;background:linear-gradient(90deg,#440154,#3b528b,#21918c,#5ec962,#fde725)}
+.note{border-left:4px solid #d6a500;padding:.6rem 1rem;background:rgba(214,165,0,.08)}
+code{overflow-wrap:anywhere} .data-links a{margin-right:1rem}
+@media(max-width:600px){body{margin:1rem auto}}
+@media print{.figure-actions{display:none}.figure-frame{overflow:visible}body{max-width:none}}
+</style></head><body>
+<main><p><a href="../figure-index.json">All recorded closed-loop figures</a></p>
+<h1>Fuel flow and mass plane</h1>
+<p>Stage-coloured projections from saved records. Solid traces show executed plant replay. Dotted traces show the initial model prediction. Shaded shapes show serialized finite authored-action parent clouds; dashed outlines show fixed-plan trajectory enclosures. Parallelotope projections use the frame and coordinate semantics stored in that trace.</p>
+<div class="figure-actions"><label for="stage-focus">Output state focus</label><select id="stage-focus" aria-label="Output state focus"><option value="all">All stages</option><option value="0">Output state stage 0 (initial)</option><option value="1">Output state stage 1; replay 0→1</option><option value="2">Output state stage 2; replay 1→2</option><option value="3">Output state stage 3; replay 2→3</option><option value="4">Output state stage 4; replay 3→4</option><option value="5">Output state stage 5; replay 4→5</option><option value="6">Output state stage 6; replay 5→6</option><option value="7">Output state stage 7; replay 6→7</option><option value="8">Output state stage 8; replay 7→8</option><option value="9">Output state stage 9; replay 8→9</option><option value="10">Output state stage 10; replay 9→10</option><option value="11">Output state stage 11; replay 10→11</option><option value="12">Output state stage 12; replay 11→12</option><option value="13">Output state stage 13; replay 12→13</option><option value="14">Output state stage 14; replay 13→14</option><option value="15">Output state stage 15; replay 14→15</option><option value="16">Output state stage 16; replay 15→16</option><option value="17">Output state stage 17; replay 16→17</option><option value="18">Output state stage 18; replay 17→18</option><option value="19">Output state stage 19; replay 18→19</option><option value="20">Output state stage 20; replay 19→20</option><option value="21">Output state stage 21; replay 20→21</option><option value="22">Output state stage 22; replay 21→22</option><option value="23">Output state stage 23; replay 22→23</option><option value="24">Output state stage 24; replay 23→24</option><option value="25">Output state stage 25; replay 24→25</option><option value="26">Output state stage 26; replay 25→26</option><option value="27">Output state stage 27; replay 26→27</option><option value="28">Output state stage 28; replay 27→28</option><option value="29">Output state stage 29; replay 28→29</option><option value="30">Output state stage 30; replay 29→30</option><option value="31">Output state stage 31; replay 30→31</option><option value="32">Output state stage 32; replay 31→32</option><option value="33">Output state stage 33; replay 32→33</option><option value="34">Output state stage 34; replay 33→34</option><option value="35">Output state stage 35; replay 34→35</option><option value="36">Output state stage 36; replay 35→36</option><option value="37">Output state stage 37; replay 36→37</option><option value="38">Output state stage 38; replay 37→38</option><option value="39">Output state stage 39; replay 38→39</option><option value="40">Output state stage 40; replay 39→40</option></select>
+<a href="fuel-fuel-flow.svg">Standalone SVG</a><a href="fuel-fuel-flow.png">PNG</a><a href="fuel-fuel-flow.plotted-data.json">Exact plotted-data JSON</a></div>
+<p class="note"><strong>Evidence scope.</strong> Retained graph and finite authored-action model predictions are numerical and policy-conditioned. These plots do not show all-admissible-control reachability. A point or a membership flag is a witness, not a materialized region. The marked terminal objective target is soft, not a hard target set.</p>
+<div class="figure-frame"><svg id="stage-svg" viewBox="0 0 1000 620" role="img" aria-label="Interactive Fuel flow and mass plane stage view"></svg></div>
+<div><small>Shared physical-time color scale: 0 to 20 s</small><div class="time-key" role="img" aria-label="Shared time color scale from early purple to late yellow"></div></div>
+<p class="data-links"><a href="fuel-fuel-flow.svg">Open the all-stage SVG export</a> · <a href="fuel-fuel-flow.png">Open the all-stage PNG export</a> · <a href="fuel-fuel-flow.plotted-data.json">Exact plotted-data JSON</a></p>
+<h2>Unavailable geometric layers</h2><ul><li>complete all-stage forward-set geometry over the full reachable parent set</li><li>all-admissible-control forward reachable sets</li><li>materialized backward/predecessor sets</li><li>materialized full-state intersections</li></ul>
+<h2>Incomplete comparison tracks</h2><ul><li><code>native-box-mpc/1</code>: No geometry or trajectory is inferred from an absent or incomplete attempt.</li><li><code>native-zonotope-mpc/1</code>: No geometry or trajectory is inferred from an absent or incomplete attempt.</li><li><code>native-parallelotope-mpc/1</code>: No geometry or trajectory is inferred from an absent or incomplete attempt.</li><li><code>native-ellipsoid-mpc/1</code>: No geometry or trajectory is inferred from an absent or incomplete attempt.</li></ul>
+<h2>Tracks without materialized parent-cloud shapes</h2><ul><li><code>native-exact-polytope-backward-graph/1</code>: The saved response has no projectable materialized shape geometry.</li></ul>
+<h2>Saved source records</h2><ul><li><code>syn-nl-fuel-01-20261114T081002Z-4065cce8</code> capture locator <code>syn-nl-fuel-01/attempts/syn-nl-fuel-01-20261114T081002Z-4065cce8</code>, raw manifest SHA-256 <code>4c77f065390f10e0772a5258d9057370d2690abd6fa32ee078e5ba898d4b04ab</code>, task <code>358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b</code></li></ul>
+<p>The immutable raw capture archive is external to this Pages bundle. The locators and per-file SHA-256 values above identify its records; a public raw archive link is not available in this capture.</p>
+<h2>Rebuild the figures</h2><pre><code>python scripts/reports/recorded_closed_loop_figures.py --capture-root &quot;$CSL_CLOSED_LOOP_CAPTURE_ROOT&quot; --output docs/examples/closed-loop --attempt earth-orbit=earth-orbit-20261114T080440Z-38040600 --attempt syn-nl-fuel-01=syn-nl-fuel-01-20261114T081002Z-4065cce8 --attempt syn-nl-lv-01=syn-nl-lv-01-20261114T075910Z-d5019063</code></pre>
+<p>Source commits <code>089075e919cdea0a59d6535235d62b0c06ceb7a9</code>. Coordinate axes are Fuel flow q_f (kg/s) and Fuel mass m_f (kg). Figures use style <code>csl-report-quantitative-v1</code>.</p>
+<section class="math-input"><p>Projection matrix P maps raw state coordinates to the displayed axes: <span class="math-matrix" role="math" aria-label="Projection matrix P: 0.0, 0.0, 0.0, 1.0; 0.0, 1.0, 0.0, 0.0"><span class="math-bracket math-bracket-left" aria-hidden="true"></span><math display="inline" aria-hidden="true"><mtable columnspacing="0.7em" rowspacing="0.25em"><mtr><mtd><mn>0.0</mn></mtd><mtd><mn>0.0</mn></mtd><mtd><mn>0.0</mn></mtd><mtd><mn>1.0</mn></mtd></mtr><mtr><mtd><mn>0.0</mn></mtd><mtd><mn>1.0</mn></mtd><mtd><mn>0.0</mn></mtd><mtd><mn>0.0</mn></mtd></mtr></mtable></math><span class="math-bracket math-bracket-right" aria-hidden="true"></span></span></p><p>Raw scale vector in state order: <span class="math-matrix" role="math" aria-label="Raw scale vector: 100.0; 30.0; 3.0; 1.0"><span class="math-bracket math-bracket-left" aria-hidden="true"></span><math display="inline" aria-hidden="true"><mtable columnspacing="0.7em" rowspacing="0.25em"><mtr><mtd><mn>100.0</mn></mtd></mtr><mtr><mtd><mn>30.0</mn></mtd></mtr><mtr><mtd><mn>3.0</mn></mtd></mtr><mtr><mtd><mn>1.0</mn></mtd></mtr></mtable></math><span class="math-bracket math-bracket-right" aria-hidden="true"></span></span>. Recorded values are already physical, so the scales are not reapplied.</p><p>Exact coordinate-transform metadata is available in the plotted-data JSON.</p></section>
+<script>
+const focus=document.querySelector('#stage-focus'),svg=document.querySelector('#stage-svg');
+const NS='http://www.w3.org/2000/svg';
+const make=(tag,attrs={},text='')=>{const e=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,String(v));if(text)e.textContent=text;return e};
+const stops=['#440154','#3b528b','#21918c','#5ec962','#fde725'];
+const color=(time,end)=>{const t=Math.min(1,Math.max(0,time/Math.max(end,1e-12)))*4,i=Math.min(3,Math.floor(t)),f=t-i;const rgb=c=>[parseInt(c.slice(1,3),16),parseInt(c.slice(3,5),16),parseInt(c.slice(5,7),16)];const a=rgb(stops[i]),b=rgb(stops[i+1]);return `rgb(${a.map((v,j)=>Math.round(v+(b[j]-v)*f)).join(',')})`};
+const replayForOutputStage=(rows,k,dt)=>{const eps=Math.max(1,Math.abs(k*dt))*1e-10;if(k===0)return rows.filter(p=>Math.abs(p.time)<=eps);const lo=(k-1)*dt,hi=k*dt;return rows.filter(p=>p.time>=lo-eps&&p.time<=hi+eps)};
+function draw(d,selected){
+ const runs=d.runs, b=d.plot_bounds, left=95,right=950,top=45,bottom=535;
+ const x=v=>left+(v-b.x[0])/(b.x[1]-b.x[0])*(right-left), y=v=>bottom-(v-b.y[0])/(b.y[1]-b.y[0])*(bottom-top);
+ svg.replaceChildren();
+ svg.append(make('rect',{x:0,y:0,width:1000,height:620,fill:'transparent'}));
+ svg.append(make('line',{x1:left,y1:bottom,x2:right,y2:bottom,stroke:'#53606f'}));
+ svg.append(make('line',{x1:left,y1:top,x2:left,y2:bottom,stroke:'#53606f'}));
+ for(let i=0;i<=5;i++){const xv=b.x[0]+(b.x[1]-b.x[0])*i/5, yv=b.y[0]+(b.y[1]-b.y[0])*i/5;
+  svg.append(make('line',{x1:x(xv),y1:top,x2:x(xv),y2:bottom,stroke:'#aab2bd','stroke-opacity':.28}));
+  svg.append(make('text',{x:x(xv),y:bottom+20,'text-anchor':'middle','font-size':12,fill:'currentColor'},Number(xv.toPrecision(5)).toString()));
+  svg.append(make('line',{x1:left,y1:y(yv),x2:right,y2:y(yv),stroke:'#aab2bd','stroke-opacity':.28}));
+  svg.append(make('text',{x:left-9,y:y(yv)+4,'text-anchor':'end','font-size':12,fill:'currentColor'},Number(yv.toPrecision(5)).toString()));
+ }
+ for(let ri=0;ri<runs.length;ri++){const run=runs[ri], lineColor=['#1769aa','#c04424','#18864b','#8156a8','#bc7b12'][ri%5];
+  for(const c of [...(run.clouds||[]),...(run.fixed_plan_enclosures||[])]){if(selected!=='all'&&c.absolute_stage!==Number(selected))continue;const g=c.projected_geometry;if(!g)continue;const col=color(c.time,d.timeline_end);
+   const planTrace=c.role==='fixed-plan-trajectory-enclosure', dash=planTrace?'4 3':'';
+   if(c.representation==='ellipsoid'&&g.length===2)svg.append(make('ellipse',{cx:x(g[0][0]),cy:y(g[0][1]),rx:Math.abs(x(g[0][0]+g[1][0])-x(g[0][0])),ry:Math.abs(y(g[0][1]+g[1][1])-y(g[0][1])),fill:col,'fill-opacity':selected==='all'?.08:.2,stroke:col,'stroke-width':1,'stroke-dasharray':dash}));
+   else if(g.length>2)svg.append(make('polygon',{points:g.map(p=>`${x(p[0])},${y(p[1])}`).join(' '),fill:col,'fill-opacity':selected==='all'?.035:.16,stroke:col,'stroke-width':.6,'stroke-dasharray':dash}));
+  }
+  const graph=(run.nodes||[]).filter(n=>selected==='all'||n.absolute_stage===Number(selected));
+  for(const n of graph){const p=n.state,ix=d.coordinate_transform.raw_indices;svg.append(make('circle',{cx:x(p[ix[0]]),cy:y(p[ix[1]]),r:2.3,fill:color(n.time,d.timeline_end),'fill-opacity':.65}));}
+  const replay=selected==='all'?(run.plant_replay||[]):replayForOutputStage(run.plant_replay||[],Number(selected),d.time_step);
+  if(replay.length){svg.append(make('polyline',{points:replay.map(p=>`${x(p.point[0])},${y(p.point[1])}`).join(' '),fill:'none',stroke:lineColor,'stroke-width':2.3}));for(const p of replay)svg.append(make('circle',{cx:x(p.point[0]),cy:y(p.point[1]),r:3.1,fill:color(p.time,d.timeline_end),stroke:lineColor,'stroke-width':.7}));}
+  const plan=(run.planned_prediction||[]).filter(p=>selected==='all'||p.absolute_stage===Number(selected));
+  if(plan.length){svg.append(make('polyline',{points:plan.map(p=>`${x(p.point[0])},${y(p.point[1])}`).join(' '),fill:'none',stroke:'#111820','stroke-width':1.5,'stroke-dasharray':'5 4'}));for(const p of plan)svg.append(make('circle',{cx:x(p.point[0]),cy:y(p.point[1]),r:2.6,fill:color(p.time,d.timeline_end)}));}
+  if(selected==='all'||selected==='0'){const p=run.initial_point;svg.append(make('path',{d:`M ${x(p[0])-7} ${y(p[1])} L ${x(p[0])+7} ${y(p[1])} M ${x(p[0])} ${y(p[1])-7} L ${x(p[0])} ${y(p[1])+7}`,stroke:'#e1a900','stroke-width':3}));}
+  if(run.target)svg.append(make('path',{d:`M ${x(run.target[0])-6} ${y(run.target[1])-6} L ${x(run.target[0])+6} ${y(run.target[1])+6} M ${x(run.target[0])-6} ${y(run.target[1])+6} L ${x(run.target[0])+6} ${y(run.target[1])-6}`,stroke:'#c02f31','stroke-width':2.5}));
+  svg.append(make('rect',{x:left+5,y:top+5+ri*18,width:Math.min(280,run.controller_label.length*7.4+12),height:16,rx:2,fill:'white','fill-opacity':.86}));
+  svg.append(make('text',{x:left+10,y:top+17+ri*18,fill:lineColor,'font-size':12},run.controller_label));
+ }
+ svg.append(make('text',{x:(left+right)/2,y:590,'text-anchor':'middle','font-size':14,fill:'currentColor'},`${d.coordinate_transform.names[0]} (${d.coordinate_transform.units[0]})`));
+ const yl=make('text',{x:22,y:(top+bottom)/2,'text-anchor':'middle','font-size':14,fill:'currentColor',transform:`rotate(-90 22 ${(top+bottom)/2})`},`${d.coordinate_transform.names[1]} (${d.coordinate_transform.units[1]})`);svg.append(yl);
+}
+fetch('fuel-fuel-flow.plotted-data.json').then(r=>r.json()).then(d=>{draw(d,'all');focus.addEventListener('change',()=>draw(d,focus.value));});
+</script></main></body></html>
