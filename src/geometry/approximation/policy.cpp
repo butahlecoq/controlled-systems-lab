@@ -475,6 +475,7 @@ RunOutcome run_registered(const registry::Registry<registry::ApproximationPort> 
             if (const auto *unsupported = std::get_if<Unsupported>(&outcome))
                 return {*unsupported, {}, {}};
             auto result = std::get<OperationResult>(std::move(outcome));
+            const auto relation = result.relation;
             const auto snapshot_evidence = [](const GeometryEvidence &evidence) {
                 try {
                     return std::make_shared<const GeometryEvidence>(evidence);
@@ -484,7 +485,7 @@ RunOutcome run_registered(const registry::Registry<registry::ApproximationPort> 
             };
             const auto retain = [&](RunOutcome final) {
                 return ApproximationExecution{std::move(final), snapshot_evidence(result.evidence),
-                                              result.relation};
+                                              relation};
             };
             if (result.relation != request.direction)
                 return retain(
@@ -509,8 +510,7 @@ RunOutcome run_registered(const registry::Registry<registry::ApproximationPort> 
                     "Native output exceeds the requested primitive budget, or output size is unavailable.")});
             if (request.direction == SetRelation::heuristic) {
                 auto evidence = snapshot_evidence(result.evidence);
-                return {HeuristicApproximation{std::move(result)}, std::move(evidence),
-                        result.relation};
+                return {HeuristicApproximation{std::move(result)}, std::move(evidence), relation};
             }
             bool interrupted = false;
             const auto basis = structural_basis(request, result, context, interrupted);
@@ -526,7 +526,7 @@ RunOutcome run_registered(const registry::Registry<registry::ApproximationPort> 
                     "Same immutable set, empty subset, universal superset, exact H constraint retention, exact binary64 H containment of native points and recession rays, exact stored-binary64 generator axis cover, or exact V vertex bounds within a directional ellipsoid over the same ambient coordinates."};
                 auto evidence = snapshot_evidence(result.evidence);
                 return {EnclosedApproximation{std::move(result), *basis}, std::move(evidence),
-                        result.relation};
+                        relation};
             }
             return retain(Unsupported{
                 error(DiagnosticCode::unsupported, "approximation.inclusion",
