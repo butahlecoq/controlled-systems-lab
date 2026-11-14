@@ -54,6 +54,10 @@ TEST_CASE("native CasADi optimizes the original sum of separate source norms on 
     REQUIRE(std::holds_alternative<registry::PreparedPipeline<registry::HistoryOptimizerPort>>(pipeline));
     auto workspace=std::get<registry::PreparedPipeline<registry::HistoryOptimizerPort>>(pipeline).create();
     const auto result=std::get<0>(workspace)->run(ExecutionContext{});
+    if(const auto* diagnostic=std::get_if<Diagnostic>(&result)) {
+        INFO(diagnostic->field);
+        FAIL_CHECK(diagnostic->explanation);
+    }
     REQUIRE(std::holds_alternative<optimization::HistoryOptimizationResult>(result));
     const auto& solved=std::get<optimization::HistoryOptimizationResult>(result);
     CHECK(solved.source_cost.total==doctest::Approx(1.0).epsilon(1e-6));
