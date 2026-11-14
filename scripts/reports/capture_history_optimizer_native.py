@@ -177,9 +177,7 @@ def capture(source_root: Path, build_root: Path, output_root: Path, build_log: P
         "artifacts": {
             "csv_sha256": _sha256((output_root / "history.csv").read_bytes()),
             "figure_sha256": _sha256((output_root / "history.svg").read_bytes()),
-            "native_html_sha256": _sha256(
-                (records / "native-output.html").read_bytes()
-            ),
+            "native_html_sha256": _sha256((records / "native-output.html").read_bytes()),
             "stdout_sha256": _sha256(stdout),
             "stderr_sha256": _sha256(stderr),
             "build_log_sha256": _sha256((records / "build.log").read_bytes()),

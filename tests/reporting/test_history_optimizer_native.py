@@ -98,7 +98,9 @@ def _fixture(bundle: Path) -> None:
 
 class NativeHistoryReportTests(unittest.TestCase):
     def test_capture_redacts_local_paths_and_preserves_urls(self):
-        content = b"build=/home/alice/project; compiler=/usr/bin/c++; url=https://example.org/path\n"
+        content = (
+            b"build=/home/alice/project; compiler=/usr/bin/c++; url=https://example.org/path\n"
+        )
         public = capture._public_text(content).decode("utf-8")
         self.assertNotIn("/home/alice", public)
         self.assertNotIn("/usr/bin", public)
