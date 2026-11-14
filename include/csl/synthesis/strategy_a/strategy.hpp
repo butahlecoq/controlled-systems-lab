@@ -41,8 +41,8 @@ using Providers = registry::CheckedProviders<registry::GeometryPort,
 // exact-H profile. That profile enforces caller row caps before relation-row
 // allocation; other profile materialization caps are refused. Singular A needs
 // no inverse.
+registry::StrategyRegistration make_registration(Providers);
 registry::StrategyRegistration
-make_registration(Providers,
-                  std::optional<registry::PreparedProvider<registry::HistoryOptimizerPort>>
-                      history_optimizer = {});
+    make_registration(Providers,
+                      std::optional<registry::PreparedProvider<registry::HistoryOptimizerPort>>);
 } // namespace csl::synthesis::strategy_a

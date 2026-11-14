@@ -920,6 +920,11 @@ SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::Re
     }
     return result;
 }
+registry::StrategyRegistration
+make_registration(const registry::Registry<registry::LPPort> &lp,
+                  const registry::Registry<registry::ConvexPort> &convex) {
+    return make_registration(lp, convex, {});
+}
 registry::StrategyRegistration make_registration(
     const registry::Registry<registry::LPPort> &lp,
     const registry::Registry<registry::ConvexPort> &convex,

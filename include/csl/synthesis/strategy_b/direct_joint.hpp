@@ -54,8 +54,10 @@ public:
 };
 // Composes injected registries into the existing StrategyRegistry admission
 // path; no owned or fallback registries are created.
-registry::StrategyRegistration make_registration(
-    const registry::Registry<registry::LPPort> &, const registry::Registry<registry::ConvexPort> &,
-    std::optional<registry::PreparedProvider<registry::HistoryOptimizerPort>> history_optimizer =
-        {});
+registry::StrategyRegistration make_registration(const registry::Registry<registry::LPPort> &,
+                                                 const registry::Registry<registry::ConvexPort> &);
+registry::StrategyRegistration
+make_registration(const registry::Registry<registry::LPPort> &,
+                  const registry::Registry<registry::ConvexPort> &,
+                  std::optional<registry::PreparedProvider<registry::HistoryOptimizerPort>>);
 } // namespace csl::synthesis::strategy_b

@@ -566,6 +566,9 @@ public:
     }
 };
 }
+registry::StrategyRegistration make_registration(Providers providers) {
+    return make_registration(std::move(providers), {});
+}
 registry::StrategyRegistration make_registration(
     Providers providers,
     std::optional<registry::PreparedProvider<registry::HistoryOptimizerPort>> history_optimizer) {
