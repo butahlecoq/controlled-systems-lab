@@ -79,8 +79,12 @@ class LearningBookTests(unittest.TestCase):
                     result = subprocess.run(["git", "show", f"{commit}:{source}"],
                                             cwd=ROOT, capture_output=True)
                     self.assertEqual(result.returncode, 0, result.stderr.decode())
-                    self.assertEqual(result.stdout, (ROOT / source).read_bytes(),
-                                     "Source permalink differs from the executed example")
+                    if "source_sha256" in record:
+                        self.assertEqual(hashlib.sha256(result.stdout).hexdigest(), record["source_sha256"],
+                                         "Source permalink differs from its pinned source digest")
+                    else:
+                        self.assertEqual(result.stdout, (ROOT / source).read_bytes(),
+                                         "Source permalink differs from the executed example")
 
     @staticmethod
     def _is_retained_source_commit(repo: Path, commit: str, *, allow_in_flight_head: bool = False) -> bool:
