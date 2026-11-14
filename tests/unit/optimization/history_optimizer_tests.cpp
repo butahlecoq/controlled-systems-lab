@@ -15,7 +15,7 @@ optimization::HistoryOptimizationRequest request() {
          std::get<numeric::MatrixView>(numeric::snapshot(Matrix{0,3,{}})),
          std::get<numeric::VectorView>(numeric::snapshot_vector(Vector{}))});
     synthesis::JointHistoryRelation histories{coordinates,std::get<sets::SetData>(std::move(set))};
-    optimization::RunningControlCost running{"empty-running",1,{}};
+    optimization::RunningControlCost running{"",0,{}};
     auto compiled=optimization::compile_history_cost(histories,LinearTerminal{{0.0},0.0},running,0);
     return {{ProblemId{"problem"},ProgramId{"source-objective"}},histories,
         std::get<optimization::HistoryCostProgram>(std::move(compiled)),Vector{1.0,0.0,0.0}};
