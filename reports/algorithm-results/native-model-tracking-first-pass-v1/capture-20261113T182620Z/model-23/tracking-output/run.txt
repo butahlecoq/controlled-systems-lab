@@ -1,0 +1,13 @@
+model=catalogue-2026/model-23/1
+title=Bicycle car + actuators
+source_title=Owner-supplied research catalogue (2026)
+source_sha256=6c5e7c1b09331186b8cd9ddfcd1a71afbc7bddb438a103f2fd4dcfdf780c081e
+source_locator=Owner archive, card 23; model_23_A/B/G/x0 in the numerical supplement
+source_qualification=physical-parameter test case. State order: dX,dY [m],dpsi [rad],dvx,dvy [m/s],r [rad/s],delta [rad],a [m/s^2]. Control order: steering_cmd [rad],accel_cmd [m/s^2]. Scenario parameters; x0 deviations from moving 15 m/s trajectory. Small-angle validity required. G is a discrete per-step state-increment channel, not an identified physical force map.
+task=authored nominal quadratic tracking to zero; 3-stage horizon; 3 closed-loop replans
+task_identity=1012-authored-nominal-tracking/catalogue-2026/model-23/1-3step-zero-target-v1
+state_weight_i=1/max(1,abs(initial_i))^2; terminal_weight=5*state_weight; R=0.02*I
+recorded_coordinate_actuator_bounds=[-1,1]; state_bounds=none; units=source catalogue coordinates
+external_selection=authored_fixed_zero; source_E_channel_retained=8 coordinates
+time_step=0.05 second
+assurance=numerical; this is not empirical calibration, certified optimality, robust control, or nonlinear stability evidence

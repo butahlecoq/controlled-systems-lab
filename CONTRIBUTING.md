@@ -90,11 +90,26 @@ library. Run them locally with
 
 The same configured gate covers the 57 maintained Python compatibility entry
 points under `reports/algorithm-results/tooling`. `pyproject.toml` defines the
-scope for the default Ruff and ty commands above. The nine real OPT07/OPT11
-implementations in that tree remain excluded and require separate quality
-adoption; immutable report/source captures elsewhere are also outside this gate.
+scope for the default Ruff and ty commands above. The gate also covers all nine
+maintained OPT07/OPT11 implementations in that tree, including their fixture,
+record, collector and saved-report boundaries. Immutable report/source captures
+elsewhere remain outside this gate.
 Use `ruff check --show-files` to inspect Ruff's selected files. No explicit file
 arguments are needed for the lint, format or type checks. The workflow triggers
 on tooling-tree changes and exercises existing compatibility consumers with
 `python -m unittest discover -s tests/reporting -p 'test_syn03_strategy_a_report.py'` and
 `python -m unittest discover -s tests/reporting -p 'test_syn03_ts02_report.py'`.
+
+The workflow exercises OPT07's oracle, collector and saved-report tests with
+`python -m unittest discover -s tests/reporting -p 'test_opt07_*.py'`, OPT11's
+publication tests with
+`python -m unittest discover -s tests/reporting -p 'test_opt11_publication.py'`,
+and its collector tests with
+`python -m unittest discover -s reports/algorithm-results/tooling/opt11 -p 'test_collect.py'`.
+These checks validate saved evidence and synthetic test records without running
+algorithm measurements. The ty search path includes the maintained tooling root
+so each OPT07/OPT11 namespace retains its local imports and direct CLI behavior.
+
+The same default Ruff and ty scope covers the maintained discrete MPC 2D
+stager and the visual-gallery tests. The workflow runs the gallery test, which
+also verifies the example's saved native output and source-owned route entry.

@@ -1,0 +1,337 @@
+{
+  "schema": "local.csl1012.row-scaling-spike/1",
+  "created_utc": "2026-11-13T22:02:42.381348+00:00",
+  "configuration": {
+    "name": "1012-bounded-row-min-power2-diagnostic/1",
+    "row_scaling": "Only rows with actual nonzero<=1e-12; exponent=max(0,-ilogb(row_min)); scaled offending-row minimum in[1,2). Distinct from minimal-threshold-lift profile, not claimed conditioning remedy.",
+    "exactness": "scalbn, no overflow/underflow, bit-exact inverse for every finite coefficient and row bound; optional absent bounds remain unbounded",
+    "objective": "unchanged quadratic coefficients/linear/offset; variables unchanged",
+    "original_task_ids": [
+      "1012-authored-nominal-tracking/catalogue-2026/model-23/1-3step-zero-target-v1",
+      "1012-authored-nominal-tracking/catalogue-2026/model-27/1-3step-zero-target-v1",
+      "1012-authored-nominal-tracking/catalogue-2026/model-28/1-3step-zero-target-v1"
+    ],
+    "derived_program_suffix": "/diagnostic-row-min-power2-v1",
+    "dual": "y_original=D*y_scaled, mathematical relation only; no emitted duals/public remap evidence",
+    "limits": {
+      "wall_seconds": 300,
+      "wall_scope": "whole new process group; SIGKILL on timeout",
+      "cpu_seconds": 300,
+      "cpu_scope": "Linux RLIMIT_CPU per process; inherited by consumer, CPU threads charged to process; not aggregate descendants",
+      "address_space_bytes": 8589934592,
+      "memory_scope": "Linux RLIMIT_AS per process, inherited by consumer; virtual address space, not RSS or cgroup aggregate",
+      "requested_native_solver_threads": 1,
+      "native_request": "ResourcePolicy{1,1,1,...}; OMP/OpenBLAS/MKL env1",
+      "concurrent_attempts": 1,
+      "lock": "${WORK_ROOT}/native-build.lock"
+    }
+  },
+  "configuration_sha256": "d44de18799b986054e3b71b6b86ee600c30551a9ca2313c021e976b6be065eec",
+  "baseline_source_commit": "5df7f97fbf40eb4858a8dafb7a1e74dd5318c816",
+  "sources_sha256": {
+    "baseline_native_model_tracking.cpp": "5ad749b82aae9e668e1fbd0ecdd48c11539d82aa7b7f93eb8add3113a375a221",
+    "row_scaling_driver.cpp": "eb27038ab0fa156d9f587a8088047305cd1dc9aef1067e8f9cb113d7cb512751",
+    "row_scaling.hpp": "6b5b64b65177d0b5365d98b36b972c14b529ff44bb6ec1059fed65a381027469",
+    "analytic.cpp": "37e7257c9f8ca6cb31ae392a2f4921daf7449a0aafae86d678df46baf1d6a972",
+    "CMakeLists.txt": "8491d7784811921c13ef3b755fd144849134eda70be0f2c3965837ea1c5d1024",
+    "run_attempts.py": "9f19097304dfd9aba4a95ef14452c4aff1e2af2c1bc3167aca7663d718ab2bec",
+    "check_results.py": "3067a563aa2eebf8ad4a3504430f74afd19d708ef423f66bb139ee1d7ce849f8"
+  },
+  "binaries_sha256": {
+    "row_scaling_driver": "806dcf372ac7059926564ff1dc2931c85f75c4ef3fe76415b44ad5d3dadb59e1",
+    "analytic": "1117c6b62d6e0c6de3233c21898ef7fa0189087eb4978803cb7e1ae400f512f3"
+  },
+  "compiler": {
+    "path": "/usr/bin/g++",
+    "sha256": "f04191f6a7b2cd7d9a62e1745872b8a6088791e5af6955488c69c9b2c4668bc9",
+    "cc1plus_path": "/usr/lib/gcc/x86_64-pc-linux-gnu/16/cc1plus",
+    "cc1plus_sha256": "0026a9e66550c7f470558dfbe99f861073294e601d62b7b74eeb50fdebb09bef",
+    "version": "g++ (GCC) 16.2.1 20260810"
+  },
+  "build": {
+    "cmake_version": "3.31.6",
+    "type": "Release",
+    "commands_lock": "${WORK_ROOT}/native-build.lock",
+    "parallel_jobs": 1,
+    "prefix_read_only": "${SDK_PREFIX}",
+    "CMakeCache_sha256": "1cc365a230d99019b17bfdf98d641567c88acaba0333c96631432cf099257f98",
+    "link_commands": {
+      "row_scaling_driver": "/usr/bin/g++ -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/row_scaling_driver.dir/link.d CMakeFiles/row_scaling_driver.dir/row_scaling_driver.cpp.o -o row_scaling_driver  ${SDK_PREFIX}/lib/libcsl_model_catalogue.a ${SDK_PREFIX}/lib/libcsl_nominal_quadratic_history.a ${SDK_PREFIX}/lib/libcsl_highs_convex.a ${SDK_PREFIX}/lib/libcsl_geometry_generators.a ${SDK_PREFIX}/lib/libcsl_convex.a ${SDK_PREFIX}/lib/libcsl_optimization.a ${SDK_PREFIX}/lib/libcsl_registry.a ${SDK_PREFIX}/lib/libcsl_verifiers.a ${SDK_PREFIX}/lib/libcsl_resolved_core.a ${SDK_PREFIX}/lib/libcsl_problem.a ${SDK_PREFIX}/lib/libcsl_model.a ${SDK_PREFIX}/lib/libcsl_objectives.a ${SDK_PREFIX}/lib/libcsl_sets.a ${SDK_PREFIX}/lib/libcsl_numeric.a ${SDK_PREFIX}/lib/libcsl_contracts.a ${SDK_PREFIX}/lib/libhighs.a\n",
+      "analytic": "/usr/bin/g++ -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/analytic.dir/link.d CMakeFiles/analytic.dir/analytic.cpp.o -o analytic  ${SDK_PREFIX}/lib/libcsl_highs_convex.a ${SDK_PREFIX}/lib/libcsl_convex.a ${SDK_PREFIX}/lib/libcsl_optimization.a ${SDK_PREFIX}/lib/libcsl_registry.a ${SDK_PREFIX}/lib/libcsl_verifiers.a ${SDK_PREFIX}/lib/libcsl_resolved_core.a ${SDK_PREFIX}/lib/libcsl_problem.a ${SDK_PREFIX}/lib/libcsl_model.a ${SDK_PREFIX}/lib/libcsl_objectives.a ${SDK_PREFIX}/lib/libcsl_sets.a ${SDK_PREFIX}/lib/libcsl_numeric.a ${SDK_PREFIX}/lib/libcsl_contracts.a ${SDK_PREFIX}/lib/libhighs.a\n"
+    },
+    "link_archives_sha256": {
+      "${SDK_PREFIX}/lib/libcsl_model_catalogue.a": "692e65753f7b45743890fccc12f8c9bab34ac1d13d0d43d89d59dbfc1c49d246",
+      "${SDK_PREFIX}/lib/libcsl_nominal_quadratic_history.a": "12efd2001ee09b2154e6b18fc5a78e937dface24207bdd850a964f3beedcb00b",
+      "${SDK_PREFIX}/lib/libcsl_highs_convex.a": "0e2700c17ec91b8d20ca84b4e400ee8780098ef027964566b82e04bda580794c",
+      "${SDK_PREFIX}/lib/libcsl_geometry_generators.a": "e97953fa1dc10b31fba56d15e45f61a678829889a489af800d48fd1b83ee0651",
+      "${SDK_PREFIX}/lib/libcsl_convex.a": "5121f441f05f964eb88f5facf51ce15d4147f6ae5ca53c16b8b758557b235477",
+      "${SDK_PREFIX}/lib/libcsl_optimization.a": "8edba0f5b921e3173ee2b800d5eb2736a769afc82bca07abb5ea18652c96e43a",
+      "${SDK_PREFIX}/lib/libcsl_registry.a": "9957db3a9e0ffe3161449484a03d8665219283d0f71bbe07110a7fcd1e6828f3",
+      "${SDK_PREFIX}/lib/libcsl_verifiers.a": "408913f944a2f75b51bed292d08eb02cdf3b56f6447c4d0a5208ec7071d0ce9a",
+      "${SDK_PREFIX}/lib/libcsl_resolved_core.a": "00781522b8177c8676dd0dea85ab5e8e6d75e0321ded3af54a56c8a92b013357",
+      "${SDK_PREFIX}/lib/libcsl_problem.a": "035734b1c901c8dc2a85629aa16be12b15c8b9e3399c2aed53e4fa5a034d2e8e",
+      "${SDK_PREFIX}/lib/libcsl_model.a": "1ca87f24cde7e9dea53fa8327acf1bac05665f6f476efd8055660fb28b8d8275",
+      "${SDK_PREFIX}/lib/libcsl_objectives.a": "8b97e48614bcfbad6e04fc1b2d5e2c8f9bc5123d5c18b831b9cf040987560eff",
+      "${SDK_PREFIX}/lib/libcsl_sets.a": "c9c8889bbc52dfad785246a8a9a67339576bae4b29f324760f07ecad256b8d15",
+      "${SDK_PREFIX}/lib/libcsl_numeric.a": "9160133e117685818d4dc87fb0179633da777fc10fc043401fdc7e4a944ee1f8",
+      "${SDK_PREFIX}/lib/libcsl_contracts.a": "afbecd584d1732402bb15f9ab6d2773b356ec3ae69c8389afb2350f99c1d73f4",
+      "${SDK_PREFIX}/lib/libhighs.a": "3f8aa1c9dcda1e3b5ba07fa8996ecec33956ed4b6cd6d5e8f9007c56a74f75e1"
+    },
+    "flags": {
+      "row_scaling_driver": "# CMAKE generated file: DO NOT EDIT!\n# Generated by \"Unix Makefiles\" Generator, CMake Version 3.31\n\n# compile CXX with /usr/bin/g++\nCXX_DEFINES = \n\nCXX_INCLUDES = -isystem ${SDK_PREFIX}/include\n\nCXX_FLAGS = -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror\n\n",
+      "analytic": "# CMAKE generated file: DO NOT EDIT!\n# Generated by \"Unix Makefiles\" Generator, CMake Version 3.31\n\n# compile CXX with /usr/bin/g++\nCXX_DEFINES = \n\nCXX_INCLUDES = -isystem ${SDK_PREFIX}/include\n\nCXX_FLAGS = -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror\n\n"
+    }
+  },
+  "sdk_inventory_sha256": "5b017927a6d44d00af1cfbb45d4245be40a78c1b06d0c888ff0d9d91b5dc6e8f",
+  "sdk_inventory_verified_before_after": 240,
+  "qualification_scope": "Existing source-bound history component/header preserved; new local helper consumer only, no fresh whole SDK qualification",
+  "attempt_receipts": {
+    "analytic-normalized": {
+      "command": [
+        "flock",
+        "${WORK_ROOT}/native-build.lock",
+        "${DIAGNOSTIC_ROOT}/build/analytic",
+        "${DIAGNOSTIC_ROOT}/attempts/analytic-normalized-output"
+      ],
+      "started_utc": "2026-11-13T21:58:33.987441+00:00",
+      "finished_utc": "2026-11-13T21:58:34.007972+00:00",
+      "returncode": 0,
+      "status": "completed",
+      "wall_seconds": 0.02055081003345549,
+      "cpu_seconds_observed_child_accounting": 0.012503999999999998,
+      "limits": {
+        "wall_seconds": 300,
+        "wall_scope": "whole new process group; SIGKILL on timeout",
+        "cpu_seconds": 300,
+        "cpu_scope": "Linux RLIMIT_CPU per process; inherited by consumer, CPU threads charged to process; not aggregate descendants",
+        "address_space_bytes": 8589934592,
+        "memory_scope": "Linux RLIMIT_AS per process, inherited by consumer; virtual address space, not RSS or cgroup aggregate",
+        "requested_native_solver_threads": 1,
+        "native_request": "ResourcePolicy{1,1,1,...}; OMP/OpenBLAS/MKL env1",
+        "concurrent_attempts": 1,
+        "lock": "${WORK_ROOT}/native-build.lock"
+      },
+      "process_group_remains_after_wait": false,
+      "stdout.log_sha256": "8b9f42e077f558aa7a5bed6d627b6168ed82ed0326873dd8dc38f49e76c3b9d2",
+      "stderr.log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "model-23-original-export": {
+      "command": [
+        "flock",
+        "${WORK_ROOT}/native-build.lock",
+        "${DIAGNOSTIC_ROOT}/build/row_scaling_driver",
+        "export",
+        "catalogue-2026/model-23/1",
+        "${DIAGNOSTIC_ROOT}/attempts/model-23-original-export-output"
+      ],
+      "started_utc": "2026-11-13T21:58:38.999674+00:00",
+      "finished_utc": "2026-11-13T21:58:39.019055+00:00",
+      "returncode": 0,
+      "status": "completed",
+      "wall_seconds": 0.019386250991374254,
+      "cpu_seconds_observed_child_accounting": 0.013985,
+      "limits": {
+        "wall_seconds": 300,
+        "wall_scope": "whole new process group; SIGKILL on timeout",
+        "cpu_seconds": 300,
+        "cpu_scope": "Linux RLIMIT_CPU per process; inherited by consumer, CPU threads charged to process; not aggregate descendants",
+        "address_space_bytes": 8589934592,
+        "memory_scope": "Linux RLIMIT_AS per process, inherited by consumer; virtual address space, not RSS or cgroup aggregate",
+        "requested_native_solver_threads": 1,
+        "native_request": "ResourcePolicy{1,1,1,...}; OMP/OpenBLAS/MKL env1",
+        "concurrent_attempts": 1,
+        "lock": "${WORK_ROOT}/native-build.lock"
+      },
+      "process_group_remains_after_wait": false,
+      "stdout.log_sha256": "55c0aba4f7f6a433687fa500a815f5e745e0687d5ce629f7985539a90c1aefeb",
+      "stderr.log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "model-27-original-export": {
+      "command": [
+        "flock",
+        "${WORK_ROOT}/native-build.lock",
+        "${DIAGNOSTIC_ROOT}/build/row_scaling_driver",
+        "export",
+        "catalogue-2026/model-27/1",
+        "${DIAGNOSTIC_ROOT}/attempts/model-27-original-export-output"
+      ],
+      "started_utc": "2026-11-13T21:58:39.020065+00:00",
+      "finished_utc": "2026-11-13T21:58:39.056216+00:00",
+      "returncode": 0,
+      "status": "completed",
+      "wall_seconds": 0.036179239861667156,
+      "cpu_seconds_observed_child_accounting": 0.030433,
+      "limits": {
+        "wall_seconds": 300,
+        "wall_scope": "whole new process group; SIGKILL on timeout",
+        "cpu_seconds": 300,
+        "cpu_scope": "Linux RLIMIT_CPU per process; inherited by consumer, CPU threads charged to process; not aggregate descendants",
+        "address_space_bytes": 8589934592,
+        "memory_scope": "Linux RLIMIT_AS per process, inherited by consumer; virtual address space, not RSS or cgroup aggregate",
+        "requested_native_solver_threads": 1,
+        "native_request": "ResourcePolicy{1,1,1,...}; OMP/OpenBLAS/MKL env1",
+        "concurrent_attempts": 1,
+        "lock": "${WORK_ROOT}/native-build.lock"
+      },
+      "process_group_remains_after_wait": false,
+      "stdout.log_sha256": "55c0aba4f7f6a433687fa500a815f5e745e0687d5ce629f7985539a90c1aefeb",
+      "stderr.log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "model-28-original-export": {
+      "command": [
+        "flock",
+        "${WORK_ROOT}/native-build.lock",
+        "${DIAGNOSTIC_ROOT}/build/row_scaling_driver",
+        "export",
+        "catalogue-2026/model-28/1",
+        "${DIAGNOSTIC_ROOT}/attempts/model-28-original-export-output"
+      ],
+      "started_utc": "2026-11-13T21:58:39.057288+00:00",
+      "finished_utc": "2026-11-13T21:58:39.124337+00:00",
+      "returncode": 0,
+      "status": "completed",
+      "wall_seconds": 0.06708025303669274,
+      "cpu_seconds_observed_child_accounting": 0.05142000000000001,
+      "limits": {
+        "wall_seconds": 300,
+        "wall_scope": "whole new process group; SIGKILL on timeout",
+        "cpu_seconds": 300,
+        "cpu_scope": "Linux RLIMIT_CPU per process; inherited by consumer, CPU threads charged to process; not aggregate descendants",
+        "address_space_bytes": 8589934592,
+        "memory_scope": "Linux RLIMIT_AS per process, inherited by consumer; virtual address space, not RSS or cgroup aggregate",
+        "requested_native_solver_threads": 1,
+        "native_request": "ResourcePolicy{1,1,1,...}; OMP/OpenBLAS/MKL env1",
+        "concurrent_attempts": 1,
+        "lock": "${WORK_ROOT}/native-build.lock"
+      },
+      "process_group_remains_after_wait": false,
+      "stdout.log_sha256": "55c0aba4f7f6a433687fa500a815f5e745e0687d5ce629f7985539a90c1aefeb",
+      "stderr.log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "model-23-row-scale": {
+      "command": [
+        "flock",
+        "${WORK_ROOT}/native-build.lock",
+        "${DIAGNOSTIC_ROOT}/build/row_scaling_driver",
+        "row-scale",
+        "catalogue-2026/model-23/1",
+        "${DIAGNOSTIC_ROOT}/attempts/model-23-row-scale-output"
+      ],
+      "started_utc": "2026-11-13T21:59:04.103314+00:00",
+      "finished_utc": "2026-11-13T21:59:04.121784+00:00",
+      "returncode": 0,
+      "status": "completed",
+      "wall_seconds": 0.01847598305903375,
+      "cpu_seconds_observed_child_accounting": 0.017061,
+      "limits": {
+        "wall_seconds": 300,
+        "wall_scope": "whole new process group; SIGKILL on timeout",
+        "cpu_seconds": 300,
+        "cpu_scope": "Linux RLIMIT_CPU per process; inherited by consumer, CPU threads charged to process; not aggregate descendants",
+        "address_space_bytes": 8589934592,
+        "memory_scope": "Linux RLIMIT_AS per process, inherited by consumer; virtual address space, not RSS or cgroup aggregate",
+        "requested_native_solver_threads": 1,
+        "native_request": "ResourcePolicy{1,1,1,...}; OMP/OpenBLAS/MKL env1",
+        "concurrent_attempts": 1,
+        "lock": "${WORK_ROOT}/native-build.lock"
+      },
+      "process_group_remains_after_wait": false,
+      "stdout.log_sha256": "6684ec474403590dbdc832081296a03a1b85d72c20ab46fc421ceda246a021a7",
+      "stderr.log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "model-27-row-scale": {
+      "command": [
+        "flock",
+        "${WORK_ROOT}/native-build.lock",
+        "${DIAGNOSTIC_ROOT}/build/row_scaling_driver",
+        "row-scale",
+        "catalogue-2026/model-27/1",
+        "${DIAGNOSTIC_ROOT}/attempts/model-27-row-scale-output"
+      ],
+      "started_utc": "2026-11-13T21:59:04.122858+00:00",
+      "finished_utc": "2026-11-13T21:59:04.141502+00:00",
+      "returncode": 1,
+      "status": "failed_or_refused",
+      "wall_seconds": 0.01865966897457838,
+      "cpu_seconds_observed_child_accounting": 0.016894,
+      "limits": {
+        "wall_seconds": 300,
+        "wall_scope": "whole new process group; SIGKILL on timeout",
+        "cpu_seconds": 300,
+        "cpu_scope": "Linux RLIMIT_CPU per process; inherited by consumer, CPU threads charged to process; not aggregate descendants",
+        "address_space_bytes": 8589934592,
+        "memory_scope": "Linux RLIMIT_AS per process, inherited by consumer; virtual address space, not RSS or cgroup aggregate",
+        "requested_native_solver_threads": 1,
+        "native_request": "ResourcePolicy{1,1,1,...}; OMP/OpenBLAS/MKL env1",
+        "concurrent_attempts": 1,
+        "lock": "${WORK_ROOT}/native-build.lock"
+      },
+      "process_group_remains_after_wait": false,
+      "stdout.log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr.log_sha256": "40e27879daed30531116d735033ee687205456ce18ec259398cf909baa0f8f9d"
+    },
+    "model-28-row-scale": {
+      "command": [
+        "flock",
+        "${WORK_ROOT}/native-build.lock",
+        "${DIAGNOSTIC_ROOT}/build/row_scaling_driver",
+        "row-scale",
+        "catalogue-2026/model-28/1",
+        "${DIAGNOSTIC_ROOT}/attempts/model-28-row-scale-output"
+      ],
+      "started_utc": "2026-11-13T21:59:04.142549+00:00",
+      "finished_utc": "2026-11-13T21:59:04.209807+00:00",
+      "returncode": 1,
+      "status": "failed_or_refused",
+      "wall_seconds": 0.06728947698138654,
+      "cpu_seconds_observed_child_accounting": 0.04492500000000001,
+      "limits": {
+        "wall_seconds": 300,
+        "wall_scope": "whole new process group; SIGKILL on timeout",
+        "cpu_seconds": 300,
+        "cpu_scope": "Linux RLIMIT_CPU per process; inherited by consumer, CPU threads charged to process; not aggregate descendants",
+        "address_space_bytes": 8589934592,
+        "memory_scope": "Linux RLIMIT_AS per process, inherited by consumer; virtual address space, not RSS or cgroup aggregate",
+        "requested_native_solver_threads": 1,
+        "native_request": "ResourcePolicy{1,1,1,...}; OMP/OpenBLAS/MKL env1",
+        "concurrent_attempts": 1,
+        "lock": "${WORK_ROOT}/native-build.lock"
+      },
+      "process_group_remains_after_wait": false,
+      "stdout.log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr.log_sha256": "40e27879daed30531116d735033ee687205456ce18ec259398cf909baa0f8f9d"
+    },
+    "resource-limit-probe": {
+      "command": [
+        "flock",
+        "${WORK_ROOT}/native-build.lock",
+        "${WORK_ROOT}/controller-env/bin/python",
+        "-c",
+        "import json,resource,mmap; print(json.dumps({\"AS\":resource.getrlimit(resource.RLIMIT_AS),\"CPU\":resource.getrlimit(resource.RLIMIT_CPU)}));\ntry: mmap.mmap(-1,9*1024**3); raise RuntimeError(\"oversize mmap unexpectedly admitted\")\nexcept OSError as e: print(\"9GiB mapping rejected\", e.errno)"
+      ],
+      "started_utc": "2026-11-13T22:01:57.086239+00:00",
+      "finished_utc": "2026-11-13T22:01:57.122853+00:00",
+      "returncode": 0,
+      "status": "completed",
+      "wall_seconds": 0.03661342989653349,
+      "cpu_seconds_observed_child_accounting": 0.033226,
+      "limits": {
+        "wall_seconds": 300,
+        "wall_scope": "whole new process group; SIGKILL on timeout",
+        "cpu_seconds": 300,
+        "cpu_scope": "Linux RLIMIT_CPU per process; inherited by consumer, CPU threads charged to process; not aggregate descendants",
+        "address_space_bytes": 8589934592,
+        "memory_scope": "Linux RLIMIT_AS per process, inherited by consumer; virtual address space, not RSS or cgroup aggregate",
+        "requested_native_solver_threads": 1,
+        "native_request": "ResourcePolicy{1,1,1,...}; OMP/OpenBLAS/MKL env1",
+        "concurrent_attempts": 1,
+        "lock": "${WORK_ROOT}/native-build.lock"
+      },
+      "process_group_remains_after_wait": false,
+      "stdout.log_sha256": "01ad6f1439f7b39b89134c3fec5ad64f27e22be560e495d107327d4e02a3060f",
+      "stderr.log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "resource_policy_probe": "{\"AS\": [8589934592, 8589934592], \"CPU\": [300, 300]}\n9GiB mapping rejected 12\n",
+  "independent_checks_sha256": "4d64b64e95262fefae0c2cef2d8a5ed4801da2529e09301673b2243c0adbc906"
+}

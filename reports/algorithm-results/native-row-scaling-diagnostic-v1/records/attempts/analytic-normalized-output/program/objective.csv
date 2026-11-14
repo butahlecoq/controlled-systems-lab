@@ -1,0 +1,8 @@
+kind,row,column,value
+Q,0,0,2
+Q,0,1,0
+Q,1,0,0
+Q,1,1,2
+linear,0,0,0
+linear,1,0,0
+offset,0,0,0

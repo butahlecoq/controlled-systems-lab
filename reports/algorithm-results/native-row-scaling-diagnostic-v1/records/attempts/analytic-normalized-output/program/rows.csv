@@ -1,0 +1,2 @@
+row,role,stage,coordinate,min_abs_nonzero,max_abs_nonzero,power2_exponent,original_lower,original_upper,scaled_lower,scaled_upper
+0,analytic_equalities,0,0,8.8817841970012523e-16,8.8817841970012523e-16,50,2.6645352591003757e-15,2.6645352591003757e-15,3,3

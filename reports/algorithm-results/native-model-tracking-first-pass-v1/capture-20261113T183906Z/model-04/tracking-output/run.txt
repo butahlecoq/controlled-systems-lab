@@ -1,0 +1,17 @@
+model=catalogue-2026/model-4/1
+title=GPU cluster
+source_title=Owner-supplied research catalogue (2026)
+source_sha256=6c5e7c1b09331186b8cd9ddfcd1a71afbc7bddb438a103f2fd4dcfdf780c081e
+source_locator=Owner archive, card 4; printed decimal matrices
+source_qualification=synthetic per-class productivity, Alibaba trace for workloads. State order: W_inf,W_train,W_batch [GPU*h]. Control order: g1,g2,g3 [GPU]. Jobs/discrete GPUs and no overservice require authored variants. G is a discrete per-step state-increment channel, not an identified physical force map.
+task=authored nominal quadratic tracking to zero; 3-stage horizon; 3 closed-loop replans
+task_identity=1012-authored-nominal-tracking/catalogue-2026/model-4/1-3step-zero-target-v1
+state_weight_i=1/max(1,abs(initial_i))^2; terminal_weight=5*state_weight; R=0.02*I
+recorded_coordinate_actuator_bounds=[-1,1]; state_bounds=none; units=source catalogue coordinates
+external_selection=supplied_nominal_external; source_E_channel_retained=3 coordinates
+time_step=1 hour
+assurance=numerical; this is not empirical calibration, certified optimality, robust control, or nonlinear stability evidence
+solver=csl.convex.highs version=1.0.0+highs.1.11.0
+completed_replans=3
+zero-disturbance/selected-nominal realized running cost=14.9605
+final_observed_state=217.15,442.6,548.146
