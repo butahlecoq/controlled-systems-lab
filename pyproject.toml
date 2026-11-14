@@ -3,6 +3,12 @@ required-version = "==0.17.5"
 target-version = "py311"
 line-length = 100
 include = [
+    "tests/architecture/check_numeric_dependencies.py",
+    "tests/architecture/check_stage_projection_boundaries.py",
+    "tests/cmake/test_dependency_archive.py",
+    "tests/obs04/perf_control_mock.py",
+    "tests/obs04/perf_probe_tests.py",
+    "scripts/obs04_perf_probe.py",
     "scripts/ci/**/*.py", "tests/ci/**/*.py", "scripts/catalogue/**/*.py",
     "scripts/reports/frozen_native_bundle.py", "scripts/reports/stage_native_model_catalogue.py", "scripts/reports/stage_native_extended_models.py",
     "scripts/reports/stage_native_row_scaling_diagnostic.py", "tests/reporting/test_stage_native_row_scaling_diagnostic.py",
@@ -38,10 +44,10 @@ select = ["E4", "E7", "E9", "F", "I", "B"]
 
 [tool.ty.environment]
 python-version = "3.11"
-extra-paths = ["scripts/ci", "scripts/reports", "benchmarks/reporting/closed_loop", "benchmarks/reporting/mpc11", "reports/algorithm-results/tooling"]
+extra-paths = ["scripts", "scripts/ci", "scripts/reports", "benchmarks/reporting/closed_loop", "benchmarks/reporting/mpc11", "reports/algorithm-results/tooling"]
 
 [tool.ty.src]
-include = ["scripts/ci", "tests/ci", "scripts/catalogue", "scripts/reports/frozen_native_bundle.py", "scripts/reports/stage_native_model_catalogue.py", "scripts/reports/stage_native_extended_models.py", "scripts/reports/site_additions.py", "scripts/reports/stage_app02.py", "tests/reporting/test_site_additions.py", "tests/reporting/test_app02_saved.py", "scripts/reports/report_data.py", "scripts/reports/report_source_identity.py", "scripts/reports/publication_policy.py", "scripts/reports/schema3_publication_policies.py", "scripts/reports/registered_reports.py", "scripts/reports/collector_common.py", "scripts/reports/render.py", "scripts/reports/site.py", "scripts/reports/site_design.py", "scripts/reports/landing.py", "scripts/reports/visual_examples.py", "scripts/reports/learning_book.py", "scripts/reports/figure_style.py", "scripts/reports/plot.py", "scripts/reports/b04_c_exact_registered_reports.py", "tests/reporting/test_b04_publication_source_snapshot.py", "tests/reporting/test_publication_spine_boundaries.py", "scripts/reports/stage_ext04.py", "scripts/reports/stage_finite_feedback.py", "scripts/reports/stage_geo07.py", "scripts/reports/stage_geo07_port.py", "scripts/reports/stage_geo07_dependent.py", "reports/algorithm-results/tooling", "scripts/reports/stage_native_row_scaling_diagnostic.py", "tests/reporting/test_stage_native_row_scaling_diagnostic.py"]
+include = ["tests/architecture/check_numeric_dependencies.py","tests/architecture/check_stage_projection_boundaries.py","tests/cmake/test_dependency_archive.py","tests/obs04/perf_control_mock.py","tests/obs04/perf_probe_tests.py","scripts/obs04_perf_probe.py", "scripts/ci", "tests/ci", "scripts/catalogue", "scripts/reports/frozen_native_bundle.py", "scripts/reports/stage_native_model_catalogue.py", "scripts/reports/stage_native_extended_models.py", "scripts/reports/site_additions.py", "scripts/reports/stage_app02.py", "tests/reporting/test_site_additions.py", "tests/reporting/test_app02_saved.py", "scripts/reports/report_data.py", "scripts/reports/report_source_identity.py", "scripts/reports/publication_policy.py", "scripts/reports/schema3_publication_policies.py", "scripts/reports/registered_reports.py", "scripts/reports/collector_common.py", "scripts/reports/render.py", "scripts/reports/site.py", "scripts/reports/site_design.py", "scripts/reports/landing.py", "scripts/reports/visual_examples.py", "scripts/reports/learning_book.py", "scripts/reports/figure_style.py", "scripts/reports/plot.py", "scripts/reports/b04_c_exact_registered_reports.py", "tests/reporting/test_b04_publication_source_snapshot.py", "tests/reporting/test_publication_spine_boundaries.py", "scripts/reports/stage_ext04.py", "scripts/reports/stage_finite_feedback.py", "scripts/reports/stage_geo07.py", "scripts/reports/stage_geo07_port.py", "scripts/reports/stage_geo07_dependent.py", "reports/algorithm-results/tooling", "scripts/reports/stage_native_row_scaling_diagnostic.py", "tests/reporting/test_stage_native_row_scaling_diagnostic.py"]
 
 [tool.ty.terminal]
 error-on-warning = true

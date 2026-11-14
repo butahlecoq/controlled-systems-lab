@@ -4,6 +4,12 @@ on:
   pull_request:
     paths:
       - '.github/actions/pages-deploy/**'
+      - 'tests/architecture/check_numeric_dependencies.py'
+      - 'tests/architecture/check_stage_projection_boundaries.py'
+      - 'tests/cmake/test_dependency_archive.py'
+      - 'tests/obs04/perf_control_mock.py'
+      - 'tests/obs04/perf_probe_tests.py'
+      - 'scripts/obs04_perf_probe.py'
       - 'scripts/ci/**'
       - 'tests/ci/**'
       - 'scripts/catalogue/**'
@@ -62,6 +68,12 @@ on:
     branches: [main]
     paths:
       - '.github/actions/pages-deploy/**'
+      - 'tests/architecture/check_numeric_dependencies.py'
+      - 'tests/architecture/check_stage_projection_boundaries.py'
+      - 'tests/cmake/test_dependency_archive.py'
+      - 'tests/obs04/perf_control_mock.py'
+      - 'tests/obs04/perf_probe_tests.py'
+      - 'scripts/obs04_perf_probe.py'
       - 'scripts/ci/**'
       - 'tests/ci/**'
       - 'scripts/catalogue/**'
@@ -169,3 +181,9 @@ jobs:
           python -m unittest discover -s tests/reporting -p 'test_opt07_*.py'
           python -m unittest discover -s tests/reporting -p 'test_opt11_publication.py'
           python -m unittest discover -s reports/algorithm-results/tooling/opt11 -p 'test_collect.py'
+
+      - name: Check architecture boundaries and decoded perf sample parsing
+        run: |
+          python tests/architecture/check_numeric_dependencies.py
+          python tests/architecture/check_stage_projection_boundaries.py
+          python tests/obs04/perf_probe_tests.py
