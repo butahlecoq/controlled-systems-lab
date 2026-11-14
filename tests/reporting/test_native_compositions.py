@@ -88,6 +88,27 @@ class NativeCompositionTests(unittest.TestCase):
                 manifest_path=capabilities.COMPOSITIONS_MANIFEST,
             )
 
+    def test_common_runner_selects_an_explicit_noncomposition_catalogue(self):
+        manifest = capabilities.validate_manifest(manifest_path=capabilities.MANIFEST)
+        graph = manifest["graphs"][0]
+        task_name = (
+            graph["task_id"].split("/")[0] if graph["task_id"].startswith("syn-") else "earth-orbit"
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            attempt = run_closed_loop.run_task(
+                task_name,
+                root,
+                root / "missing-bridge",
+                graph_id=graph["graph_id"],
+                capability_manifest_path=capabilities.MANIFEST,
+            )
+            self.assertEqual(attempt["status"], "refused")
+            request = json.loads((Path(attempt["attempt"]) / "request.json").read_text())
+            self.assertEqual(request["requested"]["graph_id"], graph["graph_id"])
+            refusal = json.loads((Path(attempt["attempt"]) / "resolution-refusal.json").read_text())
+            self.assertIn("common execution bridge does not exist", refusal["reason"])
+
     def test_signed_but_incorrect_exclusion_ledger_is_rejected(self):
         forged = copy.deepcopy(self.manifest)
         excluded = next(c for c in forged["candidates"] if c["status"] == "incompatible")
