@@ -90,9 +90,10 @@ library. Run them locally with
 
 The same configured gate covers the 57 maintained Python compatibility entry
 points under `reports/algorithm-results/tooling`. `pyproject.toml` defines the
-scope for the default Ruff and ty commands above. The nine real OPT07/OPT11
-implementations in that tree remain excluded and require separate quality
-adoption; immutable report/source captures elsewhere are also outside this gate.
+scope for the default Ruff and ty commands above. The gate also covers all nine
+maintained OPT07/OPT11 implementations in that tree, including their fixture,
+record, collector and saved-report boundaries. Immutable report/source captures
+elsewhere remain outside this gate.
 Use `ruff check --show-files` to inspect Ruff's selected files. No explicit file
 arguments are needed for the lint, format or type checks. The workflow triggers
 on tooling-tree changes and exercises existing compatibility consumers with
@@ -122,8 +123,8 @@ publication checks select its authenticated, versioned historical source bytes;
 formatting a maintained helper does not change the execution source of an old
 capture. The EXT04 observed-replay, finite-feedback and three GEO07 publication owners
 use the same exact inventory and archive checks for retained routes and join
-the default quality scope. This expands the gate to 104 Python files on this branch; broader
-Python adoption remains tracked in issue 993.
+the default quality scope. Use `ruff check --show-files` for the current selected paths; broader Python
+adoption remains tracked in issue 993.
 
 The workflow additionally exercises the saved convex/collector/gallery consumers,
 publication lifecycle tests, and the EXT04, finite-feedback and GEO07 owner
@@ -131,3 +132,13 @@ families. Publisher-byte identity checks apply to unpinned publications; retaine
 historical routes require both their exact source inventory and the exact
 regenerated archive. Repacking a native evidence ZIP changes its identity bytes
 and cannot reuse a historical route.
+
+The workflow exercises OPT07's oracle, collector and saved-report tests with
+`python -m unittest discover -s tests/reporting -p 'test_opt07_*.py'`, OPT11's
+publication tests with
+`python -m unittest discover -s tests/reporting -p 'test_opt11_publication.py'`,
+and its collector tests with
+`python -m unittest discover -s reports/algorithm-results/tooling/opt11 -p 'test_collect.py'`.
+These checks validate saved evidence and synthetic test records without running
+algorithm measurements. The ty search path includes the maintained tooling root
+so each OPT07/OPT11 namespace retains its local imports and direct CLI behavior.

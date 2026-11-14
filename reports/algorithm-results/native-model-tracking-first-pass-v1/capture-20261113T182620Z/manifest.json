@@ -1,0 +1,110 @@
+{
+  "branch": "feat/1012-native-model-tracking-baselines-20261113",
+  "capture_id": "capture-20261113T182620Z",
+  "code_head": "1a0bb0d15ae504ae07ca9036e168d16e1392ffe4",
+  "created_utc": "2026-11-13T18:26:20.577882+00:00",
+  "executables": {
+    "catalogue": {
+      "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_discrete_models",
+      "sha256": "2dfef4337b41ef82c2b1d4bada42e89e9a48ce8373f29e649ad807f9e46ffd27"
+    },
+    "source21": {
+      "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/quadcopter_mpc",
+      "sha256": "154c9d057f99c471274e43d20d83fd7525ab2b4b3b51445a71059c0516096e9b"
+    },
+    "tracking": {
+      "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+      "sha256": "84de4946d0b9bb3775ec7576ae2d21b0038a5282499c8f56e52c6e7554dab9ee"
+    }
+  },
+  "finished_utc": "2026-11-13T18:26:20.639111+00:00",
+  "installed_sdk_component_qualification": {
+    "archive_sha256": "12efd2001ee09b2154e6b18fc5a78e937dface24207bdd850a964f3beedcb00b",
+    "qualification_receipt": "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1012-running-state-design-20261113/candidate-a/qualification-c16-source-binding.json",
+    "receipt_sha256": "7353462a88eac5fe1148fa37a24313ee821b655bac35e8f2269dd7e4d843539a",
+    "source_commit": "c16a19dd900bc5e186273008f610a712dc177981",
+    "source_tree_sha1": "4944d54987055a8747ea6875bf0feb6d58da3dcb",
+    "whole_sdk_qualification_claimed": false
+  },
+  "outcomes": [
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-23/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182620Z/model-23/tracking-output"
+      ],
+      "elapsed_seconds": 0.00386860896833241,
+      "finished_utc": "2026-11-13T18:26:20.619195+00:00",
+      "model": "catalogue-2026/model-23/1",
+      "returncode": 1,
+      "started_utc": "2026-11-13T18:26:20.614975+00:00",
+      "status": "failed",
+      "stderr_sha256": "7315cfd03966950b9ab3e7037e86913a9cf8fc2cd05f833e1c59baccf7675bc4",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-27/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182620Z/model-27/tracking-output"
+      ],
+      "elapsed_seconds": 0.007897505071014166,
+      "finished_utc": "2026-11-13T18:26:20.628401+00:00",
+      "model": "catalogue-2026/model-27/1",
+      "returncode": 1,
+      "started_utc": "2026-11-13T18:26:20.620172+00:00",
+      "status": "failed",
+      "stderr_sha256": "7315cfd03966950b9ab3e7037e86913a9cf8fc2cd05f833e1c59baccf7675bc4",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-28/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182620Z/model-28/tracking-output"
+      ],
+      "elapsed_seconds": 0.007935219909995794,
+      "finished_utc": "2026-11-13T18:26:20.637848+00:00",
+      "model": "catalogue-2026/model-28/1",
+      "returncode": 1,
+      "started_utc": "2026-11-13T18:26:20.629485+00:00",
+      "status": "failed",
+      "stderr_sha256": "7315cfd03966950b9ab3e7037e86913a9cf8fc2cd05f833e1c59baccf7675bc4",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timeout_seconds": 60
+    }
+  ],
+  "requested_model_indices": [
+    23,
+    27,
+    28
+  ],
+  "runtime_limits": {
+    "native_tracking_seconds_per_case": 60,
+    "source21_seconds": 120,
+    "threads": 1
+  },
+  "schema": "csl.1012-native-model-tracking-capture/1",
+  "scope": "functional first native MPC/tracking pass across all 35 source-catalogue records; no performance comparison",
+  "summary": {
+    "attempted_model_records": 3,
+    "completed_models": 0,
+    "failed_models": 3,
+    "timed_out_models": 0
+  },
+  "task_profiles": {
+    "external_policy": "fold printed affine offset plus E*w_nominal when catalogue nominal external exists; otherwise explicitly select fixed external zero and retain original E in catalogue data",
+    "model21": "source21 literal horizon=10, Q/QN/R and bounds; 15 observed-state replans from existing native C++ source task",
+    "other34": "authored zero-target quadratic; horizon=3; three closed-loop replans; state weight_i=1/max(1,abs(initial_i))^2; terminal=5x state weight; R=0.02I; recorded-input bounds [-1,1]; no state bounds"
+  },
+  "working_source_sha256": {
+    "examples/CMakeLists.txt": "3a02dc2d243917d6b69fbf0657b5c03b7a7eb582a96bc3a06dbc0f9820aae101",
+    "examples/native_discrete_models.cpp": "cf3c1ae16456693ad814f803b17299d2344839fc6b2a14121ef1861138324b2b",
+    "examples/native_model_tracking.cpp": "5ad749b82aae9e668e1fbd0ecdd48c11539d82aa7b7f93eb8add3113a375a221",
+    "examples/quadcopter_mpc.cpp": "5946f8603bf4ff3021c3020d90be7fc826173f771693a0d038794c9a8e7ca607",
+    "examples/quadcopter_mpc_task.cpp": "5fa0031706a16c78411a33e3162f04f1862afeff7dfff4f7cd97b7f39097f826",
+    "scripts/reports/native_model_tracking_first_pass.py": "88bf0568168387c2be2e316d4f50127e5295f7a15c75e83ad4f8a4c68c0e0183"
+  }
+}

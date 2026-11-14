@@ -1,20 +1,39 @@
 """Fixed OPT-11 fixtures and exact dyadic hull/certificate oracle."""
+
 from __future__ import annotations
 
-from fractions import Fraction
 import hashlib
 import json
+from fractions import Fraction
 
 FIXTURES = {
-    "signed-grid": [[[-4., -4.], [-4., 0.], [-4., 4.], [0., -4.], [0., 4.],
-                     [4., -4.], [4., 0.], [4., 4.]][(i * 3) % 8]
-                    for i in range(33)],
-    "duplicate-collinear": [[(-16. if i % 3 == 0 else (0. if i % 3 == 1 else 16.)),
-                             (-32. if i % 3 == 0 else (0. if i % 3 == 1 else 32.))]
-                            for i in range(33)],
-    "rank-one-offset": [[(-8. if i % 3 == 0 else (0. if i % 3 == 1 else 8.)),
-                         (-22. if i % 3 == 0 else (2. if i % 3 == 1 else 26.))]
-                        for i in range(33)],
+    "signed-grid": [
+        [
+            [-4.0, -4.0],
+            [-4.0, 0.0],
+            [-4.0, 4.0],
+            [0.0, -4.0],
+            [0.0, 4.0],
+            [4.0, -4.0],
+            [4.0, 0.0],
+            [4.0, 4.0],
+        ][(i * 3) % 8]
+        for i in range(33)
+    ],
+    "duplicate-collinear": [
+        [
+            (-16.0 if i % 3 == 0 else (0.0 if i % 3 == 1 else 16.0)),
+            (-32.0 if i % 3 == 0 else (0.0 if i % 3 == 1 else 32.0)),
+        ]
+        for i in range(33)
+    ],
+    "rank-one-offset": [
+        [
+            (-8.0 if i % 3 == 0 else (0.0 if i % 3 == 1 else 8.0)),
+            (-22.0 if i % 3 == 0 else (2.0 if i % 3 == 1 else 26.0)),
+        ]
+        for i in range(33)
+    ],
 }
 
 
@@ -24,8 +43,9 @@ def require(condition: bool, message: str) -> None:
 
 
 def fixture_digest() -> str:
-    encoded = json.dumps(FIXTURES, sort_keys=True, separators=(",", ":"),
-                         ensure_ascii=True, allow_nan=False).encode()
+    encoded = json.dumps(
+        FIXTURES, sort_keys=True, separators=(",", ":"), ensure_ascii=True, allow_nan=False
+    ).encode()
     return hashlib.sha256(encoded).hexdigest()
 
 
@@ -64,7 +84,8 @@ def inside_hull(p, hull) -> bool:
         return p == hull[0]
     if len(hull) == 2:
         return cross(hull[0], hull[1], p) == 0 and all(
-            min(a, b) <= x <= max(a, b) for x, a, b in zip(p, hull[0], hull[1]))
+            min(a, b) <= x <= max(a, b) for x, a, b in zip(p, hull[0], hull[1], strict=False)
+        )
     return all(cross(hull[i], hull[(i + 1) % len(hull)], p) >= 0 for i in range(len(hull)))
 
 
@@ -83,7 +104,9 @@ def recursive_query_namespaces(points: list[list[float]]) -> dict[int, set[str]]
         visit(ids[:middle], path + "0")
         visit(ids[middle:], path + "1")
 
-    ordered = sorted(range(len(points)), key=lambda point_id: (point_key(points[point_id]), point_id))
+    ordered = sorted(
+        range(len(points)), key=lambda point_id: (point_key(points[point_id]), point_id)
+    )
     visit(ordered, "r")
     return namespaces
 
@@ -93,11 +116,14 @@ def exact_certificate(call: dict) -> None:
     fixture = call.get("fixture")
     method = call.get("method")
     expected_problem = f"opt11-{fixture}"
-    require(fixture in FIXTURES and call.get("problem") == expected_problem,
-            "point-cloud problem identity differs from its fixture")
+    require(
+        fixture in FIXTURES and call.get("problem") == expected_problem,
+        "point-cloud problem identity differs from its fixture",
+    )
     require(method in {"baseline", "recursive"}, "certificate reducer method is missing")
-    allowed_recursive_namespaces = (recursive_query_namespaces(points)
-                                    if method == "recursive" else None)
+    allowed_recursive_namespaces = (
+        recursive_query_namespaces(points) if method == "recursive" else {}
+    )
     retained = call["retained"]
     removed = call["removed"]
     n = len(points)
@@ -106,20 +132,30 @@ def exact_certificate(call: dict) -> None:
     cert_by_id = {}
     for cert in removed:
         target = cert.get("point")
-        require(type(target) is int and 0 <= target < n and target not in cert_by_id,
-                "duplicate or invalid removed ID")
-        require(cert.get("program_problem") == expected_problem,
-                "certificate program problem identity differs from its fixture cloud")
+        require(
+            type(target) is int and 0 <= target < n and target not in cert_by_id,
+            "duplicate or invalid removed ID",
+        )
+        require(
+            cert.get("program_problem") == expected_problem,
+            "certificate program problem identity differs from its fixture cloud",
+        )
         program = cert.get("program")
         if method == "baseline":
             expected_program = f"hull-membership-{target}"
-            require(program == expected_program,
-                    "baseline certificate program identity does not match the removed point")
+            require(
+                program == expected_program,
+                "baseline certificate program identity does not match the removed point",
+            )
         else:
-            allowed = {f"hull-membership-{namespace}-{target}"
-                       for namespace in allowed_recursive_namespaces[target]}
-            require(program in allowed,
-                    "recursive certificate program identity is not a valid node query for this point")
+            allowed = {
+                f"hull-membership-{namespace}-{target}"
+                for namespace in allowed_recursive_namespaces[target]
+            }
+            require(
+                program in allowed,
+                "recursive certificate program identity is not a valid node query for this point",
+            )
         terms = cert.get("terms")
         require(isinstance(terms, list) and terms, "empty deletion certificate")
         weights = []
@@ -127,18 +163,25 @@ def exact_certificate(call: dict) -> None:
         for term in terms:
             require(isinstance(term, list) and len(term) == 2, "malformed certificate term")
             source, raw_weight = term
-            require(type(source) is int and 0 <= source < n and
-                    isinstance(raw_weight, (float, int)), "invalid certificate source/weight")
+            require(
+                type(source) is int and 0 <= source < n and isinstance(raw_weight, (float, int)),
+                "invalid certificate source/weight",
+            )
             weight = q(raw_weight)
             require(weight >= 0, "negative exact dyadic certificate weight")
             weights.append(weight)
             for axis, coordinate in enumerate(points[source]):
                 reconstructed[axis] += weight * q(coordinate)
         require(sum(weights, Fraction(0)) == 1, "certificate weights do not sum exactly to one")
-        require(tuple(reconstructed) == point_key(points[target]), "certificate does not reconstruct exact dyadic point")
+        require(
+            tuple(reconstructed) == point_key(points[target]),
+            "certificate does not reconstruct exact dyadic point",
+        )
         cert_by_id[target] = terms
-    require(set(retained).isdisjoint(cert_by_id) and set(retained) | set(cert_by_id) == set(range(n)),
-            "retained and removed IDs do not partition fixture")
+    require(
+        set(retained).isdisjoint(cert_by_id) and set(retained) | set(cert_by_id) == set(range(n)),
+        "retained and removed IDs do not partition fixture",
+    )
 
     def expand(point_id, stack=()):
         require(point_id not in stack, "cyclic deletion certificate")
@@ -153,15 +196,29 @@ def exact_certificate(call: dict) -> None:
 
     final_hull = convex_hull([points[i] for i in retained])
     expected_hull = convex_hull(points)
-    require(set(expected_hull).issubset(set(point_key(points[i]) for i in retained)),
-            "literal extreme vertex missing from retained output")
-    require(all(inside_hull(point_key(points[i]), expected_hull) for i in retained),
-            "retained point lies outside literal input hull")
+    require(
+        set(expected_hull).issubset(set(point_key(points[i]) for i in retained)),
+        "literal extreme vertex missing from retained output",
+    )
+    require(
+        all(inside_hull(point_key(points[i]), expected_hull) for i in retained),
+        "retained point lies outside literal input hull",
+    )
     for target in cert_by_id:
         expansion = expand(target)
-        require(sum(expansion.values(), Fraction(0)) == 1, "expanded certificate weights do not sum to one")
-        value = [sum((weight * q(points[i][axis]) for i, weight in expansion.items()), Fraction(0))
-                 for axis in range(len(points[target]))]
-        require(tuple(value) == point_key(points[target]), "expanded certificate fails exact final-hull check")
-    require(all(inside_hull(point_key(p), final_hull) for p in points),
-            "retained coordinates do not contain every input point")
+        require(
+            sum(expansion.values(), Fraction(0)) == 1,
+            "expanded certificate weights do not sum to one",
+        )
+        value = [
+            sum((weight * q(points[i][axis]) for i, weight in expansion.items()), Fraction(0))
+            for axis in range(len(points[target]))
+        ]
+        require(
+            tuple(value) == point_key(points[target]),
+            "expanded certificate fails exact final-hull check",
+        )
+    require(
+        all(inside_hull(point_key(p), final_hull) for p in points),
+        "retained coordinates do not contain every input point",
+    )

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Verify and reproduce · native model tracking</title>
+  <link rel="stylesheet" href="examples.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to guide</a>
+  <main id="main" class="page-content">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <ol><li><a href="../index.html">Examples</a></li><li><a href="index.html">Native model tracking</a></li><li aria-current="page">Verify and reproduce</li></ol>
+    </nav>
+    <p class="eyebrow">Reproducibility guide · Python standard library for verification</p>
+    <h1>Verify this saved publication or create a new capture</h1>
+    <p>This guide explains two different operations. Bundle verification checks committed capture-derived files and deterministic ZIP bytes; it does not invoke a solver. A new native capture runs all 35 cases and writes a new timestamped directory, leaving the historical capture untouched.</p>
+
+    <section aria-labelledby="verify-heading">
+      <h2 id="verify-heading">Verify the published bundle</h2>
+      <p>Use a full-history checkout. The original native producer is bound to commit <code>635ac5ba59d230e2b09062690adc943ea6451568</code>. The independent packaging renderer is pinned separately by the tracked <code>publication-lock.json</code>; that pin authenticates the renderer source, not the earlier native run.</p>
+      <pre><code>git clone https://github.com/butahlecoq/controlled-systems-lab.git
+cd controlled-systems-lab
+TOOL_COMMIT=$(python3 -c 'import json; print(json.load(open("reports/algorithm-results/native-model-tracking-first-pass-v1/publication-lock.json"))["portable_renderer_commit"])')
+git show "$TOOL_COMMIT:scripts/reports/stage_native_model_tracking_first_pass.py" &gt; /tmp/stage-native-model-tracking-pinned.py
+cmp /tmp/stage-native-model-tracking-pinned.py scripts/reports/stage_native_model_tracking_first_pass.py
+python3 -B scripts/reports/stage_native_model_tracking_first_pass.py --check</code></pre>
+      <p>The check requires only Python's standard library and committed repository inputs. It renders the bundle in memory and verifies the committed ZIP and adjacent checksum against the publication lock. The ZIP contains the generated HTML, guide, figures, raw records, input inventory, and checks; these generated members are not separate tracked site files. Sorted member names, fixed timestamps, and stored entries make the ZIP byte-reproducible. Its internal <code>SHA256SUMS.json</code> inventories every member except itself and the enclosing ZIP; the adjacent <code>.zip.sha256</code> authenticates the archive.</p>
+    </section>
+
+    <section aria-labelledby="capture-heading">
+      <h2 id="capture-heading">Create a new native capture</h2>
+      <p>Set <code>CSL_PREFIX</code> to an installed controlled-systems-lab prefix whose <code>lib/cmake/CSL</code> directory exports the native targets. This requires a configured C++ toolchain. The supervisor checks the installed prefix's <code>SHA256SUMS</code> inventory before running the cases.</p>
+      <pre><code>cmake -S examples -B build/native-tracking \
+  -DCSL_DIR="$CSL_PREFIX/lib/cmake/CSL" \
+  -DCMAKE_BUILD_TYPE=Release
+cmake --build build/native-tracking --parallel 1 \
+  --target native_model_tracking native_discrete_models quadcopter_mpc
+python3 -B scripts/reports/native_model_tracking_first_pass.py \
+  --build build/native-tracking \
+  --sdk-snapshot "$CSL_PREFIX" \
+  --output-parent reports/algorithm-results/native-model-tracking-first-pass-v1</code></pre>
+      <p>All 35 public discrete-model records are attempted. Model 21 retains the literal source task; the other 34 use authored educational tracking profiles. The configured limits are 120 seconds for source 21 and 60 seconds per other case. Failures and timeouts remain in the new capture rather than being omitted.</p>
+      <p>Each capture is written to a new UTC-timestamped directory. To verify a particular capture, pass its explicit directory; the verifier writes a sibling check directory and does not modify the capture:</p>
+      <pre><code>python3 -B scripts/reports/verify_native_model_tracking_first_pass.py \
+  reports/algorithm-results/native-model-tracking-first-pass-v1/capture-YYYYMMDDTHHMMSSZ</code></pre>
+      <p>These educational tracking profiles do not claim a performance ranking, physical calibration, or nonlinear stability result.</p>
+    </section>
+    <p><a href="index.html">Return to the saved report</a> · <a href="native-model-tracking-first-pass-v1.zip">Download the complete offline bundle</a></p>
+  </main>
+</body>
+</html>

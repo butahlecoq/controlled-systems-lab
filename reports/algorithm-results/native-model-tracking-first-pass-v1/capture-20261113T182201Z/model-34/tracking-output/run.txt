@@ -1,0 +1,17 @@
+model=catalogue-2026/model-34/1
+title=Eight-zone AI datacentre
+source_title=Owner-supplied research catalogue (2026)
+source_sha256=6c5e7c1b09331186b8cd9ddfcd1a71afbc7bddb438a103f2fd4dcfdf780c081e
+source_locator=Owner archive, card 34; model_34_A/B/G/x0 in the numerical supplement
+source_qualification=synthetic physical coupling, NLR load profiles for disturbances. State order: per zone temperature deviation [scale absent],work queue [scale absent],energy balance [scale absent]. Control order: GPU allocation,cooling [normalized]. Synthetic thermal/queue/energy coupling; G only numeric archive, .02 to T and1 to queue per zone. Thermal data needed separately; queue/nonnegative domain and energy units not specified.
+task=authored nominal quadratic tracking to zero; 3-stage horizon; 3 closed-loop replans
+task_identity=1012-authored-nominal-tracking/catalogue-2026/model-34/1-3step-zero-target-v1
+state_weight_i=1/max(1,abs(initial_i))^2; terminal_weight=5*state_weight; R=0.02*I
+recorded_coordinate_actuator_bounds=[-1,1]; state_bounds=none; units=source catalogue coordinates
+external_selection=authored_fixed_zero; source_E_channel_retained=16 coordinates
+time_step=60 second
+assurance=numerical; this is not empirical calibration, certified optimality, robust control, or nonlinear stability evidence
+solver=csl.convex.highs version=1.0.0+highs.1.11.0
+completed_replans=3
+zero-disturbance/selected-nominal realized running cost=44.1947
+final_observed_state=1.41312,20.2243,0.0452304,1.41312,20.2243,0.0452304,1.41312,20.2243,0.0452304,1.41312,20.2243,0.0452304,1.41312,20.2243,0.0452304,1.41312,20.2243,0.0452304,1.41312,20.2243,0.0452304,1.41312,20.2243,0.0452304

@@ -1,8 +1,9 @@
 """Exact authored examples for the temporal audit, not an optimizer or proof engine.
 
 Only the Python standard library is used. All comparisons remain active under -O.
-The report proves the continuous history statements; these finite literal checks
-exercise offsets, initial memory, stage bounds and the stated counterexamples.
+The historical report proofs are unavailable in this checkout. These finite
+literal checks exercise offsets, initial memory, stage bounds and the stated
+counterexamples; they do not verify continuous history claims.
 """
 from fractions import Fraction as Q
 
@@ -96,4 +97,5 @@ def check_temporal_lift():
 if __name__ == "__main__":
     for name in check_temporal_lift():
         print(f"PASS {name}")
-    print("9 exact literal checks passed; continuum claims require the report proofs.")
+    print("9 exact literal checks passed; report proofs are unavailable in this checkout; "
+          "continuum claims are not verified.")
