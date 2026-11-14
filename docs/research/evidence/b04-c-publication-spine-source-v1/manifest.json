@@ -1,0 +1,30 @@
+{
+  "existing_snapshot": {
+    "files_sha256": {
+      ".github/workflows/algorithm-reports.yml": "321feccc93d8402af6e8acd39c578bdf92882483353ab692b38ef8ef7df5dc9f",
+      "README.txt": "9fb39ce6382304eaea161999a1bf7a506b384800d75c373c4aea3031f625766b",
+      "scripts/reports/algorithm_visual_coverage.json": "577d4c93bad6bb36d6f2c103568293e61d5057b5de2b6c0a04c6f6ffa9daf953",
+      "scripts/reports/b04_c_exact_registered_reports.py": "e23f86f8d809c5aa8596c0ca596479d3c0a267d347c28c1a3d514779593e572b",
+      "scripts/reports/landing.py": "f148bd982f39dd1b0f9b3a42c205e13c18b69f553f5ca93eeb4645fdb4c87b08",
+      "scripts/reports/schema3_publication_policies.py": "64143d67b83a320a6d53f0d2e6eeafc0ba6a842a5c6a424652050d1dd66e54ef",
+      "scripts/reports/site.py": "0ad048e3cdfd0ceca48f53d21c2c9e804d0b1a3291bdf1e89826658bdf13a2b4",
+      "scripts/reports/visual_examples.py": "774f5efc82ee1955b9f14660c55f102b8734a2861d06be5a8432c705c3ac17fd"
+    },
+    "root": "docs/research/evidence/b04-c-publication-source-snapshot"
+  },
+  "extracted_from_commit": "9a81334f03c92891f400ce7c50b296b1ec74aed3",
+  "files": {
+    "scripts/reports/publication_policy.py": "cf5b78f346caaa7db222afa734cce4d8de31c014955e1d7ce536fdf0c22ea1bd",
+    "scripts/reports/registered_reports.py": "9d52af81c1d5c8756773056ac66bf5836e54d39cf73985036f3d03bf2792b3f6",
+    "scripts/reports/report_data.py": "76a52d00e05b5d3201c9ed92c4c384e36e2b26f5da7a0e4c4817db4a513edef5"
+  },
+  "git_blobs": {
+    "scripts/reports/publication_policy.py": "8a897aea5f160880c91b0b769fbed96e7585b9e3",
+    "scripts/reports/registered_reports.py": "53a260c032d3ee583f6657ba2afd224f484210b1",
+    "scripts/reports/report_data.py": "062f830eb5d5bf09c2542ed6c1651d9207a4929f"
+  },
+  "owner_manifest_sha256": "8ee378c901c36a148166fa5dd5a2bf2747352847ff1510869bd9babaaf32aee8",
+  "owner_report_id": "b04-c-exact-dyadic-v1",
+  "schema": "csl.b04-c-publication-spine-source/1",
+  "source_role": "Historical publication-source identity only; this preservation does not claim numerical execution at the extraction commit."
+}
