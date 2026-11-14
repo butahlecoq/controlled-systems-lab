@@ -1,0 +1,291 @@
+{
+  "schema": "csl.scenario/1",
+  "id": "npoa-2017-programmed-fuel-v1",
+  "horizon": 10,
+  "model": {
+    "kind": "linear_discrete",
+    "A": [
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        -1,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        -1,
+        1
+      ]
+    ],
+    "B": [
+      [
+        0.4166666666666667
+      ],
+      [
+        0
+      ],
+      [
+        -0.3333333333333333
+      ],
+      [
+        0
+      ]
+    ]
+  },
+  "initial_state": [
+    25.14,
+    247,
+    19.915,
+    199.92
+  ],
+  "controls": {
+    "kind": "box",
+    "lower": [
+      -1
+    ],
+    "upper": [
+      1
+    ]
+  },
+  "states": {
+    "kind": "stages",
+    "values": [
+      {
+        "kind": "box",
+        "lower": [
+          24.167,
+          null,
+          19.33,
+          null
+        ],
+        "upper": [
+          25.833,
+          null,
+          20.66,
+          null
+        ]
+      },
+      {
+        "kind": "box",
+        "lower": [
+          24.167,
+          null,
+          19.33,
+          null
+        ],
+        "upper": [
+          25.833,
+          null,
+          20.66,
+          null
+        ]
+      },
+      {
+        "kind": "box",
+        "lower": [
+          24.167,
+          null,
+          19.33,
+          null
+        ],
+        "upper": [
+          25.833,
+          null,
+          20.66,
+          null
+        ]
+      },
+      {
+        "kind": "box",
+        "lower": [
+          24.167,
+          null,
+          19.33,
+          null
+        ],
+        "upper": [
+          25.833,
+          null,
+          20.66,
+          null
+        ]
+      },
+      {
+        "kind": "box",
+        "lower": [
+          24.167,
+          null,
+          19.33,
+          null
+        ],
+        "upper": [
+          25.833,
+          null,
+          20.66,
+          null
+        ]
+      },
+      {
+        "kind": "box",
+        "lower": [
+          24.167,
+          null,
+          19.33,
+          null
+        ],
+        "upper": [
+          25.833,
+          null,
+          20.66,
+          null
+        ]
+      },
+      {
+        "kind": "box",
+        "lower": [
+          24.167,
+          null,
+          19.33,
+          null
+        ],
+        "upper": [
+          25.833,
+          null,
+          20.66,
+          null
+        ]
+      },
+      {
+        "kind": "box",
+        "lower": [
+          24.167,
+          null,
+          19.33,
+          null
+        ],
+        "upper": [
+          25.833,
+          null,
+          20.66,
+          null
+        ]
+      },
+      {
+        "kind": "box",
+        "lower": [
+          24.167,
+          null,
+          19.33,
+          null
+        ],
+        "upper": [
+          25.833,
+          null,
+          20.66,
+          null
+        ]
+      },
+      {
+        "kind": "box",
+        "lower": [
+          24.167,
+          null,
+          19.33,
+          null
+        ],
+        "upper": [
+          25.833,
+          null,
+          20.66,
+          null
+        ]
+      },
+      {
+        "kind": "box",
+        "lower": [
+          24.167,
+          null,
+          19.33,
+          null
+        ],
+        "upper": [
+          25.833,
+          null,
+          20.66,
+          null
+        ]
+      }
+    ]
+  },
+  "objective": {
+    "kind": "quadratic",
+    "Q": [
+      [
+        2,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        4,
+        0,
+        -2
+      ],
+      [
+        0,
+        0,
+        2,
+        0
+      ],
+      [
+        0,
+        -2,
+        0,
+        4
+      ]
+    ],
+    "linear": [
+      -50,
+      0,
+      -40,
+      0
+    ],
+    "offset": 1025
+  },
+  "metadata": {
+    "state_labels": [
+      "oxidizer mass flow",
+      "oxidizer tank mass",
+      "fuel mass flow",
+      "fuel tank mass"
+    ],
+    "control_labels": [
+      "programmed scalar control"
+    ],
+    "state_units": [
+      "source scale unspecified",
+      "source scale unspecified",
+      "source scale unspecified",
+      "source scale unspecified"
+    ],
+    "control_units": [
+      "dimensionless source interval"
+    ],
+    "title": "2017 programmed-control fuel task",
+    "description": "Article-derived open-loop task. Bulaev, Goranov, Kalev, “Constructing optimal programmed control for complex mechanical objects” (2017), section 4, pp. 11–13. Source SHA-256 a8ed876c8a34d4eb798c031c6ede02a662e771b73cbead65cc42be8ff6132dc0. State bounds apply at t=0,...,10. No disturbance set, initial uncertainty, or feedback policy is specified. Physical unit scales remain unspecified."
+  }
+}
