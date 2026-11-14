@@ -56,6 +56,12 @@ target_link_libraries(strategy_a_public_client PRIVATE CSL::strategy_a)
 add_test(NAME strategy_a_public_client COMMAND strategy_a_public_client)
 csl_test_target(strategy_a_public_client synthesis)
 
+add_executable(strategy_b_public_client tests/synthesis/strategy_b/public_client.cpp)
+target_compile_features(strategy_b_public_client PRIVATE cxx_std_20)
+target_link_libraries(strategy_b_public_client PRIVATE CSL::strategy_b)
+add_test(NAME strategy_b_public_client COMMAND strategy_b_public_client)
+csl_test_target(strategy_b_public_client synthesis)
+
 add_executable(control_recovery_tests tests/unit/synthesis/control_recovery_tests.cpp)
 target_link_libraries(control_recovery_tests PRIVATE CSL::control_recovery doctest::doctest)
 add_test(NAME control_recovery_tests COMMAND control_recovery_tests)

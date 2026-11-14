@@ -1594,6 +1594,64 @@
       "action_domain": "not_applicable to this module role",
       "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
       "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "supporting_operations",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.nlp.casadi-ipopt.history-cost",
+        "version": "1"
+      },
+      "role": "whole-history_source_cost_optimizer",
+      "input": "complete H-represented canonical [x0,...,xT,u0,...,u(T-1)] relation and compiled authored terminal-plus-running cost",
+      "output": "numerically checked full-history feasible candidate and recomputed source objective",
+      "dimension": "admitted discrete nominal histories with bounded finite request dimensions",
+      "assurance": "numerical local NLP candidate; no global optimality, nonlinear safety, or inclusion proof",
+      "relation": "candidate feasible point in the supplied complete history domain",
+      "operations": [
+        "whole-history quadratic objective",
+        "separate weighted residual-norm epigraphs"
+      ],
+      "dependencies": [],
+      "build": "CSL_ENABLE_CASADI plus native CasADi/IPOPT",
+      "source": {
+        "path": "src/adapters/nlp/casadi_history_optimizer.cpp"
+      },
+      "model_classes": [
+        "discrete nominal open-loop problems admitted by full-history recovery"
+      ],
+      "action_domain": "the supplied full-horizon control coordinates and original source constraints",
+      "tolerance_policy": "ExecutionContext numerical policy for independent full-H and authored-cost readback checks.",
+      "budget_policy": "An ExecutionContext deadline caps IPOPT wall time when present; cancellation is checked before and after the synchronous solve. Without an explicit deadline, no wall-time guarantee is claimed."
+    },
+    {
+      "group": "supporting_operations",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.conic.superscs.history-cost",
+        "version": "1"
+      },
+      "role": "whole-history_source_cost_optimizer",
+      "input": "complete H-represented canonical [x0,...,xT,u0,...,u(T-1)] relation and compiled affine-plus-norm authored terminal/running cost",
+      "output": "numerically checked full-history feasible candidate and recomputed source objective",
+      "dimension": "admitted discrete nominal histories with bounded finite request dimensions",
+      "assurance": "numerical conic candidate; no global optimality, nonlinear safety, or inclusion proof",
+      "relation": "candidate feasible point in the supplied complete history domain",
+      "operations": [
+        "whole-history affine objective",
+        "separate exact second-order-cone residual norms"
+      ],
+      "dependencies": [],
+      "build": "CSL_ENABLE_CASADI plus CasADi SuperSCS conic plugin",
+      "source": {
+        "path": "src/adapters/nlp/casadi_superscs_history_optimizer.cpp"
+      },
+      "model_classes": [
+        "discrete nominal open-loop problems admitted by full-history recovery"
+      ],
+      "action_domain": "the supplied full-horizon control coordinates and original source constraints",
+      "tolerance_policy": "ExecutionContext numerical policy for independent full-H and authored-cost readback checks.",
+      "budget_policy": "An ExecutionContext deadline is checked before and after the synchronous conic solve; without an explicit deadline, no wall-time guarantee is claimed."
     }
   ],
   "finite_probe_profiles": [
@@ -1739,6 +1797,26 @@
         "reason": "Qhull converter target is not compiled in this build."
       },
       "source": "src/adapters/polyhedral/qhull.cpp"
+    },
+    {
+      "candidate_id": "supporting/whole-history-casadi-nlp/build-profile-v1",
+      "status_when_CSL_ENABLE_CASADI_false": "backend_unavailable",
+      "status_when_CSL_ENABLE_CASADI_true": "requires concrete optimizer prepare receipt and numerical candidate validation",
+      "first_unmet_when_unavailable": {
+        "field": "build.CSL_ENABLE_CASADI",
+        "reason": "The optional native CasADi/IPOPT whole-history provider is not compiled in this build."
+      },
+      "source": "src/adapters/nlp/casadi_history_optimizer.cpp"
+    },
+    {
+      "candidate_id": "supporting/whole-history-superscs-conic/build-profile-v1",
+      "status_when_CSL_ENABLE_CASADI_false": "backend_unavailable",
+      "status_when_CSL_ENABLE_CASADI_true": "requires explicit cold-start request, SuperSCS plugin, and numerical candidate validation",
+      "first_unmet_when_unavailable": {
+        "field": "build.CSL_ENABLE_CASADI",
+        "reason": "The optional native CasADi/SuperSCS whole-history provider is not compiled in this build."
+      },
+      "source": "src/adapters/nlp/casadi_superscs_history_optimizer.cpp"
     }
   ],
   "output_contract": {

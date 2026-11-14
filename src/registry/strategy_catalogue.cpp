@@ -12,11 +12,17 @@ std::string module_value(const ModuleId& module) {
 }
 
 std::vector<std::pair<std::string, std::string>> slots(const StrategyConfiguration& c) {
-    return {{"strategy", module_value(c.strategy)}, {"lp", module_value(c.lp)},
-        {"convex", module_value(c.convex)}, {"hull", module_value(c.hull)},
-        {"geometry", module_value(c.geometry)}, {"converter", module_value(c.converter)},
-        {"approximation", module_value(c.approximation)}, {"selector", module_value(c.selector)},
-        {"representation", c.representation.value.empty() ? "not_used" : c.representation.value}};
+    return {
+        {"strategy", module_value(c.strategy)},
+        {"lp", module_value(c.lp)},
+        {"convex", module_value(c.convex)},
+        {"hull", module_value(c.hull)},
+        {"geometry", module_value(c.geometry)},
+        {"converter", module_value(c.converter)},
+        {"approximation", module_value(c.approximation)},
+        {"selector", module_value(c.selector)},
+        {"representation", c.representation.value.empty() ? "not_used" : c.representation.value},
+        {"history_optimizer", module_value(c.history_optimizer)}};
 }
 
 bool active(const std::optional<std::vector<StrategyRegistration::ConfigurationSlot>>& slots,
@@ -38,6 +44,8 @@ StrategyConfiguration route_configuration(const StrategyConfiguration& requested
     if (!active(active_slots,Slot::approximation)) result.approximation = {};
     if (!active(active_slots,Slot::selector)) result.selector = {};
     if (!active(active_slots,Slot::representation)) result.representation = {};
+    if (!active(active_slots, Slot::history_optimizer))
+        result.history_optimizer = {};
     return result;
 }
 
@@ -52,15 +60,17 @@ std::string_view slot_name(StrategyRegistration::ConfigurationSlot slot) {
     case Slot::approximation: return "approximation";
     case Slot::selector: return "selector";
     case Slot::representation: return "representation";
+    case Slot::history_optimizer:
+        return "history_optimizer";
     }
     return "invalid";
 }
 
 bool same_configuration(const StrategyConfiguration& a, const StrategyConfiguration& b) {
-    return a.strategy == b.strategy && a.lp == b.lp && a.convex == b.convex &&
-        a.hull == b.hull && a.geometry == b.geometry && a.converter == b.converter &&
-        a.approximation == b.approximation && a.selector == b.selector &&
-        a.representation == b.representation;
+    return a.strategy == b.strategy && a.lp == b.lp && a.convex == b.convex && a.hull == b.hull &&
+           a.geometry == b.geometry && a.converter == b.converter &&
+           a.approximation == b.approximation && a.selector == b.selector &&
+           a.representation == b.representation && a.history_optimizer == b.history_optimizer;
 }
 
 void append(std::ostringstream& output, std::string_view value) {

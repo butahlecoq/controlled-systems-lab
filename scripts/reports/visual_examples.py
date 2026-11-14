@@ -30,6 +30,8 @@ import stage_buryatia_dim4
 import stage_buryatia_volterra
 import stage_discrete_mpc_2d
 import stage_ext07
+import stage_history_membership_2d
+import stage_history_optimizer_native
 import stage_native_discrete_models
 import stage_native_extended_models
 import stage_native_flexible_pitch
@@ -827,6 +829,7 @@ def validate_gallery_inventory(out, entries):
                 "saved-data-companion",
                 "saved-data-illustration",
                 "analytic-illustration",
+                "native-current-source-example",
             },
             "unknown visual inventory status",
         )
@@ -1397,6 +1400,14 @@ def build(catalog, site):
         Path(__file__).resolve().parents[2]
     )
     saved_figures += history_card
+    native_history_files, native_history_inventory, native_history_card = (
+        stage_history_optimizer_native.build(Path(__file__).resolve().parents[2])
+    )
+    saved_figures += native_history_card
+    membership_history_files, membership_history_inventory, membership_history_card = (
+        stage_history_membership_2d.build(Path(__file__).resolve().parents[2])
+    )
+    saved_figures += membership_history_card
     positive_part_files, positive_part_inventory, positive_part_card = (
         stage_positive_part_budget_2d.build(Path(__file__).resolve().parents[2])
     )
@@ -1471,6 +1482,8 @@ def build(catalog, site):
     outputs.update(tracking_files)
     outputs.update(row_scaling_files)
     outputs.update(history_files)
+    outputs.update(native_history_files)
+    outputs.update(membership_history_files)
     outputs.update(positive_part_files)
     outputs.update(mpc_files)
     outputs.update(extended_files)
@@ -1669,6 +1682,8 @@ def build(catalog, site):
     gallery_inventory.extend(tracking_inventory)
     gallery_inventory.extend(row_scaling_inventory)
     gallery_inventory.extend(history_inventory)
+    gallery_inventory.extend(native_history_inventory)
+    gallery_inventory.extend(membership_history_inventory)
     gallery_inventory.extend(positive_part_inventory)
     gallery_inventory.extend(mpc_inventory)
     gallery_inventory.extend(extended_inventory)

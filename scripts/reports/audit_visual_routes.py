@@ -182,7 +182,11 @@ SAVED_COMPANION_ROUTES = {
     "benchmarks/reporting/issue6/b07_render_projection.py",
     "benchmarks/reporting/issue6/b09_render_projection.py",
 }
-SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
+SAVED_DATA_COMPANION_COLLECTORS = {
+    "scripts/reports/app01/collect.py",
+    "scripts/reports/capture_history_optimizer_native.py",
+    "scripts/reports/capture_history_membership_2d.py",
+}
 SAVED_DATA_ILLUSTRATION_RENDERERS = {
     "scripts/reports/render_native_model_tracking_first_pass.py": (
         "Projects independently checked, immutable all-stage native trajectories into two-dimensional views; it reruns neither the controller nor its optimizer."),
@@ -542,7 +546,12 @@ def build(root: Path = ROOT) -> dict:
                     "native-model-tracking-first-pass-v1/checks/independent_results.csv",
                     "native-model-tracking-first-pass-v1/checks/full_state_trajectory_checked.csv",
                     "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip",
-                    "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip.sha256"] + stage_buryatia_volterra.asset_paths() + geometry_companion_assets() +
+                    "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip.sha256",
+                    "history-membership-zonotope-2d-v1/index.html",
+                    "history-membership-zonotope-2d-v1/history.svg",
+                    "history-membership-zonotope-2d-v1/history.csv",
+                    "history-membership-zonotope-2d-v1/records/receipt.json",
+                    "history-membership-zonotope-2d-v1/history-membership-zonotope-2d-v1.zip"] + stage_buryatia_volterra.asset_paths() + geometry_companion_assets() +
                     viz10_companion_assets() + control_witness_companions.asset_paths(),
                  "disposition": "adopted-shared-quantitative-policy"},
                 {"route": "examples/native-model-tracking-first-pass-v1/index.html",
@@ -553,6 +562,13 @@ def build(root: Path = ROOT) -> dict:
                             "native-model-tracking-first-pass-v1/SHA256SUMS.json",
                             "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip",
                             "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip.sha256"],
+                 "disposition": "source-owned saved functional bundle; no optimization is rerun"},
+                {"route": "examples/history-membership-zonotope-2d-v1/index.html",
+                 "assets": ["history-membership-zonotope-2d-v1/index.html",
+                            "history-membership-zonotope-2d-v1/history.svg",
+                            "history-membership-zonotope-2d-v1/history.csv",
+                            "history-membership-zonotope-2d-v1/records/receipt.json",
+                            "history-membership-zonotope-2d-v1/history-membership-zonotope-2d-v1.zip"],
                  "disposition": "source-owned saved functional bundle; no optimization is rerun"}],
             "migration_owner": "#669 owns the shared policy; deferred family renderers link to scoped follow-up issues #684–#687, while frozen report bundles remain immutable evidence"}
 

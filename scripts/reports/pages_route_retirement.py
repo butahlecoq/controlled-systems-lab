@@ -48,6 +48,9 @@ BARE_ROUTE_REPLACEMENTS = {
 # Gallery pages are assembled by visual_examples.py. These additional sources
 # own page content or figures for the routes they contribute.
 EXAMPLE_ROUTE_PRODUCERS = {
+    "examples/history-membership-zonotope-2d-v1/index.html": ["scripts/reports/stage_history_membership_2d.py", "scripts/reports/visual_examples.py"],
+    "examples/history-membership-zonotope-2d-v1/records/native-output.html": ["scripts/reports/stage_history_membership_2d.py", "reports/algorithm-results/history-membership-zonotope-2d-v1/records/native-output.html"],
+    "examples/history-optimizer-native-2d-v1/records/native-output.html": ["scripts/reports/stage_history_optimizer_native.py", "reports/algorithm-results/history-optimizer-native-2d-v1/records/native-output.html"],
     "examples/native-row-scaling-diagnostic-v1/index.html": ["scripts/reports/stage_native_row_scaling_diagnostic.py", "reports/algorithm-results/native-row-scaling-diagnostic-v1/index.html"],
     "examples/native-row-scaling-diagnostic-v1/guide.html": ["scripts/reports/stage_native_row_scaling_diagnostic.py", "reports/algorithm-results/native-row-scaling-diagnostic-v1/guide.html"],
     "examples/native-model-tracking-first-pass-v1/index.html": ["scripts/reports/stage_native_model_tracking_first_pass.py", "scripts/reports/visual_examples.py"],

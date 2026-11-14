@@ -66,7 +66,8 @@ option(CSL_BUILD_MPC04_REPORT "Build the finite MPC-04 closed-loop report driver
 
 option(CSL_BUILD_REPORTS "Build the non-installed algorithm report driver" OFF)
 option(CSL_BUILD_NOMINAL_TUBE_CAPTURE "Build the source-bound closed-H nominal tube capture tool" OFF)
-option(CSL_ENABLE_CASADI "Build the optional native C++ CasADi/IPOPT fixed-tail optimizer" OFF)
+option(CSL_ENABLE_CASADI "Build the optional native C++ CasADi/IPOPT history optimizers" OFF)
+option(CSL_BUILD_HISTORY_MEMBERSHIP_2D_EXAMPLE "Build the source-cost history membership 2D example" OFF)
 if(CSL_ENABLE_CASADI)
   include(cmake/CasadiDependencies.cmake)
 endif()
@@ -160,6 +161,47 @@ target_compile_definitions(csl_closed_loop_native_policy PRIVATE
   CSL_NATIVE_BUILD_TYPE="${CMAKE_BUILD_TYPE}")
 target_include_directories(csl_closed_loop_native_policy SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 set_target_properties(csl_closed_loop_native_policy PROPERTIES CXX_EXTENSIONS OFF)
+if(CSL_ENABLE_CASADI)
+  add_executable(history_optimizer_2d_example tools/history_optimizer_2d_example.cpp)
+  target_link_libraries(history_optimizer_2d_example PRIVATE CSL::casadi_superscs_history_optimizer)
+  set_target_properties(history_optimizer_2d_example PROPERTIES CXX_EXTENSIONS OFF)
+  csl_strict_warnings(history_optimizer_2d_example)
+endif()
+if(CSL_BUILD_HISTORY_MEMBERSHIP_2D_EXAMPLE)
+  if(NOT CSL_ENABLE_CASADI)
+    message(FATAL_ERROR "The history membership example requires CSL_ENABLE_CASADI")
+  endif()
+  execute_process(
+    COMMAND git rev-parse HEAD
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    OUTPUT_VARIABLE CSL_HISTORY_MEMBERSHIP_SOURCE_COMMIT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE CSL_HISTORY_MEMBERSHIP_GIT_RESULT)
+  string(LENGTH "${CSL_HISTORY_MEMBERSHIP_SOURCE_COMMIT}"
+    CSL_HISTORY_MEMBERSHIP_SOURCE_COMMIT_LENGTH)
+  if(NOT CSL_HISTORY_MEMBERSHIP_GIT_RESULT EQUAL 0 OR
+     NOT CSL_HISTORY_MEMBERSHIP_SOURCE_COMMIT_LENGTH EQUAL 40 OR
+     NOT CSL_HISTORY_MEMBERSHIP_SOURCE_COMMIT MATCHES "^[0-9a-f]+$")
+    message(FATAL_ERROR "The history membership example requires a Git source commit")
+  endif()
+  if(NOT casadi_VERSION)
+    message(FATAL_ERROR "The history membership example requires a versioned CasADi package")
+  endif()
+  set(CSL_HISTORY_MEMBERSHIP_SOURCE_COMMIT "${CSL_HISTORY_MEMBERSHIP_SOURCE_COMMIT}"
+    CACHE INTERNAL "Source commit compiled into the history membership example" FORCE)
+  set(CSL_HISTORY_MEMBERSHIP_COMPILER "${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}"
+    CACHE INTERNAL "Compiler identity for the history membership example" FORCE)
+  set(CSL_HISTORY_MEMBERSHIP_CASADI_VERSION "${casadi_VERSION}"
+    CACHE INTERNAL "CasADi version for the history membership example" FORCE)
+  add_executable(history_membership_2d_example tools/history_membership_2d_example.cpp)
+  target_link_libraries(history_membership_2d_example PRIVATE CSL::casadi_history_optimizer)
+  target_compile_definitions(history_membership_2d_example PRIVATE
+    CSL_HISTORY_MEMBERSHIP_SOURCE_COMMIT="${CSL_HISTORY_MEMBERSHIP_SOURCE_COMMIT}"
+    CSL_HISTORY_MEMBERSHIP_COMPILER="${CSL_HISTORY_MEMBERSHIP_COMPILER}"
+    CSL_HISTORY_MEMBERSHIP_CASADI_VERSION="${CSL_HISTORY_MEMBERSHIP_CASADI_VERSION}")
+  set_target_properties(history_membership_2d_example PROPERTIES CXX_EXTENSIONS OFF)
+  csl_strict_warnings(history_membership_2d_example)
+endif()
 if(BUILD_TESTING)
   find_program(CSL_NATIVE_FRAME_TEST_PYTHON NAMES python3)
   if(CSL_NATIVE_FRAME_TEST_PYTHON)

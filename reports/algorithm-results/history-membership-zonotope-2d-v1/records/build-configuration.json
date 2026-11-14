@@ -1,0 +1,16 @@
+{
+  "schema": "csl.history-membership-build-identity/1",
+  "source_root_matches_checkout": true,
+  "source_commit": "bac6ff91fbb41b44603638a73ff963e7cd8467c0",
+  "build_type": "Release",
+  "generator": "Ninja",
+  "casadi_enabled": true,
+  "casadi_version": "3.8.0",
+  "example_enabled": true,
+  "cmake_version": "3.31.6",
+  "compiler": {
+    "executable": "c++",
+    "id": "GNU",
+    "version": "16.2.1"
+  }
+}

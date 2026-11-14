@@ -61,6 +61,18 @@ on:
       - 'scripts/reports/stage_app02.py'
       - 'tests/reporting/test_site_additions.py'
       - 'tests/reporting/test_app02_saved.py'
+      - 'scripts/reports/capture_history_optimizer_native.py'
+      - 'scripts/reports/stage_history_optimizer_native.py'
+      - 'tests/reporting/test_history_optimizer_native.py'
+      - 'reports/algorithm-results/history-optimizer-native-2d-v1/**'
+      - 'scripts/reports/capture_history_membership_2d.py'
+      - 'scripts/reports/stage_history_membership_2d.py'
+      - 'tests/reporting/test_history_membership_2d.py'
+      - 'reports/algorithm-results/history-membership-zonotope-2d-v1/**'
+      - 'scripts/reports/visual_examples.py'
+      - 'scripts/reports/pages_route_retirement.py'
+      - 'scripts/reports/audit_visual_routes.py'
+      - 'scripts/reports/mathematical-presentation-routes.json'
       - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
       - 'scripts/reports/stage_closed_loop_initial_baselines.py'
@@ -139,6 +151,18 @@ on:
       - 'scripts/reports/stage_app02.py'
       - 'tests/reporting/test_site_additions.py'
       - 'tests/reporting/test_app02_saved.py'
+      - 'scripts/reports/capture_history_optimizer_native.py'
+      - 'scripts/reports/stage_history_optimizer_native.py'
+      - 'tests/reporting/test_history_optimizer_native.py'
+      - 'reports/algorithm-results/history-optimizer-native-2d-v1/**'
+      - 'scripts/reports/capture_history_membership_2d.py'
+      - 'scripts/reports/stage_history_membership_2d.py'
+      - 'tests/reporting/test_history_membership_2d.py'
+      - 'reports/algorithm-results/history-membership-zonotope-2d-v1/**'
+      - 'scripts/reports/visual_examples.py'
+      - 'scripts/reports/pages_route_retirement.py'
+      - 'scripts/reports/audit_visual_routes.py'
+      - 'scripts/reports/mathematical-presentation-routes.json'
       - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
       - 'scripts/reports/stage_closed_loop_initial_baselines.py'
@@ -205,6 +229,10 @@ jobs:
 
       - name: Check the locked source-only native row-scaling publication
         run: python -m unittest discover -s tests/reporting -p 'test_stage_native_row_scaling_diagnostic.py'
+      - name: Check the saved native whole-history optimizer route
+        run: python -m unittest discover -s tests/reporting -p 'test_history_optimizer_native.py'
+      - name: Check the saved typed-membership 2D example
+        run: python -m unittest discover -s tests/reporting -p 'test_history_membership_2d.py'
       - name: Check the matched discrete MPC example and visual gallery
         run: |
           python -m unittest discover -s tests/reporting -p 'test_discrete_mpc_2d.py'
