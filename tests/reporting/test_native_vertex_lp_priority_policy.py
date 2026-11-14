@@ -9,10 +9,12 @@ import re
 import subprocess
 import sys
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "benchmarks/reporting/closed_loop"))
 from native_graph_probe import bind_task_hash, request
+from native_graph_policy import NativeGraphPolicy
 
 POLICY = "structural-column-index/v1"
 TRIANGLE = [[-1.0, -1.0], [1.0, -1.0], [0.0, 1.0]]
@@ -42,6 +44,43 @@ def assumptions(response: dict) -> list[str]:
             for item in call["evidence_assumptions"]]
 
 
+def factory_options(query: dict) -> dict:
+    names = ("reachable_set_method", "hull_provider", "vertex_lp_provider",
+             "conversion_provider", "checker_budget", "control_optimizer", "limits",
+             "vertex_lp_priority_policy")
+    return {key: query[key] for key in names if key in query}
+
+
+class PriorityPolicyWrapperBoundaryTests(unittest.TestCase):
+    def test_declared_policy_is_forwarded_and_absence_is_preserved(self):
+        for explicit in (True, False):
+            policy = NativeGraphPolicy.__new__(NativeGraphPolicy)
+            policy.use_backward_graph = True
+            policy.factory_options = factory_options(fixture(SQUARE, policy=POLICY if explicit else None))
+            options = policy._geometry_options()
+            self.assertEqual("vertex_lp_priority_policy" in options, explicit)
+            if explicit:
+                self.assertEqual(options["vertex_lp_priority_policy"], POLICY)
+
+    def test_malformed_unknown_and_inactive_wrapper_policy_is_not_dropped(self):
+        cases = [fixture(SQUARE, policy="unknown/v1"), fixture(SQUARE, lp="phase-one-bland")]
+        malformed = fixture(SQUARE)
+        malformed["vertex_lp_priority_policy"] = None
+        cases.append(malformed)
+        source = fixture(SQUARE)
+        source["reachable_set_method"]["id"] += ".source-index"
+        source["vertex_lp_provider"] = "not_used"
+        cases.append(source)
+        for query in cases:
+            for active in (True, False):
+                with self.subTest(query=query, active=active):
+                    policy = NativeGraphPolicy.__new__(NativeGraphPolicy)
+                    policy.factory_options = factory_options(query)
+                    policy.use_backward_graph = active
+                    with self.assertRaisesRegex(ValueError, "vertex_lp_priority_policy"):
+                        policy._geometry_options()
+
+
 @unittest.skipUnless(os.environ.get("CSL_NATIVE_POLICY_BRIDGE"),
                      "Configured native CTest supplies the built bridge")
 class NativeVertexLpPriorityPolicyTests(unittest.TestCase):
@@ -50,6 +89,44 @@ class NativeVertexLpPriorityPolicyTests(unittest.TestCase):
                                 input=json.dumps(query) + "\n", text=True,
                                 capture_output=True, check=True, timeout=20)
         return json.loads(result.stdout)
+
+    def test_real_policy_wrapper_forwards_priority_and_binds_both_native_receipts(self):
+        for explicit in (True, False):
+            with self.subTest(explicit=explicit):
+                query = fixture(SQUARE, policy=POLICY if explicit else None)
+                task = {"task_id": query["task_id"],
+                        "control_domains": {"finite": {"problem_id": query["action_profile_id"], "actions": SQUARE}},
+                        "model": {"model_id": query["source_model_id"],
+                                  "states": [{"bounds": bound} for bound in query["state_bounds"]]},
+                        "episode": {"intervals": 1, "dt": 1.0},
+                        "objective": {"objective_id": query["running_cost"]["objective_id"]}}
+                receipt = {"model_id": query["predictor_model_id"],
+                           "coefficient_assurance": query["predictor_assurance"],
+                           "physical_coefficients": query["predictor_stages"]}
+                # Supply an authored one-stage identity plant to the source adapters;
+                # preparation, option forwarding, process exchange and receipts are real.
+                with patch("native_graph_policy.prediction_receipt", return_value=receipt), \
+                        patch("native_graph_policy._source_cost", return_value=query["running_cost"]), \
+                        patch("native_graph_policy._terminal_objective", return_value=query["terminal_objective"]):
+                    policy = NativeGraphPolicy(task, query["task_sha256"],
+                        "native-exact-polytope-backward-graph/1", query["action_profile_id"], factory_options(query))
+                try:
+                    response = policy.query(task["task_id"], [0.0, 0.0], 0)
+                    self.assertEqual(response["status"], "accepted", response)
+                    sent = response["query_receipt"]["request"]
+                    for selection in (sent, response["geometry_selection"],
+                                      response["graph_receipt"]["geometry_selection"]):
+                        self.assertEqual("vertex_lp_priority_policy" in selection, explicit)
+                        if explicit:
+                            self.assertEqual(selection["vertex_lp_priority_policy"], POLICY)
+                    evidence = assumptions(response)
+                    if explicit:
+                        self.assertTrue(any("actual_provider=phase-one-priority-tie@1;" in item and
+                                            "status=completed;" in item for item in evidence), evidence)
+                    else:
+                        self.assertTrue(any("Priority count must match" in item for item in evidence), evidence)
+                finally:
+                    policy.close()
 
     def test_nonfive_membership_domains_execute_the_selected_priority_provider(self):
         observed_columns = set()
