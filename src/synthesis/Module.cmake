@@ -24,7 +24,8 @@ endif()
 csl_add_library(csl_strategy_a STATIC
   src/synthesis/strategy_a/strategy.cpp)
 
-target_link_libraries(csl_strategy_a PUBLIC CSL::nominal_forward CSL::terminal_minimizers CSL::control_recovery CSL::artifacts)
+target_link_libraries(csl_strategy_a PUBLIC CSL::nominal_forward CSL::terminal_minimizers
+  CSL::control_recovery CSL::history_optimizer CSL::artifacts)
 
 csl_add_library(csl_strategy_ts01 STATIC src/synthesis/strategy_ts01/analytic_profile.cpp)
 
@@ -34,7 +35,7 @@ csl_add_library(csl_strategy_b STATIC src/synthesis/strategy_b/direct_joint.cpp)
 
 target_link_libraries(csl_strategy_b PUBLIC
   CSL::resolved_problem CSL::sets CSL::registry CSL::convex CSL::verification
-  CSL::strategy_ts01
+  CSL::strategy_ts01 CSL::history_optimizer
   PRIVATE CSL::artifacts)
 
 csl_add_library(csl_witness_selector STATIC src/synthesis/witness_selector.cpp)
