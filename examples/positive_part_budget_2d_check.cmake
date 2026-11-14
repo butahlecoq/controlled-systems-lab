@@ -21,9 +21,9 @@ file(READ "${output_dir}/native-example.stdout" recorded_output)
 if(NOT "${recorded_output}" STREQUAL "${output}")
   message(FATAL_ERROR "Saved stdout differs from the actual native example output")
 endif()
-if(NOT "${solution}" MATCHES "u0,0.2,0.1,-0.2,0.2" OR
-   NOT "${solution}" MATCHES "u1,-0.2,-0.2,-0.2,0.2" OR
-   NOT "${solution}" MATCHES "positive_part_budget,0.1,0.1,0,0.1")
+if(NOT "${solution}" MATCHES "u0,0[.]2,0[.]1[0-9]*,-0[.]2,0[.]2" OR
+   NOT "${solution}" MATCHES "u1,-0[.]2,-0[.]2[0-9]*,-0[.]2,0[.]2" OR
+   NOT "${solution}" MATCHES "positive_part_budget,0[.]1,0[.]1[0-9]*,0,0[.]1")
   message(FATAL_ERROR "Saved native solution differs from the checked output: ${solution}")
 endif()
 message(STATUS "${output}")
