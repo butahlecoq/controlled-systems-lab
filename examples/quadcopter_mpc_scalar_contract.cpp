@@ -4,67 +4,103 @@
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
+#include <utility>
 
 int main() try {
     using namespace csl;
     using namespace csl::optimization;
     using namespace csl::registry;
     using namespace csl::examples::quadcopter_mpc;
-    const NominalProblem problem{
-        {1,1,{1}}, {1,1,{1}}, {1,1,{1}}, {1,1,{1}}, {1,1,{1}},
-        {0}, {1}, 2, {{-10,10}}, {{-10,10}}};
-    auto sample_task=problem;
-    sample_task.initial={0.25};
-    const Vector sample_states{0.25,0.65,0.45};
-    const Vector sample_controls{0.4,-0.2};
-    if(!source_history_feasible(sample_task,sample_states,sample_controls))
-        throw std::runtime_error("Independent source feasibility check rejected a hand-built history");
-    auto sample_program=compile_nominal_quadratic_history(make_task(sample_task));
-    if(!std::holds_alternative<ConvexProgram>(sample_program))
+    const NominalProblem problem{{1, 1, {1}}, {1, 1, {1}}, {1, 1, {1}}, {1, 1, {1}},
+                                 {1, 1, {1}}, {0},         {1},         2};
+    const std::vector<Interval> state_bounds{{-10, 10}};
+    const std::vector<Interval> input_bounds{{-10, 10}};
+    auto sample_task = problem;
+    sample_task.initial = {0.25};
+    const Vector sample_states{0.25, 0.65, 0.45};
+    const Vector sample_controls{0.4, -0.2};
+    if (!source_history_feasible(sample_task, state_bounds, input_bounds, sample_states,
+                                 sample_controls))
+        throw std::runtime_error(
+            "Independent source feasibility check rejected a hand-built history");
+    auto sample_program =
+        compile_nominal_quadratic_history(make_task(sample_task, state_bounds, input_bounds));
+    if (!std::holds_alternative<CompiledNominalQuadraticHistory>(sample_program))
         throw std::runtime_error("History compiler rejected the source21-shaped sample task");
-    const Vector sample_history{0.25,0.65,0.45,0.4,-0.2};
-    auto compiled_evaluation=evaluate_primal(std::get<ConvexProgram>(sample_program),sample_history,
-        {1e-9,1e-9},{{"source21-literal-cost-and-constraint-cross-check"},"1"});
-    if(!std::holds_alternative<ConvexPrimalEvaluation>(compiled_evaluation) ||
-       std::abs(std::get<ConvexPrimalEvaluation>(compiled_evaluation).original_objective-
-           evaluate_source_cost(sample_task,sample_states,sample_controls))>1e-9 ||
-       std::get<ConvexPrimalEvaluation>(compiled_evaluation).residuals.rows.violation>1e-9)
-        throw std::runtime_error("Compiled cost/constraints disagreed on an arbitrary source21-shaped history");
-    auto invalid_states=sample_states;
-    invalid_states[2]+=0.1;
-    if(source_history_feasible(sample_task,invalid_states,sample_controls))
-        throw std::runtime_error("Independent source feasibility check accepted a changed dynamics state");
+    const auto &sample_compiled = std::get<CompiledNominalQuadraticHistory>(sample_program);
+    Vector sample_history(sample_compiled.layout.total_variable_count, 0.0);
+    for (std::size_t stage = 0; stage < sample_states.size(); ++stage)
+        sample_history[sample_compiled.layout.state_index(stage, 0).value()] = sample_states[stage];
+    for (std::size_t stage = 0; stage < sample_controls.size(); ++stage)
+        sample_history[sample_compiled.layout.control_index(stage, 0).value()] =
+            sample_controls[stage];
+    auto compiled_evaluation =
+        evaluate_primal(sample_compiled.program, sample_history, {1e-9, 1e-9},
+                        {{"source21-literal-cost-and-constraint-cross-check"}, "1"});
+    if (!std::holds_alternative<ConvexPrimalEvaluation>(compiled_evaluation) ||
+        std::abs(std::get<ConvexPrimalEvaluation>(compiled_evaluation).original_objective -
+                 evaluate_source_cost(sample_task, sample_states, sample_controls)) > 1e-9 ||
+        std::get<ConvexPrimalEvaluation>(compiled_evaluation).residuals.rows.violation > 1e-9)
+        throw std::runtime_error(
+            "Compiled cost/constraints disagreed on an arbitrary source21-shaped history");
+    auto invalid_states = sample_states;
+    invalid_states[2] += 0.1;
+    if (source_history_feasible(sample_task, state_bounds, input_bounds, invalid_states,
+                                sample_controls))
+        throw std::runtime_error(
+            "Independent source feasibility check accepted a changed dynamics state");
     Registry<ConvexPort> registry;
-    if (registry.add(std::get<Registration<ConvexPort>>(adapters::convex::make_highs_registration())))
+    if (registry.add(
+            std::get<Registration<ConvexPort>>(adapters::convex::make_highs_registration())))
         throw std::runtime_error("HiGHS registration failed");
     Requirements requirements;
     requirements.output.representation = {"csl.program-result.v1"};
-    auto solve=[&](const NominalProblem& task) {
-        auto made=compile_nominal_quadratic_history(make_task(task));
-        if(const auto* errors=std::get_if<Diagnostics>(&made)) {
-            for(const auto& error:*errors) std::cerr<<error.field<<": "<<error.explanation<<'\n';
+    auto solve = [&](const NominalProblem &task) {
+        auto made = compile_nominal_quadratic_history(make_task(task, state_bounds, input_bounds));
+        if (const auto *errors = std::get_if<Diagnostics>(&made)) {
+            for (const auto &error : *errors)
+                std::cerr << error.field << ": " << error.explanation << '\n';
             throw std::runtime_error("scalar tracking QP rejected");
         }
-        if(!std::holds_alternative<ConvexProgram>(made)) throw std::runtime_error("scalar tracking QP stopped");
-        const auto& program=std::get<ConvexProgram>(made);
-        auto preparation=prepare_pipeline(select(registry,{{"csl.convex.highs"},{}},program,requirements));
-        if(!std::holds_alternative<PreparedPipeline<ConvexPort>>(preparation)) throw std::runtime_error("HiGHS selection failed");
-        auto [workspace]=std::get<PreparedPipeline<ConvexPort>>(preparation).create();
-        auto outcome=workspace->run({std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}}),{},{},{1e-8,1e-8},"scalar-mpc"});
-        const auto* result=std::get_if<ProgramResult>(&outcome);
-        if(!result || result->termination!=Termination::completed || result->outcome.value!=MathematicalOutcome::optimal || !result->primal)
+        if (!std::holds_alternative<CompiledNominalQuadraticHistory>(made))
+            throw std::runtime_error("scalar tracking QP stopped");
+        const auto &history = std::get<CompiledNominalQuadraticHistory>(made);
+        const auto &program = history.program;
+        auto preparation =
+            prepare_pipeline(select(registry, {{"csl.convex.highs"}, {}}, program, requirements));
+        if (!std::holds_alternative<PreparedPipeline<ConvexPort>>(preparation))
+            throw std::runtime_error("HiGHS selection failed");
+        auto [workspace] = std::get<PreparedPipeline<ConvexPort>>(preparation).create();
+        auto outcome =
+            workspace->run({std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}}),
+                            {},
+                            {},
+                            {1e-8, 1e-8},
+                            "scalar-mpc"});
+        const auto *result = std::get_if<ProgramResult>(&outcome);
+        if (!result || result->termination != Termination::completed ||
+            result->outcome.value != MathematicalOutcome::optimal || !result->primal ||
+            !history.layout.accepts_primal_size(result->primal->size()))
             throw std::runtime_error("scalar MPC did not solve to numerical optimality");
-        return *result->primal;
+        return std::pair{history.layout, *result->primal};
     };
-    const auto primal=solve(problem);
-    if(primal.size()!=5 || std::abs(primal[0])>1e-7 || std::abs(primal[1]-.6)>1e-7 ||
-       std::abs(primal[2]-.8)>1e-7 || std::abs(primal[3]-.6)>1e-7 || std::abs(primal[4]-.2)>1e-7)
+    const auto [layout, primal] = solve(problem);
+    if (layout.total_variable_count != 5 ||
+        std::abs(primal[layout.state_index(0, 0).value()]) > 1e-7 ||
+        std::abs(primal[layout.state_index(1, 0).value()] - .6) > 1e-7 ||
+        std::abs(primal[layout.state_index(2, 0).value()] - .8) > 1e-7 ||
+        std::abs(primal[layout.control_index(0, 0).value()] - .6) > 1e-7 ||
+        std::abs(primal[layout.control_index(1, 0).value()] - .2) > 1e-7)
         throw std::runtime_error("running-state/control tracking optimum was not u=(0.6,0.2)");
-    auto observed_problem=problem;
-    observed_problem.initial[0]=.25;
-    const auto observed_primal=solve(observed_problem);
-    if(std::abs(observed_primal[0]-.25)>1e-7 || std::abs(observed_primal[3]-.45)>1e-7 ||
-       std::abs(observed_primal[4]-.15)>1e-7)
+    auto observed_problem = problem;
+    observed_problem.initial[0] = .25;
+    const auto [observed_layout, observed_primal] = solve(observed_problem);
+    if (std::abs(observed_primal[observed_layout.state_index(0, 0).value()] - .25) > 1e-7 ||
+        std::abs(observed_primal[observed_layout.control_index(0, 0).value()] - .45) > 1e-7 ||
+        std::abs(observed_primal[observed_layout.control_index(1, 0).value()] - .15) > 1e-7)
         throw std::runtime_error("MPC initial equality did not follow the observed state");
     std::cout << "scalar running-state MPC: u=(0.6,0.2); observed-state equality preserved\n";
-} catch (const std::exception& e) { std::cerr << e.what() << '\n'; return 1; }
+} catch (const std::exception &e) {
+    std::cerr << e.what() << '\n';
+    return 1;
+}

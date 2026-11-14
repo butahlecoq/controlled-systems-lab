@@ -644,9 +644,9 @@ def _string_end(data: mmap.mmap, start: int) -> int:
     position = start + 1
     while True:
         quote = data.find(b'"', position)
-        slash = data.find(b"\\", position)
         if quote < 0:
             raise ValueError("JSON string is truncated")
+        slash = data.find(b"\\", position, quote)
         if slash < 0 or quote < slash:
             if _JSON_CONTROL.search(data, position, quote) is not None:
                 raise ValueError("JSON string contains an unescaped control character")

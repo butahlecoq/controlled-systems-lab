@@ -22,10 +22,20 @@ class VisualRouteInventoryTests(unittest.TestCase):
         history_stager=producers["scripts/reports/stage_nominal_quadratic_history.py"]
         self.assertEqual(history_stager["disposition"],"saved-data-illustration-renderer")
         self.assertIn("as raw solver data",history_stager["role_and_disposition_reason"])
+        budget_stager=producers["scripts/reports/stage_positive_part_budget_2d.py"]
+        self.assertEqual(budget_stager["disposition"],"saved-data-illustration-renderer")
+        self.assertIn("exact positive-part feasible polygon",budget_stager["role_and_disposition_reason"])
+        mpc_stager=producers["scripts/reports/stage_discrete_mpc_2d.py"]
+        self.assertEqual(mpc_stager["disposition"],"saved-data-illustration-renderer")
+        self.assertIn("no robustness claim",mpc_stager["role_and_disposition_reason"])
         gallery_route=next(route for route in inventory["gallery_routes"]
                            if route["route"]=="examples/index.html")
         self.assertIn("nominal-quadratic-history-2d.html",gallery_route["assets"])
         self.assertIn("nominal_quadratic_history_2d.csv",gallery_route["assets"])
+        self.assertIn("positive-part-budget-2d.html",gallery_route["assets"])
+        self.assertIn("positive_part_budget_2d_native-solution.csv",gallery_route["assets"])
+        self.assertIn("discrete-mpc-2d.html",gallery_route["assets"])
+        self.assertIn("discrete_mpc_2d-output.csv",gallery_route["assets"])
         tube_renderer=producers["scripts/reports/nominal_tube_figure.py"]
         self.assertEqual(tube_renderer["disposition"],"saved-data-illustration-renderer")
         self.assertIn("full-state H rows F, B and I",tube_renderer["role_and_disposition_reason"])
@@ -286,6 +296,12 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "nominal-quadratic-history-2d.html", "nominal-quadratic-history-2d.svg",
             "nominal-quadratic-history-2d.json", "nominal_quadratic_history_2d.csv",
             "nominal_quadratic_history_2d-output.txt",
+            "positive-part-budget-2d.html", "positive-part-budget-2d.svg",
+            "positive-part-budget-2d.json", "positive_part_budget_2d_vertices.csv",
+            "positive_part_budget_2d_native-solution.csv", "positive_part_budget_2d_run.txt",
+            "positive_part_budget_2d_native-example.stdout",
+            "discrete-mpc-2d.html", "discrete-mpc-2d.svg", "discrete-mpc-2d.json",
+            "discrete_mpc_2d-output.csv", "discrete_mpc_2d-output.txt",
             "adaptive-ode-replay.csv", "adaptive-ode-replay.html",
             "adaptive-ode-replay.json", "adaptive-ode-replay.svg",
             "fuel-b06-viz06-export.json", "fuel-b06-viz03.html", "fuel-b06-viz06-before.svg",

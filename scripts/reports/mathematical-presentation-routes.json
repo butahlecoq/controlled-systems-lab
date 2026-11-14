@@ -639,6 +639,16 @@
       "owner": "scripts/reports/stage_nominal_quadratic_history.py"
     },
     {
+      "route": "examples/positive-part-budget-2d.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_positive_part_budget_2d.py"
+    },
+    {
+      "route": "examples/discrete-mpc-2d.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_discrete_mpc_2d.py"
+    },
+    {
       "route": "examples/nominal_linear_exact_2d.html",
       "disposition": "maintained",
       "owner": "examples/nominal_linear_exact_2d.html"
@@ -1544,6 +1554,39 @@
       "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
     },
     {
+      "route": "mpc07-comparison-e7f5b1b56577e225/evidence/bounded-policy-0e821c2a-recheck-v2/index.html",
+      "disposition": "frozen",
+      "owner": "benchmarks/reporting/mpc07/evidence/bounded-policy-0e821c2a-recheck-v2/index.html",
+      "sha256": "250519a67c5db9b886edc763e86af2694926898424dc3ed1075971f9624e434a",
+      "witness": "Unchanged frozen source benchmarks/reporting/mpc07/evidence/bounded-policy-0e821c2a-recheck-v2/index.html; complete SHA256SUMS anchored by stage_mpc07_comparison.ANCHORS['bounded-policy-0e821c2a-recheck-v2'] = d03f44424e7df6bf5caf7caf0650ae1a7a69da2da12d3954a22f3d2e9a4c88d9; qualified local composition at32d9bd0d7a9dac34d0dbdc1e66ad289321667eab"
+    },
+    {
+      "route": "mpc07-comparison-e7f5b1b56577e225/evidence/bounded-policy-0e821c2a/index.html",
+      "disposition": "frozen",
+      "owner": "benchmarks/reporting/mpc07/evidence/bounded-policy-0e821c2a/index.html",
+      "sha256": "3d1882bdb1703a784c0be7caef55c304d236db0e5cdc4a1a2cfb85c8a8d4587f",
+      "witness": "Unchanged frozen source benchmarks/reporting/mpc07/evidence/bounded-policy-0e821c2a/index.html; complete SHA256SUMS anchored by stage_mpc07_comparison.ANCHORS['bounded-policy-0e821c2a'] = 5c50928b1650a5f665df415d7b9cd7750cafd81d8d12e28956b74bc7413b4afe; qualified local composition at32d9bd0d7a9dac34d0dbdc1e66ad289321667eab"
+    },
+    {
+      "route": "mpc07-comparison-e7f5b1b56577e225/evidence/joint-filter-04369201-recheck-v2/index.html",
+      "disposition": "frozen",
+      "owner": "benchmarks/reporting/mpc07/evidence/joint-filter-04369201-recheck-v2/index.html",
+      "sha256": "a399e7c8c95ca9cd194a69e9ac405a601288056b7b3f74bbcec12f7741d660dd",
+      "witness": "Unchanged frozen source benchmarks/reporting/mpc07/evidence/joint-filter-04369201-recheck-v2/index.html; complete SHA256SUMS anchored by stage_mpc07_comparison.ANCHORS['joint-filter-04369201-recheck-v2'] = 37d34a5095825831eb6e8e8e9bba607a304a8d75a77c27a1115b26e36aaaf6ed; qualified local composition at32d9bd0d7a9dac34d0dbdc1e66ad289321667eab"
+    },
+    {
+      "route": "mpc07-comparison-e7f5b1b56577e225/evidence/joint-filter-04369201/index.html",
+      "disposition": "frozen",
+      "owner": "benchmarks/reporting/mpc07/evidence/joint-filter-04369201/index.html",
+      "sha256": "dc1391e0456a35e704ee7722d52e0577cc3d22650f5a09a587a76a921fb8da63",
+      "witness": "Unchanged frozen source benchmarks/reporting/mpc07/evidence/joint-filter-04369201/index.html; complete SHA256SUMS anchored by stage_mpc07_comparison.ANCHORS['joint-filter-04369201'] = f7ee7214ac3a9f3ca963fce474e1e8688a7e739156a416d3d8cf879709202169; qualified local composition at32d9bd0d7a9dac34d0dbdc1e66ad289321667eab"
+    },
+    {
+      "route": "mpc07-comparison-e7f5b1b56577e225/index.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_mpc07_comparison.py"
+    },
+    {
       "route": "mpc08-complete-5a9414f2ae07b6708738/captures/exact/index.html",
       "disposition": "frozen",
       "owner": "reports/published-route-preservation/manifest.json",
@@ -1556,6 +1599,18 @@
       "owner": "reports/published-route-preservation/manifest.json",
       "sha256": "3f21fedacbf63bb28514c7cee67e7d63ec4eb0e51d437c1d2216701209f419b6",
       "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc08-complete-df312784b3995e4633bd/captures/exact/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/mpc08-exact-regions-79ec2978-20261110/capture.zip",
+      "sha256": "65cd8f5d0c153d0f9016d3d5aec28168db3ecf03b3fa2fec664433bee664dd98",
+      "witness": "Exact index.html member of reports/algorithm-results/mpc08-exact-regions-79ec2978-20261110/capture.zip, ZIP SHA256 6487e8c642efc2f4c4ea9ab5cc83719c511022d4a1ee0e4fd2a9429a7ff29e76; complete SHA256SUMS anchored by stage_mpc08_complete.SPECS = 4b5fcbac7a4e158dc52c43834409ccddc3ba03ae95a0d8b0a47556899b5a5d22; capture source 79ec2978bb18a77abf5817b6f940aa3a89b0e488"
+    },
+    {
+      "route": "mpc08-complete-df312784b3995e4633bd/index.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_mpc08_complete.py"
     },
     {
       "route": "mpc08-explicit-nonunique-v1/index.html",
@@ -1577,6 +1632,11 @@
       "owner": "reports/published-route-preservation/manifest.json",
       "sha256": "3c9ba0fdec049bb9bd662e10d2d7aa1dab045a616f834258542b2536dfd245b2",
       "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc10-comparison-8af1fc5093906ef91b76/index.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_mpc10_comparison.py"
     },
     {
       "route": "mpc10-comparison-cbf22e8c7e22c30bf91f/index.html",
@@ -1612,6 +1672,11 @@
       "owner": "reports/published-route-preservation/manifest.json",
       "sha256": "20f55a3fab25342798cef26d723514e44aacd42fc003752b1f69a1e171e769a2",
       "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc11-mesh-timing-7606a2c0b2cd4dcd1df2/index.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_mpc11_mesh_timing.py"
     },
     {
       "route": "mpc11-mesh-timing-924055126ac3856ac279/index.html",

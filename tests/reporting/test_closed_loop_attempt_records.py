@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import json
+import mmap
 from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "benchmarks/reporting/closed_loop"))
@@ -24,6 +26,25 @@ class ClosedLoopAttemptRecordTests(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.temporary.cleanup()
+
+    def test_selective_reader_string_scan_work_is_bounded_by_record_size(self):
+        record = self.attempt / "many-small-strings.json"
+        record.write_text(json.dumps({"keep": 7, "omit": ["short" for _ in range(2000)],
+            "padding": "x" * 100000}))
+        scanned_bytes = 0
+
+        class CountedMapping(mmap.mmap):
+            def find(self, needle, start=0, end=None):
+                nonlocal scanned_bytes
+                bound = len(self) if end is None else end
+                found = super().find(needle, start, bound)
+                scanned_bytes += max(0, (bound if found < 0 else found + len(needle)) - start)
+                return found
+
+        with mock.patch.object(mmap, "mmap", CountedMapping):
+            value, _ = read_object_fields(record, selected={"keep"})
+        self.assertEqual(value, {"keep": 7})
+        self.assertLessEqual(scanned_bytes, 3 * record.stat().st_size)
 
     def _record(self) -> dict:
         return {"schema": "csl.closed-loop.attempt/2", "format_version": 2,

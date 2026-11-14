@@ -1459,6 +1459,15 @@
       "role_and_disposition_reason": "Authenticates the frozen v2 manifest and native 35a708df producer identity, then copies all current and superseded two-state affine lesson assets byte exactly into the Pages gallery; no numerical execution or historical relabelling."
     },
     {
+      "source": "scripts/reports/stage_discrete_mpc_2d.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "discrete-mpc-2d.svg"
+      ],
+      "disposition": "saved-data-illustration-renderer",
+      "role_and_disposition_reason": "Checks and stages the committed actual native open-loop/MPC state and action capture, then renders its 2D state path and first-control traces using the shared Omarchy page template. It runs no optimizer or simulated-policy code and describes the declared replay only; it makes no robustness claim."
+    },
+    {
       "source": "scripts/reports/stage_env717.py",
       "signal_count": 3,
       "asset_name_literals": [
@@ -2008,6 +2017,15 @@
       ],
       "disposition": "saved-data-illustration-renderer",
       "role_and_disposition_reason": "Stages an analytic two-state reachable-line diagram, rounded values transcribed from the committed native example output, and a source-bound binary check record using the shared Omarchy page template and stylesheet. It runs no solver and does not present the diagram or CSV as raw solver data."
+    },
+    {
+      "source": "scripts/reports/stage_positive_part_budget_2d.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "feasible-set.svg"
+      ],
+      "disposition": "saved-data-illustration-renderer",
+      "role_and_disposition_reason": "Stages the analytically derived exact positive-part feasible polygon and captured output from a source-bound native HiGHS example, using the shared Omarchy page template and stylesheet. It runs no solver and distinguishes the authored 2D illustration from the source model episode test."
     },
     {
       "source": "scripts/reports/stage_projection_figures.py",
@@ -4230,6 +4248,18 @@
         "nominal_quadratic_history_2d.csv",
         "nominal_quadratic_history_2d-output.txt",
         "nominal-quadratic-history-2d.json",
+        "positive-part-budget-2d.html",
+        "positive-part-budget-2d.svg",
+        "positive-part-budget-2d.json",
+        "positive_part_budget_2d_vertices.csv",
+        "positive_part_budget_2d_native-solution.csv",
+        "positive_part_budget_2d_run.txt",
+        "positive_part_budget_2d_native-example.stdout",
+        "discrete-mpc-2d.html",
+        "discrete-mpc-2d.svg",
+        "discrete-mpc-2d.json",
+        "discrete_mpc_2d-output.csv",
+        "discrete_mpc_2d-output.txt",
         "app02-diamond-v1.html",
         "app02-diamond-v1.svg",
         "app02-diamond-v1.png",

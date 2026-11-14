@@ -206,6 +206,12 @@ SAVED_DATA_ILLUSTRATION_RENDERERS = {
         "Stages an analytic two-state reachable-line diagram, rounded values transcribed from the committed native example output, "
         "and a source-bound binary check record using the shared Omarchy page template and stylesheet. "
         "It runs no solver and does not present the diagram or CSV as raw solver data."),
+    "scripts/reports/stage_positive_part_budget_2d.py": (
+        "Stages the analytically derived exact positive-part feasible polygon and captured output from a source-bound native HiGHS example, "
+        "using the shared Omarchy page template and stylesheet. It runs no solver and distinguishes the authored 2D illustration from the source model episode test."),
+    "scripts/reports/stage_discrete_mpc_2d.py": (
+        "Checks and stages the committed actual native open-loop/MPC state and action capture, then renders its 2D state path and first-control traces using the shared Omarchy page template. "
+        "It runs no optimizer or simulated-policy code and describes the declared replay only; it makes no robustness claim."),
     "scripts/reports/buryatia/render_2d.py": (
         "Renders all saved source-qualified native affine 2D stages and a terminal overlay; the factor matrix is "
         "retained in each ellipse record and the sampled boundary is checked against that represented set. "
@@ -485,6 +491,12 @@ def build(root: Path = ROOT) -> dict:
                     "nominal-quadratic-history-2d.html", "nominal-quadratic-history-2d.svg",
                     "nominal_quadratic_history_2d.csv", "nominal_quadratic_history_2d-output.txt",
                     "nominal-quadratic-history-2d.json",
+                    "positive-part-budget-2d.html", "positive-part-budget-2d.svg",
+                    "positive-part-budget-2d.json", "positive_part_budget_2d_vertices.csv",
+                    "positive_part_budget_2d_native-solution.csv", "positive_part_budget_2d_run.txt",
+                    "positive_part_budget_2d_native-example.stdout",
+                    "discrete-mpc-2d.html", "discrete-mpc-2d.svg", "discrete-mpc-2d.json",
+                    "discrete_mpc_2d-output.csv", "discrete_mpc_2d-output.txt",
                     "app02-diamond-v1.html", "app02-diamond-v1.svg",
                     "app02-diamond-v1.png", "app02-diamond-v1-export.json",
                     "app04-square-v1.html", "app04-square-v1.svg",

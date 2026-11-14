@@ -75,7 +75,7 @@ def materialize(files,folder):
 
 
 def source_export(capture,checking=None):
-    revision=subprocess.check_output(['git','log','--first-parent','--full-history','-1','--format=%H','--',*HELPERS],cwd=ROOT,text=True).strip()
+    revision=subprocess.check_output(['git','log','-1','--format=%H','--',*HELPERS],cwd=ROOT,text=True).strip()
     require(re.fullmatch('[0-9a-f]{40}',revision),'invalid helper source revision')
     files={};objects=set()
     for name in HELPERS:

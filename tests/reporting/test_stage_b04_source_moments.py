@@ -139,6 +139,9 @@ class StageB04SourceMomentsTests(unittest.TestCase):
     def test_live_style_changes_do_not_change_historical_source_or_bundle(self):
         baseline = stage_b04.stage(self.site)
         live_style = ROOT / "scripts/reports/figure_style.py"
+        expected_style = subprocess.check_output(
+            ["git", "show", f"{stage_b04.SOURCE_COMMIT}:{stage_b04.STYLE_PATH}"], cwd=ROOT)
+        self.assertEqual(expected_style, (ROOT / stage_b04.FROZEN_STYLE_PATH).read_bytes())
         read_bytes = Path.read_bytes
 
         def changed_style(path):
@@ -152,7 +155,7 @@ class StageB04SourceMomentsTests(unittest.TestCase):
         self.assertEqual((changed_site / (changed + ".zip")).read_bytes(),
                          (self.site / (baseline + ".zip")).read_bytes())
         self.assertEqual((changed_site / changed / "source-root/scripts/reports/figure_style.py").read_bytes(),
-                         read_bytes(live_style))
+                         expected_style)
 
     def test_tampered_selected_historical_style_is_rejected(self):
         historical_style = ROOT / "benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/figure_style.py"
