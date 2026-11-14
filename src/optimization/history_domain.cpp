@@ -186,6 +186,12 @@ bool h_contains(const sets::HRepresentation &h, std::span<const double> state,
 
 Diagnostics check_history_domain_memberships(const HistoryDomain &domain) {
     Diagnostics errors;
+    struct SeenSetIdentity {
+        SetId id;
+        HistorySetFamily family;
+        const HistoryMembershipShape *geometry;
+    };
+    std::vector<SeenSetIdentity> seen_identities;
     const auto &coordinates = domain.original.coordinates;
     const auto state_dimension = coordinates.dimensions.state;
     const auto max = std::numeric_limits<std::size_t>::max();
@@ -282,7 +288,7 @@ Diagnostics check_history_domain_memberships(const HistoryDomain &domain) {
                 },
                 geometry);
         };
-        const bool valid =
+        bool valid =
             valid_geometry(member.shape, member.origin.selected, member.origin.selected_family) &&
             member.origin.source && member.origin.source->id == member.origin.reference &&
             valid_geometry(member.origin.source->geometry, member.origin.source->id,
@@ -290,6 +296,24 @@ Diagnostics check_history_domain_memberships(const HistoryDomain &domain) {
             (member.origin.reference != member.origin.selected ||
              (member.origin.source->family == member.origin.selected_family &&
               same_membership_payload(member.shape, member.origin.source->geometry)));
+        if (valid) {
+            const auto consistent_identity = [&](const SetId &id, HistorySetFamily family,
+                                                 const HistoryMembershipShape &geometry) {
+                const auto found =
+                    std::find_if(seen_identities.begin(), seen_identities.end(),
+                                 [&](const SeenSetIdentity &seen) { return seen.id == id; });
+                if (found == seen_identities.end()) {
+                    seen_identities.push_back({id, family, &geometry});
+                    return true;
+                }
+                return found->family == family &&
+                       same_membership_payload(*found->geometry, geometry);
+            };
+            valid = consistent_identity(member.origin.selected, member.origin.selected_family,
+                                        member.shape) &&
+                    consistent_identity(member.origin.source->id, member.origin.source->family,
+                                        member.origin.source->geometry);
+        }
         if (!valid)
             errors.push_back(invalid(
                 field,

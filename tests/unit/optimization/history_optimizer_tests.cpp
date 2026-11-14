@@ -362,6 +362,16 @@ TEST_CASE("whole-history memberships check real latent witnesses and retain the 
         CHECK(std::holds_alternative<Diagnostic>(run()));
         CHECK(candidate.calls == before);
     }
+    SUBCASE("set identity cannot bind contradictory payloads across memberships") {
+        auto duplicate = r.domain.memberships[2];
+        auto &selected = std::get<HistoryAxisBoxMembership>(duplicate.shape);
+        selected.center[0] = 0.25;
+        duplicate.origin.source->geometry = duplicate.shape;
+        r.domain.memberships.push_back(std::move(duplicate));
+        const auto before = candidate.calls;
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+        CHECK(candidate.calls == before);
+    }
     SUBCASE("a mismatched coordinate frame is rejected") {
         r.domain.memberships[1].origin.coordinate_frame = "other-frame";
         const auto before = candidate.calls;
