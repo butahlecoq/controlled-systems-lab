@@ -477,6 +477,25 @@
       ]
     },
     {
+      "id": "discrete-nominal-mpc",
+      "name": "Source-task profiles and finite nominal MPC",
+      "composition": "installed-native-controller-module",
+      "modules": [
+        "CSL::controllers",
+        "CSL::nominal_quadratic_history"
+      ],
+      "support": "supported-2d-observed-state-mpc",
+      "limit": "The worked example is one authored model-7 task with a fixed eight-stage horizon and declared forecast/replay. Catalogue profile admission does not complete missing source domains, model-30 positive-part constraints or source stabilization objectives.",
+      "catalog_kinds": [],
+      "report_routes": [],
+      "examples": [
+        "discrete-mpc-2d"
+      ],
+      "implementation_issues": [
+        1012
+      ]
+    },
+    {
       "id": "continuous-discretization",
       "name": "Continuous affine system discretization",
       "composition": "outside-initial-paired-synthesis-flow",

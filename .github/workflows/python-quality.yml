@@ -50,6 +50,8 @@ on:
       - 'tests/reporting/test_app02_saved.py'
       - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
+      - 'scripts/reports/stage_discrete_mpc_2d.py'
+      - 'tests/reporting/test_discrete_mpc_2d.py'
       - 'reports/algorithm-results/native-row-scaling-diagnostic-v1/**'
       - 'tests/reporting/test_syn03_strategy_a_report.py'
       - 'tests/reporting/test_syn03_ts02_report.py'
@@ -108,6 +110,8 @@ on:
       - 'tests/reporting/test_app02_saved.py'
       - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
+      - 'scripts/reports/stage_discrete_mpc_2d.py'
+      - 'tests/reporting/test_discrete_mpc_2d.py'
       - 'reports/algorithm-results/native-row-scaling-diagnostic-v1/**'
       - 'tests/reporting/test_syn03_strategy_a_report.py'
       - 'tests/reporting/test_syn03_ts02_report.py'
@@ -164,6 +168,10 @@ jobs:
 
       - name: Check the locked source-only native row-scaling publication
         run: python -m unittest discover -s tests/reporting -p 'test_stage_native_row_scaling_diagnostic.py'
+      - name: Check the matched discrete MPC example and visual gallery
+        run: |
+          python -m unittest discover -s tests/reporting -p 'test_discrete_mpc_2d.py'
+          python -m unittest discover -s tests/reporting -p 'test_visual_examples.py'
       - name: Exercise OPT07 and OPT11 collectors, oracles and saved reports
         run: |
           python -m unittest discover -s tests/reporting -p 'test_opt07_*.py'
