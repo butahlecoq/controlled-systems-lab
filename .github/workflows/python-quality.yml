@@ -11,6 +11,12 @@ on:
       - 'tests/reporting/test_closed_loop_tracing.py'
       - 'docs/catalogue/closed-loop-native-compositions-v1.*'
       - 'benchmarks/reporting/closed_loop/requirements.txt'
+      - 'tests/architecture/check_numeric_dependencies.py'
+      - 'tests/architecture/check_stage_projection_boundaries.py'
+      - 'tests/cmake/test_dependency_archive.py'
+      - 'tests/obs04/perf_control_mock.py'
+      - 'tests/obs04/perf_probe_tests.py'
+      - 'scripts/obs04_perf_probe.py'
       - 'scripts/ci/**'
       - 'tests/ci/**'
       - 'scripts/catalogue/**'
@@ -78,6 +84,12 @@ on:
       - 'tests/reporting/test_closed_loop_tracing.py'
       - 'docs/catalogue/closed-loop-native-compositions-v1.*'
       - 'benchmarks/reporting/closed_loop/requirements.txt'
+      - 'tests/architecture/check_numeric_dependencies.py'
+      - 'tests/architecture/check_stage_projection_boundaries.py'
+      - 'tests/cmake/test_dependency_archive.py'
+      - 'tests/obs04/perf_control_mock.py'
+      - 'tests/obs04/perf_probe_tests.py'
+      - 'scripts/obs04_perf_probe.py'
       - 'scripts/ci/**'
       - 'tests/ci/**'
       - 'scripts/catalogue/**'
@@ -194,3 +206,8 @@ jobs:
 
       - name: Check explicit native compositions and common runner failure paths
         run: python -m unittest tests.reporting.test_native_compositions tests.reporting.test_closed_loop_native_capabilities tests.reporting.test_closed_loop_runner_failures tests.reporting.test_closed_loop_tracing
+      - name: Check architecture boundaries and decoded perf sample parsing
+        run: |
+          python tests/architecture/check_numeric_dependencies.py
+          python tests/architecture/check_stage_projection_boundaries.py
+          python tests/obs04/perf_probe_tests.py
