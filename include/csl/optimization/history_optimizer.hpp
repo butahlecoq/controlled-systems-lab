@@ -1,6 +1,7 @@
 #pragma once
 
 #include <csl/optimization/history_cost.hpp>
+#include <csl/optimization/history_domain.hpp>
 #include <csl/registry/provider.hpp>
 
 namespace csl::registry { struct HistoryOptimizerPort; }
@@ -9,6 +10,7 @@ namespace csl::optimization {
 
 struct SuppliedStart {
     Vector history;
+    std::vector<HistoryMembershipWitness> membership_witnesses{};
 };
 struct ColdStart {};
 using HistoryOptimizationStart = std::variant<SuppliedStart, ColdStart>;
@@ -19,12 +21,16 @@ struct SuppliedReadbacks {
     // Solver-specific dual coordinates; backend checks their dimension against its actual solver.
     Vector supplied_duals;
     Vector dual_readback;
+    std::vector<HistoryMembershipWitness> supplied_membership_witnesses{};
+    std::vector<HistoryMembershipWitness> membership_witness_readback{};
 };
 struct VerifiedSuppliedStart {
     Vector supplied_history;
     Vector primal_readback;
     Vector supplied_duals;
     Vector dual_readback;
+    std::vector<HistoryMembershipWitness> supplied_membership_witnesses{};
+    std::vector<HistoryMembershipWitness> membership_witness_readback{};
 };
 struct BackendColdStartEvidence {
     std::string backend_identity;
@@ -36,7 +42,7 @@ using HistoryInitializationReceipt = std::variant<VerifiedSuppliedStart, Backend
 
 struct HistoryOptimizationRequest {
     ProgramIdentity identity;
-    synthesis::JointHistoryRelation feasible_histories;
+    HistoryDomain domain;
     HistoryCostProgram source_cost;
     HistoryOptimizationStart start;
 };
@@ -46,6 +52,7 @@ struct RawHistorySolve {
     double reported_objective;
     RawHistoryInitializationEvidence initialization;
     std::string diagnostics;
+    std::vector<HistoryMembershipWitness> membership_witnesses{};
 };
 using RawHistorySolveOutcome=std::variant<RawHistorySolve,Diagnostic,OperationStopped>;
 
@@ -64,6 +71,7 @@ struct HistoryOptimizationResult {
     double maximum_history_violation;
     HistoryInitializationReceipt initialization;
     std::string diagnostics;
+    std::vector<HistoryMembershipWitness> membership_witnesses{};
 };
 using HistoryOptimizationOutcome=std::variant<HistoryOptimizationResult,Diagnostic,OperationStopped>;
 

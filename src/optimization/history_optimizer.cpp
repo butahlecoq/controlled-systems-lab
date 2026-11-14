@@ -94,11 +94,13 @@ std::pair<std::vector<Vector>,std::vector<Vector>> unpack(const JointCoordinates
 
 Diagnostics check_history_optimization_request(const HistoryOptimizationRequest& r) {
     Diagnostics out;
-    const auto& c=r.feasible_histories.coordinates;
+    const auto& c=r.domain.original.coordinates;
     if(r.identity.problem.value.empty()||r.identity.program.value.empty())out.push_back(invalid("history.identity","Problem and program identities are required."));
     if(!size_is_valid(c)) {
         out.push_back(invalid("history.coordinates","Whole-history optimization requires bounded nonzero nominal state/control coordinates and horizon.")); return out;
     }
+    const auto membership_errors = check_history_domain_memberships(r.domain);
+    out.insert(out.end(), membership_errors.begin(), membership_errors.end());
     const auto size=history_size(c);
     if(size>std::numeric_limits<std::size_t>::max()/size) {
         out.push_back(invalid("history.coordinates","Canonical history matrix size overflows addressable storage.")); return out;
@@ -114,8 +116,8 @@ Diagnostics check_history_optimization_request(const HistoryOptimizationRequest&
                 invalid("history.initial",
                         "Supplied full-history vector has invalid shape or non-finite entries."));
     }
-    if(r.feasible_histories.relation.metadata()->set.dimension!=size)out.push_back(invalid("history.domain","Full feasible-history domain has the wrong ambient dimension."));
-    const auto representation=r.feasible_histories.relation.representation();
+    if(r.domain.original.relation.metadata()->set.dimension!=size)out.push_back(invalid("history.domain","Full feasible-history domain has the wrong ambient dimension."));
+    const auto representation=r.domain.original.relation.representation();
     if(!std::holds_alternative<sets::HRepresentation>(representation)&&
        !std::holds_alternative<sets::SingletonRepresentation>(representation)&&
        !std::holds_alternative<sets::UniversalRepresentation>(representation))
@@ -128,7 +130,7 @@ Diagnostics check_history_optimization_request(const HistoryOptimizationRequest&
             out.push_back(invalid("history.cost.norm","Compiled source norm has invalid dimensions, weights, or coefficient."));
     }
     if(out.empty()) {
-        const auto recompilation=compile_history_cost(r.feasible_histories,r.source_cost.terminal_source,
+        const auto recompilation=compile_history_cost(r.domain.original,r.source_cost.terminal_source,
             r.source_cost.running_source,r.source_cost.absolute_stage_offset);
         const auto* expected=std::get_if<HistoryCostProgram>(&recompilation);
         if(!expected) {
@@ -159,12 +161,16 @@ std::optional<Diagnostic> check_history_initialization(const HistoryOptimization
         return std::nullopt;
     Diagnostic error{DiagnosticCode::invalid_input,"history.domain",""};
     const double violation =
-        domain_violation(r.feasible_histories.relation, supplied->history, error);
+        domain_violation(r.domain.original.relation, supplied->history, error);
     if(!error.explanation.empty())return error;
     if (violation >
-        tolerance(context, domain_scale(r.feasible_histories.relation, supplied->history)))
+        tolerance(context, domain_scale(r.domain.original.relation, supplied->history)))
         return invalid("history.initial",
                        "Supplied start history is outside the full feasible-history domain.");
+    const auto membership_errors = check_history_membership_witnesses(
+        r.domain, supplied->history, supplied->membership_witnesses, context.numerical);
+    if (!membership_errors.empty())
+        return membership_errors.front();
     return std::nullopt;
 }
 
@@ -172,7 +178,7 @@ HistoryOptimizationOutcome check_history_optimization_result(const HistoryOptimi
     RawHistorySolve raw,const ExecutionContext& context) {
     const auto request_diagnostics=check_history_optimization_request(r);
     if(!request_diagnostics.empty())return request_diagnostics.front();
-    const auto size=history_size(r.feasible_histories.coordinates);
+    const auto size=history_size(r.domain.original.coordinates);
     if (raw.history.size() != size || !finite(raw.history) ||
         !std::isfinite(raw.reported_objective))
         return invalid("history.backend.result",
@@ -185,6 +191,8 @@ HistoryOptimizationOutcome check_history_optimization_result(const HistoryOptimi
             evidence->dual_readback.size() != evidence->supplied_duals.size() ||
             !finite(evidence->supplied_duals) ||
             evidence->dual_readback != evidence->supplied_duals ||
+            evidence->supplied_membership_witnesses != supplied->membership_witnesses ||
+            evidence->membership_witness_readback != supplied->membership_witnesses ||
             std::any_of(evidence->supplied_duals.begin(), evidence->supplied_duals.end(),
                         [](double v) { return v != 0; }))
             return invalid(
@@ -192,7 +200,9 @@ HistoryOptimizationOutcome check_history_optimization_result(const HistoryOptimi
                 "Backend returned malformed supplied-start or actual primal/zero-dual readback evidence.");
         initialization =
             VerifiedSuppliedStart{evidence->supplied_history, evidence->primal_readback,
-                                  evidence->supplied_duals, evidence->dual_readback};
+                                  evidence->supplied_duals, evidence->dual_readback,
+                                  evidence->supplied_membership_witnesses,
+                                  evidence->membership_witness_readback};
     } else {
         const auto *evidence = std::get_if<BackendColdStartEvidence>(&raw.initialization);
         if (!evidence || evidence->backend_identity.empty() || evidence->start_policy.empty() ||
@@ -204,10 +214,14 @@ HistoryOptimizationOutcome check_history_optimization_result(const HistoryOptimi
     }
     if(const auto diagnostic=check_history_initialization(r,context))return *diagnostic;
     Diagnostic error{DiagnosticCode::invalid_input,"history.domain",""};
-    const double violation=domain_violation(r.feasible_histories.relation,raw.history,error);
+    const double violation=domain_violation(r.domain.original.relation,raw.history,error);
     if(!error.explanation.empty())return error;
-    if(violation>tolerance(context,domain_scale(r.feasible_histories.relation,raw.history)))return invalid("history.backend.feasibility","Backend history violates the full feasible-history relation.");
-    const auto [states,controls]=unpack(r.feasible_histories.coordinates,raw.history);
+    if(violation>tolerance(context,domain_scale(r.domain.original.relation,raw.history)))return invalid("history.backend.feasibility","Backend history violates the full feasible-history relation.");
+    const auto membership_errors = check_history_membership_witnesses(
+        r.domain, raw.history, raw.membership_witnesses, context.numerical);
+    if (!membership_errors.empty())
+        return membership_errors.front();
+    const auto [states,controls]=unpack(r.domain.original.coordinates,raw.history);
     auto cost=evaluate_history_cost(r.source_cost,states,controls);
     if(const auto* d=std::get_if<Diagnostics>(&cost))return d->front();
     if(const auto* stopped=std::get_if<OperationStopped>(&cost))return *stopped;
@@ -220,7 +234,8 @@ HistoryOptimizationOutcome check_history_optimization_result(const HistoryOptimi
                                      raw.reported_objective,
                                      violation,
                                      std::move(initialization),
-                                     std::move(raw.diagnostics)};
+                                     std::move(raw.diagnostics),
+                                     std::move(raw.membership_witnesses)};
 }
 } // namespace detail
 } // namespace csl::optimization

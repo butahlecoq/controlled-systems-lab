@@ -275,6 +275,11 @@ class VisualRouteInventoryTests(unittest.TestCase):
                       tracking_route["assets"])
         self.assertIn("scripts/reports/stage_native_model_tracking_first_pass.py",
                       [entry["source"] for entry in inventory["producers_and_routes"]])
+        membership_route=next(route for route in inventory["gallery_routes"]
+                              if route["route"]=="examples/history-membership-zonotope-2d-v1/index.html")
+        self.assertIn("history-membership-zonotope-2d-v1/history.svg",membership_route["assets"])
+        self.assertIn("scripts/reports/capture_history_membership_2d.py",
+                      [entry["source"] for entry in inventory["producers_and_routes"]])
         gallery_assets=set(inventory["gallery_routes"][0]["assets"])
         self.assertEqual(gallery_assets,{
             "examples.css", "fuel-b06-viz06.html", "fuel-b06-viz06-source.json",
@@ -338,6 +343,11 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "native-model-tracking-first-pass-v1/checks/full_state_trajectory_checked.csv",
             "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip",
             "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip.sha256",
+            "history-membership-zonotope-2d-v1/index.html",
+            "history-membership-zonotope-2d-v1/history.svg",
+            "history-membership-zonotope-2d-v1/history.csv",
+            "history-membership-zonotope-2d-v1/records/receipt.json",
+            "history-membership-zonotope-2d-v1/history-membership-zonotope-2d-v1.zip",
             *audit_visual_routes.stage_buryatia_volterra.asset_paths(),
             *audit_visual_routes.geometry_companion_assets(),
             *audit_visual_routes.viz10_companion_assets(),

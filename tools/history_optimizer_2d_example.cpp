@@ -37,7 +37,7 @@ optimization::HistoryOptimizationRequest make_request() {
     if(!std::holds_alternative<optimization::HistoryCostProgram>(compiled))
         throw std::runtime_error("source objective did not compile");
     return {{ProblemId{"two-state-integrator"}, ProgramId{"terminal-euclidean-plus-running-l1"}},
-            std::move(histories),
+            {std::move(histories), {}},
             std::get<optimization::HistoryCostProgram>(std::move(compiled)),
             optimization::ColdStart{}};
 }

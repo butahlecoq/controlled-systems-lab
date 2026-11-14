@@ -38,7 +38,7 @@ optimization::HistoryOptimizationRequest integrator_request(double running_weigh
     if (!std::holds_alternative<optimization::HistoryCostProgram>(compiled))
         throw std::runtime_error("2D integrator source cost did not compile");
     return {{ProblemId{"2d-integrator"}, ProgramId{"terminal-l2-plus-running-l1"}},
-            histories,
+            {histories, {}},
             std::get<optimization::HistoryCostProgram>(compiled),
             optimization::ColdStart{}};
 }

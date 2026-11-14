@@ -512,6 +512,11 @@
       "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
     },
     {
+      "route": "examples/history-membership-zonotope-2d-v1/index.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_history_membership_2d.py"
+    },
+    {
       "route": "examples/history-optimizer-native-2d-v1/index.html",
       "disposition": "maintained",
       "owner": "scripts/reports/stage_history_optimizer_native.py"

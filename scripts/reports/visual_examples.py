@@ -34,6 +34,7 @@ import stage_native_model_tracking_first_pass
 import stage_native_row_scaling_diagnostic
 import stage_nominal_quadratic_history
 import stage_history_optimizer_native
+import stage_history_membership_2d
 import stage_native_flexible_pitch
 import visual_illustrations
 import visual_example_geometry as geometry_examples
@@ -922,6 +923,9 @@ def build(catalog, site):
     native_history_files, native_history_inventory, native_history_card = stage_history_optimizer_native.build(
         Path(__file__).resolve().parents[2])
     saved_figures += native_history_card
+    membership_history_files, membership_history_inventory, membership_history_card = stage_history_membership_2d.build(
+        Path(__file__).resolve().parents[2])
+    saved_figures += membership_history_card
     extended_files, extended_inventory, extended_cards = stage_native_extended_models.build(
         Path(__file__).resolve().parents[2])
     saved_figures += extended_cards
@@ -974,6 +978,7 @@ def build(catalog, site):
     outputs.update(row_scaling_files)
     outputs.update(history_files)
     outputs.update(native_history_files)
+    outputs.update(membership_history_files)
     outputs.update(extended_files)
     repository_root = Path(__file__).resolve().parents[2]
     cost_page_root = repository_root / "docs/examples/history-cost-2d-v1"
@@ -1089,6 +1094,7 @@ def build(catalog, site):
     gallery_inventory.extend(row_scaling_inventory)
     gallery_inventory.extend(history_inventory)
     gallery_inventory.extend(native_history_inventory)
+    gallery_inventory.extend(membership_history_inventory)
     gallery_inventory.extend(extended_inventory)
     geometry_first = geometry_inventory[0]
     gallery_inventory.append({"family": "Geometry and optimization",

@@ -31,7 +31,7 @@ struct LinearDomain {
 };
 LinearDomain linear_domain(const optimization::HistoryOptimizationRequest &request) {
     const auto n = request.source_cost.quadratic.dimension;
-    const auto representation = request.feasible_histories.relation.representation();
+    const auto representation = request.domain.original.relation.representation();
     if (const auto *h = std::get_if<sets::HRepresentation>(&representation)) {
         const auto rows = h->inequalities.rows() + h->equalities.rows();
         Matrix a{rows, n, Vector(rows * n, 0.0)};
@@ -65,6 +65,9 @@ class SuperSCSWorkspace final : public optimization::HistoryOptimizerWorkspace {
     optimization::RawHistorySolveOutcome
     solve_candidate(const optimization::HistoryOptimizationRequest &request,
                     const ExecutionContext &context) override {
+        if (!request.domain.memberships.empty())
+            return Diagnostic{DiagnosticCode::unsupported, "history.memberships",
+                              "SuperSCS history-domain membership lifting is not implemented."};
         if (!std::holds_alternative<optimization::ColdStart>(request.start))
             return Diagnostic{
                 DiagnosticCode::unsupported, "history.start",
@@ -227,6 +230,9 @@ make_casadi_superscs_history_optimizer_registration() {
                 const auto diagnostics = optimization::check_history_optimization_request(request);
                 if (!diagnostics.empty())
                     return diagnostics;
+                if (!request.domain.memberships.empty())
+                    return Diagnostics{{DiagnosticCode::unsupported, "history.memberships",
+                        "SuperSCS history-domain membership lifting is not implemented."}};
                 if (!std::holds_alternative<optimization::ColdStart>(request.start))
                     return Diagnostics{
                         {DiagnosticCode::unsupported, "history.start",

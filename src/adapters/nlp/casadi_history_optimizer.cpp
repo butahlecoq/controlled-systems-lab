@@ -30,12 +30,34 @@ bool fits_casadi_dimension(std::size_t dimension) {
 bool fits_casadi_request(const optimization::HistoryOptimizationRequest& request) {
     if (!fits_casadi_dimension(request.source_cost.quadratic.dimension))
         return false;
-    const auto representation=request.feasible_histories.relation.representation();
+    const auto representation=request.domain.original.relation.representation();
     if(const auto* h=std::get_if<sets::HRepresentation>(&representation))
         if(!fits_casadi_dimension(h->inequalities.rows())||!fits_casadi_dimension(h->inequalities.cols())||
            !fits_casadi_dimension(h->equalities.rows())||!fits_casadi_dimension(h->equalities.cols()))return false;
     for(const auto& term:request.source_cost.residual_norms)
         if(!fits_casadi_dimension(term.map.rows)||!fits_casadi_dimension(term.map.cols))return false;
+    for (const auto &member : request.domain.memberships) {
+        const bool fits = std::visit([](const auto &selected) {
+            using T = std::decay_t<decltype(selected)>;
+            if constexpr (std::is_same_v<T, optimization::HistoryHMembership>) {
+                const auto h = std::get<sets::HRepresentation>(selected.selected.representation());
+                return fits_casadi_dimension(h.inequalities.rows()) &&
+                       fits_casadi_dimension(h.equalities.rows());
+            } else if constexpr (std::is_same_v<T, optimization::HistoryAxisBoxMembership>) {
+                return fits_casadi_dimension(selected.radii.size());
+            } else if constexpr (std::is_same_v<T, optimization::HistoryZonotopeMembership>) {
+                return fits_casadi_dimension(selected.generators.cols);
+            } else if constexpr (std::is_same_v<T, optimization::HistoryParallelotopeMembership>) {
+                return fits_casadi_dimension(selected.frame.cols);
+            } else if constexpr (std::is_same_v<T, optimization::HistoryBallFactorMembership>) {
+                return fits_casadi_dimension(selected.selected.factor.cols);
+            } else {
+                const auto v = std::get<sets::VRepresentation>(selected.selected.representation());
+                return fits_casadi_dimension(v.vertices.rows());
+            }
+        }, member.shape);
+        if (!fits) return false;
+    }
     return true;
 }
 Vector values(const DM& vector) {return static_cast<Vector>(vector);}
@@ -55,6 +77,99 @@ void constrain(casadi::Opti& opti,const MX& z,const sets::SetData& domain) {
     }
     if(h->inequalities.rows())opti.subject_to(MX::mtimes(dense(h->inequalities),z)<=DM(values(h->upper_bounds)));
     if(h->equalities.rows())opti.subject_to(MX::mtimes(dense(h->equalities),z)==DM(values(h->equality_values)));
+}
+using MembershipVariable = std::optional<MX>;
+
+std::vector<MembershipVariable> constrain_memberships(
+    casadi::Opti &opti, const MX &history, const optimization::HistoryDomain &domain,
+    const std::vector<optimization::HistoryMembershipWitness> &initial) {
+    std::vector<MembershipVariable> variables;
+    const auto n = domain.original.coordinates.dimensions.state;
+    for (std::size_t i = 0; i < domain.memberships.size(); ++i) {
+        const auto &member = domain.memberships[i];
+        const auto first = static_cast<casadi_int>(member.stage.value * n);
+        const auto state = history(casadi::Slice(first, first + static_cast<casadi_int>(n)));
+        std::visit([&](const auto &selected) {
+            using T = std::decay_t<decltype(selected)>;
+            if constexpr (std::is_same_v<T, optimization::HistoryHMembership>) {
+                constrain(opti, state, selected.selected);
+                variables.push_back(std::nullopt);
+            } else {
+                Matrix factor;
+                Vector center;
+                Vector seed;
+                if constexpr (std::is_same_v<T, optimization::HistoryAxisBoxMembership>) {
+                    factor = Matrix{n, n, Vector(n * n, 0.0)};
+                    for (std::size_t j = 0; j < n; ++j)
+                        factor.values[j * n + j] = selected.radii[j];
+                    center = selected.center;
+                    seed = std::get<optimization::HistoryAxisBoxWitness>(initial[i]).coefficients;
+                } else if constexpr (std::is_same_v<T, optimization::HistoryZonotopeMembership>) {
+                    factor = selected.generators;
+                    center = selected.center;
+                    seed = std::get<optimization::HistoryZonotopeWitness>(initial[i]).coefficients;
+                } else if constexpr (std::is_same_v<T, optimization::HistoryParallelotopeMembership>) {
+                    factor = selected.frame;
+                    center = selected.center;
+                    seed = std::get<optimization::HistoryParallelotopeWitness>(initial[i]).coefficients;
+                } else if constexpr (std::is_same_v<T, optimization::HistoryBallFactorMembership>) {
+                    factor = selected.selected.factor;
+                    center = selected.selected.center;
+                    seed = std::get<optimization::HistoryBallFactorWitness>(initial[i]).coefficients;
+                } else {
+                    const auto representation = selected.selected.representation();
+                    const auto &vertices = std::get<sets::VRepresentation>(representation).vertices;
+                    factor = Matrix{n, vertices.rows(), Vector(n * vertices.rows(), 0.0)};
+                    center = Vector(n, 0.0);
+                    for (std::size_t row = 0; row < vertices.rows(); ++row)
+                        for (std::size_t col = 0; col < n; ++col)
+                            factor.values[col * factor.cols + row] = vertices(row, col);
+                    seed = std::get<optimization::HistoryVSimplexWitness>(initial[i]).coefficients;
+                }
+                if (factor.cols == 0) {
+                    opti.subject_to(state == DM(center));
+                    variables.push_back(std::nullopt);
+                    return;
+                }
+                const auto coefficients = opti.variable(static_cast<casadi_int>(factor.cols));
+                opti.subject_to(state == DM(center) + MX::mtimes(dense(factor), coefficients));
+                if constexpr (std::is_same_v<T, optimization::HistoryAxisBoxMembership> ||
+                              std::is_same_v<T, optimization::HistoryZonotopeMembership>) {
+                    opti.subject_to(opti.bounded(-1, coefficients, 1));
+                } else if constexpr (std::is_same_v<T, optimization::HistoryParallelotopeMembership>) {
+                    opti.subject_to(opti.bounded(DM(selected.lower), coefficients, DM(selected.upper)));
+                } else if constexpr (std::is_same_v<T, optimization::HistoryBallFactorMembership>) {
+                    opti.subject_to(MX::dot(coefficients, coefficients) <= 1);
+                } else {
+                    opti.subject_to(coefficients >= 0);
+                    opti.subject_to(MX::dot(DM::ones(static_cast<casadi_int>(factor.cols)),
+                                            coefficients) == 1);
+                }
+                opti.set_initial(coefficients, DM(seed));
+                variables.push_back(coefficients);
+            }
+        }, member.shape);
+    }
+    return variables;
+}
+
+optimization::HistoryMembershipWitness make_witness(const optimization::HistoryMembership &member,
+                                                      Vector coefficients) {
+    return std::visit([&](const auto &selected) -> optimization::HistoryMembershipWitness {
+        using T = std::decay_t<decltype(selected)>;
+        if constexpr (std::is_same_v<T, optimization::HistoryHMembership>)
+            return optimization::HistoryHWitness{};
+        else if constexpr (std::is_same_v<T, optimization::HistoryAxisBoxMembership>)
+            return optimization::HistoryAxisBoxWitness{std::move(coefficients)};
+        else if constexpr (std::is_same_v<T, optimization::HistoryZonotopeMembership>)
+            return optimization::HistoryZonotopeWitness{std::move(coefficients)};
+        else if constexpr (std::is_same_v<T, optimization::HistoryParallelotopeMembership>)
+            return optimization::HistoryParallelotopeWitness{std::move(coefficients)};
+        else if constexpr (std::is_same_v<T, optimization::HistoryBallFactorMembership>)
+            return optimization::HistoryBallFactorWitness{std::move(coefficients)};
+        else
+            return optimization::HistoryVSimplexWitness{std::move(coefficients)};
+    }, member.shape);
 }
 class NativeWorkspace final:public optimization::HistoryOptimizerWorkspace {
 public:
@@ -78,7 +193,9 @@ public:
             casadi::Opti opti;
             const auto z=opti.variable(static_cast<casadi_int>(size));
             opti.set_initial(z, DM(initial_history));
-            constrain(opti,z,request.feasible_histories.relation);
+            constrain(opti,z,request.domain.original.relation);
+            const auto membership_variables = constrain_memberships(
+                opti, z, request.domain, supplied->membership_witnesses);
             const auto& q=cost.quadratic;
             MX objective=0.5*MX::mtimes(std::vector<MX>{z.T(),dense(q.Q),z})+
                 MX::dot(DM(q.linear),z)+q.offset;
@@ -115,6 +232,13 @@ public:
             opti.set_initial(opti.lam_g(),DM::zeros(dual_count));
             const auto initial_primal=values(opti.debug().value(z,opti.initial()));
             const auto initial_dual=values(opti.debug().value(opti.lam_g(),opti.initial()));
+            std::vector<optimization::HistoryMembershipWitness> membership_readbacks;
+            for (std::size_t i = 0; i < membership_variables.size(); ++i) {
+                auto coefficients = membership_variables[i]
+                    ? values(opti.debug().value(*membership_variables[i], opti.initial())) : Vector{};
+                membership_readbacks.push_back(make_witness(request.domain.memberships[i],
+                                                           std::move(coefficients)));
+            }
             if(initial_dual.size()!=static_cast<std::size_t>(dual_count)||
                std::any_of(initial_dual.begin(),initial_dual.end(),[](double value){return value!=0;}))
                 return Diagnostic{DiagnosticCode::evidence_mismatch,"history.casadi_ipopt.initial_duals",
@@ -132,11 +256,20 @@ public:
                 return OperationStopped{StopReason::deadline_expired,"Native CasADi history optimization deadline reached"};
             const auto diagnostics="native C++ CasADi "+std::string(casadi::CasadiMeta::version())+
                 "; IPOPT; "+opti.stats().at("return_status").to_string()+"; all history coordinates free; local numerical";
+            std::vector<optimization::HistoryMembershipWitness> membership_witnesses;
+            for (std::size_t i = 0; i < membership_variables.size(); ++i) {
+                auto coefficients = membership_variables[i]
+                    ? values(solution.value(*membership_variables[i])) : Vector{};
+                membership_witnesses.push_back(make_witness(request.domain.memberships[i],
+                                                           std::move(coefficients)));
+            }
             return optimization::RawHistorySolve{
                 values(solution.value(z)), static_cast<double>(solution.value(objective)),
                 optimization::SuppliedReadbacks{initial_history, initial_primal,
-                                                Vector(initial_dual.size(), 0.0), initial_dual},
-                diagnostics};
+                                                Vector(initial_dual.size(), 0.0), initial_dual,
+                                                supplied->membership_witnesses,
+                                                std::move(membership_readbacks)},
+                diagnostics, std::move(membership_witnesses)};
         } catch(const std::exception& error) {
             if(context.cancellation.stop_requested())return OperationStopped{StopReason::cancelled,"Native CasADi history optimization cancelled"};
             if(context.deadline&&std::chrono::steady_clock::now()>=*context.deadline)

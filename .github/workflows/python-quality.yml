@@ -19,6 +19,14 @@ on:
       - 'scripts/reports/stage_history_optimizer_native.py'
       - 'tests/reporting/test_history_optimizer_native.py'
       - 'reports/algorithm-results/history-optimizer-native-2d-v1/**'
+      - 'scripts/reports/capture_history_membership_2d.py'
+      - 'scripts/reports/stage_history_membership_2d.py'
+      - 'tests/reporting/test_history_membership_2d.py'
+      - 'reports/algorithm-results/history-membership-zonotope-2d-v1/**'
+      - 'scripts/reports/visual_examples.py'
+      - 'scripts/reports/pages_route_retirement.py'
+      - 'scripts/reports/audit_visual_routes.py'
+      - 'scripts/reports/mathematical-presentation-routes.json'
       - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
       - 'reports/algorithm-results/native-row-scaling-diagnostic-v1/**'
@@ -48,6 +56,14 @@ on:
       - 'scripts/reports/stage_history_optimizer_native.py'
       - 'tests/reporting/test_history_optimizer_native.py'
       - 'reports/algorithm-results/history-optimizer-native-2d-v1/**'
+      - 'scripts/reports/capture_history_membership_2d.py'
+      - 'scripts/reports/stage_history_membership_2d.py'
+      - 'tests/reporting/test_history_membership_2d.py'
+      - 'reports/algorithm-results/history-membership-zonotope-2d-v1/**'
+      - 'scripts/reports/visual_examples.py'
+      - 'scripts/reports/pages_route_retirement.py'
+      - 'scripts/reports/audit_visual_routes.py'
+      - 'scripts/reports/mathematical-presentation-routes.json'
       - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
       - 'reports/algorithm-results/native-row-scaling-diagnostic-v1/**'
@@ -96,6 +112,8 @@ jobs:
         run: python -m unittest discover -s tests/reporting -p 'test_stage_native_row_scaling_diagnostic.py'
       - name: Check the saved native whole-history optimizer route
         run: python -m unittest discover -s tests/reporting -p 'test_history_optimizer_native.py'
+      - name: Check the saved typed-membership 2D example
+        run: python -m unittest discover -s tests/reporting -p 'test_history_membership_2d.py'
       - name: Exercise OPT07 and OPT11 collectors, oracles and saved reports
         run: |
           python -m unittest discover -s tests/reporting -p 'test_opt07_*.py'

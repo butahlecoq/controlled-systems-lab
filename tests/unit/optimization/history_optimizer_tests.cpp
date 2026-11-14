@@ -18,7 +18,7 @@ optimization::HistoryOptimizationRequest request() {
     optimization::RunningControlCost running{"",0,{}};
     auto compiled=optimization::compile_history_cost(histories,LinearTerminal{{0.0},0.0},running,0);
     return {{ProblemId{"problem"}, ProgramId{"source-objective"}},
-            histories,
+            {histories, {}},
             std::get<optimization::HistoryCostProgram>(std::move(compiled)),
             optimization::SuppliedStart{Vector{1.0, 0.0, 0.0}}};
 }
@@ -29,6 +29,8 @@ struct Candidate final:optimization::HistoryOptimizerWorkspace {
     bool bad_dual_readback{};
     bool bad_objective{};
     bool bad_initialization_mode{};
+    bool bad_witness_readback{};
+    std::vector<optimization::HistoryMembershipWitness> candidate_memberships;
     int calls{};
     optimization::RawHistorySolveOutcome solve_candidate(const optimization::HistoryOptimizationRequest& r,
         const ExecutionContext&) override {
@@ -41,9 +43,14 @@ struct Candidate final:optimization::HistoryOptimizerWorkspace {
             Vector supplied_duals(2, 0.0), dual_readback(bad_dual_shape ? 1 : 2, 0.0);
             if (bad_dual_readback)
                 dual_readback[0] = 1.0;
+            auto witness_readback = supplied->membership_witnesses;
+            if (bad_witness_readback && !witness_readback.empty())
+                witness_readback.pop_back();
             initialization = optimization::SuppliedReadbacks{supplied->history, std::move(initial),
                                                              std::move(supplied_duals),
-                                                             std::move(dual_readback)};
+                                                             std::move(dual_readback),
+                                                             supplied->membership_witnesses,
+                                                             std::move(witness_readback)};
         } else if (bad_initialization_mode) {
             initialization = optimization::SuppliedReadbacks{{}, {}, {}, {}};
         } else {
@@ -52,7 +59,8 @@ struct Candidate final:optimization::HistoryOptimizerWorkspace {
                 "test backend does not expose internal startup state"};
         }
         return optimization::RawHistorySolve{candidate, bad_objective ? 1.0 : 0.0,
-                                             std::move(initialization), "test backend"};
+                                             std::move(initialization), "test backend",
+                                             candidate_memberships};
     }
 };
 }
@@ -149,4 +157,203 @@ TEST_CASE("whole-history port rejects an infeasible initial history before calli
     REQUIRE(std::holds_alternative<Diagnostic>(result));
     CHECK(std::get<Diagnostic>(result).field=="history.initial");
     CHECK(candidate.calls==0);
+}
+
+TEST_CASE("whole-history memberships check real latent witnesses and retain the original H domain") {
+    auto r = request();
+    r.domain.state_frame = "physical-state-frame";
+    auto &start = std::get<optimization::SuppliedStart>(r.start);
+    start.history = {1.0, 0.5, 0.0};
+    Candidate candidate;
+    candidate.candidate = {0.0, 0.5, 0.0};
+    using namespace optimization;
+    const auto origin = [](HistorySetFamily family, const char *selected) {
+        return HistoryMembershipOrigin{{selected}, {selected}, family,
+                                       SetRelation::inner, "physical-state-frame", {1}};
+    };
+    auto h = std::get<sets::SetData>(sets::make_h({{"h-region"}, 1, {}},
+        {std::get<numeric::MatrixView>(numeric::snapshot(Matrix{2, 1, {1, -1}})),
+         std::get<numeric::VectorView>(numeric::snapshot_vector(Vector{1, 0})),
+         std::get<numeric::MatrixView>(numeric::snapshot(Matrix{0, 1, {}})),
+         std::get<numeric::VectorView>(numeric::snapshot_vector(Vector{}))}));
+    const auto make_polytope_source = [&](const char *id) {
+        const auto representation = std::get<sets::HRepresentation>(h.representation());
+        return std::get<sets::SetData>(sets::make_h({{id}, 1, {}}, representation));
+    };
+    auto v = std::get<sets::SetData>(sets::make_v({{"v-region"}, 1, {}},
+        {std::get<numeric::MatrixView>(numeric::snapshot(Matrix{2, 1, {0, 1}})),
+         std::get<numeric::MatrixView>(numeric::snapshot(Matrix{0, 1, {}}))}));
+    r.domain.memberships = {
+        {{1}, origin(HistorySetFamily::polytope, "h-region"), HistoryHMembership{h}},
+        {{1}, origin(HistorySetFamily::zonotope, "z-region"),
+         HistoryZonotopeMembership{{0}, {1, 2, {1, 1}}}},
+        {{1}, origin(HistorySetFamily::box, "b-region"),
+         HistoryAxisBoxMembership{{0}, {1}}},
+        {{1}, origin(HistorySetFamily::parallelotope, "p-region"),
+         HistoryParallelotopeMembership{{0}, {1, 1, {1}}, {-1}, {1}}},
+        {{1}, origin(HistorySetFamily::ellipsoid, "e-region"),
+         HistoryBallFactorMembership{{{0}, {1, 2, {1, 0}}}}},
+        {{1}, origin(HistorySetFamily::polytope, "v-region"), HistoryVSimplexMembership{v}}};
+    for (auto &member : r.domain.memberships)
+        member.origin.source =
+            HistorySourceGeometry{member.origin.reference, member.origin.selected_family, member.shape};
+    start.membership_witnesses = {HistoryHWitness{}, HistoryZonotopeWitness{{0.25, 0.25}},
+        HistoryAxisBoxWitness{{0.5}}, HistoryParallelotopeWitness{{0.5}},
+        HistoryBallFactorWitness{{0.5, 0}}, HistoryVSimplexWitness{{0.5, 0.5}}};
+    candidate.candidate_memberships = start.membership_witnesses;
+    const auto run = [&]() { return registry::HistoryOptimizerPort::run(candidate, r, ExecutionContext{}); };
+    REQUIRE(std::holds_alternative<HistoryOptimizationResult>(run()));
+    SUBCASE("polytope source can qualify zonotope and box selected memberships") {
+        auto &zonotope = r.domain.memberships[1];
+        zonotope.origin.reference = {"polytope-source-for-zonotope"};
+        zonotope.origin.source = HistorySourceGeometry{
+            zonotope.origin.reference, HistorySetFamily::polytope,
+            HistoryHMembership{make_polytope_source("polytope-source-for-zonotope")}};
+
+        auto &box = r.domain.memberships[2];
+        box.origin.reference = {"polytope-source-for-box"};
+        box.origin.source = HistorySourceGeometry{
+            box.origin.reference, HistorySetFamily::polytope,
+            HistoryHMembership{make_polytope_source("polytope-source-for-box")}};
+
+        CHECK(std::holds_alternative<HistoryOptimizationResult>(run()));
+    }
+    SUBCASE("missing output witness is rejected") {
+        candidate.candidate_memberships.pop_back();
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+    }
+    SUBCASE("wrong witness kind is rejected") {
+        candidate.candidate_memberships[1] = HistoryBallFactorWitness{{0.25, 0.25}};
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+    }
+    SUBCASE("invalid generator reconstruction is rejected") {
+        candidate.candidate_memberships[1] = HistoryZonotopeWitness{{0.1, 0.1}};
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+    }
+    SUBCASE("invalid ball norm is rejected even with a null generator") {
+        candidate.candidate_memberships[4] = HistoryBallFactorWitness{{0.5, 2.0}};
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+    }
+    SUBCASE("invalid simplex is rejected despite reconstructing the state") {
+        candidate.candidate_memberships[5] = HistoryVSimplexWitness{{0.7, 0.5}};
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+    }
+    SUBCASE("original full-history H remains mandatory") {
+        candidate.candidate[2] = 2.0;
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+    }
+    SUBCASE("false selected-set provenance is rejected before the backend") {
+        r.domain.memberships[0].origin.selected = {"different-id"};
+        const auto before = candidate.calls;
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+        CHECK(candidate.calls == before);
+    }
+    SUBCASE("an invalid start witness is rejected before the backend") {
+        start.membership_witnesses[1] = HistoryZonotopeWitness{{2.0, -1.5}};
+        const auto before = candidate.calls;
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+        CHECK(candidate.calls == before);
+    }
+    SUBCASE("false start witness readback is rejected") {
+        candidate.bad_witness_readback = true;
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+    }
+    SUBCASE("a singular parallelotope frame is rejected") {
+        std::get<HistoryParallelotopeMembership>(r.domain.memberships[3].shape).frame.values[0] = 0;
+        const auto before = candidate.calls;
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+        CHECK(candidate.calls == before);
+    }
+    SUBCASE("a full-rank frame permits a singleton coordinate interval") {
+        auto &region = std::get<HistoryParallelotopeMembership>(r.domain.memberships[3].shape);
+        region.lower[0] = region.upper[0] = 0.5;
+        CHECK(std::holds_alternative<HistoryOptimizationResult>(run()));
+    }
+    SUBCASE("family and shape cannot be relabeled") {
+        r.domain.memberships[1].origin.selected_family = HistorySetFamily::box;
+        const auto before = candidate.calls;
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+        CHECK(candidate.calls == before);
+    }
+    SUBCASE("H-representation approximation remains a polytope membership") {
+        r.domain.memberships[0].origin.selected_family = HistorySetFamily::ellipsoid;
+        const auto before = candidate.calls;
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+        CHECK(candidate.calls == before);
+    }
+    SUBCASE("V-simplex approximation remains a polytope membership") {
+        r.domain.memberships[5].origin.selected_family = HistorySetFamily::box;
+        const auto before = candidate.calls;
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+        CHECK(candidate.calls == before);
+    }
+    SUBCASE("missing reference identity is rejected") {
+        r.domain.memberships[1].origin.reference = {""};
+        const auto before = candidate.calls;
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+        CHECK(candidate.calls == before);
+    }
+    SUBCASE("missing source geometry is rejected") {
+        r.domain.memberships[1].origin.source.reset();
+        const auto before = candidate.calls;
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+        CHECK(candidate.calls == before);
+    }
+    SUBCASE("source family mismatch is rejected") {
+        r.domain.memberships[1].origin.source->family = HistorySetFamily::box;
+        const auto before = candidate.calls;
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+        CHECK(candidate.calls == before);
+    }
+    SUBCASE("source geometry must match its independently declared family") {
+        auto &source = r.domain.memberships[1].origin.source.value();
+        source.family = HistorySetFamily::polytope;
+        const auto before = candidate.calls;
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+        CHECK(candidate.calls == before);
+    }
+    SUBCASE("source geometry dimension mismatch is rejected") {
+        auto &source =
+            std::get<HistoryZonotopeMembership>(r.domain.memberships[1].origin.source->geometry);
+        source.center.push_back(0.0);
+        const auto before = candidate.calls;
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+        CHECK(candidate.calls == before);
+    }
+    SUBCASE("source identity mismatch is rejected") {
+        r.domain.memberships[1].origin.source->id = {"another-source"};
+        const auto before = candidate.calls;
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+        CHECK(candidate.calls == before);
+    }
+    SUBCASE("native source payload identity mismatch is rejected") {
+        r.domain.memberships[0].origin.source->id = {"another-h-source"};
+        r.domain.memberships[0].origin.reference = {"another-h-source"};
+        const auto before = candidate.calls;
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+        CHECK(candidate.calls == before);
+    }
+    SUBCASE("a mismatched coordinate frame is rejected") {
+        r.domain.memberships[1].origin.coordinate_frame = "other-frame";
+        const auto before = candidate.calls;
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+        CHECK(candidate.calls == before);
+    }
+    SUBCASE("a wrong canonical state binding is rejected") {
+        r.domain.memberships[1].origin.canonical_state_indices[0] = 0;
+        const auto before = candidate.calls;
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+        CHECK(candidate.calls == before);
+    }
+    SUBCASE("named selected coordinates must agree with the original state block") {
+        const auto original = std::get<sets::HRepresentation>(r.domain.original.relation.representation());
+        r.domain.original.relation = std::get<sets::SetData>(
+            sets::make_h({{"full-history"}, 3, {"x0", "x1", "u0"}}, original));
+        const auto selected = std::get<sets::HRepresentation>(h.representation());
+        r.domain.memberships[0].shape = HistoryHMembership{std::get<sets::SetData>(
+            sets::make_h({{"h-region"}, 1, {"x0"}}, selected))};
+        const auto before = candidate.calls;
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+        CHECK(candidate.calls == before);
+    }
 }

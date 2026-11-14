@@ -11,7 +11,8 @@ target_link_libraries(csl_control_recovery PUBLIC CSL::resolved_problem CSL::set
 csl_add_library(csl_history_cost STATIC src/optimization/history_cost.cpp)
 target_link_libraries(csl_history_cost PUBLIC CSL::control_recovery CSL::running_control_cost CSL::objectives)
 
-csl_add_library(csl_history_optimizer STATIC src/optimization/history_optimizer.cpp)
+csl_add_library(csl_history_optimizer STATIC src/optimization/history_optimizer.cpp
+  src/optimization/history_domain.cpp)
 target_link_libraries(csl_history_optimizer PUBLIC CSL::history_cost CSL::registry)
 if(CSL_ENABLE_CASADI)
   csl_add_library(csl_casadi_history_optimizer STATIC src/adapters/nlp/casadi_history_optimizer.cpp)
