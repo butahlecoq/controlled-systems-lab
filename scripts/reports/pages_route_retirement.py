@@ -151,10 +151,51 @@ EXAMPLE_ROUTE_PRODUCERS = {
     "examples/lotka-volterra-sampled-v1.html": ["scripts/reports/approx_extension_companions.py"],
     "examples/closed-loop-pilot-2d.html": ["scripts/reports/stage_closed_loop_pilot.py",
                                            "scripts/reports/render_closed_loop_pilot.py"],
+    "examples/closed-loop/figures/baseline-089075e9-earth-orbit.html": [
+        "scripts/reports/learning_book.py",
+        "docs/examples/closed-loop/figure-index.json",
+        "docs/examples/closed-loop/figures/baseline-089075e9-earth-orbit.html",
+    ],
+    "examples/closed-loop/figures/baseline-089075e9-fuel-fuel-flow.html": [
+        "scripts/reports/learning_book.py",
+        "docs/examples/closed-loop/figure-index.json",
+        "docs/examples/closed-loop/figures/baseline-089075e9-fuel-fuel-flow.html",
+    ],
+    "examples/closed-loop/figures/baseline-089075e9-fuel-state.html": [
+        "scripts/reports/learning_book.py",
+        "docs/examples/closed-loop/figure-index.json",
+        "docs/examples/closed-loop/figures/baseline-089075e9-fuel-state.html",
+    ],
+    "examples/closed-loop/figures/baseline-089075e9-lotka-populations.html": [
+        "scripts/reports/learning_book.py",
+        "docs/examples/closed-loop/figure-index.json",
+        "docs/examples/closed-loop/figures/baseline-089075e9-lotka-populations.html",
+    ],
     "examples/viz10/index.html": ["scripts/reports/viz10_plot_companions.py"],
 }
 
 STANDALONE_REPORT_ROUTE_PRODUCERS = {
+    "closed-loop-initial-baselines-v1/index.html": [
+        "scripts/reports/stage_closed_loop_initial_baselines.py",
+        "reports/closed-loop-initial-baselines-v1/index.html",
+        "reports/closed-loop-initial-baselines-v1/publication-manifest.json",
+        ".github/workflows/algorithm-reports.yml"],
+    "closed-loop-initial-baselines-v1/figures/baseline-089075e9-earth-orbit.html": [
+        "scripts/reports/stage_closed_loop_initial_baselines.py",
+        "reports/closed-loop-initial-baselines-v1/publication-manifest.json",
+        ".github/workflows/algorithm-reports.yml"],
+    "closed-loop-initial-baselines-v1/figures/baseline-089075e9-fuel-fuel-flow.html": [
+        "scripts/reports/stage_closed_loop_initial_baselines.py",
+        "reports/closed-loop-initial-baselines-v1/publication-manifest.json",
+        ".github/workflows/algorithm-reports.yml"],
+    "closed-loop-initial-baselines-v1/figures/baseline-089075e9-fuel-state.html": [
+        "scripts/reports/stage_closed_loop_initial_baselines.py",
+        "reports/closed-loop-initial-baselines-v1/publication-manifest.json",
+        ".github/workflows/algorithm-reports.yml"],
+    "closed-loop-initial-baselines-v1/figures/baseline-089075e9-lotka-populations.html": [
+        "scripts/reports/stage_closed_loop_initial_baselines.py",
+        "reports/closed-loop-initial-baselines-v1/publication-manifest.json",
+        ".github/workflows/algorithm-reports.yml"],
     "closed-loop-history-functional/native-parallelotope-d6fc-v1/index.html": [
         "scripts/reports/stage_history_functional.py",
         "scripts/reports/native_parallelotope_functional.py",
@@ -177,6 +218,7 @@ STANDALONE_REPORT_ROUTE_PRODUCERS = {
 }
 
 GALLERY_INDEX_PRODUCERS = [
+    "scripts/reports/stage_closed_loop_initial_baselines.py",
     "scripts/reports/stage_buryatia_volterra.py",
     "scripts/reports/stage_native_extended_models.py",
     "scripts/reports/stage_native_discrete_models.py",

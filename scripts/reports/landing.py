@@ -134,6 +134,12 @@ FAMILIES = {
         "finite-action oracle, a shared-selector MILP and its continuous selector relaxation. "
         "The report measures no performance and does not complete issue #599.",
     ),
+    "closed-loop-initial-baselines": Family(
+        r"closed-loop-initial-baselines-v1",
+        "synthesis",
+        "Initial three-task closed-loop baselines",
+        "Publishes three observed-state NMPC episode baselines over Lotka–Volterra, Earth orbit, and fuel, with 90 held steps, replay records, four all-stage projection figures, and a frozen source-only evidence ZIP. It does not claim complete forward/backward/intersection geometry or compare the full planned module universe.",
+    ),
     "closed-loop-pilot": Family(
         r"closed-loop-pilot-v1",
         "synthesis",
@@ -1272,6 +1278,28 @@ def build(site: Path) -> None:
                     ("Lotka–Volterra 2D example", closed_loop + "/example-2d.html"),
                     ("Full coverage record", closed_loop + "/raw/coverage.json"),
                     ("Offline report ZIP", closed_loop + ".zip"),
+                ),
+            )
+        )
+    initial = "closed-loop-initial-baselines-v1"
+    if (site / initial / "index.html").is_file():
+        details = json.loads(
+            (site / initial / "publication-manifest.json").read_text(encoding="utf-8")
+        )
+        detailed = [entry for entry in detailed if entry.report_id != initial]
+        detailed.append(
+            Entry(
+                report_id=initial,
+                scope=details.get("measured_scope", "Three initial closed-loop episode baselines"),
+                limits=details.get(
+                    "evidence_limits",
+                    "No complete reachable-set geometry or full module comparison",
+                ),
+                commit=details.get("source_commit", ""),
+                links=(
+                    ("Initial baseline report", initial + "/index.html"),
+                    ("Coverage record", initial + "/coverage.json"),
+                    ("Frozen source-only ZIP", initial + ".zip"),
                 ),
             )
         )

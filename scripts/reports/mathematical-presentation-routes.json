@@ -125,6 +125,31 @@
       "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
     },
     {
+      "route": "closed-loop-initial-baselines-v1/index.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_closed_loop_initial_baselines.py"
+    },
+    {
+      "route": "closed-loop-initial-baselines-v1/figures/baseline-089075e9-earth-orbit.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_closed_loop_initial_baselines.py"
+    },
+    {
+      "route": "closed-loop-initial-baselines-v1/figures/baseline-089075e9-fuel-fuel-flow.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_closed_loop_initial_baselines.py"
+    },
+    {
+      "route": "closed-loop-initial-baselines-v1/figures/baseline-089075e9-fuel-state.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_closed_loop_initial_baselines.py"
+    },
+    {
+      "route": "closed-loop-initial-baselines-v1/figures/baseline-089075e9-lotka-populations.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_closed_loop_initial_baselines.py"
+    },
+    {
       "route": "closed-loop-native-feedback/figures/analytic-action-clouds.html",
       "disposition": "maintained",
       "owner": "reports/closed-loop-native-feedback/figures/analytic-action-clouds.html"
@@ -388,6 +413,26 @@
       "route": "examples/closed-loop-pilot-2d.html",
       "disposition": "maintained",
       "owner": "scripts/reports/stage_closed_loop_pilot.py"
+    },
+    {
+      "route": "examples/closed-loop/figures/baseline-089075e9-earth-orbit.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/closed-loop/figures/baseline-089075e9-earth-orbit.html"
+    },
+    {
+      "route": "examples/closed-loop/figures/baseline-089075e9-fuel-fuel-flow.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/closed-loop/figures/baseline-089075e9-fuel-fuel-flow.html"
+    },
+    {
+      "route": "examples/closed-loop/figures/baseline-089075e9-fuel-state.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/closed-loop/figures/baseline-089075e9-fuel-state.html"
+    },
+    {
+      "route": "examples/closed-loop/figures/baseline-089075e9-lotka-populations.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/closed-loop/figures/baseline-089075e9-lotka-populations.html"
     },
     {
       "route": "examples/closed-loop/figures/earth-orbit.html",
