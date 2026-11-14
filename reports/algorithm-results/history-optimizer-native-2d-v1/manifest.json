@@ -1,0 +1,15 @@
+{
+  "schema": "csl.history-optimizer-native-2d/1",
+  "source_commit": "bac6ff91fbb41b44603638a73ff963e7cd8467c0",
+  "binary_sha256": "88b8b62bafbba8ae40de71eadf5d0da0736e9bd5d1fa4c7a4c443e529e35a534",
+  "files": {
+    "history.csv": "bd3ca2851670dbb0b4ce4762671e21cb730dd6483b0cbe1a8845dace5cdf3042",
+    "history.svg": "ef843f1c79660308606ddb82101794a8d210075a801f3d3b6a8a8703e29cff8c",
+    "index.html": "7ee4c39ada696aab724b5ebb6dcd9f476a3328d82a5f182a566e2b41092f08dc",
+    "records/CMakeCache.txt": "c31817eba6a8280e01b35eb7e57a847e54107a64b4ff3b193ff54f268dd32992",
+    "records/build.log": "8c35b1682f73592d30612d7b0fabdb384fcfff35cb5a076cb48b85b1368aa794",
+    "records/native-output.html": "4007ef029ec5613cc14cd8f3e09387abe66843b3169e37c9c4a21f835927b490",
+    "records/receipt.json": "813b4d6f39e52afee624364b6241dfef913302e464751f2fa0a26d0fc63791df",
+    "records/stdout.txt": "010e21a45d1bd43dddcdd4e88646603faa529a3fda57cbdb6c8776797da3d6ad"
+  }
+}

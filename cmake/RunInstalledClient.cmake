@@ -3,6 +3,16 @@
 if(NOT DEFINED CSL_BUILD_PARALLELISM)
   set(CSL_BUILD_PARALLELISM 4)
 endif()
+if(NOT DEFINED CSL_ENABLE_CASADI)
+  set(CSL_ENABLE_CASADI OFF)
+endif()
+set(casadi_args)
+if(CSL_ENABLE_CASADI)
+  if(NOT IS_ABSOLUTE "${CSL_CASADI_DIR}" OR NOT EXISTS "${CSL_CASADI_DIR}/casadi-config.cmake")
+    message(FATAL_ERROR "The optional installed consumer requires the configured CasADi package directory")
+  endif()
+  list(APPEND casadi_args "-Dcasadi_DIR=${CSL_CASADI_DIR}")
+endif()
 if(NOT CSL_BUILD_PARALLELISM MATCHES "^[1-9][0-9]*$")
   message(FATAL_ERROR "CSL_BUILD_PARALLELISM must be a positive integer")
 endif()
@@ -137,6 +147,7 @@ if(CSL_TOOLSET)
 endif()
 execute_process(COMMAND "${CMAKE_COMMAND}" -S "${work}/source" -B "${work}/build"
   ${generator_args} "-DCMAKE_PREFIX_PATH=${prefix}" "-DCMAKE_BUILD_TYPE=${CSL_CONFIG}"
+  ${casadi_args}
   "-DCMAKE_CXX_COMPILER=${CSL_CXX_COMPILER}"
   "-DCMAKE_CXX_COMPILER_LAUNCHER=${CSL_CXX_COMPILER_LAUNCHER}"
   "-DCMAKE_CXX_FLAGS=${CSL_CXX_FLAGS}"
@@ -180,6 +191,7 @@ file(COPY "${CSL_SOURCE_DIR}/examples/scenarios/double-integrator-generality.jso
   DESTINATION "${example_source}/scenarios")
 execute_process(COMMAND "${CMAKE_COMMAND}" -S "${example_source}" -B "${work}/examples-build"
   ${generator_args} "-DCMAKE_PREFIX_PATH=${prefix}" "-DCMAKE_BUILD_TYPE=${CSL_CONFIG}"
+  ${casadi_args}
   "-DCMAKE_CXX_COMPILER=${CSL_CXX_COMPILER}" "-DCMAKE_CXX_FLAGS=${CSL_CXX_FLAGS}"
   "-DCMAKE_CXX_COMPILER_LAUNCHER=${CSL_CXX_COMPILER_LAUNCHER}"
   "-DCMAKE_EXE_LINKER_FLAGS=${CSL_EXE_LINKER_FLAGS}"
