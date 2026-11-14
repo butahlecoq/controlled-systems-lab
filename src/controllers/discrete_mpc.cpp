@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <numeric>
 #include <string_view>
 #include <utility>
 
@@ -62,11 +63,18 @@ ConstraintRow empty_row(std::size_t nx, std::size_t nu, std::size_t nw, Interval
     return {Vector(nx, 0.0), Vector(nu, 0.0), Vector(nw, 0.0), std::move(bound)};
 }
 
+std::vector<std::size_t> all_control_indices(std::size_t nu) {
+    std::vector<std::size_t> indices(nu);
+    std::iota(indices.begin(), indices.end(), 0);
+    return indices;
+}
+
 void add_control_budget(std::vector<ConstraintRow> &rows, std::size_t nx, std::size_t nu,
-                        std::size_t nw, std::size_t count, double upper) {
+                        std::size_t nw, std::span<const std::size_t> control_indices,
+                        double upper) {
     auto row = empty_row(nx, nu, nw, {std::nullopt, upper});
-    for (std::size_t i = 0; i < count; ++i)
-        row.control[i] = 1.0;
+    for (const auto index : control_indices)
+        row.control.at(index) = 1.0;
     rows.push_back(std::move(row));
 }
 
@@ -129,6 +137,7 @@ SourceConstraints source_constraints(std::size_t model_number, std::size_t nx, s
         for (std::size_t i = 0; i < nu; ++i)
             control(i, 0.0, upper);
     };
+    const auto every_control = all_control_indices(nu);
     const auto all_states = [&](double lower, double upper) {
         for (std::size_t i = 0; i < nx; ++i)
             state(i, lower, upper);
@@ -149,7 +158,7 @@ SourceConstraints source_constraints(std::size_t model_number, std::size_t nx, s
     case 3:
         for (std::size_t i = 0; i < nu; ++i)
             control(i, 0.0, std::nullopt);
-        add_control_budget(result.rows, nx, nu, nw, nu, 8.0);
+        add_control_budget(result.rows, nx, nu, nw, every_control, 8.0);
         state(0, 0.0, std::nullopt);
         state(1, 0.0, std::nullopt);
         add_availability(result.rows, nx, nu, nw, 2, 0, 0);
@@ -158,7 +167,7 @@ SourceConstraints source_constraints(std::size_t model_number, std::size_t nx, s
     case 4:
         for (std::size_t i = 0; i < nu; ++i)
             control(i, 0.0, std::nullopt);
-        add_control_budget(result.rows, nx, nu, nw, nu, 200.0);
+        add_control_budget(result.rows, nx, nu, nw, every_control, 200.0);
         all_states(0.0, 1000.0);
         result.needs_relaxation = true;
         break;
@@ -172,7 +181,7 @@ SourceConstraints source_constraints(std::size_t model_number, std::size_t nx, s
         break;
     case 6:
         all_controls(11.0);
-        add_control_budget(result.rows, nx, nu, nw, nu, 22.0);
+        add_control_budget(result.rows, nx, nu, nw, every_control, 22.0);
         for (std::size_t i = 0; i < nx; ++i)
             state(i, 0.0, std::nullopt);
         break;
@@ -240,7 +249,7 @@ SourceConstraints source_constraints(std::size_t model_number, std::size_t nx, s
     case 18:
         for (std::size_t i = 0; i < nu; ++i)
             control(i, 0.0, std::nullopt);
-        add_control_budget(result.rows, nx, nu, nw, nu, 30.0);
+        add_control_budget(result.rows, nx, nu, nw, every_control, 30.0);
         state(0, 0.0, std::nullopt);
         state(1, 0.0, std::nullopt);
         add_availability(result.rows, nx, nu, nw, 2, 0, 0);
@@ -299,11 +308,11 @@ SourceConstraints source_constraints(std::size_t model_number, std::size_t nx, s
         for (std::size_t zone = 0; zone < 20; ++zone)
             state(zone * 2, -3.0, 3.0);
         all_controls(5.0);
-        add_control_budget(result.rows, nx, nu, nw, nu, 45.0);
+        add_control_budget(result.rows, nx, nu, nw, every_control, 45.0);
         break;
     case 29:
         all_controls(12.0);
-        add_control_budget(result.rows, nx, nu, nw, nu, 100.0);
+        add_control_budget(result.rows, nx, nu, nw, every_control, 100.0);
         break;
     case 30:
         result.deferred = true;
@@ -322,19 +331,29 @@ SourceConstraints source_constraints(std::size_t model_number, std::size_t nx, s
             control(i, 0.0, 10.0);
             control(i + 24, 0.0, 2.0);
         }
-        add_control_budget(result.rows, nx, nu, nw, nu, 120.0);
+        add_control_budget(result.rows, nx, nu, nw, every_control, 120.0);
         break;
     case 33:
         all_controls(10.0);
-        add_control_budget(result.rows, nx, nu, nw, nu, 60.0);
+        add_control_budget(result.rows, nx, nu, nw, every_control, 60.0);
         break;
     case 34:
         all_controls(10.0);
-        add_control_budget(result.rows, nx, nu, nw, 8, 50.0);
+        {
+            std::vector<std::size_t> gpu_controls;
+            for (std::size_t index = 0; index < nu; index += 2)
+                gpu_controls.push_back(index);
+            add_control_budget(result.rows, nx, nu, nw, gpu_controls, 50.0);
+        }
         break;
     case 35:
         all_controls(1.0);
-        add_control_budget(result.rows, nx, nu, nw, 12, 8.0);
+        {
+            std::vector<std::size_t> radio_controls;
+            for (std::size_t index = 0; index < nu; index += 2)
+                radio_controls.push_back(index);
+            add_control_budget(result.rows, nx, nu, nw, radio_controls, 8.0);
+        }
         break;
     default:
         result.deferred = true;

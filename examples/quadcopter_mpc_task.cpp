@@ -11,6 +11,14 @@ using Row = std::vector<std::pair<std::size_t, double>>;
 bool square(const Matrix &m, std::size_t n) {
     return m.rows == n && m.cols == n && m.values.size() == n * n;
 }
+
+void validate_cost_shapes(const NominalProblem &p) {
+    const auto nx = p.initial.size(), nu = p.B.cols;
+    if (!p.horizon || p.reference.size() != nx || !square(p.A, nx) || p.B.rows != nx ||
+        p.B.values.size() != nx * nu || !square(p.Q, nx) || !square(p.QN, nx) || !square(p.R, nu))
+        throw std::invalid_argument("Inconsistent source21 objective dimensions");
+}
+
 double quadratic(const Matrix &q, const Vector &x) {
     double v = 0;
     for (std::size_t i = 0; i < x.size(); ++i)
@@ -18,14 +26,10 @@ double quadratic(const Matrix &q, const Vector &x) {
             v += x[i] * q.values[i * q.cols + j] * x[j];
     return v;
 }
-}
 
-optimization::NominalQuadraticHistoryTask make_task(const NominalProblem &p) {
-    const auto nx = p.initial.size(), nu = p.input_bounds.size(), n = p.horizon;
-    if (!n || p.reference.size() != nx || p.state_bounds.size() != nx || !square(p.A, nx) ||
-        p.B.rows != nx || p.B.cols != nu || p.B.values.size() != nx * nu || !square(p.Q, nx) ||
-        !square(p.QN, nx) || !square(p.R, nu))
-        throw std::invalid_argument("Inconsistent source21 task dimensions");
+std::vector<optimization::QuadraticHistoryStageCost> source_history_costs(const NominalProblem &p) {
+    validate_cost_shapes(p);
+    const auto nx = p.initial.size(), nu = p.B.cols;
     const auto scaled_hessian = [](const Matrix &q) {
         Matrix result = q;
         for (auto &value : result.values)
@@ -40,29 +44,55 @@ optimization::NominalQuadraticHistoryTask make_task(const NominalProblem &p) {
         return result;
     };
     const auto tracking_offset = [&](const Matrix &q) { return quadratic(q, p.reference); };
-
-    std::vector<LinearStage> dynamics(n, {p.A, p.B, Matrix{nx, 0, {}}, Vector(nx, 0.0)});
-    std::vector<std::vector<Interval>> state_bounds(n + 1, p.state_bounds);
-    std::vector<std::vector<Interval>> control_bounds(n, p.input_bounds);
     std::vector<optimization::QuadraticHistoryStageCost> running;
-    running.reserve(n);
-    for (std::size_t stage = 0; stage < n; ++stage)
+    running.reserve(p.horizon);
+    for (std::size_t stage = 0; stage < p.horizon; ++stage)
         running.push_back({scaled_hessian(p.Q), Matrix{nx, nu, Vector(nx * nu, 0.0)},
                            scaled_hessian(p.R), tracking_linear(p.Q), Vector(nu, 0.0),
                            tracking_offset(p.Q)});
+    return running;
+}
+
+QuadraticTerminal source_terminal_cost(const NominalProblem &p) {
+    const auto nx = p.initial.size();
+    Matrix scaled = p.QN;
+    for (auto &value : scaled.values)
+        value *= 2.0;
+    Vector linear(nx, 0.0);
+    for (std::size_t i = 0; i < nx; ++i)
+        for (std::size_t j = 0; j < nx; ++j)
+            linear[i] -= 2.0 * p.QN.values[i * nx + j] * p.reference[j];
+    return {std::move(scaled), std::move(linear), quadratic(p.QN, p.reference)};
+}
+}
+
+optimization::NominalQuadraticHistoryTask make_task(const NominalProblem &p,
+                                                    std::span<const Interval> state_bounds,
+                                                    std::span<const Interval> input_bounds) {
+    const auto nx = p.initial.size(), nu = p.B.cols, n = p.horizon;
+    const auto running = source_history_costs(p);
+    if (state_bounds.size() != nx || input_bounds.size() != nu)
+        throw std::invalid_argument("Inconsistent source21 history bounds");
+
+    std::vector<LinearStage> dynamics(n, {p.A, p.B, Matrix{nx, 0, {}}, Vector(nx, 0.0)});
+    std::vector<std::vector<Interval>> staged_state_bounds(
+        n + 1, std::vector<Interval>(state_bounds.begin(), state_bounds.end()));
+    std::vector<std::vector<Interval>> staged_control_bounds(
+        n, std::vector<Interval>(input_bounds.begin(), input_bounds.end()));
     return {{{"quadcopter-mpc"}, {"source21-horizon" + std::to_string(n)}},
             std::move(dynamics),
             KnownInitial{p.initial},
-            std::move(state_bounds),
-            std::move(control_bounds),
+            std::move(staged_state_bounds),
+            std::move(staged_control_bounds),
             std::nullopt,
-            std::move(running),
-            {scaled_hessian(p.QN), tracking_linear(p.QN), tracking_offset(p.QN)}};
+            running,
+            source_terminal_cost(p)};
 }
 
 controllers::AuthoredTaskChoices make_source21_choices(const NominalProblem &p,
                                                        std::size_t external_dimension) {
-    auto history = make_task(p);
+    const auto running = source_history_costs(p);
+    auto terminal = source_terminal_cost(p);
     const auto zero_inputs = std::vector<Vector>(p.horizon, Vector(external_dimension, 0.0));
     controllers::AuthoredTaskChoices choices;
     choices.problem_id = {"quadcopter-mpc"};
@@ -71,8 +101,8 @@ controllers::AuthoredTaskChoices make_source21_choices(const NominalProblem &p,
     choices.objective_id = "source21-published-quadratic-cost";
     choices.horizon_id = "source21-fixed-horizon-per-replan";
     choices.final_stage = p.horizon;
-    choices.running_costs = std::move(history.running_costs);
-    choices.terminal_cost = std::move(history.terminal_cost);
+    choices.running_costs = running;
+    choices.terminal_cost = std::move(terminal);
     choices.forecast_external = zero_inputs;
     choices.forecast_id = "source21-nominal-zero-external-forecast";
     choices.replay_external = zero_inputs;
@@ -82,7 +112,7 @@ controllers::AuthoredTaskChoices make_source21_choices(const NominalProblem &p,
 
 double evaluate_source_cost(const NominalProblem &p, std::span<const double> states,
                             std::span<const double> controls) {
-    const auto nx = p.initial.size(), nu = p.input_bounds.size();
+    const auto nx = p.initial.size(), nu = p.B.cols;
     if (states.size() != (p.horizon + 1) * nx || controls.size() != p.horizon * nu)
         return std::numeric_limits<double>::quiet_NaN();
     double result = 0;
@@ -103,7 +133,7 @@ double evaluate_source_cost(const NominalProblem &p, std::span<const double> sta
 
 double evaluate_running_stage(const NominalProblem &p, std::span<const double> state,
                               std::span<const double> control) {
-    const auto nx = p.initial.size(), nu = p.input_bounds.size();
+    const auto nx = p.initial.size(), nu = p.B.cols;
     if (state.size() != nx || control.size() != nu)
         return std::numeric_limits<double>::quiet_NaN();
     Vector d(nx);
@@ -115,10 +145,12 @@ double evaluate_running_stage(const NominalProblem &p, std::span<const double> s
             result += control[i] * p.R.values[i * nu + j] * control[j];
     return result;
 }
-bool source_history_feasible(const NominalProblem &p, std::span<const double> states,
+bool source_history_feasible(const NominalProblem &p, std::span<const Interval> state_bounds,
+                             std::span<const Interval> input_bounds, std::span<const double> states,
                              std::span<const double> controls, double tolerance) {
-    const auto nx = p.initial.size(), nu = p.input_bounds.size();
-    if (states.size() != (p.horizon + 1) * nx || controls.size() != p.horizon * nu ||
+    const auto nx = p.initial.size(), nu = p.B.cols;
+    if (state_bounds.size() != nx || input_bounds.size() != nu ||
+        states.size() != (p.horizon + 1) * nx || controls.size() != p.horizon * nu ||
         !std::isfinite(tolerance) || tolerance < 0)
         return false;
     for (std::size_t i = 0; i < nx; ++i)
@@ -138,16 +170,16 @@ bool source_history_feasible(const NominalProblem &p, std::span<const double> st
         for (std::size_t i = 0; i < nx; ++i) {
             const auto value = states[k * nx + i];
             if (!std::isfinite(value) ||
-                (p.state_bounds[i].lower && value < *p.state_bounds[i].lower - tolerance) ||
-                (p.state_bounds[i].upper && value > *p.state_bounds[i].upper + tolerance))
+                (state_bounds[i].lower && value < *state_bounds[i].lower - tolerance) ||
+                (state_bounds[i].upper && value > *state_bounds[i].upper + tolerance))
                 return false;
         }
     for (std::size_t k = 0; k < p.horizon; ++k)
         for (std::size_t i = 0; i < nu; ++i) {
             const auto value = controls[k * nu + i];
             if (!std::isfinite(value) ||
-                (p.input_bounds[i].lower && value < *p.input_bounds[i].lower - tolerance) ||
-                (p.input_bounds[i].upper && value > *p.input_bounds[i].upper + tolerance))
+                (input_bounds[i].lower && value < *input_bounds[i].lower - tolerance) ||
+                (input_bounds[i].upper && value > *input_bounds[i].upper + tolerance))
                 return false;
         }
     return true;

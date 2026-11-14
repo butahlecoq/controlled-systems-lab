@@ -3,6 +3,7 @@
 #include <doctest/doctest.h>
 
 #include <algorithm>
+#include <cmath>
 #include <limits>
 #include <stdexcept>
 #include <string>
@@ -67,6 +68,26 @@ NominalMpcTask task_for(std::size_t number, AuthoredTaskChoices choices) {
         throw std::runtime_error("model profile was not admitted");
     return std::get<NominalMpcTask>(std::move(admission));
 }
+
+std::size_t find_control_budget_row(const auto &qp, std::size_t state_count,
+                                    std::span<const std::size_t> budget_controls, double upper) {
+    for (std::size_t row = 0; row < qp.rows().size(); ++row) {
+        if (!qp.rows()[row].upper || *qp.rows()[row].upper != upper || qp.rows()[row].lower)
+            continue;
+        bool matches = true;
+        for (std::size_t column = 0; column < state_count; ++column)
+            matches = matches && qp.constraints()(row, column) == 0.0;
+        for (std::size_t column = 0; column + state_count < qp.constraints().cols(); ++column) {
+            const bool selected = std::find(budget_controls.begin(), budget_controls.end(),
+                                            column) != budget_controls.end();
+            matches =
+                matches && qp.constraints()(row, state_count + column) == (selected ? 1.0 : 0.0);
+        }
+        if (matches)
+            return row;
+    }
+    throw std::runtime_error("Compiled QP did not retain the source control-budget row");
+}
 } // namespace
 
 TEST_CASE("source profile factory records an explicit admission for every catalogue model") {
@@ -121,6 +142,26 @@ TEST_CASE("profile choices do not silently relax integer or source-availability 
           std::string::npos);
 }
 
+TEST_CASE("source21 bounds are owned by the source profile consumed by its caller") {
+    const auto data = std::get<DiscreteModelData>(load_model(21));
+    const auto task = task_for(21, choices_for(data, 2));
+    REQUIRE(task.state_bounds.size() == 3);
+    REQUIRE(task.control_bounds.size() == 2);
+    for (const auto &stage : task.state_bounds) {
+        CHECK(stage[0].lower == doctest::Approx(-std::acos(-1.0) / 6.0));
+        CHECK(stage[0].upper == doctest::Approx(std::acos(-1.0) / 6.0));
+        CHECK(stage[1].lower == doctest::Approx(-std::acos(-1.0) / 6.0));
+        CHECK(stage[1].upper == doctest::Approx(std::acos(-1.0) / 6.0));
+        CHECK(stage[5].lower == doctest::Approx(-1.0));
+        CHECK_FALSE(stage[5].upper.has_value());
+    }
+    for (const auto &stage : task.control_bounds)
+        for (const auto &bound : stage) {
+            CHECK(bound.lower == doctest::Approx(-0.9916));
+            CHECK(bound.upper == doctest::Approx(2.4084));
+        }
+}
+
 TEST_CASE("model 26 source headway is a coupled transition and terminal state constraint") {
     auto task = task_for(26, choices_for(std::get<DiscreteModelData>(load_model(26)), 2));
     REQUIRE(task.stage_constraints.size() == 2);
@@ -145,6 +186,74 @@ TEST_CASE("model 26 source headway is a coupled transition and terminal state co
     CHECK(qp.constraints()(128, 60) == 1.0); // terminal x[T], no terminal control column
     CHECK(qp.constraints()(128, 63) == -1.0);
     CHECK(qp.constraints()(128, 64) == -1.2);
+}
+
+TEST_CASE("interleaved model 34 and 35 resource budgets use their source control channels") {
+    const auto verify = [](std::size_t model_number, double budget_upper,
+                           std::vector<std::size_t> resource_controls, double resource_amount,
+                           double other_channel_amount) {
+        const auto data = std::get<DiscreteModelData>(load_model(model_number));
+        auto task = task_for(model_number, choices_for(data, 1));
+        REQUIRE(task.stage_constraints.size() == 1);
+        REQUIRE(task.stage_constraints.front().bounds.size() == 1);
+        const auto &row = task.stage_constraints.front();
+        REQUIRE(row.control_map.rows == 1);
+        REQUIRE(row.control_map.cols == data.coefficients.B.cols);
+        CHECK(row.bounds.front().upper == budget_upper);
+
+        auto compiled = compile_mpc_decision(task, {0}, task.initial.point);
+        REQUIRE(std::holds_alternative<ConvexProgram>(compiled));
+        const auto &qp = std::get<ConvexProgram>(compiled).quadratic_program();
+        const auto state_count = 2 * data.coefficients.A.rows;
+        const auto budget_row =
+            find_control_budget_row(qp, state_count, resource_controls, budget_upper);
+        Vector resource_only(data.coefficients.B.cols, 0.0);
+        Vector other_channel(data.coefficients.B.cols, 0.0);
+        for (const auto index : resource_controls)
+            resource_only[index] = resource_amount;
+        for (std::size_t index = 0; index < other_channel.size(); ++index)
+            if (std::find(resource_controls.begin(), resource_controls.end(), index) ==
+                resource_controls.end())
+                other_channel[index] = other_channel_amount;
+
+        const auto compiled_lhs = [&](std::span<const double> controls) {
+            double value = 0.0;
+            for (std::size_t index = 0; index < controls.size(); ++index)
+                value += qp.constraints()(budget_row, state_count + index) * controls[index];
+            return value;
+        };
+        const auto source_lhs = [&](std::span<const double> controls) {
+            double value = 0.0;
+            for (const auto index : resource_controls)
+                value += controls[index];
+            return value;
+        };
+        for (const auto *candidate : {&resource_only, &other_channel})
+            for (std::size_t index = 0; index < candidate->size(); ++index) {
+                const auto &bound = task.control_bounds[0][index];
+                const bool satisfies_lower = !bound.lower || candidate->at(index) >= *bound.lower;
+                const bool satisfies_upper = !bound.upper || candidate->at(index) <= *bound.upper;
+                CHECK(satisfies_lower);
+                CHECK(satisfies_upper);
+            }
+
+        CHECK(compiled_lhs(resource_only) == source_lhs(resource_only));
+        CHECK(compiled_lhs(resource_only) > budget_upper);
+        CHECK(source_lhs(resource_only) > budget_upper);
+        CHECK(compiled_lhs(other_channel) == source_lhs(other_channel));
+        CHECK(compiled_lhs(other_channel) <= budget_upper);
+        CHECK(source_lhs(other_channel) <= budget_upper);
+    };
+
+    std::vector<std::size_t> model34_gpu_controls;
+    for (std::size_t index = 0; index < 16; index += 2)
+        model34_gpu_controls.push_back(index);
+    verify(34, 50.0, model34_gpu_controls, 10.0, 10.0);
+
+    std::vector<std::size_t> model35_radio_controls;
+    for (std::size_t index = 0; index < 24; index += 2)
+        model35_radio_controls.push_back(index);
+    verify(35, 8.0, model35_radio_controls, 1.0, 1.0);
 }
 
 TEST_CASE(
