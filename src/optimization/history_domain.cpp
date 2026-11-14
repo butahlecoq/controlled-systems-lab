@@ -19,8 +19,7 @@ bool finite(std::span<const double> values) {
 }
 
 bool same_matrix(const Matrix &left, const Matrix &right) {
-    return left.rows == right.rows && left.cols == right.cols &&
-           left.values == right.values;
+    return left.rows == right.rows && left.cols == right.cols && left.values == right.values;
 }
 
 bool same_matrix(const numeric::MatrixView &left, const numeric::MatrixView &right) {

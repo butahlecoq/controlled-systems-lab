@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
 #include <csl/adapters/nlp/casadi_superscs_history_optimizer.hpp>

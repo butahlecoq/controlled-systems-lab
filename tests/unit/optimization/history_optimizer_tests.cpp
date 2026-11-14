@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
 #include <csl/optimization/history_optimizer.hpp>
@@ -32,22 +31,24 @@ problem::ResolvedProblem source_problem() {
     return std::get<problem::ResolvedProblem>(resolved);
 }
 optimization::HistoryOptimizationRequest request() {
-    const JointCoordinates coordinates{{1,1,0},1};
-    auto set=sets::make_h({{"full-history"},3,{}},
-        {std::get<numeric::MatrixView>(numeric::snapshot(Matrix{2,3,{0,0,1,0,0,-1}})),
-         std::get<numeric::VectorView>(numeric::snapshot_vector(Vector{1,0})),
-         std::get<numeric::MatrixView>(numeric::snapshot(Matrix{0,3,{}})),
+    const JointCoordinates coordinates{{1, 1, 0}, 1};
+    auto set = sets::make_h(
+        {{"full-history"}, 3, {}},
+        {std::get<numeric::MatrixView>(numeric::snapshot(Matrix{2, 3, {0, 0, 1, 0, 0, -1}})),
+         std::get<numeric::VectorView>(numeric::snapshot_vector(Vector{1, 0})),
+         std::get<numeric::MatrixView>(numeric::snapshot(Matrix{0, 3, {}})),
          std::get<numeric::VectorView>(numeric::snapshot_vector(Vector{}))});
-    synthesis::JointHistoryRelation histories{coordinates,std::get<sets::SetData>(std::move(set))};
-    optimization::RunningControlCost running{"",0,{}};
-    auto compiled=optimization::compile_history_cost(histories,LinearTerminal{{0.0},0.0},running,0);
+    synthesis::JointHistoryRelation histories{coordinates, std::get<sets::SetData>(std::move(set))};
+    optimization::RunningControlCost running{"", 0, {}};
+    auto compiled =
+        optimization::compile_history_cost(histories, LinearTerminal{{0.0}, 0.0}, running, 0);
     return {{ProblemId{"problem"}, ProgramId{"source-objective"}},
             {histories, {}},
             std::get<optimization::HistoryCostProgram>(std::move(compiled)),
             optimization::SuppliedStart{Vector{1.0, 0.0, 0.0}}};
 }
-struct Candidate final:optimization::HistoryOptimizerWorkspace {
-    Vector candidate{0.0,0.0,0.0};
+struct Candidate final : optimization::HistoryOptimizerWorkspace {
+    Vector candidate{0.0, 0.0, 0.0};
     bool bad_readback{};
     bool bad_dual_shape{};
     bool bad_dual_readback{};
@@ -56,8 +57,9 @@ struct Candidate final:optimization::HistoryOptimizerWorkspace {
     bool bad_witness_readback{};
     std::vector<optimization::HistoryMembershipWitness> candidate_memberships;
     int calls{};
-    optimization::RawHistorySolveOutcome solve_candidate(const optimization::HistoryOptimizationRequest& r,
-        const ExecutionContext&) override {
+    optimization::RawHistorySolveOutcome
+    solve_candidate(const optimization::HistoryOptimizationRequest &r,
+                    const ExecutionContext &) override {
         ++calls;
         optimization::RawHistoryInitializationEvidence initialization;
         if (const auto *supplied = std::get_if<optimization::SuppliedStart>(&r.start)) {
@@ -70,7 +72,8 @@ struct Candidate final:optimization::HistoryOptimizerWorkspace {
             auto witness_readback = supplied->membership_witnesses;
             if (bad_witness_readback && !witness_readback.empty())
                 witness_readback.pop_back();
-            initialization = optimization::SuppliedReadbacks{supplied->history, std::move(initial),
+            initialization = optimization::SuppliedReadbacks{supplied->history,
+                                                             std::move(initial),
                                                              std::move(supplied_duals),
                                                              std::move(dual_readback),
                                                              supplied->membership_witnesses,
@@ -192,22 +195,21 @@ TEST_CASE("shared strategy history seam prepares and reports the selected optimi
 }
 
 TEST_CASE("whole-history port checks backend output against the original cost") {
-    auto r=request();
+    auto r = request();
     Candidate candidate;
-    const auto result=registry::HistoryOptimizerPort::run(candidate,r,ExecutionContext{});
+    const auto result = registry::HistoryOptimizerPort::run(candidate, r, ExecutionContext{});
     REQUIRE(std::holds_alternative<optimization::HistoryOptimizationResult>(result));
-    const auto& checked=std::get<optimization::HistoryOptimizationResult>(result);
-    CHECK(checked.identity==r.identity);
-    CHECK(checked.history==Vector{0.0,0.0,0.0});
-    CHECK(checked.source_cost.total==doctest::Approx(0.0));
+    const auto &checked = std::get<optimization::HistoryOptimizationResult>(result);
+    CHECK(checked.identity == r.identity);
+    CHECK(checked.history == Vector{0.0, 0.0, 0.0});
+    CHECK(checked.source_cost.total == doctest::Approx(0.0));
     CHECK(std::holds_alternative<optimization::VerifiedSuppliedStart>(checked.initialization));
 }
 
 TEST_CASE("whole-history port rejects invalid numerical policies before backend execution") {
-    for (const auto policy : {
-             NumericalPolicy{std::numeric_limits<double>::quiet_NaN(), 0.0},
-             NumericalPolicy{0.0, -1.0},
-             NumericalPolicy{std::numeric_limits<double>::infinity(), 0.0}}) {
+    for (const auto policy : {NumericalPolicy{std::numeric_limits<double>::quiet_NaN(), 0.0},
+                              NumericalPolicy{0.0, -1.0},
+                              NumericalPolicy{std::numeric_limits<double>::infinity(), 0.0}}) {
         auto r = request();
         Candidate candidate;
         ExecutionContext context;
@@ -243,65 +245,72 @@ TEST_CASE("whole-history port rejects initialization evidence from the wrong mod
 }
 
 TEST_CASE("whole-history port rejects false initialization readback") {
-    auto r=request();
-    Candidate candidate; candidate.bad_readback=true;
-    const auto result=registry::HistoryOptimizerPort::run(candidate,r,ExecutionContext{});
+    auto r = request();
+    Candidate candidate;
+    candidate.bad_readback = true;
+    const auto result = registry::HistoryOptimizerPort::run(candidate, r, ExecutionContext{});
     REQUIRE(std::holds_alternative<Diagnostic>(result));
-    CHECK(std::get<Diagnostic>(result).field=="history.backend.readback");
+    CHECK(std::get<Diagnostic>(result).field == "history.backend.readback");
 }
 
 TEST_CASE("whole-history port rejects false zero-dual readback") {
-    auto r=request();
-    Candidate candidate; candidate.bad_dual_readback=true;
-    const auto result=registry::HistoryOptimizerPort::run(candidate,r,ExecutionContext{});
+    auto r = request();
+    Candidate candidate;
+    candidate.bad_dual_readback = true;
+    const auto result = registry::HistoryOptimizerPort::run(candidate, r, ExecutionContext{});
     REQUIRE(std::holds_alternative<Diagnostic>(result));
-    CHECK(std::get<Diagnostic>(result).field=="history.backend.readback");
+    CHECK(std::get<Diagnostic>(result).field == "history.backend.readback");
 }
 
 TEST_CASE("whole-history port rejects mismatched supplied and read-back dual vectors") {
-    auto r=request();
-    Candidate candidate; candidate.bad_dual_shape=true;
-    const auto result=registry::HistoryOptimizerPort::run(candidate,r,ExecutionContext{});
+    auto r = request();
+    Candidate candidate;
+    candidate.bad_dual_shape = true;
+    const auto result = registry::HistoryOptimizerPort::run(candidate, r, ExecutionContext{});
     REQUIRE(std::holds_alternative<Diagnostic>(result));
-    CHECK(std::get<Diagnostic>(result).field=="history.backend.readback");
+    CHECK(std::get<Diagnostic>(result).field == "history.backend.readback");
 }
 
 TEST_CASE("whole-history port rejects a compiled polynomial inconsistent with source formulas") {
-    auto r=request(); r.source_cost.quadratic.offset+=1.0;
+    auto r = request();
+    r.source_cost.quadratic.offset += 1.0;
     Candidate candidate;
-    const auto result=registry::HistoryOptimizerPort::run(candidate,r,ExecutionContext{});
+    const auto result = registry::HistoryOptimizerPort::run(candidate, r, ExecutionContext{});
     REQUIRE(std::holds_alternative<Diagnostic>(result));
-    CHECK(std::get<Diagnostic>(result).field=="history.cost");
-    CHECK(candidate.calls==0);
+    CHECK(std::get<Diagnostic>(result).field == "history.cost");
+    CHECK(candidate.calls == 0);
 }
 
 TEST_CASE("whole-history port rejects a backend objective that differs from source J") {
-    auto r=request();
-    Candidate candidate; candidate.bad_objective=true;
-    const auto result=registry::HistoryOptimizerPort::run(candidate,r,ExecutionContext{});
+    auto r = request();
+    Candidate candidate;
+    candidate.bad_objective = true;
+    const auto result = registry::HistoryOptimizerPort::run(candidate, r, ExecutionContext{});
     REQUIRE(std::holds_alternative<Diagnostic>(result));
-    CHECK(std::get<Diagnostic>(result).field=="history.backend.objective");
+    CHECK(std::get<Diagnostic>(result).field == "history.backend.objective");
 }
 
 TEST_CASE("whole-history port checks every returned full-domain inequality") {
-    auto r=request();
-    Candidate candidate; candidate.candidate={0.0,0.0,2.0};
-    const auto result=registry::HistoryOptimizerPort::run(candidate,r,ExecutionContext{});
+    auto r = request();
+    Candidate candidate;
+    candidate.candidate = {0.0, 0.0, 2.0};
+    const auto result = registry::HistoryOptimizerPort::run(candidate, r, ExecutionContext{});
     REQUIRE(std::holds_alternative<Diagnostic>(result));
-    CHECK(std::get<Diagnostic>(result).field=="history.backend.feasibility");
+    CHECK(std::get<Diagnostic>(result).field == "history.backend.feasibility");
 }
 
 TEST_CASE("whole-history port rejects an infeasible initial history before calling the backend") {
     auto r = request();
     std::get<optimization::SuppliedStart>(r.start).history[2] = 2.0;
     Candidate candidate;
-    const auto result=registry::HistoryOptimizerPort::run(candidate,r,ExecutionContext{});
+    const auto result = registry::HistoryOptimizerPort::run(candidate, r, ExecutionContext{});
     REQUIRE(std::holds_alternative<Diagnostic>(result));
-    CHECK(std::get<Diagnostic>(result).field=="history.initial");
-    CHECK(candidate.calls==0);
+    CHECK(std::get<Diagnostic>(result).field == "history.initial");
+    CHECK(candidate.calls == 0);
 }
 
-TEST_CASE("whole-history memberships check real latent witnesses and retain the original H domain") {
+TEST_CASE(
+    "whole-history memberships check real latent witnesses and retain the original H domain") {
     auto r = request();
     r.domain.state_frame = "physical-state-frame";
     auto &start = std::get<optimization::SuppliedStart>(r.start);
@@ -310,40 +319,49 @@ TEST_CASE("whole-history memberships check real latent witnesses and retain the 
     candidate.candidate = {0.0, 0.5, 0.0};
     using namespace optimization;
     const auto origin = [](HistorySetFamily family, const char *selected) {
-        return HistoryMembershipOrigin{{selected}, {selected}, family,
-                                       SetRelation::inner, "physical-state-frame", {1}};
+        return HistoryMembershipOrigin{
+            {selected}, {selected}, family, SetRelation::inner, "physical-state-frame", {1}};
     };
-    auto h = std::get<sets::SetData>(sets::make_h({{"h-region"}, 1, {}},
-        {std::get<numeric::MatrixView>(numeric::snapshot(Matrix{2, 1, {1, -1}})),
-         std::get<numeric::VectorView>(numeric::snapshot_vector(Vector{1, 0})),
-         std::get<numeric::MatrixView>(numeric::snapshot(Matrix{0, 1, {}})),
-         std::get<numeric::VectorView>(numeric::snapshot_vector(Vector{}))}));
+    auto h = std::get<sets::SetData>(
+        sets::make_h({{"h-region"}, 1, {}},
+                     {std::get<numeric::MatrixView>(numeric::snapshot(Matrix{2, 1, {1, -1}})),
+                      std::get<numeric::VectorView>(numeric::snapshot_vector(Vector{1, 0})),
+                      std::get<numeric::MatrixView>(numeric::snapshot(Matrix{0, 1, {}})),
+                      std::get<numeric::VectorView>(numeric::snapshot_vector(Vector{}))}));
     const auto make_polytope_source = [&](const char *id) {
         const auto representation = std::get<sets::HRepresentation>(h.representation());
         return std::get<sets::SetData>(sets::make_h({{id}, 1, {}}, representation));
     };
-    auto v = std::get<sets::SetData>(sets::make_v({{"v-region"}, 1, {}},
-        {std::get<numeric::MatrixView>(numeric::snapshot(Matrix{2, 1, {0, 1}})),
-         std::get<numeric::MatrixView>(numeric::snapshot(Matrix{0, 1, {}}))}));
+    auto v = std::get<sets::SetData>(
+        sets::make_v({{"v-region"}, 1, {}},
+                     {std::get<numeric::MatrixView>(numeric::snapshot(Matrix{2, 1, {0, 1}})),
+                      std::get<numeric::MatrixView>(numeric::snapshot(Matrix{0, 1, {}}))}));
     r.domain.memberships = {
         {{1}, origin(HistorySetFamily::polytope, "h-region"), HistoryHMembership{h}},
-        {{1}, origin(HistorySetFamily::zonotope, "z-region"),
+        {{1},
+         origin(HistorySetFamily::zonotope, "z-region"),
          HistoryZonotopeMembership{{0}, {1, 2, {1, 1}}}},
-        {{1}, origin(HistorySetFamily::box, "b-region"),
-         HistoryAxisBoxMembership{{0}, {1}}},
-        {{1}, origin(HistorySetFamily::parallelotope, "p-region"),
+        {{1}, origin(HistorySetFamily::box, "b-region"), HistoryAxisBoxMembership{{0}, {1}}},
+        {{1},
+         origin(HistorySetFamily::parallelotope, "p-region"),
          HistoryParallelotopeMembership{{0}, {1, 1, {1}}, {-1}, {1}}},
-        {{1}, origin(HistorySetFamily::ellipsoid, "e-region"),
+        {{1},
+         origin(HistorySetFamily::ellipsoid, "e-region"),
          HistoryBallFactorMembership{{{0}, {1, 2, {1, 0}}}}},
         {{1}, origin(HistorySetFamily::polytope, "v-region"), HistoryVSimplexMembership{v}}};
     for (auto &member : r.domain.memberships)
-        member.origin.source =
-            HistorySourceGeometry{member.origin.reference, member.origin.selected_family, member.shape};
-    start.membership_witnesses = {HistoryHWitness{}, HistoryZonotopeWitness{{0.25, 0.25}},
-        HistoryAxisBoxWitness{{0.5}}, HistoryParallelotopeWitness{{0.5}},
-        HistoryBallFactorWitness{{0.5, 0}}, HistoryVSimplexWitness{{0.5, 0.5}}};
+        member.origin.source = HistorySourceGeometry{member.origin.reference,
+                                                     member.origin.selected_family, member.shape};
+    start.membership_witnesses = {HistoryHWitness{},
+                                  HistoryZonotopeWitness{{0.25, 0.25}},
+                                  HistoryAxisBoxWitness{{0.5}},
+                                  HistoryParallelotopeWitness{{0.5}},
+                                  HistoryBallFactorWitness{{0.5, 0}},
+                                  HistoryVSimplexWitness{{0.5, 0.5}}};
     candidate.candidate_memberships = start.membership_witnesses;
-    const auto run = [&]() { return registry::HistoryOptimizerPort::run(candidate, r, ExecutionContext{}); };
+    const auto run = [&]() {
+        return registry::HistoryOptimizerPort::run(candidate, r, ExecutionContext{});
+    };
     REQUIRE(std::holds_alternative<HistoryOptimizationResult>(run()));
     SUBCASE("polytope source can qualify zonotope and box selected memberships") {
         auto &zonotope = r.domain.memberships[1];
@@ -509,12 +527,13 @@ TEST_CASE("whole-history memberships check real latent witnesses and retain the 
         CHECK(candidate.calls == before);
     }
     SUBCASE("named selected coordinates must agree with the original state block") {
-        const auto original = std::get<sets::HRepresentation>(r.domain.original.relation.representation());
+        const auto original =
+            std::get<sets::HRepresentation>(r.domain.original.relation.representation());
         r.domain.original.relation = std::get<sets::SetData>(
             sets::make_h({{"full-history"}, 3, {"x0", "x1", "u0"}}, original));
         const auto selected = std::get<sets::HRepresentation>(h.representation());
-        r.domain.memberships[0].shape = HistoryHMembership{std::get<sets::SetData>(
-            sets::make_h({{"h-region"}, 1, {"x0"}}, selected))};
+        r.domain.memberships[0].shape = HistoryHMembership{
+            std::get<sets::SetData>(sets::make_h({{"h-region"}, 1, {"x0"}}, selected))};
         const auto before = candidate.calls;
         CHECK(std::holds_alternative<Diagnostic>(run()));
         CHECK(candidate.calls == before);
