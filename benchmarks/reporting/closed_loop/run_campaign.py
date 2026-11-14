@@ -293,6 +293,23 @@ def attempted_graphs(output_root: Path, freeze_record: dict) -> set[tuple[str, s
     }
 
 
+def campaign_order(graphs: list[dict]) -> list[dict]:
+    """Interleave tasks so bounded campaign batches cover every environment."""
+    by_task = {task_name: [] for task_name in TASK_NAMES}
+    for graph in graphs:
+        task_name = graph["task_name"]
+        if task_name not in by_task:
+            raise ValueError(f"campaign graph has an unknown task: {task_name}")
+        by_task[task_name].append(graph)
+
+    return [
+        by_task[task_name][index]
+        for index in range(max(map(len, by_task.values()), default=0))
+        for task_name in TASK_NAMES
+        if index < len(by_task[task_name])
+    ]
+
+
 def append_event(path: Path, event: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as stream:
@@ -313,7 +330,7 @@ def run_campaign(
     attempted_now = 0
     skipped = 0
     events_path = output_root / "campaign-events.jsonl"
-    for item in record["graphs"]:
+    for item in campaign_order(record["graphs"]):
         key = (item["task_name"], item["graph_id"])
         if key in attempted:
             skipped += 1

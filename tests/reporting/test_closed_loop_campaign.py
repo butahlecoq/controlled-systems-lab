@@ -90,6 +90,34 @@ class ClosedLoopCampaignTests(unittest.TestCase):
         self.assertTrue(all(graph["catalogue_path"] in graph["catalogues"] for graph in graphs))
         self.assertTrue(all(graph["admission"]["status"] == "admitted" for graph in graphs))
 
+    def test_bounded_campaign_order_interleaves_all_three_tasks(self):
+        graphs = [
+            {"task_name": "syn-nl-lv-01", "graph_id": "lv-1"},
+            {"task_name": "syn-nl-lv-01", "graph_id": "lv-2"},
+            {"task_name": "earth-orbit", "graph_id": "orbit-1"},
+            {"task_name": "syn-nl-fuel-01", "graph_id": "fuel-1"},
+            {"task_name": "earth-orbit", "graph_id": "orbit-2"},
+            {"task_name": "syn-nl-fuel-01", "graph_id": "fuel-2"},
+            {"task_name": "syn-nl-fuel-01", "graph_id": "fuel-3"},
+        ]
+
+        ordered = run_campaign.campaign_order(graphs)
+
+        self.assertEqual(
+            [(graph["task_name"], graph["graph_id"]) for graph in ordered],
+            [
+                ("syn-nl-lv-01", "lv-1"),
+                ("earth-orbit", "orbit-1"),
+                ("syn-nl-fuel-01", "fuel-1"),
+                ("syn-nl-lv-01", "lv-2"),
+                ("earth-orbit", "orbit-2"),
+                ("syn-nl-fuel-01", "fuel-2"),
+                ("syn-nl-fuel-01", "fuel-3"),
+            ],
+        )
+        with self.assertRaisesRegex(ValueError, "unknown task"):
+            run_campaign.campaign_order([{"task_name": "unknown"}])
+
     def test_attempt_classification_keeps_refusal_reason_and_outcome(self):
         with tempfile.TemporaryDirectory() as directory:
             attempt_path = Path(directory) / "attempt.json"
