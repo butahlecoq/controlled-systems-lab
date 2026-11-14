@@ -4,6 +4,11 @@ on:
   pull_request:
     paths:
       - '.github/actions/pages-deploy/**'
+      - 'benchmarks/reporting/closed_loop/capabilities.py'
+      - 'benchmarks/reporting/closed_loop/native_compositions.py'
+      - 'benchmarks/reporting/closed_loop/run_closed_loop.py'
+      - 'tests/reporting/test_native_compositions.py'
+      - 'docs/catalogue/closed-loop-native-compositions-v1.*'
       - 'scripts/ci/**'
       - 'tests/ci/**'
       - 'scripts/catalogue/**'
@@ -62,6 +67,11 @@ on:
     branches: [main]
     paths:
       - '.github/actions/pages-deploy/**'
+      - 'benchmarks/reporting/closed_loop/capabilities.py'
+      - 'benchmarks/reporting/closed_loop/native_compositions.py'
+      - 'benchmarks/reporting/closed_loop/run_closed_loop.py'
+      - 'tests/reporting/test_native_compositions.py'
+      - 'docs/catalogue/closed-loop-native-compositions-v1.*'
       - 'scripts/ci/**'
       - 'tests/ci/**'
       - 'scripts/catalogue/**'
@@ -169,3 +179,6 @@ jobs:
           python -m unittest discover -s tests/reporting -p 'test_opt07_*.py'
           python -m unittest discover -s tests/reporting -p 'test_opt11_publication.py'
           python -m unittest discover -s reports/algorithm-results/tooling/opt11 -p 'test_collect.py'
+
+      - name: Check explicit native compositions and common runner failure paths
+        run: python -m unittest tests.reporting.test_native_compositions tests.reporting.test_closed_loop_native_capabilities tests.reporting.test_closed_loop_runner_failures
