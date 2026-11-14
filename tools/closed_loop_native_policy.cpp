@@ -279,6 +279,8 @@ Json query_failure(const Json& input, const std::string& status, const std::stri
     Json result{{"status", status}, {"reason", reason}, {"invocations", Json::array()}};
     for(const auto* key : {"task_id", "task_sha256", "action_profile_id"})
         if(input.is_object() && input.contains(key)) result[key] = input.at(key);
+    if(input.is_object() && input.contains("vertex_lp_priority_policy"))
+        result["vertex_lp_priority_policy"] = input.at("vertex_lp_priority_policy");
     if(input.is_object() && input.contains("controller_id"))
         result["policy_id"] = input.at("controller_id").get<std::string>() + "/query/1";
     return result;
@@ -373,6 +375,34 @@ registry::Registration<registry::HullReducerPort> hull_registration(
     throw std::runtime_error("Unsupported or unimplemented HullReducerPort id: "+method.id);
 }
 
+registry::Registration<registry::LPPort> structural_priority_registration(const LinearProgram& program) {
+    if(program.variables().empty())
+        throw std::runtime_error("vertex_lp_priority_policy structural-column-index/v1 requires a nonempty structural variable domain");
+    optimization::phase_one::Options options;
+    options.structural_entering_priorities.resize(program.variables().size());
+    std::iota(options.structural_entering_priorities.begin(),options.structural_entering_priorities.end(),0.0);
+    auto registration=optimization::phase_one::make_registration(std::move(options));
+    if(const auto* diagnostics=std::get_if<Diagnostics>(&registration))
+        throw std::runtime_error(diagnostics->empty()?"Phase-I priority registration unavailable":diagnostics->front().explanation);
+    return std::get<registry::Registration<registry::LPPort>>(std::move(registration));
+}
+
+registry::Registration<registry::LPPort> structural_priority_provider() {
+    return {{{"phase-one-priority-tie"},"1"},
+        [](const LinearProgram& program,const registry::Requirements& requirements)->registry::Capability {
+            if(program.variables().empty())
+                return Diagnostics{{DiagnosticCode::invalid_input,"vertex_lp_priority_policy",
+                    "structural-column-index/v1 requires a nonempty structural variable domain"}};
+            return structural_priority_registration(program).capabilities(program,requirements);
+        },
+        [](const LinearProgram& program) {
+            return structural_priority_registration(program).factory(program);
+        },
+        [](const LinearProgram& program,LPWorkspace& workspace) {
+            return structural_priority_registration(program).basis_factory(program,workspace);
+        }};
+}
+
 registry::PreparedProvider<registry::GeometryPort> affine_sum_provider(const Json& input) {
     const MethodSelection reachable=method_selection(input.at("reachable_set_method"),"reachable_set_method");
     if(reachable.version!="1.0.0")
@@ -409,12 +439,16 @@ registry::PreparedProvider<registry::GeometryPort> affine_sum_provider(const Jso
             throw std::runtime_error("Phase-I LP registration unavailable");
         lp_registration=std::get<registry::Registration<registry::LPPort>>(std::move(lp_result));
     } else if(lp_method.id=="phase-one-priority-tie") {
-        optimization::phase_one::Options options;
-        options.structural_entering_priorities={0,1,2,3,4};
-        auto lp_result=optimization::phase_one::make_registration(std::move(options));
-        if(!std::holds_alternative<registry::Registration<registry::LPPort>>(lp_result))
-            throw std::runtime_error("Phase-I priority-tie LP registration unavailable");
-        lp_registration=std::get<registry::Registration<registry::LPPort>>(std::move(lp_result));
+        if(input.contains("vertex_lp_priority_policy")) {
+            lp_registration=structural_priority_provider();
+        } else {
+            optimization::phase_one::Options options;
+            options.structural_entering_priorities={0,1,2,3,4};
+            auto lp_result=optimization::phase_one::make_registration(std::move(options));
+            if(!std::holds_alternative<registry::Registration<registry::LPPort>>(lp_result))
+                throw std::runtime_error("Phase-I priority-tie LP registration unavailable");
+            lp_registration=std::get<registry::Registration<registry::LPPort>>(std::move(lp_result));
+        }
     } else if(lp_method.id=="csl.lp.highs") {
 #if CSL_NATIVE_HAS_HIGHS
         auto lp_result=adapters::lp::make_highs_registration();
@@ -508,12 +542,14 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
     auto provider = std::get<registry::PreparedProvider<registry::GeometryPort>>(std::move(prepared));
     const auto reachable_provider = affine_sum_provider(input);
     Json geometry_calls=Json::array();
-    const auto geometry_selection=Json{{"reachable_set_method",input.at("reachable_set_method")},
+    auto geometry_selection=Json{{"reachable_set_method",input.at("reachable_set_method")},
         {"hull_provider",input.at("hull_provider")},{"vertex_lp_provider",input.at("vertex_lp_provider")},
         {"conversion_provider",input.at("conversion_provider")},{"checker_budget",input.at("checker_budget")},
         {"control_optimizer",input.at("control_optimizer")},
         {"terminal_optimizer_provider","not_used"},
         {"terminal_value_evaluation","direct authored objective evaluation"}};
+    if(input.contains("vertex_lp_priority_policy"))
+        geometry_selection["vertex_lp_priority_policy"]=input.at("vertex_lp_priority_policy");
     const auto outcome = optimization::finite_action_stage_layered_graph(request,
         {beam_width, max_nodes, representation==optimization::NominalRepresentation::exact_polytope ?
             std::nullopt : std::optional{representation},max_generators,
@@ -1278,6 +1314,19 @@ Json continuous_history_query(const Json& in) {
 }
 
 Json query(const Json& in) {
+    if(in.contains("vertex_lp_priority_policy")) {
+        if(!in.at("vertex_lp_priority_policy").is_string() ||
+                in.at("vertex_lp_priority_policy")!="structural-column-index/v1")
+            return query_failure(in,"rejected","Unknown vertex_lp_priority_policy; expected structural-column-index/v1");
+        const auto reachable=in.value("reachable_set_method",Json{});
+        const auto lp=in.value("vertex_lp_provider",Json{});
+        if(in.value("mode",std::string{})!="" ||
+                in.value("search_policy",std::string{})!="stage-layered-backward-viability" ||
+                !reachable.is_object() || reachable.value("id",std::string{})!="csl.geometry.affine-sum" ||
+                !lp.is_object() || lp.value("id",std::string{})!="phase-one-priority-tie")
+            return query_failure(in,"rejected",
+                "vertex_lp_priority_policy requires the active stage-layered csl.geometry.affine-sum phase-one-priority-tie vertex LP provider");
+    }
     if(in.value("mode", std::string{}) == "continuous-history/1" || in.value("mode",std::string{})=="fixed-tail-policy/1") return continuous_history_query(in);
     if(in.contains("candidate_action_indices") &&
             (!in.at("candidate_action_indices").is_array() || in.at("candidate_action_indices").empty())) {

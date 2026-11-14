@@ -200,6 +200,8 @@ class NativeGraphPolicy:
                 if self.use_backward_graph else
                 "finite-action receding-horizon fixed-plan MPC using exhaustive full action histories when within budget, otherwise a deterministic bounded catalogue of full-horizon constant and single-switch histories; exact source running-cost ranking, authored state-constraint replay, and a separately recomputed original affine trajectory")}
 
+        if "vertex_lp_priority_policy" in self.factory_options:
+            self._geometry_options()
         self.process = subprocess.Popen([str(self.executable)], stdin=subprocess.PIPE,
             stdout=subprocess.PIPE, stderr=None, text=True, bufsize=1)
 
@@ -246,6 +248,12 @@ class NativeGraphPolicy:
                 "version": os.environ.get(env_version, default_version)}
 
     def _geometry_options(self) -> dict[str, object]:
+        if "vertex_lp_priority_policy" in self.factory_options:
+            priority_policy = self.factory_options["vertex_lp_priority_policy"]
+            if not isinstance(priority_policy, str) or priority_policy != "structural-column-index/v1":
+                raise ValueError("factory_options.vertex_lp_priority_policy must be structural-column-index/v1")
+            if not self.use_backward_graph:
+                raise ValueError("factory_options.vertex_lp_priority_policy requires an active backward-graph vertex LP provider")
         if self.factory_options:
             required = ("reachable_set_method", "hull_provider", "vertex_lp_provider",
                         "conversion_provider", "checker_budget", "control_optimizer")
@@ -283,9 +291,14 @@ class NativeGraphPolicy:
             raise ValueError("factory_options.checker_budget must have positive capacity and nonnegative wall limit")
         optimizer = self._method_option("control_optimizer", "CSL_NATIVE_CONTROL_OPTIMIZER",
             "CSL_NATIVE_CONTROL_OPTIMIZER_VERSION", "csl.optimization.finite-action-stage-layered-graph", "1.0.0")
-        return {"reachable_set_method": reachable, "hull_provider": hull,
+        result = {"reachable_set_method": reachable, "hull_provider": hull,
             "vertex_lp_provider": lp, "conversion_provider": conversion,
             "checker_budget": checker, "control_optimizer": optimizer}
+        if "vertex_lp_priority_policy" in self.factory_options:
+            if reachable["id"] != "csl.geometry.affine-sum" or not isinstance(lp, Mapping) or lp["id"] != "phase-one-priority-tie":
+                raise ValueError("factory_options.vertex_lp_priority_policy requires the active csl.geometry.affine-sum phase-one-priority-tie vertex LP provider")
+            result["vertex_lp_priority_policy"] = priority_policy
+        return result
 
     def query(self, task_id: str, observed_physical_state: list[float], absolute_update_index: int) -> dict:
         self.last_query_capture = None
@@ -403,6 +416,14 @@ class NativeGraphPolicy:
             raise ValueError(f"native controller response does not echo source task identity: {response}")
         if response.get("action_profile_id") != self.action_profile_id:
             raise ValueError("native controller response does not echo action profile")
+        if self.use_backward_graph and response.get("status") == "accepted":
+            for selection in (response.get("geometry_selection"),
+                              response.get("graph_receipt", {}).get("geometry_selection")):
+                if "vertex_lp_priority_policy" in request:
+                    if not isinstance(selection, Mapping) or selection.get("vertex_lp_priority_policy") != request["vertex_lp_priority_policy"]:
+                        raise ValueError("native controller response does not echo vertex_lp_priority_policy")
+                elif isinstance(selection, Mapping) and "vertex_lp_priority_policy" in selection:
+                    raise ValueError("native controller response declares an unrequested vertex_lp_priority_policy")
         response["policy_semantics"] = self.preparation_receipt["controller_semantics"]
         response["prediction_profile"] = {"model_id": self.receipt["model_id"],
             "assurance": self.receipt["coefficient_assurance"], "task_sha256": self.task_sha256,
