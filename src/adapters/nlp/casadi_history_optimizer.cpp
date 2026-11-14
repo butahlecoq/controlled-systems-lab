@@ -104,7 +104,10 @@ constrain_memberships(casadi::Opti &opti, const MX &history,
     const auto n = domain.original.coordinates.dimensions.state;
     for (std::size_t i = 0; i < domain.memberships.size(); ++i) {
         const auto &member = domain.memberships[i];
-        const auto first = static_cast<casadi_int>(member.stage.value * n);
+        // Request validation bounds the stage and state dimension by the full
+        // history size; widen each factor before multiplying in CasADi's index
+        // type so the size_t product cannot overflow first.
+        const auto first = static_cast<casadi_int>(member.stage.value) * static_cast<casadi_int>(n);
         const auto state = history(casadi::Slice(first, first + static_cast<casadi_int>(n)));
         std::visit(
             [&](const auto &selected) {

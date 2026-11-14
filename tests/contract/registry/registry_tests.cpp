@@ -3,6 +3,7 @@
 #include <csl/registry/provider.hpp>
 #include <csl/registry/strategy_catalogue.hpp>
 #include <csl/optimization/history_optimizer.hpp>
+#include <algorithm>
 #include <limits>
 #include <functional>
 #include <set>
