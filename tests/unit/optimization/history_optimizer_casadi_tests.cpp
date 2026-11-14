@@ -66,6 +66,10 @@ TEST_CASE("running cost can choose a different history from the terminal-only mi
     auto registration=adapters::nlp::make_casadi_history_optimizer_registration();
     auto workspace=registration.factory(request);
     const auto result=registry::HistoryOptimizerPort::run(*workspace,request,ExecutionContext{});
+    if(const auto* diagnostic=std::get_if<Diagnostic>(&result)) {
+        INFO(diagnostic->field);
+        FAIL_CHECK(diagnostic->explanation);
+    }
     REQUIRE(std::holds_alternative<optimization::HistoryOptimizationResult>(result));
     const auto& solved=std::get<optimization::HistoryOptimizationResult>(result);
     CHECK(solved.source_cost.total==doctest::Approx(std::sqrt(2.0)).epsilon(1e-6));
