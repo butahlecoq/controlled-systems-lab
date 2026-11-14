@@ -829,6 +829,7 @@ def validate_gallery_inventory(out, entries):
                 "saved-data-companion",
                 "saved-data-illustration",
                 "analytic-illustration",
+                "native-current-source-example",
             },
             "unknown visual inventory status",
         )
