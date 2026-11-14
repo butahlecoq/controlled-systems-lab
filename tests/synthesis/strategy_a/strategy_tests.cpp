@@ -35,6 +35,49 @@ template<class T,class... E> T take(std::variant<T,E...> value) {
 template<class T,class V> T alternative(V value) {
     REQUIRE(std::holds_alternative<T>(value));return std::get<T>(std::move(value));
 }
+class ZeroHistoryOptimizer final : public optimization::HistoryOptimizerWorkspace {
+    optimization::RawHistorySolveOutcome
+    solve_candidate(const optimization::HistoryOptimizationRequest &request,
+                    const ExecutionContext &) override {
+        const auto coordinates = request.domain.original.coordinates;
+        const auto n = coordinates.dimensions.state;
+        const auto m = coordinates.dimensions.control;
+        const auto horizon = coordinates.horizon;
+        std::vector<Vector> states(horizon + 1, Vector(n, 0.0));
+        std::vector<Vector> controls(horizon, Vector(m, 0.0));
+        Vector history((horizon + 1) * n + horizon * m, 0.0);
+        const auto cost =
+            optimization::evaluate_history_cost(request.source_cost, states, controls);
+        if (const auto *errors = std::get_if<Diagnostics>(&cost))
+            return errors->front();
+        if (const auto *stopped = std::get_if<OperationStopped>(&cost))
+            return *stopped;
+        const auto evaluated = std::get<optimization::HistoryCostEvaluation>(cost);
+        return optimization::RawHistorySolve{
+            std::move(history),
+            evaluated.total,
+            optimization::BackendColdStartEvidence{
+                "test.zero-history", "zero cold start",
+                "test provider exposes no primal or dual readbacks"},
+            "deterministic zero-history integration fixture",
+            {}};
+    }
+};
+PreparedProvider<HistoryOptimizerPort> zero_history_optimizer() {
+    Registry<HistoryOptimizerPort> registry;
+    REQUIRE_FALSE(registry.add(
+        {{{"test.zero-history-optimizer"}, "1"},
+         [](const optimization::HistoryOptimizationRequest &,
+            const Requirements &requirements) -> Capability { return Offer{requirements.output}; },
+         [](const optimization::HistoryOptimizationRequest &)
+             -> std::unique_ptr<optimization::HistoryOptimizerWorkspace> {
+             return std::make_unique<ZeroHistoryOptimizer>();
+         }}));
+    Requirements requirements;
+    requirements.output.representation = {"csl.history-optimization-result.v1"};
+    return take(prepare_provider(
+        select_provider(registry, Method{{"test.zero-history-optimizer"}, "1"}, requirements)));
+}
 SetHandle interval(std::string id,double lo,double hi,std::string label="x") {
     return take(sets::make_h({{std::move(id)},1,{std::move(label)}},
         {take(numeric::snapshot(Matrix{2,1,{1,-1}})),take(numeric::snapshot_vector(Vector{hi,-lo})),
@@ -339,12 +382,14 @@ public:
     DeadlineAfterTerminal(std::unique_ptr<ConvexWorkspace> inner,ExecutionContext& caller_context)
         :inner_(std::move(inner)),caller_context_(&caller_context){}
 };
-std::variant<PreparedStrategy,Rejection> admit(const StrategyRequest& request_,bool reject_terminal=false,
-    std::optional<std::stop_source> stop_after_terminal={},bool omit_test_verifier=false,
-    bool fail_terminal_numerically=false,bool limit_terminal_resources=false,
-    ExecutionContext* expire_deadline_after_terminal=nullptr,int* lp_workspace_factories=nullptr,
-    bool deadline_terminal_result=false,bool source_index_path=false,bool source_index_legacy=false,
-    bool a43_hull_path=false) {
+std::variant<PreparedStrategy, Rejection>
+admit(const StrategyRequest &request_, bool reject_terminal = false,
+      std::optional<std::stop_source> stop_after_terminal = {}, bool omit_test_verifier = false,
+      bool fail_terminal_numerically = false, bool limit_terminal_resources = false,
+      ExecutionContext *expire_deadline_after_terminal = nullptr,
+      int *lp_workspace_factories = nullptr, bool deadline_terminal_result = false,
+      bool source_index_path = false, bool source_index_legacy = false, bool a43_hull_path = false,
+      std::optional<PreparedProvider<HistoryOptimizerPort>> history_optimizer = {}) {
     auto lp=take(adapters::lp::make_highs_registration());
     if(lp_workspace_factories) {
         const auto factory=lp.factory;
@@ -411,7 +456,8 @@ std::variant<PreparedStrategy,Rejection> admit(const StrategyRequest& request_,b
     program.output.representation={"csl.program-result.v1"};
     auto providers=take(check_providers(select_provider(projections,pm,h),select_provider(affines,am,v),
         select_provider(conversions,cm,h),select_provider(lps,lm,program),select_provider(convexes,qm,program)));
-    auto registration=synthesis::strategy_a::make_registration(std::move(providers));
+    auto registration = synthesis::strategy_a::make_registration(std::move(providers),
+                                                                 std::move(history_optimizer));
     if(omit_test_verifier)registration.complete_family_verifier={};
     StrategyRegistry strategies;REQUIRE_FALSE(strategies.add(std::move(registration)));
     Requirements output;output.output.representation=request_.family.representation;
@@ -611,6 +657,36 @@ bool has_equality(const sets::HRepresentation& h,const Vector& coefficients,doub
     return false;
 }
 }
+TEST_CASE("Strategy A invokes the prepared whole-history optimizer before terminal optimization") {
+    auto query = request(integrator());
+    query.configuration.history_optimizer = {"test.zero-history-optimizer"};
+    query.history_optimization =
+        std::make_shared<const optimization::StrategyHistoryOptimizationProfile>(
+            optimization::StrategyHistoryOptimizationProfile{
+                ProgramId{"strategy-a-history-run"},
+                {"strategy-a-history-running-cost", 2, {}},
+                0,
+                "state",
+                {},
+                optimization::ColdStart{}});
+    auto prepared = take(admit(query, false, {}, false, false, false, nullptr, nullptr, false,
+                               false, false, false, zero_history_optimizer()));
+    auto workspace = prepared.create();
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    auto result = take(workspace->run(context));
+    REQUIRE(result.history_optimization);
+    CHECK(result.history_optimization->program.value == "strategy-a-history-run");
+    REQUIRE(result.history_optimization->provider.actual_module);
+    CHECK(result.history_optimization->provider.actual_module->value ==
+          "test.zero-history-optimizer");
+    REQUIRE(std::holds_alternative<optimization::BackendColdStartEvidence>(
+        result.history_optimization->result->initialization));
+    REQUIRE(result.incumbents.size() >= 1);
+    CHECK(result.incumbents.front().witness.states.size() == 3);
+    CHECK(result.incumbents.front().witness.controls.size() == 2);
+}
+
 TEST_CASE("Strategy A runs source-index hulls in a 2D control tube and selects a separate terminal optimizer") {
     auto problem=planar_control_problem();
     const auto request_=request(problem);
