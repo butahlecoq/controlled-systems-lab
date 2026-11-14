@@ -45,6 +45,19 @@ def ensure_clean_source() -> None:
         raise ValueError("campaign freeze requires a clean source worktree")
 
 
+def ensure_reviewed_source() -> None:
+    try:
+        subprocess.check_call(
+            ["git", "merge-base", "--is-ancestor", "HEAD", "refs/remotes/origin/main"],
+            cwd=ROOT,
+        )
+    except (OSError, subprocess.CalledProcessError) as error:
+        raise ValueError(
+            "campaign freeze requires a source commit reachable from origin/main; "
+            "fetch reviewed main before freezing"
+        ) from error
+
+
 def ensure_clean_tracked_source() -> None:
     for args in (["git", "diff", "--quiet", "HEAD"], ["git", "diff", "--cached", "--quiet"]):
         try:
@@ -153,8 +166,13 @@ def build_freeze(bridge: Path, wall_seconds: int, cpu_seconds: int) -> dict:
             "address_space_enforcement": "POSIX RLIMIT_AS on worker process; inherited by child processes",
             "suite_worker_count": 1,
             "solver_threads": 1,
-            "suite_memory_allocation_bytes": 16 * 1024**3,
-            "suite_memory_enforcement": "one active worker; no machine-wide suite limiter",
+            "suite_memory_request_policy": (
+                "min(2 GiB, 75% of available memory at attempt start); recorded by the runner"
+            ),
+            "suite_memory_allocation_bytes": None,
+            "suite_memory_enforcement": (
+                "no machine-wide suite limiter; per-process RLIMIT_AS only"
+            ),
         },
         "claim_scope": (
             "One-pass correctness and outcome inventory. No timing winner is claimed; "
@@ -183,6 +201,7 @@ def build_freeze(bridge: Path, wall_seconds: int, cpu_seconds: int) -> dict:
 
 def freeze(path: Path, bridge: Path, wall_seconds: int, cpu_seconds: int) -> dict:
     ensure_clean_source()
+    ensure_reviewed_source()
     sidecar_path = path.with_suffix(path.suffix + ".sha256")
     if path.exists() or sidecar_path.exists():
         raise ValueError(f"freeze file already exists and is immutable: {path}")
@@ -205,6 +224,7 @@ def read_freeze(path: Path, bridge: Path) -> dict:
         raise ValueError("unsupported campaign freeze schema")
     if source_commit() != record["source_commit"]:
         raise ValueError("current source commit differs from frozen campaign commit")
+    ensure_reviewed_source()
     ensure_clean_tracked_source()
     if sha256_file(Path(__file__).resolve()) != record["runner_sha256"]:
         raise ValueError("campaign driver source differs from the frozen commit")

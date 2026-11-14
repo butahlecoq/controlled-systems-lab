@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -24,6 +25,7 @@ class ClosedLoopCampaignTests(unittest.TestCase):
             path = root / "campaign.json"
             with (
                 patch.object(run_campaign, "ensure_clean_source"),
+                patch.object(run_campaign, "ensure_reviewed_source"),
                 patch.object(run_campaign, "ensure_clean_tracked_source"),
             ):
                 run_campaign.freeze(path, bridge, 300, 300)
@@ -37,7 +39,30 @@ class ClosedLoopCampaignTests(unittest.TestCase):
             loaded["candidate_counts"]["canonical_active_graphs"], len(loaded["graphs"])
         )
         self.assertEqual(loaded["resource_profile"]["suite_worker_count"], 1)
+        self.assertIsNone(loaded["resource_profile"]["suite_memory_allocation_bytes"])
+        self.assertEqual(
+            loaded["resource_profile"]["suite_memory_request_policy"],
+            "min(2 GiB, 75% of available memory at attempt start); recorded by the runner",
+        )
         self.assertEqual(loaded["bridge"]["name"], "bridge")
+
+    def test_freeze_requires_a_commit_reachable_from_reviewed_main(self):
+        with patch.object(
+            run_campaign.subprocess,
+            "check_call",
+            side_effect=subprocess.CalledProcessError(1, "git merge-base"),
+        ):
+            with self.assertRaisesRegex(ValueError, "reachable from origin/main"):
+                run_campaign.ensure_reviewed_source()
+
+    def test_reviewed_source_gate_checks_commit_ancestry(self):
+        with patch.object(run_campaign.subprocess, "check_call") as check_call:
+            run_campaign.ensure_reviewed_source()
+
+        check_call.assert_called_once_with(
+            ["git", "merge-base", "--is-ancestor", "HEAD", "refs/remotes/origin/main"],
+            cwd=run_campaign.ROOT,
+        )
 
     def test_inventory_reconciles_all_catalogue_graph_references(self):
         sources, graphs, candidates = run_campaign.catalogue_inventory()
