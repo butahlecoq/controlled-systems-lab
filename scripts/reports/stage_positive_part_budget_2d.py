@@ -179,6 +179,32 @@ def _page(record: dict) -> str:
             ),
             f'<p><a href="{VERTICES}">Analytic polygon vertices (CSV)</a> · <a href="{SOLUTION}">Native solution (CSV)</a> · <a href="{RUN}">Run details</a> · <a href="{STDOUT}">Captured stdout</a> · <a href="{RECORD}">Inputs, derivation and provenance (JSON)</a></p>',
             f'<p>Source: <a href="{CPP_SOURCE}">native example</a> · <a href="{API_SOURCE}">public history-QP API</a> · <a href="https://github.com/butahlecoq/controlled-systems-lab/tree/{SOURCE}">source commit {SOURCE}</a>.</p>',
+            "<h3>Rebuild the captured example</h3>",
+            "<p>Use Git, Ninja, CMake 3.31 or newer, and a C++20 compiler. Run these POSIX shell "
+            "commands from the root of a repository checkout. Network access is required to fetch "
+            "pinned build dependencies. The separate worktree selects the captured source; the "
+            "build and output directories are siblings of your checkout.</p>",
+            site_design.code_block(
+                'task_repro_root="$PWD/../csl-positive-part-repro"\n'
+                'mkdir -p "$task_repro_root"\n'
+                f'git worktree add --detach "$task_repro_root/source" {SOURCE}\n'
+                'cmake -S "$task_repro_root/source" -B "$task_repro_root/build" -G Ninja '
+                "-DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DCSL_ENABLE_HIGHS=ON "
+                '"-DCMAKE_INSTALL_PREFIX=$task_repro_root/install"\n'
+                'cmake --build "$task_repro_root/build" --parallel 1 --target install\n'
+                'cmake -S "$task_repro_root/source/examples" '
+                '-B "$task_repro_root/examples-build" -G Ninja -DCMAKE_BUILD_TYPE=Release '
+                '"-DCMAKE_PREFIX_PATH=$task_repro_root/install"\n'
+                'cmake --build "$task_repro_root/examples-build" --parallel 1 '
+                "--target positive_part_budget_2d\n"
+                '"$task_repro_root/examples-build/positive_part_budget_2d" '
+                '"$task_repro_root/output"',
+                "Build and run the source-pinned positive-part example",
+            ),
+            "<p>The output directory contains <code>native-solution.csv</code>, "
+            "<code>vertices.csv</code>, <code>run.txt</code>, and "
+            "<code>native-example.stdout</code>. The console result has the control point and "
+            "objective shown above.</p>",
             '<p class="limits">This is an authored two-control illustration of the exact convex constraint. It is separate from the 30-control source model episode test; it does not redefine that source model or claim a general policy guarantee.</p>',
             "</section>",
             site_design.page_end(),

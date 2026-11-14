@@ -660,6 +660,11 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("pᵢ≥uᵢ", page)
         self.assertIn("(0.2,−0.2)", page)
         self.assertIn("(0.1,−0.2)", page)
+        self.assertIn("git worktree add --detach", page)
+        self.assertIn("-DCSL_ENABLE_HIGHS=ON", page)
+        self.assertIn("--target positive_part_budget_2d", page)
+        self.assertIn("-DCMAKE_PREFIX_PATH=$task_repro_root/install", page)
+        self.assertIn("task_repro_root/output", page)
         self.assertEqual(record["answer"]["native_solution"], "(0.1,-0.2)")
         self.assertEqual(record["answer"]["literal_objective"], 0.005)
         self.assertEqual(record["evidence"]["assurance"],
