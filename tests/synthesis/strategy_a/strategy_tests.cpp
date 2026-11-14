@@ -53,14 +53,36 @@ class ZeroHistoryOptimizer final : public optimization::HistoryOptimizerWorkspac
         if (const auto *stopped = std::get_if<OperationStopped>(&cost))
             return *stopped;
         const auto evaluated = std::get<optimization::HistoryCostEvaluation>(cost);
+        std::vector<optimization::HistoryMembershipWitness> witnesses;
+        for (const auto &membership : request.domain.memberships) {
+            std::visit(
+                [&](const auto &shape) {
+                    using Shape = std::decay_t<decltype(shape)>;
+                    if constexpr (std::is_same_v<Shape, optimization::HistoryHMembership>)
+                        witnesses.emplace_back(optimization::HistoryHWitness{});
+                    else if constexpr (std::is_same_v<Shape,
+                                                      optimization::HistoryAxisBoxMembership>)
+                        witnesses.emplace_back(optimization::HistoryAxisBoxWitness{{-1.0}});
+                    else if constexpr (std::is_same_v<Shape,
+                                                      optimization::HistoryZonotopeMembership>)
+                        witnesses.emplace_back(optimization::HistoryZonotopeWitness{{-1.0}});
+                    else if constexpr (std::is_same_v<Shape,
+                                                      optimization::HistoryParallelotopeMembership>)
+                        witnesses.emplace_back(optimization::HistoryParallelotopeWitness{{-1.0}});
+                    else if constexpr (std::is_same_v<Shape,
+                                                      optimization::HistoryBallFactorMembership>)
+                        witnesses.emplace_back(optimization::HistoryBallFactorWitness{{-1.0}});
+                    else
+                        witnesses.emplace_back(optimization::HistoryVSimplexWitness{{1.0, 0.0}});
+                },
+                membership.shape);
+        }
         return optimization::RawHistorySolve{
-            std::move(history),
-            evaluated.total,
+            std::move(history), evaluated.total,
             optimization::BackendColdStartEvidence{
                 "test.zero-history", "zero cold start",
                 "test provider exposes no primal or dual readbacks"},
-            "deterministic zero-history integration fixture",
-            {}};
+            "deterministic zero-history integration fixture", std::move(witnesses)};
     }
 };
 PreparedProvider<HistoryOptimizerPort> zero_history_optimizer() {
@@ -82,6 +104,46 @@ SetHandle interval(std::string id,double lo,double hi,std::string label="x") {
     return take(sets::make_h({{std::move(id)},1,{std::move(label)}},
         {take(numeric::snapshot(Matrix{2,1,{1,-1}})),take(numeric::snapshot_vector(Vector{hi,-lo})),
          take(numeric::snapshot(Matrix{0,1,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
+}
+std::vector<optimization::HistoryMembership> typed_history_memberships() {
+    using namespace optimization;
+    const auto h = [&](std::string id) {
+        return take(
+            sets::make_h({{std::move(id)}, 1, {}}, {take(numeric::snapshot(Matrix{2, 1, {1, -1}})),
+                                                    take(numeric::snapshot_vector(Vector{1, 0})),
+                                                    take(numeric::snapshot(Matrix{0, 1, {}})),
+                                                    take(numeric::snapshot_vector(Vector{}))}));
+    };
+    auto polytope = h("strategy-history-polytope");
+    const auto v = take(sets::make_v({{"strategy-history-simplex"}, 1, {}},
+                                     {take(numeric::snapshot(Matrix{2, 1, {0, 1}})),
+                                      take(numeric::snapshot(Matrix{0, 1, {}}))}));
+    const auto add = [](StageIndex stage, SetId id, HistorySetFamily family,
+                        HistoryMembershipShape shape) {
+        HistoryMembershipOrigin origin{id,
+                                       id,
+                                       family,
+                                       SetRelation::equivalent,
+                                       "state",
+                                       {1},
+                                       HistorySourceGeometry{id, family, shape}};
+        return HistoryMembership{stage, std::move(origin), std::move(shape)};
+    };
+    const auto hshape = HistoryMembershipShape{HistoryHMembership{polytope}};
+    const auto box = HistoryMembershipShape{HistoryAxisBoxMembership{{0.5}, {0.5}}};
+    const auto zonotope = HistoryMembershipShape{HistoryZonotopeMembership{{0.5}, {1, 1, {0.5}}}};
+    const auto parallelotope =
+        HistoryMembershipShape{HistoryParallelotopeMembership{{0.5}, {1, 1, {0.5}}, {-1}, {1}}};
+    const auto ellipsoid =
+        HistoryMembershipShape{HistoryBallFactorMembership{{{0.5}, {1, 1, {0.5}}}}};
+    const auto simplex = HistoryMembershipShape{HistoryVSimplexMembership{v}};
+    return {add({1}, {"strategy-history-polytope"}, HistorySetFamily::polytope, hshape),
+            add({1}, {"strategy-history-box"}, HistorySetFamily::box, box),
+            add({1}, {"strategy-history-zonotope"}, HistorySetFamily::zonotope, zonotope),
+            add({1}, {"strategy-history-parallelotope"}, HistorySetFamily::parallelotope,
+                parallelotope),
+            add({1}, {"strategy-history-ellipsoid"}, HistorySetFamily::ellipsoid, ellipsoid),
+            add({1}, {"strategy-history-simplex"}, HistorySetFamily::polytope, simplex)};
 }
 template<class Port> PreparedProvider<Port> selected(Registration<Port> entry,std::string representation) {
     Registry<Port> registry;Method method{entry.identity.id,entry.identity.version};
@@ -667,7 +729,7 @@ TEST_CASE("Strategy A invokes the prepared whole-history optimizer before termin
                 {"strategy-a-history-running-cost", 2, {}},
                 0,
                 "state",
-                {},
+                typed_history_memberships(),
                 optimization::ColdStart{}});
     auto prepared = take(admit(query, false, {}, false, false, false, nullptr, nullptr, false,
                                false, false, false, zero_history_optimizer()));
@@ -682,6 +744,19 @@ TEST_CASE("Strategy A invokes the prepared whole-history optimizer before termin
           "test.zero-history-optimizer");
     REQUIRE(std::holds_alternative<optimization::BackendColdStartEvidence>(
         result.history_optimization->result->initialization));
+    REQUIRE(result.history_optimization->result->membership_witnesses.size() == 6);
+    CHECK(std::holds_alternative<optimization::HistoryHWitness>(
+        result.history_optimization->result->membership_witnesses[0]));
+    CHECK(std::holds_alternative<optimization::HistoryAxisBoxWitness>(
+        result.history_optimization->result->membership_witnesses[1]));
+    CHECK(std::holds_alternative<optimization::HistoryZonotopeWitness>(
+        result.history_optimization->result->membership_witnesses[2]));
+    CHECK(std::holds_alternative<optimization::HistoryParallelotopeWitness>(
+        result.history_optimization->result->membership_witnesses[3]));
+    CHECK(std::holds_alternative<optimization::HistoryBallFactorWitness>(
+        result.history_optimization->result->membership_witnesses[4]));
+    CHECK(std::holds_alternative<optimization::HistoryVSimplexWitness>(
+        result.history_optimization->result->membership_witnesses[5]));
     REQUIRE(result.incumbents.size() >= 1);
     CHECK(result.incumbents.front().witness.states.size() == 3);
     CHECK(result.incumbents.front().witness.controls.size() == 2);
