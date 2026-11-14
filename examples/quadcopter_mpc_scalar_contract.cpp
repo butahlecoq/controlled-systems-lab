@@ -4,6 +4,7 @@
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
+#include <utility>
 
 int main() try {
     using namespace csl;
@@ -24,11 +25,17 @@ int main() try {
             "Independent source feasibility check rejected a hand-built history");
     auto sample_program =
         compile_nominal_quadratic_history(make_task(sample_task, state_bounds, input_bounds));
-    if (!std::holds_alternative<ConvexProgram>(sample_program))
+    if (!std::holds_alternative<CompiledNominalQuadraticHistory>(sample_program))
         throw std::runtime_error("History compiler rejected the source21-shaped sample task");
-    const Vector sample_history{0.25, 0.65, 0.45, 0.4, -0.2};
+    const auto &sample_compiled = std::get<CompiledNominalQuadraticHistory>(sample_program);
+    Vector sample_history(sample_compiled.layout.total_variable_count, 0.0);
+    for (std::size_t stage = 0; stage < sample_states.size(); ++stage)
+        sample_history[sample_compiled.layout.state_index(stage, 0).value()] = sample_states[stage];
+    for (std::size_t stage = 0; stage < sample_controls.size(); ++stage)
+        sample_history[sample_compiled.layout.control_index(stage, 0).value()] =
+            sample_controls[stage];
     auto compiled_evaluation =
-        evaluate_primal(std::get<ConvexProgram>(sample_program), sample_history, {1e-9, 1e-9},
+        evaluate_primal(sample_compiled.program, sample_history, {1e-9, 1e-9},
                         {{"source21-literal-cost-and-constraint-cross-check"}, "1"});
     if (!std::holds_alternative<ConvexPrimalEvaluation>(compiled_evaluation) ||
         std::abs(std::get<ConvexPrimalEvaluation>(compiled_evaluation).original_objective -
@@ -55,9 +62,10 @@ int main() try {
                 std::cerr << error.field << ": " << error.explanation << '\n';
             throw std::runtime_error("scalar tracking QP rejected");
         }
-        if (!std::holds_alternative<ConvexProgram>(made))
+        if (!std::holds_alternative<CompiledNominalQuadraticHistory>(made))
             throw std::runtime_error("scalar tracking QP stopped");
-        const auto &program = std::get<ConvexProgram>(made);
+        const auto &history = std::get<CompiledNominalQuadraticHistory>(made);
+        const auto &program = history.program;
         auto preparation =
             prepare_pipeline(select(registry, {{"csl.convex.highs"}, {}}, program, requirements));
         if (!std::holds_alternative<PreparedPipeline<ConvexPort>>(preparation))
@@ -71,20 +79,25 @@ int main() try {
                             "scalar-mpc"});
         const auto *result = std::get_if<ProgramResult>(&outcome);
         if (!result || result->termination != Termination::completed ||
-            result->outcome.value != MathematicalOutcome::optimal || !result->primal)
+            result->outcome.value != MathematicalOutcome::optimal || !result->primal ||
+            !history.layout.accepts_primal_size(result->primal->size()))
             throw std::runtime_error("scalar MPC did not solve to numerical optimality");
-        return *result->primal;
+        return std::pair{history.layout, *result->primal};
     };
-    const auto primal = solve(problem);
-    if (primal.size() != 5 || std::abs(primal[0]) > 1e-7 || std::abs(primal[1] - .6) > 1e-7 ||
-        std::abs(primal[2] - .8) > 1e-7 || std::abs(primal[3] - .6) > 1e-7 ||
-        std::abs(primal[4] - .2) > 1e-7)
+    const auto [layout, primal] = solve(problem);
+    if (layout.total_variable_count != 5 ||
+        std::abs(primal[layout.state_index(0, 0).value()]) > 1e-7 ||
+        std::abs(primal[layout.state_index(1, 0).value()] - .6) > 1e-7 ||
+        std::abs(primal[layout.state_index(2, 0).value()] - .8) > 1e-7 ||
+        std::abs(primal[layout.control_index(0, 0).value()] - .6) > 1e-7 ||
+        std::abs(primal[layout.control_index(1, 0).value()] - .2) > 1e-7)
         throw std::runtime_error("running-state/control tracking optimum was not u=(0.6,0.2)");
     auto observed_problem = problem;
     observed_problem.initial[0] = .25;
-    const auto observed_primal = solve(observed_problem);
-    if (std::abs(observed_primal[0] - .25) > 1e-7 || std::abs(observed_primal[3] - .45) > 1e-7 ||
-        std::abs(observed_primal[4] - .15) > 1e-7)
+    const auto [observed_layout, observed_primal] = solve(observed_problem);
+    if (std::abs(observed_primal[observed_layout.state_index(0, 0).value()] - .25) > 1e-7 ||
+        std::abs(observed_primal[observed_layout.control_index(0, 0).value()] - .45) > 1e-7 ||
+        std::abs(observed_primal[observed_layout.control_index(1, 0).value()] - .15) > 1e-7)
         throw std::runtime_error("MPC initial equality did not follow the observed state");
     std::cout << "scalar running-state MPC: u=(0.6,0.2); observed-state equality preserved\n";
 } catch (const std::exception &e) {

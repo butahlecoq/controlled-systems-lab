@@ -127,6 +127,15 @@ csl_example(native_model_catalogue CSL::model_catalogue CSL::generator_adapter C
 csl_example(native_four_state_reachability CSL::model_catalogue CSL::geometry_generators CSL::quickhull_2d)
 csl_example(native_discrete_models CSL::model_catalogue)
 csl_example(discrete_mpc_2d CSL::controllers CSL::model_catalogue CSL::highs_convex)
+csl_example(positive_part_budget_2d CSL::highs_convex CSL::nominal_quadratic_history)
+if(TARGET positive_part_budget_2d)
+  add_test(NAME positive_part_budget_2d
+    COMMAND "${CMAKE_COMMAND}"
+      "-DEXAMPLE_EXE=$<TARGET_FILE:positive_part_budget_2d>"
+      "-DOUTPUT_PARENT=${CMAKE_CURRENT_BINARY_DIR}"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/positive_part_budget_2d_check.cmake")
+  set_tests_properties(positive_part_budget_2d PROPERTIES TIMEOUT 30)
+endif()
 
 if(TARGET CSL::highs_convex AND TARGET CSL::model_catalogue)
   add_executable(native_model_tracking native_model_tracking.cpp)

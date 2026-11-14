@@ -51,6 +51,7 @@ include = [
     "benchmarks/reporting/closed_loop/run_closed_loop.py",
     "tests/reporting/test_native_compositions.py",
     "tests/reporting/test_closed_loop_tracing.py",
+    "scripts/reports/stage_positive_part_budget_2d.py",
 ]
 
 [tool.ruff.lint]
@@ -110,6 +111,7 @@ include = [
     "benchmarks/reporting/closed_loop/run_closed_loop.py",
     "tests/reporting/test_native_compositions.py",
     "tests/reporting/test_closed_loop_tracing.py",
+    "scripts/reports/stage_positive_part_budget_2d.py",
 ]
 
 [tool.ty.terminal]

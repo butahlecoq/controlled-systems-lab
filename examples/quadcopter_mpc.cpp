@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <optional>
 #include <stdexcept>
 
 namespace {
@@ -61,6 +62,7 @@ int main(int argc, char **argv) try {
         throw std::runtime_error("Source21 task profile rejected its explicit OSQP choices");
     const auto mpc_task = std::get<NominalMpcTask>(std::move(profile));
     Vector previous_primal;
+    std::optional<HistoryVariableLayout> previous_layout;
 
     Registry<ConvexPort> registry;
     if (registry.add(
@@ -76,34 +78,41 @@ int main(int argc, char **argv) try {
     for (std::size_t iteration = 0; iteration < replans; ++iteration) {
         const auto observed_state = task.initial;
         auto compiled = compile_mpc_decision(mpc_task, {0}, observed_state);
-        if (!std::holds_alternative<ConvexProgram>(compiled))
+        if (!std::holds_alternative<CompiledNominalQuadraticHistory>(compiled))
             throw std::runtime_error("MPC quadratic program rejected");
-        auto program = std::get<ConvexProgram>(std::move(compiled));
-        if (!previous_primal.empty()) {
-            const auto state_count = (horizon + 1) * nx, control_offset = state_count;
-            Vector warm_start(program.quadratic_program().variables().size(), 0);
+        auto history = std::get<CompiledNominalQuadraticHistory>(std::move(compiled));
+        auto program = std::move(history.program);
+        const auto layout = std::move(history.layout);
+        if (!previous_primal.empty() && previous_layout &&
+            previous_layout->auxiliary_variable_count == 0 &&
+            layout.auxiliary_variable_count == 0) {
+            Vector warm_start(layout.total_variable_count, 0);
             for (std::size_t k = 0; k < horizon; ++k) {
-                const auto source_state = (k + 1) * nx;
-                std::copy_n(previous_primal.begin() + static_cast<std::ptrdiff_t>(source_state), nx,
-                            warm_start.begin() + static_cast<std::ptrdiff_t>(k * nx));
-                const auto source_control = control_offset + std::min(k + 1, horizon - 1) * nu;
-                std::copy_n(
-                    previous_primal.begin() + static_cast<std::ptrdiff_t>(source_control), nu,
-                    warm_start.begin() + static_cast<std::ptrdiff_t>(control_offset + k * nu));
+                for (std::size_t i = 0; i < nx; ++i)
+                    warm_start[*layout.state_index(k, i)] =
+                        previous_primal[*previous_layout->state_index(k + 1, i)];
+                for (std::size_t i = 0; i < nu; ++i)
+                    warm_start[*layout.control_index(k, i)] =
+                        previous_primal[*previous_layout->control_index(
+                            std::min(k + 1, horizon - 1), i)];
             }
-            std::copy(observed_state.begin(), observed_state.end(), warm_start.begin());
-            const auto terminal_control = control_offset + (horizon - 1) * nu;
-            const auto terminal_state = horizon * nx;
-            auto warm_terminal = take<Vector>(
-                system.step({0}, std::span(previous_primal).subspan(state_count - nx, nx),
-                            std::span(previous_primal).subspan(terminal_control, nu),
-                            Vector(model.external.size(), 0)));
-            std::copy(warm_terminal.begin(), warm_terminal.end(),
-                      warm_start.begin() + static_cast<std::ptrdiff_t>(terminal_state));
+            for (std::size_t i = 0; i < nx; ++i)
+                warm_start[*layout.state_index(0, i)] = observed_state[i];
+            const auto terminal_control_start = previous_layout->control_index(horizon - 1, 0);
+            if (!terminal_control_start || *terminal_control_start > previous_primal.size() ||
+                nu > previous_primal.size() - *terminal_control_start)
+                throw std::runtime_error("Source21 layout has no complete terminal control block");
+            auto warm_terminal = take<Vector>(system.step(
+                {0},
+                std::span(previous_primal).subspan(previous_layout->state_variable_count - nx, nx),
+                std::span(previous_primal).subspan(*terminal_control_start, nu),
+                Vector(model.external.size(), 0)));
+            for (std::size_t i = 0; i < nx; ++i)
+                warm_start[*layout.state_index(horizon, i)] = warm_terminal[i];
             bool feasible = true;
             for (std::size_t k = 0; k <= horizon; ++k)
                 for (std::size_t i = 0; i < nx; ++i) {
-                    const double value = warm_start[k * nx + i];
+                    const double value = warm_start[*layout.state_index(k, i)];
                     if ((mpc_task.state_bounds[k][i].lower &&
                          value < *mpc_task.state_bounds[k][i].lower - 1e-7) ||
                         (mpc_task.state_bounds[k][i].upper &&
@@ -112,7 +121,7 @@ int main(int argc, char **argv) try {
                 }
             for (std::size_t k = 0; k < horizon; ++k)
                 for (std::size_t i = 0; i < nu; ++i) {
-                    const double value = warm_start[control_offset + k * nu + i];
+                    const double value = warm_start[*layout.control_index(k, i)];
                     if ((mpc_task.control_bounds[k][i].lower &&
                          value < *mpc_task.control_bounds[k][i].lower - 1e-7) ||
                         (mpc_task.control_bounds[k][i].upper &&
@@ -160,15 +169,21 @@ int main(int argc, char **argv) try {
             throw std::runtime_error(detail);
         }
         const auto &z = *result->primal;
+        if (!layout.accepts_primal_size(z.size()))
+            throw std::runtime_error("Source21 solver returned a primal with invalid layout size");
         previous_primal = z;
-        const auto state_count = (horizon + 1) * nx, control_offset = state_count;
+        previous_layout = layout;
+        const auto state_count = layout.state_variable_count;
+        const auto control_offset = layout.state_variable_count;
         if (!source_history_feasible(
                 task, mpc_task.state_bounds.front(), mpc_task.control_bounds.front(),
-                std::span(z).first(state_count), std::span(z).subspan(control_offset)))
+                std::span(z).first(state_count),
+                std::span(z).subspan(control_offset, layout.control_variable_count)))
             throw std::runtime_error(
                 "Independent source21 dynamics/bounds check rejected the solver history");
-        const double physical_cost = evaluate_source_cost(task, std::span(z).first(state_count),
-                                                          std::span(z).subspan(control_offset));
+        const double physical_cost = evaluate_source_cost(
+            task, std::span(z).first(state_count),
+            std::span(z).subspan(control_offset, layout.control_variable_count));
         auto checked =
             evaluate_primal(program, z, {1e-8, 1e-8}, {{"source21-independent-plan-cost"}, "1"});
         if (!std::holds_alternative<ConvexPrimalEvaluation>(checked) ||
