@@ -51,14 +51,24 @@ def capture(source_root: Path, build_root: Path, output_root: Path,
     for path in (binary, cache, build_log):
         if path.is_symlink() or not path.is_file():
             raise RuntimeError("missing or symlinked native provenance input: " + str(path))
+    output_root = Path(output_root).resolve()
+    try:
+        output_relative = output_root.relative_to(source_root).as_posix()
+    except ValueError as error:
+        raise RuntimeError("native capture output must stay inside the source checkout") from error
     status = subprocess.run(
-        ["git", "status", "--porcelain", "--untracked-files=no"],
+        ["git", "status", "--porcelain", "--untracked-files=all"],
         cwd=source_root,
         check=True,
         stdout=subprocess.PIPE,
         text=True,
     ).stdout
-    if status.strip():
+    unexpected = [
+        line for line in status.splitlines()
+        if not (line.startswith("?? ") and
+                (line[3:] == output_relative or line[3:].startswith(output_relative + "/")))
+    ]
+    if unexpected:
         raise RuntimeError("native capture requires a committed and clean source tree")
     source = subprocess.run(
         ["git", "rev-parse", "HEAD"], cwd=source_root, check=True,
@@ -76,7 +86,6 @@ def capture(source_root: Path, build_root: Path, output_root: Path,
         if committed != working:
             raise RuntimeError("working source differs from committed Git bytes: " + relative)
         source_files[relative] = _sha256(committed)
-    output_root = output_root.resolve()
     records = output_root / "records"
     if output_root.exists() and any(output_root.iterdir()):
         raise RuntimeError("refusing to overwrite existing native history evidence")
