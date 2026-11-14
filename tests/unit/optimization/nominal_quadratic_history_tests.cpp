@@ -27,7 +27,8 @@ NominalQuadraticHistoryTask task() {
             {{{-2.0, 2.0}}, {{-2.0, 2.0}}},
             TemporalConstraints{{1, 8, {0, 2}, {6, 7}, {-1.0, 1.0}}, {{-0.8, -0.8}}},
             {no_state, tracking},
-            {{2, 2, {0.0, 0.0, 0.0, 0.0}}, {0.0, 0.0}, 0.0}};
+            {{2, 2, {0.0, 0.0, 0.0, 0.0}}, {0.0, 0.0}, 0.0},
+            {}};
 }
 
 CompiledNominalQuadraticHistory accepted(ConvexDataResult<CompiledNominalQuadraticHistory> result) {

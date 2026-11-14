@@ -31,7 +31,8 @@ NominalQuadraticHistoryTask make_task(bool track_interior_state) {
             {{{-1, 1}}, {{-1, 1}}},
             std::nullopt,
             {stage0, stage1},
-            {zero_x, {0, 0}, 0}};
+            {zero_x, {0, 0}, 0},
+            {}};
 }
 
 std::pair<HistoryVariableLayout, Vector> solve(const NominalQuadraticHistoryTask &task) {
