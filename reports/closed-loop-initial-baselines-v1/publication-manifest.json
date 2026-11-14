@@ -1,0 +1,109 @@
+{
+  "schema": "csl.closed-loop-initial-baseline-publication/1",
+  "report_id": "closed-loop-initial-baselines-v1",
+  "source_commit": "089075e919cdea0a59d6535235d62b0c06ceb7a9",
+  "measured_scope": "Three source-bound observed-state NMPC episode attempts, one exact-polytope backward-graph controller, one profile, 90 held steps.",
+  "evidence_limits": "Numerical replay evidence only; not complete all-stage forward/backward/intersection geometry, global optimality, or a full module comparison.",
+  "delivery_impact": "Source-only report, docs, and Pages workflow. No native source, installed package, API, dependency, or solver change; no release needed.",
+  "archive": {
+    "path": "reports/closed-loop-initial-baselines-v1.zip",
+    "bytes": 16698315,
+    "sha256": "82c1df826d25037b77321ab8bfba2102186106527f56d6b27fa24934c2c5fa46",
+    "receipt_path": "freeze-receipt.json",
+    "capture_manifest_mapped_members": 1179,
+    "zip_non_directory_members": 1182,
+    "additional_members": [
+      "capture-manifest.json",
+      "executed-helpers/947-run-initial-baselines-089075e9.py",
+      "executed-helpers/947-smoke-replay-089075e9.py"
+    ],
+    "absolute_path_note": "Capture-local paths were audited and may remain only inside the frozen raw archive; the published receipt is a portable projection."
+  },
+  "files": {
+    "coverage.json": {
+      "bytes": 10493,
+      "sha256": "f06bcaaa38ce2707939f3ecc66ec2647ee8523de07613051552ba33aebec0170"
+    },
+    "figure-index.json": {
+      "bytes": 38699,
+      "sha256": "152cace8b71eafef01d38f04ca5d1c0ae542320e6cc2f6c3f0ed1a3b174a0555"
+    },
+    "figures/baseline-089075e9-earth-orbit.html": {
+      "bytes": 12654,
+      "sha256": "6f7271201cf52d34288d14f851b3903384dfd4165ec88f0245c4652041af8b23"
+    },
+    "figures/baseline-089075e9-earth-orbit.plotted-data.json": {
+      "bytes": 376380,
+      "sha256": "a899feca04874a4b06829c1d33709c6993bafe325966d3d8f1e63ae03e506b2e"
+    },
+    "figures/baseline-089075e9-earth-orbit.png": {
+      "bytes": 94429,
+      "sha256": "4a06bb6732d518af1658be1762e2c8ea752ed67661c830f9d919607659fcb78c"
+    },
+    "figures/baseline-089075e9-earth-orbit.svg": {
+      "bytes": 158957,
+      "sha256": "65143d390c51364c01fe97f256ea0d50df67665412d3060f42aee425af155275"
+    },
+    "figures/baseline-089075e9-fuel-fuel-flow.html": {
+      "bytes": 14539,
+      "sha256": "93288cce82df4a7a18d4dd674f21d68b3b43a70216808c7751d982122e34178e"
+    },
+    "figures/baseline-089075e9-fuel-fuel-flow.plotted-data.json": {
+      "bytes": 730512,
+      "sha256": "9e1c0e3ad7a982b0201389f4fffdf0cc1b1ca328d57d40c65fc5fec5894da20c"
+    },
+    "figures/baseline-089075e9-fuel-fuel-flow.png": {
+      "bytes": 246915,
+      "sha256": "f9cee3ecbcc62d1c3b0c566ead4eedf6c1b3cfebb5127b22a28460908f4b8b83"
+    },
+    "figures/baseline-089075e9-fuel-fuel-flow.svg": {
+      "bytes": 258471,
+      "sha256": "fa7d578feb868192c0fb6d3a0d796398e8fff7a2ea25e3c75d32b15d3621d61a"
+    },
+    "figures/baseline-089075e9-fuel-state.html": {
+      "bytes": 14530,
+      "sha256": "19060d6f99c7a485c5b83c54b81d93e0dce7e134c1ec7768e9f8871b61850e0d"
+    },
+    "figures/baseline-089075e9-fuel-state.plotted-data.json": {
+      "bytes": 729486,
+      "sha256": "0094959f12e3a99fad1ddf6976776ae1fd16d2f2aedcc53ecd4eb170c7de0a91"
+    },
+    "figures/baseline-089075e9-fuel-state.png": {
+      "bytes": 275281,
+      "sha256": "8f950d14bacda04bb4fc095799813f94fdacd6bbb2bda233c9d4e9c60554c52d"
+    },
+    "figures/baseline-089075e9-fuel-state.svg": {
+      "bytes": 260300,
+      "sha256": "04685f099d0c4bdb9a219a0348ad21d041095481c3e0c9554dfcc2910963a487"
+    },
+    "figures/baseline-089075e9-lotka-populations.html": {
+      "bytes": 13281,
+      "sha256": "013b5bc26671c031fbfad781b0ff05d81eb54c5ac0bf4a41529d24e907e713a1"
+    },
+    "figures/baseline-089075e9-lotka-populations.plotted-data.json": {
+      "bytes": 497013,
+      "sha256": "84be8ccdcbdb5c9fd77f5f317071e5687851e39c075583ca2fb0b7eed0480d0a"
+    },
+    "figures/baseline-089075e9-lotka-populations.png": {
+      "bytes": 134050,
+      "sha256": "ff2d49e5ba6a231153912c1a56f139047c5999cfa0f139af32946bd05e7632e4"
+    },
+    "figures/baseline-089075e9-lotka-populations.svg": {
+      "bytes": 210757,
+      "sha256": "bc11da3c0ff9e00037633f5c8a8173625ce4dbeb243b462197e391879040ad19"
+    },
+    "freeze-receipt.json": {
+      "bytes": 289141,
+      "sha256": "1b83d2f15d2df7af8ad006514f9125f69d04934152528d32c3bc7d7e654525d0"
+    },
+    "index.html": {
+      "bytes": 3449,
+      "sha256": "60b067043b8c59f69291427f021336170f746a0189768ea69dd0ced37e7d9c42"
+    },
+    "initial-outcome-snapshot.json": {
+      "bytes": 7000,
+      "sha256": "3f877393ac46e7461fa0417dec9ec1e4cfa1ef2c611d796c2bda584d32c22913"
+    }
+  },
+  "freeze_receipt_original_sha256": "88b2af4663d3fa9644bfa92d95a13c9e58fd3ba887d6cceb9f23d80830a941e7"
+}
