@@ -322,7 +322,8 @@ int main(int argc, char **argv) try {
         const auto control = history.layout.control_index(stage, 0).value();
         const double u = primal.at(control);
         if (u < -1.0 - 1e-8 || u > 1.0 + 1e-8)
-            throw std::runtime_error("Saved control violates the source interval");
+            throw std::runtime_error("Control at stage " + std::to_string(stage) + " is " +
+                                     std::to_string(u) + ", outside the source interval");
         const std::array<double, 4> expected{
             trajectory[state] + (5.0 / 12.0) * u, trajectory[state + 1] - trajectory[state],
             trajectory[state + 2] - (1.0 / 3.0) * u, trajectory[state + 3] - trajectory[state + 2]};
