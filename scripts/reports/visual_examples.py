@@ -1387,8 +1387,9 @@ def build(catalog, site):
         stage_native_model_tracking_first_pass.build(Path(__file__).resolve().parents[2])
     )
     saved_figures += tracking_card
-    row_scaling_files, row_scaling_inventory, row_scaling_card = stage_native_row_scaling_diagnostic.build(
-        Path(__file__).resolve().parents[2])
+    row_scaling_files, row_scaling_inventory, row_scaling_card = (
+        stage_native_row_scaling_diagnostic.build(Path(__file__).resolve().parents[2])
+    )
     saved_figures += row_scaling_card
     history_files, history_inventory, history_card = stage_nominal_quadratic_history.build(
         Path(__file__).resolve().parents[2]
