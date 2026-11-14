@@ -1,3 +1,4 @@
+#include <ostream>
 #include <doctest/doctest.h>
 #include <csl/model/spatial_flight.hpp>
 #include <csl/model/spatial_flight_catalogue.hpp>
