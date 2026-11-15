@@ -98,7 +98,7 @@ class ClosedLoopCampaignTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "native policy build profile.*changed"):
                     run_campaign.read_freeze(path, bridge, native_bridge, cache)
 
-    def test_attempt_manifest_records_the_frozen_native_policy_binary(self):
+    def test_campaign_provider_identity_is_a_sidecar_and_checks_executed_binary(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             native_bridge = root / "native-policy"
@@ -106,16 +106,14 @@ class ClosedLoopCampaignTests(unittest.TestCase):
             native_hash = run_campaign.sha256_file(native_bridge)
             attempt_path = root / "attempt"
             attempt_path.mkdir()
-            (attempt_path / "request.json").write_text(
-                json.dumps({"requested": {"graph_id": "graph/one"}}), encoding="utf-8"
-            )
-            (attempt_path / "attempt.json").write_text(
-                json.dumps(
-                    {"preparation_receipt": {"adapter_receipt": {"executable_sha256": native_hash}}}
-                ),
-                encoding="utf-8",
-            )
-            (attempt_path / "run-manifest.json").write_text("{}", encoding="utf-8")
+            request = {"requested": {"graph_id": "graph/one"}}
+            attempt = {
+                "preparation_receipt": {"adapter_receipt": {"executable_sha256": native_hash}}
+            }
+            manifest = {"runner": "evidence"}
+            (attempt_path / "request.json").write_text(json.dumps(request), encoding="utf-8")
+            (attempt_path / "attempt.json").write_text(json.dumps(attempt), encoding="utf-8")
+            (attempt_path / "run-manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
             record = {
                 "native_policy": {
                     "sha256": native_hash,
@@ -128,27 +126,72 @@ class ClosedLoopCampaignTests(unittest.TestCase):
                 "resource_profile": {"profile_id": "profile"},
             }
             item = {
+                "task_name": "syn-nl-lv-01",
                 "task_sha256": "task-hash",
                 "graph_id": "graph/one",
                 "graph_fingerprint": "fingerprint",
                 "capability_manifest_sha256": "catalogue-hash",
-                "controller": {},
-                "execution": {},
             }
 
-            run_campaign.bind_native_policy_runtime(attempt_path, record, item)
-            requested = json.loads((attempt_path / "request.json").read_text())["requested"]
-            manifest = json.loads((attempt_path / "run-manifest.json").read_text())
-            self.assertEqual(requested["native_policy_bridge_sha256"], native_hash)
-            self.assertEqual(
-                manifest["campaign_runtime"]["executed_native_policy_bridge_sha256"], native_hash
-            )
+            run_campaign.write_campaign_runtime_sidecar(attempt_path, record, item)
+            binding = json.loads((attempt_path / "campaign-runtime.json").read_text())
+            self.assertEqual(binding["executed_native_policy_bridge_sha256"], native_hash)
+            self.assertEqual(json.loads((attempt_path / "request.json").read_text()), request)
+            self.assertEqual(json.loads((attempt_path / "run-manifest.json").read_text()), manifest)
 
-            attempt = json.loads((attempt_path / "attempt.json").read_text())
             attempt["preparation_receipt"]["adapter_receipt"]["executable_sha256"] = "wrong"
             (attempt_path / "attempt.json").write_text(json.dumps(attempt), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "different from its campaign freeze"):
-                run_campaign.bind_native_policy_runtime(attempt_path, record, item)
+                run_campaign.write_campaign_runtime_sidecar(attempt_path, record, item)
+
+    def test_started_campaign_intent_recovers_runner_attempt_without_rewriting_it(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            output_root = root / "results"
+            native_bridge = root / "native-policy"
+            native_bridge.write_bytes(b"native policy")
+            bridge = root / "bridge"
+            bridge.write_bytes(b"bridge")
+            item = {
+                "task_name": "syn-nl-lv-01",
+                "graph_id": "graph/one",
+                "graph_fingerprint": "fingerprint",
+                "task_sha256": "task-hash",
+                "capability_manifest_sha256": "catalogue-hash",
+            }
+            record = {
+                "source_commit": "source",
+                "bridge": {"sha256": run_campaign.sha256_file(bridge)},
+                "native_policy": {
+                    "sha256": run_campaign.sha256_file(native_bridge),
+                    "build_cache_sha256": "cache-hash",
+                    "build_profile": {"casadi": "ON"},
+                },
+                "environment": {"runtime_packages": {"casadi": "3.8.0"}},
+                "resource_profile": {"profile_id": "profile"},
+                "graphs": [item],
+            }
+            journal_path = run_campaign.campaign_journal_path(output_root, item)
+            journal = run_campaign.campaign_binding(record, item)
+            journal.update({"state": "started", "started_unix_ns": 1})
+            run_campaign.write_json_atomically(journal_path, journal)
+            attempt_path = output_root / item["task_name"] / "attempts" / "attempt-1"
+            attempt_path.mkdir(parents=True)
+            request = {
+                "source_commit": "source",
+                "requested": {"graph_id": "graph/one", "resource_profile_id": "profile"},
+            }
+            (attempt_path / "request.json").write_text(json.dumps(request))
+            attempt_data = {"attempt_id": "attempt-1", "status": "failed"}
+            (attempt_path / "attempt.json").write_text(json.dumps(attempt_data))
+
+            recovered = list(run_campaign.iter_verified_attempts(output_root, record))
+
+            self.assertEqual(len(recovered), 1)
+            self.assertEqual(json.loads(journal_path.read_text())["state"], "recovered")
+            self.assertEqual(json.loads((attempt_path / "request.json").read_text()), request)
+            self.assertEqual(json.loads((attempt_path / "attempt.json").read_text()), attempt_data)
+            self.assertTrue((attempt_path / "campaign-runtime.json").is_file())
 
     def test_freeze_requires_a_commit_reachable_from_reviewed_main(self):
         with patch.object(
@@ -254,9 +297,6 @@ class ClosedLoopCampaignTests(unittest.TestCase):
                         "requested": {
                             "graph_id": "graph/already-attempted",
                             "resource_profile_id": "worker-wall-300-cpu-300/1",
-                            "native_policy_bridge_sha256": run_campaign.sha256_file(
-                                root / "native-policy"
-                            ),
                         },
                     }
                 )
@@ -272,7 +312,9 @@ class ClosedLoopCampaignTests(unittest.TestCase):
                     "name": native_bridge.name,
                     "sha256": run_campaign.sha256_file(native_bridge),
                     "build_cache_sha256": "frozen-cache-hash",
+                    "build_profile": {"casadi": "ON"},
                 },
+                "environment": {"runtime_packages": {"casadi": "3.8.0"}},
                 "resource_profile": {
                     "profile_id": "worker-wall-300-cpu-300/1",
                     "attempt_wall_seconds": 300,
@@ -308,13 +350,12 @@ class ClosedLoopCampaignTests(unittest.TestCase):
                         "graph_fingerprint": "fingerprint-1",
                         "capability_manifest_sha256": "manifest-hash",
                         "bridge_sha256": run_campaign.sha256_file(bridge),
-                        "campaign_runtime": {
-                            "native_policy_bridge_sha256": run_campaign.sha256_file(native_bridge),
-                            "native_policy_build_cache_sha256": "frozen-cache-hash",
-                        },
                         "resource_profile_id": "worker-wall-300-cpu-300/1",
                     }
                 )
+            )
+            (existing / "campaign-runtime.json").write_text(
+                json.dumps(run_campaign.campaign_binding(record, record["graphs"][0], existing))
             )
             result = {
                 "attempt": str(output_root / "syn-nl-lv-01" / "attempts" / "new-attempt"),
@@ -326,7 +367,7 @@ class ClosedLoopCampaignTests(unittest.TestCase):
             }
             with (
                 patch.object(run_campaign.run_closed_loop, "run_task", return_value=result) as run,
-                patch.object(run_campaign, "bind_native_policy_runtime"),
+                patch.object(run_campaign, "write_campaign_runtime_sidecar"),
                 patch.object(
                     run_campaign.run_closed_loop,
                     "write_coverage",
