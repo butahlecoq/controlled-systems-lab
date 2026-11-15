@@ -5,9 +5,11 @@ from __future__ import annotations
 import argparse
 import copy
 import hashlib
+import importlib.metadata
 import json
 import os
 import platform
+import re
 import subprocess
 import sys
 import time
@@ -28,11 +30,90 @@ from contracts import ROOT, load_task, manifest_sha256
 
 MANIFEST_PATHS = (MANIFEST, NATIVE_MANIFEST, HISTORY_MANIFEST, COMPOSITIONS_MANIFEST)
 TASK_NAMES = ("syn-nl-lv-01", "earth-orbit", "syn-nl-fuel-01")
-CAMPAIGN_SCHEMA = "csl.closed-loop-composition-campaign/1"
+CAMPAIGN_SCHEMA = "csl.closed-loop-composition-campaign/2"
+RUNTIME_PACKAGES = ("numpy", "scipy", "do-mpc", "casadi", "matplotlib")
 
 
 def sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def runtime_packages() -> dict[str, str | None]:
+    versions = {}
+    for name in RUNTIME_PACKAGES:
+        try:
+            versions[name] = importlib.metadata.version(name)
+        except importlib.metadata.PackageNotFoundError:
+            versions[name] = None
+    return versions
+
+
+def cmake_variable(path: Path, name: str) -> str | None:
+    if not path.is_file():
+        return None
+    text = path.read_text(encoding="utf-8")
+    match = re.search(rf"set\({re.escape(name)}(?:\s+\"([^\"]+)\"|\s+([^\s\)]+))\)", text)
+    return (match.group(1) or match.group(2)) if match else None
+
+
+def native_build_profile(cache_path: Path) -> dict[str, str | None]:
+    if not cache_path.is_file():
+        raise ValueError(f"native policy CMake cache does not exist: {cache_path}")
+    values = {}
+    for line in cache_path.read_text(encoding="utf-8").splitlines():
+        if not line or line.startswith("//") or line.startswith("#") or ":" not in line:
+            continue
+        key, _, value = line.partition(":")
+        _, separator, value = value.partition("=")
+        if separator:
+            values[key] = value
+    source_root = values.get("CSL_SOURCE_ROOT")
+    if source_root is None or Path(source_root).resolve() != ROOT.resolve():
+        raise ValueError("native policy build cache does not belong to the frozen source tree")
+    compiler_id = values.get("CMAKE_CXX_COMPILER_ID")
+    compiler_version = values.get("CMAKE_CXX_COMPILER_VERSION")
+    compiler_details = next(cache_path.parent.glob("CMakeFiles/*/CMakeCXXCompiler.cmake"), None)
+    if compiler_details is not None:
+        text = compiler_details.read_text(encoding="utf-8")
+        compiler_id_match = re.search(r'set\(CMAKE_CXX_COMPILER_ID "([^"]+)"\)', text)
+        compiler_version_match = re.search(r'set\(CMAKE_CXX_COMPILER_VERSION "([^"]+)"\)', text)
+        compiler_id = compiler_id or (compiler_id_match.group(1) if compiler_id_match else None)
+        compiler_version = compiler_version or (
+            compiler_version_match.group(1) if compiler_version_match else None
+        )
+    highs_build = values.get("HIGHS_BINARY_DIR")
+    highs_config = (
+        Path(highs_build) / "highs-config.cmake"
+        if highs_build
+        else cache_path.parent / "_deps/csl_highs-build/highs-config.cmake"
+    )
+    qhull_source = values.get("FETCHCONTENT_SOURCE_DIR_CSL_QHULL") or str(
+        cache_path.parent / "_deps/csl_qhull-src"
+    )
+    casadi_config = (
+        Path(values["casadi_DIR"]) / "casadi-config-version.cmake"
+        if values.get("casadi_DIR")
+        else None
+    )
+    return {
+        "source_root": "reviewed repository checkout",
+        "build_type": values.get("CMAKE_BUILD_TYPE"),
+        "generator": values.get("CMAKE_GENERATOR"),
+        "cxx_compiler": Path(values["CMAKE_CXX_COMPILER"]).name
+        if values.get("CMAKE_CXX_COMPILER")
+        else None,
+        "cxx_compiler_id": compiler_id,
+        "cxx_compiler_version": compiler_version,
+        "highs": values.get("CSL_ENABLE_HIGHS"),
+        "highs_version": cmake_variable(highs_config, "HIGHS_VERSION"),
+        "qhull": values.get("CSL_ENABLE_QHULL"),
+        "qhull_version": cmake_variable(Path(qhull_source) / "CMakeLists.txt", "qhull_VERSION"),
+        "casadi": values.get("CSL_ENABLE_CASADI"),
+        "casadi_package_version": runtime_packages().get("casadi"),
+        "casadi_cpp_package_version": cmake_variable(casadi_config, "PACKAGE_VERSION")
+        if casadi_config
+        else None,
+    }
 
 
 def source_commit() -> str:
@@ -135,9 +216,17 @@ def catalogue_inventory() -> tuple[list[dict], list[dict], list[dict]]:
     return sources, graphs, candidates
 
 
-def build_freeze(bridge: Path, wall_seconds: int, cpu_seconds: int) -> dict:
+def build_freeze(
+    bridge: Path,
+    native_policy_bridge: Path,
+    native_policy_cache: Path,
+    wall_seconds: int,
+    cpu_seconds: int,
+) -> dict:
     if not bridge.is_file():
         raise ValueError(f"execution bridge does not exist: {bridge}")
+    if not native_policy_bridge.is_file():
+        raise ValueError(f"native policy bridge does not exist: {native_policy_bridge}")
     sources, graphs, candidates = catalogue_inventory()
     task_hashes = {name: manifest_sha256(load_task(name)) for name in TASK_NAMES}
     graph_counts_by_task = {
@@ -153,10 +242,17 @@ def build_freeze(bridge: Path, wall_seconds: int, cpu_seconds: int) -> dict:
             "platform": platform.platform(),
             "architecture": platform.machine(),
             "logical_cpus": os.cpu_count(),
+            "runtime_packages": runtime_packages(),
         },
         "bridge": {
             "name": bridge.name,
             "sha256": sha256_file(bridge),
+        },
+        "native_policy": {
+            "name": native_policy_bridge.name,
+            "sha256": sha256_file(native_policy_bridge),
+            "build_cache_sha256": sha256_file(native_policy_cache),
+            "build_profile": native_build_profile(native_policy_cache),
         },
         "resource_profile": {
             "profile_id": f"worker-wall-{wall_seconds}-cpu-{cpu_seconds}/1",
@@ -199,13 +295,22 @@ def build_freeze(bridge: Path, wall_seconds: int, cpu_seconds: int) -> dict:
     }
 
 
-def freeze(path: Path, bridge: Path, wall_seconds: int, cpu_seconds: int) -> dict:
+def freeze(
+    path: Path,
+    bridge: Path,
+    native_policy_bridge: Path,
+    native_policy_cache: Path,
+    wall_seconds: int,
+    cpu_seconds: int,
+) -> dict:
     ensure_clean_source()
     ensure_reviewed_source()
     sidecar_path = path.with_suffix(path.suffix + ".sha256")
     if path.exists() or sidecar_path.exists():
         raise ValueError(f"freeze file already exists and is immutable: {path}")
-    record = build_freeze(bridge, wall_seconds, cpu_seconds)
+    record = build_freeze(
+        bridge, native_policy_bridge, native_policy_cache, wall_seconds, cpu_seconds
+    )
     payload = json.dumps(record, sort_keys=True, indent=2, allow_nan=False) + "\n"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(payload, encoding="utf-8")
@@ -214,7 +319,12 @@ def freeze(path: Path, bridge: Path, wall_seconds: int, cpu_seconds: int) -> dic
     return record
 
 
-def read_freeze(path: Path, bridge: Path) -> dict:
+def read_freeze(
+    path: Path,
+    bridge: Path,
+    native_policy_bridge: Path,
+    native_policy_cache: Path,
+) -> dict:
     payload = path.read_bytes()
     sidecar = path.with_suffix(path.suffix + ".sha256").read_text().split()[0]
     if hashlib.sha256(payload).hexdigest() != sidecar:
@@ -242,11 +352,112 @@ def read_freeze(path: Path, bridge: Path) -> dict:
         raise ValueError("a frozen task contract has changed")
     if not bridge.is_file() or sha256_file(bridge) != record["bridge"]["sha256"]:
         raise ValueError("frozen execution bridge is unavailable or has changed")
+    native_policy = record["native_policy"]
+    if (
+        not native_policy_bridge.is_file()
+        or sha256_file(native_policy_bridge) != native_policy["sha256"]
+    ):
+        raise ValueError("frozen native policy bridge is unavailable or has changed")
+    if (
+        not native_policy_cache.is_file()
+        or sha256_file(native_policy_cache) != native_policy["build_cache_sha256"]
+        or native_build_profile(native_policy_cache) != native_policy["build_profile"]
+    ):
+        raise ValueError("frozen native policy build profile is unavailable or has changed")
+    if runtime_packages() != record["environment"]["runtime_packages"]:
+        raise ValueError("runtime Python provider versions differ from the frozen environment")
     return record
 
 
+def campaign_binding(record: dict, item: dict, attempt_path: Path | None = None) -> dict:
+    return {
+        "schema": "csl.closed-loop-campaign-attempt/1",
+        "source_commit": record["source_commit"],
+        "task_name": item["task_name"],
+        "task_sha256": item["task_sha256"],
+        "graph_id": item["graph_id"],
+        "graph_fingerprint": item["graph_fingerprint"],
+        "capability_manifest_sha256": item["capability_manifest_sha256"],
+        "bridge_sha256": record["bridge"]["sha256"],
+        "resource_profile_id": record["resource_profile"]["profile_id"],
+        "native_policy_bridge_sha256": record["native_policy"]["sha256"],
+        "native_policy_build_cache_sha256": record["native_policy"]["build_cache_sha256"],
+        "native_policy_build_profile": record["native_policy"]["build_profile"],
+        "python_runtime_packages": record["environment"]["runtime_packages"],
+        "attempt": str(attempt_path) if attempt_path else None,
+    }
+
+
+def write_json_atomically(path: Path, value: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(path.name + ".tmp")
+    temporary.write_text(json.dumps(value, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+    os.replace(temporary, path)
+
+
+def campaign_journal_path(output_root: Path, item: dict) -> Path:
+    identity = f"{item['task_name']}\0{item['graph_id']}".encode()
+    return output_root / ".campaign-attempts" / f"{hashlib.sha256(identity).hexdigest()}.json"
+
+
+def recover_started_attempts(output_root: Path, record: dict) -> None:
+    """Recover a runner attempt created after its durable campaign intent."""
+    journals = output_root / ".campaign-attempts"
+    if not journals.is_dir():
+        return
+    planned = {(item["task_name"], item["graph_id"]): item for item in record["graphs"]}
+    for journal_path in journals.glob("*.json"):
+        try:
+            journal = json.loads(journal_path.read_text(encoding="utf-8"))
+            if journal.get("state") != "started":
+                continue
+            item = planned[(journal["task_name"], journal["graph_id"])]
+            candidates = []
+            for request_path in (output_root / item["task_name"] / "attempts").glob(
+                "*/request.json"
+            ):
+                request = json.loads(request_path.read_text(encoding="utf-8"))
+                if (
+                    request.get("source_commit") == record["source_commit"]
+                    and request.get("requested", {}).get("graph_id") == item["graph_id"]
+                    and request.get("requested", {}).get("resource_profile_id")
+                    == record["resource_profile"]["profile_id"]
+                    and request_path.stat().st_mtime_ns >= journal.get("started_unix_ns", 0)
+                    and not (request_path.parent / "campaign-runtime.json").exists()
+                ):
+                    candidates.append(request_path.parent)
+            if len(candidates) == 1:
+                attempt_path = candidates[0]
+                binding = campaign_binding(record, item, attempt_path)
+                attempt_data = attempt_path / "attempt.json"
+                if attempt_data.is_file():
+                    receipt = json.loads(attempt_data.read_text(encoding="utf-8"))
+                    binding["executed_native_policy_bridge_sha256"] = (
+                        receipt.get("preparation_receipt", {})
+                        .get("adapter_receipt", {})
+                        .get("executable_sha256")
+                    )
+                if (
+                    binding.get("executed_native_policy_bridge_sha256") is not None
+                    and binding["executed_native_policy_bridge_sha256"]
+                    != record["native_policy"]["sha256"]
+                ):
+                    journal["state"] = "rejected_provider_mismatch"
+                    write_json_atomically(journal_path, journal)
+                    continue
+                write_json_atomically(attempt_path / "campaign-runtime.json", binding)
+                journal.update({"state": "recovered", "attempt": str(attempt_path)})
+                write_json_atomically(journal_path, journal)
+            elif not candidates:
+                journal["state"] = "interrupted_before_runner_attempt"
+                write_json_atomically(journal_path, journal)
+        except (OSError, KeyError, json.JSONDecodeError):
+            continue
+
+
 def iter_verified_attempts(output_root: Path, record: dict):
-    """Yield attempts whose request and runner manifest match this frozen plan."""
+    """Yield attempts whose runner outputs match a durable campaign sidecar."""
+    recover_started_attempts(output_root, record)
     planned = {(graph["task_name"], graph["graph_id"]): graph for graph in record["graphs"]}
     for path in output_root.glob("*/attempts/*/request.json"):
         try:
@@ -256,31 +467,48 @@ def iter_verified_attempts(output_root: Path, record: dict):
             task_name = path.parents[2].name
             key = (task_name, graph_id)
             item = planned.get(key)
+            binding_path = path.parent / "campaign-runtime.json"
+            if not binding_path.is_file():
+                continue
+            binding = json.loads(binding_path.read_text(encoding="utf-8"))
             if (
                 item is None
                 or request.get("source_commit") != record["source_commit"]
                 or requested.get("resource_profile_id") != record["resource_profile"]["profile_id"]
+                or binding.get("executed_native_policy_bridge_sha256")
+                not in (None, record["native_policy"]["sha256"])
+                or any(
+                    binding.get(name) != value
+                    for name, value in campaign_binding(record, item, path.parent).items()
+                )
             ):
                 continue
             attempt_path = path.parent / "attempt.json"
             if not attempt_path.is_file():
                 continue
+            attempt_data = json.loads(attempt_path.read_text(encoding="utf-8"))
+            executed_binary = (
+                attempt_data.get("preparation_receipt", {})
+                .get("adapter_receipt", {})
+                .get("executable_sha256")
+            )
+            if executed_binary != binding.get("executed_native_policy_bridge_sha256"):
+                continue
             run_manifest_path = path.parent / "run-manifest.json"
-            if not run_manifest_path.is_file():
-                continue
-            run_manifest = json.loads(run_manifest_path.read_text(encoding="utf-8"))
-            if (
-                run_manifest.get("source_commit") != record["source_commit"]
-                or run_manifest.get("task_sha256") != item["task_sha256"]
-                or run_manifest.get("graph_id") != item["graph_id"]
-                or run_manifest.get("graph_fingerprint") != item["graph_fingerprint"]
-                or run_manifest.get("capability_manifest_sha256")
-                != item["capability_manifest_sha256"]
-                or run_manifest.get("bridge_sha256") != record["bridge"]["sha256"]
-                or run_manifest.get("resource_profile_id")
-                != record["resource_profile"]["profile_id"]
-            ):
-                continue
+            if run_manifest_path.is_file():
+                run_manifest = json.loads(run_manifest_path.read_text(encoding="utf-8"))
+                if (
+                    run_manifest.get("source_commit") != record["source_commit"]
+                    or run_manifest.get("task_sha256") != item["task_sha256"]
+                    or run_manifest.get("graph_id") != item["graph_id"]
+                    or run_manifest.get("graph_fingerprint") != item["graph_fingerprint"]
+                    or run_manifest.get("capability_manifest_sha256")
+                    != item["capability_manifest_sha256"]
+                    or run_manifest.get("bridge_sha256") != record["bridge"]["sha256"]
+                    or run_manifest.get("resource_profile_id")
+                    != record["resource_profile"]["profile_id"]
+                ):
+                    continue
             yield item, path, attempt_path
         except (OSError, KeyError, json.JSONDecodeError):
             continue
@@ -318,10 +546,54 @@ def append_event(path: Path, event: dict) -> None:
         os.fsync(stream.fileno())
 
 
+def run_frozen_attempt(
+    task_name: str,
+    output_root: Path,
+    bridge: Path,
+    native_policy_bridge: Path,
+    profile: dict,
+    item: dict,
+    manifest_path: Path,
+) -> dict:
+    variable = "CSL_NATIVE_POLICY_BRIDGE"
+    previous = os.environ.get(variable)
+    os.environ[variable] = str(native_policy_bridge.resolve(strict=True))
+    try:
+        return run_closed_loop.run_task(
+            task_name,
+            output_root,
+            bridge,
+            attempt_wall_seconds=profile["attempt_wall_seconds"],
+            attempt_cpu_seconds=profile["attempt_cpu_seconds"],
+            graph_id=item["graph_id"],
+            capability_manifest_path=manifest_path,
+        )
+    finally:
+        if previous is None:
+            os.environ.pop(variable, None)
+        else:
+            os.environ[variable] = previous
+
+
+def write_campaign_runtime_sidecar(attempt_path: Path, record: dict, item: dict) -> None:
+    """Persist campaign provenance beside, without rewriting, common-runner evidence."""
+    attempt_record_path = attempt_path / "attempt.json"
+    attempt = json.loads(attempt_record_path.read_text(encoding="utf-8"))
+    adapter_receipt = attempt.get("preparation_receipt", {}).get("adapter_receipt", {})
+    actual_binary_sha256 = adapter_receipt.get("executable_sha256")
+    frozen_binary_sha256 = record["native_policy"]["sha256"]
+    if actual_binary_sha256 is not None and actual_binary_sha256 != frozen_binary_sha256:
+        raise ValueError("attempt used a native policy bridge different from its campaign freeze")
+    binding = campaign_binding(record, item, attempt_path)
+    binding["executed_native_policy_bridge_sha256"] = actual_binary_sha256
+    write_json_atomically(attempt_path / "campaign-runtime.json", binding)
+
+
 def run_campaign(
     record: dict,
     output_root: Path,
     bridge: Path,
+    native_policy_bridge: Path,
     max_attempts: int | None = None,
 ) -> dict:
     profile = record["resource_profile"]
@@ -338,16 +610,23 @@ def run_campaign(
         if max_attempts is not None and attempted_now >= max_attempts:
             continue
         manifest_path = ROOT / item["catalogue_path"]
-        result = run_closed_loop.run_task(
+        journal_path = campaign_journal_path(output_root, item)
+        journal = campaign_binding(record, item)
+        journal.update({"state": "started", "started_unix_ns": time.time_ns()})
+        write_json_atomically(journal_path, journal)
+        result = run_frozen_attempt(
             item["task_name"],
             output_root,
             bridge,
-            attempt_wall_seconds=profile["attempt_wall_seconds"],
-            attempt_cpu_seconds=profile["attempt_cpu_seconds"],
-            graph_id=item["graph_id"],
-            capability_manifest_path=manifest_path,
+            native_policy_bridge,
+            profile,
+            item,
+            manifest_path,
         )
         attempt_path = Path(result["attempt"]).resolve()
+        write_campaign_runtime_sidecar(attempt_path, record, item)
+        journal.update({"state": "completed", "attempt": str(attempt_path)})
+        write_json_atomically(journal_path, journal)
         try:
             attempt_reference = str(attempt_path.relative_to(output_root.resolve()))
         except ValueError as error:
@@ -364,6 +643,7 @@ def run_campaign(
                 "task_name": item["task_name"],
                 "task_sha256": item["task_sha256"],
                 "attempt": attempt_reference,
+                "native_policy_bridge_sha256": record["native_policy"]["sha256"],
                 "status": result.get("overall_status", result.get("status")),
                 "algorithm_status": result.get("algorithm_status"),
                 "postcheck_status": result.get("postcheck_status"),
@@ -389,6 +669,7 @@ def run_campaign(
     )
     return {
         "source_commit": record["source_commit"],
+        "native_policy_bridge_sha256": record["native_policy"]["sha256"],
         "canonical_active_graphs": len(record["graphs"]),
         "attempted_before_run": attempted_before_run,
         "attempted_this_run": attempted_now,
@@ -529,12 +810,16 @@ def main() -> int:
     commands = parser.add_subparsers(dest="command", required=True)
     freeze_parser = commands.add_parser("freeze", help="validate and freeze all four catalogues")
     freeze_parser.add_argument("--bridge", type=Path, required=True)
+    freeze_parser.add_argument("--native-policy-bridge", type=Path, required=True)
+    freeze_parser.add_argument("--native-policy-cache", type=Path, required=True)
     freeze_parser.add_argument("--output", type=Path, required=True)
     freeze_parser.add_argument("--attempt-wall-seconds", type=positive_integer, default=300)
     freeze_parser.add_argument("--attempt-cpu-seconds", type=positive_integer, default=300)
     run_parser = commands.add_parser("run", help="run missing graph/task pairs from a freeze")
     run_parser.add_argument("--freeze", type=Path, required=True)
     run_parser.add_argument("--bridge", type=Path, required=True)
+    run_parser.add_argument("--native-policy-bridge", type=Path, required=True)
+    run_parser.add_argument("--native-policy-cache", type=Path, required=True)
     run_parser.add_argument("--output-root", type=Path, required=True)
     run_parser.add_argument("--max-attempts", type=positive_integer)
     args = parser.parse_args()
@@ -544,6 +829,8 @@ def main() -> int:
             record = freeze(
                 args.output,
                 args.bridge,
+                args.native_policy_bridge,
+                args.native_policy_cache,
                 args.attempt_wall_seconds,
                 args.attempt_cpu_seconds,
             )
@@ -553,9 +840,15 @@ def main() -> int:
                 "candidate_counts": record["candidate_counts"],
             }
         else:
-            record = read_freeze(args.freeze, args.bridge)
+            record = read_freeze(
+                args.freeze, args.bridge, args.native_policy_bridge, args.native_policy_cache
+            )
             result = run_campaign(
-                record, args.output_root.resolve(), args.bridge.resolve(), args.max_attempts
+                record,
+                args.output_root.resolve(),
+                args.bridge.resolve(),
+                args.native_policy_bridge.resolve(),
+                args.max_attempts,
             )
     except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
         parser.error(str(error))
