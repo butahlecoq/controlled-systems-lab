@@ -7,9 +7,8 @@ import hashlib
 import html
 import json
 from pathlib import Path
-from typing import Any
-
 from site_design import page_end, page_start
+from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -150,7 +149,11 @@ def draw_svg(
         parts.append(f'<text x="{left-12}" y="{Y+4:.2f}" class="tick" text-anchor="end">{xml(number(y))}</text>')
     parts.append(f'<rect x="{left}" y="{top}" width="{plot_width}" height="{plot_height}" fill="none" stroke="#64748b"/>')
 
-    for node, (x, y) in zip(nodes, [(float(n["state"][i]), float(n["state"][j])) for n in nodes]):
+    for node, (x, y) in zip(
+        nodes,
+        [(float(n["state"][i]), float(n["state"][j])) for n in nodes],
+        strict=True,
+    ):
         stage = int(node["absolute_stage"])
         tip = f"stage {stage}; node {node['node_id']}; state {node['state']}; backward viable {node.get('backward_viable')}"
         parts.append(f'<circle cx="{px(x):.2f}" cy="{py(y):.2f}" r="4.2" fill="{color(stage,final_stage)}" fill-opacity="0.43"><title>{xml(tip)}</title></circle>')
