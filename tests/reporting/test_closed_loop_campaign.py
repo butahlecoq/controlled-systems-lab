@@ -17,21 +17,47 @@ import run_campaign  # noqa: E402
 
 
 class ClosedLoopCampaignTests(unittest.TestCase):
+    @staticmethod
+    def native_inputs(root: Path) -> tuple[Path, Path]:
+        native_bridge = root / "native-policy"
+        native_bridge.write_bytes(b"test native policy bridge")
+        cache = root / "CMakeCache.txt"
+        cache.write_text(
+            "\n".join(
+                (
+                    f"CSL_SOURCE_ROOT:UNINITIALIZED={run_campaign.ROOT}",
+                    "CMAKE_BUILD_TYPE:STRING=Release",
+                    "CMAKE_GENERATOR:INTERNAL=Ninja",
+                    "CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++",
+                    "CMAKE_CXX_COMPILER_ID:STRING=GNU",
+                    "CMAKE_CXX_COMPILER_VERSION:STRING=16.2.1",
+                    "CSL_ENABLE_HIGHS:BOOL=ON",
+                    "CSL_ENABLE_QHULL:BOOL=ON",
+                    "CSL_ENABLE_CASADI:BOOL=ON",
+                    "casadi_DIR:PATH=/opt/casadi",
+                )
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        return native_bridge, cache
+
     def test_freeze_round_trip_revalidates_current_source_catalogues(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             bridge = root / "bridge"
             bridge.write_bytes(b"test bridge")
+            native_bridge, cache = self.native_inputs(root)
             path = root / "campaign.json"
             with (
                 patch.object(run_campaign, "ensure_clean_source"),
                 patch.object(run_campaign, "ensure_reviewed_source"),
                 patch.object(run_campaign, "ensure_clean_tracked_source"),
             ):
-                run_campaign.freeze(path, bridge, 300, 300)
+                run_campaign.freeze(path, bridge, native_bridge, cache, 300, 300)
                 with self.assertRaisesRegex(ValueError, "already exists and is immutable"):
-                    run_campaign.freeze(path, bridge, 300, 300)
-                loaded = run_campaign.read_freeze(path, bridge)
+                    run_campaign.freeze(path, bridge, native_bridge, cache, 300, 300)
+                loaded = run_campaign.read_freeze(path, bridge, native_bridge, cache)
 
         self.assertEqual(loaded["source_commit"], run_campaign.source_commit())
         self.assertEqual(len(loaded["catalogues"]), 4)
@@ -45,6 +71,84 @@ class ClosedLoopCampaignTests(unittest.TestCase):
             "min(2 GiB, 75% of available memory at attempt start); recorded by the runner",
         )
         self.assertEqual(loaded["bridge"]["name"], "bridge")
+        self.assertEqual(loaded["native_policy"]["name"], "native-policy")
+        self.assertEqual(loaded["native_policy"]["build_profile"]["casadi"], "ON")
+        self.assertEqual(
+            loaded["native_policy"]["build_profile"]["casadi_package_version"], "3.8.0"
+        )
+
+    def test_freeze_rejects_changed_native_policy_binary_or_build_profile(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            bridge = root / "bridge"
+            bridge.write_bytes(b"test bridge")
+            native_bridge, cache = self.native_inputs(root)
+            path = root / "campaign.json"
+            with (
+                patch.object(run_campaign, "ensure_clean_source"),
+                patch.object(run_campaign, "ensure_reviewed_source"),
+                patch.object(run_campaign, "ensure_clean_tracked_source"),
+            ):
+                run_campaign.freeze(path, bridge, native_bridge, cache, 300, 300)
+                native_bridge.write_bytes(b"changed native policy bridge")
+                with self.assertRaisesRegex(ValueError, "native policy bridge.*changed"):
+                    run_campaign.read_freeze(path, bridge, native_bridge, cache)
+                native_bridge.write_bytes(b"test native policy bridge")
+                cache.write_text(cache.read_text() + "CSL_ENABLE_CASADI:BOOL=OFF\n")
+                with self.assertRaisesRegex(ValueError, "native policy build profile.*changed"):
+                    run_campaign.read_freeze(path, bridge, native_bridge, cache)
+
+    def test_attempt_manifest_records_the_frozen_native_policy_binary(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            native_bridge = root / "native-policy"
+            native_bridge.write_bytes(b"native policy")
+            native_hash = run_campaign.sha256_file(native_bridge)
+            attempt_path = root / "attempt"
+            attempt_path.mkdir()
+            (attempt_path / "request.json").write_text(
+                json.dumps({"requested": {"graph_id": "graph/one"}}), encoding="utf-8"
+            )
+            (attempt_path / "attempt.json").write_text(
+                json.dumps(
+                    {"preparation_receipt": {"adapter_receipt": {"executable_sha256": native_hash}}}
+                ),
+                encoding="utf-8",
+            )
+            (attempt_path / "run-manifest.json").write_text("{}", encoding="utf-8")
+            record = {
+                "native_policy": {
+                    "sha256": native_hash,
+                    "build_cache_sha256": "cache-hash",
+                    "build_profile": {"casadi": "ON"},
+                },
+                "environment": {"runtime_packages": {"casadi": "3.8.0"}},
+                "source_commit": "source",
+                "bridge": {"sha256": "bridge-hash"},
+                "resource_profile": {"profile_id": "profile"},
+            }
+            item = {
+                "task_sha256": "task-hash",
+                "graph_id": "graph/one",
+                "graph_fingerprint": "fingerprint",
+                "capability_manifest_sha256": "catalogue-hash",
+                "controller": {},
+                "execution": {},
+            }
+
+            run_campaign.bind_native_policy_runtime(attempt_path, record, item)
+            requested = json.loads((attempt_path / "request.json").read_text())["requested"]
+            manifest = json.loads((attempt_path / "run-manifest.json").read_text())
+            self.assertEqual(requested["native_policy_bridge_sha256"], native_hash)
+            self.assertEqual(
+                manifest["campaign_runtime"]["executed_native_policy_bridge_sha256"], native_hash
+            )
+
+            attempt = json.loads((attempt_path / "attempt.json").read_text())
+            attempt["preparation_receipt"]["adapter_receipt"]["executable_sha256"] = "wrong"
+            (attempt_path / "attempt.json").write_text(json.dumps(attempt), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "different from its campaign freeze"):
+                run_campaign.bind_native_policy_runtime(attempt_path, record, item)
 
     def test_freeze_requires_a_commit_reachable_from_reviewed_main(self):
         with patch.object(
@@ -139,6 +243,8 @@ class ClosedLoopCampaignTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             output_root = root / "results"
+            native_bridge = root / "native-policy"
+            native_bridge.write_bytes(b"native policy")
             existing = output_root / "syn-nl-lv-01" / "attempts" / "existing"
             existing.mkdir(parents=True)
             (existing / "request.json").write_text(
@@ -148,6 +254,9 @@ class ClosedLoopCampaignTests(unittest.TestCase):
                         "requested": {
                             "graph_id": "graph/already-attempted",
                             "resource_profile_id": "worker-wall-300-cpu-300/1",
+                            "native_policy_bridge_sha256": run_campaign.sha256_file(
+                                root / "native-policy"
+                            ),
                         },
                     }
                 )
@@ -159,6 +268,11 @@ class ClosedLoopCampaignTests(unittest.TestCase):
             record = {
                 "source_commit": "frozen-source",
                 "bridge": {"name": bridge.name, "sha256": run_campaign.sha256_file(bridge)},
+                "native_policy": {
+                    "name": native_bridge.name,
+                    "sha256": run_campaign.sha256_file(native_bridge),
+                    "build_cache_sha256": "frozen-cache-hash",
+                },
                 "resource_profile": {
                     "profile_id": "worker-wall-300-cpu-300/1",
                     "attempt_wall_seconds": 300,
@@ -194,6 +308,10 @@ class ClosedLoopCampaignTests(unittest.TestCase):
                         "graph_fingerprint": "fingerprint-1",
                         "capability_manifest_sha256": "manifest-hash",
                         "bridge_sha256": run_campaign.sha256_file(bridge),
+                        "campaign_runtime": {
+                            "native_policy_bridge_sha256": run_campaign.sha256_file(native_bridge),
+                            "native_policy_build_cache_sha256": "frozen-cache-hash",
+                        },
                         "resource_profile_id": "worker-wall-300-cpu-300/1",
                     }
                 )
@@ -208,6 +326,7 @@ class ClosedLoopCampaignTests(unittest.TestCase):
             }
             with (
                 patch.object(run_campaign.run_closed_loop, "run_task", return_value=result) as run,
+                patch.object(run_campaign, "bind_native_policy_runtime"),
                 patch.object(
                     run_campaign.run_closed_loop,
                     "write_coverage",
@@ -219,7 +338,9 @@ class ClosedLoopCampaignTests(unittest.TestCase):
                     return_value={"schema": "campaign-coverage-test/1"},
                 ),
             ):
-                summary = run_campaign.run_campaign(record, output_root, bridge, max_attempts=1)
+                summary = run_campaign.run_campaign(
+                    record, output_root, bridge, native_bridge, max_attempts=1
+                )
 
             run.assert_called_once()
             self.assertEqual(run.call_args.args[0], "syn-nl-lv-01")
