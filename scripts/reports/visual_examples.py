@@ -1622,7 +1622,7 @@ def build(catalog, site):
             "status": "educational-example",
             "anchor": "kpabep-near-collinear-20261115",
             "page": "kpabep-near-collinear-20261115.html",
-            "figure": "kpabep-near-collinear-20261115.html#plot",
+            "figure": "kpabep-near-collinear-20261115.html",
             "source_page": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c741260362092c988fdb4aa4ee6a793575a59e4/examples/geometry/kpabep_near_collinear.cpp",
             "raw_record": "kpabep-near-collinear-20261115.json",
         }
