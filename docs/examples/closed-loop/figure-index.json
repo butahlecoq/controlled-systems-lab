@@ -3024,6 +3024,238 @@
       "time_step": 0.5,
       "timeline_end": 20.0,
       "title": "Fuel flow and mass plane"
+    },
+    {
+      "id": "campaign-syn-nl-lv-01-lotka",
+      "availability": "ready",
+      "href": "examples/closed-loop/figures/campaign-syn-nl-lv-01-lotka.html",
+      "svg_href": "examples/closed-loop/figures/campaign-syn-nl-lv-01-lotka.svg",
+      "plotted_data_href": "examples/closed-loop/figures/campaign-syn-nl-lv-01-lotka.plotted-data.json",
+      "title": "syn-nl-lv-01: retained graph and closed-loop replay (lotka)",
+      "task_id": "syn-nl-lv-01/continuous-receding/1",
+      "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+      "geometry_source_commit": "9140e2a6fde55697b2035349a0996941be80297c",
+      "stage_count": 31,
+      "transition_count": 30,
+      "time_step": 0.1,
+      "timeline_end": 3.0,
+      "coordinate_transform": {
+        "raw_indices": [
+          0,
+          1
+        ],
+        "names": [
+          "Prey P",
+          "Predator R"
+        ],
+        "units": [
+          "thousand individuals",
+          "thousand individuals"
+        ],
+        "description": "Physical coordinates; no scaling or convexification applied.",
+        "source_values_are_physical": true,
+        "scale_applied_to_source_values": false
+      },
+      "layer_scopes": [
+        "retained finite-action graph states F_ret[k] across all stages",
+        "backward-viable retained nodes F_ret[k] ∩ B_ret[k]",
+        "selected retained-graph plan from first query",
+        "observed closed-loop plant replay",
+        "initial state and terminal-stage retained nodes"
+      ],
+      "missing_layers": [
+        "complete unpruned action reachability (search coverage is incomplete; beam width is 8)",
+        "continuous-control reachable-set boundaries; points are retained graph states, with no convex hull drawn",
+        "validated-arithmetic certificates for predecessor and membership checks",
+        "globally optimal causal feedback policy"
+      ],
+      "raw_record_refs": [
+        {
+          "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-v2-9140e2a6-20261115/lotka-results.tar.zst",
+          "archive_member": "reports/closed-loop-composition-campaign-v2/results/syn-nl-lv-01/attempts/syn-nl-lv-01-20261115T112425Z-8de524f1/attempt.json",
+          "sha256": "1c1ac8b68ccc6cfd3de08dfd68c52b69b1952098848d70ca4315bce491866ddf"
+        },
+        {
+          "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-v2-9140e2a6-20261115/lotka-results.tar.zst",
+          "archive_member": "reports/closed-loop-composition-campaign-v2/results/syn-nl-lv-01/attempts/syn-nl-lv-01-20261115T112425Z-8de524f1/stage-000.json",
+          "sha256": "dd7b84dbcb33229bdeda0d2bc8c7a674f9a9672c0ceff02915b9d54988d658d7"
+        }
+      ],
+      "reproduction_command": "python scripts/reports/campaign_graph_figures.py --campaign-root reports/closed-loop-composition-campaign-v2"
+    },
+    {
+      "id": "campaign-earth-orbit-orbit",
+      "availability": "ready",
+      "href": "examples/closed-loop/figures/campaign-earth-orbit-orbit.html",
+      "svg_href": "examples/closed-loop/figures/campaign-earth-orbit-orbit.svg",
+      "plotted_data_href": "examples/closed-loop/figures/campaign-earth-orbit-orbit.plotted-data.json",
+      "title": "earth-orbit: retained graph and closed-loop replay (orbit)",
+      "task_id": "env717-earth-orbit/continuous-receding/1",
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+      "geometry_source_commit": "9140e2a6fde55697b2035349a0996941be80297c",
+      "stage_count": 21,
+      "transition_count": 20,
+      "time_step": 100.0,
+      "timeline_end": 2000.0,
+      "coordinate_transform": {
+        "raw_indices": [
+          0,
+          3
+        ],
+        "names": [
+          "Radius r",
+          "Angular rate ω"
+        ],
+        "units": [
+          "km",
+          "rad/s"
+        ],
+        "description": "Physical coordinates; no scaling or convexification applied.",
+        "source_values_are_physical": true,
+        "scale_applied_to_source_values": false
+      },
+      "layer_scopes": [
+        "retained finite-action graph states F_ret[k] across all stages",
+        "backward-viable retained nodes F_ret[k] ∩ B_ret[k]",
+        "selected retained-graph plan from first query",
+        "observed closed-loop plant replay",
+        "initial state and terminal-stage retained nodes"
+      ],
+      "missing_layers": [
+        "complete unpruned action reachability (search coverage is incomplete; beam width is 8)",
+        "continuous-control reachable-set boundaries; points are retained graph states, with no convex hull drawn",
+        "validated-arithmetic certificates for predecessor and membership checks",
+        "globally optimal causal feedback policy"
+      ],
+      "raw_record_refs": [
+        {
+          "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-v2-9140e2a6-20261115/earth-orbit-results.tar.zst",
+          "archive_member": "reports/closed-loop-composition-campaign-v2/results/earth-orbit/attempts/earth-orbit-20261115T110111Z-4475ae9f/attempt.json",
+          "sha256": "20b8e84db4e74b2603cfa2ed8f0c6f84a0f14876312c80f231662f7313e27b64"
+        },
+        {
+          "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-v2-9140e2a6-20261115/earth-orbit-results.tar.zst",
+          "archive_member": "reports/closed-loop-composition-campaign-v2/results/earth-orbit/attempts/earth-orbit-20261115T110111Z-4475ae9f/stage-000.json",
+          "sha256": "67d179266c4fa9e51066586abc7764515b6086c06ceb1e5bf20cabf079843391"
+        }
+      ],
+      "reproduction_command": "python scripts/reports/campaign_graph_figures.py --campaign-root reports/closed-loop-composition-campaign-v2"
+    },
+    {
+      "id": "campaign-syn-nl-fuel-01-oxidizer",
+      "availability": "ready",
+      "href": "examples/closed-loop/figures/campaign-syn-nl-fuel-01-oxidizer.html",
+      "svg_href": "examples/closed-loop/figures/campaign-syn-nl-fuel-01-oxidizer.svg",
+      "plotted_data_href": "examples/closed-loop/figures/campaign-syn-nl-fuel-01-oxidizer.plotted-data.json",
+      "title": "syn-nl-fuel-01: retained graph and closed-loop replay (oxidizer)",
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b",
+      "geometry_source_commit": "9140e2a6fde55697b2035349a0996941be80297c",
+      "stage_count": 41,
+      "transition_count": 40,
+      "time_step": 0.5,
+      "timeline_end": 20.0,
+      "coordinate_transform": {
+        "raw_indices": [
+          2,
+          0
+        ],
+        "names": [
+          "Oxidizer flow qₒₓ",
+          "Oxidizer mass mₒₓ"
+        ],
+        "units": [
+          "kg/s",
+          "kg"
+        ],
+        "description": "Physical coordinates; no scaling or convexification applied.",
+        "source_values_are_physical": true,
+        "scale_applied_to_source_values": false
+      },
+      "layer_scopes": [
+        "retained finite-action graph states F_ret[k] across all stages",
+        "backward-viable retained nodes F_ret[k] ∩ B_ret[k]",
+        "selected retained-graph plan from first query",
+        "observed closed-loop plant replay",
+        "initial state and terminal-stage retained nodes"
+      ],
+      "missing_layers": [
+        "complete unpruned action reachability (search coverage is incomplete; beam width is 8)",
+        "continuous-control reachable-set boundaries; points are retained graph states, with no convex hull drawn",
+        "validated-arithmetic certificates for predecessor and membership checks",
+        "globally optimal causal feedback policy"
+      ],
+      "raw_record_refs": [
+        {
+          "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-v2-9140e2a6-20261115/fuel-results.tar.zst",
+          "archive_member": "reports/closed-loop-composition-campaign-v2/results/syn-nl-fuel-01/attempts/syn-nl-fuel-01-20261115T110441Z-2ccaccc0/attempt.json",
+          "sha256": "6bd0154aa1f6d6e9bf394fd64b2b9b9fc3505f9d5adfd7b1709ae052db60cba7"
+        },
+        {
+          "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-v2-9140e2a6-20261115/fuel-results.tar.zst",
+          "archive_member": "reports/closed-loop-composition-campaign-v2/results/syn-nl-fuel-01/attempts/syn-nl-fuel-01-20261115T110441Z-2ccaccc0/stage-000.json",
+          "sha256": "c6d1d9451b1f12b1f474346da221913213a28dda4210cb13cd67a38f79208b6d"
+        }
+      ],
+      "reproduction_command": "python scripts/reports/campaign_graph_figures.py --campaign-root reports/closed-loop-composition-campaign-v2"
+    },
+    {
+      "id": "campaign-syn-nl-fuel-01-fuel",
+      "availability": "ready",
+      "href": "examples/closed-loop/figures/campaign-syn-nl-fuel-01-fuel.html",
+      "svg_href": "examples/closed-loop/figures/campaign-syn-nl-fuel-01-fuel.svg",
+      "plotted_data_href": "examples/closed-loop/figures/campaign-syn-nl-fuel-01-fuel.plotted-data.json",
+      "title": "syn-nl-fuel-01: retained graph and closed-loop replay (fuel)",
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b",
+      "geometry_source_commit": "9140e2a6fde55697b2035349a0996941be80297c",
+      "stage_count": 41,
+      "transition_count": 40,
+      "time_step": 0.5,
+      "timeline_end": 20.0,
+      "coordinate_transform": {
+        "raw_indices": [
+          3,
+          1
+        ],
+        "names": [
+          "Fuel flow q_f",
+          "Fuel mass m_f"
+        ],
+        "units": [
+          "kg/s",
+          "kg"
+        ],
+        "description": "Physical coordinates; no scaling or convexification applied.",
+        "source_values_are_physical": true,
+        "scale_applied_to_source_values": false
+      },
+      "layer_scopes": [
+        "retained finite-action graph states F_ret[k] across all stages",
+        "backward-viable retained nodes F_ret[k] ∩ B_ret[k]",
+        "selected retained-graph plan from first query",
+        "observed closed-loop plant replay",
+        "initial state and terminal-stage retained nodes"
+      ],
+      "missing_layers": [
+        "complete unpruned action reachability (search coverage is incomplete; beam width is 8)",
+        "continuous-control reachable-set boundaries; points are retained graph states, with no convex hull drawn",
+        "validated-arithmetic certificates for predecessor and membership checks",
+        "globally optimal causal feedback policy"
+      ],
+      "raw_record_refs": [
+        {
+          "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-v2-9140e2a6-20261115/fuel-results.tar.zst",
+          "archive_member": "reports/closed-loop-composition-campaign-v2/results/syn-nl-fuel-01/attempts/syn-nl-fuel-01-20261115T110441Z-2ccaccc0/attempt.json",
+          "sha256": "6bd0154aa1f6d6e9bf394fd64b2b9b9fc3505f9d5adfd7b1709ae052db60cba7"
+        },
+        {
+          "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-v2-9140e2a6-20261115/fuel-results.tar.zst",
+          "archive_member": "reports/closed-loop-composition-campaign-v2/results/syn-nl-fuel-01/attempts/syn-nl-fuel-01-20261115T110441Z-2ccaccc0/stage-000.json",
+          "sha256": "c6d1d9451b1f12b1f474346da221913213a28dda4210cb13cd67a38f79208b6d"
+        }
+      ],
+      "reproduction_command": "python scripts/reports/campaign_graph_figures.py --campaign-root reports/closed-loop-composition-campaign-v2"
     }
   ],
   "schema": "csl.closed-loop.figure-index/1",
