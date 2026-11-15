@@ -2026,7 +2026,7 @@ def build(catalog, site):
         '<circle cx="150" cy="72" r="7" fill="#a73434"/>'
         '<text x="36" y="93" fill="currentColor" font-size="12">retained endpoints</text>'
         '<text x="162" y="77" fill="currentColor" font-size="12">omitted vertex</text></svg></a>'
-        '<p>Exact binary64 orientation detects a genuine vertex 3.55 × 10⁻¹⁵ from the returned segment. The faithful reducer returns an inner approximation with no established error bound.</p>'
+        "<p>Exact binary64 orientation detects a genuine vertex 3.55 × 10⁻¹⁵ from the returned segment. The faithful reducer returns an inner approximation with no established error bound.</p>"
         '<p><a href="kpabep-near-collinear-20261115.html">Open the complete plotted reproduction →</a> · '
         '<a href="kpabep-near-collinear-20261115.json">Evidence record</a></p></article>'
     )
