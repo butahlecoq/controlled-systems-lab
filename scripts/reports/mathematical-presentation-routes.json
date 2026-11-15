@@ -704,6 +704,11 @@
       "owner": "scripts/reports/stage_discrete_mpc_2d.py"
     },
     {
+      "route": "examples/kpabep-near-collinear-20261115.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/kpabep-near-collinear-20261115.html"
+    },
+    {
       "route": "examples/nominal_linear_exact_2d.html",
       "disposition": "maintained",
       "owner": "examples/nominal_linear_exact_2d.html"

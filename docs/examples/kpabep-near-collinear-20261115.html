@@ -16,7 +16,7 @@
 <h1>A tolerance can remove a true hull vertex</h1>
 <p>This saved run uses the source-faithful BTULSHOR KPABEP/MODIF reducer on three represented binary64 points. The middle point is a true vertex of their convex hull: the exact orientation determinant is nonzero. With the historical MODIF tolerance <code>epsilon = 1e-5</code>, KPABEP returns only source IDs 2 and 0.</p>
 <figure>
-<svg viewBox="0 0 760 300" role="img" aria-labelledby="plot-title plot-desc">
+<svg id="plot" viewBox="0 0 760 300" role="img" aria-labelledby="plot-title plot-desc">
 <title id="plot-title">The omitted point lies 3.55 femtometres from the returned endpoint segment in coordinate units</title>
 <desc id="plot-desc">The horizontal axis is projection along the endpoint segment. The vertical axis is signed perpendicular distance in units of ten to the minus fifteen. Endpoints zero and two lie on zero; point one lies at minus 3.55169. The red point is omitted by the reducer.</desc>
 <rect x="0" y="0" width="760" height="300" fill="transparent"/>

@@ -68,6 +68,9 @@ EXAMPLE_ROUTE_PRODUCERS = {
     "examples/native-quadcopter-mpc.html": ["scripts/reports/stage_native_discrete_models.py", "scripts/reports/native_discrete_models.py", "docs/examples/native-quadcopter-mpc.html"],
     "examples/adaptive-ode-replay.html": ["scripts/reports/render_adaptive_ode_example.py"],
     "examples/source-index-geometry-2d.html": ["docs/examples/source-index-geometry-2d.html"],
+    "examples/kpabep-near-collinear-20261115.html": [
+        "docs/examples/kpabep-near-collinear-20261115.html"
+    ],
     "examples/app01-plan-timing-v1.html": ["scripts/reports/approx_extension_companions.py"],
     "examples/app02-diamond-v1.html": ["scripts/reports/approx_extension_companions.py"],
     "examples/app03-zonotope-v1.html": ["scripts/reports/approx_extension_companions.py"],

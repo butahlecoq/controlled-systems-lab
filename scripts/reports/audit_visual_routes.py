@@ -547,6 +547,8 @@ def build(root: Path = ROOT) -> dict:
                     "native-model-tracking-first-pass-v1/checks/full_state_trajectory_checked.csv",
                     "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip",
                     "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip.sha256",
+                    "kpabep-near-collinear-20261115.html",
+                    "kpabep-near-collinear-20261115.json",
                     "history-membership-zonotope-2d-v1/index.html",
                     "history-membership-zonotope-2d-v1/history.svg",
                     "history-membership-zonotope-2d-v1/history.csv",
