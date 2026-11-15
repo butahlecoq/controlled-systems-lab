@@ -422,6 +422,7 @@ def recover_started_attempts(output_root: Path, record: dict) -> None:
                     and request.get("requested", {}).get("graph_id") == item["graph_id"]
                     and request.get("requested", {}).get("resource_profile_id")
                     == record["resource_profile"]["profile_id"]
+                    and request_path.stat().st_mtime_ns >= journal.get("started_unix_ns", 0)
                     and not (request_path.parent / "campaign-runtime.json").exists()
                 ):
                     candidates.append(request_path.parent)
