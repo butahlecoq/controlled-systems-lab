@@ -182,7 +182,12 @@ class ClosedLoopCampaignTests(unittest.TestCase):
                 "requested": {"graph_id": "graph/one", "resource_profile_id": "profile"},
             }
             (attempt_path / "request.json").write_text(json.dumps(request))
-            attempt_data = {"attempt_id": "attempt-1", "status": "failed"}
+            native_hash = run_campaign.sha256_file(native_bridge)
+            attempt_data = {
+                "attempt_id": "attempt-1",
+                "status": "failed",
+                "preparation_receipt": {"adapter_receipt": {"executable_sha256": native_hash}},
+            }
             (attempt_path / "attempt.json").write_text(json.dumps(attempt_data))
 
             recovered = list(run_campaign.iter_verified_attempts(output_root, record))
@@ -194,7 +199,8 @@ class ClosedLoopCampaignTests(unittest.TestCase):
             self.assertTrue((attempt_path / "campaign-runtime.json").is_file())
             sidecar_path = attempt_path / "campaign-runtime.json"
             sidecar = json.loads(sidecar_path.read_text())
-            sidecar["executed_native_policy_bridge_sha256"] = "unexpected-binary-hash"
+            self.assertEqual(sidecar["executed_native_policy_bridge_sha256"], native_hash)
+            sidecar["executed_native_policy_bridge_sha256"] = None
             sidecar_path.write_text(json.dumps(sidecar))
             self.assertEqual(list(run_campaign.iter_verified_attempts(output_root, record)), [])
 

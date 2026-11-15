@@ -486,6 +486,14 @@ def iter_verified_attempts(output_root: Path, record: dict):
             attempt_path = path.parent / "attempt.json"
             if not attempt_path.is_file():
                 continue
+            attempt_data = json.loads(attempt_path.read_text(encoding="utf-8"))
+            executed_binary = (
+                attempt_data.get("preparation_receipt", {})
+                .get("adapter_receipt", {})
+                .get("executable_sha256")
+            )
+            if executed_binary != binding.get("executed_native_policy_bridge_sha256"):
+                continue
             run_manifest_path = path.parent / "run-manifest.json"
             if run_manifest_path.is_file():
                 run_manifest = json.loads(run_manifest_path.read_text(encoding="utf-8"))
