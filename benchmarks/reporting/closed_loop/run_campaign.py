@@ -475,6 +475,8 @@ def iter_verified_attempts(output_root: Path, record: dict):
                 item is None
                 or request.get("source_commit") != record["source_commit"]
                 or requested.get("resource_profile_id") != record["resource_profile"]["profile_id"]
+                or binding.get("executed_native_policy_bridge_sha256")
+                not in (None, record["native_policy"]["sha256"])
                 or any(
                     binding.get(name) != value
                     for name, value in campaign_binding(record, item, path.parent).items()

@@ -192,6 +192,11 @@ class ClosedLoopCampaignTests(unittest.TestCase):
             self.assertEqual(json.loads((attempt_path / "request.json").read_text()), request)
             self.assertEqual(json.loads((attempt_path / "attempt.json").read_text()), attempt_data)
             self.assertTrue((attempt_path / "campaign-runtime.json").is_file())
+            sidecar_path = attempt_path / "campaign-runtime.json"
+            sidecar = json.loads(sidecar_path.read_text())
+            sidecar["executed_native_policy_bridge_sha256"] = "unexpected-binary-hash"
+            sidecar_path.write_text(json.dumps(sidecar))
+            self.assertEqual(list(run_campaign.iter_verified_attempts(output_root, record)), [])
 
     def test_freeze_requires_a_commit_reachable_from_reviewed_main(self):
         with patch.object(
