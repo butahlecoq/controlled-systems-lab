@@ -232,6 +232,10 @@ SAVED_DATA_ILLUSTRATION_RENDERERS = {
         "the numerical half-plane clipping keeps the saved coefficients and checks plotted vertices against raw rows. "
         "A saved nonlinear NMPC trajectory is overlaid separately. This does not claim nonlinear reachable sets or "
         "global control optimality."),
+    "scripts/reports/campaign_graph_figures.py": (
+        "Renders authenticated saved finite-action campaign graph states, backward-viable nodes, selected first-query "
+        "plans and observed plant replays in four physical 2D projections. It runs no solver, draws no convex hull, "
+        "and discloses incomplete beam-pruned search coverage and retained-graph-only optimality."),
 }
 SAVED_DATA_COMPANION_RENDERERS = {
     "scripts/reports/fixed_tail_example.py",

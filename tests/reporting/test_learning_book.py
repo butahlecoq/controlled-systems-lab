@@ -41,9 +41,29 @@ class LearningBookTests(unittest.TestCase):
     def setUp(self):
         self.manifest = json.loads((ROOT / "docs/catalogue/learning-book-v1.json").read_text())
         self.inventory = json.loads((ROOT / "docs/catalogue/module-composition-inventory-v1.json").read_text())
-        self.figures = {"schema": "csl.closed-loop.figure-index/1", "figures": [
+        campaign_figures = [
+            {
+                "id": figure_id,
+                "availability": "ready",
+                "href": f"examples/closed-loop/figures/{figure_id}.html",
+                "layer_scopes": ["retained graph nodes", "observed plant replay"],
+                "missing_layers": ["continuous reachable-set boundaries", "global optimality"],
+            }
+            for figure_id in (
+                "campaign-syn-nl-lv-01-lotka",
+                "campaign-earth-orbit-orbit",
+                "campaign-syn-nl-fuel-01-oxidizer",
+                "campaign-syn-nl-fuel-01-fuel",
+            )
+        ]
+        pending_figures = [
             {"id": key, "availability": "pending", "reason": "No source fixture is staged."}
-            for key in ("lotka-populations", "earth-orbit", "fuel-state", "fuel-fuel-flow")]}
+            for key in ("lotka-populations", "earth-orbit", "fuel-state", "fuel-fuel-flow")
+        ]
+        self.figures = {
+            "schema": "csl.closed-loop.figure-index/1",
+            "figures": [*pending_figures, *campaign_figures],
+        }
 
     def test_module_claims_are_executable_and_navigation_is_derived(self):
         chapters = learning_book.validate(self.manifest, self.inventory, self.figures)
@@ -183,17 +203,18 @@ class LearningBookTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "no executable source witness"):
             learning_book.validate(broken, self.inventory, self.figures)
 
-    def test_ready_lessons_have_complete_reproduction_fields_and_pending_is_explicit(self):
+    def test_ready_lessons_have_complete_reproduction_fields(self):
         chapters = learning_book.validate(self.manifest, self.inventory, self.figures)
         ready = [chapter for chapter in chapters if chapter["status"] == "ready"]
         self.assertGreaterEqual(len(ready), 10)
         self.assertTrue(all(chapter["command"] and chapter["expected_output"] and
                             chapter["mathematical_input"] and chapter["intermediate_geometry"] and
                             chapter["support_limits"] for chapter in ready))
-        pending = next(chapter for chapter in chapters if chapter["id"] == "native-substitution-matrix")
-        self.assertEqual(pending["status"], "pending")
-        self.assertIn("#943", pending["summary"])
-        self.assertFalse(pending["command"])
+        campaign = next(chapter for chapter in chapters if chapter["id"] == "native-substitution-matrix")
+        self.assertEqual(campaign["status"], "ready")
+        self.assertIn("513 admitted", campaign["summary"])
+        self.assertTrue(campaign["command"])
+        self.assertFalse(any(chapter["status"] == "pending" for chapter in chapters))
 
     def test_runnable_lesson_inputs_are_math_first_and_match_source_fixtures(self):
         chapters = learning_book.validate(self.manifest, self.inventory, self.figures)
@@ -431,6 +452,12 @@ Q subset E; E subset [-sqrt(2),sqrt(2)]^2; Q is [-1,1]^2
                     "Oxidizer projection P_ox x = [q_ox, m_ox]^T: 0, 0, 1, 0; 1, 0, 0, 0",
                     "Fuel projection P_f x = [q_f, m_f]^T: 0, 0, 0, 1; 0, 1, 0, 0",
                 ],
+                "native-substitution-matrix": [
+                    "Retained graph layers and selected policy path",
+                    "I_ret[k] = F_ret[k] ∩ B_ret[k]",
+                    "498",
+                    "513",
+                ],
                 "controller-composition": [
                     "Control bounds for each stage u₀,u₁ ∈ [0,1]: 0; 1",
                     "<td>terminal objective</td><td>minimize (x₂−1)²</td>",
@@ -508,6 +535,10 @@ Q subset E; E subset [-sqrt(2),sqrt(2)]^2; Q is [-1,1]^2
                 "missing_layers": ["all-admissible-control forward sets"]})
         entries.extend({"id": figure_id, "availability": "pending", "reason": "Not part of this smoke."}
                        for figure_id in ("lotka-populations", "earth-orbit"))
+        entries.extend(
+            figure for figure in self.figures["figures"]
+            if figure["id"].startswith("campaign-")
+        )
         index = {"schema": "csl.closed-loop.figure-index/1", "figures": entries}
         with tempfile.TemporaryDirectory() as tmp:
             site = Path(tmp)
