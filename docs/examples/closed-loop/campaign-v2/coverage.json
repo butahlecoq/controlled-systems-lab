@@ -10961,6 +10961,6 @@
     "campaign-index.tar.zst",
     "lotka-results.tar.zst",
     "earth-orbit-results.tar.zst",
-    "fuel-results.tar.zst"
+    "fuel-results.tar.zst.parts.json"
   ]
 }

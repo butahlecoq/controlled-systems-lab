@@ -66,7 +66,7 @@ CASES: dict[str, Case] = {
     "syn-nl-fuel-01": {
         "task": "syn-nl-fuel-01/continuous-receding/1",
         "attempt": "syn-nl-fuel-01-20261115T110441Z-2ccaccc0",
-        "archive": "fuel-results.tar.zst",
+        "archive": "fuel-results.tar.zst.parts.json",
         "time_step": 0.5,
         "planes": [
             {
@@ -322,7 +322,7 @@ def dashboard_html(coverage: dict[str, Any]) -> str:
         f'<section><h2>All-stage projections and trajectories</h2><div class="cards"><ul>{"".join(figure_cards)}</ul></div><p>Dots show retained finite-action graph states at every stage; the plots separately show backward-viable retained nodes, the selected first-query plan, and observed closed-loop replay. Fuel uses flow-versus-mass projections for oxidizer and fuel.</p></section>'
     )
     parts.append(
-        f'<section><h2>Scope and limits</h2><aside class="notice"><p><strong>These are coverage results, not a performance ranking.</strong> There are no five alternating timing repetitions. A graph outcome marked complete means its configured runner completed; it does not imply globally complete search or global optimality.</p><p>The illustrative backward-graph figures report beam width 8 and <code>search_coverage=incomplete</code>. Their dots are retained finite-action states, not continuous reachable-set boundaries; no convex hull is drawn. The selected plan is optimal only over its retained graph, and plant replay is shown separately.</p></aside><p>Source commit <code>{xml(coverage["source_commit"])}</code>. Freeze SHA-256 <code>{xml(coverage["freeze_sha256"])}</code>; complete coverage record SHA-256 <code>{xml(coverage["coverage_record_sha256"])}</code>.</p><p><a href="archive-manifest.json">Archive SHA-256 manifest</a>.</p></section><section><h2>Raw immutable records</h2><p>Compressed tar archives can be extracted into one directory to restore the campaign tree. Verify SHA-256 using the manifest before analysis.</p><ul>{archive_links}</ul></section>'
+        f'<section><h2>Scope and limits</h2><aside class="notice"><p><strong>These are coverage results, not a performance ranking.</strong> There are no five alternating timing repetitions. A graph outcome marked complete means its configured runner completed; it does not imply globally complete search or global optimality.</p><p>The illustrative backward-graph figures report beam width 8 and <code>search_coverage=incomplete</code>. Their dots are retained finite-action states, not continuous reachable-set boundaries; no convex hull is drawn. The selected plan is optimal only over its retained graph, and plant replay is shown separately.</p></aside><p>Source commit <code>{xml(coverage["source_commit"])}</code>. Freeze SHA-256 <code>{xml(coverage["freeze_sha256"])}</code>; complete coverage record SHA-256 <code>{xml(coverage["coverage_record_sha256"])}</code>.</p><p><a href="archive-manifest.json">Archive SHA-256 manifest</a>.</p></section><section><h2>Raw immutable records</h2><p>Compressed tar archives can be extracted into one directory to restore the campaign tree. Verify SHA-256 using the manifest before analysis. The fuel archive is published as deterministic 100 MiB parts because the release connection cannot carry a 1.99 GB stream reliably: download every listed part, concatenate them in numerical order, then verify the reconstructed archive SHA-256 in the manifest.</p><ul>{archive_links}</ul></section>'
     )
     parts.append(page_end())
     return "".join(parts)
@@ -398,7 +398,7 @@ def main() -> int:
             "campaign-index.tar.zst",
             "lotka-results.tar.zst",
             "earth-orbit-results.tar.zst",
-            "fuel-results.tar.zst",
+            "fuel-results.tar.zst.parts.json",
         ],
     }
     args.coverage_output.parent.mkdir(parents=True, exist_ok=True)

@@ -36,10 +36,14 @@
       "redacted_home_prefix_occurrences": 344
     },
     {
-      "name": "fuel-results.tar.zst",
-      "sha256": "18b1e0b31259cabb34bdd3468ad91805a58165623d039d44d5000ccbedbdd57c",
-      "size_bytes": 1992241274,
-      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-v2-9140e2a6-20261115/fuel-results.tar.zst",
+      "name": "fuel-results.tar.zst.parts.json",
+      "sha256": "e85936e66d3f1530fb8a3efc7551c44d16bdade96900c6083e477e1fd5076ff2",
+      "size_bytes": 3484,
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-v2-9140e2a6-20261115/fuel-results.tar.zst.parts.json",
+      "logical_asset": "fuel-results.tar.zst",
+      "logical_sha256": "18b1e0b31259cabb34bdd3468ad91805a58165623d039d44d5000ccbedbdd57c",
+      "logical_size_bytes": 1992241274,
+      "delivery": "nineteen 100 MiB-or-smaller release assets concatenated in numerical order; descriptor lists parts and restoration command",
       "source_archive_sha256": "9388c21b5f701bf2789095b6ff0de94331140a845d44e620a39a1b8cfe76b90c",
       "source_archive_size_bytes": 1992181145,
       "redacted_text_files": 347,
@@ -56,7 +60,7 @@
       "redacted_home_prefix_occurrences": 371
     }
   ],
-  "restore_command": "for asset in campaign-index lotka-results earth-orbit-results fuel-results; do zstd -dc \"$asset.tar.zst\" | tar -xf - -C DESTINATION; done",
+  "restore_command": "Download every fuel-results.tar.zst.NN.part named in fuel-results.tar.zst.parts.json; concatenate in numerical order to fuel-results.tar.zst and verify its logical_sha256. Then for asset in campaign-index lotka-results earth-orbit-results fuel-results; do zstd -dc \"$asset.tar.zst\" | tar -xf - -C DESTINATION; done",
   "coverage_summary": {
     "admitted_and_attempted_graphs": 513,
     "complete": 498,
