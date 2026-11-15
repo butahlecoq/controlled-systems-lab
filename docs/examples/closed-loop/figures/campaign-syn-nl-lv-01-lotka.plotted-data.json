@@ -9901,12 +9901,12 @@
   ],
   "record_refs": [
     {
-      "archive": "syn-nl-lv-01-results.tar.zst",
+      "archive": "lotka-results.tar.zst",
       "member": "reports/closed-loop-composition-campaign-v2/results/syn-nl-lv-01/attempts/syn-nl-lv-01-20261115T112425Z-8de524f1/attempt.json",
       "sha256": "1c1ac8b68ccc6cfd3de08dfd68c52b69b1952098848d70ca4315bce491866ddf"
     },
     {
-      "archive": "syn-nl-lv-01-results.tar.zst",
+      "archive": "lotka-results.tar.zst",
       "member": "reports/closed-loop-composition-campaign-v2/results/syn-nl-lv-01/attempts/syn-nl-lv-01-20261115T112425Z-8de524f1/stage-000.json",
       "sha256": "dd7b84dbcb33229bdeda0d2bc8c7a674f9a9672c0ceff02915b9d54988d658d7"
     }

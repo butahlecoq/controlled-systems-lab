@@ -484,12 +484,12 @@ def main() -> int:
                 "observed_closed_loop_replay": replay,
                 "record_refs": [
                     {
-                        "archive": f"{case_id}-results.tar.zst",
+                        "archive": case["archive"],
                         "member": relative_attempt,
                         "sha256": sha256(attempt_path),
                     },
                     {
-                        "archive": f"{case_id}-results.tar.zst",
+                        "archive": case["archive"],
                         "member": relative_stage,
                         "sha256": sha256(stage_path),
                     },
