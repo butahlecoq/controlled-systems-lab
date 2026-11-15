@@ -1546,11 +1546,13 @@ def build(catalog, site):
         "source-index-geometry-2d.html",
         "source-index-geometry-2d.svg",
         "source-index-geometry-2d-records.json",
+        "kpabep-near-collinear-20261115.html",
+        "kpabep-near-collinear-20261115.json",
     ):
         source = adaptive_assets / name
         require(
             source.is_file() and not source.is_symlink(),
-            "missing source-index geometry example asset: " + name,
+            "missing source-index/KPABEP geometry example asset: " + name,
         )
         outputs[name] = (
             source.read_bytes() if source.suffix != ".html" else source.read_text(encoding="utf-8")
@@ -1611,6 +1613,18 @@ def build(catalog, site):
             "figure": "source-index-geometry-2d.svg",
             "source_page": "https://github.com/butahlecoq/controlled-systems-lab/blob/main/examples/source_index_geometry_2d.cpp",
             "raw_record": "source-index-geometry-2d-records.json",
+        }
+    )
+    gallery_inventory.append(
+        {
+            "family": "Convex hull · source-faithful legacy reducer",
+            "title": "When tolerance removes a true hull vertex",
+            "status": "educational-example",
+            "anchor": "kpabep-near-collinear-20261115",
+            "page": "kpabep-near-collinear-20261115.html",
+            "figure": "kpabep-near-collinear-20261115.html#plot",
+            "source_page": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c741260362092c988fdb4aa4ee6a793575a59e4/examples/geometry/kpabep_near_collinear.cpp",
+            "raw_record": "kpabep-near-collinear-20261115.json",
         }
     )
     qhull_example_source = qhull_highs_strategy_a_example.load_record()["source_commit"]
@@ -1998,6 +2012,24 @@ def build(catalog, site):
     navigation += '<a href="#analytic-illustrations">Analytic geometry and optimization</a>'
     navigation += '<a href="#algorithm-coverage">Algorithm coverage map</a>'
     navigation += '<a href="#saved-report-figures">More saved algorithm figures</a>'
+    kpabep_card = (
+        '<article class="saved-figure" id="kpabep-near-collinear-20261115">'
+        '<p class="eyebrow">Convex hull · source-faithful legacy reducer</p>'
+        '<h3><a href="kpabep-near-collinear-20261115.html">When tolerance removes a true hull vertex</a></h3>'
+        '<a href="kpabep-near-collinear-20261115.html" aria-label="Open the near-collinear KPABEP example">'
+        '<svg viewBox="0 0 300 105" role="img" aria-labelledby="kpabep-card-title kpabep-card-desc">'
+        '<title id="kpabep-card-title">A near-collinear point outside the returned segment</title>'
+        '<desc id="kpabep-card-desc">The green segment joins the retained endpoints. A red point, omitted by KPABEP, lies just below the segment.</desc>'
+        '<line x1="30" y1="50" x2="270" y2="50" stroke="#287357" stroke-width="5"/>'
+        '<line x1="150" y1="50" x2="150" y2="72" stroke="#a73434" stroke-width="2" stroke-dasharray="4 3"/>'
+        '<circle cx="30" cy="50" r="6" fill="#287357"/><circle cx="270" cy="50" r="6" fill="#287357"/>'
+        '<circle cx="150" cy="72" r="7" fill="#a73434"/>'
+        '<text x="36" y="93" fill="currentColor" font-size="12">retained endpoints</text>'
+        '<text x="162" y="77" fill="currentColor" font-size="12">omitted vertex</text></svg></a>'
+        '<p>Exact binary64 orientation detects a genuine vertex 3.55 × 10⁻¹⁵ from the returned segment. The faithful reducer returns an inner approximation with no established error bound.</p>'
+        '<p><a href="kpabep-near-collinear-20261115.html">Open the complete plotted reproduction →</a> · '
+        '<a href="kpabep-near-collinear-20261115.json">Evidence record</a></p></article>'
+    )
     body = (
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
@@ -2036,6 +2068,7 @@ def build(catalog, site):
         "<h2>Analytic geometry and optimization</h2><p>These exact low-dimensional examples explain the operations with literal inputs and answers. They are not solver traces or performance evidence.</p>"
         '<div class="saved-grid">'
         + visual_illustrations.cards(analytic_inventory)
+        + kpabep_card
         + "</div></section>"
         + '<section id="algorithm-coverage"><p class="eyebrow">Implementation map</p>'
         "<h2>Algorithm families and 2D limits</h2><p>This map follows the current framework composition document and published report catalog. "
