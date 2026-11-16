@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include <numeric>
+#include <ostream>
 #include <set>
 #include <string>
 
