@@ -36,6 +36,10 @@ if(TARGET CSL::highs_convex AND TARGET CSL::highs_lp AND TARGET CSL::qhull_conve
   add_executable(strategy_a_tests tests/synthesis/strategy_a/strategy_tests.cpp)
   target_link_libraries(strategy_a_tests PRIVATE CSL::strategy_a CSL::affine_sum CSL::qhull_conversion CSL::highs_lp CSL::highs_convex doctest::doctest)
   target_compile_features(strategy_a_tests PRIVATE cxx_std_20)
+  if(TARGET CSL::casadi_superscs_history_optimizer)
+    target_link_libraries(strategy_a_tests PRIVATE CSL::casadi_superscs_history_optimizer)
+    target_compile_definitions(strategy_a_tests PRIVATE CSL_TEST_REAL_HISTORY_OPTIMIZER=1)
+  endif()
 
   add_test(NAME strategy_a_tests COMMAND strategy_a_tests)
   csl_strict_warnings(strategy_a_tests)
@@ -117,6 +121,10 @@ csl_test_target(hybrid_reachability_public_client synthesis)
 
 if(TARGET CSL::highs_convex AND TARGET CSL::highs_lp AND TARGET CSL::strategy_a AND TARGET CSL::affine_sum AND TARGET CSL::qhull_conversion)
   add_executable(direct_joint_strategy_tests tests/synthesis/strategy_b/direct_joint_tests.cpp)
+  if(TARGET CSL::casadi_superscs_history_optimizer)
+    target_link_libraries(direct_joint_strategy_tests PRIVATE CSL::casadi_superscs_history_optimizer)
+    target_compile_definitions(direct_joint_strategy_tests PRIVATE CSL_TEST_REAL_HISTORY_OPTIMIZER=1)
+  endif()
   target_link_libraries(direct_joint_strategy_tests PRIVATE CSL::strategy_b CSL::strategy_a CSL::problem CSL::affine_sum CSL::qhull_conversion CSL::highs_lp CSL::highs_convex CSL::artifacts CSL::input doctest::doctest)
   target_include_directories(direct_joint_strategy_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/registry)
   target_compile_definitions(direct_joint_strategy_tests PRIVATE

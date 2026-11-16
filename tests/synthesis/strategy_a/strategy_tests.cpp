@@ -1,5 +1,8 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
+#ifdef CSL_TEST_REAL_HISTORY_OPTIMIZER
+#include <csl/adapters/nlp/casadi_superscs_history_optimizer.hpp>
+#endif
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/synthesis/strategy_a/nominal_linear_exact_profile.hpp>
 #include <csl/synthesis/b04_c_exact_family.hpp>
@@ -719,6 +722,38 @@ bool has_equality(const sets::HRepresentation& h,const Vector& coefficients,doub
     return false;
 }
 }
+#ifdef CSL_TEST_REAL_HISTORY_OPTIMIZER
+TEST_CASE("Strategy A executes the real conic optimizer with typed history memberships") {
+    auto registration = adapters::nlp::make_casadi_superscs_history_optimizer_registration();
+    const auto identity = registration.identity;
+    Registry<HistoryOptimizerPort> registry;
+    REQUIRE_FALSE(registry.add(std::move(registration)));
+    Requirements requirements;
+    requirements.output.representation = {"csl.history-optimization-result.v1"};
+    auto provider = take(prepare_provider(select_provider(
+        registry, Method{identity.id, identity.version}, requirements)));
+    auto query = request(integrator());
+    query.configuration.history_optimizer = identity.id;
+    query.history_optimization =
+        std::make_shared<const optimization::StrategyHistoryOptimizationProfile>(
+            optimization::StrategyHistoryOptimizationProfile{
+                ProgramId{"strategy-a-real-history-run"}, {{}, 0, {}}, 0, "state",
+                typed_history_memberships(), optimization::ColdStart{}});
+    auto prepared = take(admit(query, false, {}, false, false, false, nullptr, nullptr,
+                               false, false, false, false, std::move(provider)));
+    auto workspace = prepared.create();
+    auto result = take(workspace->run(ExecutionContext{}));
+    REQUIRE(result.history_optimization);
+    REQUIRE(result.history_optimization->result);
+    CHECK(std::isfinite(result.history_optimization->result->reported_objective));
+    CHECK(result.history_optimization->result->maximum_history_violation <= 1e-6);
+    CHECK(std::holds_alternative<optimization::BackendColdStartEvidence>(
+        result.history_optimization->result->initialization));
+    CHECK(result.history_optimization->result->membership_witnesses.size() == 6);
+    REQUIRE(result.history_optimization->provider.actual_module);
+    CHECK(result.history_optimization->provider.actual_module->value == identity.id.value);
+}
+#endif
 TEST_CASE("Strategy A invokes the prepared whole-history optimizer before terminal optimization") {
     auto query = request(integrator());
     query.configuration.history_optimizer = {"test.zero-history-optimizer"};

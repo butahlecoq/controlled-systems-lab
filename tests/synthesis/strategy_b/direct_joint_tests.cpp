@@ -1,5 +1,8 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
+#ifdef CSL_TEST_REAL_HISTORY_OPTIMIZER
+#include <csl/adapters/nlp/casadi_superscs_history_optimizer.hpp>
+#endif
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
 #include <csl/input/scenario_loader.hpp>
 #include <csl/problem/temporal_lifts.hpp>
@@ -1261,6 +1264,36 @@ TEST_CASE("T-S03 singular A preserves earlier controls at a unique terminal opti
         CHECK_FALSE(contains(relation,point));CHECK_FALSE(contains(a_relation,point,1e-7));
     }
 }
+#ifdef CSL_TEST_REAL_HISTORY_OPTIMIZER
+TEST_CASE("Strategy B executes the real conic optimizer with typed history memberships") {
+    using namespace registry;
+    auto registration = adapters::nlp::make_casadi_superscs_history_optimizer_registration();
+    const auto identity = registration.identity;
+    Registry<HistoryOptimizerPort> providers;
+    REQUIRE_FALSE(providers.add(std::move(registration)));
+    Requirements requirements;
+    requirements.output.representation = {"csl.history-optimization-result.v1"};
+    auto provider = accepted(prepare_provider(select_provider(
+        providers, Method{identity.id, identity.version}, requirements)));
+    const auto problem = resolve(integrator());
+    const auto family = request(problem);
+    auto profile = std::make_shared<const optimization::StrategyHistoryOptimizationProfile>(
+        optimization::StrategyHistoryOptimizationProfile{
+            ProgramId{"strategy-b-real-history-run"}, {{}, 0, {}}, 0, "state",
+            typed_history_memberships(), optimization::ColdStart{}});
+    const auto prepared = registered_prepared(
+        problem, family, false, Termination::completed, nullptr, {},
+        MathematicalOutcome::optimal, std::move(provider), profile);
+    const auto result = accepted(prepared.create()->run(ExecutionContext{}));
+    REQUIRE(result.history_optimization);
+    REQUIRE(result.history_optimization->result);
+    CHECK(std::isfinite(result.history_optimization->result->reported_objective));
+    CHECK(result.history_optimization->result->maximum_history_violation <= 1e-6);
+    CHECK(result.history_optimization->result->membership_witnesses.size() == 6);
+    REQUIRE(result.history_optimization->provider.actual_module);
+    CHECK(result.history_optimization->provider.actual_module->value == identity.id.value);
+}
+#endif
 TEST_CASE("Strategy B invokes the prepared whole-history optimizer before its terminal solver") {
     const auto problem = resolve(integrator());
     const auto family = request(problem);
