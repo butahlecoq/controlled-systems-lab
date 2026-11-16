@@ -3,6 +3,7 @@
 #include <csl/model/linear_system.hpp>
 
 #include <algorithm>
+#include <ostream>
 #include <set>
 #include <utility>
 
