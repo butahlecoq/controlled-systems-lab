@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <ostream>
 
 namespace {
 template <class T, class... Errors> T take(std::variant<T, Errors...> value) {
