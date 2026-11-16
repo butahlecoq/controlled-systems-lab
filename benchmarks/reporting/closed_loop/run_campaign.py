@@ -1320,6 +1320,7 @@ def build_comparison_pack_request(
                     "status": status,
                     "result": attempt_data,
                     "measurement": {
+                        "status": "passed" if status == "completed" else status,
                         "phase": "measured",
                         "repetition": repetition,
                         "order_index": event["order_index"],
