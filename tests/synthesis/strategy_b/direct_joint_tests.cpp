@@ -1,7 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #ifdef CSL_TEST_REAL_HISTORY_OPTIMIZER
-#include <csl/adapters/nlp/casadi_superscs_history_optimizer.hpp>
+#include <csl/adapters/nlp/casadi_history_optimizer.hpp>
 #endif
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
 #include <csl/input/scenario_loader.hpp>
@@ -1275,12 +1275,12 @@ TEST_CASE("Strategy B executes the real conic optimizer with typed history membe
         {{0, {optimization::EuclideanControlPenalty{{1, 1, {1}}, {0}, running_weight}}},
          {1, {optimization::EuclideanControlPenalty{{1, 1, {1}}, {0}, running_weight}}}}};
     using namespace registry;
-    auto registration = adapters::nlp::make_casadi_superscs_history_optimizer_registration();
+    auto registration = adapters::nlp::make_casadi_history_optimizer_registration();
     const auto identity = registration.identity;
     Registry<HistoryOptimizerPort> providers;
     REQUIRE_FALSE(providers.add(std::move(registration)));
     Requirements requirements;
-    requirements.output.representation = {"csl.history-optimization-result.v1"};
+    requirements.output.representation = {"csl.whole-history-source-cost.v1"};
     auto provider = accepted(prepare_provider(
         select_provider(providers, Method{identity.id, identity.version}, requirements)));
     const auto problem = resolve(integrator());
@@ -1288,7 +1288,14 @@ TEST_CASE("Strategy B executes the real conic optimizer with typed history membe
     auto profile = std::make_shared<const optimization::StrategyHistoryOptimizationProfile>(
         optimization::StrategyHistoryOptimizationProfile{
             ProgramId{"strategy-b-real-history-run"}, running, 0, "state",
-            typed_history_memberships(), optimization::ColdStart{}});
+            typed_history_memberships(),
+            optimization::SuppliedStart{{0, 0.5, 1, 0.5, 0.5},
+                                        {optimization::HistoryHWitness{},
+                                         optimization::HistoryAxisBoxWitness{{0}},
+                                         optimization::HistoryZonotopeWitness{{0}},
+                                         optimization::HistoryParallelotopeWitness{{0}},
+                                         optimization::HistoryBallFactorWitness{{0}},
+                                         optimization::HistoryVSimplexWitness{{0.5, 0.5}}}}});
     const auto prepared =
         registered_prepared(problem, family, false, Termination::completed, nullptr, {},
                             MathematicalOutcome::optimal, std::move(provider), profile);

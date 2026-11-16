@@ -1,7 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #ifdef CSL_TEST_REAL_HISTORY_OPTIMIZER
-#include <csl/adapters/nlp/casadi_superscs_history_optimizer.hpp>
+#include <csl/adapters/nlp/casadi_history_optimizer.hpp>
 #endif
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/synthesis/strategy_a/nominal_linear_exact_profile.hpp>
@@ -732,12 +732,12 @@ TEST_CASE("Strategy A executes the real conic optimizer with typed history membe
         2,
         {{0, {optimization::EuclideanControlPenalty{{1, 1, {1}}, {0}, running_weight}}},
          {1, {optimization::EuclideanControlPenalty{{1, 1, {1}}, {0}, running_weight}}}}};
-    auto registration = adapters::nlp::make_casadi_superscs_history_optimizer_registration();
+    auto registration = adapters::nlp::make_casadi_history_optimizer_registration();
     const auto identity = registration.identity;
     Registry<HistoryOptimizerPort> registry;
     REQUIRE_FALSE(registry.add(std::move(registration)));
     Requirements requirements;
-    requirements.output.representation = {"csl.history-optimization-result.v1"};
+    requirements.output.representation = {"csl.whole-history-source-cost.v1"};
     auto provider = take(prepare_provider(
         select_provider(registry, Method{identity.id, identity.version}, requirements)));
     auto query = request(integrator());
@@ -746,11 +746,27 @@ TEST_CASE("Strategy A executes the real conic optimizer with typed history membe
         std::make_shared<const optimization::StrategyHistoryOptimizationProfile>(
             optimization::StrategyHistoryOptimizationProfile{
                 ProgramId{"strategy-a-real-history-run"}, running, 0, "state",
-                typed_history_memberships(), optimization::ColdStart{}});
+                typed_history_memberships(),
+                optimization::SuppliedStart{{0, 0.5, 1, 0.5, 0.5},
+                                            {optimization::HistoryHWitness{},
+                                             optimization::HistoryAxisBoxWitness{{0}},
+                                             optimization::HistoryZonotopeWitness{{0}},
+                                             optimization::HistoryParallelotopeWitness{{0}},
+                                             optimization::HistoryBallFactorWitness{{0}},
+                                             optimization::HistoryVSimplexWitness{{0.5, 0.5}}}}});
     auto prepared = take(admit(query, false, {}, false, false, false, nullptr, nullptr, false,
                                false, false, false, std::move(provider)));
     auto workspace = prepared.create();
-    auto result = take(workspace->run(ExecutionContext{}));
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    auto result = take(workspace->run(context));
+    INFO("termination=" << static_cast<int>(result.termination) << " stop=" << result.stop.index());
+    if (const auto *failure = std::get_if<ScopedRequestRejection>(&result.stop))
+        for (const auto &diagnostic : failure->diagnostics)
+            MESSAGE(diagnostic.field << ": " << diagnostic.explanation);
+    if (const auto *failure = std::get_if<ContractValidationFailure>(&result.stop))
+        for (const auto &diagnostic : failure->diagnostics)
+            MESSAGE(diagnostic.field << ": " << diagnostic.explanation);
     REQUIRE(result.history_optimization);
     REQUIRE(result.history_optimization->result);
     CHECK(std::isfinite(result.history_optimization->result->reported_objective));
@@ -758,7 +774,7 @@ TEST_CASE("Strategy A executes the real conic optimizer with typed history membe
     CHECK(result.history_optimization->result->reported_objective ==
           doctest::Approx(running_weight == 0.0 ? 0.0 : 0.4375).epsilon(1e-5));
     CHECK(result.history_optimization->result->maximum_history_violation <= 1e-6);
-    CHECK(std::holds_alternative<optimization::BackendColdStartEvidence>(
+    CHECK(std::holds_alternative<optimization::VerifiedSuppliedStart>(
         result.history_optimization->result->initialization));
     CHECK(result.history_optimization->result->membership_witnesses.size() == 6);
     REQUIRE(result.history_optimization->provider.actual_module);

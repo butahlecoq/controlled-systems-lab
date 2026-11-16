@@ -255,7 +255,9 @@ public:
             if(context.deadline&&std::chrono::steady_clock::now()>=*context.deadline)
                 return OperationStopped{StopReason::deadline_expired,"Native CasADi history optimization deadline reached"};
             const auto diagnostics="native C++ CasADi "+std::string(casadi::CasadiMeta::version())+
-                "; IPOPT; "+opti.stats().at("return_status").to_string()+"; all history coordinates free; local numerical";
+                "; IPOPT; "+opti.stats().at("return_status").to_string()+
+                "; iterations="+opti.stats().at("iter_count").to_string()+
+                "; all history coordinates free; local numerical";
             std::vector<optimization::HistoryMembershipWitness> membership_witnesses;
             for (std::size_t i = 0; i < membership_variables.size(); ++i) {
                 auto coefficients = membership_variables[i]
