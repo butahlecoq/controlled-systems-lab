@@ -1285,12 +1285,6 @@ def build_comparison_pack_request(
             event = events[(task_name, "measured", repetition, side)]
             attempt_path = Path(event["attempt"])
             attempt_data = json.loads((attempt_path / "attempt.json").read_text(encoding="utf-8"))
-            manifest_path = attempt_path / "run-manifest.json"
-            manifest = (
-                json.loads(manifest_path.read_text(encoding="utf-8"))
-                if manifest_path.is_file()
-                else {}
-            )
             runtime_binary = (
                 attempt_data.get("preparation_receipt", {})
                 .get("adapter_receipt", {})
@@ -1320,13 +1314,15 @@ def build_comparison_pack_request(
                     "status": status,
                     "result": attempt_data,
                     "measurement": {
+                        "schema": "csl.closed-loop-paired-timing-event/1",
                         "status": "passed" if status == "completed" else status,
-                        "phase": "measured",
+                        "strategy": graph_controller["id"],
+                        "instrumentation": "disabled",
                         "repetition": repetition,
+                        "warmup": False,
                         "order_index": event["order_index"],
                         "end_to_end_wall_seconds": event.get("end_to_end_wall_seconds"),
                         "worker_wall_seconds": event.get("worker_wall_seconds"),
-                        "claim": manifest.get("claim"),
                     },
                 }
             )
