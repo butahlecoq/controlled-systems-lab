@@ -1,0 +1,32 @@
+{
+  "schema": "csl.release-concatenated-asset/1",
+  "logical_asset": "fuel-results.tar.zst",
+  "logical_size_bytes": 1992241274,
+  "logical_sha256": "18b1e0b31259cabb34bdd3468ad91805a58165623d039d44d5000ccbedbdd57c",
+  "part_size_bytes": 104857600,
+  "parts": [
+    "fuel-results.tar.zst.00.part", "fuel-results.tar.zst.01.part", "fuel-results.tar.zst.02.part", "fuel-results.tar.zst.03.part", "fuel-results.tar.zst.04.part", "fuel-results.tar.zst.05.part", "fuel-results.tar.zst.06.part", "fuel-results.tar.zst.07.part", "fuel-results.tar.zst.08.part", "fuel-results.tar.zst.09.part", "fuel-results.tar.zst.10.part", "fuel-results.tar.zst.11.part", "fuel-results.tar.zst.12.part", "fuel-results.tar.zst.13.part", "fuel-results.tar.zst.14.part", "fuel-results.tar.zst.15.part", "fuel-results.tar.zst.16.part", "fuel-results.tar.zst.17.part", "fuel-results.tar.zst.18.part"
+  ],
+  "part_sha256": {
+    "fuel-results.tar.zst.00.part": "ffedf20e0583c86fcd26fae379ce97833e8575a1679752baa2a6614007e0d715",
+    "fuel-results.tar.zst.01.part": "1f71b5eea3ad404925e78af64b33fc8f3a83258d59681640e9577077f6b52725",
+    "fuel-results.tar.zst.02.part": "08c52f0bca427a23519a4a89d559002db93f3023803a12631e933f785b446c1d",
+    "fuel-results.tar.zst.03.part": "92f08d9acadaad4cb08bcf413e2c96a70f80c85239b3d6b4848ed98df2f88a8f",
+    "fuel-results.tar.zst.04.part": "cefa5a91ccd291715bd73b73ab820e2297bcdc57f81f6497aa48ea3740bc271b",
+    "fuel-results.tar.zst.05.part": "b91a5bf78706734f320ea3ae857a3ff08fdfe7832465f225f01d54bf66b0e448",
+    "fuel-results.tar.zst.06.part": "b519984b1e19903d120de6ca31fce902fff92feaed48fa9572b7371e20922a71",
+    "fuel-results.tar.zst.07.part": "aec1a8aaeaa5c1513a9cabb34e04855b6e3c472282d0f55ac95918b28d19e40a",
+    "fuel-results.tar.zst.08.part": "3c12af45dba86f643e550ec37e8d63fb17387e54d287839c95d20f6add7a243e",
+    "fuel-results.tar.zst.09.part": "fe8b757b553ab8ab30057ed6ffb23c5e649bb16c859b4e95b1062597796477ce",
+    "fuel-results.tar.zst.10.part": "37c576020d0c0473a7be996e0bfa76650f92e76925d9298f91064b71bca004d2",
+    "fuel-results.tar.zst.11.part": "3e040076b42ddfabbf984e99f19f07989a732b3ba519fc9cd23794575c21b2ab",
+    "fuel-results.tar.zst.12.part": "351d9fccb99517e3b9a5e13a7025dbd3788a9d353171e4b606fb62f4b1c9f039",
+    "fuel-results.tar.zst.13.part": "6f94f571cc3ddc01d9ad365ef34f6f9a703df2ada7cb38bec5660f771da30c96",
+    "fuel-results.tar.zst.14.part": "b1486b40e04866ca745ad8ed33eacc85e45e622b0d018b8585cb54b6d8832b06",
+    "fuel-results.tar.zst.15.part": "b604d625c6648e3501b4ea4a524078d8c0f59f67f0d1a1aafee81414aa4a4e15",
+    "fuel-results.tar.zst.16.part": "702b47b245c71a78d320d643f042cea986e674382e8bef327497e94e36c5f61c",
+    "fuel-results.tar.zst.17.part": "fa9d00334b617f479c75a04f38bd95ac2fb8aa150755b12c1cea90b5073b51f7",
+    "fuel-results.tar.zst.18.part": "53ccdbc243f654c9247e7d209b01d0cd1d53989ee5b72068568a9ee731162eec"
+  },
+  "reconstruct_command": "cat fuel-results.tar.zst.00.part fuel-results.tar.zst.01.part fuel-results.tar.zst.02.part fuel-results.tar.zst.03.part fuel-results.tar.zst.04.part fuel-results.tar.zst.05.part fuel-results.tar.zst.06.part fuel-results.tar.zst.07.part fuel-results.tar.zst.08.part fuel-results.tar.zst.09.part fuel-results.tar.zst.10.part fuel-results.tar.zst.11.part fuel-results.tar.zst.12.part fuel-results.tar.zst.13.part fuel-results.tar.zst.14.part fuel-results.tar.zst.15.part fuel-results.tar.zst.16.part fuel-results.tar.zst.17.part fuel-results.tar.zst.18.part > fuel-results.tar.zst"
+}

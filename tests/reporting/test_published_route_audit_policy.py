@@ -160,10 +160,15 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
                 self.assertTrue(result["passed"], result)
                 math_route = "learn/representation-consumers.html"
                 self.assertEqual(set(result["reviewed_learning_navigation_changes"]),
-                                 set(routes) - {math_route})
+                                 set(routes) - {math_route, "learn/index.html"})
                 self.assertIn(math_route, result["reviewed_mutable_changes"])
+                self.assertIn("learn/index.html", result["reviewed_mutable_changes"])
                 self.assertEqual(preservation.digest((site / math_route).read_bytes()),
                                  manifest["mutable_copy_reviewed_sha256"][math_route])
+                self.assertEqual(
+                    preservation.digest((site / "learn/index.html").read_bytes()),
+                    manifest["mutable_routes_reviewed_sha256"]["learn/index.html"],
+                )
 
                 mutated_routes = {
                     "body mutation": (
@@ -204,10 +209,7 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
                 self.assertFalse(result["passed"])
                 self.assertEqual(
                     set(result["unexpected_changed"]),
-                    {
-                        "learn/index.html",
-                        "learn/closed-loop-semantics.html",
-                    },
+                    {"learn/closed-loop-semantics.html"},
                 )
                 self.assertNotIn(math_route, result["unexpected_changed"])
 

@@ -134,6 +134,16 @@ if(TARGET CSL::casadi_superscs_history_optimizer)
   csl_test_target(history_optimizer_superscs_tests optimization)
 endif()
 
+if(TARGET CSL::casadi_history_optimizer)
+  add_executable(npoa_2017_fuel_history_casadi_tests
+    tests/unit/optimization/npoa_2017_fuel_history_casadi_tests.cpp)
+  target_link_libraries(npoa_2017_fuel_history_casadi_tests PRIVATE
+    CSL::casadi_history_optimizer doctest::doctest_with_main)
+  add_test(NAME npoa_2017_fuel_history_casadi_tests
+    COMMAND npoa_2017_fuel_history_casadi_tests)
+  csl_test_target(npoa_2017_fuel_history_casadi_tests optimization)
+endif()
+
 add_executable(nominal_quadratic_history_tests tests/unit/optimization/nominal_quadratic_history_tests.cpp)
 target_link_libraries(nominal_quadratic_history_tests PRIVATE CSL::nominal_quadratic_history doctest::doctest_with_main)
 add_test(NAME nominal_quadratic_history_tests COMMAND nominal_quadratic_history_tests)

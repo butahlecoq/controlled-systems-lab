@@ -2367,12 +2367,12 @@
     },
     {
       "id": "native-substitution-matrix",
-      "title": "Pending: compare native modules on fixed tasks",
+      "title": "Capstone: Three-task module-composition campaign",
       "group": "capstones",
       "group_label": "Environment capstones",
       "role": "evidence",
-      "status": "pending",
-      "status_label": "Pending · native comparison capture not published",
+      "status": "ready",
+      "status_label": "Ready · exhaustive graph coverage and retained-stage figures",
       "prerequisites": [
         "lotka-capstone",
         "orbit-capstone",
@@ -2380,20 +2380,169 @@
       ],
       "module_ids": [],
       "source": "native-substitution-matrix.html",
-      "summary": "The observed-state CSL pilot is published for all three fixed tasks. Module substitutions using the captured native 30-batch policy comparisons remain pending until issue #943 is published.",
-      "mathematical_input": null,
-      "command": null,
-      "expected_output": null,
-      "intermediate_geometry": null,
-      "support_limits": "Issue #943 is still in progress and has not published its capture or report. Do not infer native replacement performance or outcomes from the observed-state pilot. All bypassed modules in the current three-task baseline are marked not_used.",
-      "figure_ids": [],
-      "records": [],
+      "summary": "Coverage and retained-stage visual evidence for 513 admitted closed-loop module compositions on Lotka–Volterra, Earth orbit, and fuel transfer. All per-graph outcomes and unsuccessful attempts are retained.",
+      "mathematical_input": "Frozen source commit 9140e2a6fde55697b2035349a0996941be80297c; three common task contracts and task hashes; 513 admitted graph configurations; fixed finite-action controller profiles and resource limits.",
+      "command": "mkdir -p build/campaign-v2\nBASE=https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-v2-9140e2a6-20261115\nfor asset in campaign-index lotka-results earth-orbit-results; do curl -L \"$BASE/$asset.tar.zst\" -o \"build/campaign-v2/$asset.tar.zst\"; done\ncurl -L \"$BASE/fuel-results.tar.zst.parts.json\" -o build/campaign-v2/fuel-results.tar.zst.parts.json\nfor part in $(jq -r '.parts[]' build/campaign-v2/fuel-results.tar.zst.parts.json); do curl -L \"$BASE/$part\" -o \"build/campaign-v2/$part\"; done\ncat build/campaign-v2/fuel-results.tar.zst.*.part > build/campaign-v2/fuel-results.tar.zst\nsha256sum build/campaign-v2/fuel-results.tar.zst\nfor asset in build/campaign-v2/*.tar.zst; do zstd -dc \"$asset\" | tar -xf - -C build/campaign-v2; done\ncp docs/examples/closed-loop/figure-index.json build/campaign-v2/figure-index.json\npython scripts/reports/campaign_graph_figures.py --campaign-root build/campaign-v2/reports/closed-loop-composition-campaign-v2 --output build/campaign-v2/figures --figure-index build/campaign-v2/figure-index.json --coverage-output build/campaign-v2/coverage.json",
+      "expected_output": "513 of 513 admitted graph configurations have recorded outcomes: 498 complete, 5 incorrect, 6 failed, 1 timed out, and 3 unsupported. The raw attempt log includes 15 additional historical inconclusive rows; 20 source-incompatible candidates have explicit exclusion reasons.",
+      "intermediate_geometry": "For each stage k the figure displays retained forward graph states F_ret[k], backward-viable retained nodes as the intersection F_ret[k] ∩ B_ret[k], terminal-stage retained nodes, the selected first-query graph plan, and the observed closed-loop replay. Fuel has separate oxidizer flow–mass and fuel flow–mass projections.",
+      "support_limits": "The graph universe was fully attempted, but representative graph search is beam-pruned (beam width 8; search_coverage=incomplete). Point clouds are retained finite-action states, not continuous reachable-set boundaries; no convex hull is inferred. The selected plan is optimal only within its retained graph. The campaign has no five alternating timing repetitions and supports no speed ranking. Run outcome complete does not imply global search completeness or global optimality.",
+      "figure_ids": [
+        "campaign-syn-nl-lv-01-lotka",
+        "campaign-earth-orbit-orbit",
+        "campaign-syn-nl-fuel-01-oxidizer",
+        "campaign-syn-nl-fuel-01-fuel"
+      ],
+      "records": [
+        {
+          "label": "Campaign dashboard and complete graph outcome JSON",
+          "href": "../examples/closed-loop/campaign-v2/index.html"
+        },
+        {
+          "label": "Archive SHA-256 manifest",
+          "href": "../examples/closed-loop/campaign-v2/archive-manifest.json"
+        },
+        {
+          "label": "Campaign frozen task and provider contracts",
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/tree/9140e2a6fde55697b2035349a0996941be80297c/docs/contracts/closed-loop"
+        },
+        {
+          "label": "Issue #947 and remaining gates",
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/issues/947"
+        },
+        {
+          "label": "Campaign index archive",
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-v2-9140e2a6-20261115/campaign-index.tar.zst"
+        },
+        {
+          "label": "Lotka raw-attempt archive",
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-v2-9140e2a6-20261115/lotka-results.tar.zst"
+        },
+        {
+          "label": "Earth orbit raw-attempt archive",
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-v2-9140e2a6-20261115/earth-orbit-results.tar.zst"
+        },
+        {
+          "label": "Fuel raw-attempt archive",
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-v2-9140e2a6-20261115/fuel-results.tar.zst"
+        }
+      ],
       "example_sources": [
         "docs/contracts/closed-loop/syn-nl-lv-01.json",
         "docs/contracts/closed-loop/earth-orbit.json",
         "docs/contracts/closed-loop/syn-nl-fuel-01.json"
       ],
-      "kind": "saved evidence"
+      "kind": "saved evidence",
+      "mathematical_displays": [],
+      "mathematical_tables": [
+        {
+          "label": "Retained graph layers and selected policy path",
+          "columns": [
+            "symbol",
+            "definition"
+          ],
+          "rows": [
+            [
+              "F_ret[k]",
+              "forward states retained at stage k after graph selection"
+            ],
+            [
+              "B_ret[k]",
+              "retained nodes with a backward-viable continuation"
+            ],
+            [
+              "I_ret[k] = F_ret[k] ∩ B_ret[k]",
+              "retained forward nodes marked backward viable"
+            ],
+            [
+              "X_plan[0..N]",
+              "selected first-query plan; optimality is scoped to the retained graph"
+            ],
+            [
+              "X_replay[0..N]",
+              "observed closed-loop plant replay"
+            ]
+          ]
+        },
+        {
+          "label": "Final graph outcomes by task",
+          "columns": [
+            "task",
+            "admitted",
+            "complete",
+            "incorrect",
+            "failed",
+            "timed out",
+            "unsupported"
+          ],
+          "rows": [
+            [
+              "Lotka–Volterra",
+              "178",
+              "171",
+              "5",
+              "0",
+              "1",
+              "1"
+            ],
+            [
+              "Earth orbit",
+              "167",
+              "161",
+              "0",
+              "5",
+              "0",
+              "1"
+            ],
+            [
+              "Fuel transfer",
+              "168",
+              "166",
+              "0",
+              "1",
+              "0",
+              "1"
+            ],
+            [
+              "Total",
+              "513",
+              "498",
+              "5",
+              "6",
+              "1",
+              "3"
+            ]
+          ]
+        },
+        {
+          "label": "Campaign accounting",
+          "columns": [
+            "quantity",
+            "count"
+          ],
+          "rows": [
+            [
+              "admitted and attempted graph configurations",
+              "513"
+            ],
+            [
+              "recorded attempt rows",
+              "528"
+            ],
+            [
+              "historical inconclusive attempt rows",
+              "15"
+            ],
+            [
+              "source-incompatible candidates with recorded reasons",
+              "20"
+            ],
+            [
+              "duplicate catalogue graph references",
+              "15"
+            ]
+          ]
+        }
+      ]
     }
   ],
   "module_catalogue": {

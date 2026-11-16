@@ -1,0 +1,75 @@
+{
+  "schema": "csl.example.kpabep-near-collinear/1",
+  "case_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-5244567e52b08e46",
+  "originating_campaign_attempt_id": "syn-nl-lv-01-20261115T050916Z-85c617f8",
+  "record_scope": "Self-contained minimal reproduction evidence. The full campaign attempt bundle remains in the local campaign archive and is not required to inspect the input, raw reducer result, checker verdict, or build identity recorded here.",
+  "source_commit": "9140e2a6fde55697b2035349a0996941be80297c",
+  "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+  "provider": {
+    "id": "csl.hull.source.btulshor-kpabep",
+    "version": "1.0.0",
+    "modif_epsilon": 0.00001,
+    "raw_statuses_by_candidate_id": [[2, 2], [0, 2], [1, 1]],
+    "returned_source_ids": [2, 0],
+    "returned_points": [
+      [121.45081948489535, 60.995217786602744],
+      [121.95041958088437, 61.00721298737068]
+    ],
+    "modif_calls": 3,
+    "pivots": 5
+  },
+  "checker": {
+    "id": "csl.geometry.bounded-hull-checker",
+    "version": "1",
+    "input_digest": "608f7e0795943f106f5e3c0c9c6149fd3f647acb4ec151a5ac0ce699cbc34e5e",
+    "status": "incorrect",
+    "reason": "input point lies outside reported convex hull",
+    "elapsed_ns": 36178,
+    "budget_ms": 5000,
+    "max_points": 64
+  },
+  "build": {
+    "execution_bridge_sha256": "b5d47c14c65f1d2f833eaec4d9713bcc4717b130bd688e943ade7442c363973f",
+    "native_policy_bridge_sha256": "5e04c46eb80d624185bfc836b0bafabad9a216fdd5e78f600eca61f1b6b3c23c",
+    "build_cache_sha256": "aca969b51dba2231447ab1b7c63cb86a62a23836b9837a2ded2fc4623090c1c5",
+    "build_type": "Release",
+    "compiler": "GNU 16.2.1",
+    "generator": "Ninja",
+    "casadi": "3.8.0",
+    "highs": "1.11.0",
+    "qhull": "8.0.2"
+  },
+  "ordered_points_binary64_hex": [
+    ["405e7cd3aca65817", "404e80ec5aec6e88"],
+    ["405e6cd6f34f2cd9", "404e8027d367ae12"],
+    ["405e5cda39f8019b", "404e7f634be2ed9b"]
+  ],
+  "ordered_points_decimal": [
+    [121.95041958088437, 61.00721298737068],
+    [121.70061953288986, 61.001215386986715],
+    [121.45081948489535, 60.995217786602744]
+  ],
+  "exact_orientation_cross_product": "-8789057836447/4951760157141521099596496896",
+  "input_point_1_distance_from_endpoint_segment": {
+    "expression": "abs(cross_product) / sqrt((x2-x0)^2 + (y2-y0)^2)",
+    "approximately": 3.551690120668659e-15
+  },
+  "classification": {
+    "returned_convex_hull": "strict inner approximation of the represented input convex hull",
+    "global_error_bound": "none established",
+    "safe_as_outer_reachable_set": false,
+    "faithful_raw_result_preserved": true
+  },
+  "sensitivity_diagnostic": {
+    "scope": "Functional execution of the source reducer; no timing claim.",
+    "source": "examples/geometry/kpabep_near_collinear.cpp",
+    "compile_command": "c++ -std=c++20 -O2 -Iinclude examples/geometry/kpabep_near_collinear.cpp src/geometry/legacy_btulshor.cpp -o /tmp/kpabep-near-collinear && /tmp/kpabep-near-collinear",
+    "compiler": "GNU 16.2.1",
+    "example_source_sha256": "d7867a067457822b53c5edf30c07ffa15a45405fb688d485f6126799fb7d47b1",
+    "executable_sha256": "d0319e22f0ecd20033803e6e3f85c96dcdba2e45f6a13f3274111d1adaa9261d",
+    "power_of_two_scales": [-10, -5, 0, 5, 10],
+    "all_scales_returned_original_ids": [2, 0],
+    "all_six_vertex_orders_omitted_original_id": 1,
+    "ordinary_non_collinear_triangle_returned_ids": [2, 0, 1]
+  }
+}

@@ -163,6 +163,13 @@
       "role_and_disposition_reason": "Renders all saved source-qualified native affine 2D stages and a terminal overlay; the factor matrix is retained in each ellipse record and the sampled boundary is checked against that represented set. The page makes no nonlinear, feedback, minimax or timing claim."
     },
     {
+      "source": "scripts/reports/campaign_graph_figures.py",
+      "signal_count": 3,
+      "asset_name_literals": [],
+      "disposition": "saved-data-illustration-renderer",
+      "role_and_disposition_reason": "Renders authenticated saved finite-action campaign graph states, backward-viable nodes, selected first-query plans and observed plant replays in four physical 2D projections. It runs no solver, draws no convex hull, and discloses incomplete beam-pruned search coverage and retained-graph-only optimality."
+    },
+    {
       "source": "scripts/reports/capture_history_membership_2d.py",
       "signal_count": 4,
       "asset_name_literals": [
@@ -2333,7 +2340,7 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 97,
+      "signal_count": 98,
       "asset_name_literals": [
         "adaptive-ode-replay.svg",
         "app01-plan-timing-v1.svg",
@@ -4355,6 +4362,8 @@
         "native-model-tracking-first-pass-v1/checks/full_state_trajectory_checked.csv",
         "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip",
         "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip.sha256",
+        "kpabep-near-collinear-20261115.html",
+        "kpabep-near-collinear-20261115.json",
         "history-membership-zonotope-2d-v1/index.html",
         "history-membership-zonotope-2d-v1/history.svg",
         "history-membership-zonotope-2d-v1/history.csv",

@@ -232,6 +232,10 @@ SAVED_DATA_ILLUSTRATION_RENDERERS = {
         "the numerical half-plane clipping keeps the saved coefficients and checks plotted vertices against raw rows. "
         "A saved nonlinear NMPC trajectory is overlaid separately. This does not claim nonlinear reachable sets or "
         "global control optimality."),
+    "scripts/reports/campaign_graph_figures.py": (
+        "Renders authenticated saved finite-action campaign graph states, backward-viable nodes, selected first-query "
+        "plans and observed plant replays in four physical 2D projections. It runs no solver, draws no convex hull, "
+        "and discloses incomplete beam-pruned search coverage and retained-graph-only optimality."),
 }
 SAVED_DATA_COMPANION_RENDERERS = {
     "scripts/reports/fixed_tail_example.py",
@@ -547,6 +551,8 @@ def build(root: Path = ROOT) -> dict:
                     "native-model-tracking-first-pass-v1/checks/full_state_trajectory_checked.csv",
                     "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip",
                     "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip.sha256",
+                    "kpabep-near-collinear-20261115.html",
+                    "kpabep-near-collinear-20261115.json",
                     "history-membership-zonotope-2d-v1/index.html",
                     "history-membership-zonotope-2d-v1/history.svg",
                     "history-membership-zonotope-2d-v1/history.csv",
