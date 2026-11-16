@@ -1,0 +1,74 @@
+{
+  "schema": "csl.closed-loop.campaign-archive-manifest/1",
+  "campaign_id": "closed-loop-composition-campaign-v2",
+  "release_tag": "evidence/closed-loop-campaign-v2-9140e2a6-20261115",
+  "source_commit": "9140e2a6fde55697b2035349a0996941be80297c",
+  "source_freeze_sha256": "3efb373c82c0ff94cecfbc81f35dee4aaf46c15a619c76abab18c8e5247ca9c1",
+  "coverage_record_sha256": "2f513361c985c6069f85435ca538e3b385026825a36c51974ff043eb2f605558",
+  "archive_format": "zstd-compressed tar; each archive stores the reports/closed-loop-composition-campaign-v2 path prefix",
+  "portable_redaction": {
+    "replacement": "${CSL_HOME}/",
+    "scope": "Text reproduction metadata, campaign indexes, worker diagnostics, and coverage records only.",
+    "preserved": "Attempt outcomes, physical states, controls, stage records, bridge responses, saved numerical outputs, and raw unsuccessful-attempt data remain byte-for-byte unchanged.",
+    "redacted_files_total": 1575,
+    "home_prefix_occurrences_total": 1602,
+    "credential_pattern_matches_in_scanned_metadata": 0
+  },
+  "assets": [
+    {
+      "name": "campaign-index.tar.zst",
+      "sha256": "547628f0e296e99a372d48805895d68fd7cd47f34cc804c77ea12f7734a759a4",
+      "size_bytes": 457987,
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-v2-9140e2a6-20261115/campaign-index.tar.zst",
+      "source_archive_sha256": "0ca1df042f5b7b25adba17bb42ea4ea0d3e1cb72df3922a8f1ad64a70d18f482",
+      "source_archive_size_bytes": 457776,
+      "redacted_text_files": 517,
+      "redacted_home_prefix_occurrences": 536
+    },
+    {
+      "name": "earth-orbit-results.tar.zst",
+      "sha256": "c3ecb4d798e6fed5808e3df242e10262d6bb8f53d7804cc202706d2904753337",
+      "size_bytes": 857268764,
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-v2-9140e2a6-20261115/earth-orbit-results.tar.zst",
+      "source_archive_sha256": "dcd69a0fbe56e090bf463e4f2075e934340d311e1e41c4f52e9bb2085ec68e3a",
+      "source_archive_size_bytes": 857209723,
+      "redacted_text_files": 344,
+      "redacted_home_prefix_occurrences": 344
+    },
+    {
+      "name": "fuel-results.tar.zst.parts.json",
+      "sha256": "e85936e66d3f1530fb8a3efc7551c44d16bdade96900c6083e477e1fd5076ff2",
+      "size_bytes": 3484,
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-v2-9140e2a6-20261115/fuel-results.tar.zst.parts.json",
+      "logical_asset": "fuel-results.tar.zst",
+      "logical_sha256": "18b1e0b31259cabb34bdd3468ad91805a58165623d039d44d5000ccbedbdd57c",
+      "logical_size_bytes": 1992241274,
+      "delivery": "nineteen 100 MiB-or-smaller release assets concatenated in numerical order; descriptor lists parts and restoration command",
+      "source_archive_sha256": "9388c21b5f701bf2789095b6ff0de94331140a845d44e620a39a1b8cfe76b90c",
+      "source_archive_size_bytes": 1992181145,
+      "redacted_text_files": 347,
+      "redacted_home_prefix_occurrences": 351
+    },
+    {
+      "name": "lotka-results.tar.zst",
+      "sha256": "24e2d5ddddbf3714cb842edf19d06fb8265ca37841fc676a4e017850d6d4738f",
+      "size_bytes": 743052238,
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-v2-9140e2a6-20261115/lotka-results.tar.zst",
+      "source_archive_sha256": "131d78db852f7c3e81f4008006e4fe7f5e50dccd63ddb8609317eb5db9628985",
+      "source_archive_size_bytes": 742962894,
+      "redacted_text_files": 367,
+      "redacted_home_prefix_occurrences": 371
+    }
+  ],
+  "restore_command": "Download every fuel-results.tar.zst.NN.part named in fuel-results.tar.zst.parts.json; concatenate in numerical order to fuel-results.tar.zst and verify its logical_sha256. Then for asset in campaign-index lotka-results earth-orbit-results fuel-results; do zstd -dc \"$asset.tar.zst\" | tar -xf - -C DESTINATION; done",
+  "coverage_summary": {
+    "admitted_and_attempted_graphs": 513,
+    "complete": 498,
+    "incorrect": 5,
+    "failed": 6,
+    "timed_out": 1,
+    "unsupported": 3,
+    "historical_inconclusive_attempt_rows": 15,
+    "source_incompatible_candidates": 20
+  }
+}

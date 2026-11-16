@@ -125,11 +125,6 @@
       "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
     },
     {
-      "route": "closed-loop-initial-baselines-v1/index.html",
-      "disposition": "maintained",
-      "owner": "scripts/reports/stage_closed_loop_initial_baselines.py"
-    },
-    {
       "route": "closed-loop-initial-baselines-v1/figures/baseline-089075e9-earth-orbit.html",
       "disposition": "maintained",
       "owner": "scripts/reports/stage_closed_loop_initial_baselines.py"
@@ -146,6 +141,11 @@
     },
     {
       "route": "closed-loop-initial-baselines-v1/figures/baseline-089075e9-lotka-populations.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_closed_loop_initial_baselines.py"
+    },
+    {
+      "route": "closed-loop-initial-baselines-v1/index.html",
       "disposition": "maintained",
       "owner": "scripts/reports/stage_closed_loop_initial_baselines.py"
     },
@@ -415,6 +415,11 @@
       "owner": "scripts/reports/stage_closed_loop_pilot.py"
     },
     {
+      "route": "examples/closed-loop/campaign-v2/index.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/campaign_graph_figures.py"
+    },
+    {
       "route": "examples/closed-loop/figures/baseline-089075e9-earth-orbit.html",
       "disposition": "maintained",
       "owner": "docs/examples/closed-loop/figures/baseline-089075e9-earth-orbit.html"
@@ -433,6 +438,26 @@
       "route": "examples/closed-loop/figures/baseline-089075e9-lotka-populations.html",
       "disposition": "maintained",
       "owner": "docs/examples/closed-loop/figures/baseline-089075e9-lotka-populations.html"
+    },
+    {
+      "route": "examples/closed-loop/figures/campaign-earth-orbit-orbit.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/campaign_graph_figures.py"
+    },
+    {
+      "route": "examples/closed-loop/figures/campaign-syn-nl-fuel-01-fuel.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/campaign_graph_figures.py"
+    },
+    {
+      "route": "examples/closed-loop/figures/campaign-syn-nl-fuel-01-oxidizer.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/campaign_graph_figures.py"
+    },
+    {
+      "route": "examples/closed-loop/figures/campaign-syn-nl-lv-01-lotka.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/campaign_graph_figures.py"
     },
     {
       "route": "examples/closed-loop/figures/earth-orbit.html",
@@ -473,6 +498,11 @@
       "route": "examples/control-witness-v1.html",
       "disposition": "maintained",
       "owner": "scripts/reports/control_witness_companions.py"
+    },
+    {
+      "route": "examples/discrete-mpc-2d.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_discrete_mpc_2d.py"
     },
     {
       "route": "examples/ext01-b08-timing-v1.html",
@@ -587,6 +617,11 @@
       "owner": "scripts/reports/visual_examples.py"
     },
     {
+      "route": "examples/kpabep-near-collinear-20261115.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/kpabep-near-collinear-20261115.html"
+    },
+    {
       "route": "examples/lotka-volterra-sampled-v1.html",
       "disposition": "maintained",
       "owner": "scripts/reports/approx_extension_companions.py"
@@ -694,24 +729,14 @@
       "owner": "scripts/reports/stage_nominal_quadratic_history.py"
     },
     {
-      "route": "examples/positive-part-budget-2d.html",
-      "disposition": "maintained",
-      "owner": "scripts/reports/stage_positive_part_budget_2d.py"
-    },
-    {
-      "route": "examples/discrete-mpc-2d.html",
-      "disposition": "maintained",
-      "owner": "scripts/reports/stage_discrete_mpc_2d.py"
-    },
-    {
-      "route": "examples/kpabep-near-collinear-20261115.html",
-      "disposition": "maintained",
-      "owner": "docs/examples/kpabep-near-collinear-20261115.html"
-    },
-    {
       "route": "examples/nominal_linear_exact_2d.html",
       "disposition": "maintained",
       "owner": "examples/nominal_linear_exact_2d.html"
+    },
+    {
+      "route": "examples/positive-part-budget-2d.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_positive_part_budget_2d.py"
     },
     {
       "route": "examples/qhull-highs-strategy-a-2d.html",

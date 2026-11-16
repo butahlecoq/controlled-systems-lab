@@ -224,6 +224,8 @@ def audit(baseline: Path, site: Path) -> dict:
                 changed_zips.append(route)
     mutable = manifest["mutable_routes_reviewed_separately"]
     reviewed_copies = manifest["mutable_copy_reviewed_sha256"]
+    reviewed_mutable_routes = manifest.get("mutable_routes_reviewed_sha256", {})
+    reviewed_mutable_hashes = {**reviewed_copies, **reviewed_mutable_routes}
     unexpected = [
         n
         for n in changed
@@ -231,7 +233,10 @@ def audit(baseline: Path, site: Path) -> dict:
         and n not in reviewed_learning_navigation_changes
         and (
             n not in mutable
-            or (n in reviewed_copies and digest((site / n).read_bytes()) != reviewed_copies[n])
+            or (
+                n in reviewed_mutable_hashes
+                and digest((site / n).read_bytes()) != reviewed_mutable_hashes[n]
+            )
         )
     ]
     return {
