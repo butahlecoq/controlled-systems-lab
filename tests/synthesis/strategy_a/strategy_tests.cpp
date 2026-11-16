@@ -724,6 +724,14 @@ bool has_equality(const sets::HRepresentation& h,const Vector& coefficients,doub
 }
 #ifdef CSL_TEST_REAL_HISTORY_OPTIMIZER
 TEST_CASE("Strategy A executes the real conic optimizer with typed history memberships") {
+    double running_weight = 0.0;
+    SUBCASE("terminal cost") {}
+    SUBCASE("running norm changes the optimum") { running_weight = 0.5; }
+    optimization::RunningControlCost running{
+        "strategy-real-running",
+        2,
+        {{0, {optimization::EuclideanControlPenalty{{1, 1, {1}}, {0}, running_weight}}},
+         {1, {optimization::EuclideanControlPenalty{{1, 1, {1}}, {0}, running_weight}}}}};
     auto registration = adapters::nlp::make_casadi_superscs_history_optimizer_registration();
     const auto identity = registration.identity;
     Registry<HistoryOptimizerPort> registry;
@@ -737,12 +745,8 @@ TEST_CASE("Strategy A executes the real conic optimizer with typed history membe
     query.history_optimization =
         std::make_shared<const optimization::StrategyHistoryOptimizationProfile>(
             optimization::StrategyHistoryOptimizationProfile{
-                ProgramId{"strategy-a-real-history-run"},
-                {{}, 0, {}},
-                0,
-                "state",
-                typed_history_memberships(),
-                optimization::ColdStart{}});
+                ProgramId{"strategy-a-real-history-run"}, running, 0, "state",
+                typed_history_memberships(), optimization::ColdStart{}});
     auto prepared = take(admit(query, false, {}, false, false, false, nullptr, nullptr, false,
                                false, false, false, std::move(provider)));
     auto workspace = prepared.create();
@@ -750,9 +754,9 @@ TEST_CASE("Strategy A executes the real conic optimizer with typed history membe
     REQUIRE(result.history_optimization);
     REQUIRE(result.history_optimization->result);
     CHECK(std::isfinite(result.history_optimization->result->reported_objective));
-    // The feasible endpoint x2=1 attains the nonnegative source cost (x2-1)^2.
+    // For s=u0+u1 in [0,2], minimize (s-1)^2+w*s: s=1-w/2.
     CHECK(result.history_optimization->result->reported_objective ==
-          doctest::Approx(0.0).epsilon(1e-5));
+          doctest::Approx(running_weight == 0.0 ? 0.0 : 0.4375).epsilon(1e-5));
     CHECK(result.history_optimization->result->maximum_history_violation <= 1e-6);
     CHECK(std::holds_alternative<optimization::BackendColdStartEvidence>(
         result.history_optimization->result->initialization));
@@ -766,13 +770,12 @@ TEST_CASE("Strategy A invokes the prepared whole-history optimizer before termin
     query.configuration.history_optimizer = {"test.zero-history-optimizer"};
     query.history_optimization =
         std::make_shared<const optimization::StrategyHistoryOptimizationProfile>(
-            optimization::StrategyHistoryOptimizationProfile{
-                ProgramId{"strategy-a-history-run"},
-                {{}, 0, {}},
-                0,
-                "state",
-                typed_history_memberships(),
-                optimization::ColdStart{}});
+            optimization::StrategyHistoryOptimizationProfile{ProgramId{"strategy-a-history-run"},
+                                                             {{}, 0, {}},
+                                                             0,
+                                                             "state",
+                                                             typed_history_memberships(),
+                                                             optimization::ColdStart{}});
     auto prepared = take(admit(query, false, {}, false, false, false, nullptr, nullptr, false,
                                false, false, false, zero_history_optimizer()));
     auto workspace = prepared.create();

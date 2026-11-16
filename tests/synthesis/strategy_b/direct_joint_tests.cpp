@@ -1266,6 +1266,14 @@ TEST_CASE("T-S03 singular A preserves earlier controls at a unique terminal opti
 }
 #ifdef CSL_TEST_REAL_HISTORY_OPTIMIZER
 TEST_CASE("Strategy B executes the real conic optimizer with typed history memberships") {
+    double running_weight = 0.0;
+    SUBCASE("terminal cost") {}
+    SUBCASE("running norm changes the optimum") { running_weight = 0.5; }
+    optimization::RunningControlCost running{
+        "strategy-real-running",
+        2,
+        {{0, {optimization::EuclideanControlPenalty{{1, 1, {1}}, {0}, running_weight}}},
+         {1, {optimization::EuclideanControlPenalty{{1, 1, {1}}, {0}, running_weight}}}}};
     using namespace registry;
     auto registration = adapters::nlp::make_casadi_superscs_history_optimizer_registration();
     const auto identity = registration.identity;
@@ -1278,12 +1286,9 @@ TEST_CASE("Strategy B executes the real conic optimizer with typed history membe
     const auto problem = resolve(integrator());
     const auto family = request(problem);
     auto profile = std::make_shared<const optimization::StrategyHistoryOptimizationProfile>(
-        optimization::StrategyHistoryOptimizationProfile{ProgramId{"strategy-b-real-history-run"},
-                                                         {{}, 0, {}},
-                                                         0,
-                                                         "state",
-                                                         typed_history_memberships(),
-                                                         optimization::ColdStart{}});
+        optimization::StrategyHistoryOptimizationProfile{
+            ProgramId{"strategy-b-real-history-run"}, running, 0, "state",
+            typed_history_memberships(), optimization::ColdStart{}});
     const auto prepared =
         registered_prepared(problem, family, false, Termination::completed, nullptr, {},
                             MathematicalOutcome::optimal, std::move(provider), profile);
@@ -1291,9 +1296,9 @@ TEST_CASE("Strategy B executes the real conic optimizer with typed history membe
     REQUIRE(result.history_optimization);
     REQUIRE(result.history_optimization->result);
     CHECK(std::isfinite(result.history_optimization->result->reported_objective));
-    // The feasible endpoint x2=1 attains the nonnegative source cost (x2-1)^2.
+    // For s=u0+u1 in [0,2], minimize (s-1)^2+w*s: s=1-w/2.
     CHECK(result.history_optimization->result->reported_objective ==
-          doctest::Approx(0.0).epsilon(1e-5));
+          doctest::Approx(running_weight == 0.0 ? 0.0 : 0.4375).epsilon(1e-5));
     CHECK(result.history_optimization->result->maximum_history_violation <= 1e-6);
     CHECK(result.history_optimization->result->membership_witnesses.size() == 6);
     REQUIRE(result.history_optimization->provider.actual_module);
