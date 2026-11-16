@@ -244,8 +244,7 @@ public:
                 return Diagnostic{DiagnosticCode::evidence_mismatch,"history.casadi_ipopt.initial_duals",
                     "CasADi initial dual readback differs from this NLP's zero dual vector or constraint dimension."};
             casadi::Dict options{{"sb","yes"},{"print_level",0},{"max_iter",6000},
-                {"tol",1e-12},{"acceptable_tol",1e-13},{"constr_viol_tol",1e-12},
-                {"acceptable_constr_viol_tol",1e-12},{"dual_inf_tol",1e-12},
+                {"tol",1e-11},{"acceptable_tol",1e-10},
                 {"compl_inf_tol",1e-12},{"bound_relax_factor",0.0},
                 {"warm_start_init_point","yes"}};
             if(context.deadline)
