@@ -53,9 +53,7 @@ class ClosedLoopCampaignTests(unittest.TestCase):
                 patch.object(run_campaign, "ensure_clean_source"),
                 patch.object(run_campaign, "ensure_reviewed_source"),
                 patch.object(run_campaign, "ensure_clean_tracked_source"),
-                patch.object(
-                    run_campaign, "runtime_packages", return_value={"casadi": "3.8.0"}
-                ),
+                patch.object(run_campaign, "runtime_packages", return_value={"casadi": "3.8.0"}),
             ):
                 run_campaign.freeze(path, bridge, native_bridge, cache, 300, 300)
                 with self.assertRaisesRegex(ValueError, "already exists and is immutable"):
