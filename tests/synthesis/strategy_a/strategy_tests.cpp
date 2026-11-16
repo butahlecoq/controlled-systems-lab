@@ -730,22 +730,29 @@ TEST_CASE("Strategy A executes the real conic optimizer with typed history membe
     REQUIRE_FALSE(registry.add(std::move(registration)));
     Requirements requirements;
     requirements.output.representation = {"csl.history-optimization-result.v1"};
-    auto provider = take(prepare_provider(select_provider(
-        registry, Method{identity.id, identity.version}, requirements)));
+    auto provider = take(prepare_provider(
+        select_provider(registry, Method{identity.id, identity.version}, requirements)));
     auto query = request(integrator());
     query.configuration.history_optimizer = identity.id;
     query.history_optimization =
         std::make_shared<const optimization::StrategyHistoryOptimizationProfile>(
             optimization::StrategyHistoryOptimizationProfile{
-                ProgramId{"strategy-a-real-history-run"}, {{}, 0, {}}, 0, "state",
-                typed_history_memberships(), optimization::ColdStart{}});
-    auto prepared = take(admit(query, false, {}, false, false, false, nullptr, nullptr,
-                               false, false, false, false, std::move(provider)));
+                ProgramId{"strategy-a-real-history-run"},
+                {{}, 0, {}},
+                0,
+                "state",
+                typed_history_memberships(),
+                optimization::ColdStart{}});
+    auto prepared = take(admit(query, false, {}, false, false, false, nullptr, nullptr, false,
+                               false, false, false, std::move(provider)));
     auto workspace = prepared.create();
     auto result = take(workspace->run(ExecutionContext{}));
     REQUIRE(result.history_optimization);
     REQUIRE(result.history_optimization->result);
     CHECK(std::isfinite(result.history_optimization->result->reported_objective));
+    // The feasible endpoint x2=1 attains the nonnegative source cost (x2-1)^2.
+    CHECK(result.history_optimization->result->reported_objective ==
+          doctest::Approx(0.0).epsilon(1e-5));
     CHECK(result.history_optimization->result->maximum_history_violation <= 1e-6);
     CHECK(std::holds_alternative<optimization::BackendColdStartEvidence>(
         result.history_optimization->result->initialization));

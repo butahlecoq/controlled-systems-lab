@@ -1273,21 +1273,27 @@ TEST_CASE("Strategy B executes the real conic optimizer with typed history membe
     REQUIRE_FALSE(providers.add(std::move(registration)));
     Requirements requirements;
     requirements.output.representation = {"csl.history-optimization-result.v1"};
-    auto provider = accepted(prepare_provider(select_provider(
-        providers, Method{identity.id, identity.version}, requirements)));
+    auto provider = accepted(prepare_provider(
+        select_provider(providers, Method{identity.id, identity.version}, requirements)));
     const auto problem = resolve(integrator());
     const auto family = request(problem);
     auto profile = std::make_shared<const optimization::StrategyHistoryOptimizationProfile>(
-        optimization::StrategyHistoryOptimizationProfile{
-            ProgramId{"strategy-b-real-history-run"}, {{}, 0, {}}, 0, "state",
-            typed_history_memberships(), optimization::ColdStart{}});
-    const auto prepared = registered_prepared(
-        problem, family, false, Termination::completed, nullptr, {},
-        MathematicalOutcome::optimal, std::move(provider), profile);
+        optimization::StrategyHistoryOptimizationProfile{ProgramId{"strategy-b-real-history-run"},
+                                                         {{}, 0, {}},
+                                                         0,
+                                                         "state",
+                                                         typed_history_memberships(),
+                                                         optimization::ColdStart{}});
+    const auto prepared =
+        registered_prepared(problem, family, false, Termination::completed, nullptr, {},
+                            MathematicalOutcome::optimal, std::move(provider), profile);
     const auto result = accepted(prepared.create()->run(ExecutionContext{}));
     REQUIRE(result.history_optimization);
     REQUIRE(result.history_optimization->result);
     CHECK(std::isfinite(result.history_optimization->result->reported_objective));
+    // The feasible endpoint x2=1 attains the nonnegative source cost (x2-1)^2.
+    CHECK(result.history_optimization->result->reported_objective ==
+          doctest::Approx(0.0).epsilon(1e-5));
     CHECK(result.history_optimization->result->maximum_history_violation <= 1e-6);
     CHECK(result.history_optimization->result->membership_witnesses.size() == 6);
     REQUIRE(result.history_optimization->provider.actual_module);
