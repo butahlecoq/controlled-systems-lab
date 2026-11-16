@@ -276,6 +276,72 @@ class ClosedLoopCampaignTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unknown task"):
             run_campaign.campaign_order([{"task_name": "unknown"}])
 
+    def test_paired_method_schedule_excludes_warmup_and_alternates_measured_order(self):
+        self.assertEqual(
+            run_campaign.paired_method_schedule(5),
+            [
+                {"phase": "warmup", "repetition": 0, "order": ["A", "B"]},
+                {"phase": "measured", "repetition": 1, "order": ["A", "B"]},
+                {"phase": "measured", "repetition": 2, "order": ["B", "A"]},
+                {"phase": "measured", "repetition": 3, "order": ["A", "B"]},
+                {"phase": "measured", "repetition": 4, "order": ["B", "A"]},
+                {"phase": "measured", "repetition": 5, "order": ["A", "B"]},
+            ],
+        )
+        with self.assertRaisesRegex(ValueError, "at least one measured repetition"):
+            run_campaign.paired_method_schedule(0)
+
+    def test_paired_timing_rejects_events_from_another_freeze(self):
+        tasks = ("syn-nl-lv-01", "earth-orbit", "syn-nl-fuel-01")
+        controllers = {
+            "A": "native-fixed-tail-polytope-ipopt/1",
+            "B": "native-fixed-tail-zonotope-ipopt/1",
+        }
+        graphs = [
+            {
+                "task_name": task,
+                "graph_id": f"{task}/{side}",
+                "graph_fingerprint": "a" * 64,
+                "task_sha256": "b" * 64,
+                "action_profile_id": "same-profile",
+                "controller": {"id": controller},
+            }
+            for task in tasks
+            for side, controller in controllers.items()
+        ]
+        record = {
+            "source_commit": "c" * 40,
+            "bridge": {"sha256": "d" * 64},
+            "native_policy": {"sha256": "e" * 64},
+            "resource_profile": {"profile_id": "profile/1"},
+            "graphs": graphs,
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            freeze = root / "freeze.json"
+            freeze.write_text("frozen campaign")
+            output = root / "results"
+            output.mkdir()
+            event = {
+                "schema": "csl.closed-loop-paired-timing-event/2",
+                "freeze_sha256": "0" * 64,
+                "source_commit": record["source_commit"],
+                "bridge_sha256": record["bridge"]["sha256"],
+                "native_policy_sha256": record["native_policy"]["sha256"],
+                "resource_profile_id": record["resource_profile"]["profile_id"],
+                "task_name": tasks[0],
+                "phase": "warmup",
+                "repetition": 0,
+                "side": "A",
+                "try_index": 1,
+                "state": "completed",
+            }
+            (output / "paired-timing-events.jsonl").write_text(json.dumps(event) + "\n")
+            with self.assertRaisesRegex(ValueError, "different freeze"):
+                run_campaign.run_paired_timing(
+                    record, freeze, output, root / "bridge", root / "native", root / "packer"
+                )
+
     def test_attempt_classification_keeps_refusal_reason_and_outcome(self):
         with tempfile.TemporaryDirectory() as directory:
             attempt_path = Path(directory) / "attempt.json"
