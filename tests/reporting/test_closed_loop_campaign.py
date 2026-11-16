@@ -291,6 +291,73 @@ class ClosedLoopCampaignTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "at least one measured repetition"):
             run_campaign.paired_method_schedule(0)
 
+    def test_comparison_pack_request_maps_completed_run_to_passed_measurement(self):
+        task_name = "syn-nl-lv-01"
+        methods = {
+            "A": {
+                "controller": {"id": "native-fixed-tail-polytope-ipopt/1", "version": "1"},
+                "graph_fingerprint": "a" * 64,
+                "source_files": [],
+            },
+            "B": {
+                "controller": {"id": "native-fixed-tail-zonotope-ipopt/1", "version": "1"},
+                "graph_fingerprint": "b" * 64,
+                "source_files": [],
+            },
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            events = {}
+            for side in ("A", "B"):
+                attempt_path = root / side
+                attempt_path.mkdir()
+                (attempt_path / "attempt.json").write_text(
+                    json.dumps(
+                        {
+                            "attempt_id": f"attempt-{side}",
+                            "overall_status": "complete",
+                            "preparation_receipt": {
+                                "adapter_receipt": {"executable_sha256": "c" * 64}
+                            },
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+                (attempt_path / "run-manifest.json").write_text(
+                    json.dumps({"claim": "paired timing pilot"}), encoding="utf-8"
+                )
+                events[(task_name, "measured", 1, side)] = {
+                    "attempt": str(attempt_path),
+                    "order_index": 1 if side == "A" else 2,
+                    "end_to_end_wall_seconds": 12.0,
+                    "worker_wall_seconds": 4.0,
+                }
+
+            request = run_campaign.build_comparison_pack_request(
+                {
+                    "source_commit": "d" * 40,
+                    "resource_profile": {"profile_id": "worker-wall-300-cpu-300/1"},
+                    "native_policy": {
+                        "sha256": "c" * 64,
+                        "build_profile": {
+                            "cxx_compiler_id": "GNU",
+                            "cxx_compiler_version": "16.2.1",
+                            "build_type": "Release",
+                        },
+                    },
+                },
+                task_name,
+                methods,
+                events,
+                1,
+            )
+
+        attempts = [method["attempts"][0] for method in request["methods"]]
+        self.assertEqual([attempt["status"] for attempt in attempts], ["completed", "completed"])
+        self.assertEqual(
+            [attempt["measurement"]["status"] for attempt in attempts], ["passed", "passed"]
+        )
+
     def test_paired_timing_rejects_events_from_another_freeze(self):
         tasks = ("syn-nl-lv-01", "earth-orbit", "syn-nl-fuel-01")
         controllers = {

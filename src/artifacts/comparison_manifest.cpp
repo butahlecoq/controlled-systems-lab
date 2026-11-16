@@ -630,6 +630,17 @@ bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const 
         return measurement.contains("strategy")&&measurement.at("strategy")==spec.strategies.at(arm)&&
             measurement.contains("instrumentation")&&measurement.at("instrumentation")==spec.instrumentation.at(arm)&&
             measurement.contains("repetition")&&measurement.at("repetition").get<std::uint32_t>()==repetition;
+    if(schema=="csl.closed-loop-paired-timing-event/1")
+        return exact_fields(measurement,{"schema","status","strategy","instrumentation","repetition",
+                "warmup","order_index","end_to_end_wall_seconds","worker_wall_seconds"})&&
+            measurement.at("strategy")==spec.strategies.at(arm)&&
+            measurement.at("instrumentation")==spec.instrumentation.at(arm)&&
+            measurement.at("repetition")==repetition+1&&measurement.at("warmup")==false&&
+            nonnegative_integer(measurement.at("order_index"))&&
+            measurement.at("end_to_end_wall_seconds").is_number()&&
+            measurement.at("end_to_end_wall_seconds").get<double>()>=0.0&&
+            measurement.at("worker_wall_seconds").is_number()&&
+            measurement.at("worker_wall_seconds").get<double>()>=0.0;
     if(schema=="csl.mpc03-b08-comparison-event/1")
         return measurement.contains("strategy")&&measurement.at("strategy")==spec.strategies.at(arm)&&
             measurement.contains("instrumentation")&&measurement.at("instrumentation")==spec.instrumentation.at(arm)&&
