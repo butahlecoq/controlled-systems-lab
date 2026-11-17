@@ -476,8 +476,8 @@ struct PipelineAccess {
                 return *rejection;
             return std::apply(
                 [](auto &...e) {
-                    return CheckedPipeline<Ports...>{std::tuple<CheckedEntry<Ports>...>{
-                        std::get<CheckedEntry<Ports>>(e)...}};
+                    return CheckedPipeline<Ports...>{
+                        std::tuple<CheckedEntry<Ports>...>{std::get<CheckedEntry<Ports>>(e)...}};
                 },
                 entries);
         }
