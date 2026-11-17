@@ -546,7 +546,7 @@ def _control_domain_bounds(bounds: object) -> str:
     intervals = []
     for interval in bounds:
         if not isinstance(interval, list) or len(interval) != 2:
-            return str(bounds)
+            return "unspecified"
         intervals.append("[" + ", ".join(str(value) for value in interval) + "]")
     return " × ".join(intervals)
 
