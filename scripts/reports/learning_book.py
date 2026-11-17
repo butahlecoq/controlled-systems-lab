@@ -7,6 +7,7 @@ import ast
 import json
 import re
 import sys
+from functools import lru_cache
 from html import escape
 from pathlib import Path
 from urllib.parse import quote
@@ -314,6 +315,16 @@ def validate(manifest: dict, inventory: dict, figure_index: dict | None = None) 
             path = (ROOT / example).resolve()
             if not path.is_relative_to(ROOT.resolve()) or not path.is_file():
                 raise ValueError(f"{chapter['id']}: missing or unsafe example source {example}")
+            if path.suffix == ".json":
+                try:
+                    source_document = _read_json(path)
+                except (OSError, json.JSONDecodeError):
+                    source_document = None
+                if (
+                    isinstance(source_document, dict)
+                    and source_document.get("schema") == "csl.closed-loop.task/1"
+                ):
+                    _validate_model_track_contract(chapter, example, source_document)
         unknown_prerequisites = set(chapter.get("prerequisites", [])) - by_id
         if unknown_prerequisites:
             raise ValueError(
@@ -428,6 +439,355 @@ def validate(manifest: dict, inventory: dict, figure_index: dict | None = None) 
     return chapters
 
 
+@lru_cache(maxsize=1)
+def _saved_result_model_ids() -> dict[str, tuple[str, ...]]:
+    identities: dict[str, set[str]] = {}
+    for path in ROOT.glob("reports/closed-loop-pilot/*/attempts/*/attempt.json"):
+        attempt = _read_json(path)
+        task_id = attempt.get("task_id")
+        model_id = attempt.get("model_id")
+        if isinstance(task_id, str) and isinstance(model_id, str):
+            identities.setdefault(task_id, set()).add(model_id)
+    return {task_id: tuple(sorted(model_ids)) for task_id, model_ids in identities.items()}
+
+
+def _validate_model_track_contract(chapter: dict, source_path: str, task: dict) -> None:
+    """Check the model/predictor identities already owned by a closed-loop task contract."""
+    task_id = task.get("task_id")
+    model = task.get("model")
+    if not isinstance(task_id, str) or not isinstance(model, dict):
+        raise ValueError(f"{chapter['id']}: incomplete closed-loop model track in {source_path}")
+    model_id = model.get("model_id")
+    if not isinstance(model_id, str) or not model_id:
+        raise ValueError(f"{chapter['id']}: plant model track has no stable model_id")
+    source_identity = task.get("source") or {}
+    source_model_id = source_identity.get("model_id")
+    if source_model_id and source_model_id != model_id:
+        raise ValueError(
+            f"{chapter['id']}: source model_id {source_model_id!r} differs from plant track {model_id!r}"
+        )
+    states = model.get("states")
+    controls = model.get("controls")
+    equations = model.get("equations")
+    prediction = task.get("prediction")
+    if not isinstance(states, list) or not states or not isinstance(controls, list):
+        raise ValueError(f"{chapter['id']}: model track needs ordered states and controls")
+    if not isinstance(equations, list) or not equations:
+        raise ValueError(f"{chapter['id']}: model track needs its defining equations")
+    if not isinstance(prediction, dict) or not isinstance(prediction.get("affine_model_id"), str):
+        raise ValueError(f"{chapter['id']}: predictor track needs an affine_model_id")
+
+    # The published capability catalogue is an independent task-to-model crosswalk.
+    capabilities_path = ROOT / "docs/catalogue/closed-loop-pilot-capabilities-v1.json"
+    capabilities = _read_json(capabilities_path)
+    matching = [
+        graph for graph in capabilities.get("graphs", []) if graph.get("task_id") == task_id
+    ]
+    if matching and any(graph.get("model_id") != model_id for graph in matching):
+        raise ValueError(
+            f"{chapter['id']}: task/model identity disagrees with the published capability catalogue"
+        )
+    saved_model_ids = _saved_result_model_ids().get(task_id, ())
+    if saved_model_ids and any(saved_model_id != model_id for saved_model_id in saved_model_ids):
+        raise ValueError(
+            f"{chapter['id']}: task/model identity disagrees with saved execution records"
+        )
+
+
+def _task_contracts(chapters: list[dict]) -> list[tuple[dict, str, dict]]:
+    by_task_id: dict[str, tuple[dict, str, dict]] = {}
+    for chapter in chapters:
+        for source in chapter.get("example_sources", []):
+            path = ROOT / source
+            if path.suffix != ".json":
+                continue
+            contract = _read_json(path)
+            if contract.get("schema") == "csl.closed-loop.task/1":
+                task_id = contract.get("task_id")
+                previous = by_task_id.get(task_id)
+                if previous is None or chapter["id"].endswith("-capstone"):
+                    by_task_id[task_id] = (chapter, source, contract)
+    return list(by_task_id.values())
+
+
+def _track_anchor(model_id: str) -> str:
+    return "track-" + re.sub(r"[^a-z0-9]+", "-", model_id.lower()).strip("-")
+
+
+def _model_tracks_section(chapter: dict) -> str:
+    tracks = [(source, contract) for owner, source, contract in _task_contracts([chapter])]
+    if not tracks:
+        return ""
+
+    parts = ['<section class="model-tracks"><h2>System identity and model tracks</h2>']
+    parts.append(
+        "<p>The task contract is the source of truth for these formulations. Plant identity, "
+        "prediction model, and reachable-set representation are separate choices.</p>"
+    )
+    for contract_path, task in tracks:
+        model = task["model"]
+        prediction = task["prediction"]
+        episode = task.get("episode", {})
+        anchor = _track_anchor(model["model_id"])
+        parts.append(f'<article id="{escape(anchor, quote=True)}">')
+        parts.append(
+            f'<h3 id="{escape(anchor + "-plant", quote=True)}">Plant track <code>'
+            + escape(model["model_id"])
+            + "</code></h3><p><strong>Task.</strong> <code>"
+            + escape(task["task_id"])
+            + "</code>; <strong>source case.</strong> "
+            + escape(str(model.get("case_id", "unspecified")))
+            + ".</p>"
+        )
+        parts.append(
+            '<p><strong>State ordering and coordinates.</strong></p><div class="scroll model-table" tabindex="0" role="region" aria-label="State coordinates"><table><thead><tr><th>Index</th><th>State</th><th>Initial</th><th>Unit</th><th>Bounds</th><th>Scale</th></tr></thead><tbody>'
+        )
+        for index, state in enumerate(model["states"], start=1):
+            parts.append(
+                "<tr><td>"
+                + str(index)
+                + "</td><td>"
+                + escape(str(state.get("name", "")))
+                + "</td><td>"
+                + escape(str(state.get("initial", "unspecified")))
+                + "</td><td>"
+                + escape(str(state.get("unit", "unspecified")))
+                + "</td><td>"
+                + escape(str(state.get("bounds", "unspecified")))
+                + "</td><td>"
+                + escape(str(state.get("scale", "unspecified")))
+                + "</td></tr>"
+            )
+        parts.append("</tbody></table></div><p><strong>Controls.</strong></p><ul>")
+        for control in model["controls"]:
+            parts.append(
+                "<li><code>"
+                + escape(str(control.get("name", "u")))
+                + "</code> ∈ "
+                + escape(str(control.get("bounds", "unspecified")))
+                + " "
+                + escape(str(control.get("unit", "")))
+                + "</li>"
+            )
+        parts.append("</ul>")
+        domains = task.get("control_domains", {})
+        if domains:
+            parts.append("<p><strong>Named task control domains.</strong></p><ul>")
+            for name, domain in domains.items():
+                profile = domain.get("problem_id", "")
+                if "actions" in domain:
+                    values = "; ".join(
+                        "(" + ", ".join(str(value) for value in action) + ")"
+                        for action in domain["actions"]
+                    )
+                    descriptor = "finite actions " + values
+                else:
+                    descriptor = "component bounds " + str(domain.get("bounds", "unspecified"))
+                parts.append(
+                    "<li><strong>"
+                    + escape(str(name))
+                    + "</strong> <code>"
+                    + escape(str(profile))
+                    + "</code>: "
+                    + escape(descriptor)
+                    + "; "
+                    + escape(str(domain.get("semantics", "semantics unspecified")))
+                    + ".</li>"
+                )
+            parts.append("</ul>")
+        parts.append('<p><strong>Plant equations.</strong></p><div class="equation-list">')
+        for equation in model["equations"]:
+            parts.append("<p>" + escape(equation) + "</p>")
+        parts.append("</div>")
+        if model.get("parameters"):
+            parts.append(
+                '<p><strong>Parameters.</strong></p><div class="scroll"><table><thead><tr><th>Parameter</th><th>Value</th><th>Unit</th></tr></thead><tbody>'
+            )
+            for name, parameter in model["parameters"].items():
+                parts.append(
+                    "<tr><td><code>"
+                    + escape(str(name))
+                    + "</code></td><td>"
+                    + escape(str(parameter.get("value", "unspecified")))
+                    + "</td><td>"
+                    + escape(str(parameter.get("unit", "unspecified")))
+                    + "</td></tr>"
+                )
+            parts.append("</tbody></table></div>")
+        parts.append(
+            "<p><strong>Domain.</strong> "
+            + escape(str(model.get("domain", "not stated in the task contract")))
+            + ".</p>"
+        )
+        source_identity = task.get("source") or {}
+        if source_identity.get("path"):
+            parts.append(
+                '<p><strong>Source provenance.</strong> <a href="'
+                + escape(_repository_href(source_identity["path"]), quote=True)
+                + '"><code>'
+                + escape(source_identity["path"])
+                + "</code></a>; SHA-256 <code>"
+                + escape(str(source_identity.get("sha256", "not recorded")))
+                + "</code>.</p>"
+            )
+        parts.append(
+            f'<h3 id="{escape(anchor + "-prediction", quote=True)}">Prediction track <code>'
+            + escape(prediction["affine_model_id"])
+            + "</code></h3><p><strong>Plant.</strong> "
+            + escape(str(prediction.get("plant", "unspecified")))
+            + ". <strong>Transformation.</strong> "
+            + escape(str(prediction.get("discretization", "unspecified")))
+            + ".</p><p><strong>Producer.</strong> <code>"
+            + escape(str(prediction.get("producer", "unspecified")))
+            + "</code>. <strong>Qualification.</strong> "
+            + escape(str(prediction.get("validity", "not stated")))
+            + ".</p>"
+        )
+        parts.append(
+            "<p><strong>Time grid.</strong> "
+            + escape(str(episode.get("intervals", "unspecified")))
+            + " intervals over "
+            + escape(str(episode.get("final_time", "unspecified")))
+            + " "
+            + escape(str(episode.get("time_unit", "unspecified")))
+            + "; Δt = "
+            + escape(str(episode.get("dt", "unspecified")))
+            + ". Execution: "
+            + escape(str((episode.get("execution") or {}).get("method", "unspecified")))
+            + ".</p>"
+        )
+        objective = task.get("objective", {})
+
+        def flatten_objective(prefix: str, value) -> list[tuple[str, object]]:
+            if not isinstance(value, dict):
+                return [(prefix, value)]
+            fields = []
+            for key, nested in value.items():
+                fields.extend(flatten_objective(f"{prefix}.{key}" if prefix else key, nested))
+            return fields
+
+        objective_fields = flatten_objective("", objective)
+        objective_fields = [
+            (key, value) for key, value in objective_fields if key not in {"objective_id", "kind"}
+        ]
+        if objective_fields:
+            parts.append(
+                '<p><strong>Objective definition.</strong></p><div class="scroll"><table><thead><tr><th>Term</th><th>Definition/data</th></tr></thead><tbody>'
+            )
+            for key, value in objective_fields:
+                rendered = (
+                    "["
+                    + "; ".join(
+                        ", ".join(str(cell) for cell in row) if isinstance(row, list) else str(row)
+                        for row in value
+                    )
+                    + "]"
+                    if isinstance(value, list)
+                    and value
+                    and any(isinstance(row, list) for row in value)
+                    else ", ".join(str(item) for item in value)
+                    if isinstance(value, list)
+                    else str(value)
+                )
+                parts.append(
+                    '<tr><th scope="row"><code>'
+                    + escape(key)
+                    + "</code></th><td>"
+                    + escape(rendered)
+                    + "</td></tr>"
+                )
+            parts.append("</tbody></table></div>")
+        terminal = task.get("terminal_condition")
+        if terminal:
+            terminal_summary = (
+                "; ".join(f"{key.replace('_', ' ')}: {value}" for key, value in terminal.items())
+                if isinstance(terminal, dict)
+                else str(terminal)
+            )
+            parts.append(
+                "<p><strong>Terminal condition.</strong> " + escape(terminal_summary) + ".</p>"
+            )
+        closed_loop = episode.get("closed_loop", {})
+        closed_loop_summary = (
+            "; ".join(f"{key.replace('_', ' ')}: {value}" for key, value in closed_loop.items())
+            if isinstance(closed_loop, dict)
+            else str(closed_loop)
+        )
+        parts.append(
+            "<p><strong>Objective track.</strong> <code>"
+            + escape(str(objective.get("objective_id", "unspecified")))
+            + "</code> — "
+            + escape(str(objective.get("kind", "unspecified")))
+            + ".</p><p><strong>Closed-loop semantics.</strong> "
+            + escape(closed_loop_summary)
+            + '.</p><p><a href="'
+            + escape(_repository_href(contract_path), quote=True)
+            + '">Open the task contract and full objective/constraint definition</a>.</p>'
+        )
+        parts.append("</article>")
+    parts.append("</section>")
+    return "".join(parts)
+
+
+def _model_tracks_page(chapters: list[dict]) -> str:
+    page = [
+        site_design.page_start(
+            "System formulations and model tracks",
+            stylesheet_href="../examples/examples.css",
+            crumbs=[
+                ("Learn", "../index.html"),
+                ("Learning book", "index.html"),
+                ("Model tracks", "model-tracks.html"),
+            ],
+            main_class="page-content learning-reference",
+            current_href="model-tracks.html",
+        ),
+        '<p class="eyebrow">Generated reference · source contracts</p><h1>System formulations and model tracks</h1>',
+        "<p>Each row is derived from a closed-loop task contract already used by a capstone. The plant model, prediction model and objective have separate identities; reachable-set families are not physical model tracks. Open a lesson for ordered coordinates, equations, parameters, input bounds, time grid and qualification notes.</p>",
+        '<div class="scroll" tabindex="0" role="region" aria-label="System model track comparison"><table><caption>System model track comparison</caption><thead><tr><th>System / task</th><th>Plant track</th><th>Prediction track</th><th>State/control dimensions</th><th>Prediction transformation</th><th>Task contract</th></tr></thead><tbody>',
+    ]
+    for chapter, source, task in _task_contracts(chapters):
+        model = task["model"]
+        prediction = task["prediction"]
+        page.append(
+            '<tr><th scope="row"><a href="'
+            + escape(chapter["id"] + ".html", quote=True)
+            + '">'
+            + escape(chapter["title"])
+            + "</a><br><code>"
+            + escape(task["task_id"])
+            + "</code></th><td>"
+            + '<a href="'
+            + escape(
+                chapter["id"] + ".html#" + _track_anchor(model["model_id"]) + "-plant",
+                quote=True,
+            )
+            + '"><code>'
+            + escape(model["model_id"])
+            + '</code></a></td><td><a href="'
+            + escape(
+                chapter["id"] + ".html#" + _track_anchor(model["model_id"]) + "-prediction",
+                quote=True,
+            )
+            + '"><code>'
+            + escape(prediction["affine_model_id"])
+            + "</code></a></td><td>"
+            + str(len(model["states"]))
+            + " / "
+            + str(len(model["controls"]))
+            + "</td><td>"
+            + escape(str(prediction.get("discretization", "unspecified")))
+            + '</td><td><a href="'
+            + escape(_repository_href(source), quote=True)
+            + '">Task contract</a></td></tr>'
+        )
+    page.append(
+        "</tbody></table></div><p>Identical mathematics requires matching the plant and predictor track IDs and their definitions, along with the task’s controls, time grid and objective. A shared system name alone does not establish equivalence.</p>"
+    )
+    page.append(site_design.page_end())
+    return "".join(page)
+
+
 def _chapter_page(
     chapter: dict,
     chapters: list[dict],
@@ -457,6 +817,7 @@ def _chapter_page(
         f"Evidence class: {escape(role_label)}; {escape(chapter['kind'])}.</p>"
     )
     parts.append(chapter_html)
+    parts.append(_model_tracks_section(chapter))
     displays = chapter.get("mathematical_displays", [])
     tables = chapter.get("mathematical_tables", [])
     if displays or tables or chapter.get("mathematical_conclusion"):
@@ -831,6 +1192,9 @@ def build(
     page.append(
         '<p><a href="module-catalogue.html">Browse the module inventory and lesson evidence</a></p>'
     )
+    page.append(
+        '<p><a href="model-tracks.html">Compare system formulations and model tracks</a></p>'
+    )
     page.append('<p><a href="../index.html">Return to the examples and reports</a></p>')
     page.append(site_design.page_end())
     site_files[f"{BOOK_PATH}/index.html"] = "".join(page).encode("utf-8")
@@ -844,6 +1208,7 @@ def build(
     site_files[f"{BOOK_PATH}/module-catalogue.html"] = _module_catalogue_page(
         manifest, inventory
     ).encode("utf-8")
+    site_files[f"{BOOK_PATH}/model-tracks.html"] = _model_tracks_page(chapters).encode("utf-8")
     if figures:
         site_files["examples/closed-loop/figure-index.json"] = (
             json.dumps(figures, indent=2, ensure_ascii=False).encode("utf-8") + b"\n"

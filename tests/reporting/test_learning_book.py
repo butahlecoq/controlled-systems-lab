@@ -105,6 +105,51 @@ class LearningBookTests(unittest.TestCase):
                         self.assertEqual(result.stdout, (ROOT / source).read_bytes(),
                                          "Source permalink differs from the executed example")
 
+    def test_model_tracks_are_generated_from_contracts_and_saved_results(self):
+        chapters = learning_book.validate(self.manifest, self.inventory, self.figures)
+        tracks = learning_book._task_contracts(chapters)
+        self.assertEqual(len(tracks), 3)
+        page = learning_book._model_tracks_page(chapters)
+        self.assertIn("System formulations and model tracks", page)
+        for chapter, source, contract in tracks:
+            with self.subTest(task=contract["task_id"]):
+                self.assertIn(contract["model"]["model_id"], page)
+                self.assertIn(contract["prediction"]["affine_model_id"], page)
+                self.assertIn(chapter["id"] + ".html", page)
+                detail = learning_book._model_tracks_section(chapter)
+                self.assertIn(contract["task_id"], detail)
+                self.assertIn(contract["model"]["equations"][0], detail)
+                self.assertIn("State ordering and coordinates", detail)
+                self.assertIn("Parameters", detail)
+                self.assertIn("Qualification", detail)
+                self.assertIn(contract["source"]["path"], detail)
+                self.assertIn(source, detail)
+
+                saved_model_ids = learning_book._saved_result_model_ids().get(
+                    contract["task_id"], ()
+                )
+                self.assertTrue(saved_model_ids)
+                self.assertTrue(
+                    all(model_id == contract["model"]["model_id"] for model_id in saved_model_ids)
+                )
+
+                generated = PageElements()
+                generated.feed(detail)
+                anchor = learning_book._track_anchor(contract["model"]["model_id"])
+                self.assertIn(anchor, generated.ids)
+                self.assertIn(anchor + "-plant", generated.ids)
+                self.assertIn(anchor + "-prediction", generated.ids)
+                self.assertIn(chapter["id"] + ".html#" + anchor + "-plant", page)
+
+    def test_model_track_source_identity_must_match_task_contract(self):
+        chapter = next(item for item in self.manifest["chapters"] if item["id"] == "lotka-capstone")
+        contract = json.loads((ROOT / chapter["example_sources"][0]).read_text())
+        contract["source"]["model_id"] = "different/source-model/1"
+        with self.assertRaisesRegex(ValueError, "differs from plant track"):
+            learning_book._validate_model_track_contract(
+                chapter, chapter["example_sources"][0], contract
+            )
+
     @staticmethod
     def _is_retained_source_commit(repo: Path, commit: str, *, allow_in_flight_head: bool = False) -> bool:
         main_ref = "refs/remotes/origin/main"
@@ -328,6 +373,11 @@ Q subset E; E subset [-sqrt(2),sqrt(2)]^2; Q is [-1,1]^2
             self.assertIn('href="install-consumer.html"', landing)
             self.assertIn('href="native-substitution-matrix.html"', landing)
             self.assertIn('href="module-catalogue.html"', landing)
+            self.assertIn('href="model-tracks.html"', landing)
+            tracks = (site / "learn/model-tracks.html").read_text()
+            self.assertIn("syn-nl-lv-01/ode/1", tracks)
+            self.assertIn("env717-earth-orbit/two-body-force-ode/continuous/1", tracks)
+            self.assertIn("syn-nl-fuel-01/ode/1", tracks)
             catalogue = (site / "learn/module-catalogue.html").read_text()
             self.assertEqual(catalogue.count('id="module-'), len(self.inventory["modules"]))
             self.assertIn("reference-only in this book", catalogue)
