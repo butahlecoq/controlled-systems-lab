@@ -1,0 +1,76 @@
+{
+  "schema": "csl.four-state-projection-approximation-run/1",
+  "source_commit": "d4fb12413688db87e48797f148ce1d0e82d3c644",
+  "model": "archival-2017-4d-scalar-reachability/1",
+  "run_scope": {
+    "state_dimension": 4,
+    "control_channels": 1,
+    "transitions": 15,
+    "stages": 16,
+    "projection_planes": [
+      "x1-x2",
+      "x3-x4"
+    ],
+    "projection_stage_cases": 32,
+    "methods": [
+      "box",
+      "parallelotope-fixed-45deg",
+      "zonotope-axis-cover",
+      "ellipsoid-fixed-45deg"
+    ],
+    "approximation_calls": 128
+  },
+  "measurement": {
+    "repetitions_per_method_and_case": 5,
+    "order": "interleaved; method order rotates across repetitions and stages",
+    "timed_interval": "one geometry::approximation::run_registered call, including provider execution and policy admission",
+    "excluded": "registry construction, request preparation, reference hull construction, output extraction, CSV/SVG rendering",
+    "limiter_profile": "not collected; no performance-winner claim"
+  },
+  "environment": {
+    "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "kernel": "7.2.8-9-omarchy",
+    "architecture": "x86_64",
+    "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "logical_cpus": 8,
+    "compiler": "GCC 16.2.1",
+    "build_type": "Release",
+    "threads": "one process; calls run sequentially; no external CPU or memory isolation"
+  },
+  "numerical_scope": [
+    "stored binary64 input and propagation",
+    "provider admission uses declared numerical policies",
+    "not validated arithmetic or a certified real-arithmetic enclosure",
+    "sampled support gaps are diagnostics only"
+  ],
+  "files": {
+    "approximation-summary.csv": {
+      "sha256": "32457f27e0849495824e2b30a3c6c2a71c6c8f8361b83cb857899a51a1fe7462",
+      "bytes": 24966
+    },
+    "examples.css": {
+      "sha256": "11ded2b69cec694ff61ecad0493f175becbfc47bce3d641f2ee512543bb82cf4",
+      "bytes": 12234
+    },
+    "index.html": {
+      "sha256": "3b7a45b690fcf45db5316907d4dceee8cb580879c2f7024fdcbac7e924513e31",
+      "bytes": 7093
+    },
+    "run-summary.txt": {
+      "sha256": "d990f46865f7fccbd6b94ed0fe0398eda76c8390638ce154f8b71073d0763919",
+      "bytes": 407
+    },
+    "support-samples.csv": {
+      "sha256": "5bee53907a7fa173d20c2ce5e3611403beaac0f0da37fa46d6477e5e011b3ace",
+      "bytes": 1079799
+    },
+    "x1-x2-approximation-stages.svg": {
+      "sha256": "e5e851aa2d6868f76f321b2c273bdb9cb3d912044bf2846132cf93748777ccaf",
+      "bytes": 58137
+    },
+    "x3-x4-approximation-stages.svg": {
+      "sha256": "753d602024e41c2e731a71d2568f78be433303fead293df7d7db2feb75f0cde5",
+      "bytes": 58036
+    }
+  }
+}
