@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Four-state reachable set projection approximations</title>
+  <link rel="stylesheet" href="examples.css">
+  <style>
+    .figures{display:grid;grid-template-columns:1fr;gap:1.25rem}
+    .figures figure{margin:0}.figures img{width:100%;height:auto;border:1px solid var(--border,#888)}
+    .data-table{width:100%;border-collapse:collapse}.data-table th,.data-table td{padding:.55rem;text-align:left;border-bottom:1px solid var(--border,#888)}.table-scroll{overflow-x:auto}
+    .data-table td.num{text-align:right;font-variant-numeric:tabular-nums}.note{padding:1rem;border-inline-start:.25rem solid #d09b42;background:color-mix(in srgb,#d09b42 10%,transparent)}
+    @media(max-width:650px){.data-table{font-size:.88rem}.data-table th,.data-table td{padding:.35rem}}
+  </style>
+</head>
+<body><main class="page-content">
+  <nav class="breadcrumbs" aria-label="Breadcrumb"><ol><li><a href="../index.html">Examples</a></li><li><a href="../native-four-state-reachability.html">Four-state reachability</a></li><li aria-current="page">Projection approximations</li></ol></nav>
+  <p class="eyebrow">Saved native C++ run · four states · 15 transitions · 2 projections</p>
+  <h1>How four outer approximations change the projected reachable sets</h1>
+  <p>This report propagates the source-qualified four-state scalar-input model, then compares four registered outer approximation methods on the <var>x</var><sub>1</sub>–<var>x</var><sub>2</sub> and <var>x</var><sub>3</sub>–<var>x</var><sub>4</sub> projections at every stage. The input is an independent interval at each step. There is no objective, controller or second player in this model.</p>
+
+  <section><h2>All stages, same axes</h2>
+    <div class="figures">
+      <figure><a href="x1-x2-approximation-stages.svg"><img src="x1-x2-approximation-stages.svg" alt="All 16 computed x1-x2 generator-set projections overlaid with box, fixed 45 degree parallelotope, axis-cover zonotope and fixed 45 degree ellipsoid outer approximations"></a><figcaption>Coordinates <var>x</var><sub>1</sub>–<var>x</var><sub>2</sub>; each panel is one stage, and all panels use shared axes.</figcaption></figure>
+      <figure><a href="x3-x4-approximation-stages.svg"><img src="x3-x4-approximation-stages.svg" alt="All 16 computed x3-x4 generator-set projections overlaid with box, fixed 45 degree parallelotope, axis-cover zonotope and fixed 45 degree ellipsoid outer approximations"></a><figcaption>Coordinates <var>x</var><sub>3</sub>–<var>x</var><sub>4</sub>; each panel is one stage, and all panels use shared axes.</figcaption></figure>
+    </div>
+    <p>The reference is the computed polygon boundary of each projected stored generator set. Each colored boundary is an outer approximation admitted by its provider policy. The orientation of the parallelotope and ellipsoid is fixed at 45° for every stage; it is not fitted or optimized. The zonotope axis-cover output has a factor budget of 8.</p>
+  </section>
+
+  <section><h2>Observed area and call-time ranges</h2>
+    <p>Ranges below summarize the 32 projection-stage cases for each method. Area ratio is approximate output area divided by reference projection area. Time is the median of five alternating calls per case; the shown range is across those 32 case medians.</p>
+    <div class="table-scroll"><table class="data-table"><thead><tr><th>Method</th><th>Area ratio range</th><th>Median call-time range</th><th>Admission basis</th></tr></thead><tbody>
+      <tr><th scope="row">Axis-aligned box</th><td class="num">1.000–1.226</td><td class="num">193–1,099 μs</td><td>V-to-H containment</td></tr>
+      <tr><th scope="row">Parallelotope, fixed 45°</th><td class="num">2.988–49.082</td><td class="num">308–1,196 μs</td><td>V-to-H containment</td></tr>
+      <tr><th scope="row">Zonotope axis cover, budget 8</th><td class="num">1.000–1.125</td><td class="num">13–569 μs</td><td>Generator-axis cover</td></tr>
+      <tr><th scope="row">Directional ellipsoid, fixed 45°</th><td class="num">4.693–77.098</td><td class="num">148–538 μs</td><td>V-to-ellipsoid containment</td></tr>
+    </tbody></table></div>
+    <p class="note"><strong>Reading the numbers:</strong> the fixed-orientation shapes over-enclose the narrow initial projection substantially. This is evidence about these four policies, this model and these coordinate planes. Call times are descriptive observations on one unisolated development host, not a speed ranking: the measurement includes the registered provider and policy admission, excludes setup and drawing, and has no separate limiter profile.</p>
+  </section>
+
+  <section><h2>Numerical scope</h2>
+    <ul>
+      <li>The full four-state reachable-set propagation uses stored binary64 model data and retains all generator factors. The comparison projects that set before applying the 2D approximators.</li>
+      <li>Each returned approximation passed its declared numerical admission policy. This does not establish validated real-arithmetic containment or certified rounding.</li>
+      <li>Area comes from the resulting 2D boundaries; ellipsoid area uses its analytic area formula. Sampled support gaps in the raw CSV are diagnostics only and are not the admission proof.</li>
+      <li>Five calls per method and projection-stage pair were interleaved in rotating order. Each call-time interval covers <code>run_registered</code>, including provider execution and admission. Registry setup, input preparation, result extraction and rendering are outside the interval.</li>
+    </ul>
+  </section>
+
+  <section><h2>Reproduce and inspect the records</h2>
+    <pre><code>cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+cmake --build build/release --parallel 4
+cmake --install build/release --prefix build/release/install
+cmake -S examples -B build/examples -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=build/release/install
+cmake --build build/examples --target native_four_state_approximation
+build/examples/native_four_state_approximation new-output-directory</code></pre>
+    <p><a href="approximation-summary.csv">Per-stage approximation areas and timings (CSV)</a> · <a href="support-samples.csv">64-direction support diagnostics (CSV)</a> · <a href="manifest.json">Run manifest and file hashes (JSON)</a> · <a href="four-state-projection-approximations-v1.zip">Offline report bundle (ZIP)</a></p>
+    <p>Algorithm source: <a href="https://github.com/butahlecoq/controlled-systems-lab/tree/d4fb12413688db87e48797f148ce1d0e82d3c644/examples/native_four_state_approximation.cpp">commit d4fb12413688db87e48797f148ce1d0e82d3c644</a>. Model details and source qualification are in the <a href="../native-four-state-reachability.html">four-state reachability lesson</a>.</p>
+  </section>
+  <footer class="provenance">Controlled Systems Lab · saved numerical example · binary64 numerical evidence</footer>
+</main></body></html>
