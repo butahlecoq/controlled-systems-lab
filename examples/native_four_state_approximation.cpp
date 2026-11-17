@@ -121,7 +121,7 @@ sets::GeneratorSet project(const sets::GeneratorSet &set, std::size_t x, std::si
                            const std::string &id) {
     const auto count = set.factor_ids().size();
     sets::GeneratorInput input{};
-    input.id = id;
+    input.id.value = id;
     input.center = {set.center()[x], set.center()[y]};
     input.generators.rows = 2;
     input.generators.cols = count;
