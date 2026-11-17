@@ -142,6 +142,16 @@ class LearningBookTests(unittest.TestCase):
                 self.assertTrue(
                     all(model_id == contract["model"]["model_id"] for model_id in saved_model_ids)
                 )
+                saved_prediction_ids = learning_book._saved_result_prediction_ids().get(
+                    contract["task_id"], ()
+                )
+                self.assertTrue(saved_prediction_ids)
+                self.assertTrue(
+                    all(
+                        prediction_id == contract["prediction"]["affine_model_id"]
+                        for prediction_id in saved_prediction_ids
+                    )
+                )
 
                 generated = PageElements()
                 generated.feed(detail)
@@ -156,6 +166,15 @@ class LearningBookTests(unittest.TestCase):
         contract = json.loads((ROOT / chapter["example_sources"][0]).read_text())
         contract["source"]["model_id"] = "different/source-model/1"
         with self.assertRaisesRegex(ValueError, "differs from plant track"):
+            learning_book._validate_model_track_contract(
+                chapter, chapter["example_sources"][0], contract
+            )
+
+    def test_model_track_prediction_identity_must_match_saved_execution_records(self):
+        chapter = next(item for item in self.manifest["chapters"] if item["id"] == "lotka-capstone")
+        contract = json.loads((ROOT / chapter["example_sources"][0]).read_text())
+        contract["prediction"]["affine_model_id"] = "different/predictor/1"
+        with self.assertRaisesRegex(ValueError, "predictor identity disagrees"):
             learning_book._validate_model_track_contract(
                 chapter, chapter["example_sources"][0], contract
             )

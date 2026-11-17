@@ -451,6 +451,24 @@ def _saved_result_model_ids() -> dict[str, tuple[str, ...]]:
     return {task_id: tuple(sorted(model_ids)) for task_id, model_ids in identities.items()}
 
 
+@lru_cache(maxsize=1)
+def _saved_result_prediction_ids() -> dict[str, tuple[str, ...]]:
+    identities: dict[str, set[str]] = {}
+    for path in ROOT.glob(
+        "reports/closed-loop-pilot/closed-loop-pilot-v1/raw/attempts/**/check-input.json"
+    ):
+        record = _read_json(path)
+        task = record.get("task") or {}
+        task_id = task.get("task_id")
+        prediction = task.get("prediction") or {}
+        prediction_id = prediction.get("affine_model_id")
+        if isinstance(task_id, str) and isinstance(prediction_id, str):
+            identities.setdefault(task_id, set()).add(prediction_id)
+    return {
+        task_id: tuple(sorted(prediction_ids)) for task_id, prediction_ids in identities.items()
+    }
+
+
 def _validate_model_track_contract(chapter: dict, source_path: str, task: dict) -> None:
     """Check the model/predictor identities already owned by a closed-loop task contract."""
     task_id = task.get("task_id")
@@ -491,6 +509,14 @@ def _validate_model_track_contract(chapter: dict, source_path: str, task: dict) 
     if saved_model_ids and any(saved_model_id != model_id for saved_model_id in saved_model_ids):
         raise ValueError(
             f"{chapter['id']}: task/model identity disagrees with saved execution records"
+        )
+    saved_prediction_ids = _saved_result_prediction_ids().get(task_id, ())
+    prediction_id = prediction["affine_model_id"]
+    if saved_prediction_ids and any(
+        saved_prediction_id != prediction_id for saved_prediction_id in saved_prediction_ids
+    ):
+        raise ValueError(
+            f"{chapter['id']}: predictor identity disagrees with saved execution records"
         )
 
 
