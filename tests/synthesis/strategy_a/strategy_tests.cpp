@@ -723,7 +723,7 @@ bool has_equality(const sets::HRepresentation& h,const Vector& coefficients,doub
 }
 }
 #ifdef CSL_TEST_REAL_HISTORY_OPTIMIZER
-TEST_CASE("Strategy A executes the real conic optimizer with typed history memberships") {
+TEST_CASE("Strategy A executes the real CasADi-IPOPT history optimizer with typed memberships") {
     double running_weight = 0.0;
     SUBCASE("terminal cost") {}
     SUBCASE("running norm changes the optimum") { running_weight = 0.5; }
