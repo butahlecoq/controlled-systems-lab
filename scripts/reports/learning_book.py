@@ -570,6 +570,11 @@ def _model_tracks_section(chapter: dict) -> str:
                 + "</li>"
             )
         parts.append("</ul>")
+        parts.append("<p><strong>Disturbances.</strong> ")
+        parts.append(
+            escape(str(task.get("disturbances", "Not specified by this task contract.")))
+            + "</p>"
+        )
         domains = task.get("control_domains", {})
         if domains:
             parts.append("<p><strong>Named task control domains.</strong></p><ul>")
@@ -720,7 +725,11 @@ def _model_tracks_section(chapter: dict) -> str:
             + escape(str(objective.get("kind", "unspecified")))
             + ".</p><p><strong>Closed-loop semantics.</strong> "
             + escape(closed_loop_summary)
-            + '.</p><p><a href="'
+            + '.</p><p><strong>Observation supplied to the controller.</strong> '
+            + escape(str(closed_loop.get("observation", "Not specified by this task contract.")))
+            + '.</p><p><strong>State and terminal constraints.</strong> State bounds are listed above; '
+            + escape(str(terminal or "No terminal condition is specified."))
+            + '. Objective targets are not feasibility constraints unless the contract says otherwise.</p><p><a href="'
             + escape(_repository_href(contract_path), quote=True)
             + '">Open the task contract and full objective/constraint definition</a>.</p>'
         )
@@ -729,7 +738,7 @@ def _model_tracks_section(chapter: dict) -> str:
     return "".join(parts)
 
 
-def _model_tracks_page(chapters: list[dict]) -> str:
+def _model_tracks_page(chapters: list[dict], figure_index: dict | None = None) -> str:
     page = [
         site_design.page_start(
             "System formulations and model tracks",
@@ -746,6 +755,15 @@ def _model_tracks_page(chapters: list[dict]) -> str:
         "<p>Each row is derived from a closed-loop task contract already used by a capstone. The plant model, prediction model and objective have separate identities; reachable-set families are not physical model tracks. Open a lesson for ordered coordinates, equations, parameters, input bounds, time grid and qualification notes.</p>",
         '<div class="scroll" tabindex="0" role="region" aria-label="System model track comparison"><table><caption>System model track comparison</caption><thead><tr><th>System / task</th><th>Plant track</th><th>Prediction track</th><th>State/control dimensions</th><th>Prediction transformation</th><th>Task contract</th></tr></thead><tbody>',
     ]
+    figures_by_id: dict[str, dict] = {}
+    figures_by_task: dict[str, list[dict]] = {}
+    for figure in (figure_index or {}).get("figures", []):
+        figure_id = figure.get("id")
+        if isinstance(figure_id, str):
+            figures_by_id[figure_id] = figure
+        task_id = figure.get("task_id")
+        if isinstance(task_id, str):
+            figures_by_task.setdefault(task_id, []).append(figure)
     for chapter, source, task in _task_contracts(chapters):
         model = task["model"]
         prediction = task["prediction"]
@@ -779,8 +797,34 @@ def _model_tracks_page(chapters: list[dict]) -> str:
             + escape(str(prediction.get("discretization", "unspecified")))
             + '</td><td><a href="'
             + escape(_repository_href(source), quote=True)
-            + '">Task contract</a></td></tr>'
+            + '">Task contract</a>'
         )
+        visual_links = [
+            figures_by_id[figure_id]
+            for figure_id in chapter.get("figure_ids", [])
+            if figure_id in figures_by_id
+            and figures_by_id[figure_id].get("availability") == "ready"
+            and figures_by_id[figure_id].get("href")
+        ]
+        visual_ids = {figure.get("id") for figure in visual_links}
+        visual_links.extend(
+            figure
+            for figure in figures_by_task.get(task["task_id"], [])
+            if figure.get("availability") == "ready"
+            and figure.get("href")
+            and figure.get("id") not in visual_ids
+        )
+        if visual_links:
+            page.append("<br><strong>Visuals:</strong> ")
+            page.append(
+                " · ".join(
+                    '<a href="../' + escape(figure["href"], quote=True) + '">'
+                    + escape(str(figure.get("title") or figure["id"]))
+                    + "</a>"
+                    for figure in visual_links
+                )
+            )
+        page.append("</td></tr>")
     page.append(
         "</tbody></table></div><p>Identical mathematics requires matching the plant and predictor track IDs and their definitions, along with the task’s controls, time grid and objective. A shared system name alone does not establish equivalence.</p>"
     )
@@ -1208,7 +1252,7 @@ def build(
     site_files[f"{BOOK_PATH}/module-catalogue.html"] = _module_catalogue_page(
         manifest, inventory
     ).encode("utf-8")
-    site_files[f"{BOOK_PATH}/model-tracks.html"] = _model_tracks_page(chapters).encode("utf-8")
+    site_files[f"{BOOK_PATH}/model-tracks.html"] = _model_tracks_page(chapters, figures).encode("utf-8")
     if figures:
         site_files["examples/closed-loop/figure-index.json"] = (
             json.dumps(figures, indent=2, ensure_ascii=False).encode("utf-8") + b"\n"

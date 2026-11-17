@@ -43,6 +43,12 @@ class LearningBookTests(unittest.TestCase):
         campaign_figures = [
             {
                 "id": figure_id,
+                "task_id": {
+                    "campaign-syn-nl-lv-01-lotka": "syn-nl-lv-01/continuous-receding/1",
+                    "campaign-earth-orbit-orbit": "env717-earth-orbit/continuous-receding/1",
+                    "campaign-syn-nl-fuel-01-oxidizer": "syn-nl-fuel-01/continuous-receding/1",
+                    "campaign-syn-nl-fuel-01-fuel": "syn-nl-fuel-01/continuous-receding/1",
+                }[figure_id],
                 "availability": "ready",
                 "href": f"examples/closed-loop/figures/{figure_id}.html",
                 "layer_scopes": ["retained graph nodes", "observed plant replay"],
@@ -109,19 +115,23 @@ class LearningBookTests(unittest.TestCase):
         chapters = learning_book.validate(self.manifest, self.inventory, self.figures)
         tracks = learning_book._task_contracts(chapters)
         self.assertEqual(len(tracks), 3)
-        page = learning_book._model_tracks_page(chapters)
+        page = learning_book._model_tracks_page(chapters, self.figures)
         self.assertIn("System formulations and model tracks", page)
         for chapter, source, contract in tracks:
             with self.subTest(task=contract["task_id"]):
                 self.assertIn(contract["model"]["model_id"], page)
                 self.assertIn(contract["prediction"]["affine_model_id"], page)
                 self.assertIn(chapter["id"] + ".html", page)
+                self.assertIn("Visuals:", page)
                 detail = learning_book._model_tracks_section(chapter)
                 self.assertIn(contract["task_id"], detail)
                 self.assertIn(contract["model"]["equations"][0], detail)
                 self.assertIn("State ordering and coordinates", detail)
                 self.assertIn("Parameters", detail)
                 self.assertIn("Qualification", detail)
+                self.assertIn("Disturbances", detail)
+                self.assertIn("Observation supplied to the controller", detail)
+                self.assertIn("State and terminal constraints", detail)
                 self.assertIn(contract["source"]["path"], detail)
                 self.assertIn(source, detail)
 
