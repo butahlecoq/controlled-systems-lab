@@ -310,11 +310,18 @@ class LPWorkspaceView final : public LPWorkspace {
 };
 namespace detail {
 template <class Port> struct CheckedEntry {
-    const Registration<Port> *entry{};
-    const typename Port::Request *request{};
+    const Registration<Port> *entry;
+    const typename Port::Request *request;
     Requirements requirements;
     Provenance provenance;
     Offer offer;
+
+    CheckedEntry(const Registration<Port> &registration,
+                 const typename Port::Request &request_value, Requirements requirements_value,
+                 Provenance provenance_value, Offer offer_value)
+        : entry(&registration), request(&request_value),
+          requirements(std::move(requirements_value)), provenance(std::move(provenance_value)),
+          offer(std::move(offer_value)) {}
 };
 template <class Port> struct PreparedEntry {
     Registration<Port> entry;
@@ -417,7 +424,7 @@ struct PipelineAccess {
                                        static_cast<bool>(entry.basis_factory), accepts_validated);
         if (!diagnostics.empty())
             return Rejection{provenance, std::move(diagnostics)};
-        return CheckedEntry<Port>{&entry, &s.request, s.requirements, provenance, offer};
+        return CheckedEntry<Port>{entry, s.request, s.requirements, provenance, offer};
     }
     template <class... Ports>
     static std::variant<CheckedPipeline<Ports...>, Rejection> check(const Selection<Ports> &...s) {

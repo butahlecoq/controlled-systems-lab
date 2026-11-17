@@ -125,7 +125,7 @@ struct ProviderAccess {
             return Rejection{storage.provenance, std::move(diagnostics)};
         // Reuse the same checked-entry snapshot and factory path as fixed queries.
         const CheckedPipeline<Port> checked{std::tuple<CheckedEntry<Port>>{CheckedEntry<Port>{
-            &storage.entry, &request, storage.requirements, storage.provenance, offer}}};
+            storage.entry, request, storage.requirements, storage.provenance, offer}}};
         return checked.snapshot();
     }
     template <class... Fixed, class... Generated, class Builder>
