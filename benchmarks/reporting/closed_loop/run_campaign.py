@@ -4,17 +4,20 @@ from __future__ import annotations
 
 import argparse
 import copy
+import fcntl
 import hashlib
 import importlib.metadata
 import json
 import os
 import platform
 import re
+import statistics
 import subprocess
 import sys
 import time
 import uuid
 from pathlib import Path
+from typing import Literal, TypedDict
 
 import run_closed_loop
 from capabilities import (
@@ -32,6 +35,12 @@ MANIFEST_PATHS = (MANIFEST, NATIVE_MANIFEST, HISTORY_MANIFEST, COMPOSITIONS_MANI
 TASK_NAMES = ("syn-nl-lv-01", "earth-orbit", "syn-nl-fuel-01")
 CAMPAIGN_SCHEMA = "csl.closed-loop-composition-campaign/2"
 RUNTIME_PACKAGES = ("numpy", "scipy", "do-mpc", "casadi", "matplotlib")
+
+
+class PairedScheduleRow(TypedDict):
+    phase: Literal["warmup", "measured"]
+    repetition: int
+    order: list[Literal["A", "B"]]
 
 
 def sha256_file(path: Path) -> str:
@@ -554,6 +563,7 @@ def run_frozen_attempt(
     profile: dict,
     item: dict,
     manifest_path: Path,
+    measurement_claim: str = "one-off correctness pilot; clocks descriptive, no speed comparison",
 ) -> dict:
     variable = "CSL_NATIVE_POLICY_BRIDGE"
     previous = os.environ.get(variable)
@@ -567,6 +577,7 @@ def run_frozen_attempt(
             attempt_cpu_seconds=profile["attempt_cpu_seconds"],
             graph_id=item["graph_id"],
             capability_manifest_path=manifest_path,
+            measurement_claim=measurement_claim,
         )
     finally:
         if previous is None:
@@ -798,6 +809,560 @@ def build_campaign_coverage(record: dict, output_root: Path) -> dict:
     }
 
 
+def paired_method_schedule(repetitions: int) -> list[PairedScheduleRow]:
+    """Return one excluded warm-up and alternating measured A/B attempts."""
+    if repetitions < 1:
+        raise ValueError("paired comparison requires at least one measured repetition")
+    schedule: list[PairedScheduleRow] = [{"phase": "warmup", "repetition": 0, "order": ["A", "B"]}]
+    for repetition in range(1, repetitions + 1):
+        order: list[Literal["A", "B"]] = ["A", "B"] if repetition % 2 else ["B", "A"]
+        schedule.append({"phase": "measured", "repetition": repetition, "order": order})
+    return schedule
+
+
+def run_paired_timing(
+    record: dict,
+    freeze_path: Path,
+    output_root: Path,
+    bridge: Path,
+    native_policy_bridge: Path,
+    comparison_packer: Path,
+    repetitions: int = 5,
+) -> dict:
+    output_root.mkdir(parents=True, exist_ok=True)
+    lock_path = output_root / ".paired-timing.lock"
+    with lock_path.open("a+", encoding="utf-8") as lock_file:
+        try:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as error:
+            raise ValueError("another paired timing invocation owns this output root") from error
+        try:
+            return _run_paired_timing_locked(
+                record,
+                freeze_path,
+                output_root,
+                bridge,
+                native_policy_bridge,
+                comparison_packer,
+                repetitions,
+            )
+        finally:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+
+
+def _run_paired_timing_locked(
+    record: dict,
+    freeze_path: Path,
+    output_root: Path,
+    bridge: Path,
+    native_policy_bridge: Path,
+    comparison_packer: Path,
+    repetitions: int,
+) -> dict:
+    """Measure fixed-tail polytope and zonotope sides in paired alternating order."""
+    if repetitions < 5:
+        raise ValueError("comparison-program timing requires at least five measured repetitions")
+    controllers = {
+        "A": "native-fixed-tail-polytope-ipopt/1",
+        "B": "native-fixed-tail-zonotope-ipopt/1",
+    }
+    tasks = ("syn-nl-lv-01", "earth-orbit", "syn-nl-fuel-01")
+    graphs_by_task: dict[str, dict[str, dict]] = {task: {} for task in tasks}
+    for item in record["graphs"]:
+        task = item["task_name"]
+        controller = item.get("controller", {}).get("id")
+        if task in graphs_by_task and controller in controllers.values():
+            side = next(side for side, value in controllers.items() if value == controller)
+            if side in graphs_by_task[task]:
+                raise ValueError(f"frozen comparison has duplicate {side} graph for {task}")
+            graphs_by_task[task][side] = item
+    if any(set(sides) != {"A", "B"} for sides in graphs_by_task.values()):
+        raise ValueError("frozen comparison must contain both matched methods for all three tasks")
+    for task, sides in graphs_by_task.items():
+        a, b = sides["A"], sides["B"]
+        if (a["task_sha256"], a["action_profile_id"]) != (b["task_sha256"], b["action_profile_id"]):
+            raise ValueError(f"comparison methods do not share task and action profile: {task}")
+
+    events_path = output_root / "paired-timing-events.jsonl"
+    freeze_sha256 = sha256_file(freeze_path)
+    existing: dict[tuple[str, str, int, str, int], dict] = {}
+    expected_identity = {
+        "freeze_sha256": freeze_sha256,
+        "source_commit": record["source_commit"],
+        "bridge_sha256": record["bridge"]["sha256"],
+        "native_policy_sha256": record["native_policy"]["sha256"],
+        "resource_profile_id": record["resource_profile"]["profile_id"],
+    }
+    if events_path.exists():
+        for line_number, line in enumerate(events_path.read_text(encoding="utf-8").splitlines(), 1):
+            event = json.loads(line)
+            if event.get("schema") != "csl.closed-loop-paired-timing-event/2":
+                raise ValueError(f"unknown paired timing event schema on line {line_number}")
+            if any(event.get(field) != value for field, value in expected_identity.items()):
+                raise ValueError(
+                    f"paired timing event belongs to a different freeze on line {line_number}"
+                )
+            key = (
+                event["task_name"],
+                event["phase"],
+                event["repetition"],
+                event["side"],
+                event["try_index"],
+            )
+            if key in existing:
+                previous = existing[key]
+                if previous.get("state") != "started" or event.get("state") not in {
+                    "completed",
+                    "interrupted",
+                }:
+                    raise ValueError(
+                        f"invalid paired timing event transition on line {line_number}"
+                    )
+            existing[key] = event
+
+    def event_graph(event: dict) -> dict:
+        try:
+            return graphs_by_task[event["task_name"]][event["side"]]
+        except KeyError as error:
+            raise ValueError("paired timing event names an unknown task or method side") from error
+
+    def validate_completed_event(event: dict) -> None:
+        graph = event_graph(event)
+        expected = {
+            "graph_id": graph["graph_id"],
+            "graph_fingerprint": graph["graph_fingerprint"],
+            "task_sha256": graph["task_sha256"],
+            "controller_id": graph["controller"]["id"],
+        }
+        if any(event.get(field) != value for field, value in expected.items()):
+            raise ValueError("paired timing event graph identity differs from its freeze")
+        attempt_path = Path(event["attempt"]).resolve(strict=True)
+        try:
+            attempt_path.relative_to(output_root.resolve())
+        except ValueError as error:
+            raise ValueError("paired timing event points outside its output root") from error
+        attempt_file = attempt_path / "attempt.json"
+        if sha256_file(attempt_file) != event.get("attempt_sha256"):
+            raise ValueError("paired timing attempt hash differs from its event")
+        request = json.loads((attempt_path / "request.json").read_text(encoding="utf-8"))
+        manifest_path = attempt_path / "run-manifest.json"
+        manifest = (
+            json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.is_file() else {}
+        )
+        runtime_path = attempt_path / "campaign-runtime.json"
+        runtime_binding = (
+            json.loads(runtime_path.read_text(encoding="utf-8")) if runtime_path.is_file() else {}
+        )
+        recorded_manifest_hash = event.get("run_manifest_sha256")
+        if (manifest_path.is_file() != (recorded_manifest_hash is not None)) or (
+            manifest_path.is_file() and sha256_file(manifest_path) != recorded_manifest_hash
+        ):
+            raise ValueError("paired timing run-manifest hash differs from its event")
+        if not runtime_path.is_file() or sha256_file(runtime_path) != event.get(
+            "campaign_runtime_sha256"
+        ):
+            raise ValueError("paired timing runtime binding is missing or changed")
+        if (
+            request.get("source_commit") != record["source_commit"]
+            or request.get("requested", {}).get("graph_id") != graph["graph_id"]
+            or request.get("requested", {}).get("resource_profile_id")
+            != record["resource_profile"]["profile_id"]
+            or request.get("requested", {}).get("task_name") != graph["task_name"]
+            or (manifest and manifest.get("graph_fingerprint") != graph["graph_fingerprint"])
+            or (manifest and manifest.get("bridge_sha256") != record["bridge"]["sha256"])
+            or (manifest and manifest.get("source_commit") != record["source_commit"])
+            or (manifest and manifest.get("task_sha256") != graph["task_sha256"])
+            or (
+                manifest
+                and manifest.get("capability_manifest_sha256")
+                != graph["capability_manifest_sha256"]
+            )
+            or (
+                manifest
+                and manifest.get("resource_profile_id") != record["resource_profile"]["profile_id"]
+            )
+            or (
+                manifest
+                and manifest.get("resolved_modules", {}).get("id") != graph["controller"]["id"]
+            )
+            or any(
+                runtime_binding.get(field) != value
+                for field, value in campaign_binding(record, graph, attempt_path).items()
+            )
+        ):
+            raise ValueError("paired timing attempt receipt differs from its frozen graph")
+        attempt_data = json.loads(attempt_file.read_text(encoding="utf-8"))
+        if attempt_data.get("overall_status") != event.get("overall_status"):
+            raise ValueError("paired timing event status differs from its attempt receipt")
+        end_to_end = attempt_data.get("end_to_end", {})
+        if event.get("end_to_end_wall_seconds") != end_to_end.get("wall_seconds") or event.get(
+            "worker_wall_seconds"
+        ) != end_to_end.get("worker_wall_seconds"):
+            raise ValueError("paired timing event measurement differs from its attempt receipt")
+        executed_binary = (
+            attempt_data.get("preparation_receipt", {})
+            .get("adapter_receipt", {})
+            .get("executable_sha256")
+        )
+        if executed_binary not in (None, record["native_policy"]["sha256"]):
+            raise ValueError("paired timing attempt used a different native policy binary")
+        if runtime_binding.get("executed_native_policy_bridge_sha256") != executed_binary:
+            raise ValueError("paired timing runtime binding differs from the executed binary")
+
+    for _key, event in existing.items():
+        graph = event_graph(event)
+        if (
+            event.get("graph_id") != graph["graph_id"]
+            or event.get("graph_fingerprint") != graph["graph_fingerprint"]
+            or event.get("task_sha256") != graph["task_sha256"]
+            or event.get("controller_id") != graph["controller"]["id"]
+        ):
+            raise ValueError("paired timing event graph identity differs from its freeze")
+        if event.get("state") == "completed":
+            validate_completed_event(event)
+
+    for key, event in list(existing.items()):
+        if event.get("state") != "started":
+            continue
+        graph = event_graph(event)
+        attempts = []
+        for request_path in (output_root / graph["task_name"] / "attempts").glob("*/request.json"):
+            try:
+                request = json.loads(request_path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            if (
+                request.get("source_commit") == record["source_commit"]
+                and request.get("requested", {}).get("graph_id") == graph["graph_id"]
+                and request.get("requested", {}).get("resource_profile_id")
+                == record["resource_profile"]["profile_id"]
+                and request_path.stat().st_mtime_ns >= event.get("started_unix_ns", 0)
+            ):
+                attempts.append(request_path.parent.resolve())
+        if len(attempts) == 1:
+            attempt_path = attempts[0]
+            write_campaign_runtime_sidecar(attempt_path, record, graph)
+            attempt_data = json.loads((attempt_path / "attempt.json").read_text(encoding="utf-8"))
+            event.update(
+                {
+                    "state": "completed",
+                    "attempt": str(attempt_path),
+                    "attempt_sha256": sha256_file(attempt_path / "attempt.json"),
+                    "run_manifest_sha256": sha256_file(attempt_path / "run-manifest.json")
+                    if (attempt_path / "run-manifest.json").is_file()
+                    else None,
+                    "campaign_runtime_sha256": sha256_file(attempt_path / "campaign-runtime.json"),
+                    "overall_status": attempt_data.get("overall_status", "incomplete"),
+                    "algorithm_status": attempt_data.get("algorithm_status", "incomplete"),
+                    "postcheck_status": attempt_data.get("postcheck_status", "not_run"),
+                    "render_status": attempt_data.get("render_status", "not_run"),
+                    "end_to_end_wall_seconds": attempt_data.get("end_to_end", {}).get(
+                        "wall_seconds"
+                    ),
+                    "worker_wall_seconds": attempt_data.get("end_to_end", {}).get(
+                        "worker_wall_seconds"
+                    ),
+                    "resumed_interrupted_attempt": True,
+                    "completed_unix_ns": time.time_ns(),
+                }
+            )
+        else:
+            event.update(
+                {
+                    "state": "interrupted",
+                    "interruption_reason": "no unique durable common-runner attempt matched the start event",
+                    "candidate_attempt_count": len(attempts),
+                    "completed_unix_ns": time.time_ns(),
+                }
+            )
+        append_event(events_path, event)
+        existing[key] = event
+        if event["state"] == "completed":
+            validate_completed_event(event)
+
+    claim = f"paired timing pilot; {repetitions} measured repetitions per method; alternating order"
+    scheduled = 0
+    for task in tasks:
+        for scheduled_row in paired_method_schedule(repetitions):
+            for side in scheduled_row["order"]:
+                sample_key = (task, scheduled_row["phase"], scheduled_row["repetition"], side)
+                prior = [key for key in existing if key[:4] == sample_key]
+                completed = [
+                    existing[key] for key in prior if existing[key].get("state") == "completed"
+                ]
+                if completed:
+                    continue
+                try_index = max((key[4] for key in prior), default=0) + 1
+                key = (*sample_key, try_index)
+                item = graphs_by_task[task][side]
+                event = {
+                    "schema": "csl.closed-loop-paired-timing-event/2",
+                    **expected_identity,
+                    "task_name": task,
+                    "phase": scheduled_row["phase"],
+                    "repetition": scheduled_row["repetition"],
+                    "try_index": try_index,
+                    "order_index": len(existing),
+                    "side": side,
+                    "graph_id": item["graph_id"],
+                    "graph_fingerprint": item["graph_fingerprint"],
+                    "task_sha256": item["task_sha256"],
+                    "controller_id": controllers[side],
+                    "started_unix_ns": time.time_ns(),
+                    "state": "started",
+                }
+                append_event(events_path, event)
+                result = run_frozen_attempt(
+                    task,
+                    output_root,
+                    bridge,
+                    native_policy_bridge,
+                    record["resource_profile"],
+                    item,
+                    ROOT / item["catalogue_path"],
+                    measurement_claim=claim,
+                )
+                attempt_path = Path(result["attempt"])
+                write_campaign_runtime_sidecar(attempt_path, record, item)
+                attempt_data = json.loads(
+                    (attempt_path / "attempt.json").read_text(encoding="utf-8")
+                )
+                event.update(
+                    {
+                        "state": "completed",
+                        "attempt": str(attempt_path),
+                        "attempt_sha256": sha256_file(attempt_path / "attempt.json"),
+                        "run_manifest_sha256": sha256_file(attempt_path / "run-manifest.json")
+                        if (attempt_path / "run-manifest.json").is_file()
+                        else None,
+                        "campaign_runtime_sha256": sha256_file(
+                            attempt_path / "campaign-runtime.json"
+                        ),
+                        "overall_status": attempt_data.get("overall_status"),
+                        "algorithm_status": attempt_data.get("algorithm_status"),
+                        "postcheck_status": attempt_data.get("postcheck_status"),
+                        "render_status": attempt_data.get("render_status"),
+                        "end_to_end_wall_seconds": attempt_data.get("end_to_end", {}).get(
+                            "wall_seconds"
+                        ),
+                        "worker_wall_seconds": attempt_data.get("end_to_end", {}).get(
+                            "worker_wall_seconds"
+                        ),
+                        "completed_unix_ns": time.time_ns(),
+                    }
+                )
+                append_event(events_path, event)
+                existing[key] = event
+                scheduled += 1
+                validate_completed_event(event)
+
+    completed_samples: dict[tuple[str, str, int, str], dict] = {}
+    for key, event in existing.items():
+        if event.get("state") == "completed":
+            completed_samples[key[:4]] = event
+
+    summaries: dict[str, dict] = {}
+    for task in tasks:
+        summaries[task] = {}
+        for side in ("A", "B"):
+            rows = [
+                event
+                for (event_task, phase, _repetition, event_side), event in completed_samples.items()
+                if event_task == task and phase == "measured" and event_side == side
+            ]
+            rows.sort(key=lambda event: event["repetition"])
+            values = [
+                row["end_to_end_wall_seconds"]
+                for row in rows
+                if row.get("overall_status") == "complete"
+                and isinstance(row.get("end_to_end_wall_seconds"), (int, float))
+            ]
+            summaries[task][side] = {
+                "method": controllers[side],
+                "measured_attempts": len(rows),
+                "successful_timed_attempts": len(values),
+                "failures_or_incomplete": [
+                    {
+                        "repetition": row["repetition"],
+                        "status": row.get("overall_status"),
+                        "attempt": row.get("attempt"),
+                    }
+                    for row in rows
+                    if row.get("overall_status") != "complete"
+                ],
+                "end_to_end_wall_seconds": {
+                    "median": statistics.median(values) if values else None,
+                    "range": [min(values), max(values)] if values else None,
+                    "samples": values,
+                },
+                "attempts": [
+                    {
+                        "repetition": row["repetition"],
+                        "attempt": row.get("attempt"),
+                        "sha256": row.get("attempt_sha256"),
+                        "status": row.get("overall_status"),
+                        "wall_seconds": row.get("end_to_end_wall_seconds"),
+                    }
+                    for row in rows
+                ],
+            }
+    comparison_records: dict[str, str] = {}
+    for task in tasks:
+        pack_request = build_comparison_pack_request(
+            record,
+            task,
+            graphs_by_task[task],
+            completed_samples,
+            repetitions,
+        )
+        request_path = output_root / f"{task}-comparison-pack-request.json"
+        write_json_atomically(request_path, pack_request)
+        completed = subprocess.run(
+            [str(comparison_packer.resolve(strict=True)), str(request_path)],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        comparison_path = output_root / f"{task}-comparison-record.json"
+        comparison_path.write_text(completed.stdout, encoding="utf-8")
+        comparison_records[task] = str(comparison_path)
+
+    summary = {
+        "schema": "csl.closed-loop-paired-timing-summary/1",
+        "source_commit": record["source_commit"],
+        "freeze_sha256": freeze_sha256,
+        "native_policy_sha256": record["native_policy"]["sha256"],
+        "bridge_sha256": record["bridge"]["sha256"],
+        "resource_profile": record["resource_profile"],
+        "measured_repetitions_per_method": repetitions,
+        "warmups_per_method": 1,
+        "order": "AB for odd repetitions; BA for even repetitions; warmup AB per task",
+        "scope": "runner end-to-end wall time includes worker launch, execution, independent CSL replay, bounded checker processes, and rendering; worker wall is reported per attempt",
+        "claim": "paired timing pilot; no winner unless all outcomes and limiter evidence support a comparison",
+        "limiter_profile": "not collected",
+        "tasks": summaries,
+        "comparison_records": comparison_records,
+        "events": str(events_path),
+        "attempts_executed_this_invocation": scheduled,
+    }
+    summary_path = output_root / "paired-timing-summary.json"
+    write_json_atomically(summary_path, summary)
+    summary["summary_path"] = str(summary_path)
+    return summary
+
+
+def build_comparison_pack_request(
+    record: dict,
+    task_name: str,
+    methods: dict[str, dict],
+    events: dict[tuple[str, str, int, str], dict],
+    repetitions: int,
+) -> dict:
+    """Build an OBS-04 pack request from validated paired attempts."""
+    task = load_task(task_name)
+    manifest_text = json.dumps(task, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    manifest_digest = hashlib.sha256(manifest_text.encode()).hexdigest()
+    problem_id = f"csl.problem.v1.sha256:{manifest_digest}"
+    request_descriptor = {
+        "schema": "csl.closed-loop-paired-timing-request/1",
+        "task_sha256": manifest_sha256(task),
+        "source_commit": record["source_commit"],
+        "resource_profile": record["resource_profile"],
+        "warmups_per_method": 1,
+        "measured_repetitions": repetitions,
+        "order": "AB for odd repetitions; BA for even repetitions; warmup AB",
+    }
+    request_digest = hashlib.sha256(
+        json.dumps(request_descriptor, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+    method_rows = []
+    for side in ("A", "B"):
+        graph = methods[side]
+        attempts = []
+        graph_controller = graph["controller"]
+        source_records = graph["source_files"]
+        for repetition in range(1, repetitions + 1):
+            event = events[(task_name, "measured", repetition, side)]
+            attempt_path = Path(event["attempt"])
+            attempt_data = json.loads((attempt_path / "attempt.json").read_text(encoding="utf-8"))
+            runtime_binary = (
+                attempt_data.get("preparation_receipt", {})
+                .get("adapter_receipt", {})
+                .get("executable_sha256")
+            )
+            if not runtime_binary:
+                runtime_binary = record["native_policy"]["sha256"]
+            build_profile = record["native_policy"]["build_profile"]
+            runtime = {
+                "language": "C++ and Python",
+                "implementation": "CSL closed-loop native fixed-tail policy",
+                "version": graph_controller["version"],
+                "executable_sha256": runtime_binary,
+                "os": platform.system(),
+                "architecture": platform.machine(),
+                "compiler": build_profile["cxx_compiler_id"],
+                "compiler_version": build_profile["cxx_compiler_version"],
+                "build_type": build_profile["build_type"],
+            }
+            status = attempt_data.get("overall_status", "incomplete")
+            if status == "complete":
+                status = "completed"
+            attempts.append(
+                {
+                    "run_id": attempt_data["attempt_id"],
+                    "runtime": runtime,
+                    "status": status,
+                    "result": attempt_data,
+                    "measurement": {
+                        "schema": "csl.closed-loop-paired-timing-event/1",
+                        "status": "passed" if status == "completed" else status,
+                        "strategy": graph_controller["id"],
+                        "instrumentation": "disabled",
+                        "repetition": repetition,
+                        "warmup": False,
+                        "order_index": event["order_index"],
+                        "end_to_end_wall_seconds": event.get("end_to_end_wall_seconds"),
+                        "worker_wall_seconds": event.get("worker_wall_seconds"),
+                    },
+                }
+            )
+        method_rows.append(
+            {
+                "id": graph_controller["id"],
+                "version": graph_controller["version"],
+                "configuration_id": "csl.config.v1.sha256:" + graph["graph_fingerprint"],
+                "sources": source_records,
+                "deviations_sha256": None,
+                "attempts": attempts,
+            }
+        )
+    arms = [
+        {
+            "configuration_id": method["configuration_id"],
+            "strategy": method["id"],
+            "instrumentation": "disabled",
+        }
+        for method in method_rows
+    ]
+    comparison_spec = {
+        "schema": "csl.comparison-spec/2",
+        "problem_id": problem_id,
+        "request_digest": request_digest,
+        "repetitions": repetitions,
+        "input_manifest_hash": manifest_digest,
+        "input_manifest_source": "resolved-problem-canonical-bytes",
+        "arms": arms,
+    }
+    return {
+        "schema": "csl.comparison-pack-request/1",
+        "manifest": manifest_text,
+        "input_manifest_schema": "resolved-problem-canonical-bytes",
+        "request_digest": request_digest,
+        "comparison_spec": comparison_spec,
+        "methods": method_rows,
+    }
+
+
 def positive_integer(value: str) -> int:
     parsed = int(value)
     if parsed <= 0:
@@ -822,6 +1387,16 @@ def main() -> int:
     run_parser.add_argument("--native-policy-cache", type=Path, required=True)
     run_parser.add_argument("--output-root", type=Path, required=True)
     run_parser.add_argument("--max-attempts", type=positive_integer)
+    paired_parser = commands.add_parser(
+        "paired-timing", help="run alternating fixed-tail polytope/zonotope repetitions"
+    )
+    paired_parser.add_argument("--freeze", type=Path, required=True)
+    paired_parser.add_argument("--bridge", type=Path, required=True)
+    paired_parser.add_argument("--native-policy-bridge", type=Path, required=True)
+    paired_parser.add_argument("--native-policy-cache", type=Path, required=True)
+    paired_parser.add_argument("--output-root", type=Path, required=True)
+    paired_parser.add_argument("--comparison-packer", type=Path, required=True)
+    paired_parser.add_argument("--repetitions", type=positive_integer, default=5)
     args = parser.parse_args()
 
     try:
@@ -839,7 +1414,7 @@ def main() -> int:
                 "source_commit": record["source_commit"],
                 "candidate_counts": record["candidate_counts"],
             }
-        else:
+        elif args.command == "run":
             record = read_freeze(
                 args.freeze, args.bridge, args.native_policy_bridge, args.native_policy_cache
             )
@@ -849,6 +1424,19 @@ def main() -> int:
                 args.bridge.resolve(),
                 args.native_policy_bridge.resolve(),
                 args.max_attempts,
+            )
+        else:
+            record = read_freeze(
+                args.freeze, args.bridge, args.native_policy_bridge, args.native_policy_cache
+            )
+            result = run_paired_timing(
+                record,
+                args.freeze.resolve(),
+                args.output_root.resolve(),
+                args.bridge.resolve(),
+                args.native_policy_bridge.resolve(),
+                args.comparison_packer.resolve(),
+                args.repetitions,
             )
     except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
         parser.error(str(error))

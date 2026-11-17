@@ -923,7 +923,10 @@ def run_task(
     attempt_cpu_seconds: int = DEFAULT_ATTEMPT_CPU_SECONDS,
     graph_id: str | None = None,
     capability_manifest_path: Path | None = None,
+    measurement_claim: str = "descriptive single attempt; no speed comparison",
 ) -> dict:
+    if not measurement_claim.strip():
+        raise ValueError("measurement claim must not be empty")
     resource_profile = attempt_resource_profile(attempt_wall_seconds, attempt_cpu_seconds)
     attempt_started = time.monotonic()
     attempt_id = (
@@ -1116,7 +1119,7 @@ def run_task(
             "suite_worker_count": 1,
             "suite_memory_enforcement": "none; per-process RLIMIT_AS only; no machine-wide limiter",
         },
-        "claim": "one-off correctness pilot; clocks descriptive, no speed comparison",
+        "claim": measurement_claim,
     }
     atomic_json(attempt / "run-manifest.json", manifest)
     initial.update(
@@ -1319,7 +1322,7 @@ def run_task(
         "wall_seconds": time.monotonic() - attempt_started,
         "scope": "worker launch, execution, independent CSL replay, bounded checker processes, and rendering",
         "worker_wall_seconds": result["supervisor"]["wall_seconds"],
-        "performance_claim": "descriptive single attempt; no speed comparison",
+        "performance_claim": measurement_claim,
     }
     result.update(derive_outcome_status(result))
     if result.get("format_version") == 2:
