@@ -477,7 +477,7 @@ struct PipelineAccess {
             return std::apply(
                 [](auto &...e) {
                     return CheckedPipeline<Ports...>{std::tuple<CheckedEntry<Ports>...>{
-                        std::get<CheckedEntry<Ports>>(std::move(e))...}};
+                        std::get<CheckedEntry<Ports>>(e)...}};
                 },
                 entries);
         }

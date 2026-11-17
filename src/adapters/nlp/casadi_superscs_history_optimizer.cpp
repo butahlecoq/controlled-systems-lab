@@ -151,7 +151,9 @@ class SuperSCSWorkspace final : public optimization::HistoryOptimizerWorkspace {
             if (!cones.empty()) {
                 psd = MX::diagcat(cones);
                 const auto flattened =
-                    MX::reshape(psd, static_cast<casadi_int>(psd_dimension * psd_dimension), 1);
+                    MX::reshape(psd, static_cast<casadi_int>(psd_dimension) *
+                                        static_cast<casadi_int>(psd_dimension),
+                                1);
                 const casadi::Function build_conic_data("history_soc_data", {z},
                                                         {MX::jacobian(flattened, z), psd});
                 const auto data = build_conic_data(
