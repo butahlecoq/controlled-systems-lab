@@ -125,6 +125,8 @@ csl_example(adaptive_ode_replay CSL::simulation)
 csl_example(native_slide50_reachability CSL::model_catalogue CSL::generator_adapter CSL::quickhull_2d)
 csl_example(native_model_catalogue CSL::model_catalogue CSL::generator_adapter CSL::quickhull_2d)
 csl_example(native_four_state_reachability CSL::model_catalogue CSL::geometry_generators CSL::quickhull_2d)
+csl_example(native_four_state_approximation CSL::model_catalogue CSL::geometry_generators
+  CSL::quickhull_2d CSL::approximation)
 csl_example(native_discrete_models CSL::model_catalogue)
 csl_example(discrete_mpc_2d CSL::controllers CSL::model_catalogue CSL::highs_convex)
 csl_example(positive_part_budget_2d CSL::highs_convex CSL::nominal_quadratic_history)
@@ -215,6 +217,8 @@ example_check(native_catalogue_source_cases native_model_catalogue "" 0
   "Native model catalogue: 2 source cases and all full-state corner checks passed")
 example_check(native_four_state_source_case native_four_state_reachability "" 0
   "Native four-state reachability: fifteen transitions and 1280 support checks passed")
+example_check(native_four_state_projection_approximations native_four_state_approximation "" 0
+  "Native four-state projection approximation comparison passed")
 example_check(native_discrete_source_models native_discrete_models "" 0
   "Native discrete model data: 35 models")
 if(TARGET discrete_mpc_2d)

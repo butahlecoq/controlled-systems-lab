@@ -550,6 +550,11 @@
       "owner": "docs/examples/fixed-plan-minimax-2d.html"
     },
     {
+      "route": "examples/four-state-projection-approximations-v1/index.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_four_state_projection_approximations.py"
+    },
+    {
       "route": "examples/fuel-b06-viz03.html",
       "disposition": "maintained",
       "owner": "docs/examples/fuel-b06-viz03.html"
