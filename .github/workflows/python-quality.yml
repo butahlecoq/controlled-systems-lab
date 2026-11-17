@@ -83,6 +83,9 @@ on:
       - 'scripts/reports/stage_discrete_mpc_2d.py'
       - 'tests/reporting/test_discrete_mpc_2d.py'
       - 'scripts/reports/stage_positive_part_budget_2d.py'
+      - 'scripts/reports/stage_four_state_projection_approximations.py'
+      - 'tests/reporting/test_four_state_projection_approximations.py'
+      - 'reports/algorithm-results/four-state-projection-approximations-v1/**'
       - 'reports/algorithm-results/native-row-scaling-diagnostic-v1/**'
       - 'reports/closed-loop-initial-baselines-v1/**'
       - 'reports/closed-loop-initial-baselines-v1.zip'
@@ -176,6 +179,9 @@ on:
       - 'scripts/reports/stage_discrete_mpc_2d.py'
       - 'tests/reporting/test_discrete_mpc_2d.py'
       - 'scripts/reports/stage_positive_part_budget_2d.py'
+      - 'scripts/reports/stage_four_state_projection_approximations.py'
+      - 'tests/reporting/test_four_state_projection_approximations.py'
+      - 'reports/algorithm-results/four-state-projection-approximations-v1/**'
       - 'reports/algorithm-results/native-row-scaling-diagnostic-v1/**'
       - 'reports/closed-loop-initial-baselines-v1/**'
       - 'reports/closed-loop-initial-baselines-v1.zip'
@@ -239,6 +245,8 @@ jobs:
         run: python -m unittest discover -s tests/reporting -p 'test_history_optimizer_native.py'
       - name: Check the saved typed-membership 2D example
         run: python -m unittest discover -s tests/reporting -p 'test_history_membership_2d.py'
+      - name: Check the four-state projection approximation report
+        run: python -m unittest discover -s tests/reporting -p 'test_four_state_projection_approximations.py'
       - name: Check the matched discrete MPC example and visual gallery
         run: |
           python -m unittest discover -s tests/reporting -p 'test_discrete_mpc_2d.py'

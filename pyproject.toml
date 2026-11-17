@@ -63,6 +63,8 @@ include = [
     "tests/reporting/test_closed_loop_campaign.py",
     "tests/reporting/test_closed_loop_tracing.py",
     "scripts/reports/stage_positive_part_budget_2d.py",
+    "scripts/reports/stage_four_state_projection_approximations.py",
+    "tests/reporting/test_four_state_projection_approximations.py",
 ]
 
 [tool.ruff.lint]
@@ -134,6 +136,8 @@ include = [
     "tests/reporting/test_closed_loop_campaign.py",
     "tests/reporting/test_closed_loop_tracing.py",
     "scripts/reports/stage_positive_part_budget_2d.py",
+    "scripts/reports/stage_four_state_projection_approximations.py",
+    "tests/reporting/test_four_state_projection_approximations.py",
 ]
 
 [tool.ty.terminal]

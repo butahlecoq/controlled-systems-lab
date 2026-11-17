@@ -30,6 +30,7 @@ import stage_buryatia_dim4
 import stage_buryatia_volterra
 import stage_discrete_mpc_2d
 import stage_ext07
+import stage_four_state_projection_approximations
 import stage_history_membership_2d
 import stage_history_optimizer_native
 import stage_native_discrete_models
@@ -1372,6 +1373,10 @@ def build(catalog, site):
         Path(__file__).resolve().parents[2]
     )
     saved_figures += native_cards
+    approximation_files, approximation_inventory, approximation_cards = (
+        stage_four_state_projection_approximations.build(Path(__file__).resolve().parents[2])
+    )
+    saved_figures += approximation_cards
     buryatia_files, buryatia_inventory, buryatia_card = stage_buryatia_dim4.build(
         Path(__file__).resolve().parents[2]
     )
@@ -1475,6 +1480,7 @@ def build(catalog, site):
     outputs.update(episode_geometry_assets)
     outputs.update(analytic_files)
     outputs.update(native_files)
+    outputs.update(approximation_files)
     outputs.update(buryatia_files)
     outputs.update(volterra_files)
     outputs.update(pitch_files)
@@ -1689,6 +1695,7 @@ def build(catalog, site):
     gallery_inventory.extend(analytic_inventory)
     gallery_inventory.extend(fuel_layer_inventory)
     gallery_inventory.extend(native_inventory)
+    gallery_inventory.extend(approximation_inventory)
     gallery_inventory.extend(buryatia_inventory)
     gallery_inventory.extend(volterra_inventory)
     gallery_inventory.extend(pitch_inventory)
