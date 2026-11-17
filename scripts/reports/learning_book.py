@@ -572,8 +572,7 @@ def _model_tracks_section(chapter: dict) -> str:
         parts.append("</ul>")
         parts.append("<p><strong>Disturbances.</strong> ")
         parts.append(
-            escape(str(task.get("disturbances", "Not specified by this task contract.")))
-            + "</p>"
+            escape(str(task.get("disturbances", "Not specified by this task contract."))) + "</p>"
         )
         domains = task.get("control_domains", {})
         if domains:
@@ -725,9 +724,9 @@ def _model_tracks_section(chapter: dict) -> str:
             + escape(str(objective.get("kind", "unspecified")))
             + ".</p><p><strong>Closed-loop semantics.</strong> "
             + escape(closed_loop_summary)
-            + '.</p><p><strong>Observation supplied to the controller.</strong> '
+            + ".</p><p><strong>Observation supplied to the controller.</strong> "
             + escape(str(closed_loop.get("observation", "Not specified by this task contract.")))
-            + '.</p><p><strong>State and terminal constraints.</strong> State bounds are listed above; '
+            + ".</p><p><strong>State and terminal constraints.</strong> State bounds are listed above; "
             + escape(str(terminal or "No terminal condition is specified."))
             + '. Objective targets are not feasibility constraints unless the contract says otherwise.</p><p><a href="'
             + escape(_repository_href(contract_path), quote=True)
@@ -818,7 +817,9 @@ def _model_tracks_page(chapters: list[dict], figure_index: dict | None = None) -
             page.append("<br><strong>Visuals:</strong> ")
             page.append(
                 " · ".join(
-                    '<a href="../' + escape(figure["href"], quote=True) + '">'
+                    '<a href="../'
+                    + escape(figure["href"], quote=True)
+                    + '">'
                     + escape(str(figure.get("title") or figure["id"]))
                     + "</a>"
                     for figure in visual_links
@@ -1252,7 +1253,9 @@ def build(
     site_files[f"{BOOK_PATH}/module-catalogue.html"] = _module_catalogue_page(
         manifest, inventory
     ).encode("utf-8")
-    site_files[f"{BOOK_PATH}/model-tracks.html"] = _model_tracks_page(chapters, figures).encode("utf-8")
+    site_files[f"{BOOK_PATH}/model-tracks.html"] = _model_tracks_page(chapters, figures).encode(
+        "utf-8"
+    )
     if figures:
         site_files["examples/closed-loop/figure-index.json"] = (
             json.dumps(figures, indent=2, ensure_ascii=False).encode("utf-8") + b"\n"
