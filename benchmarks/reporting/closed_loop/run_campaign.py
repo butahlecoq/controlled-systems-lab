@@ -7,6 +7,7 @@ import copy
 import fcntl
 import hashlib
 import importlib.metadata
+import itertools
 import json
 import os
 import platform
@@ -35,6 +36,17 @@ MANIFEST_PATHS = (MANIFEST, NATIVE_MANIFEST, HISTORY_MANIFEST, COMPOSITIONS_MANI
 TASK_NAMES = ("syn-nl-lv-01", "earth-orbit", "syn-nl-fuel-01")
 CAMPAIGN_SCHEMA = "csl.closed-loop-composition-campaign/2"
 RUNTIME_PACKAGES = ("numpy", "scipy", "do-mpc", "casadi", "matplotlib")
+FIXED_TAIL_REPRESENTATIONS = ("box", "ellipsoid", "parallelotope", "polytope", "zonotope")
+
+
+def fixed_tail_controller_id(representation: str) -> str:
+    if representation not in FIXED_TAIL_REPRESENTATIONS:
+        raise ValueError(f"unsupported fixed-tail representation: {representation}")
+    return f"native-fixed-tail-{representation}-ipopt/1"
+
+
+def fixed_tail_representation_pairs() -> list[tuple[str, str]]:
+    return list(itertools.combinations(FIXED_TAIL_REPRESENTATIONS, 2))
 
 
 class PairedScheduleRow(TypedDict):
@@ -820,6 +832,46 @@ def paired_method_schedule(repetitions: int) -> list[PairedScheduleRow]:
     return schedule
 
 
+def select_paired_graphs(
+    record: dict, controller_a: str, controller_b: str
+) -> dict[str, dict[str, dict]]:
+    if not controller_a or not controller_b or controller_a == controller_b:
+        raise ValueError("paired timing requires two different controller identities")
+    controllers = {"A": controller_a, "B": controller_b}
+    graphs_by_task: dict[str, dict[str, dict]] = {task: {} for task in TASK_NAMES}
+    for item in record["graphs"]:
+        task = item["task_name"]
+        controller = item.get("controller", {}).get("id")
+        if task in graphs_by_task and controller in controllers.values():
+            side = next(side for side, value in controllers.items() if value == controller)
+            if side in graphs_by_task[task]:
+                raise ValueError(f"frozen comparison has duplicate {side} graph for {task}")
+            graphs_by_task[task][side] = item
+    if any(set(sides) != {"A", "B"} for sides in graphs_by_task.values()):
+        raise ValueError("frozen comparison must contain both matched methods for all three tasks")
+    for task, sides in graphs_by_task.items():
+        a, b = sides["A"], sides["B"]
+        if (
+            a["task_id"],
+            a["task_sha256"],
+            a["action_profile_id"],
+            a["execution"],
+            a["role_bindings"].get("control_optimizer"),
+            a["controller"].get("solver"),
+        ) != (
+            b["task_id"],
+            b["task_sha256"],
+            b["action_profile_id"],
+            b["execution"],
+            b["role_bindings"].get("control_optimizer"),
+            b["controller"].get("solver"),
+        ):
+            raise ValueError(
+                f"comparison methods do not share task, action, execution and solver: {task}"
+            )
+    return graphs_by_task
+
+
 def run_paired_timing(
     record: dict,
     freeze_path: Path,
@@ -828,7 +880,11 @@ def run_paired_timing(
     native_policy_bridge: Path,
     comparison_packer: Path,
     repetitions: int = 5,
+    controller_a: str | None = None,
+    controller_b: str | None = None,
 ) -> dict:
+    controller_a = fixed_tail_controller_id("polytope") if controller_a is None else controller_a
+    controller_b = fixed_tail_controller_id("zonotope") if controller_b is None else controller_b
     output_root.mkdir(parents=True, exist_ok=True)
     lock_path = output_root / ".paired-timing.lock"
     with lock_path.open("a+", encoding="utf-8") as lock_file:
@@ -845,6 +901,8 @@ def run_paired_timing(
                 native_policy_bridge,
                 comparison_packer,
                 repetitions,
+                controller_a,
+                controller_b,
             )
         finally:
             fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
@@ -858,30 +916,15 @@ def _run_paired_timing_locked(
     native_policy_bridge: Path,
     comparison_packer: Path,
     repetitions: int,
+    controller_a: str,
+    controller_b: str,
 ) -> dict:
-    """Measure fixed-tail polytope and zonotope sides in paired alternating order."""
+    """Measure two frozen controller profiles in paired alternating order."""
     if repetitions < 5:
         raise ValueError("comparison-program timing requires at least five measured repetitions")
-    controllers = {
-        "A": "native-fixed-tail-polytope-ipopt/1",
-        "B": "native-fixed-tail-zonotope-ipopt/1",
-    }
+    controllers = {"A": controller_a, "B": controller_b}
     tasks = ("syn-nl-lv-01", "earth-orbit", "syn-nl-fuel-01")
-    graphs_by_task: dict[str, dict[str, dict]] = {task: {} for task in tasks}
-    for item in record["graphs"]:
-        task = item["task_name"]
-        controller = item.get("controller", {}).get("id")
-        if task in graphs_by_task and controller in controllers.values():
-            side = next(side for side, value in controllers.items() if value == controller)
-            if side in graphs_by_task[task]:
-                raise ValueError(f"frozen comparison has duplicate {side} graph for {task}")
-            graphs_by_task[task][side] = item
-    if any(set(sides) != {"A", "B"} for sides in graphs_by_task.values()):
-        raise ValueError("frozen comparison must contain both matched methods for all three tasks")
-    for task, sides in graphs_by_task.items():
-        a, b = sides["A"], sides["B"]
-        if (a["task_sha256"], a["action_profile_id"]) != (b["task_sha256"], b["action_profile_id"]):
-            raise ValueError(f"comparison methods do not share task and action profile: {task}")
+    graphs_by_task = select_paired_graphs(record, controller_a, controller_b)
 
     events_path = output_root / "paired-timing-events.jsonl"
     freeze_sha256 = sha256_file(freeze_path)
@@ -1080,7 +1123,7 @@ def _run_paired_timing_locked(
         if event["state"] == "completed":
             validate_completed_event(event)
 
-    claim = f"paired timing pilot; {repetitions} measured repetitions per method; alternating order"
+    claim = f"paired timing; {repetitions} measured repetitions per method; alternating order"
     scheduled = 0
     for task in tasks:
         for scheduled_row in paired_method_schedule(repetitions):
@@ -1237,8 +1280,9 @@ def _run_paired_timing_locked(
         "measured_repetitions_per_method": repetitions,
         "warmups_per_method": 1,
         "order": "AB for odd repetitions; BA for even repetitions; warmup AB per task",
+        "controllers": controllers,
         "scope": "runner end-to-end wall time includes worker launch, execution, independent CSL replay, bounded checker processes, and rendering; worker wall is reported per attempt",
-        "claim": "paired timing pilot; no winner unless all outcomes and limiter evidence support a comparison",
+        "claim": "No ranking unless correctness and limiter evidence support it.",
         "limiter_profile": "not collected",
         "tasks": summaries,
         "comparison_records": comparison_records,
@@ -1247,6 +1291,124 @@ def _run_paired_timing_locked(
     }
     summary_path = output_root / "paired-timing-summary.json"
     write_json_atomically(summary_path, summary)
+    summary["summary_path"] = str(summary_path)
+    return summary
+
+
+def _representation_pair_differences(graph_a: dict, graph_b: dict) -> dict:
+    role_a = graph_a.get("role_bindings", {})
+    role_b = graph_b.get("role_bindings", {})
+    controller_a = graph_a.get("controller", {})
+    controller_b = graph_b.get("controller", {})
+    return {
+        "changed_role_bindings": {
+            key: {"A": role_a.get(key), "B": role_b.get(key)}
+            for key in sorted(set(role_a) | set(role_b))
+            if role_a.get(key) != role_b.get(key)
+        },
+        "changed_controller_fields": sorted(
+            key
+            for key in set(controller_a) | set(controller_b)
+            if controller_a.get(key) != controller_b.get(key)
+        ),
+    }
+
+
+def run_fixed_tail_representation_matrix(
+    record: dict,
+    freeze_path: Path,
+    output_root: Path,
+    bridge: Path,
+    native_policy_bridge: Path,
+    comparison_packer: Path,
+    repetitions: int = 5,
+) -> dict:
+    """Run every pair among the five admitted fixed-tail representations."""
+    if repetitions < 5:
+        raise ValueError("comparison-program timing requires at least five measured repetitions")
+    output_root.mkdir(parents=True, exist_ok=True)
+    pairs = fixed_tail_representation_pairs()
+    expected_pairs = [f"{left}-vs-{right}" for left, right in pairs]
+    graphs = {(item["task_name"], item["controller"]["id"]): item for item in record["graphs"]}
+    comparisons = []
+    summary_path = output_root / "representation-matrix-summary.json"
+    summary = {
+        "schema": "csl.closed-loop-fixed-tail-representation-matrix/1",
+        "source_commit": record["source_commit"],
+        "freeze_sha256": sha256_file(freeze_path),
+        "native_policy_sha256": record["native_policy"]["sha256"],
+        "bridge_sha256": record["bridge"]["sha256"],
+        "resource_profile": record["resource_profile"],
+        "representations": list(FIXED_TAIL_REPRESENTATIONS),
+        "pair_count": len(pairs),
+        "task_pair_count": len(pairs) * len(TASK_NAMES),
+        "measured_repetitions_per_method": repetitions,
+        "warmups_per_method": 1,
+        "planned_measured_attempts": len(pairs) * len(TASK_NAMES) * 2 * repetitions,
+        "planned_warmup_attempts": len(pairs) * len(TASK_NAMES) * 2,
+        "pair_order": expected_pairs,
+        "comparison_scope": (
+            "Task, action, execution, control optimizer and solver are matched. Per-pair role and "
+            "controller differences are retained, so timings compare full profiles rather than "
+            "isolating a representation effect when associated geometry wiring also changes."
+        ),
+        "limiter_profile": "not collected",
+        "claim": "paired descriptive timings; no ranking unless correctness and limiter evidence support it",
+        "comparisons": comparisons,
+    }
+    write_json_atomically(summary_path, summary)
+
+    for representation_a, representation_b in pairs:
+        controller_a = fixed_tail_controller_id(representation_a)
+        controller_b = fixed_tail_controller_id(representation_b)
+        pair_id = f"{representation_a}-vs-{representation_b}"
+        pair_output = output_root / "pairs" / pair_id
+        per_task_differences = {}
+        for task in TASK_NAMES:
+            try:
+                graph_a = graphs[(task, controller_a)]
+                graph_b = graphs[(task, controller_b)]
+            except KeyError as error:
+                raise ValueError(
+                    f"representation matrix is missing {error.args[0][0]} {error.args[0][1]}"
+                ) from error
+            per_task_differences[task] = _representation_pair_differences(graph_a, graph_b)
+
+        pair_summary = run_paired_timing(
+            record,
+            freeze_path,
+            pair_output,
+            bridge,
+            native_policy_bridge,
+            comparison_packer,
+            repetitions,
+            controller_a,
+            controller_b,
+        )
+        comparisons.append(
+            {
+                "pair_id": pair_id,
+                "representation_a": representation_a,
+                "representation_b": representation_b,
+                "controller_a": controller_a,
+                "controller_b": controller_b,
+                "matched_fields": [
+                    "task id and hash",
+                    "action profile",
+                    "execution profile",
+                    "control optimizer",
+                    "solver",
+                ],
+                "other_profile_field_differences_by_task": per_task_differences,
+                "output_root": str(pair_output),
+                "comparison_records": pair_summary["comparison_records"],
+                "tasks": pair_summary["tasks"],
+                "attempts_executed_this_invocation": pair_summary[
+                    "attempts_executed_this_invocation"
+                ],
+            }
+        )
+        write_json_atomically(summary_path, summary)
     summary["summary_path"] = str(summary_path)
     return summary
 
@@ -1388,7 +1550,7 @@ def main() -> int:
     run_parser.add_argument("--output-root", type=Path, required=True)
     run_parser.add_argument("--max-attempts", type=positive_integer)
     paired_parser = commands.add_parser(
-        "paired-timing", help="run alternating fixed-tail polytope/zonotope repetitions"
+        "paired-timing", help="run alternating repetitions for a frozen controller pair"
     )
     paired_parser.add_argument("--freeze", type=Path, required=True)
     paired_parser.add_argument("--bridge", type=Path, required=True)
@@ -1397,6 +1559,19 @@ def main() -> int:
     paired_parser.add_argument("--output-root", type=Path, required=True)
     paired_parser.add_argument("--comparison-packer", type=Path, required=True)
     paired_parser.add_argument("--repetitions", type=positive_integer, default=5)
+    paired_parser.add_argument("--controller-a", default=fixed_tail_controller_id("polytope"))
+    paired_parser.add_argument("--controller-b", default=fixed_tail_controller_id("zonotope"))
+    matrix_parser = commands.add_parser(
+        "representation-matrix",
+        help="run all pairwise fixed-tail representation timings on the three tasks",
+    )
+    matrix_parser.add_argument("--freeze", type=Path, required=True)
+    matrix_parser.add_argument("--bridge", type=Path, required=True)
+    matrix_parser.add_argument("--native-policy-bridge", type=Path, required=True)
+    matrix_parser.add_argument("--native-policy-cache", type=Path, required=True)
+    matrix_parser.add_argument("--output-root", type=Path, required=True)
+    matrix_parser.add_argument("--comparison-packer", type=Path, required=True)
+    matrix_parser.add_argument("--repetitions", type=positive_integer, default=5)
     args = parser.parse_args()
 
     try:
@@ -1425,7 +1600,7 @@ def main() -> int:
                 args.native_policy_bridge.resolve(),
                 args.max_attempts,
             )
-        else:
+        elif args.command == "paired-timing":
             record = read_freeze(
                 args.freeze, args.bridge, args.native_policy_bridge, args.native_policy_cache
             )
@@ -1436,6 +1611,21 @@ def main() -> int:
                 args.bridge.resolve(),
                 args.native_policy_bridge.resolve(),
                 args.comparison_packer.resolve(),
+                args.repetitions,
+                args.controller_a,
+                args.controller_b,
+            )
+        else:
+            record = read_freeze(
+                args.freeze, args.bridge, args.native_policy_bridge, args.native_policy_cache
+            )
+            result = run_fixed_tail_representation_matrix(
+                record,
+                args.freeze.resolve(strict=True),
+                args.output_root.resolve(),
+                args.bridge.resolve(strict=True),
+                args.native_policy_bridge.resolve(strict=True),
+                args.comparison_packer.resolve(strict=True),
                 args.repetitions,
             )
     except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
