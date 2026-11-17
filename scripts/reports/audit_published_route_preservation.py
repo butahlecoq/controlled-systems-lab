@@ -151,6 +151,33 @@ def _learning_navigation_replacements(manifest: dict) -> dict:
     return replacements
 
 
+def _invalid_learning_navigation_routes(manifest: dict) -> set[str]:
+    """Keep mutable page hashes from overriding a rejected navigation review."""
+    chapters = json.loads(BOOK_MANIFEST.read_text())["chapters"]
+    indexes = {chapter["id"]: index for index, chapter in enumerate(chapters)}
+    invalid = set()
+    for insertion in manifest.get("learning_navigation_insertions_reviewed_separately", []):
+        chapter_id = insertion["chapter_id"]
+        if chapter_id not in indexes:
+            continue
+        index = indexes[chapter_id]
+        if not 0 < index < len(chapters) - 1:
+            continue
+        chapter = chapters[index]
+        previous, following = chapters[index - 1], chapters[index + 1]
+        if (
+            digest(_canonical_json(chapter).encode()) != insertion["chapter_sha256"]
+            or previous["id"] != insertion["previous_chapter_id"]
+            or following["id"] != insertion["next_chapter_id"]
+        ):
+            # The insertion's successor carries the new `previous` target. Keep
+            # that route out of the exact-page hash allowance if its identity
+            # review was invalidated; the remaining mutable routes are still
+            # governed by their byte hashes.
+            invalid.add("learn/" + following["id"] + ".html")
+    return invalid
+
+
 def _learning_navigation_only(
     route: str, expected: bytes, actual: bytes, replacements: list
 ) -> bool:
@@ -187,6 +214,7 @@ def audit(baseline: Path, site: Path) -> dict:
     reviewed_receipt_order_changes = {}
     reviewed_learning_navigation_changes = {}
     learning_replacements = _learning_navigation_replacements(manifest)
+    invalid_learning_navigation_routes = _invalid_learning_navigation_routes(manifest)
     order_only_receipts = manifest.get("order_insensitive_receipts_reviewed_separately", {})
     total = zip_count = 0
     with tarfile.open(baseline) as bundle:
@@ -229,13 +257,16 @@ def audit(baseline: Path, site: Path) -> dict:
     unexpected = [
         n
         for n in changed
-        if n not in reviewed_receipt_order_changes
-        and n not in reviewed_learning_navigation_changes
-        and (
-            n not in mutable
-            or (
-                n in reviewed_mutable_hashes
-                and digest((site / n).read_bytes()) != reviewed_mutable_hashes[n]
+        if n in invalid_learning_navigation_routes
+        or (
+            n not in reviewed_receipt_order_changes
+            and n not in reviewed_learning_navigation_changes
+            and (
+                n not in mutable
+                or (
+                    n in reviewed_mutable_hashes
+                    and digest((site / n).read_bytes()) != reviewed_mutable_hashes[n]
+                )
             )
         )
     ]

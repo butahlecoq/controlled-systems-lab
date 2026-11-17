@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-import importlib.util
 import hashlib
-from html.parser import HTMLParser
+import importlib.util
 import json
-from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import unittest
+from html.parser import HTMLParser
+from pathlib import Path
 from urllib.parse import unquote, urlsplit
-
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts/reports/learning_book.py"
@@ -339,6 +338,52 @@ Q subset E; E subset [-sqrt(2),sqrt(2)]^2; Q is [-1,1]^2
             self.assertTrue((site / "examples/closed-loop/figure-index.json").is_file())
             self.assertEqual((site / "examples/index.html").read_bytes(), gallery)
             self.assertEqual((site / "saved-report.zip").read_bytes(), b"frozen evidence bytes")
+
+    def test_chapters_link_sources_checks_and_evidence_class(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            site = Path(tmp)
+            figure_index = site / "figure-index.json"
+            figure_index.write_text(json.dumps(self.figures))
+            learning_book.build(site, figure_index_path=figure_index)
+            modules = {
+                item["identity"].get("id") or item["identity"].get("symbol"): item
+                for item in self.inventory["modules"]
+            }
+            for chapter in self.manifest["chapters"]:
+                path = site / f"learn/{chapter['id']}.html"
+                page = PageElements()
+                page.feed(path.read_text())
+                with self.subTest(chapter=chapter["id"]):
+                    self.assertIn("Evidence class:", path.read_text())
+                    for source in chapter["example_sources"]:
+                        self.assertIn(learning_book._repository_href(source), page.links)
+                    lesson_check = learning_book._repository_href(
+                        "tests/reporting/test_learning_book.py"
+                    )
+                    self.assertIn(lesson_check, page.links)
+                    chapter_modules = [modules[module_id] for module_id in chapter["module_ids"]]
+                    for test_path in learning_book._module_test_declarations(chapter_modules):
+                        self.assertIn(learning_book._repository_href(test_path), page.links)
+                    self.assertIn("not a numerical algorithm verifier", path.read_text())
+
+    def test_module_catalogue_exposes_source_contract_limits_and_tests(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            site = Path(tmp)
+            figure_index = site / "figure-index.json"
+            figure_index.write_text(json.dumps(self.figures))
+            learning_book.build(site, figure_index_path=figure_index)
+            page = (site / "learn/module-catalogue.html").read_text()
+            modules = self.inventory["modules"]
+            self.assertIn("registered_provider", page)
+            for module in modules:
+                identity = module["identity"].get("id") or module["identity"].get("symbol")
+                with self.subTest(module=identity):
+                    self.assertIn(identity, page)
+                    self.assertIn(str(module.get("assurance", "unspecified")), page)
+                    self.assertIn(str(module.get("build", "unspecified")), page)
+                    source = module.get("source", {}).get("path")
+                    if source:
+                        self.assertIn(learning_book._repository_href(source), page)
 
     def test_built_primary_math_contains_runnable_fixture_values(self):
         with tempfile.TemporaryDirectory() as tmp:
