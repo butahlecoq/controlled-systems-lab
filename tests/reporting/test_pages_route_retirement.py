@@ -309,6 +309,13 @@ class PagesRouteRetirementTests(unittest.TestCase):
             record = retirement._producer_record(site, "learn/model-tracks.html", {}, "fixture")
             self.assertIn("scripts/reports/learning_book.py", record["files"])
             self.assertIn("docs/catalogue/learning-book-v1.json", record["files"])
+            self.assertIn("docs/examples/closed-loop/figure-index.json", record["files"])
+            for task_contract in (
+                "docs/contracts/closed-loop/syn-nl-lv-01.json",
+                "docs/contracts/closed-loop/earth-orbit.json",
+                "docs/contracts/closed-loop/syn-nl-fuel-01.json",
+            ):
+                self.assertIn(task_contract, record["files"])
             self.assertNotIn("docs/examples/learning/chapters/model-tracks.html", record["files"])
             self.assertTrue(all((repo / source).is_file() for source in record["files"]))
 
