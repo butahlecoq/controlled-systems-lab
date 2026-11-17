@@ -1390,6 +1390,11 @@
       "owner": "scripts/reports/learning_book.py"
     },
     {
+      "route": "learn/model-tracks.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
       "route": "learn/native-forward-models.html",
       "disposition": "maintained",
       "owner": "scripts/reports/learning_book.py"

@@ -540,6 +540,17 @@ def _track_anchor(model_id: str) -> str:
     return "track-" + re.sub(r"[^a-z0-9]+", "-", model_id.lower()).strip("-")
 
 
+def _control_domain_bounds(bounds: object) -> str:
+    if not isinstance(bounds, list) or not bounds:
+        return "unspecified"
+    intervals = []
+    for interval in bounds:
+        if not isinstance(interval, list) or len(interval) != 2:
+            return str(bounds)
+        intervals.append("[" + ", ".join(str(value) for value in interval) + "]")
+    return " × ".join(intervals)
+
+
 def _model_tracks_section(chapter: dict) -> str:
     tracks = [(source, contract) for owner, source, contract in _task_contracts([chapter])]
     if not tracks:
@@ -612,7 +623,8 @@ def _model_tracks_section(chapter: dict) -> str:
                     )
                     descriptor = "finite actions " + values
                 else:
-                    descriptor = "component bounds " + str(domain.get("bounds", "unspecified"))
+                    bounds = _control_domain_bounds(domain.get("bounds"))
+                    descriptor = "control domain " + bounds
                 parts.append(
                     "<li><strong>"
                     + escape(str(name))
