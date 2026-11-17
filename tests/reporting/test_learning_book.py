@@ -375,12 +375,19 @@ Q subset E; E subset [-sqrt(2),sqrt(2)]^2; Q is [-1,1]^2
             page = (site / "learn/module-catalogue.html").read_text()
             modules = self.inventory["modules"]
             self.assertIn("registered_provider", page)
+            self.assertEqual(page.count("Actual interface or route."), len(modules))
             for module in modules:
                 identity = module["identity"].get("id") or module["identity"].get("symbol")
                 with self.subTest(module=identity):
                     self.assertIn(identity, page)
                     self.assertIn(str(module.get("assurance", "unspecified")), page)
                     self.assertIn(str(module.get("build", "unspecified")), page)
+                    interface, interface_path, interface_note = learning_book._module_interface(
+                        module
+                    )
+                    self.assertIn(learning_book._repository_href(interface_path), page)
+                    self.assertIn(interface, page)
+                    self.assertIn(interface_note, page)
                     source = module.get("source", {}).get("path")
                     if source:
                         self.assertIn(learning_book._repository_href(source), page)

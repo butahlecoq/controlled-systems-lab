@@ -62,6 +62,75 @@ def _module_test_declarations(modules: list[dict]) -> list[str]:
     return sorted(owners)
 
 
+def _module_interface(module: dict) -> tuple[str, str, str]:
+    """Describe the real provider seam or direct route for one inventory entry."""
+    kind = module["kind"]
+    identity = module["identity"].get("id", "")
+    source = module.get("source", {}).get("path", "")
+    ports = {
+        "LPPort": "include/csl/registry/registry.hpp",
+        "HullReducerPort": "include/csl/geometry/hull_reducer.hpp",
+        "SourceIndexHullPort": "include/csl/geometry/source_index_hull.hpp",
+        "ApproximationPort": "include/csl/registry/registry.hpp",
+        "StrategyRegistration / StrategyPort": "include/csl/registry/registry.hpp",
+        "ConversionPort": "include/csl/registry/registry.hpp",
+        "GeometryPort": "include/csl/registry/registry.hpp",
+        "ConvexPort": "include/csl/registry/registry.hpp",
+        "HistoryOptimizerPort": "include/csl/optimization/history_optimizer.hpp",
+    }
+    if kind == "registered_provider":
+        if identity.startswith(("csl.lp.", "phase-one-")):
+            name = "LPPort"
+        elif identity.startswith("csl.hull.source."):
+            name = "SourceIndexHullPort"
+        elif identity.startswith("csl.hull."):
+            name = "HullReducerPort"
+        elif (
+            identity.startswith("csl.approximation.")
+            or identity == "csl.geometry.zonotope.axis-cover"
+        ):
+            name = "ApproximationPort"
+        elif identity.startswith("csl.synthesis."):
+            name = "StrategyRegistration / StrategyPort"
+        elif identity.startswith("csl.conversion."):
+            name = "ConversionPort"
+        elif identity.startswith("csl.geometry."):
+            name = "GeometryPort"
+        elif identity.startswith("csl.convex."):
+            name = "ConvexPort"
+        elif identity.startswith(("csl.nlp.", "csl.conic.")):
+            name = "HistoryOptimizerPort"
+        else:
+            raise ValueError(f"{identity}: registered provider has no documented interface mapping")
+        return (
+            name,
+            ports[name],
+            "Registered provider; implementation source is linked in this entry.",
+        )
+    if kind == "internal_registration_factory":
+        name = "ApproximationPort"
+        return name, ports[name], "Factory that creates the typed provider registration."
+    if kind == "public_representation_type":
+        return (
+            "Public representation type",
+            source,
+            "Data type, not an interchangeable algorithm provider.",
+        )
+    if kind == "public_function_route":
+        return (
+            "Direct public function",
+            source,
+            "Public API route; no provider substitution is declared.",
+        )
+    if kind == "external_program_route":
+        return (
+            "External program route",
+            source,
+            "Executable or script entry; no C++ provider seam is declared.",
+        )
+    raise ValueError(f"{identity or source}: unsupported inventory kind {kind!r}")
+
+
 def _module_ids(inventory: dict) -> set[str]:
     result = set()
     for module in inventory["modules"]:
@@ -644,6 +713,12 @@ def _module_catalogue_page(manifest: dict, inventory: dict) -> str:
             f"<strong>Dimension.</strong> {escape(str(module.get('dimension', 'unspecified')))}. "
             f"<strong>Assurance.</strong> {escape(str(module.get('assurance', 'unspecified')))}. "
             f"<strong>Relation.</strong> {escape(str(module.get('relation', 'unspecified')))}.</p>"
+        )
+        interface, interface_path, interface_note = _module_interface(module)
+        page.append(
+            "<p><strong>Actual interface or route.</strong> "
+            f'<a href="{escape(_repository_href(interface_path), quote=True)}"><code>{escape(interface)}</code></a>. '
+            f"{escape(interface_note)}</p>"
         )
         operations = module.get("operations", [])
         dependencies = module.get("dependencies", [])
