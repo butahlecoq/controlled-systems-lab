@@ -1708,6 +1708,14 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_four_state_projection_approximations.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "x1-x2-approximation-stages.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_history_membership_2d.py",
       "signal_count": 5,
       "asset_name_literals": [
@@ -3422,6 +3430,17 @@
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669,
       "companion_route": "examples/finite-feedback-timing-v1.html"
+    },
+    {
+      "route": "four-state-projection-approximations-v1",
+      "source_bundle": "four-state-projection-approximations-v1",
+      "assets": [
+        "x1-x2-approximation-stages.svg",
+        "x3-x4-approximation-stages.svg"
+      ],
+      "index_sha256": "3b7a45b690fcf45db5316907d4dceee8cb580879c2f7024fdcbac7e924513e31",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
     },
     {
       "route": "geo02-20261012T235755Z-6b1f504ad3db",
