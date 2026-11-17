@@ -16,6 +16,33 @@ Strategy A (reachability, terminal minimization and backward recovery), Strategy
 
 Start with the live issue and pull request requirements. Repository instructions identify the current contribution and release guidance.
 
+## Repository map
+
+Follow this map from the mathematical task to the implementation and the evidence that checks or describes it. The arrows show a reader path, not the complete runtime dependency graph.
+
+```mermaid
+flowchart LR
+  Task[Task data and model] --> Headers[Public C++ headers]
+  Headers --> Modules[CMake-owned native modules]
+  Modules --> Examples[Executable examples]
+  Modules --> Tests[Tests]
+  Examples --> Results[Saved reports and evidence]
+  Tests --> CI[CI workflows]
+```
+
+| If you want to… | Start here | Next step |
+| --- | --- | --- |
+| Run a supported consumer example | [Quick start](#quick-start), [installed examples](examples/CMakeLists.txt) | Choose a [scenario](examples/scenarios/) and its [schema](schemas/scenario/); inspect the example's checks and output. |
+| Find a model, algorithm or public type | [Public headers](include/csl/), [native source](src/) | The ordered module list is in [CMakeLists.txt](CMakeLists.txt); each module owns build declarations and focused tests in `src/<module>/Module.cmake` and `src/<module>/Tests.cmake`. |
+| Change or verify native behavior | [Module declarations](src/), [tests](tests/) | Follow the owning module's `Tests.cmake`, then the relevant [native CI workflow](.github/workflows/native.yml). Tests are also grouped by unit, contract and integration scope. |
+| Learn a topic or inspect its task contract | [Learning-book catalogue](docs/catalogue/learning-book-v1.json), [chapter pages](docs/examples/learning/chapters/), [closed-loop task contracts](docs/contracts/closed-loop/) | Compare the documented model and capability with an executable example before interpreting a result. |
+| Reproduce or interpret a numerical result | [Reporting tools](benchmarks/reporting/), [saved report index](reports/algorithm-results/index.html) | Read the report's source and scope, then apply the [published-results evidence rules](docs/architecture/published-algorithm-results.md). |
+| Understand package and contribution policy | [CMake package setup](cmake/Package.cmake), [test catalogue](cmake/TestCatalog.cmake), [delivery guidance](docs/agents/delivery.md) | The numbered [architecture decisions](docs/architecture/decisions/) record accepted design constraints. |
+
+**Use path:** start with the Quick start, select an installed example and scenario, then follow its saved output or report to the evidence limits.
+
+**Extend and verify path:** locate the public header, follow CMake's module entry to `src/<module>/`, run that module's focused tests, and check the applicable CI and evidence rules.
+
 ## Quick start
 
 Requires Git, CMake/CTest 3.31 or newer and a C++20 compiler (MSVC 2022, GCC 13 or Clang 18 are CI toolchains). Put CMake on PATH; on Windows a Visual Studio developer shell with its CMake component installed provides the tools. Run from the repository root and stop on any nonzero exit. The first configure downloads the existing pinned dependencies; no Python is needed with `BUILD_TESTING=OFF`. Installation is a local development check, not a binary distribution license grant.
