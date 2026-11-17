@@ -374,7 +374,11 @@ def _producer_record(site: Path, route: str, catalog: dict[str, dict], source_id
                                for chapter in data.get("chapters", []))
         elif route == "learn/module-catalogue.html":
             sources.append("docs/catalogue/module-composition-inventory-v1.json")
-        elif len(parts) == 2 and parts[1].endswith(".html"):
+        elif (
+            route != "learn/model-tracks.html"
+            and len(parts) == 2
+            and parts[1].endswith(".html")
+        ):
             sources.append("docs/examples/learning/chapters/" + parts[1][:-5] + ".html")
         return {"files": sources, "owner_status": "chapter-manifest-producer"}
     if top == "examples":
