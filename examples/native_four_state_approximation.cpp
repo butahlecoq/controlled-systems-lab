@@ -120,13 +120,16 @@ std::vector<Point> zonotope_boundary(const sets::GeneratorSet &set) {
 sets::GeneratorSet project(const sets::GeneratorSet &set, std::size_t x, std::size_t y,
                            const std::string &id) {
     const auto count = set.factor_ids().size();
-    sets::GeneratorInput input{id,
-                               {set.center()[x], set.center()[y]},
-                               {2, count, Vector(2 * count)},
-                               set.factor_ids(),
-                               {0, count, {}},
-                               {},
-                               {"x" + std::to_string(x + 1), "x" + std::to_string(y + 1)}};
+    sets::GeneratorInput input{};
+    input.id = id;
+    input.center = {set.center()[x], set.center()[y]};
+    input.generators.rows = 2;
+    input.generators.cols = count;
+    input.generators.values.resize(2 * count);
+    input.factor_ids = set.factor_ids();
+    input.equalities.rows = 0;
+    input.equalities.cols = count;
+    input.coordinate_labels = {"x" + std::to_string(x + 1), "x" + std::to_string(y + 1)};
     for (std::size_t column = 0; column < count; ++column) {
         input.generators.values[column] = set.generators().values[x * count + column];
         input.generators.values[count + column] = set.generators().values[y * count + column];
