@@ -9,6 +9,7 @@ import re
 import sys
 from html import escape
 from pathlib import Path
+from urllib.parse import quote
 
 try:
     import mathematical_notation
@@ -32,6 +33,102 @@ BOOK_PATH = "learn"
 
 def _read_json(path: Path):
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _repository_href(path: str) -> str:
+    return "https://github.com/butahlecoq/controlled-systems-lab/blob/main/" + quote(
+        path, safe="/._-"
+    )
+
+
+def _module_test_declarations(modules: list[dict]) -> list[str]:
+    """Resolve each source-backed module to its CMake-owned focused test declaration."""
+    cmake_files = list((ROOT / "src").rglob("Module.cmake"))
+    owners: set[str] = set()
+    for module in modules:
+        source = module.get("source", {}).get("path", "")
+        if source.startswith("src/"):
+            relative_source = source[4:]
+            for module_file in cmake_files:
+                if relative_source in module_file.read_text(encoding="utf-8"):
+                    test_file = module_file.with_name("Tests.cmake")
+                    if test_file.is_file():
+                        owners.add(test_file.relative_to(ROOT).as_posix())
+        elif source.startswith("include/csl/"):
+            area = source.split("/", 3)[2]
+            test_file = ROOT / "src" / area / "Tests.cmake"
+            if test_file.is_file():
+                owners.add(test_file.relative_to(ROOT).as_posix())
+    return sorted(owners)
+
+
+def _module_interface(module: dict) -> tuple[str, str, str]:
+    """Describe the real provider seam or direct route for one inventory entry."""
+    kind = module["kind"]
+    identity = module["identity"].get("id", "")
+    source = module.get("source", {}).get("path", "")
+    ports = {
+        "LPPort": "include/csl/registry/registry.hpp",
+        "HullReducerPort": "include/csl/geometry/hull_reducer.hpp",
+        "SourceIndexHullPort": "include/csl/geometry/source_index_hull.hpp",
+        "ApproximationPort": "include/csl/registry/registry.hpp",
+        "StrategyRegistration / StrategyPort": "include/csl/registry/registry.hpp",
+        "ConversionPort": "include/csl/registry/registry.hpp",
+        "GeometryPort": "include/csl/registry/registry.hpp",
+        "ConvexPort": "include/csl/registry/registry.hpp",
+        "HistoryOptimizerPort": "include/csl/optimization/history_optimizer.hpp",
+    }
+    if kind == "registered_provider":
+        if identity.startswith(("csl.lp.", "phase-one-")):
+            name = "LPPort"
+        elif identity.startswith("csl.hull.source."):
+            name = "SourceIndexHullPort"
+        elif identity.startswith("csl.hull."):
+            name = "HullReducerPort"
+        elif (
+            identity.startswith("csl.approximation.")
+            or identity == "csl.geometry.zonotope.axis-cover"
+        ):
+            name = "ApproximationPort"
+        elif identity.startswith("csl.synthesis."):
+            name = "StrategyRegistration / StrategyPort"
+        elif identity.startswith("csl.conversion."):
+            name = "ConversionPort"
+        elif identity.startswith("csl.geometry."):
+            name = "GeometryPort"
+        elif identity.startswith("csl.convex."):
+            name = "ConvexPort"
+        elif identity.startswith(("csl.nlp.", "csl.conic.")):
+            name = "HistoryOptimizerPort"
+        else:
+            raise ValueError(f"{identity}: registered provider has no documented interface mapping")
+        return (
+            name,
+            ports[name],
+            "Registered provider; implementation source is linked in this entry.",
+        )
+    if kind == "internal_registration_factory":
+        name = "ApproximationPort"
+        return name, ports[name], "Factory that creates the typed provider registration."
+    if kind == "public_representation_type":
+        return (
+            "Public representation type",
+            source,
+            "Data type, not an interchangeable algorithm provider.",
+        )
+    if kind == "public_function_route":
+        return (
+            "Direct public function",
+            source,
+            "Public API route; no provider substitution is declared.",
+        )
+    if kind == "external_program_route":
+        return (
+            "External program route",
+            source,
+            "Executable or script entry; no C++ provider seam is declared.",
+        )
+    raise ValueError(f"{identity or source}: unsupported inventory kind {kind!r}")
 
 
 def _module_ids(inventory: dict) -> set[str]:
@@ -210,6 +307,13 @@ def validate(manifest: dict, inventory: dict, figure_index: dict | None = None) 
             raise ValueError(f"{chapter['id']}: invalid educational/evidence role")
         if chapter.get("status") not in {"ready", "pending"}:
             raise ValueError(f"{chapter['id']}: invalid chapter status")
+        example_sources = chapter.get("example_sources")
+        if not isinstance(example_sources, list) or not example_sources:
+            raise ValueError(f"{chapter['id']}: chapter needs source paths for its example or data")
+        for example in example_sources:
+            path = (ROOT / example).resolve()
+            if not path.is_relative_to(ROOT.resolve()) or not path.is_file():
+                raise ValueError(f"{chapter['id']}: missing or unsafe example source {example}")
         unknown_prerequisites = set(chapter.get("prerequisites", [])) - by_id
         if unknown_prerequisites:
             raise ValueError(
@@ -347,7 +451,11 @@ def _chapter_page(
     ]
     parts.append(f'<p class="eyebrow">{escape(chapter["group_label"])}</p>')
     parts.append(f"<h1>{escape(chapter['title'])}</h1>")
-    parts.append(f'<p class="learning-status">{escape(chapter["status_label"])}</p>')
+    role_label = "Educational material" if chapter["role"] == "educational" else "Saved evidence"
+    parts.append(
+        f'<p class="learning-status">{escape(chapter["status_label"])} · '
+        f"Evidence class: {escape(role_label)}; {escape(chapter['kind'])}.</p>"
+    )
     parts.append(chapter_html)
     displays = chapter.get("mathematical_displays", [])
     tables = chapter.get("mathematical_tables", [])
@@ -504,6 +612,46 @@ def _chapter_page(
                     + "</span></li>"
                 )
         parts.append("</ul></section>")
+    parts.append('<section class="lesson-trace"><h2>Sources and checks</h2>')
+    parts.append(
+        "<p><strong>Evidence class.</strong> "
+        + escape(role_label)
+        + "; content kind: "
+        + escape(chapter["kind"])
+        + ". The support limits above define what this lesson does and does not establish.</p>"
+    )
+    parts.append("<h3>Repository source paths</h3><ul>")
+    for source in chapter["example_sources"]:
+        parts.append(
+            '<li><a href="'
+            + escape(_repository_href(source), quote=True)
+            + '"><code>'
+            + escape(source)
+            + "</code></a></li>"
+        )
+    parts.append("</ul><h3>Verification paths</h3><ul>")
+    check_paths = {"tests/reporting/test_learning_book.py"}
+    check_paths.update(
+        source for source in chapter["example_sources"] if source.startswith("tests/")
+    )
+    modules_by_id = {
+        module["identity"].get("id") or module["identity"].get("symbol"): module
+        for module in (inventory or {}).get("modules", [])
+    }
+    chapter_modules = [modules_by_id[module_id] for module_id in chapter.get("module_ids", [])]
+    check_paths.update(_module_test_declarations(chapter_modules))
+    for check_path in sorted(check_paths):
+        parts.append(
+            '<li><a href="'
+            + escape(_repository_href(check_path), quote=True)
+            + '"><code>'
+            + escape(check_path)
+            + "</code></a></li>"
+        )
+    parts.append(
+        "</ul><p>The learning-book test checks lesson structure and links; it is not a numerical "
+        "algorithm verifier.</p></section>"
+    )
     previous = chapter.get("previous")
     following = chapter.get("next")
     by_id = {item["id"]: item for item in chapters}
@@ -531,7 +679,10 @@ def _module_catalogue_page(manifest: dict, inventory: dict) -> str:
     page.extend(
         [
             '<p class="eyebrow">Generated reference</p><h1>Module inventory and lesson evidence</h1>',
-            "<p>The inventory lists declared module contracts. A chapter claims a module only when it links to an executable installed consumer source. An inventory entry without a lesson link is reference-only in this book.</p>",
+            "<p>The inventory lists declared method identities, roles, inputs and outputs, implementation paths, build requirements, assurance and set relations. "
+            "A <code>registered_provider</code> is an adapter at a typed seam; direct-function and representation entries are not presented as interchangeable providers. "
+            "A chapter claims a module only when its manifest links an executable installed consumer source. An entry without a chapter link is reference-only in this book. "
+            '<a href="module-inventory.json">Open the machine-readable inventory</a>.</p>',
         ]
     )
     chapter_links = {}
@@ -545,19 +696,58 @@ def _module_catalogue_page(manifest: dict, inventory: dict) -> str:
         title = module.get("role", module.get("group", "Module"))
         page.append(f'<li id="module-{number}"><h2><code>{escape(module_id)}</code></h2>')
         page.append(
-            f"<p><strong>Inventory group.</strong> {escape(str(module.get('group', 'unspecified')))}. "
-        )
-        page.append(f"<strong>Role.</strong> {escape(str(title))}.</p>")
-        page.append(
-            f"<p><strong>Input.</strong> <code>{escape(str(module.get('input', 'unspecified')))}</code>. "
-        )
-        page.append(
-            f"<strong>Output.</strong> <code>{escape(str(module.get('output', 'unspecified')))}</code>.</p>"
+            f"<p><strong>Topic.</strong> {escape(str(module.get('group', 'unspecified')))}. "
+            f"<strong>Entry kind.</strong> <code>{escape(str(module.get('kind', 'unspecified')))}</code>. "
+            f"<strong>Role.</strong> {escape(str(title))}. "
+            f"<strong>Build.</strong> {escape(str(module.get('build', 'unspecified')))}.</p>"
         )
         source = module.get("source", {}).get("path")
         if source:
             page.append(
-                f"<p><strong>Implementation source.</strong> <code>{escape(source)}</code>.</p>"
+                "<p><strong>Declared source path.</strong> "
+                f'<a href="{escape(_repository_href(source), quote=True)}"><code>{escape(source)}</code></a>.</p>'
+            )
+        page.append(
+            f"<p><strong>Input → output.</strong> <code>{escape(str(module.get('input', 'unspecified')))}</code> "
+            f"→ <code>{escape(str(module.get('output', 'unspecified')))}</code>. "
+            f"<strong>Dimension.</strong> {escape(str(module.get('dimension', 'unspecified')))}. "
+            f"<strong>Assurance.</strong> {escape(str(module.get('assurance', 'unspecified')))}. "
+            f"<strong>Relation.</strong> {escape(str(module.get('relation', 'unspecified')))}.</p>"
+        )
+        interface, interface_path, interface_note = _module_interface(module)
+        page.append(
+            "<p><strong>Actual interface or route.</strong> "
+            f'<a href="{escape(_repository_href(interface_path), quote=True)}"><code>{escape(interface)}</code></a>. '
+            f"{escape(interface_note)}</p>"
+        )
+        operations = module.get("operations", [])
+        dependencies = module.get("dependencies", [])
+        if operations or dependencies:
+            page.append(
+                "<p><strong>Operations.</strong> "
+                + escape("; ".join(str(item) for item in operations) or "none declared")
+                + ". <strong>Dependencies.</strong> "
+                + escape("; ".join(str(item) for item in dependencies) or "none declared")
+                + ".</p>"
+            )
+        test_declarations = _module_test_declarations([module])
+        if test_declarations:
+            page.append(
+                "<p><strong>Focused test declarations.</strong> "
+                + "; ".join(
+                    '<a href="'
+                    + escape(_repository_href(path), quote=True)
+                    + '"><code>'
+                    + escape(path)
+                    + "</code></a>"
+                    for path in test_declarations
+                )
+                + ".</p>"
+            )
+        else:
+            page.append(
+                "<p><strong>Focused tests.</strong> No module-owned C++ test declaration was resolved; "
+                "the linked chapter and its source-specific checks define the available evidence.</p>"
             )
         linked = chapter_links.get(module_id, [])
         if linked:
