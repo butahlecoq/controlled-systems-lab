@@ -60,7 +60,10 @@ int main(int argc, char** argv) {
         std::ifstream input(argv[1], std::ios::binary);
         if (!input) throw std::runtime_error("could not open comparison request");
         const auto request = Json::parse(input);
-        if (request.at("schema") != "csl.exp06-pack-request/1")
+        const auto request_schema = request.at("schema").get<std::string>();
+        const bool exp06_request = request_schema == "csl.exp06-pack-request/1";
+        const bool generic_request = request_schema == "csl.comparison-pack-request/1";
+        if (!exp06_request && !generic_request)
             throw std::invalid_argument("unknown pack request schema");
         const auto manifest_text = request.at("manifest").get<std::string>();
         const auto manifest_bytes = bytes(manifest_text);
@@ -71,6 +74,8 @@ int main(int argc, char** argv) {
         const auto manifest_hash = problem::hex(manifest.digest());
         const auto problem_id = std::string("csl.problem.v1.sha256:") + manifest_hash;
         const auto request_digest = parse_digest(request.at("request_digest").get<std::string>());
+        const auto input_manifest_schema =
+            request.value("input_manifest_schema", std::string{"csl.geometry-hull-input/1"});
         const auto& methods = request.at("methods");
         if (!methods.is_array() || methods.size() < 2 || methods.size() > 8)
             throw std::invalid_argument("paired methods are required");
@@ -94,7 +99,7 @@ int main(int argc, char** argv) {
                 run_input.problem = {problem_id};
                 run_input.configuration = {configuration_id};
                 run_input.request_digest = request_digest;
-                run_input.input_manifest_schema = "csl.geometry-hull-input/1";
+                run_input.input_manifest_schema = input_manifest_schema;
                 run_input.input_manifest = manifest_bytes;
                 run_input.method_id = method_id;
                 run_input.method_version = method.at("version").get<std::string>();
@@ -122,10 +127,22 @@ int main(int argc, char** argv) {
                     std::move(recorded), measurement_payload});
             }
         }
-        const auto spec = Json{{"schema", "csl.comparison-spec/2"}, {"problem_id", problem_id},
-            {"request_digest", problem::hex(request_digest)}, {"repetitions", repetitions},
-            {"input_manifest_hash", manifest_hash}, {"input_manifest_source", "csl.geometry-hull-input/1"},
-            {"arms", std::move(arms)}};
+        const auto spec = generic_request
+                              ? request.at("comparison_spec")
+                              : Json{{"schema", "csl.comparison-spec/2"},
+                                     {"problem_id", problem_id},
+                                     {"request_digest", problem::hex(request_digest)},
+                                     {"repetitions", repetitions},
+                                     {"input_manifest_hash", manifest_hash},
+                                     {"input_manifest_source", "csl.geometry-hull-input/1"},
+                                     {"arms", arms}};
+        if (spec.at("problem_id") != problem_id ||
+            spec.at("request_digest") != problem::hex(request_digest) ||
+            spec.at("repetitions") != repetitions ||
+            spec.at("input_manifest_hash") != manifest_hash ||
+            spec.at("input_manifest_source") != input_manifest_schema || spec.at("arms") != arms)
+            throw std::invalid_argument(
+                "comparison spec identity differs from its input manifest or attempts");
         const auto spec_text = spec.dump();
         const auto spec_bytes = bytes(spec_text);
         const auto spec_content_result = problem::snapshot_content(std::span<const std::byte>(spec_bytes));

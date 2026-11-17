@@ -277,6 +277,139 @@ class ClosedLoopCampaignTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unknown task"):
             run_campaign.campaign_order([{"task_name": "unknown"}])
 
+    def test_paired_method_schedule_excludes_warmup_and_alternates_measured_order(self):
+        self.assertEqual(
+            run_campaign.paired_method_schedule(5),
+            [
+                {"phase": "warmup", "repetition": 0, "order": ["A", "B"]},
+                {"phase": "measured", "repetition": 1, "order": ["A", "B"]},
+                {"phase": "measured", "repetition": 2, "order": ["B", "A"]},
+                {"phase": "measured", "repetition": 3, "order": ["A", "B"]},
+                {"phase": "measured", "repetition": 4, "order": ["B", "A"]},
+                {"phase": "measured", "repetition": 5, "order": ["A", "B"]},
+            ],
+        )
+        with self.assertRaisesRegex(ValueError, "at least one measured repetition"):
+            run_campaign.paired_method_schedule(0)
+
+    def test_comparison_pack_request_maps_completed_run_to_passed_measurement(self):
+        task_name = "syn-nl-lv-01"
+        methods = {
+            "A": {
+                "controller": {"id": "native-fixed-tail-polytope-ipopt/1", "version": "1"},
+                "graph_fingerprint": "a" * 64,
+                "source_files": [],
+            },
+            "B": {
+                "controller": {"id": "native-fixed-tail-zonotope-ipopt/1", "version": "1"},
+                "graph_fingerprint": "b" * 64,
+                "source_files": [],
+            },
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            events = {}
+            for side in ("A", "B"):
+                attempt_path = root / side
+                attempt_path.mkdir()
+                (attempt_path / "attempt.json").write_text(
+                    json.dumps(
+                        {
+                            "attempt_id": f"attempt-{side}",
+                            "overall_status": "complete",
+                            "preparation_receipt": {
+                                "adapter_receipt": {"executable_sha256": "c" * 64}
+                            },
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+                (attempt_path / "run-manifest.json").write_text(
+                    json.dumps({"claim": "paired timing pilot"}), encoding="utf-8"
+                )
+                events[(task_name, "measured", 1, side)] = {
+                    "attempt": str(attempt_path),
+                    "order_index": 1 if side == "A" else 2,
+                    "end_to_end_wall_seconds": 12.0,
+                    "worker_wall_seconds": 4.0,
+                }
+
+            request = run_campaign.build_comparison_pack_request(
+                {
+                    "source_commit": "d" * 40,
+                    "resource_profile": {"profile_id": "worker-wall-300-cpu-300/1"},
+                    "native_policy": {
+                        "sha256": "c" * 64,
+                        "build_profile": {
+                            "cxx_compiler_id": "GNU",
+                            "cxx_compiler_version": "16.2.1",
+                            "build_type": "Release",
+                        },
+                    },
+                },
+                task_name,
+                methods,
+                events,
+                1,
+            )
+
+        attempts = [method["attempts"][0] for method in request["methods"]]
+        self.assertEqual([attempt["status"] for attempt in attempts], ["completed", "completed"])
+        self.assertEqual(
+            [attempt["measurement"]["status"] for attempt in attempts], ["passed", "passed"]
+        )
+
+    def test_paired_timing_rejects_events_from_another_freeze(self):
+        tasks = ("syn-nl-lv-01", "earth-orbit", "syn-nl-fuel-01")
+        controllers = {
+            "A": "native-fixed-tail-polytope-ipopt/1",
+            "B": "native-fixed-tail-zonotope-ipopt/1",
+        }
+        graphs = [
+            {
+                "task_name": task,
+                "graph_id": f"{task}/{side}",
+                "graph_fingerprint": "a" * 64,
+                "task_sha256": "b" * 64,
+                "action_profile_id": "same-profile",
+                "controller": {"id": controller},
+            }
+            for task in tasks
+            for side, controller in controllers.items()
+        ]
+        record = {
+            "source_commit": "c" * 40,
+            "bridge": {"sha256": "d" * 64},
+            "native_policy": {"sha256": "e" * 64},
+            "resource_profile": {"profile_id": "profile/1"},
+            "graphs": graphs,
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            freeze = root / "freeze.json"
+            freeze.write_text("frozen campaign")
+            output = root / "results"
+            output.mkdir()
+            event = {
+                "schema": "csl.closed-loop-paired-timing-event/2",
+                "freeze_sha256": "0" * 64,
+                "source_commit": record["source_commit"],
+                "bridge_sha256": record["bridge"]["sha256"],
+                "native_policy_sha256": record["native_policy"]["sha256"],
+                "resource_profile_id": record["resource_profile"]["profile_id"],
+                "task_name": tasks[0],
+                "phase": "warmup",
+                "repetition": 0,
+                "side": "A",
+                "try_index": 1,
+                "state": "completed",
+            }
+            (output / "paired-timing-events.jsonl").write_text(json.dumps(event) + "\n")
+            with self.assertRaisesRegex(ValueError, "different freeze"):
+                run_campaign.run_paired_timing(
+                    record, freeze, output, root / "bridge", root / "native", root / "packer"
+                )
+
     def test_attempt_classification_keeps_refusal_reason_and_outcome(self):
         with tempfile.TemporaryDirectory() as directory:
             attempt_path = Path(directory) / "attempt.json"

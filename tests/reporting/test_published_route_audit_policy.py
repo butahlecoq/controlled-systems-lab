@@ -151,7 +151,11 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
                     entry["chapter_id"]
                     for entry in manifest["learning_navigation_insertions_reviewed_separately"]
                 },
-                {"native-forward-models", "native-quadcopter-mpc", "native-model-tracking-first-pass"},
+                {
+                    "native-forward-models",
+                    "native-quadcopter-mpc",
+                    "native-model-tracking-first-pass",
+                },
             )
             (source / "manifest.json").write_text(json.dumps(manifest))
 
@@ -159,12 +163,27 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
                 result = baseline_audit.audit(baseline, site)
                 self.assertTrue(result["passed"], result)
                 math_route = "learn/representation-consumers.html"
-                self.assertEqual(set(result["reviewed_learning_navigation_changes"]),
-                                 set(routes) - {math_route, "learn/index.html"})
-                self.assertIn(math_route, result["reviewed_mutable_changes"])
+                mutable_chapters = {
+                    math_route,
+                    "learn/controller-composition.html",
+                    "learn/set-operations.html",
+                    "learn/closed-loop-semantics.html",
+                }
+                self.assertEqual(
+                    set(result["reviewed_learning_navigation_changes"]),
+                    set(routes) - mutable_chapters - {"learn/index.html"},
+                )
+                self.assertTrue(mutable_chapters <= set(result["reviewed_mutable_changes"]))
                 self.assertIn("learn/index.html", result["reviewed_mutable_changes"])
-                self.assertEqual(preservation.digest((site / math_route).read_bytes()),
-                                 manifest["mutable_copy_reviewed_sha256"][math_route])
+                for route in mutable_chapters - {math_route}:
+                    self.assertEqual(
+                        preservation.digest((site / route).read_bytes()),
+                        manifest["mutable_routes_reviewed_sha256"][route],
+                    )
+                self.assertEqual(
+                    preservation.digest((site / math_route).read_bytes()),
+                    manifest["mutable_copy_reviewed_sha256"][math_route],
+                )
                 self.assertEqual(
                     preservation.digest((site / "learn/index.html").read_bytes()),
                     manifest["mutable_routes_reviewed_sha256"]["learn/index.html"],
@@ -173,6 +192,10 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
                 mutated_routes = {
                     "body mutation": (
                         "learn/representation-consumers.html",
+                        lambda data: data.replace(b"</main>", b"<p>changed body</p></main>", 1),
+                    ),
+                    "algorithm chapter mutation": (
+                        "learn/controller-composition.html",
                         lambda data: data.replace(b"</main>", b"<p>changed body</p></main>", 1),
                     ),
                     "wrong insertion target": (
@@ -200,7 +223,8 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
 
                 wrong_identity = json.loads(json.dumps(manifest))
                 forward_insertion = next(
-                    row for row in wrong_identity["learning_navigation_insertions_reviewed_separately"]
+                    row
+                    for row in wrong_identity["learning_navigation_insertions_reviewed_separately"]
                     if row["chapter_id"] == "native-forward-models"
                 )
                 forward_insertion["chapter_sha256"] = "0" * 64

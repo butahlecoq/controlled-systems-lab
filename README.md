@@ -16,6 +16,46 @@ Strategy A (reachability, terminal minimization and backward recovery), Strategy
 
 Start with the live issue and pull request requirements. Repository instructions identify the current contribution and release guidance.
 
+## Repository map
+
+Follow this map from the mathematical task to the implementation and the evidence that checks or describes it. The arrows show a reader path, not the complete runtime dependency graph.
+
+```mermaid
+flowchart LR
+  Task[Task data and model] --> Headers[Public C++ headers]
+  Headers --> Modules[CMake-owned native modules]
+  Modules --> Examples[Executable examples]
+  Modules --> Tests[Tests]
+  Examples --> Results[Saved reports and evidence]
+  Tests --> CI[CI workflows]
+```
+
+| If you want to… | Start here | Next step |
+| --- | --- | --- |
+| Run a supported consumer example | [Quick start](#quick-start), [installed examples](examples/CMakeLists.txt) | Direct examples need no scenario file; for a file-driven example, choose a [scenario](examples/scenarios/) and its [schema](schemas/scenario/). Where a visual case is available, inspect the [minimal 2D visual examples](https://butahlecoq.github.io/controlled-systems-lab/examples/), then follow each result's scope and evidence limits. |
+| Find a model, algorithm or public type | [Public headers](include/csl/), [native source](src/) | The ordered module list is in [CMakeLists.txt](CMakeLists.txt); each module owns build declarations and focused tests in `src/<module>/Module.cmake` and `src/<module>/Tests.cmake`. |
+| Change or verify native behavior | [Module declarations](src/), [tests](tests/) | Follow the owning module's `Tests.cmake`, then the relevant [native CI workflow](.github/workflows/native.yml). Tests are also grouped by unit, contract and integration scope. |
+| Learn a topic or inspect its task contract | [Learning-book catalogue](docs/catalogue/learning-book-v1.json), [chapter pages](docs/examples/learning/chapters/), [closed-loop task contracts](docs/contracts/closed-loop/) | Compare the documented model and capability with an executable example before interpreting a result. |
+| Reproduce or interpret a numerical result | [Benchmark/reporting tools](benchmarks/reporting/), [report reproduction scripts](scripts/reports/), [saved report index](reports/algorithm-results/index.html) | Read the report's source and scope, then apply the [published-results evidence rules](docs/architecture/published-algorithm-results.md). |
+| Understand package and contribution policy | [CMake package setup](cmake/Package.cmake), [test catalogue](cmake/TestCatalog.cmake), [delivery guidance](docs/agents/delivery.md) | The numbered [architecture decisions](docs/architecture/decisions/) record accepted design constraints. |
+
+**Use path:** start with the Quick start, select an installed example (and a scenario if it is file-driven), view an illustration where available, then follow its output or report to the evidence limits.
+
+**Extend and verify path:** locate the public header, follow CMake's module entry to `src/<module>/`, run that module's focused tests, and check the applicable CI and evidence rules.
+
+## Algorithm topic map
+
+The [four-group module inventory](docs/catalogue/module-composition-inventory-v1.json) is the source for stable method IDs, roles, inputs and outputs, source paths, assurance and build requirements. The [native capability catalogue](docs/catalogue/closed-loop-native-capabilities-v1.json) and [closed-loop composition catalogue](docs/catalogue/closed-loop-native-compositions-v1.json) describe request-specific support. They do not imply that every combination is implemented. Generated lesson pages link their source paths, module checks, figures and evidence class.
+
+| Topic | C++ interface and source | Lesson, example and checks |
+| --- | --- | --- |
+| **1. Vertex LP/simplex and hull methods** | `HullReducerPort` and its LP dependency in [hull reducer](include/csl/geometry/hull_reducer.hpp); LP backends in [lp_backend](include/csl/optimization/lp_backend.hpp); source-index methods in [SourceIndexHullPort](include/csl/geometry/source_index_hull.hpp). The legacy MODIF/KPABEP/REACH functions are direct calls in [legacy_btulshor](include/csl/geometry/legacy_btulshor.hpp). The inventory distinguishes them from registered providers such as `csl.hull.lp-membership`, `phase-one-bland`, `csl.hull.source.quickhull-2d` and the source-faithful KPABEP method. | [Vertex membership](docs/examples/learning/chapters/vertex-membership.html) and [simplex/comparators](docs/examples/learning/chapters/simplex-and-comparators.html); 2D [source-index example](examples/source_index_geometry_2d.cpp) and [figure](docs/examples/source-index-geometry-2d.html); [geometry tests](src/geometry/Tests.cmake) and [simplex contract tests](tests/contract/phase_one/simplex_tests.cpp). |
+| **2. Reachable-set representations** | [H/V representation types](include/csl/sets/data.hpp), [approximation interface](include/csl/geometry/approximation.hpp), and fixed-plan APIs in [reachability](include/csl/reachability/). The catalogue records polytope, zonotope, parallelotope, ellipsoid and box methods with their relation and assurance. | [Five forms on one square](docs/examples/learning/chapters/same-geometry-five-representations.html) is an analytic illustration; [native representation consumers](docs/examples/learning/chapters/representation-consumers.html) exercises installed APIs. Checks are owned by [geometry](src/geometry/Tests.cmake) and [reachability](src/reachability/Tests.cmake). |
+| **3. Reachability controllers and MPC** | `StrategyRegistration` and its registry in [registry contracts](include/csl/registry/registry.hpp), strategy IDs in the [strategy catalogue](include/csl/registry/strategy_catalogue.hpp), finite feedback in [FiniteFeedbackPort](include/csl/reachability/finite_feedback_port.hpp), and MPC contracts in [discrete MPC](include/csl/controllers/discrete_mpc.hpp). Controller and MPC routes have distinct IDs and semantics in the inventory. | [Controller composition](docs/examples/learning/chapters/controller-composition.html) and [finite-controller consumers](docs/examples/learning/chapters/finite-controller-consumers.html); runnable [registered comparison](examples/registered_synthesis_comparison.cpp) and [2D MPC](examples/discrete_mpc_2d.cpp); focused [synthesis](src/synthesis/Tests.cmake), [reachability](src/reachability/Tests.cmake) and [controller](src/controllers/Tests.cmake) checks. Claims stay within each profile's stated verifier and evidence scope. |
+| **4. Conversions, set operations, approximations and optimizers** | Actual substitution seams are `ConversionPort`, `GeometryPort`, `ApproximationPort`, `LPPort` and `ConvexPort` in [registry contracts](include/csl/registry/registry.hpp); whole-history optimization uses [HistoryOptimizerPort](include/csl/optimization/history_optimizer.hpp). Direct public functions remain identified as such in the inventory. | [Set operations](docs/examples/learning/chapters/set-operations.html), [optimization backends](docs/examples/learning/chapters/optimization-backends.html) and [terminal optimization](docs/examples/learning/chapters/terminal-optimization.html). The [scenario substitution example](examples/scenario_backend_substitution.cpp) and its [saved-output check](examples/scenario_backend_substitution_check.cmake) change only the LP provider for the same two-stage integrator request (`csl.lp.highs` / `phase-one-bland`); the result establishes numerical feasibility only. |
+
+Use the generated [module catalogue](https://butahlecoq.github.io/controlled-systems-lab/learn/module-catalogue.html) to follow each inventory ID to its implementation and lesson. Read [published-result evidence rules](docs/architecture/published-algorithm-results.md) before treating an educational figure, numerical run or validation result as interchangeable evidence.
+
 ## Quick start
 
 Requires Git, CMake/CTest 3.31 or newer and a C++20 compiler (MSVC 2022, GCC 13 or Clang 18 are CI toolchains). Put CMake on PATH; on Windows a Visual Studio developer shell with its CMake component installed provides the tools. Run from the repository root and stop on any nonzero exit. The first configure downloads the existing pinned dependencies; no Python is needed with `BUILD_TESTING=OFF`. Installation is a local development check, not a binary distribution license grant.
