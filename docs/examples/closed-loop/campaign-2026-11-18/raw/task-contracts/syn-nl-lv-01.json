@@ -1,0 +1,189 @@
+{
+  "control_domains": {
+    "continuous": {
+      "bounds": [
+        [
+          0,
+          0.05
+        ]
+      ],
+      "problem_id": "syn-nl-lv-01/continuous-receding/1/continuous-control/1",
+      "semantics": "independent admissible control at every physical interval"
+    },
+    "finite": {
+      "actions": [
+        [
+          0.0
+        ],
+        [
+          0.025
+        ],
+        [
+          0.05
+        ]
+      ],
+      "problem_id": "syn-nl-lv-01/continuous-receding/1/finite-catalog-adaptation/1",
+      "semantics": "independent catalog choice at every interval; distinct task from continuous control"
+    }
+  },
+  "episode": {
+    "closed_loop": {
+      "apply": "first-zero-order-held-input",
+      "failure": "stop-before-next-input-no-fallback",
+      "observation": "exact-full-execution-state",
+      "optimization_horizon": "shrinking-to-fixed-terminal",
+      "players": 1,
+      "second_player": false,
+      "warm_start": "shift-prior-primal-drop-applied-stage-no-terminal-repeat;zero-duals"
+    },
+    "dt": 0.1,
+    "execution": {
+      "abstol": 1e-10,
+      "method": "CVODES",
+      "reltol": 1e-09
+    },
+    "final_time": 3,
+    "hold": "zero-order",
+    "intervals": 30,
+    "time_unit": "day"
+  },
+  "legacy_source_case": null,
+  "model": {
+    "case_id": "SYN-NL-LV-01",
+    "controls": [
+      {
+        "bounds": [
+          0,
+          0.05
+        ],
+        "name": "u",
+        "unit": "1/day"
+      }
+    ],
+    "domain": "P,R finite; bounds checked independently",
+    "equations": [
+      "dP/dt=(a-b*R-u)*P",
+      "dR/dt=(d*P-c)*R"
+    ],
+    "model_id": "syn-nl-lv-01/ode/1",
+    "parameters": {
+      "a": {
+        "unit": "1/day",
+        "value": 0.8
+      },
+      "b": {
+        "unit": "1/(thousand individuals*day)",
+        "value": 0.01
+      },
+      "c": {
+        "unit": "1/day",
+        "value": 0.6
+      },
+      "d": {
+        "unit": "1/(thousand individuals*day)",
+        "value": 0.006
+      }
+    },
+    "states": [
+      {
+        "bounds": [
+          0,
+          200
+        ],
+        "initial": 120,
+        "name": "P",
+        "scale": 100,
+        "unit": "thousand individuals"
+      },
+      {
+        "bounds": [
+          0,
+          150
+        ],
+        "initial": 60,
+        "name": "R",
+        "scale": 80,
+        "unit": "thousand individuals"
+      }
+    ]
+  },
+  "objective": {
+    "evaluation": "terminal expression plus every physical running term divided by original interval count; never renormalize a shrinking tail",
+    "kind": "dimensionless-quadratic",
+    "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
+    "running_stage_range": [
+      0,
+      29
+    ],
+    "source_definition": {
+      "running_formula": "running_weight/N*sum_k(sum_i(((u[k,i]-running_reference[i])/running_scale[i])^2))",
+      "running_reference": [
+        0
+      ],
+      "running_scale": [
+        0.05
+      ],
+      "running_weight": 0.05,
+      "terminal_formula": "sum_i(terminal_weights[i]*((x[N,i]-terminal_target[i])/terminal_scale[i])^2)",
+      "terminal_scale": [
+        100,
+        80
+      ],
+      "terminal_target": [
+        100,
+        80
+      ],
+      "terminal_weights": [
+        1,
+        1
+      ]
+    }
+  },
+  "prediction": {
+    "affine_model_id": "syn-nl-lv-01/frozen-coexistence-affine/1",
+    "discretization": "per-stage matrix exponential; source-specific LV Taylor offset or fuel endpoint-matched offset",
+    "plant": "original nonlinear ODE",
+    "producer": "benchmarks/reporting/mpc11/affine.py:model",
+    "receipt_fields": [
+      "physical A,B,c",
+      "scaled A,B,c",
+      "continuous Jacobians",
+      "state and input references",
+      "discretization method and version",
+      "validity scope"
+    ],
+    "validity": "numerical local/frozen predictor only; no nonlinear enclosure or off-reference error bound"
+  },
+  "roles": {
+    "backward_feasibility": "predecessors-of-terminal-physical-state-bounds",
+    "forward_reachability": "all-admissible-control-family",
+    "off_trajectory_policy_queries": "any state in the declared model domain and physical state bounds; do not restrict to recorded nominal trajectory",
+    "off_trajectory_query_fixtures": [
+      {
+        "control": [
+          0.017
+        ],
+        "purpose": "off-nominal policy query away from initial state",
+        "state": [
+          143.0,
+          47.0
+        ]
+      }
+    ],
+    "policy_trajectory": "one-deterministic-policy-trajectory"
+  },
+  "schema": "csl.closed-loop.task/1",
+  "source": {
+    "case_id": "SYN-NL-LV-01",
+    "kind": "mpc11-scenario",
+    "model_id": "syn-nl-lv-01/ode/1",
+    "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
+    "path": "benchmarks/reporting/mpc11/scenarios/syn-nl-lv-01.json",
+    "sha256": "debf46903cbcd78694ea91bd1734f8ba9e503be36387288bbf1395661450c45b"
+  },
+  "task_id": "syn-nl-lv-01/continuous-receding/1",
+  "terminal_condition": {
+    "kind": "physical-state-bounds",
+    "objective_target_is_feasibility_constraint": false
+  }
+}

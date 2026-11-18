@@ -1,0 +1,310 @@
+{
+  "admitted_graphs": 513,
+  "archive": "csl-947-full-evidence.tar.zst",
+  "archive_bytes": 4771485559,
+  "archive_sha256": "19464969fac8fc1f4e5417de533510de11ae3276c37bedb541f052166c94d834",
+  "compatible_profile_rerun_count": 15,
+  "coverage_file": "campaign-coverage-20261118T142500Z-post-retry-reconciled.json",
+  "full_profile_attempt_rows": 516,
+  "latest_graph_outcomes": {
+    "complete": 483,
+    "inconclusive": 30
+  },
+  "part_size_limit_bytes": 99614720,
+  "parts": [
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part000.part",
+      "sha256": "ac893c5a7005bc822242cc59b6444f38e2657a861e3dfb3524ef4fa05b9834b5",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part000.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part001.part",
+      "sha256": "7ddff920baf9a6ed3f512c2da7a6ccb86ee8f57123d8ce5b8df9a2c0cbc48973",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part001.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part002.part",
+      "sha256": "d48dc4670653d9a72214cfa02acd915f7f00b2b35417f9f795b766e49caa94a3",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part002.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part003.part",
+      "sha256": "1c1c0a0b11082c93bf694270405c0e45b8417e4b79e49c18bf66f99af92516b9",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part003.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part004.part",
+      "sha256": "5dee512f318fb7390e2fc4e5d7aace2ff5d258e61eae1c09e1458b2cb7978a6a",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part004.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part005.part",
+      "sha256": "b6a8b2e147de6e73b3b69e9b6650da67b045903f6af7088558a27f1738c7c3c7",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part005.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part006.part",
+      "sha256": "da995a81c86c521f79184da7f23ae0a372dddb9a1b404711de1f909cacbe4b12",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part006.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part007.part",
+      "sha256": "1a49f584ed75e909f422a329fb2e32d09a33ca2e008a15553075df2042a4e3ff",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part007.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part008.part",
+      "sha256": "e8426189ccf7f5b3bae457c3b3b99a69097a71451320335c207cf4efa0778774",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part008.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part009.part",
+      "sha256": "8f03fb28e1bd388843a8428f0239c8b3ea4812afd6fc75f3a82a40bf1523070a",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part009.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part010.part",
+      "sha256": "a6cfe1f8cf54cf7f68702466eadcc1a18dcf6a60bd6908527f32a5e55d988114",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part010.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part011.part",
+      "sha256": "aca393e708516e9c7508bab8ed6e5375c1eff0a47741bb31334d003920ea97d3",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part011.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part012.part",
+      "sha256": "88cfe6759559253b9c6383c9707ee06ccd572a4c6f812a4c47d304f0dfe4baf2",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part012.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part013.part",
+      "sha256": "8955dd3bc8617cf54f0331ce48f399dee8abcf4c7f15924b589226f3172d1d2d",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part013.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part014.part",
+      "sha256": "ad8aa84753064a08793a6ba1960d058dcdca28ed4a1d450ab4ea77f9e521ff96",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part014.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part015.part",
+      "sha256": "ef89dec3fabc11dacc434edb9db6ce6ce66ea386c47896035f88a89ad68d17b5",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part015.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part016.part",
+      "sha256": "0390ff79c2b6863e29dda12b941ee0be533a4058d583dd35a299ab5b926d3003",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part016.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part017.part",
+      "sha256": "91914f6182d08a1f6f92e2414622706528eda5c4e56d01ea8d564385ffbc73c1",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part017.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part018.part",
+      "sha256": "84269a1bf3b18d184224c905ee020d728822c46eb7ec7ba4c901a2ac1993e65f",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part018.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part019.part",
+      "sha256": "a3391da416cf28e922cdf45042bee0f6b2609695b0db68f41fde08471ba00013",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part019.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part020.part",
+      "sha256": "0912844e3102d787496452738eae6b60b08140b11b9920e0203c3149cfce433d",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part020.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part021.part",
+      "sha256": "7dae89f4e67307cbd1fc1ae59b3934f0c937198bee36ad04c527c96b27343f50",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part021.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part022.part",
+      "sha256": "7b37c7f63b3c0cbbb30bce24380b069ec47fc8ea869963c2b2af3900794b958b",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part022.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part023.part",
+      "sha256": "728227f891ca07bdd476d6fe7895477b27d2cc332771f29393febc1696f80724",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part023.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part024.part",
+      "sha256": "2d8b35ac41d097e3e47ed4a5987cc9f41b26ea588471a7828241629aad54d996",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part024.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part025.part",
+      "sha256": "3b82e8e0ae14fa0aa2edba43a6d236f338d52ff19d191ef4d1f14949d53d4d63",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part025.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part026.part",
+      "sha256": "2085684ff58f8640e8f08b478fdf738b49600beec8c558e79113d272885e6742",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part026.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part027.part",
+      "sha256": "3aebd4e8c3b10cc769fd2706459d979b44ecee88c2a5b8a4790f61cbaebc1243",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part027.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part028.part",
+      "sha256": "ec1a876f1aa009a689fde7d8a5798f60ba940f858a7355d5df3751091d5137e4",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part028.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part029.part",
+      "sha256": "4dc9a30752374eab54b4dcc06a216084e9946c35100e11976040d715dd0bbaf1",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part029.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part030.part",
+      "sha256": "9430858a2ac91dccd5db4ef7cf4df1013fbff5f8bac36356292051c7d884fe01",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part030.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part031.part",
+      "sha256": "ed7df8a8011c2785fdcc82b5f94f932e75e2d65ae0b388e274c6feabf18456db",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part031.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part032.part",
+      "sha256": "dfebd7a4d508f188929ef7b01c42d3cf0ae1fbacd2dde575c4902e580ce07eda",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part032.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part033.part",
+      "sha256": "4d9682535bb9a41d0fc1e5ac9e42b2b472854a704e4966b53c3cbad94e22cdb3",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part033.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part034.part",
+      "sha256": "5151ca1173881affed41f67ba9e4c0d4955513eb042ecc57972c13913f84b1e5",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part034.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part035.part",
+      "sha256": "bf5ade63b116ba14f6f8e5f3a085a73f506cebf6ad1eea897e65691591757fa7",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part035.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part036.part",
+      "sha256": "be42fa90cbbd1d978df62482df45ca9ffed68e49a116055e547f34f8267061c1",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part036.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part037.part",
+      "sha256": "45135b87a024777c2550e84073df34a058e855452c2ed3c26a6b562ce50f4a4b",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part037.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part038.part",
+      "sha256": "238456dc6836b119e09df9ecd3de607d59ac9098fac358ffc628e9dbdf82f775",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part038.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part039.part",
+      "sha256": "831d50c71a5ff08f924eed8c5bf92071bb15ba3c845686bbe897bcc8c21c6789",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part039.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part040.part",
+      "sha256": "b4ec7f43caa7e54beee739aca5d60399469465e2b21a4ac36486850494b8f7e1",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part040.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part041.part",
+      "sha256": "40905a42148db59c76240fe84d16e5b14845c21c121c26be21dbaa1479417469",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part041.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part042.part",
+      "sha256": "e1452b7a04b4fed515d5307ad9280057860fb7fee4599eb49e91eee5b6e81887",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part042.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part043.part",
+      "sha256": "c227173fa1859b626faff79019b5a9897b1db203f4d3f09db60040ed035d3bb7",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part043.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part044.part",
+      "sha256": "6cc1c420a2ae0798458e7fc7a6cbbb796f8c30107ff6f9ee68a4809e7cf86b16",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part044.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part045.part",
+      "sha256": "438310602f7aff04a00a27a7f174b51ee99ffb8ae19f973430fbd0bce1725158",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part045.part"
+    },
+    {
+      "bytes": 99614720,
+      "name": "csl-947-full-evidence.tar.zst.part046.part",
+      "sha256": "4cb72adaaef12f98bf4a960fb3d0558084e16d024c0a8d2deef840bf1eb48c4d",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part046.part"
+    },
+    {
+      "bytes": 89593719,
+      "name": "csl-947-full-evidence.tar.zst.part047.part",
+      "sha256": "dabd0894e592b5121d8b97ee1a1db458ec2172fee32ac341675f229dbee5422a",
+      "url": "https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118/csl-947-full-evidence.tar.zst.part047.part"
+    }
+  ],
+  "reconstruction": "Download every listed part in numerical filename order, concatenate their bytes into csl-947-full-evidence.tar.zst, then verify archive_sha256.",
+  "release_status": "pending-reviewed-main-merge-and-upload",
+  "release_tag": "evidence/closed-loop-campaign-947-full-20261118",
+  "release_url": "https://github.com/butahlecoq/controlled-systems-lab/releases/tag/evidence%2Fclosed-loop-campaign-947-full-20261118",
+  "schema": "csl.closed-loop-campaign-archive/1",
+  "source_commit": "08af99d6f982235c22a15d4e9307fd032dfb1adb"
+}

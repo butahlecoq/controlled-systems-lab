@@ -47,6 +47,11 @@ PRESENTATION_FILES = {
 # Pages preservation owns archived routes, navigation inventories and byte/hash
 # audits. These files have no native CMake target or executable smoke consumer.
 PAGES_PUBLICATION_FILES = {
+    "docs/catalogue/learning-book-v1.json",
+    "docs/examples/learning/chapters/native-substitution-matrix.html",
+    "scripts/reports/learning_book.py",
+    "scripts/reports/render_full_profile_campaign.py",
+    "scripts/ci/route_changes.py",
     "scripts/reports/audit_published_route_preservation.py",
     "scripts/reports/preserve_published_routes.py",
     "scripts/reports/pages_route_retirement.py",
@@ -85,7 +90,9 @@ def classify(paths):
     native = not paths
     reports = not paths
     for path in paths:
-        if path in PRESENTATION_FILES | PAGES_PUBLICATION_FILES | SAVED_EPISODE_PUBLICATION_FILES:
+        if path.startswith("docs/examples/closed-loop/campaign-2026-11-18/"):
+            reports = True
+        elif path in PRESENTATION_FILES | PAGES_PUBLICATION_FILES | SAVED_EPISODE_PUBLICATION_FILES:
             reports = True
         elif path.startswith(SAVED_PUBLICATION_ROOTS):
             reports = True
