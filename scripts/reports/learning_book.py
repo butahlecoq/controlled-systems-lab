@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import hashlib
 import json
 import re
 import sys
@@ -1311,6 +1312,50 @@ def build(
                 if source.is_symlink() or not source.is_file():
                     raise ValueError(f"figure {entry['id']} is missing source asset {href}")
                 site_files[href] = source.read_bytes()
+    campaign_id = "examples/closed-loop/campaign-2026-11-18"
+    campaign_source = ROOT / "docs" / campaign_id
+    campaign_manifest = campaign_source / "provenance-manifest.json"
+    campaign_sidecar = campaign_manifest.with_suffix(".json.sha256")
+    if campaign_manifest.is_file() and not campaign_manifest.is_symlink():
+        manifest_bytes = campaign_manifest.read_bytes()
+        manifest = json.loads(manifest_bytes)
+        expected_sidecar = (
+            f"{hashlib.sha256(manifest_bytes).hexdigest()}  {campaign_manifest.name}\n"
+        )
+        if (
+            campaign_sidecar.is_symlink()
+            or campaign_sidecar.read_text(encoding="utf-8") != expected_sidecar
+        ):
+            raise ValueError(
+                "full-profile campaign publication manifest hash is missing or invalid"
+            )
+        expected_files = manifest.get("files_sha256")
+        if not isinstance(expected_files, dict):
+            raise ValueError("full-profile campaign manifest has no file hash map")
+        actual_files = {
+            path.relative_to(campaign_source).as_posix()
+            for path in campaign_source.rglob("*")
+            if path.is_file() and path not in {campaign_manifest, campaign_sidecar}
+        }
+        if actual_files != set(expected_files):
+            raise ValueError("full-profile campaign files differ from the publication manifest")
+        campaign_root = campaign_source.resolve()
+        for relative, expected_digest in expected_files.items():
+            relative_path = Path(relative)
+            source = campaign_source / relative_path
+            if (
+                relative_path.is_absolute()
+                or ".." in relative_path.parts
+                or source.is_symlink()
+                or not source.is_file()
+                or not source.resolve().is_relative_to(campaign_root)
+            ):
+                raise ValueError(f"unsafe full-profile campaign asset: {relative}")
+            if hashlib.sha256(source.read_bytes()).hexdigest() != expected_digest:
+                raise ValueError(f"full-profile campaign asset hash differs: {relative}")
+            site_files[f"{campaign_id}/{relative}"] = source.read_bytes()
+        site_files[f"{campaign_id}/provenance-manifest.json"] = manifest_bytes
+        site_files[f"{campaign_id}/provenance-manifest.json.sha256"] = campaign_sidecar.read_bytes()
     replace_existing = frozenset(path for path in site_files if (Path(site) / path).exists())
     plan = site_additions.prepare(site, site_files, replace_existing=replace_existing)
     site_additions.commit(plan)

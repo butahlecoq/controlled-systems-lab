@@ -2362,12 +2362,12 @@
       ],
       "module_ids": [],
       "source": "native-substitution-matrix.html",
-      "summary": "Coverage and retained-stage visual evidence for 513 admitted closed-loop module compositions on Lotka–Volterra, Earth orbit, and fuel transfer. All per-graph outcomes and unsuccessful attempts are retained.",
-      "mathematical_input": "Frozen source commit 9140e2a6fde55697b2035349a0996941be80297c; three common task contracts and task hashes; 513 admitted graph configurations; fixed finite-action controller profiles and resource limits.",
-      "command": "mkdir -p build/campaign-v2\nBASE=https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-v2-9140e2a6-20261115\nfor asset in campaign-index lotka-results earth-orbit-results; do curl -L \"$BASE/$asset.tar.zst\" -o \"build/campaign-v2/$asset.tar.zst\"; done\ncurl -L \"$BASE/fuel-results.tar.zst.parts.json\" -o build/campaign-v2/fuel-results.tar.zst.parts.json\nfor part in $(jq -r '.parts[]' build/campaign-v2/fuel-results.tar.zst.parts.json); do curl -L \"$BASE/$part\" -o \"build/campaign-v2/$part\"; done\ncat build/campaign-v2/fuel-results.tar.zst.*.part > build/campaign-v2/fuel-results.tar.zst\nsha256sum build/campaign-v2/fuel-results.tar.zst\nfor asset in build/campaign-v2/*.tar.zst; do zstd -dc \"$asset\" | tar -xf - -C build/campaign-v2; done\ncp docs/examples/closed-loop/figure-index.json build/campaign-v2/figure-index.json\npython scripts/reports/campaign_graph_figures.py --campaign-root build/campaign-v2/reports/closed-loop-composition-campaign-v2 --output build/campaign-v2/figures --figure-index build/campaign-v2/figure-index.json --coverage-output build/campaign-v2/coverage.json",
-      "expected_output": "513 of 513 admitted graph configurations have recorded outcomes: 498 complete, 5 incorrect, 6 failed, 1 timed out, and 3 unsupported. The raw attempt log includes 15 additional historical inconclusive rows; 20 source-incompatible candidates have explicit exclusion reasons.",
-      "intermediate_geometry": "For each stage k the figure displays retained forward graph states F_ret[k], backward-viable retained nodes as the intersection F_ret[k] ∩ B_ret[k], terminal-stage retained nodes, the selected first-query graph plan, and the observed closed-loop replay. Fuel has separate oxidizer flow–mass and fuel flow–mass projections.",
-      "support_limits": "The graph universe was fully attempted, but representative graph search is beam-pruned (beam width 8; search_coverage=incomplete). Point clouds are retained finite-action states, not continuous reachable-set boundaries; no convex hull is inferred. The selected plan is optimal only within its retained graph. The campaign has no five alternating timing repetitions and supports no speed ranking. Run outcome complete does not imply global search completeness or global optimality.",
+      "summary": "Current full-profile campaign coverage and all-stage figures for five set representations across Lotka–Volterra, Earth orbit and fuel transfer. Retains 513 admitted graph outcomes, unsuccessful attempts, 20 incompatible candidates and separate compatible-profile reruns.",
+      "mathematical_input": "Frozen full-profile source commit 08af99d6f982235c22a15d4e9307fd032dfb1adb; three source-bound nonlinear task contracts and hashes; 513 admitted graph configurations; frozen capability manifests, resource profile and provider versions.",
+      "command": "set -euo pipefail\nREPO_ROOT=\"$(git rev-parse --show-toplevel)\"\nMANIFEST=\"$REPO_ROOT/docs/examples/closed-loop/campaign-2026-11-18/raw/archive-manifest.json\"\nBASE=https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-20261118\nROOT=\"$REPO_ROOT/build/campaign-2026-11-18\"\nPARTS=\"$ROOT/parts\"\nmkdir -p \"$PARTS\" \"$ROOT/extracted\"\njq -r '.parts[].name' \"$MANIFEST\" | while IFS= read -r part; do\n  curl -fL \"$BASE/$part\" -o \"$PARTS/$part\"\ndone\nARCHIVE=\"$PARTS/$(jq -r '.archive' \"$MANIFEST\")\"\njq -r '\"\\(.archive_sha256)  \\(.archive)\"' \"$MANIFEST\" > \"$PARTS/archive.sha256\"\n(\n  cd \"$PARTS\"\n  archive_name=\"$(basename \"$ARCHIVE\")\"\n  : > \"$archive_name\"\n  while IFS= read -r part; do cat \"$part\" >> \"$archive_name\"; done < <(jq -r '.parts[].name' \"$MANIFEST\")\n  sha256sum --check archive.sha256\n)\ntar -I 'zstd -T0 -d' -xf \"$ARCHIVE\" -C \"$ROOT/extracted\"\npython scripts/reports/render_full_profile_campaign.py \\\n  --freeze \"$ROOT/extracted/full-profile/freeze.json\" \\\n  --coverage \"$ROOT/extracted/full-profile/full-outcomes/campaign-coverage-20261118T142500Z-post-retry-reconciled.json\" \\\n  --outcomes \"$ROOT/extracted/full-profile/full-outcomes\" \\\n  --targeted-reruns \"$ROOT/extracted/fixed-tail-compatible-profile/targeted-reruns\" \\\n  --archive-manifest \"$MANIFEST\" \\\n  --output \"$ROOT/rendered\"",
+      "expected_output": "The full-profile capture records 513/513 graph outcomes: 483 complete, 7 failed, 8 unsupported and 15 inconclusive; no graph is pending. Its 516 attempt records include retries. Fifteen compatible-profile reruns completed and remain supplemental. The source catalogue contains 480 candidates: 460 requestable and 20 incompatible, with zero candidates classified as backend-unavailable or implementation-missing.",
+      "intermediate_geometry": "The current dashboard shows five representations for each task. Graph figures overlay retained finite-action states at every prediction stage, backward-viable states, the selected plan and observed replay. The box controller instead displays its numerical fixed-plan outer tube and does not claim a full reachable set. Fuel uses oxidizer (mass, flow) and fuel (mass, flow) projections.",
+      "support_limits": "No five alternating timing repetitions were run, so this is not a performance ranking. Beam width is 8 and finite-action search coverage is incomplete; projected points are not continuous reachable-set boundaries and graph plans are optimal only over retained nodes. Box tubes enclose one selected fixed plan. Numerical checks use binary64. Fifteen completed compatible-profile reruns remain separate from full-profile totals.",
       "figure_ids": [
         "campaign-syn-nl-lv-01-lotka",
         "campaign-earth-orbit-orbit",
@@ -2375,6 +2375,22 @@
         "campaign-syn-nl-fuel-01-fuel"
       ],
       "records": [
+        {
+          "label": "Current full-profile dashboard and graph-by-graph coverage",
+          "href": "../examples/closed-loop/campaign-2026-11-18/index.html"
+        },
+        {
+          "label": "Current publication provenance and file hashes",
+          "href": "../examples/closed-loop/campaign-2026-11-18/provenance-manifest.json"
+        },
+        {
+          "label": "Current frozen universe",
+          "href": "../examples/closed-loop/campaign-2026-11-18/raw/freeze.json"
+        },
+        {
+          "label": "Current compatible-profile rerun summary",
+          "href": "../examples/closed-loop/campaign-2026-11-18/raw/targeted-reruns-summary.json"
+        },
         {
           "label": "Campaign dashboard and complete graph outcome JSON",
           "href": "../examples/closed-loop/campaign-v2/index.html"

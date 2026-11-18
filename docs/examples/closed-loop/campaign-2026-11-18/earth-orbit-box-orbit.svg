@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 820" role="img">
+<title>Earth orbit · box · orbit projection</title><rect width="100%" height="100%" fill="white"/>
+<style>text{font:14px system-ui,sans-serif;fill:#253047}.title{font-size:23px;font-weight:700}.axis{font-size:15px;font-weight:600}</style>
+<text x="110" y="42" class="title">Earth orbit · box · orbit projection</text>
+<text x="110" y="68">Outer fixed-plan trajectory enclosures · box representation</text>
+<line x1="110.00" y1="100" x2="110.00" y2="670" stroke="#e2e8f0"/>
+<line x1="110" y1="670.00" x2="1060" y2="670.00" stroke="#e2e8f0"/>
+<text x="110.00" y="692" text-anchor="middle">6961</text>
+<text x="100" y="674.00" text-anchor="end">0.0010771</text>
+<line x1="300.00" y1="100" x2="300.00" y2="670" stroke="#e2e8f0"/>
+<line x1="110" y1="556.00" x2="1060" y2="556.00" stroke="#e2e8f0"/>
+<text x="300.00" y="692" text-anchor="middle">6969.4</text>
+<text x="100" y="560.00" text-anchor="end">0.0010791</text>
+<line x1="490.00" y1="100" x2="490.00" y2="670" stroke="#e2e8f0"/>
+<line x1="110" y1="442.00" x2="1060" y2="442.00" stroke="#e2e8f0"/>
+<text x="490.00" y="692" text-anchor="middle">6977.7</text>
+<text x="100" y="446.00" text-anchor="end">0.0010811</text>
+<line x1="680.00" y1="100" x2="680.00" y2="670" stroke="#e2e8f0"/>
+<line x1="110" y1="328.00" x2="1060" y2="328.00" stroke="#e2e8f0"/>
+<text x="680.00" y="692" text-anchor="middle">6986.1</text>
+<text x="100" y="332.00" text-anchor="end">0.0010831</text>
+<line x1="870.00" y1="100" x2="870.00" y2="670" stroke="#e2e8f0"/>
+<line x1="110" y1="214.00" x2="1060" y2="214.00" stroke="#e2e8f0"/>
+<text x="870.00" y="692" text-anchor="middle">6994.5</text>
+<text x="100" y="218.00" text-anchor="end">0.0010851</text>
+<line x1="1060.00" y1="100" x2="1060.00" y2="670" stroke="#e2e8f0"/>
+<line x1="110" y1="100.00" x2="1060" y2="100.00" stroke="#e2e8f0"/>
+<text x="1060.00" y="692" text-anchor="middle">7002.9</text>
+<text x="100" y="104.00" text-anchor="end">0.0010871</text>
+<rect x="994.48" y="615.74" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="993.27" y="622.96" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="989.32" y="628.06" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="982.18" y="630.69" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="971.46" y="630.53" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="956.79" y="627.30" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="937.85" y="620.75" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="914.38" y="610.68" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="886.15" y="596.92" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="853.01" y="579.34" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="814.85" y="557.86" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="771.64" y="532.45" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="723.37" y="503.12" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="670.13" y="469.93" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="612.04" y="432.97" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="549.29" y="392.39" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="482.12" y="348.37" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="410.83" y="301.15" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="335.74" y="250.98" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="257.25" y="198.17" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="175.78" y="143.05" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<polyline points="994.48,615.74 993.27,622.96 989.32,628.06 982.18,630.69 971.46,630.53 956.79,627.30 937.85,620.75 914.38,610.68 886.15,596.92 853.01,579.34 814.85,557.86 771.64,532.45 723.37,503.12 670.13,469.93 612.04,432.97 549.29,392.39 482.12,348.37 410.83,301.15 335.74,250.98 257.25,198.17 175.78,143.05" fill="none" stroke="#dc2626" stroke-width="3"/>
+<polyline points="994.48,615.74 993.27,622.97 989.32,628.06 982.18,630.69 971.46,630.53 956.79,627.30 937.85,620.76 914.38,610.68 886.15,596.90 853.00,579.29 814.83,557.77 771.60,532.28 723.32,502.83 670.05,469.46 611.93,432.27 549.15,391.40 481.95,347.01 410.61,299.34 335.50,248.62 256.99,195.17 175.52,139.31" fill="none" stroke="#2563eb" stroke-width="3" stroke-dasharray="8 5"/>
+<text x="110" y="758">Amber: numerical outer fixed-plan tube · red: selected plan · blue dashed: observed closed-loop replay</text>
+<text x="110" y="785" class="axis">Radius r (km)</text>
+<text x="34" y="385.0" class="axis" transform="rotate(-90 34 385.0)">Angular rate ω (rad/s)</text></svg>
