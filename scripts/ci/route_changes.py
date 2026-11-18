@@ -51,7 +51,6 @@ PAGES_PUBLICATION_FILES = {
     "docs/examples/learning/chapters/native-substitution-matrix.html",
     "scripts/reports/learning_book.py",
     "scripts/reports/render_full_profile_campaign.py",
-    "scripts/ci/route_changes.py",
     "scripts/reports/audit_published_route_preservation.py",
     "scripts/reports/preserve_published_routes.py",
     "scripts/reports/pages_route_retirement.py",
