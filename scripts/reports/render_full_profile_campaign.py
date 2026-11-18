@@ -67,6 +67,12 @@ def esc(value: Any) -> str:
     return html.escape(str(value), quote=True)
 
 
+def fmt_number(value: Any) -> str:
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return f"{value:.6g}"
+    return esc(value)
+
+
 def draw_box_tube_svg(
     title: str,
     plane: figures.Projection,
@@ -203,6 +209,7 @@ def main() -> int:
         raise ValueError(f"no completed native graph for combinations: {sorted(missing)}")
 
     cards: dict[str, list[str]] = defaultdict(list)
+    quality_rows: list[str] = []
     for (task, representation), row in sorted(chosen.items()):
         relative = row["attempt"]["path"]
         attempt_dir = outcomes / Path(relative).parent
@@ -211,13 +218,33 @@ def main() -> int:
         response = stage["query_receipt"]["bridge_response"]
         plan = response["selected_plan"]["states"]
         replay = attempt["physical_states"]
+        objective = attempt.get("physical_objective", {})
+        observed = attempt.get("resource_limits", {}).get("observed", {})
+        action_profile = row["graph"]["action_profile_id"]
+        case = f"{task}-{representation}"
+        figure_link = f"{case}-{PLANES[task][0]['id']}.html"
+        worker_rss_mib = observed.get("worker_max_rss_kib")
+        rss_value = (
+            fmt_number(worker_rss_mib / 1024)
+            if isinstance(worker_rss_mib, (int, float))
+            else "not recorded"
+        )
+        quality_rows.append(
+            f"<tr><th>{esc(TASK_LABELS[task])}</th><td><a href='{esc(figure_link)}'>{esc(representation)}</a></td>"
+            f"<td><code>{esc(action_profile)}</code></td>"
+            f"<td>{fmt_number(response['selected_plan'].get('total_objective', 'not recorded'))}</td>"
+            f"<td>{fmt_number(objective.get('total', 'not recorded'))}</td>"
+            f"<td>{fmt_number(attempt.get('completed_holds', 'not recorded'))}</td>"
+            f"<td>{fmt_number(attempt.get('end_to_end', {}).get('worker_wall_seconds', 'not recorded'))}</td>"
+            f"<td>{fmt_number(observed.get('worker_cpu_seconds', 'not recorded'))}</td>"
+            f"<td>{rss_value}</td><td><a href='raw/plotted-data/{esc(case)}.json'>saved run data</a></td></tr>"
+        )
         receipt = response.get("graph_receipt")
         final_stage = (
             int(receipt["original_horizon"])
             if receipt
             else len(response.get("predicted_sets", [{}])[0].get("stages", [])) - 1
         )
-        case = f"{task}-{representation}"
         task_label = TASK_LABELS[task]
         plotted = {
             "schema": "csl.closed-loop-campaign-plotted-data/1",
@@ -225,11 +252,25 @@ def main() -> int:
             "task_name": task,
             "graph_id": row["graph"]["graph_id"],
             "representation": representation,
+            "action_profile_id": action_profile,
             "attempt_id": row["attempt"]["attempt_id"],
             "graph_receipt": receipt,
             "predicted_sets": response.get("predicted_sets", []),
             "selected_plan": response["selected_plan"],
             "observed_closed_loop_replay": replay,
+            "quality_and_resource_evidence": {
+                "nonlinear_physical_objective": objective,
+                "completed_holds": attempt.get("completed_holds"),
+                "worker_wall_seconds": attempt.get("end_to_end", {}).get(
+                    "worker_wall_seconds"
+                ),
+                "worker_cpu_seconds": observed.get("worker_cpu_seconds"),
+                "worker_max_rss_kib": observed.get("worker_max_rss_kib"),
+                "limit_usage": attempt.get("resolved_graph", {})
+                .get("controller", {})
+                .get("limit_usage", {}),
+                "resource_limits": attempt.get("resource_limits", {}),
+            },
         }
         plot_path = args.output / "raw/plotted-data" / f"{case}.json"
         plot_path.write_text(json.dumps(plotted, sort_keys=True, indent=2) + "\n", encoding="utf-8")
@@ -258,7 +299,7 @@ def main() -> int:
                 f"<object data='{esc(stem)}.svg' type='image/svg+xml'><a href='{esc(stem)}.svg'>Open SVG</a></object>"
             )
             page.append(
-                f"<aside class='notice'><h2>Reading this projection</h2><p>{esc(figure_note)} The red line is the selected plan and the blue dashed line is the observed closed-loop replay. Search coverage is incomplete and optimality is limited to the retained graph where graph search is used.</p></aside>"
+                f"<aside class='notice'><h2>Reading this projection</h2><p>{esc(figure_note)} The selected plan comes from the affine prediction model; the blue dashed trace replays the original nonlinear plant under applied controls. Search coverage is incomplete and optimality is limited to the retained graph where graph search is used.</p></aside>"
             )
             page.append(page_end())
             (args.output / f"{stem}.html").write_text("".join(page), encoding="utf-8")
@@ -314,43 +355,175 @@ def main() -> int:
         episode = contract["episode"]
         finite = contract["control_domains"]["finite"]["actions"]
         continuous = contract["control_domains"]["continuous"]
-        action_summary = f"{len(finite)} finite actions; continuous bounds {continuous['bounds']}"
+        continuous_bounds = " × ".join(
+            f"[{lower}, {upper}]" for lower, upper in continuous["bounds"]
+        )
         model_rows.append(
             f"<tr><th>{esc(TASK_LABELS[task])}</th><td>{len(model['states'])} · {esc(model['model_id'])}</td>"
             f"<td>{episode['dt']} × {episode['intervals']} {esc(episode['time_unit'])}</td>"
-            f"<td>{esc(action_summary)}</td><td>{esc(contract['objective']['kind'])}</td>"
-            f"<td>{esc(contract['terminal_condition']['kind'])}</td>"
+            f"<td>{len(finite)} catalog actions</td><td>{esc(continuous_bounds)}</td>"
+            f"<td>{esc(contract['objective']['kind'])}</td><td>{esc(contract['terminal_condition']['kind'])}</td>"
+            f"<td>{esc(contract['prediction']['affine_model_id'])}</td>"
+            f"<td>{esc(contract['prediction']['plant'])} · {esc(episode['execution']['method'])}</td>"
             f"<td>{episode['closed_loop']['players']} · {esc(episode['closed_loop']['observation'])}</td>"
             f"<td><a href='raw/task-contracts/{esc(task)}.json'>contract</a></td></tr>"
         )
+    native_representation_counts: dict[tuple[str, str, str], Counter[str]] = defaultdict(Counter)
+    for graph in freeze["graphs"]:
+        controller = graph["controller"]
+        if controller.get("adapter") != "native_graph_policy":
+            continue
+        representation = controller.get("factory_options", {}).get("representation")
+        cell = by_cell[(graph["task_name"], graph["graph_id"])]
+        outcome = cell["attempts"][-1]["category"] if cell["attempts"] else "pending"
+        native_representation_counts[
+            (graph["task_name"], graph["action_profile_id"], representation)
+        ][outcome] += 1
+    representation_rows = []
+    for (task, action_profile, representation), counts in sorted(native_representation_counts.items()):
+        total = sum(counts.values())
+        representation_rows.append(
+            f"<tr><th>{esc(TASK_LABELS[task])}</th><td>{esc(representation)}</td>"
+            f"<td>{esc(action_profile)}</td><td>{total}</td>"
+            f"<td>{counts.get('complete', 0)}</td><td>{counts.get('failed', 0)}</td>"
+            f"<td>{counts.get('unsupported', 0)}</td><td>{counts.get('inconclusive', 0)}</td>"
+            f"<td>{counts.get('pending', 0)}</td></tr>"
+        )
+    role_specs = (
+        ("representation", "Set representation"),
+        ("control_optimizer", "Control optimizer"),
+        ("reachable_set_method", "Reachable-set method"),
+        ("vertex_lp", "Vertex LP"),
+        ("hull_provider", "Hull provider"),
+        ("converter", "V↔H converter"),
+        ("set_reducer", "Set reducer"),
+        ("terminal_solver", "Terminal solver"),
+        ("bellman_solver", "Bellman solver"),
+        ("geometry_checker", "Geometry checker"),
+    )
+    role_rows = []
+    for role, label in role_specs:
+        bound = 0
+        explicitly_unused = 0
+        declared_not_consumed = 0
+        identities: set[str] = set()
+        explicitly_inactive = 0
+        for graph in freeze["graphs"]:
+            binding = graph.get("role_bindings", {})
+            inactive = graph.get("inactive_roles", {})
+            explicitly_inactive += role in inactive
+            if role not in binding:
+                continue
+            bound += 1
+            value = binding[role]
+            if value == "not_used":
+                explicitly_unused += 1
+            elif (
+                isinstance(value, dict)
+                and "not consumed" in str(value.get("status", "")).lower()
+            ):
+                declared_not_consumed += 1
+            elif isinstance(value, dict):
+                identity = next(
+                    (
+                        value[key]
+                        for key in ("module_id", "profile_id", "name", "id", "provider", "status")
+                        if key in value
+                    ),
+                    "active binding",
+                )
+                identities.add(str(identity))
+            else:
+                identities.add(str(value))
+        role_rows.append(
+            f"<tr><th>{esc(label)}</th><td>{bound - explicitly_unused - declared_not_consumed}</td><td>{len(identities)}</td>"
+            f"<td>{explicitly_unused}</td><td>{declared_not_consumed}</td>"
+            f"<td>{len(freeze['graphs']) - bound}</td>"
+            f"<td>{explicitly_inactive}</td></tr>"
+        )
+    limiter_usage: dict[str, Counter[str]] = defaultdict(Counter)
+    complete_attempt_count = 0
+    for cell in coverage["cells"]:
+        if not cell["attempts"] or cell["attempts"][-1]["category"] != "complete":
+            continue
+        complete_attempt_count += 1
+        attempt_path = outcomes / Path(cell["attempts"][-1]["path"]).parent / "attempt.json"
+        attempt_data = read_json(attempt_path)
+        usage = attempt_data.get("resolved_graph", {}).get("controller", {}).get("limit_usage", {})
+        for limit, status in usage.items():
+            limiter_usage[limit][str(status)] += 1
+    limiter_rows = []
+    for limit, statuses in sorted(limiter_usage.items()):
+        for status, count in sorted(statuses.items()):
+            limiter_rows.append(
+                f"<tr><th>{esc(limit)}</th><td>{esc(status.replace('_', ' '))}</td><td>{count}</td>"
+                f"<td>{complete_attempt_count - sum(statuses.values())}</td></tr>"
+            )
     task_sections = "".join(
         f"<section><h2>{esc(TASK_LABELS[task])}</h2><div class='cards'><ul>{''.join(cards[task])}</ul></div></section>"
         for task in TASK_LABELS
     )
     reconciliation = coverage.get("reconciliation", {})
     archive = read_json(args.archive_manifest)
+    graph_outcomes = coverage["outcomes"]["by_graph_outcome"]
+    admitted = coverage["outcomes"]["admitted_graphs"]
+    attempt_rows = coverage["outcomes"]["attempt_rows"]
+    latest_complete = graph_outcomes.get("complete", 0)
+    latest_inconclusive = graph_outcomes.get("inconclusive", 0)
+    latest_failed = graph_outcomes.get("failed", 0)
+    latest_unsupported = graph_outcomes.get("unsupported", 0)
+    incomplete_cells = [
+        cell
+        for cell in coverage["cells"]
+        if cell["attempts"] and cell["attempts"][-1]["category"] == "inconclusive"
+    ]
+    compatible_reruns = sum(
+        cell["attempts"][-1].get("compatible_profile_rerun", {}).get("status") == "complete"
+        for cell in incomplete_cells
+    )
     title = "Closed-loop composition campaign · full profile"
     crumbs = (("Examples", "../../index.html"), ("Campaign evidence", ""))
     page = [page_start(title, stylesheet_href="../../examples.css", crumbs=crumbs)]
     page.append(
-        "<header class='notice'><p>Single-player closed-loop · Lotka–Volterra · Earth orbit · fuel transfer</p><h1>Full-profile module composition</h1><p>Every admitted graph was attempted. Failed, unsupported and inconclusive outcomes remain visible below and in the raw coverage record.</p><div class='cards'><ul><li><strong>513</strong> admitted graph configurations</li><li><strong>516</strong> full-profile attempt records</li><li><strong>483</strong> latest graph outcomes complete</li><li><strong>30</strong> latest graph outcomes inconclusive</li></ul></div></header>"
+        f"<header class='notice'><p>Single-player closed-loop · Lotka–Volterra · Earth orbit · fuel transfer</p><h1>Full-profile module composition</h1><p>Every admitted graph was attempted. Failed, unsupported and inconclusive outcomes remain visible below and in the raw coverage record.</p><div class='cards'><ul><li><strong>{admitted}</strong> admitted graph configurations</li><li><strong>{latest_complete}</strong> complete</li><li><strong>{latest_failed}</strong> failed</li><li><strong>{latest_unsupported}</strong> unsupported</li><li><strong>{latest_inconclusive}</strong> inconclusive</li></ul></div><p>{attempt_rows} total attempt records include retries.</p></header>"
+    )
+    outcomes = coverage["outcomes"]
+    page.append(
+        f"<section><h2>Exhaustive disposition</h2><div class='scroll'><table><thead><tr><th>Task</th><th>Admitted</th>{table_head}</tr></thead><tbody>{table_rows}</tbody></table></div>"
+        f"<p>Candidate ledger: {outcomes['canonical_active_graphs']} canonical active and admitted graphs; {outcomes['attempted_graphs']} attempted; {outcomes['pending_graphs']} pending. The source catalogues contain {outcomes['source_candidates']} composition candidates ({outcomes['by_candidate_status'].get('requestable', 0)} requestable and {outcomes['incompatible_candidates']} incompatible), {outcomes['canonical_catalogue_references']} graph references ({outcomes['duplicate_catalogue_references']} duplicate references), {outcomes['backend_unavailable_candidates']} backend-unavailable candidates and {outcomes['implementation_missing_candidates']} implementation-missing candidates. Full reasons are retained in the coverage record.</p>"
+        f"<p>Of the {latest_inconclusive} latest inconclusive full-profile graph outcomes, {compatible_reruns} have completed reruns under a separate compatible profile; those reruns are supplemental, not merged into full-profile totals.</p>"
+        "<p><a href='raw/coverage.json'>Download exhaustive graph and attempt coverage</a> · <a href='raw/freeze.json'>Frozen candidate universe</a> · <a href='raw/campaign-events.jsonl'>Full-profile event ledger</a> · <a href='raw/targeted-rerun-events.jsonl'>Compatible-profile rerun events</a> · <a href='raw/archive-manifest.json'>Raw archive manifest</a></p>"
+        f"<p>The full attempt tree is a {archive['archive_bytes'] / 1_000_000_000:.2f} GB archive in {len(archive['parts'])} parts. The immutable evidence release is pending publication with this report. After publication, download each part in manifest order, concatenate the bytes, and verify the archive SHA-256 before extraction. The <a href='{esc(archive['release_url'])}'>planned release URL</a> is recorded in the manifest.</p></section>"
     )
     page.append(
-        f"<section><h2>Disposition by task</h2><div class='scroll'><table><thead><tr><th>Task</th><th>Admitted</th>{table_head}</tr></thead><tbody>{table_rows}</tbody></table></div><p>Twenty additional candidates are incompatible with the current source-index hull dimension contract; their full reasons and module settings are in the coverage record.</p><p>Among the 30 inconclusive full-profile graph outcomes, 15 fixed-tail attempts have completed reruns under a separate compatible profile; 7 failed before returning a structured controller response, and 8 were refused or unsupported, including independent hull-checker rejections. The 15 reruns are supplemental evidence and are not merged into full-profile totals.</p><p><a href='raw/coverage.json'>Download exhaustive graph and attempt coverage</a> · <a href='raw/freeze.json'>Frozen candidate universe</a> · <a href='raw/campaign-events.jsonl'>Full-profile event ledger</a> · <a href='raw/targeted-rerun-events.jsonl'>Compatible-profile rerun events (15)</a> · <a href='raw/archive-manifest.json'>Raw archive manifest</a></p><p>The full attempt tree is a 4.77 GB archive in 48 parts. <a href='{esc(archive['release_url'])}'>Open the immutable archive release</a>. Download each part in manifest order, concatenate the bytes, and verify the archive SHA-256 before extraction.</p></section>"
+        "<section><h2>Representation outcomes on finite-action profiles</h2>"
+        "<p>This table isolates the native finite-action graph profiles by task hash and action catalog. Continuous-action adapters appear in the exhaustive disposition above but are not pooled into these representation counts.</p>"
+        f"<div class='scroll'><table><thead><tr><th>Task</th><th>Representation</th><th>Action profile</th><th>Admitted</th><th>Complete</th><th>Failed</th><th>Unsupported</th><th>Inconclusive</th><th>Pending</th></tr></thead><tbody>{''.join(representation_rows)}</tbody></table></div></section>"
+    )
+    page.append(
+        "<section><h2>Representative quality and worker footprint</h2>"
+        "<p>One completed graph is shown for each task and representation, using the same task and action profile within each task. The first objective is the first query’s full affine plan; the second is the recorded objective for the applied receding-horizon controls on nonlinear plant replay. Replanning can change later controls, so their difference is not a same-controls affine prediction error. Interpret objective values within a task, not across tasks. Worker wall time, CPU and resident memory are one-run descriptors, not a timing ranking. Worker wall includes in-worker controller work and inline geometry checks; it excludes post-run independent replay, checker processes and rendering. Worker CPU and peak RSS are worker-process only and exclude bridge subprocesses.</p>"
+        f"<div class='scroll'><table><thead><tr><th>Task</th><th>Representation</th><th>Action profile</th><th>Affine-plan objective</th><th>Nonlinear replay objective</th><th>Holds</th><th>Worker wall (s)</th><th>Worker CPU (s)</th><th>Worker peak RSS (MiB)</th><th>Data</th></tr></thead><tbody>{''.join(quality_rows)}</tbody></table></div></section>"
+    )
+    page.append(
+        "<details><summary>Role participation and limit declarations</summary>"
+        "<p>Role counts come from frozen admitted graph bindings. ‘Not used’ is an explicit binding value; ‘declared but not consumed’ records a capability that the selected path did not exercise; ‘not declared’ means the binding contract has no such role. These are separate from missing implementations. Per-graph reasons are in the frozen universe. Limit statuses below are controller declarations in latest complete attempts: ‘used’ means the method consults that budget, not that it reached the cap. A missing status is not treated as zero use.</p>"
+        f"<div class='scroll'><table><thead><tr><th>Algorithm role</th><th>Selected/consumed bindings</th><th>Distinct selected identities</th><th>Explicitly not used</th><th>Declared but not consumed</th><th>Not declared</th><th>Explicit inactive-role entries</th></tr></thead><tbody>{''.join(role_rows)}</tbody></table></div>"
+        f"<p>Limit declarations are present for {sum(sum(values.values()) for values in limiter_usage.values())} role-limit entries across {complete_attempt_count} latest complete attempts. Fixed-plan profiles explicitly mark graph-search beam/node budgets as not used; graph-search profiles declare those budgets active, without asserting that any cap was hit. Details remain in the individual attempt records.</p>"
+        f"<div class='scroll'><table><thead><tr><th>Controller limit</th><th>Recorded status</th><th>Complete attempts</th><th>No status recorded</th></tr></thead><tbody>{''.join(limiter_rows)}</tbody></table></div>"
+        "<p>Download <a href='raw/freeze.json'>frozen bindings and inactive-role reasons</a> and <a href='raw/coverage.json'>complete attempt coverage</a>.</p></details>"
     )
     page.append(
         "<section><h2>What is matched, and what differs by environment</h2>"
         "<p>Each module configuration is compared only against other configurations with the same task hash and declared action/problem profile. Across the three tasks, the source models, objectives, physical constraints and control units differ; they are not one shared numerical fixture. All use one player, exact full execution-state observations and first-input zero-order holds, with failure stopping before the next input and no fallback action.</p>"
-        f"<div class='scroll'><table><thead><tr><th>Task</th><th>States · model</th><th>Step × horizon</th><th>Action domains</th><th>Objective</th><th>Terminal condition</th><th>Information pattern</th><th>Source</th></tr></thead><tbody>{''.join(model_rows)}</tbody></table></div></section>"
+        f"<div class='scroll'><table><thead><tr><th>Task</th><th>States · nonlinear model</th><th>Step × horizon</th><th>Finite catalog</th><th>Continuous bounds</th><th>Objective</th><th>Terminal condition</th><th>Affine predictor</th><th>Nonlinear execution</th><th>Information pattern</th><th>Contract</th></tr></thead><tbody>{''.join(model_rows)}</tbody></table></div></section>"
     )
     page.append(
-        "<section><h2>All-stage sets and trajectories by representation</h2><p>Each representation card uses one completed native graph on that task. Fuel projections follow the authored state order: oxidizer (mass, flow) and fuel (mass, flow). The figures combine the initial graph query’s retained forward/backward-viable nodes, its selected plan, and the observed closed-loop replay.</p></section>"
+        "<section><h2>All-stage sets and trajectories by representation</h2><p>Each representation card uses one completed native graph on that task. Its selected plan is computed with the controller’s affine prediction model; the observed replay is a separate execution of the original nonlinear plant. Fuel projections follow the authored state order: oxidizer (mass, flow) and fuel (mass, flow). The graph figures show retained forward/backward-viable nodes, plan, and replay. Box cards show the fixed-plan outer tube rather than a full reachable set.</p></section>"
     )
     page.append(task_sections)
-    admitted = coverage["outcomes"]["admitted_graphs"]
-    attempt_rows = coverage["outcomes"]["attempt_rows"]
     page.append(
-        f"<section><h2>Interpretation and provenance</h2><aside class='notice'><p><strong>These are outcome and geometry illustrations, not a performance ranking.</strong> The campaign does not contain the five alternating, tuned repetitions required for comparative timing claims. Complete means the configured run and its configured evidence stages completed; it does not establish global search completeness or globally optimal feedback.</p><p>Search uses beam width 8 and incomplete finite-action coverage. Projected dots are retained graph states, not inferred continuous reachable-set boundaries. Numerical feasibility uses binary64 checks rather than validated arithmetic.</p></aside><p>Frozen source commit <code>{esc(freeze['source_commit'])}</code>. Coverage refresh method: {esc(reconciliation.get('method', 'verified campaign coverage'))}. New attempt reconciliation and verification limitations are recorded in the coverage JSON.</p></section>"
+        f"<section><h2>Resource limits, interpretation and provenance</h2><aside class='notice'><p><strong>These are outcome and geometry illustrations, not a performance ranking.</strong> The campaign does not contain the five alternating, tuned repetitions required for comparative timing claims. Complete means the configured run and its configured evidence stages completed; it does not establish global search completeness or globally optimal feedback.</p><p>Search uses beam width 8 and incomplete finite-action coverage. Projected dots are retained graph states, not inferred continuous reachable-set boundaries. Numerical feasibility uses binary64 checks rather than validated arithmetic.</p></aside><p>Shared per-attempt cap: {freeze['resource_profile']['attempt_wall_seconds']} s wall and {freeze['resource_profile']['attempt_cpu_seconds']} s CPU, {freeze['resource_profile']['address_space_bytes'] / (1024 ** 3):.0f} GiB address-space limit, {freeze['resource_profile']['suite_worker_count']} worker and {freeze['resource_profile']['solver_threads']} solver thread. These limits are held common; per-attempt durations remain in the archived evidence and are not used here as a performance comparison.</p><p>Frozen source commit <code>{esc(freeze['source_commit'])}</code>. Coverage refresh method: {esc(reconciliation.get('method', 'verified campaign coverage'))}. New attempt reconciliation and verification limitations are recorded in the coverage JSON.</p></section>"
     )
     page.append(page_end())
     (args.output / "index.html").write_text("".join(page), encoding="utf-8")

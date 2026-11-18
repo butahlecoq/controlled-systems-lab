@@ -1,4 +1,5 @@
 {
+  "action_profile_id": "env717-earth-orbit/finite-nine-action-per-step-adaptation/1",
   "attempt_id": "earth-orbit-20261117T172759Z-b835a110",
   "graph_id": "closed-loop/earth-orbit/native-box-fixed-plan-mpc/1/cfg-7bf8a371bd7f08f9",
   "graph_receipt": null,
@@ -434,6 +435,71 @@
       ]
     }
   ],
+  "quality_and_resource_evidence": {
+    "completed_holds": 20,
+    "limit_usage": {
+      "max_beam_width": "not_used_by_fixed_plan_search",
+      "max_generators_per_stage": "used",
+      "max_graph_nodes": "not_used_by_fixed_plan_search",
+      "max_plans": "used_as_candidate_history_budget",
+      "max_points_per_stage": "used",
+      "max_score_evaluations": "used"
+    },
+    "nonlinear_physical_objective": {
+      "running": 1.3435028842544405,
+      "terminal": 63.88859760991715,
+      "total": 65.23210049417159
+    },
+    "resource_limits": {
+      "enforced": {
+        "address_space_bytes": "POSIX RLIMIT_AS on worker process",
+        "cpu_seconds_hard": 301,
+        "cpu_seconds_soft": 300,
+        "solver_threads": "environment requests one BLAS/OMP/MKL thread",
+        "wall_scope": "supervised worker process group; excludes replay, checkers and rendering",
+        "wall_seconds": 300,
+        "worker_count": "one worker"
+      },
+      "observed": {
+        "effective_address_space_bytes": [
+          8589934592,
+          8589934592
+        ],
+        "effective_cpu_seconds": [
+          300,
+          301
+        ],
+        "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+        "python": "3.11.14",
+        "python_process_threads": 1,
+        "python_traced_memory_scope": "worker Python allocations; excludes native allocations and bridge subprocesses",
+        "rss_accounting_scope": "worker process only; bridge subprocess peaks are not included",
+        "thread_environment": {
+          "MKL_NUM_THREADS": "1",
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1"
+        },
+        "worker_cpu_seconds": 7.220151,
+        "worker_max_rss_kib": 152848,
+        "worker_pid": 385565,
+        "worker_python_traced_current_bytes": 10898019,
+        "worker_python_traced_peak_bytes": 23342597,
+        "worker_stage_interval_seconds_sum": 4.8705893360311165,
+        "worker_wall_scope": "supervisor monotonic span from worker launch through process exit; includes preparation, checkpoint I/O, early rejection, lifecycle close, and terminal serialization",
+        "worker_wall_seconds": 8.404260070004966
+      },
+      "requested": {
+        "address_space_bytes": 8589934592,
+        "cpu_seconds": 300,
+        "solver_threads": 1,
+        "wall_seconds": 300,
+        "worker_count": 1
+      }
+    },
+    "worker_cpu_seconds": 7.220151,
+    "worker_max_rss_kib": 152848,
+    "worker_wall_seconds": 8.404260070004966
+  },
   "representation": "box",
   "schema": "csl.closed-loop-campaign-plotted-data/1",
   "selected_plan": {

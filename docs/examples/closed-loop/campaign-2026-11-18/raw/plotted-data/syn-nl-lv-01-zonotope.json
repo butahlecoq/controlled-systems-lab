@@ -1,4 +1,5 @@
 {
+  "action_profile_id": "syn-nl-lv-01/continuous-receding/1/finite-catalog-adaptation/1",
   "attempt_id": "syn-nl-lv-01-20261117T173331Z-cc0ede9b",
   "graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-002b6d384559e53f",
   "graph_receipt": {
@@ -134172,6 +134173,71 @@
       "role": "complete-authored-action-parent-clouds"
     }
   ],
+  "quality_and_resource_evidence": {
+    "completed_holds": 30,
+    "limit_usage": {
+      "max_beam_width": "used",
+      "max_generators_per_stage": "used",
+      "max_graph_nodes": "used",
+      "max_plans": "not_used_by_graph_search",
+      "max_points_per_stage": "not_used_by_graph_search",
+      "max_score_evaluations": "not_used_by_graph_search"
+    },
+    "nonlinear_physical_objective": {
+      "running": 0.046250000000000006,
+      "terminal": 0.051421896407747504,
+      "total": 0.09767189640774751
+    },
+    "resource_limits": {
+      "enforced": {
+        "address_space_bytes": "POSIX RLIMIT_AS on worker process",
+        "cpu_seconds_hard": 301,
+        "cpu_seconds_soft": 300,
+        "solver_threads": "environment requests one BLAS/OMP/MKL thread",
+        "wall_scope": "supervised worker process group; excludes replay, checkers and rendering",
+        "wall_seconds": 300,
+        "worker_count": "one worker"
+      },
+      "observed": {
+        "effective_address_space_bytes": [
+          8589934592,
+          8589934592
+        ],
+        "effective_cpu_seconds": [
+          300,
+          301
+        ],
+        "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+        "python": "3.11.14",
+        "python_process_threads": 1,
+        "python_traced_memory_scope": "worker Python allocations; excludes native allocations and bridge subprocesses",
+        "rss_accounting_scope": "worker process only; bridge subprocess peaks are not included",
+        "thread_environment": {
+          "MKL_NUM_THREADS": "1",
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1"
+        },
+        "worker_cpu_seconds": 40.173733,
+        "worker_max_rss_kib": 174608,
+        "worker_pid": 386648,
+        "worker_python_traced_current_bytes": 11208825,
+        "worker_python_traced_peak_bytes": 61317916,
+        "worker_stage_interval_seconds_sum": 21.543421633017715,
+        "worker_wall_scope": "supervisor monotonic span from worker launch through process exit; includes preparation, checkpoint I/O, early rejection, lifecycle close, and terminal serialization",
+        "worker_wall_seconds": 43.94353290399886
+      },
+      "requested": {
+        "address_space_bytes": 8589934592,
+        "cpu_seconds": 300,
+        "solver_threads": 1,
+        "wall_seconds": 300,
+        "worker_count": 1
+      }
+    },
+    "worker_cpu_seconds": 40.173733,
+    "worker_max_rss_kib": 174608,
+    "worker_wall_seconds": 43.94353290399886
+  },
   "representation": "zonotope",
   "schema": "csl.closed-loop-campaign-plotted-data/1",
   "selected_plan": {

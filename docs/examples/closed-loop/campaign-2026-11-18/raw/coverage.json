@@ -49,8 +49,9 @@
         {
           "algorithm_status": "incomplete",
           "attempt_id": "earth-orbit-20261117T170914Z-d1fb0246",
-          "category": "inconclusive",
+          "category": "failed",
           "diagnostic": "Controller worker failed with exit code 2; it emitted no structured bridge response after 12 completed holds. Root cause remains unresolved; attempt logs are retained.",
+          "diagnostic_kind": "controller_failed",
           "overall_status": "incomplete",
           "path": "earth-orbit/attempts/earth-orbit-20261117T170914Z-d1fb0246/attempt.json",
           "postcheck_status": "not_run",
@@ -70,8 +71,9 @@
         {
           "algorithm_status": "incomplete",
           "attempt_id": "earth-orbit-20261117T171223Z-d96e06c0",
-          "category": "inconclusive",
+          "category": "failed",
           "diagnostic": "Controller worker failed with exit code 2; it emitted no structured bridge response after 0 completed holds. Root cause remains unresolved; attempt logs are retained.",
+          "diagnostic_kind": "controller_failed",
           "overall_status": "incomplete",
           "path": "earth-orbit/attempts/earth-orbit-20261117T171223Z-d96e06c0/attempt.json",
           "postcheck_status": "not_run",
@@ -111,8 +113,9 @@
         {
           "algorithm_status": "incomplete",
           "attempt_id": "earth-orbit-20261117T171637Z-3f671b2c",
-          "category": "inconclusive",
+          "category": "failed",
           "diagnostic": "Controller worker failed with exit code 2; it emitted no structured bridge response after 12 completed holds. Root cause remains unresolved; attempt logs are retained.",
+          "diagnostic_kind": "controller_failed",
           "overall_status": "incomplete",
           "path": "earth-orbit/attempts/earth-orbit-20261117T171637Z-3f671b2c/attempt.json",
           "postcheck_status": "not_run",
@@ -132,8 +135,9 @@
         {
           "algorithm_status": "incomplete",
           "attempt_id": "earth-orbit-20261117T171815Z-d45263f0",
-          "category": "inconclusive",
+          "category": "failed",
           "diagnostic": "Controller worker failed with exit code 2; it emitted no structured bridge response after 0 completed holds. Root cause remains unresolved; attempt logs are retained.",
+          "diagnostic_kind": "controller_failed",
           "overall_status": "incomplete",
           "path": "earth-orbit/attempts/earth-orbit-20261117T171815Z-d45263f0/attempt.json",
           "postcheck_status": "not_run",
@@ -153,8 +157,9 @@
         {
           "algorithm_status": "incomplete",
           "attempt_id": "earth-orbit-20261117T172231Z-3871c98e",
-          "category": "inconclusive",
+          "category": "failed",
           "diagnostic": "Controller worker failed with exit code 2; it emitted no structured bridge response after 0 completed holds. Root cause remains unresolved; attempt logs are retained.",
+          "diagnostic_kind": "controller_failed",
           "overall_status": "incomplete",
           "path": "earth-orbit/attempts/earth-orbit-20261117T172231Z-3871c98e/attempt.json",
           "postcheck_status": "not_run",
@@ -3374,8 +3379,9 @@
         {
           "algorithm_status": "incomplete",
           "attempt_id": "earth-orbit-20261118T120332Z-d75a4ee7",
-          "category": "inconclusive",
+          "category": "unsupported",
           "diagnostic": "Unsupported: terminal set exceeds the configured corner-enumeration limit.",
+          "diagnostic_kind": "controller_unsupported",
           "overall_status": "incomplete",
           "path": "earth-orbit/attempts/earth-orbit-20261118T120332Z-d75a4ee7/attempt.json",
           "postcheck_status": "not_run",
@@ -3535,8 +3541,9 @@
         {
           "algorithm_status": "incomplete",
           "attempt_id": "syn-nl-fuel-01-20261117T172336Z-1a2805ea",
-          "category": "inconclusive",
+          "category": "failed",
           "diagnostic": "Controller worker failed with exit code 2; it emitted no structured bridge response after 0 completed holds. Root cause remains unresolved; attempt logs are retained.",
+          "diagnostic_kind": "controller_failed",
           "overall_status": "incomplete",
           "path": "syn-nl-fuel-01/attempts/syn-nl-fuel-01-20261117T172336Z-1a2805ea/attempt.json",
           "postcheck_status": "not_run",
@@ -6786,8 +6793,9 @@
         {
           "algorithm_status": "incomplete",
           "attempt_id": "syn-nl-fuel-01-20261118T120740Z-f6850ea6",
-          "category": "inconclusive",
+          "category": "unsupported",
           "diagnostic": "Unsupported: terminal set exceeds the configured corner-enumeration limit.",
+          "diagnostic_kind": "controller_unsupported",
           "overall_status": "incomplete",
           "path": "syn-nl-fuel-01/attempts/syn-nl-fuel-01-20261118T120740Z-f6850ea6/attempt.json",
           "postcheck_status": "not_run",
@@ -6947,8 +6955,9 @@
         {
           "algorithm_status": "incomplete",
           "attempt_id": "syn-nl-lv-01-20261117T172034Z-9c593e62",
-          "category": "inconclusive",
+          "category": "failed",
           "diagnostic": "Controller worker failed with exit code 2; it emitted no structured bridge response after 0 completed holds. Root cause remains unresolved; attempt logs are retained.",
+          "diagnostic_kind": "controller_failed",
           "overall_status": "incomplete",
           "path": "syn-nl-lv-01/attempts/syn-nl-lv-01-20261117T172034Z-9c593e62/attempt.json",
           "postcheck_status": "not_run",
@@ -8258,8 +8267,9 @@
         {
           "algorithm_status": "incomplete",
           "attempt_id": "syn-nl-lv-01-20261118T062605Z-83a7a2ec",
-          "category": "inconclusive",
+          "category": "unsupported",
           "diagnostic": "Unsupported: independent hull checker found that a proposed point lies outside the reported hull.",
+          "diagnostic_kind": "controller_unsupported",
           "overall_status": "incomplete",
           "path": "syn-nl-lv-01/attempts/syn-nl-lv-01-20261118T062605Z-83a7a2ec/attempt.json",
           "postcheck_status": "not_run",
@@ -8539,8 +8549,9 @@
         {
           "algorithm_status": "incomplete",
           "attempt_id": "syn-nl-lv-01-20261118T071352Z-5e39c058",
-          "category": "inconclusive",
+          "category": "unsupported",
           "diagnostic": "Unsupported: independent hull checker found that a proposed point lies outside the reported hull.",
+          "diagnostic_kind": "controller_unsupported",
           "overall_status": "incomplete",
           "path": "syn-nl-lv-01/attempts/syn-nl-lv-01-20261118T071352Z-5e39c058/attempt.json",
           "postcheck_status": "not_run",
@@ -8940,8 +8951,9 @@
         {
           "algorithm_status": "incomplete",
           "attempt_id": "syn-nl-lv-01-20261118T083003Z-e8cd6598",
-          "category": "inconclusive",
+          "category": "unsupported",
           "diagnostic": "Unsupported: independent hull checker found that a proposed point lies outside the reported hull.",
+          "diagnostic_kind": "controller_unsupported",
           "overall_status": "incomplete",
           "path": "syn-nl-lv-01/attempts/syn-nl-lv-01-20261118T083003Z-e8cd6598/attempt.json",
           "postcheck_status": "not_run",
@@ -9241,8 +9253,9 @@
         {
           "algorithm_status": "incomplete",
           "attempt_id": "syn-nl-lv-01-20261118T092606Z-5a2bdf50",
-          "category": "inconclusive",
+          "category": "unsupported",
           "diagnostic": "Unsupported: independent hull checker found that a proposed point lies outside the reported hull.",
+          "diagnostic_kind": "controller_unsupported",
           "overall_status": "incomplete",
           "path": "syn-nl-lv-01/attempts/syn-nl-lv-01-20261118T092606Z-5a2bdf50/attempt.json",
           "postcheck_status": "not_run",
@@ -9402,8 +9415,9 @@
         {
           "algorithm_status": "incomplete",
           "attempt_id": "syn-nl-lv-01-20261118T095615Z-dcf8ce85",
-          "category": "inconclusive",
+          "category": "unsupported",
           "diagnostic": "Unsupported: independent hull checker found that a proposed point lies outside the reported hull.",
+          "diagnostic_kind": "controller_unsupported",
           "overall_status": "incomplete",
           "path": "syn-nl-lv-01/attempts/syn-nl-lv-01-20261118T095615Z-dcf8ce85/attempt.json",
           "postcheck_status": "not_run",
@@ -10383,8 +10397,9 @@
         {
           "algorithm_status": "incomplete",
           "attempt_id": "syn-nl-lv-01-20261118T121703Z-bbcf637c",
-          "category": "inconclusive",
+          "category": "unsupported",
           "diagnostic": "Unsupported: terminal set exceeds the configured corner-enumeration limit.",
+          "diagnostic_kind": "controller_unsupported",
           "overall_status": "incomplete",
           "path": "syn-nl-lv-01/attempts/syn-nl-lv-01-20261118T121703Z-bbcf637c/attempt.json",
           "postcheck_status": "not_run",
@@ -10444,16 +10459,27 @@
     "admitted_graphs": 513,
     "attempt_rows": 516,
     "attempted_graphs": 513,
+    "backend_unavailable_candidates": 0,
     "by_attempt_category": {
       "complete": 484,
+      "failed": 7,
       "in-progress": 1,
-      "inconclusive": 31
+      "inconclusive": 16,
+      "unsupported": 8
+    },
+    "by_candidate_status": {
+      "incompatible": 20,
+      "requestable": 460
     },
     "by_graph_outcome": {
       "complete": 483,
-      "inconclusive": 30
+      "failed": 7,
+      "inconclusive": 15,
+      "unsupported": 8
     },
     "canonical_active_graphs": 513,
+    "canonical_catalogue_references": 528,
+    "duplicate_catalogue_references": 15,
     "excluded_candidates": [
       {
         "candidate_id": "native-composition/d7d6904e2dab3ba535b3628f2708ab0fa62cef3ab9e208f8327f3816cec20b62",
@@ -11436,8 +11462,10 @@
         "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b"
       }
     ],
+    "implementation_missing_candidates": 0,
     "incompatible_candidates": 20,
-    "pending_graphs": 0
+    "pending_graphs": 0,
+    "source_candidates": 480
   },
   "reconciliation": {
     "added_attempts": [
@@ -11457,6 +11485,13 @@
         "closed-loop/earth-orbit/native-composition/1/cfg-90b567325b24534a"
       ]
     ],
+    "attempt_category_counts": {
+      "complete": 484,
+      "failed": 7,
+      "in-progress": 1,
+      "inconclusive": 16,
+      "unsupported": 8
+    },
     "compatible_profile_reruns": {
       "claim": "15 completed reruns are preserved separately because they use a distinct compatible resource/controller profile",
       "count": 15,
@@ -11466,6 +11501,7 @@
       "summary": "fixed-tail-compatible-profile/targeted-reruns/summary.json",
       "summary_sha256": "8de8b7cd2005deb51f19efc1f10c28e4b6a2d16a385d5004724df3cdd0705eb8"
     },
+    "diagnostic_classification": "Latest graph outcomes were refined to failed/unsupported only when the terminal stage controller_status explicitly says failed/unsupported; outcomes without a terminal structured controller_status remain inconclusive.",
     "event_ledger": "campaign-events.jsonl",
     "event_ledger_sha256": "151f771e5062f71cc4dc77019ea493172b310487b9c3d62d1ea2e51dc39de423",
     "method": "prior verified campaign coverage plus newly appended event-ledger attempts; each added attempt was read from its durable attempt.json and classified with the campaign classifier",
