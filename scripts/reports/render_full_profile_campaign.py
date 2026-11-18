@@ -92,6 +92,7 @@ def draw_box_tube_svg(
     width, height = 1120, 820
     left, right, top, bottom = 110, 60, 100, 150
     pw, ph = width - left - right, height - top - bottom
+
     def px(x: float) -> float:
         return left + (x - x0) * pw / (x1 - x0)
 
@@ -102,6 +103,7 @@ def draw_box_tube_svg(
         return " ".join(
             f"{px(float(point[i])):.2f},{py(float(point[j])):.2f}" for point in sequence
         )
+
     out = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" role="img">',
         f'<title>{esc(title)}</title><rect width="100%" height="100%" fill="white"/>',
@@ -261,9 +263,7 @@ def main() -> int:
             "quality_and_resource_evidence": {
                 "nonlinear_physical_objective": objective,
                 "completed_holds": attempt.get("completed_holds"),
-                "worker_wall_seconds": attempt.get("end_to_end", {}).get(
-                    "worker_wall_seconds"
-                ),
+                "worker_wall_seconds": attempt.get("end_to_end", {}).get("worker_wall_seconds"),
                 "worker_cpu_seconds": observed.get("worker_cpu_seconds"),
                 "worker_max_rss_kib": observed.get("worker_max_rss_kib"),
                 "limit_usage": attempt.get("resolved_graph", {})
@@ -380,7 +380,9 @@ def main() -> int:
             (graph["task_name"], graph["action_profile_id"], representation)
         ][outcome] += 1
     representation_rows = []
-    for (task, action_profile, representation), counts in sorted(native_representation_counts.items()):
+    for (task, action_profile, representation), counts in sorted(
+        native_representation_counts.items()
+    ):
         total = sum(counts.values())
         representation_rows.append(
             f"<tr><th>{esc(TASK_LABELS[task])}</th><td>{esc(representation)}</td>"
@@ -418,10 +420,7 @@ def main() -> int:
             value = binding[role]
             if value == "not_used":
                 explicitly_unused += 1
-            elif (
-                isinstance(value, dict)
-                and "not consumed" in str(value.get("status", "")).lower()
-            ):
+            elif isinstance(value, dict) and "not consumed" in str(value.get("status", "")).lower():
                 declared_not_consumed += 1
             elif isinstance(value, dict):
                 identity = next(
@@ -523,7 +522,7 @@ def main() -> int:
     )
     page.append(task_sections)
     page.append(
-        f"<section><h2>Resource limits, interpretation and provenance</h2><aside class='notice'><p><strong>These are outcome and geometry illustrations, not a performance ranking.</strong> The campaign does not contain the five alternating, tuned repetitions required for comparative timing claims. Complete means the configured run and its configured evidence stages completed; it does not establish global search completeness or globally optimal feedback.</p><p>Search uses beam width 8 and incomplete finite-action coverage. Projected dots are retained graph states, not inferred continuous reachable-set boundaries. Numerical feasibility uses binary64 checks rather than validated arithmetic.</p></aside><p>Shared per-attempt cap: {freeze['resource_profile']['attempt_wall_seconds']} s wall and {freeze['resource_profile']['attempt_cpu_seconds']} s CPU, {freeze['resource_profile']['address_space_bytes'] / (1024 ** 3):.0f} GiB address-space limit, {freeze['resource_profile']['suite_worker_count']} worker and {freeze['resource_profile']['solver_threads']} solver thread. These limits are held common; per-attempt durations remain in the archived evidence and are not used here as a performance comparison.</p><p>Frozen source commit <code>{esc(freeze['source_commit'])}</code>. Coverage refresh method: {esc(reconciliation.get('method', 'verified campaign coverage'))}. New attempt reconciliation and verification limitations are recorded in the coverage JSON.</p></section>"
+        f"<section><h2>Resource limits, interpretation and provenance</h2><aside class='notice'><p><strong>These are outcome and geometry illustrations, not a performance ranking.</strong> The campaign does not contain the five alternating, tuned repetitions required for comparative timing claims. Complete means the configured run and its configured evidence stages completed; it does not establish global search completeness or globally optimal feedback.</p><p>Search uses beam width 8 and incomplete finite-action coverage. Projected dots are retained graph states, not inferred continuous reachable-set boundaries. Numerical feasibility uses binary64 checks rather than validated arithmetic.</p></aside><p>Shared per-attempt cap: {freeze['resource_profile']['attempt_wall_seconds']} s wall and {freeze['resource_profile']['attempt_cpu_seconds']} s CPU, {freeze['resource_profile']['address_space_bytes'] / (1024**3):.0f} GiB address-space limit, {freeze['resource_profile']['suite_worker_count']} worker and {freeze['resource_profile']['solver_threads']} solver thread. These limits are held common; per-attempt durations remain in the archived evidence and are not used here as a performance comparison.</p><p>Frozen source commit <code>{esc(freeze['source_commit'])}</code>. Coverage refresh method: {esc(reconciliation.get('method', 'verified campaign coverage'))}. New attempt reconciliation and verification limitations are recorded in the coverage JSON.</p></section>"
     )
     page.append(page_end())
     (args.output / "index.html").write_text("".join(page), encoding="utf-8")

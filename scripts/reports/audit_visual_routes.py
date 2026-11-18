@@ -236,6 +236,10 @@ SAVED_DATA_ILLUSTRATION_RENDERERS = {
         "Renders authenticated saved finite-action campaign graph states, backward-viable nodes, selected first-query "
         "plans and observed plant replays in four physical 2D projections. It runs no solver, draws no convex hull, "
         "and discloses incomplete beam-pruned search coverage and retained-graph-only optimality."),
+    "scripts/reports/render_full_profile_campaign.py": (
+        "Reads the frozen full-profile candidate universe, reconciled outcomes and saved attempt records; "
+        "publishes all-stage projections, nonlinear replay objectives, worker resource evidence and role dispositions. "
+        "It runs no solver and makes no timing-winner claim."),
 }
 SAVED_DATA_COMPANION_RENDERERS = {
     "scripts/reports/fixed_tail_example.py",
