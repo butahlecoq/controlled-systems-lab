@@ -36,8 +36,8 @@ ctest --test-dir build/examples -C Release -R '^discrete_mpc_2d_matched_open_loo
 ```
 
 Expect one passing test. In the published example, the actions first diverge
-at stage 4. The open-loop action is 0 and the observed-state MPC action is
-about 1.05. The state and control histories are in
+at stage 4. The first control coordinate is 0 for the open-loop plan and
+about 1.05 for observed-state MPC. The state and control histories are in
 `build/examples/discrete-mpc-2d-test-output/episode.csv`. This is a numerical
 check on the example's eight-stage task.
 
