@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <iomanip>
+#include <sstream>
 #include <utility>
 
 namespace csl::optimization {
@@ -301,12 +303,26 @@ HistoryOptimizationOutcome check_history_optimization_result(const HistoryOptimi
     if (!membership_errors.empty())
         return membership_errors.front();
     const auto [states,controls]=unpack(r.domain.original.coordinates,raw.history);
-    auto cost=evaluate_history_cost(r.source_cost,states,controls);
-    if(const auto* d=std::get_if<Diagnostics>(&cost))return d->front();
-    if(const auto* stopped=std::get_if<OperationStopped>(&cost))return *stopped;
-    const auto evaluation=std::get<HistoryCostEvaluation>(cost);
-    if(!within_tolerance(std::abs(evaluation.total-raw.reported_objective),std::max(std::abs(evaluation.total),std::abs(raw.reported_objective)),context))
-        return Diagnostic{DiagnosticCode::evidence_mismatch,"history.backend.objective","Backend objective does not match re-evaluation of the authored source cost."};
+    auto cost = evaluate_history_cost(r.source_cost, states, controls);
+    if (const auto *d = std::get_if<Diagnostics>(&cost))
+        return d->front();
+    if (const auto *stopped = std::get_if<OperationStopped>(&cost))
+        return *stopped;
+    const auto evaluation = std::get<HistoryCostEvaluation>(cost);
+    if (!within_tolerance(std::abs(evaluation.total - raw.reported_objective),
+                          std::max(std::abs(evaluation.total), std::abs(raw.reported_objective)),
+                          context)) {
+        std::ostringstream detail;
+        detail
+            << std::setprecision(17)
+            << "Backend objective does not match re-evaluation of the authored source cost: reported="
+            << raw.reported_objective << ", recomputed=" << evaluation.total << ", tolerance="
+            << tolerance(context,
+                         std::max(std::abs(evaluation.total), std::abs(raw.reported_objective)))
+            << "; " << raw.diagnostics;
+        return Diagnostic{DiagnosticCode::evidence_mismatch, "history.backend.objective",
+                          detail.str()};
+    }
     return HistoryOptimizationResult{r.identity,
                                      std::move(raw.history),
                                      evaluation,

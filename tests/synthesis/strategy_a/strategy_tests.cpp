@@ -1,5 +1,8 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
+#ifdef CSL_TEST_REAL_HISTORY_OPTIMIZER
+#include <csl/adapters/nlp/casadi_history_optimizer.hpp>
+#endif
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/synthesis/strategy_a/nominal_linear_exact_profile.hpp>
 #include <csl/synthesis/b04_c_exact_family.hpp>
@@ -719,18 +722,76 @@ bool has_equality(const sets::HRepresentation& h,const Vector& coefficients,doub
     return false;
 }
 }
+#ifdef CSL_TEST_REAL_HISTORY_OPTIMIZER
+TEST_CASE("Strategy A executes the real CasADi-IPOPT history optimizer with typed memberships") {
+    double running_weight = 0.0;
+    SUBCASE("terminal cost") {}
+    SUBCASE("running norm changes the optimum") { running_weight = 0.5; }
+    optimization::RunningControlCost running{
+        "strategy-real-running",
+        2,
+        {{0, {optimization::EuclideanControlPenalty{{1, 1, {1}}, {0}, running_weight}}},
+         {1, {optimization::EuclideanControlPenalty{{1, 1, {1}}, {0}, running_weight}}}}};
+    auto registration = adapters::nlp::make_casadi_history_optimizer_registration();
+    const auto identity = registration.identity;
+    Registry<HistoryOptimizerPort> registry;
+    REQUIRE_FALSE(registry.add(std::move(registration)));
+    Requirements requirements;
+    requirements.output.representation = {"csl.whole-history-source-cost.v1"};
+    auto provider = take(prepare_provider(
+        select_provider(registry, Method{identity.id, identity.version}, requirements)));
+    auto query = request(integrator());
+    query.configuration.history_optimizer = identity.id;
+    query.history_optimization =
+        std::make_shared<const optimization::StrategyHistoryOptimizationProfile>(
+            optimization::StrategyHistoryOptimizationProfile{
+                ProgramId{"strategy-a-real-history-run"}, running, 0, "state",
+                typed_history_memberships(),
+                optimization::SuppliedStart{{0, 0.5, 1, 0.5, 0.5},
+                                            {optimization::HistoryHWitness{},
+                                             optimization::HistoryAxisBoxWitness{{0}},
+                                             optimization::HistoryZonotopeWitness{{0}},
+                                             optimization::HistoryParallelotopeWitness{{0}},
+                                             optimization::HistoryBallFactorWitness{{0}},
+                                             optimization::HistoryVSimplexWitness{{0.5, 0.5}}}}});
+    auto prepared = take(admit(query, false, {}, false, false, false, nullptr, nullptr, false,
+                               false, false, false, std::move(provider)));
+    auto workspace = prepared.create();
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    auto result = take(workspace->run(context));
+    INFO("termination=" << static_cast<int>(result.termination) << " stop=" << result.stop.index());
+    if (const auto *failure = std::get_if<ScopedRequestRejection>(&result.stop))
+        for (const auto &diagnostic : failure->diagnostics)
+            MESSAGE(diagnostic.field << ": " << diagnostic.explanation);
+    if (const auto *failure = std::get_if<ContractValidationFailure>(&result.stop))
+        for (const auto &diagnostic : failure->diagnostics)
+            MESSAGE(diagnostic.field << ": " << diagnostic.explanation);
+    REQUIRE(result.history_optimization);
+    REQUIRE(result.history_optimization->result);
+    CHECK(std::isfinite(result.history_optimization->result->reported_objective));
+    // For s=u0+u1 in [0,2], minimize (s-1)^2+w*s: s=1-w/2.
+    CHECK(result.history_optimization->result->reported_objective ==
+          doctest::Approx(running_weight == 0.0 ? 0.0 : 0.4375).epsilon(1e-5));
+    CHECK(result.history_optimization->result->maximum_history_violation <= 1e-6);
+    CHECK(std::holds_alternative<optimization::VerifiedSuppliedStart>(
+        result.history_optimization->result->initialization));
+    CHECK(result.history_optimization->result->membership_witnesses.size() == 6);
+    REQUIRE(result.history_optimization->provider.actual_module);
+    CHECK(result.history_optimization->provider.actual_module->value == identity.id.value);
+}
+#endif
 TEST_CASE("Strategy A invokes the prepared whole-history optimizer before terminal optimization") {
     auto query = request(integrator());
     query.configuration.history_optimizer = {"test.zero-history-optimizer"};
     query.history_optimization =
         std::make_shared<const optimization::StrategyHistoryOptimizationProfile>(
-            optimization::StrategyHistoryOptimizationProfile{
-                ProgramId{"strategy-a-history-run"},
-                {{}, 0, {}},
-                0,
-                "state",
-                typed_history_memberships(),
-                optimization::ColdStart{}});
+            optimization::StrategyHistoryOptimizationProfile{ProgramId{"strategy-a-history-run"},
+                                                             {{}, 0, {}},
+                                                             0,
+                                                             "state",
+                                                             typed_history_memberships(),
+                                                             optimization::ColdStart{}});
     auto prepared = take(admit(query, false, {}, false, false, false, nullptr, nullptr, false,
                                false, false, false, zero_history_optimizer()));
     auto workspace = prepared.create();

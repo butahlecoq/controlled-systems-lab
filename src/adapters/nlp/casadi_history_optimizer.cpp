@@ -244,7 +244,8 @@ public:
                 return Diagnostic{DiagnosticCode::evidence_mismatch,"history.casadi_ipopt.initial_duals",
                     "CasADi initial dual readback differs from this NLP's zero dual vector or constraint dimension."};
             casadi::Dict options{{"sb","yes"},{"print_level",0},{"max_iter",6000},
-                {"tol",1e-11},{"acceptable_tol",1e-10},{"bound_relax_factor",0.0},
+                {"tol",1e-11},{"acceptable_tol",1e-10},
+                {"compl_inf_tol",1e-12},{"bound_relax_factor",0.0},
                 {"warm_start_init_point","yes"}};
             if(context.deadline)
                 options["max_wall_time"]=std::max(0.001,std::chrono::duration<double>(
@@ -255,7 +256,9 @@ public:
             if(context.deadline&&std::chrono::steady_clock::now()>=*context.deadline)
                 return OperationStopped{StopReason::deadline_expired,"Native CasADi history optimization deadline reached"};
             const auto diagnostics="native C++ CasADi "+std::string(casadi::CasadiMeta::version())+
-                "; IPOPT; "+opti.stats().at("return_status").to_string()+"; all history coordinates free; local numerical";
+                "; IPOPT; "+opti.stats().at("return_status").to_string()+
+                "; iterations="+std::to_string(static_cast<double>(opti.stats().at("iter_count")))+
+                "; all history coordinates free; local numerical";
             std::vector<optimization::HistoryMembershipWitness> membership_witnesses;
             for (std::size_t i = 0; i < membership_variables.size(); ++i) {
                 auto coefficients = membership_variables[i]
