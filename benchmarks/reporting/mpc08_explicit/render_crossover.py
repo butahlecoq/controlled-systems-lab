@@ -122,7 +122,7 @@ def draw(ref, workload, raw_path, summary, dest):
         label="Shrinking-horizon trajectory",
         zorder=5,
     )
-    bx.legend(loc="upper center", bbox_to_anchor=(0.5, -0.53), fontsize=8, ncol=2)
+    bx.legend(loc="upper center", bbox_to_anchor=(0.5, -0.23), fontsize=8, ncol=2)
     bx.set_title("First control for three remaining steps")
     fig.colorbar(
         coll, ax=bx, orientation="horizontal", shrink=0.85, label="Acceleration at region centroid"
