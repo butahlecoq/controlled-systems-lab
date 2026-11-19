@@ -872,6 +872,12 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/learning_model_tracks.py",
+      "signal_count": 1,
+      "asset_name_literals": [],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/lotka_volterra_sampled.py",
       "signal_count": 5,
       "asset_name_literals": [

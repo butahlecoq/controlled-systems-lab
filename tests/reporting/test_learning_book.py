@@ -139,6 +139,8 @@ class LearningBookTests(unittest.TestCase):
         self.assertEqual(page.count("Nominal external input: unspecified by the source"), 13)
         self.assertIn("Preserved solver refusal", page)
         self.assertIn("Source-defined MPC task", page)
+        self.assertTrue(any("Ten%2Dgenerator" in link for link in links.links))
+        self.assertTrue(any("Twenty%2Dzone" in link for link in links.links))
         self.assertIn("flexible-pitch/synthetic-12-state/1", page)
         self.assertIn("bulaev-2016-slide33/literal-eight/1", page)
         self.assertIn("../examples/native-four-state-reachability.html", links.links)

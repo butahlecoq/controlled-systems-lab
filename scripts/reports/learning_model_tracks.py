@@ -62,7 +62,9 @@ def _discrete_models(report_root: Path) -> str:
             raise ValueError(f"tracking outcome link is missing for {ident}")
         plot = figures.get(folder)
         plot_link = f' · <a href="{route}/{escape(plot)}">Observed trajectory</a>' if plot else ""
-        matrix_label = quote(re.sub(r"\W+$", "", f"{index}. {model['title']}"), safe="")
+        matrix_label = quote(re.sub(r"\W+$", "", f"{index}. {model['title']}"), safe="").replace(
+            "-", "%2D"
+        )
         nominal = (
             "supplied by the source" if ident in nominal_inputs else "unspecified by the source"
         )
