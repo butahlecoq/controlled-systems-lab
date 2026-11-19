@@ -1187,27 +1187,41 @@
       "records": [
         {
           "label": "Slide 33: three-state source model and complete initial box",
-          "href": "../examples/native-model-catalogue.html"
+          "href": "../examples/native-model-catalogue.html",
+          "formulation_record": "native-model-catalogue-v1/three-state.stdout",
+          "formulation_note": "Printed discrete dynamics. Seven transitions follow the illustration and eight follow the literal index range."
         },
         {
           "label": "Four-state source model: fifteen transitions",
-          "href": "../examples/native-four-state-reachability.html"
+          "href": "../examples/native-four-state-reachability.html",
+          "formulation_record": "native-model-catalogue-v1/four-state.stdout",
+          "formulation_note": "Printed discrete dynamics with one scalar input and fifteen transitions. Full-state propagation precedes projection."
         },
         {
           "label": "Flexible pitch: coupled models with explicit authored assumptions",
-          "href": "../examples/native-flexible-pitch.html"
+          "href": "../examples/native-flexible-pitch.html",
+          "formulation_record": "native-flexible-pitch-v1/manifest.json",
+          "formulation_note": "The descriptor equations are reduced to explicit dynamics and discretized under a zero-order hold. Numerical coefficients are synthetic. The lesson gives the local error estimates."
         },
         {
           "label": "Slide 50: two independent inputs and a separately authored initial box",
-          "href": "../examples/native-slide50-reachability.html"
+          "href": "../examples/native-slide50-reachability.html",
+          "formulation_record": "native-extended-models-v1/slide50/run.txt",
+          "formulation_note": "Printed discrete dynamics with two inputs. Both horizons start from an authored box because the historical initial vertices are unavailable."
         },
         {
           "label": "Synthetic spatial flight: nonlinear reference and nine-state deviations",
-          "href": "../examples/native-spatial-flight.html"
+          "href": "../examples/native-spatial-flight.html",
+          "formulation_record": "native-extended-models-v1/spatial-flight/run-receipt.txt",
+          "formulation_note": "A synthetic nonlinear reference defines a time-varying linear deviation model. Its reachable sets describe that linear model."
         },
         {
           "label": "Extended-model capture and source/build qualification",
           "href": "../examples/native-extended-models-v1/manifest.json"
+        },
+        {
+          "label": "Reachability formulations and horizon variants",
+          "href": "model-tracks.html#reachability-formulations"
         }
       ],
       "example_sources": [
@@ -1640,6 +1654,10 @@
         {
           "label": "All-stage MPC lesson",
           "href": "../examples/native-quadcopter-mpc.html"
+        },
+        {
+          "label": "Model 21 source and tracking evidence",
+          "href": "model-tracks.html#discrete-model-21"
         }
       ],
       "example_sources": [
@@ -2079,6 +2097,10 @@
         {
           "label": "Source commit and exact producer binding",
           "href": "../examples/native-model-tracking-first-pass-v1/source-binding.json"
+        },
+        {
+          "label": "Model equations, task profiles and outcomes",
+          "href": "model-tracks.html#discrete-formulations"
         }
       ],
       "example_sources": [
