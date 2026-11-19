@@ -19,7 +19,12 @@ def draw_set(ax, poly, **style):
     if len(pts) > 2:
         ax.fill(*zip(*(pts + [pts[0]]), strict=True), **style)
     elif pts:
-        ax.plot(*zip(*pts, strict=True), color=style.get("edgecolor"), linewidth=2, marker="o" if len(pts) == 1 else None)
+        ax.plot(
+            *zip(*pts, strict=True),
+            color=style.get("edgecolor"),
+            linewidth=2,
+            marker="o" if len(pts) == 1 else None,
+        )
 
 
 def draw(ref, workload, raw_path, summary, dest):
@@ -99,12 +104,23 @@ def draw(ref, workload, raw_path, summary, dest):
         q["state"] for q in workload["queries"] if q["remaining"] == 3 and q["expected"] is None
     ]
     bx.scatter(
-        *zip(*misses, strict=True), s=48, marker="x", color="#782d14", linewidths=2,
-        label="Checked infeasible states", zorder=4,
+        *zip(*misses, strict=True),
+        s=48,
+        marker="x",
+        color="#782d14",
+        linewidths=2,
+        label="Checked infeasible states",
+        zorder=4,
     )
     bx.plot(
-        *zip(*path, strict=True), "o-", color="#111111", markerfacecolor="white",
-        lw=2, ms=4, label="Shrinking-horizon trajectory", zorder=5,
+        *zip(*path, strict=True),
+        "o-",
+        color="#111111",
+        markerfacecolor="white",
+        lw=2,
+        ms=4,
+        label="Shrinking-horizon trajectory",
+        zorder=5,
     )
     bx.legend(loc="upper center", bbox_to_anchor=(0.5, -0.53), fontsize=8, ncol=2)
     bx.set_title("First control for three remaining steps")
