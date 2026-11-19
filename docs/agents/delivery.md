@@ -47,24 +47,24 @@ temporary CI outputs, not stable release URLs.
 
 ## SDK and evidence release identities
 
-- **SDK releases** use the tag and title `vMAJOR.MINOR.PATCH`, with all three
+- **SDK releases** are published in [csl-sdk](https://github.com/butahlecoq/csl-sdk/releases). The first release, [v0.1.0](https://github.com/butahlecoq/controlled-systems-lab/releases/tag/v0.1.0), stays at its original address. Use the tag and title `vMAJOR.MINOR.PATCH`, with all three
   numbers matching `project(CSL VERSION ...)` in the tagged `CMakeLists.txt`.
   Choose the next version before preparing the candidate. Keep initial
   development releases in the `0.x` series until the public API is declared
   stable.
-- **Evidence releases** retain their `evidence/` tags and descriptive titles.
+- **Evidence releases** in the research repository retain their `evidence/` tags and descriptive titles.
   Preserve existing download URLs. Set new evidence releases to
   `--latest=false` so the latest SDK release remains the entry point for
   library users.
 
-After the gates below pass, create an annotated tag at the reviewed commit on
+After the gates below pass, create an annotated tag from the SDK checkout at the reviewed commit on
 `main` and push only that tag. Verify that the remote tag resolves to the
 reviewed commit before creating the GitHub Release. Publish the source release
 with the tag as its title and the reviewed release notes. Set `tag` to the
 verified tag and `release_notes` to the notes file.
 
 ```sh
-gh release create "$tag" --repo butahlecoq/controlled-systems-lab --verify-tag \
+gh release create "$tag" --repo butahlecoq/csl-sdk --verify-tag \
   --title "$tag" --notes-file "$release_notes" --latest
 ```
 
@@ -80,10 +80,10 @@ adding install archives or other binaries.
 1. Identify the exact reviewed source commit and proposed version/tag. Describe
    supported profiles, API/package compatibility, dependency and migration
    changes, known limitations and links to the relevant issues. Do not infer a
-   stable API promise from the current `0.1.0` project version.
-2. Check the [native CI workflow](../../.github/workflows/native.yml) for every
+   stable API promise from the early `0.x` version series.
+2. Check the [SDK native CI workflow](https://github.com/butahlecoq/csl-sdk/blob/main/.github/workflows/native.yml) for every
    advertised platform and enabled-backend configuration. Use the
-   [README quick start](../../README.md#quick-start) to verify an external installed
+   [SDK quick start](https://github.com/butahlecoq/csl-sdk#quick-start) to verify an external installed
    `find_package(CSL CONFIG)` consumer and the shipped examples. Record compiler,
    architecture, Release configuration, dependency pins/patches and options.
    Reuse reviewed CI outputs from the exact candidate when their provenance and
