@@ -121,6 +121,29 @@ class GeometryMembershipTests(unittest.TestCase):
         self.assertAlmostEqual(answer["primal"][1], 0.5, places=5)
         self.assertEqual(answer["geometry_factors"], [[], []])
 
+    def test_lifted_route_rejects_omitted_and_future_prefix_rows(self):
+        from history_policy import LIFTED_POLYTOPE_IMPLEMENTATION, geometry_memberships
+        request = {"state_bounds": [None], "control_bounds": [[-1, 1]]}
+        stages = []
+        for k in range(2):
+            members = []
+            for role in ("forward", "backward", "intersection"):
+                rows = ({"kind": "prefix", "inequalities": [[0, 2]] if k else [],
+                         "equalities": [[0, k + 1]]} if role == "forward" else {"kind": "full"})
+                members.append({"role": role, "indices": [k], "kind": "lifted-h",
+                    "relation": "equivalent", "assurance": "validated", "row_selection": rows})
+            stages.append({"stage": k, "coordinates": [0], "memberships": members})
+        export = {"status": "complete", "family": "polytope",
+                  "scope": "forward_relevant_from_observation",
+                  "polytope_history": "lifted_whole_history",
+                  "implementation": LIFTED_POLYTOPE_IMPLEMENTATION, "stages": stages}
+        self.assertEqual(len(geometry_memberships(export, "polytope", 1, 1, lifted_request=request)), 6)
+        selection = stages[0]["memberships"][0]["row_selection"]
+        for bad in ([], [[0, 2]]):
+            selection["equalities"] = bad
+            with self.assertRaisesRegex(ValueError, "projection claim"):
+                geometry_memberships(export, "polytope", 1, 1, lifted_request=request)
+
     def test_source_acceptance_independently_checks_geometry_witness(self):
         from history_validation import validate
         task = {"episode": {"intervals": 1},

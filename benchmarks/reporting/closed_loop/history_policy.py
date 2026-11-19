@@ -19,10 +19,11 @@ def should_refine_epigraph(checks, solver, compiled):
             and all(value.get("passed", False) for key, value in rows.items() if key != "source_cost"))
 
 
-def geometry_memberships(export, family, state_dimension, horizon, strict_source_domain=None, *, lifted=False):
+def geometry_memberships(export, family, state_dimension, horizon, strict_source_domain=None, *, lifted_request=None):
     if (not isinstance(export, dict) or export.get("status") != "complete"
             or export.get("family") != family or export.get("scope") != "forward_relevant_from_observation"):
         raise ValueError("feedback geometry does not match the selected family and scope")
+    lifted = lifted_request is not None
     if lifted and (family != "polytope" or export.get("polytope_history") != "lifted_whole_history"
                    or export.get("implementation") != LIFTED_POLYTOPE_IMPLEMENTATION):
         raise ValueError("feedback geometry does not use the requested lifted polytope representation")
@@ -49,8 +50,22 @@ def geometry_memberships(export, family, state_dimension, horizon, strict_source
             if lifted:
                 selection = row.get("row_selection")
                 expected_selection = "prefix" if row["role"] == "forward" else "full"
-                if (row["relation"] != "equivalent" or not isinstance(selection, dict)
-                        or selection.get("kind") != expected_selection):
+                expected_rows = {"kind": expected_selection}
+                if expected_selection == "prefix":
+                    state_count = 2 * sum(bound is not None for bound in lifted_request["state_bounds"])
+                    control_count = 2 * len(lifted_request["control_bounds"])
+                    state_end = (k + 1) * state_count
+                    control_begin = (horizon + 1) * state_count
+                    ranges = [[0, state_end]] if state_end else []
+                    if k and control_count:
+                        control_end = control_begin + k * control_count
+                        if state_end == control_begin:
+                            ranges = [[0, control_end]]
+                        else:
+                            ranges.append([control_begin, control_end])
+                    expected_rows.update(inequalities=ranges, equalities=[[0, (k + 1) * state_dimension]])
+                if (row["relation"] != "equivalent" or row.get("assurance") != "validated"
+                        or selection != expected_rows):
                     raise ValueError("invalid lifted polytope projection claim")
             memberships.append(row)
     return memberships
@@ -297,7 +312,7 @@ class HistoryPolicy:
             len(observed_physical_state), len(request["predictor_stages"]),
             [{"coordinate": 0, "lower_bound": 0, "strict": True}]
                 if self.task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01" else [],
-            lifted=self.lifted_polytope)
+            lifted_request=request if self.lifted_polytope else None)
             if self.geometry_family is not None else None)
         start_recovery = None
         if response["status"] == "solved":
