@@ -22,7 +22,7 @@ The [standalone C++ SDK](https://github.com/butahlecoq/csl-sdk) contains the nat
 
 ## Quick start
 
-Start from a [checkout of the current C++ SDK](https://github.com/butahlecoq/csl-sdk#quick-start) or choose a `vMAJOR.MINOR.PATCH` tag from [GitHub Releases](https://github.com/butahlecoq/controlled-systems-lab/releases) for a specific SDK version. Releases tagged under `evidence/` contain numerical records and reproduction artifacts.
+Build from the [current C++ SDK](https://github.com/butahlecoq/csl-sdk#quick-start) or choose a tagged version from [SDK releases](https://github.com/butahlecoq/csl-sdk/releases). The first version, [v0.1.0](https://github.com/butahlecoq/controlled-systems-lab/releases/tag/v0.1.0), is available here alongside the [research evidence releases](https://github.com/butahlecoq/controlled-systems-lab/releases).
 
 Requires Git, CMake/CTest 3.31 or newer and a C++20 compiler (MSVC 2022, GCC 13 or Clang 18 are CI toolchains). Put CMake on PATH; on Windows a Visual Studio developer shell with its CMake component installed provides the tools. Run from the repository root and stop on any nonzero exit. The first configure downloads the existing pinned dependencies; no Python is needed with `BUILD_TESTING=OFF`. Installation is a local development check, not a binary distribution license grant.
 
