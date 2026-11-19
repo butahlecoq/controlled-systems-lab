@@ -737,6 +737,11 @@
       "owner": "scripts/reports/approx_extension_companions.py"
     },
     {
+      "route": "examples/mpc-crossover-6b7308c4/index.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_mpc_crossover.py"
+    },
+    {
       "route": "examples/native-discrete-models.html",
       "disposition": "maintained",
       "owner": "docs/examples/native-discrete-models.html"

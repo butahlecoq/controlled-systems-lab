@@ -18,9 +18,11 @@ action. The page shows the trajectories and the model assumptions.
 [Learn the methods](https://butahlecoq.github.io/controlled-systems-lab/learn/) ·
 [Explore the visual examples](https://butahlecoq.github.io/controlled-systems-lab/examples/)
 
+The [standalone C++ SDK](https://github.com/butahlecoq/csl-sdk) contains the native package, tests and runnable examples. This research repository hosts the comparison drivers, learning book, and historical results. [Build a research driver against the pinned SDK](CONTRIBUTING.md#run-a-research-driver-against-an-installed-sdk).
+
 ## Quick start
 
-Start from a [checkout of the current source](https://github.com/butahlecoq/controlled-systems-lab/tree/main) or choose a `vMAJOR.MINOR.PATCH` tag from [GitHub Releases](https://github.com/butahlecoq/controlled-systems-lab/releases) for a specific SDK version. Releases tagged under `evidence/` contain numerical records and reproduction artifacts.
+Start from a [checkout of the current C++ SDK](https://github.com/butahlecoq/csl-sdk#quick-start) or choose a `vMAJOR.MINOR.PATCH` tag from [GitHub Releases](https://github.com/butahlecoq/controlled-systems-lab/releases) for a specific SDK version. Releases tagged under `evidence/` contain numerical records and reproduction artifacts.
 
 Requires Git, CMake/CTest 3.31 or newer and a C++20 compiler (MSVC 2022, GCC 13 or Clang 18 are CI toolchains). Put CMake on PATH; on Windows a Visual Studio developer shell with its CMake component installed provides the tools. Run from the repository root and stop on any nonzero exit. The first configure downloads the existing pinned dependencies; no Python is needed with `BUILD_TESTING=OFF`. Installation is a local development check, not a binary distribution license grant.
 

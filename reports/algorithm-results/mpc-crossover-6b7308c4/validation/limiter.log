@@ -1,0 +1,10 @@
+Running as unit: run-p681510-i666340.service
+memory.max 1073741824
+memory.swap.max 0
+cpu.max 100000 100000
+Cpus_allowed_list:	7
+          Finished with result: success
+Main processes terminated with: code=exited, status=0/SUCCESS
+               Service runtime: 2.376s
+             CPU time consumed: 2.348s
+                   Memory peak: 18.9M (swap: 0B)

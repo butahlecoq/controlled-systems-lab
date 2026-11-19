@@ -1,0 +1,38 @@
+{
+  "source_commit": "6b7308c400824c211b3c803ebb483ffd2b741f08",
+  "native_source_unchanged_since": "3459d397b0c9d4080d77e2427091f1a35f7ae27b",
+  "host": {
+    "architecture": "x86_64",
+    "kernel": "7.2.8-9-omarchy",
+    "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "logical_cpus": 8
+  },
+  "compiler": "g++ (GCC) 16.2.1 20260810",
+  "cmake": "3.31.6",
+  "configuration": "Ninja Release, -O3 -DNDEBUG, CSL_BUILD_MPC08_REPORT=ON, BUILD_TESTING=OFF",
+  "dependency": "HiGHS 1.11.0, exact repository archive and patches",
+  "hashes": {
+    "timed_executable": "42d2e2a39363c427ad3034ff672995c714bec3373b90536448bf40592448202f",
+    "highs_archive_library": "3f8aa1c9dcda1e3b5ba07fa8996ecec33956ed4b6cd6d5e8f9007c56a74f75e1"
+  },
+  "limits": {
+    "memory_max_bytes": 1073741824,
+    "swap_max_bytes": 0,
+    "cpu_quota_us": 100000,
+    "cpu_period_us": 100000,
+    "cpu_affinity": [
+      7
+    ],
+    "wall_seconds": 300,
+    "scope": "single full native process and children; user systemd service"
+  },
+  "starts": {
+    "diagnostic_only": true,
+    "source": "qpsolver/feasibility_highs.hpp computeStartingPointHighs",
+    "result": "12/12 shifted horizons used a feasible start and valid basis; all 6 initial horizons entered Phase I",
+    "measurement_binary_instrumented": false
+  },
+  "figure_renderer": "Matplotlib 3.11.2",
+  "independent_solver": "SciPy SLSQP 1.18.1",
+  "figure_renderer_commit": "e15d456bf8525f94c62c106c49ba868cd3b2d745"
+}

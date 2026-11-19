@@ -118,6 +118,13 @@ FAMILIES = {
         "aggregate branch limits, and stop-status propagation. Its saved measurements describe this "
         "single case and do not establish a general performance comparison.",
     ),
+    "mpc-crossover": Family(
+        r"examples/mpc-crossover-6b7308c4",
+        "synthesis",
+        "When does explicit MPC repay its setup cost?",
+        "Compares the time to construct and use an explicit feedback policy with the time "
+        "to update and solve an online quadratic program for the same constrained double integrator.",
+    ),
     "mpc08-explicit-pilot": Family(
         r"mpc08-explicit-pilot-v1",
         "synthesis",
@@ -1093,7 +1100,9 @@ def text(node: Node) -> str:
 def entry_of(item: Node) -> Entry:
     """Read one assembled index item into a landing entry."""
     anchors = [(node.attrs.get("href", ""), collapse(text(node))) for node in elements(item, "a")]
-    reports = [anchor for anchor in anchors if re.fullmatch(r"[^/]+/index\.html", anchor[0])]
+    reports = [
+        anchor for anchor in anchors if re.fullmatch(r"(?:examples/)?[^/]+/index\.html", anchor[0])
+    ]
     if not reports:
         raise ValueError("index item without a report link")
     report_id = reports[0][0][: -len("/index.html")]
@@ -1238,6 +1247,23 @@ def build(site: Path) -> None:
                 limits=details.get("limits", entry.limits),
                 commit=details.get("commit", entry.commit),
                 links=entry.links,
+            )
+        )
+    crossover = "examples/mpc-crossover-6b7308c4"
+    if (site / crossover / "index.html").is_file():
+        manifest = json.loads((site / crossover / "manifest.json").read_text(encoding="utf-8"))
+        detailed = [entry for entry in detailed if entry.report_id != crossover]
+        detailed.append(
+            Entry(
+                report_id=crossover,
+                scope="Five alternating pairs at each of five workload sizes from 1 to 256 three-step trajectories.",
+                limits="The timings and observed crossover apply to this fixture, implementation, workload and host.",
+                commit=manifest["source_commit"],
+                links=(
+                    ("Raw attempts", crossover + "/raw.jsonl"),
+                    ("Measured timings", crossover + "/summary.json"),
+                    ("Offline study", crossover + "/mpc-crossover-6b7308c4.zip"),
+                ),
             )
         )
     pilot = "mpc03-open-loop-pilot-v1"

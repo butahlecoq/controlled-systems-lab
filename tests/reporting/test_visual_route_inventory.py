@@ -241,7 +241,11 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertEqual(query["assets"],["control-projection.png","control-projection.svg"])
         self.assertIn("reviewed: root inspected the shared-policy scalar",query["disposition"])
         self.assertNotIn("follow_up_issue",query)
-        reviewed_routes={paired["route"],query["route"]}
+        crossover=routes["mpc-crossover-6b7308c4"]
+        self.assertEqual(crossover["assets"],["deployment-time.svg","feedback-geometry.svg"])
+        self.assertEqual(crossover["companion_route"],"examples/mpc-crossover-6b7308c4/index.html")
+        self.assertNotIn("follow_up_issue",crossover)
+        reviewed_routes={paired["route"],query["route"],crossover["route"]}
         self.assertTrue(all(entry["disposition"].startswith("deferred: original frozen route-level readability")
                             for entry in routes.values() if entry["route"] not in reviewed_routes))
         self.assertTrue(all(entry["follow_up_issue"] ==
@@ -300,6 +304,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "positive-part-budget-2d.json", "positive_part_budget_2d_vertices.csv",
             "positive_part_budget_2d_native-solution.csv", "positive_part_budget_2d_run.txt",
             "positive_part_budget_2d_native-example.stdout",
+            "mpc-crossover-6b7308c4/index.html", "mpc-crossover-6b7308c4/feedback-geometry.svg",
+            "mpc-crossover-6b7308c4/deployment-time.svg",
             "discrete-mpc-2d.html", "discrete-mpc-2d.svg", "discrete-mpc-2d.json",
             "discrete_mpc_2d-output.csv", "discrete_mpc_2d-output.txt",
             "adaptive-ode-replay.csv", "adaptive-ode-replay.html",
