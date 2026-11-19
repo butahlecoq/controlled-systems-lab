@@ -284,8 +284,13 @@ class HistoryPolicy:
             from history_norm_solver import solve
             n = len(observed_physical_state)
             positive = [n * k for k in range(1, len(request["predictor_stages"]) + 1)] if self.task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01" else []
-            solver_receipt = solve(relation, compiled, initial=initial, positive_indices=positive,
-                                   geometry_memberships=memberships or ())
+            solve_options = {"positive_indices": positive, "geometry_memberships": memberships or ()}
+            if positive and self.geometry_family == "zonotope":
+                horizon = len(request["predictor_stages"])
+                state_scales = [field["scale"] for field in self.task["model"]["states"]]
+                input_scales = [max(abs(lo), abs(hi)) or 1.0 for lo, hi in request["control_bounds"]]
+                solve_options["physical_scales"] = state_scales * (horizon + 1) + input_scales * horizon
+            solver_receipt = solve(relation, compiled, initial=initial, **solve_options)
             result["invocations"].append({"operation": "controller.solve", "module_id": "continuous-history-mpc",
                 "profile_id": self.controller_id, "provider": "casadi-ipopt",
                 "version": solver_receipt.get("version", "unknown")})
@@ -300,8 +305,7 @@ class HistoryPolicy:
                                       "original_solver": solver_receipt}
                     self.last_query_capture["start_recovery"] = start_recovery
                     self._capture()
-                    solver_receipt = solve(relation, compiled, initial=reintegrated, positive_indices=positive,
-                                           geometry_memberships=memberships or ())
+                    solver_receipt = solve(relation, compiled, initial=reintegrated, **solve_options)
                     start_recovery.update(state="returned", retry_solver_status=solver_receipt["status"])
                     result["invocations"].append({"operation": "controller.solve", "module_id": "continuous-history-mpc",
                         "profile_id": self.controller_id, "provider": "casadi-ipopt",
@@ -335,8 +339,7 @@ class HistoryPolicy:
         if not checks["accepted"] and should_refine_epigraph(checks, solver_receipt, compiled):
             from history_norm_solver import solve
             first_solver, first_checks = solver_receipt, checks
-            solver_receipt = solve(relation, compiled, initial=primal, positive_indices=positive,
-                geometry_memberships=memberships or (), tighten_epigraph=True)
+            solver_receipt = solve(relation, compiled, initial=primal, tighten_epigraph=True, **solve_options)
             result["invocations"].append({"operation": "controller.solve", "module_id": "continuous-history-mpc",
                 "profile_id": self.controller_id, "provider": "casadi-ipopt",
                 "version": solver_receipt.get("version", "unknown"), "reason": "source-cost epigraph refinement"})
