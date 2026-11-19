@@ -17,7 +17,7 @@ struct HybridOperationKey {
     HybridOperationKind kind{};
     std::optional<std::size_t> path_index;
     std::optional<std::size_t> stage;
-    bool operator==(const HybridOperationKey&) const = default;
+    bool operator==(const HybridOperationKey &) const = default;
 };
 
 struct HybridOperationDescriptor {
@@ -30,14 +30,7 @@ struct HybridOperationDescriptor {
     Assurance requested_assurance{Assurance::numerical};
 };
 
-enum class HybridAdmissionAdapterRole {
-    trajectory,
-    reachability,
-    geometry,
-    lp,
-    convex,
-    verifier
-};
+enum class HybridAdmissionAdapterRole { trajectory, reachability, geometry, lp, convex, verifier };
 
 struct HybridOperationOffer {
     HybridOperationKey key;
@@ -73,25 +66,28 @@ class HybridAdmissionToken {
     std::unique_ptr<const Storage> storage_;
     explicit HybridAdmissionToken(std::unique_ptr<const Storage> storage);
     friend class HybridAdmissionAccess;
-public:
-    HybridAdmissionToken(const HybridAdmissionToken&) = delete;
-    HybridAdmissionToken& operator=(const HybridAdmissionToken&) = delete;
-    HybridAdmissionToken(HybridAdmissionToken&&) noexcept;
-    HybridAdmissionToken& operator=(HybridAdmissionToken&&) noexcept;
+
+  public:
+    HybridAdmissionToken(const HybridAdmissionToken &) = delete;
+    HybridAdmissionToken &operator=(const HybridAdmissionToken &) = delete;
+    HybridAdmissionToken(HybridAdmissionToken &&) noexcept;
+    HybridAdmissionToken &operator=(HybridAdmissionToken &&) noexcept;
     ~HybridAdmissionToken();
 
-    const HybridAdmissionReport& report() const noexcept;
+    const HybridAdmissionReport &report() const noexcept;
 };
 
-using HybridAdmissionResult = std::variant<HybridAdmissionToken,
-    HybridAdmissionRefused, OperationStopped>;
+using HybridAdmissionResult =
+    std::variant<HybridAdmissionToken, HybridAdmissionRefused, OperationStopped>;
 
 // Derives and checks every selected path operation without composing a
 // relation, preparing a concrete provider request, or creating a workspace.
-HybridAdmissionResult admit_hybrid_request(const model::HybridSystem&,
-    const model::HybridRequest&, const HybridExecutionSelection&,
-    model::HybridEnumerationLimits, model::HybridRelationLimits,
-    optimization::ObjectivePolicy, const ExecutionContext&);
+HybridAdmissionResult admit_hybrid_request(const model::HybridSystem &,
+                                           const model::HybridRequest &,
+                                           const HybridExecutionSelection &,
+                                           model::HybridEnumerationLimits,
+                                           model::HybridRelationLimits,
+                                           optimization::ObjectivePolicy, const ExecutionContext &);
 
 struct HybridConcreteRefinementRejected {
     HybridAdmissionReport admission;
@@ -107,31 +103,31 @@ class HybridPreparedExecution {
     std::unique_ptr<const Storage> storage_;
     explicit HybridPreparedExecution(std::unique_ptr<const Storage> storage);
     friend class HybridPreparedAccess;
-public:
-    HybridPreparedExecution(const HybridPreparedExecution&) = delete;
-    HybridPreparedExecution& operator=(const HybridPreparedExecution&) = delete;
-    HybridPreparedExecution(HybridPreparedExecution&&) noexcept;
-    HybridPreparedExecution& operator=(HybridPreparedExecution&&) noexcept;
+
+  public:
+    HybridPreparedExecution(const HybridPreparedExecution &) = delete;
+    HybridPreparedExecution &operator=(const HybridPreparedExecution &) = delete;
+    HybridPreparedExecution(HybridPreparedExecution &&) noexcept;
+    HybridPreparedExecution &operator=(HybridPreparedExecution &&) noexcept;
     ~HybridPreparedExecution();
 
-    const HybridAdmissionReport& report() const noexcept;
+    const HybridAdmissionReport &report() const noexcept;
 };
 
-using HybridRefinementResult = std::variant<HybridPreparedExecution,
-    HybridConcreteRefinementRejected, OperationStopped>;
+using HybridRefinementResult =
+    std::variant<HybridPreparedExecution, HybridConcreteRefinementRejected, OperationStopped>;
 
 // Transactionally builds selected trajectory branches, stages reachability
 // operations (including concrete projected-geometry preparation), and
 // prepares every LP/convex program before returning. The selected verifier is
 // retained for execution after solver results are available.
-HybridRefinementResult refine_hybrid_request(HybridAdmissionToken,
-    ProblemId, const ExecutionContext&);
+HybridRefinementResult refine_hybrid_request(HybridAdmissionToken, ProblemId,
+                                             const ExecutionContext &);
 
 // Consumes staged reachability operations and creates solver workspaces only
 // after refinement prepared every selected request successfully. If selected,
 // family verification runs after solver results and retains candidate analysis
 // separately from the verifier outcome.
-HybridPortfolioExecution execute_hybrid_request(HybridPreparedExecution,
-    const ExecutionContext&);
+HybridPortfolioExecution execute_hybrid_request(HybridPreparedExecution, const ExecutionContext &);
 
 } // namespace csl::synthesis

@@ -27,15 +27,15 @@ struct AffineSumOptions {
 // Implements finite polyhedral affine images and Minkowski sums using selected
 // conversion, hull-reduction, and LP providers. Finite/mixed action catalogues
 // are outside this SetHandle operation contract and are never convexified.
-registry::Registration<registry::GeometryPort> make_affine_sum_registration(
-    AffineSumDependencies, AffineSumOptions = {});
+registry::Registration<registry::GeometryPort> make_affine_sum_registration(AffineSumDependencies,
+                                                                            AffineSumOptions = {});
 
 // Source-index methods have a separate evidence contract: the affine-sum
 // workspace runs the bounded exact 2D hull checker on the generated cloud and
 // only applies provider indices after that checker verifies all-input
 // containment. The LP reducer dependency is intentionally absent for this
 // path; these methods do not issue vertex-membership LPs.
-registry::Registration<registry::GeometryPort> make_affine_sum_registration(
-    SourceIndexAffineSumDependencies, AffineSumOptions = {});
+registry::Registration<registry::GeometryPort>
+    make_affine_sum_registration(SourceIndexAffineSumDependencies, AffineSumOptions = {});
 
 } // namespace csl::geometry

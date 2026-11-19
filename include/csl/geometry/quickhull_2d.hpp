@@ -26,7 +26,9 @@ struct QuickHullControl {
     std::stop_token cancellation;
     std::optional<std::chrono::steady_clock::time_point> deadline;
 };
-struct QuickHullStopped { std::string reason; };
+struct QuickHullStopped {
+    std::string reason;
+};
 using ControlledQuickHull2DResult = std::variant<QuickHull2D, Diagnostics, QuickHullStopped>;
 
 // A geometric, LP-independent 2D hull adapter. Input is borrowed only for the
@@ -38,6 +40,6 @@ QuickHull2DResult quickhull_2d(std::span<const Vector> points);
 // Same source algorithm and ordering, with cooperative checks at comparison
 // and candidate-scan boundaries for operation callers with execution controls.
 ControlledQuickHull2DResult quickhull_2d_controlled(std::span<const Vector> points,
-    QuickHullControl control);
+                                                    QuickHullControl control);
 
 } // namespace csl::geometry

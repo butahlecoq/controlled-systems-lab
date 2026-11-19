@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <csl/controllers/discrete_mpc.hpp>
 #include <doctest/doctest.h>
 

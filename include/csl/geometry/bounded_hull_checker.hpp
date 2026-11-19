@@ -51,7 +51,8 @@ struct HullCheckRecord {
 // enumerate convex combinations of at most three reported source points.
 // It does not invoke a hull algorithm, reducer, LP, or sampled support test.
 HullCheckRecord check_source_index_hull(std::span<const Vector> input,
-    const SourceIndexHull& output, HullCheckBudget budget = {}, HullCheckControl control = {});
+                                        const SourceIndexHull &output, HullCheckBudget budget = {},
+                                        HullCheckControl control = {});
 
 struct HullSmokeRecord {
     // This is a modern-only smoke, with no historical side or timing claim.
@@ -60,9 +61,10 @@ struct HullSmokeRecord {
     std::string algorithm_failure;
     HullCheckRecord checker;
 };
-HullSmokeRecord record_bounded_hull_attempt(std::span<const Vector> input,
-    std::variant<SourceIndexHull, std::string> algorithm_result,
-    std::string algorithm_label, HullCheckBudget budget = {});
+HullSmokeRecord
+record_bounded_hull_attempt(std::span<const Vector> input,
+                            std::variant<SourceIndexHull, std::string> algorithm_result,
+                            std::string algorithm_label, HullCheckBudget budget = {});
 HullSmokeRecord run_bounded_square_smoke(HullCheckBudget budget = {});
 
 } // namespace csl::geometry

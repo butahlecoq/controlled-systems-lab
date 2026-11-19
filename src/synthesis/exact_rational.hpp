@@ -32,31 +32,29 @@ struct Rational {
     exact_h::Integer denominator{exact_h::exact_detail::from_u64(1)};
     int binary_exponent{};
 
-    friend bool operator==(const Rational&, const Rational&) = default;
+    friend bool operator==(const Rational &, const Rational &) = default;
 };
 
-inline bool charge(Budget& budget) noexcept {
+inline bool charge(Budget &budget) noexcept {
     if (budget.operations >= budget.max_operations)
         return false;
     ++budget.operations;
     return true;
 }
 
-inline bool observe(Budget& budget, const exact_h::Integer& value) noexcept {
+inline bool observe(Budget &budget, const exact_h::Integer &value) noexcept {
     const auto bits = exact_h::exact_detail::bit_length(value);
     budget.maximum_integer_bits = std::max(budget.maximum_integer_bits, bits);
     return bits <= budget.max_integer_bits;
 }
 
-inline bool valid(const Rational& value, Budget& budget) noexcept {
-    return !exact_h::exact_detail::is_zero(value.denominator) &&
-        !value.denominator.negative && observe(budget, value.numerator) &&
-        observe(budget, value.denominator);
+inline bool valid(const Rational &value, Budget &budget) noexcept {
+    return !exact_h::exact_detail::is_zero(value.denominator) && !value.denominator.negative &&
+           observe(budget, value.numerator) && observe(budget, value.denominator);
 }
 
-inline bool divide_magnitude(const Integer& dividend, const Integer& divisor,
-                             Integer& quotient, Integer& remainder,
-                             Budget& budget) {
+inline bool divide_magnitude(const Integer &dividend, const Integer &divisor, Integer &quotient,
+                             Integer &remainder, Budget &budget) {
     using namespace exact_h::exact_detail;
     if (is_zero(divisor) || divisor.negative || dividend.negative)
         return false;
@@ -84,8 +82,7 @@ inline bool divide_magnitude(const Integer& dividend, const Integer& divisor,
     return observe(budget, quotient) && observe(budget, remainder);
 }
 
-inline bool gcd(const Integer& lhs, const Integer& rhs, Integer& result,
-                Budget& budget) {
+inline bool gcd(const Integer &lhs, const Integer &rhs, Integer &result, Budget &budget) {
     using namespace exact_h::exact_detail;
     Integer left = lhs;
     Integer right = rhs;
@@ -102,8 +99,7 @@ inline bool gcd(const Integer& lhs, const Integer& rhs, Integer& result,
     return observe(budget, result);
 }
 
-inline bool divide_exact(Integer& value, const Integer& divisor,
-                         Budget& budget) {
+inline bool divide_exact(Integer &value, const Integer &divisor, Budget &budget) {
     Integer magnitude = value;
     const bool negative = magnitude.negative;
     magnitude.negative = false;
@@ -116,9 +112,9 @@ inline bool divide_exact(Integer& value, const Integer& divisor,
     return true;
 }
 
-inline bool normalize(Rational& value, Budget& budget);
+inline bool normalize(Rational &value, Budget &budget);
 
-inline bool parse_integer(std::string_view text, Integer& result, Budget& budget) {
+inline bool parse_integer(std::string_view text, Integer &result, Budget &budget) {
     using namespace exact_h::exact_detail;
     if (text.empty())
         return false;
@@ -132,8 +128,8 @@ inline bool parse_integer(std::string_view text, Integer& result, Budget& budget
         if (digit < '0' || digit > '9' || !charge(budget))
             return false;
         Integer scaled;
-        if (!exact_h::exact_detail::multiply(result, from_u64(10),
-                budget.max_integer_bits, scaled) ||
+        if (!exact_h::exact_detail::multiply(result, from_u64(10), budget.max_integer_bits,
+                                             scaled) ||
             !add(scaled, from_u64(static_cast<std::uint64_t>(digit - '0')),
                  budget.max_integer_bits))
             return false;
@@ -143,13 +139,11 @@ inline bool parse_integer(std::string_view text, Integer& result, Budget& budget
     return observe(budget, result);
 }
 
-inline bool parse(std::string_view text, Rational& result, Budget& budget) {
+inline bool parse(std::string_view text, Rational &result, Budget &budget) {
     const auto slash = text.find('/');
-    if (slash == std::string_view::npos ||
-        text.find('/', slash + 1) != std::string_view::npos)
+    if (slash == std::string_view::npos || text.find('/', slash + 1) != std::string_view::npos)
         return false;
-    if (!charge(budget) ||
-        !parse_integer(text.substr(0, slash), result.numerator, budget) ||
+    if (!charge(budget) || !parse_integer(text.substr(0, slash), result.numerator, budget) ||
         !parse_integer(text.substr(slash + 1), result.denominator, budget))
         return false;
     if (result.denominator.negative)
@@ -158,7 +152,7 @@ inline bool parse(std::string_view text, Rational& result, Budget& budget) {
     return normalize(result, budget);
 }
 
-inline bool normalize(Rational& value, Budget& budget) {
+inline bool normalize(Rational &value, Budget &budget) {
     using namespace exact_h::exact_detail;
     if (is_zero(value.denominator))
         return false;
@@ -199,38 +193,37 @@ inline bool normalize(Rational& value, Budget& budget) {
     return valid(value, budget);
 }
 
-inline bool make_integer(std::int64_t integer, Rational& result, Budget& budget) {
+inline bool make_integer(std::int64_t integer, Rational &result, Budget &budget) {
     if (!charge(budget))
         return false;
     const bool negative = integer < 0;
-    const auto magnitude = negative
-        ? static_cast<std::uint64_t>(-(integer + 1)) + 1U
-        : static_cast<std::uint64_t>(integer);
+    const auto magnitude = negative ? static_cast<std::uint64_t>(-(integer + 1)) + 1U
+                                    : static_cast<std::uint64_t>(integer);
     result = {};
     result.numerator = exact_h::exact_detail::from_u64(magnitude, negative);
     return valid(result, budget);
 }
 
-inline bool make_fraction(std::int64_t numerator, std::int64_t denominator,
-                          Rational& result, Budget& budget) {
+inline bool make_fraction(std::int64_t numerator, std::int64_t denominator, Rational &result,
+                          Budget &budget) {
     if (!charge(budget) || denominator == 0)
         return false;
     const bool numerator_negative = numerator < 0;
     const auto numerator_magnitude = numerator_negative
-        ? static_cast<std::uint64_t>(-(numerator + 1)) + 1U
-        : static_cast<std::uint64_t>(numerator);
+                                         ? static_cast<std::uint64_t>(-(numerator + 1)) + 1U
+                                         : static_cast<std::uint64_t>(numerator);
     const bool denominator_negative = denominator < 0;
     const auto denominator_magnitude = denominator_negative
-        ? static_cast<std::uint64_t>(-(denominator + 1)) + 1U
-        : static_cast<std::uint64_t>(denominator);
+                                           ? static_cast<std::uint64_t>(-(denominator + 1)) + 1U
+                                           : static_cast<std::uint64_t>(denominator);
     result = {};
-    result.numerator = exact_h::exact_detail::from_u64(
-        numerator_magnitude, numerator_negative != denominator_negative);
+    result.numerator = exact_h::exact_detail::from_u64(numerator_magnitude,
+                                                       numerator_negative != denominator_negative);
     result.denominator = exact_h::exact_detail::from_u64(denominator_magnitude);
     return normalize(result, budget);
 }
 
-inline bool from_binary64(double value, Rational& result, Budget& budget) {
+inline bool from_binary64(double value, Rational &result, Budget &budget) {
     if (!charge(budget) || !std::isfinite(value))
         return false;
     const auto decoded = exact_h::exact_detail::decode(value);
@@ -240,7 +233,7 @@ inline bool from_binary64(double value, Rational& result, Budget& budget) {
     return normalize(result, budget);
 }
 
-inline bool negate(const Rational& value, Rational& result, Budget& budget) {
+inline bool negate(const Rational &value, Rational &result, Budget &budget) {
     if (!charge(budget) || !valid(value, budget))
         return false;
     result = value;
@@ -249,8 +242,7 @@ inline bool negate(const Rational& value, Rational& result, Budget& budget) {
     return true;
 }
 
-inline bool add(const Rational& lhs, const Rational& rhs,
-                Rational& result, Budget& budget) {
+inline bool add(const Rational &lhs, const Rational &rhs, Rational &result, Budget &budget) {
     if (&lhs == &result || &rhs == &result) {
         const Rational lhs_copy = lhs;
         const Rational rhs_copy = rhs;
@@ -260,10 +252,10 @@ inline bool add(const Rational& lhs, const Rational& rhs,
     if (!charge(budget) || !valid(lhs, budget) || !valid(rhs, budget))
         return false;
     const auto exponent = std::min(lhs.binary_exponent, rhs.binary_exponent);
-    const auto lhs_shift = static_cast<std::size_t>(
-        static_cast<std::int64_t>(lhs.binary_exponent) - exponent);
-    const auto rhs_shift = static_cast<std::size_t>(
-        static_cast<std::int64_t>(rhs.binary_exponent) - exponent);
+    const auto lhs_shift =
+        static_cast<std::size_t>(static_cast<std::int64_t>(lhs.binary_exponent) - exponent);
+    const auto rhs_shift =
+        static_cast<std::size_t>(static_cast<std::int64_t>(rhs.binary_exponent) - exponent);
     if (lhs_shift > budget.max_integer_bits || rhs_shift > budget.max_integer_bits)
         return false;
 
@@ -280,10 +272,10 @@ inline bool add(const Rational& lhs, const Rational& rhs,
         result.binary_exponent = exponent;
         return normalize(result, budget);
     }
-    if (!exact_h::exact_detail::multiply(lhs.numerator, rhs.denominator,
-            budget.max_integer_bits, left_numerator) ||
-        !exact_h::exact_detail::multiply(rhs.numerator, lhs.denominator,
-            budget.max_integer_bits, right_numerator))
+    if (!exact_h::exact_detail::multiply(lhs.numerator, rhs.denominator, budget.max_integer_bits,
+                                         left_numerator) ||
+        !exact_h::exact_detail::multiply(rhs.numerator, lhs.denominator, budget.max_integer_bits,
+                                         right_numerator))
         return false;
     left = left_numerator;
     right = right_numerator;
@@ -291,22 +283,20 @@ inline bool add(const Rational& lhs, const Rational& rhs,
         !shift_left(right, rhs_shift, budget.max_integer_bits) ||
         !exact_h::exact_detail::add(left, right, budget.max_integer_bits))
         return false;
-    if (!exact_h::exact_detail::multiply(lhs.denominator, rhs.denominator,
-            budget.max_integer_bits, result.denominator))
+    if (!exact_h::exact_detail::multiply(lhs.denominator, rhs.denominator, budget.max_integer_bits,
+                                         result.denominator))
         return false;
     result.numerator = std::move(left);
     result.binary_exponent = exponent;
     return normalize(result, budget);
 }
 
-inline bool subtract(const Rational& lhs, const Rational& rhs,
-                     Rational& result, Budget& budget) {
+inline bool subtract(const Rational &lhs, const Rational &rhs, Rational &result, Budget &budget) {
     Rational negative;
     return negate(rhs, negative, budget) && add(lhs, negative, result, budget);
 }
 
-inline bool multiply(const Rational& lhs, const Rational& rhs,
-                     Rational& result, Budget& budget) {
+inline bool multiply(const Rational &lhs, const Rational &rhs, Rational &result, Budget &budget) {
     if (&lhs == &result || &rhs == &result) {
         const Rational lhs_copy = lhs;
         const Rational rhs_copy = rhs;
@@ -318,31 +308,30 @@ inline bool multiply(const Rational& lhs, const Rational& rhs,
     const auto exponent = static_cast<std::int64_t>(lhs.binary_exponent) + rhs.binary_exponent;
     if (exponent < std::numeric_limits<int>::min() || exponent > std::numeric_limits<int>::max())
         return false;
-    if (!exact_h::exact_detail::multiply(lhs.numerator, rhs.numerator,
-            budget.max_integer_bits, result.numerator) ||
-        !exact_h::exact_detail::multiply(lhs.denominator, rhs.denominator,
-            budget.max_integer_bits, result.denominator))
+    if (!exact_h::exact_detail::multiply(lhs.numerator, rhs.numerator, budget.max_integer_bits,
+                                         result.numerator) ||
+        !exact_h::exact_detail::multiply(lhs.denominator, rhs.denominator, budget.max_integer_bits,
+                                         result.denominator))
         return false;
     result.binary_exponent = static_cast<int>(exponent);
     return normalize(result, budget);
 }
 
-inline bool compare(const Rational& lhs, const Rational& rhs,
-                    int& order, Budget& budget) {
+inline bool compare(const Rational &lhs, const Rational &rhs, int &order, Budget &budget) {
     using namespace exact_h::exact_detail;
     if (!charge(budget) || !valid(lhs, budget) || !valid(rhs, budget))
         return false;
     Integer left, right;
-    if (!exact_h::exact_detail::multiply(lhs.numerator, rhs.denominator,
-            budget.max_integer_bits, left) ||
-        !exact_h::exact_detail::multiply(rhs.numerator, lhs.denominator,
-            budget.max_integer_bits, right))
+    if (!exact_h::exact_detail::multiply(lhs.numerator, rhs.denominator, budget.max_integer_bits,
+                                         left) ||
+        !exact_h::exact_detail::multiply(rhs.numerator, lhs.denominator, budget.max_integer_bits,
+                                         right))
         return false;
     const auto exponent = std::min(lhs.binary_exponent, rhs.binary_exponent);
-    const auto lhs_shift = static_cast<std::size_t>(
-        static_cast<std::int64_t>(lhs.binary_exponent) - exponent);
-    const auto rhs_shift = static_cast<std::size_t>(
-        static_cast<std::int64_t>(rhs.binary_exponent) - exponent);
+    const auto lhs_shift =
+        static_cast<std::size_t>(static_cast<std::int64_t>(lhs.binary_exponent) - exponent);
+    const auto rhs_shift =
+        static_cast<std::size_t>(static_cast<std::int64_t>(rhs.binary_exponent) - exponent);
     if (lhs_shift > budget.max_integer_bits || rhs_shift > budget.max_integer_bits ||
         !shift_left(left, lhs_shift, budget.max_integer_bits) ||
         !shift_left(right, rhs_shift, budget.max_integer_bits))
@@ -351,13 +340,11 @@ inline bool compare(const Rational& lhs, const Rational& rhs,
     return true;
 }
 
-inline bool equal(const Rational& lhs, const Rational& rhs,
-                  bool& result, Budget& budget) {
+inline bool equal(const Rational &lhs, const Rational &rhs, bool &result, Budget &budget) {
     using namespace exact_h::exact_detail;
     if (!charge(budget) || !valid(lhs, budget) || !valid(rhs, budget))
         return false;
-    if (lhs.denominator == rhs.denominator &&
-        lhs.binary_exponent == rhs.binary_exponent) {
+    if (lhs.denominator == rhs.denominator && lhs.binary_exponent == rhs.binary_exponent) {
         result = exact_h::exact_detail::compare(lhs.numerator, rhs.numerator) == 0;
         return true;
     }

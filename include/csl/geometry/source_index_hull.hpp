@@ -31,8 +31,8 @@ struct LegacyKpabepOptions {
 using SourceIndexProposalResult = std::variant<SourceIndexProposal, Diagnostics>;
 
 class SourceIndexHullWorkspace : public ExclusiveWorkspace {
-public:
-    virtual SourceIndexProposalResult propose(const PointCloud&, const ExecutionContext&) = 0;
+  public:
+    virtual SourceIndexProposalResult propose(const PointCloud &, const ExecutionContext &) = 0;
 };
 
 } // namespace csl::geometry
@@ -41,10 +41,12 @@ namespace csl::registry {
 struct SourceIndexHullPort {
     using Request = geometry::PointCloud;
     using Workspace = geometry::SourceIndexHullWorkspace;
-    static constexpr const char* name = "source-index-hull";
-    static Request snapshot(const Request& request) { return request; }
-    static geometry::SourceIndexProposalResult run(Workspace& workspace, const Request& request,
-            const ExecutionContext& context) { return workspace.propose(request, context); }
+    static constexpr const char *name = "source-index-hull";
+    static Request snapshot(const Request &request) { return request; }
+    static geometry::SourceIndexProposalResult run(Workspace &workspace, const Request &request,
+                                                   const ExecutionContext &context) {
+        return workspace.propose(request, context);
+    }
 };
 } // namespace csl::registry
 
@@ -57,7 +59,7 @@ struct SourceIndexAffineSumDependencies {
 };
 
 registry::Registration<registry::SourceIndexHullPort> make_quickhull_source_index_registration();
-registry::Registration<registry::SourceIndexHullPort> make_legacy_kpabep_source_index_registration(
-    LegacyKpabepOptions = {});
+registry::Registration<registry::SourceIndexHullPort>
+    make_legacy_kpabep_source_index_registration(LegacyKpabepOptions = {});
 
 } // namespace csl::geometry

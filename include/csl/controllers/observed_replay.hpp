@@ -24,7 +24,7 @@ struct ReleasedObservation {
 // The estimate is a caller-defined state hypothesis, not a verified state.
 using Estimator = std::function<Vector(StageIndex, std::span<const ReleasedObservation>)>;
 using Controller = std::function<Vector(StageIndex, std::span<const ReleasedObservation>,
-    std::span<const double> estimate)>;
+                                        std::span<const double> estimate)>;
 
 struct DecisionEvidence {
     StageIndex stage;
@@ -46,7 +46,7 @@ using ReplayResult = std::variant<ReplayRecord, Diagnostic, OperationStopped>;
 // choose u_k. Apply the supplied external sample, advance state and release
 // after(k) observations. before(T) releases terminal observations only.
 // This is sampled replay; it makes no all-disturbance or optimality claim.
-ReplayResult replay_observed_policy(const model::LinearSystem&, const ReplayInputs&,
-    const Estimator&, const Controller&);
+ReplayResult replay_observed_policy(const model::LinearSystem &, const ReplayInputs &,
+                                    const Estimator &, const Controller &);
 
 } // namespace csl::controllers

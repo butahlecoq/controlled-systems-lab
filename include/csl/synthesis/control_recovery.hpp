@@ -20,7 +20,7 @@ using ControlRecoveryOutcome = std::variant<JointHistoryRelation, Diagnostics>;
 // a known initial point, continuous controls, no external input, and native
 // H/singleton/empty/universal polyhedral sets. No variables are projected out.
 // Binary64 row assembly is not a numerical or validated completeness proof.
-ControlRecoveryOutcome recover_joint_history(const problem::ResolvedProblem&,
-    const sets::SetData& terminal_relation);
+ControlRecoveryOutcome recover_joint_history(const problem::ResolvedProblem &,
+                                             const sets::SetData &terminal_relation);
 
 } // namespace csl::synthesis

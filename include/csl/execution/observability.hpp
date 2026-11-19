@@ -4,64 +4,98 @@
 #include <cstdint>
 
 namespace csl::execution::observability {
-template<class T> using CollectionResult=artifacts::ArtifactResult<T>;
-struct ShardId { std::uint64_t value; bool operator==(const ShardId&) const=default; };
+template <class T> using CollectionResult = artifacts::ArtifactResult<T>;
+struct ShardId {
+    std::uint64_t value;
+    bool operator==(const ShardId &) const = default;
+};
 struct PlanInput {
-    problem::ResolvedProblem problem; artifacts::ResolvedConfiguration configuration;
-    artifacts::RunId run; std::vector<artifacts::ClockDomain> clocks;
-    std::vector<artifacts::SpanDescriptor> spans; std::uint64_t shard_count;
-    std::vector<std::string> tasks{},operations{};
+    problem::ResolvedProblem problem;
+    artifacts::ResolvedConfiguration configuration;
+    artifacts::RunId run;
+    std::vector<artifacts::ClockDomain> clocks;
+    std::vector<artifacts::SpanDescriptor> spans;
+    std::uint64_t shard_count;
+    std::vector<std::string> tasks{}, operations{};
 };
 struct CollectionAccess;
 class CollectionPlan {
-public:
-    CollectionPlan(const CollectionPlan&)=default;
-    CollectionPlan& operator=(const CollectionPlan&)=default;
-    const PlanInput& description() const noexcept;
-private:
-    struct Storage; std::shared_ptr<const Storage> storage_;
+  public:
+    CollectionPlan(const CollectionPlan &) = default;
+    CollectionPlan &operator=(const CollectionPlan &) = default;
+    const PlanInput &description() const noexcept;
+
+  private:
+    struct Storage;
+    std::shared_ptr<const Storage> storage_;
     explicit CollectionPlan(std::shared_ptr<const Storage>);
     friend struct CollectionAccess;
     friend class ObservationShard;
 };
 enum class ObservationState { returned, not_called, unknown };
 enum class CompletionStatus { returned, rejected, skipped, failed, incomplete };
-struct TickValue { bool available; std::int64_t value; artifacts::MissingReason missing; };
-struct CountValue { bool available; std::uint64_t value; artifacts::MissingReason missing; };
+struct TickValue {
+    bool available;
+    std::int64_t value;
+    artifacts::MissingReason missing;
+};
+struct CountValue {
+    bool available;
+    std::uint64_t value;
+    artifacts::MissingReason missing;
+};
 struct SizeNotObserved {};
 struct SizeUnavailable {};
-struct SizeAvailable { std::uint64_t value; };
-using SizeObservation=std::variant<SizeNotObserved,SizeUnavailable,SizeAvailable>;
+struct SizeAvailable {
+    std::uint64_t value;
+};
+using SizeObservation = std::variant<SizeNotObserved, SizeUnavailable, SizeAvailable>;
 struct SpanCompletionView {
-    artifacts::SpanId id; TickValue start,end;
-    ObservationState execution; artifacts::NotCalledReason not_called_reason;
-    bool has_termination; Termination termination;
-    CountValue iterations; std::string_view detail;
+    artifacts::SpanId id;
+    TickValue start, end;
+    ObservationState execution;
+    artifacts::NotCalledReason not_called_reason;
+    bool has_termination;
+    Termination termination;
+    CountValue iterations;
+    std::string_view detail;
     CompletionStatus status{CompletionStatus::returned};
-    bool has_outcome{false};MathematicalOutcome outcome{MathematicalOutcome::undetermined};
+    bool has_outcome{false};
+    MathematicalOutcome outcome{MathematicalOutcome::undetermined};
     std::shared_ptr<const GeometryEvidence> relation_evidence;
     std::optional<SetRelation> applied_relation;
-    SizeObservation input_size{},output_size{};
+    SizeObservation input_size{}, output_size{};
 };
-enum class RecordDisposition { retained, detail_dropped, detail_rejected, duplicate, wrong_shard, unknown_span };
+enum class RecordDisposition {
+    retained,
+    detail_dropped,
+    detail_rejected,
+    duplicate,
+    wrong_shard,
+    unknown_span
+};
 class ObservationShard {
-public:
-    ObservationShard(ObservationShard&&) noexcept;
-    ObservationShard& operator=(ObservationShard&&) noexcept;
+  public:
+    ObservationShard(ObservationShard &&) noexcept;
+    ObservationShard &operator=(ObservationShard &&) noexcept;
     ~ObservationShard();
-    ObservationShard(const ObservationShard&)=delete;
-    ObservationShard& operator=(const ObservationShard&)=delete;
+    ObservationShard(const ObservationShard &) = delete;
+    ObservationShard &operator=(const ObservationShard &) = delete;
     RecordDisposition record(SpanCompletionView) noexcept;
-    void record_overflow(std::uint64_t bucket,std::uint64_t count) noexcept;
-private:
-    struct Storage;std::unique_ptr<Storage> storage_;
+    void record_overflow(std::uint64_t bucket, std::uint64_t count) noexcept;
+
+  private:
+    struct Storage;
+    std::unique_ptr<Storage> storage_;
     explicit ObservationShard(std::unique_ptr<Storage>);
     friend struct CollectionAccess;
 };
 CollectionResult<CollectionPlan> make_collection_plan(PlanInput);
-CollectionResult<ObservationShard> make_observation_shard(const CollectionPlan&,ShardId);
-CollectionResult<artifacts::CollectedStatistics> merge_observations(const CollectionPlan&,std::vector<ObservationShard>);
-artifacts::ExecutionSummary project_execution(const BatchTiming&);
-artifacts::ExecutionSummary::Task project_task(const TaskId&,const TaskTiming&,TimePoint origin,artifacts::SpanStatus);
-artifacts::ResourceObservation project_resources(const EnforcementReport&);
+CollectionResult<ObservationShard> make_observation_shard(const CollectionPlan &, ShardId);
+CollectionResult<artifacts::CollectedStatistics> merge_observations(const CollectionPlan &,
+                                                                    std::vector<ObservationShard>);
+artifacts::ExecutionSummary project_execution(const BatchTiming &);
+artifacts::ExecutionSummary::Task project_task(const TaskId &, const TaskTiming &, TimePoint origin,
+                                               artifacts::SpanStatus);
+artifacts::ResourceObservation project_resources(const EnforcementReport &);
 }

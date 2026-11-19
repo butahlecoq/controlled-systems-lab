@@ -5,10 +5,15 @@
 #include <csl/registry/registry.hpp>
 
 namespace csl::optimization::phase_one {
-LPDataResult<LinearProgram> make_program(ProgramIdentity, const SparseMatrix&, std::span<const double>);
-struct StructuralVariable { std::size_t column; };
-struct ArtificialVariable { std::size_t row; };
-using Variable = std::variant<StructuralVariable,ArtificialVariable>;
+LPDataResult<LinearProgram> make_program(ProgramIdentity, const SparseMatrix &,
+                                         std::span<const double>);
+struct StructuralVariable {
+    std::size_t column;
+};
+struct ArtificialVariable {
+    std::size_t row;
+};
+using Variable = std::variant<StructuralVariable, ArtificialVariable>;
 struct PivotEvent {
     std::uint64_t iteration;
     Variable entering, leaving;
@@ -24,11 +29,13 @@ struct Options {
     std::vector<double> structural_entering_priorities{};
     // Synchronous post-commit borrow; may be copied. No workspace reentrancy.
     // Captured owners/synchronization are the caller's responsibility.
-    std::function<void(const PivotEvent&)> pivot_observer{};
+    std::function<void(const PivotEvent &)> pivot_observer{};
 };
-using RegistrationResult = std::variant<registry::Registration<registry::LPPort>,Diagnostics>;
+using RegistrationResult = std::variant<registry::Registration<registry::LPPort>, Diagnostics>;
 RegistrationResult make_registration(Options = {});
-struct Normalization { std::vector<int> signs; };
+struct Normalization {
+    std::vector<int> signs;
+};
 struct AuxiliaryState {
     Vector artificial;
     double value;
@@ -37,9 +44,17 @@ struct AuxiliaryState {
     std::optional<double> minimum_reduced_cost;
 };
 enum class Reason {
-    feasible, positive_auxiliary_optimum, cancelled, deadline, pivot_limit,
-    capacity, arithmetic, ill_conditioned_basis, uncertain_pricing,
-    uncertain_pivot, invalid_basic_point
+    feasible,
+    positive_auxiliary_optimum,
+    cancelled,
+    deadline,
+    pivot_limit,
+    capacity,
+    arithmetic,
+    ill_conditioned_basis,
+    uncertain_pricing,
+    uncertain_pivot,
+    invalid_basic_point
 };
 struct Snapshot {
     SolveStamp solve;
@@ -52,9 +67,9 @@ struct Snapshot {
     bool trace_truncated;
     std::size_t accounted_workspace_bytes;
 };
-using SnapshotResult = std::variant<Snapshot,BasisUnavailable>;
+using SnapshotResult = std::variant<Snapshot, BasisUnavailable>;
 class DiagnosticsView : public BasisDiagnostics {
-public:
+  public:
     virtual SnapshotResult phase_one_snapshot() const = 0;
 };
 } // namespace csl::optimization::phase_one

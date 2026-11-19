@@ -1,5 +1,5 @@
 add_executable(contract_tests probes/core-01/contract_tests.cpp)
-target_link_libraries(contract_tests PRIVATE CSL::contracts doctest::doctest)
+target_link_libraries(contract_tests PRIVATE CSL::contracts doctest::doctest_with_main)
 add_test(NAME contract_tests COMMAND contract_tests)
 csl_test_target(contract_tests contracts)
 

@@ -1,15 +1,15 @@
 add_executable(model_tests tests/unit/model/linear_system_tests.cpp)
-target_link_libraries(model_tests PRIVATE CSL::model doctest::doctest Threads::Threads)
+target_link_libraries(model_tests PRIVATE CSL::model doctest::doctest_with_main Threads::Threads)
 add_test(NAME model_tests COMMAND model_tests)
 csl_test_target(model_tests model)
 
 add_executable(model_catalogue_tests tests/unit/model/catalogue_tests.cpp)
-target_link_libraries(model_catalogue_tests PRIVATE CSL::model_catalogue doctest::doctest)
+target_link_libraries(model_catalogue_tests PRIVATE CSL::model_catalogue doctest::doctest_with_main)
 add_test(NAME model_catalogue_tests COMMAND model_catalogue_tests)
 csl_test_target(model_catalogue_tests model)
 
 add_executable(discrete_catalogue_tests tests/unit/model/discrete_catalogue_tests.cpp)
-target_link_libraries(discrete_catalogue_tests PRIVATE CSL::model_catalogue doctest::doctest)
+target_link_libraries(discrete_catalogue_tests PRIVATE CSL::model_catalogue doctest::doctest_with_main)
 add_test(NAME discrete_catalogue_tests COMMAND discrete_catalogue_tests)
 csl_test_target(discrete_catalogue_tests model)
 
@@ -18,12 +18,12 @@ target_link_libraries(discrete_catalogue_reference PRIVATE CSL::model_catalogue)
 add_test(NAME discrete_catalogue_reference COMMAND discrete_catalogue_reference)
 csl_test_target(discrete_catalogue_reference model)
 add_executable(flexible_pitch_tests tests/unit/model/flexible_pitch_tests.cpp)
-target_link_libraries(flexible_pitch_tests PRIVATE CSL::model_catalogue doctest::doctest)
+target_link_libraries(flexible_pitch_tests PRIVATE CSL::model_catalogue doctest::doctest_with_main)
 add_test(NAME flexible_pitch_tests COMMAND flexible_pitch_tests)
 csl_test_target(flexible_pitch_tests model)
 
 add_executable(spatial_flight_tests tests/unit/model/spatial_flight_tests.cpp)
-target_link_libraries(spatial_flight_tests PRIVATE CSL::model_catalogue doctest::doctest)
+target_link_libraries(spatial_flight_tests PRIVATE CSL::model_catalogue doctest::doctest_with_main)
 add_test(NAME spatial_flight_tests COMMAND spatial_flight_tests)
 csl_test_target(spatial_flight_tests model)
 
@@ -38,17 +38,17 @@ add_test(NAME four_state_catalogue_reference COMMAND four_state_catalogue_refere
 csl_test_target(four_state_catalogue_reference model)
 
 add_executable(affine_dynamics_tests tests/unit/model/affine_dynamics_test.cpp)
-target_link_libraries(affine_dynamics_tests PRIVATE CSL::model CSL::sets doctest::doctest)
+target_link_libraries(affine_dynamics_tests PRIVATE CSL::model CSL::sets doctest::doctest_with_main)
 add_test(NAME affine_dynamics_tests COMMAND affine_dynamics_tests)
 csl_test_target(affine_dynamics_tests model)
 
 add_executable(observation_model_tests tests/unit/model/observation_model_test.cpp)
-target_link_libraries(observation_model_tests PRIVATE CSL::model doctest::doctest)
+target_link_libraries(observation_model_tests PRIVATE CSL::model doctest::doctest_with_main)
 add_test(NAME observation_model_tests COMMAND observation_model_tests)
 csl_test_target(observation_model_tests model)
 
 add_executable(hybrid_model_tests tests/unit/model/hybrid_system_test.cpp)
-target_link_libraries(hybrid_model_tests PRIVATE CSL::model CSL::sets doctest::doctest)
+target_link_libraries(hybrid_model_tests PRIVATE CSL::model CSL::sets doctest::doctest_with_main)
 add_test(NAME hybrid_model_tests COMMAND hybrid_model_tests)
 csl_test_target(hybrid_model_tests model)
 
@@ -58,12 +58,12 @@ add_test(NAME model_public_client COMMAND model_public_client)
 csl_test_target(model_public_client model)
 
 add_executable(continuous_discretization_tests tests/contract/model/continuous_discretization_tests.cpp)
-target_link_libraries(continuous_discretization_tests PRIVATE CSL::model doctest::doctest)
+target_link_libraries(continuous_discretization_tests PRIVATE CSL::model doctest::doctest_with_main)
 add_test(NAME continuous_discretization_tests COMMAND continuous_discretization_tests)
 csl_test_target(continuous_discretization_tests model)
 
 add_executable(flexible_pitch_slew_tests tests/unit/model/flexible_pitch_slew_tests.cpp)
-target_link_libraries(flexible_pitch_slew_tests PRIVATE CSL::model_catalogue CSL::resolved_problem doctest::doctest)
+target_link_libraries(flexible_pitch_slew_tests PRIVATE CSL::model_catalogue CSL::resolved_problem doctest::doctest_with_main)
 add_test(NAME flexible_pitch_slew_tests COMMAND flexible_pitch_slew_tests)
 csl_test_target(flexible_pitch_slew_tests model)
 

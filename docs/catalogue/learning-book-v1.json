@@ -50,7 +50,8 @@
       "records": [
         {
           "label": "examples/registered_lp.cpp",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/examples/registered_lp.cpp"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/examples/registered_lp.cpp",
+          "source_sha256": "1bacf77e2a83aee615cb2484b6bc4e485ce91e1988d50b10b31a359d28029d59"
         },
         {
           "label": "examples/CMakeLists.txt installed package consumer",
@@ -218,7 +219,8 @@
       "records": [
         {
           "label": "tests/installed/hull_reducer_client.cpp",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/hull_reducer_client.cpp"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/hull_reducer_client.cpp",
+          "source_sha256": "161e8a1c63f0e57cbbdca8b034b07f50818e7f37bf4bbfe42c6ea8825e338e75"
         }
       ],
       "example_sources": [
@@ -304,7 +306,8 @@
       "records": [
         {
           "label": "examples/source_index_geometry_2d.cpp",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/examples/source_index_geometry_2d.cpp"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/examples/source_index_geometry_2d.cpp",
+          "source_sha256": "a03944915c97bdc2d5effe1e1a7947dbc8adff1c6c0da3da53721486e3c80eb3"
         },
         {
           "label": "Saved source-index execution records",
@@ -312,7 +315,8 @@
         },
         {
           "label": "tests/installed/legacy_btulshor_client.cpp",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/legacy_btulshor_client.cpp"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/legacy_btulshor_client.cpp",
+          "source_sha256": "9c9869b31fbbd88f9512ca771caeffb63a4d43eec89010c9566a9430d23a7c09"
         },
         {
           "label": "Classic nominal versus finite minimax TwoPoints report",
@@ -582,11 +586,13 @@
       "records": [
         {
           "label": "examples/nominal_linear_exact_2d.cpp",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/examples/nominal_linear_exact_2d.cpp"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/examples/nominal_linear_exact_2d.cpp",
+          "source_sha256": "e17c32aa480d2afed2400c00a0b5fc39173f1680e1eef0604a04c27bf91045cb"
         },
         {
           "label": "examples/registered_convex.cpp",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/examples/registered_convex.cpp"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/examples/registered_convex.cpp",
+          "source_sha256": "4c10ef55b5abdcd0c861d0ca9cebcb3a4edb4ad38328eedac5d0094deb3112c1"
         }
       ],
       "example_sources": [
@@ -993,19 +999,23 @@
       "records": [
         {
           "label": "tests/installed/box_approximation_client.cpp",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/9bbd8cbf0a669c2885ec8b649fc72789386be331/tests/installed/box_approximation_client.cpp"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/9bbd8cbf0a669c2885ec8b649fc72789386be331/tests/installed/box_approximation_client.cpp",
+          "source_sha256": "8f2aeeda3e7adb3ed6699138242b343796eb4618aa1792dbff062174e79960e6"
         },
         {
           "label": "tests/installed/box_parallelotope_client.cpp",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/box_parallelotope_client.cpp"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/box_parallelotope_client.cpp",
+          "source_sha256": "e727ba438f7966648c6d3c1cdae58fea6801174d7eb7cd39616282f7137da5ab"
         },
         {
           "label": "tests/installed/zonotope_reduction_client.cpp",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/zonotope_reduction_client.cpp"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/zonotope_reduction_client.cpp",
+          "source_sha256": "24410e9302d0e05c85d25936723f57c85f3e35b2b2b3bef288d0c3ff89e4874c"
         },
         {
           "label": "tests/installed/ellipsoidal_client.cpp",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/ellipsoidal_client.cpp"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/ellipsoidal_client.cpp",
+          "source_sha256": "8290b5dce46eccfb33f73a442c4bcb827ec85a6f0ac3e62453ca79832ed5df55"
         }
       ],
       "mathematical_displays": [
@@ -1353,11 +1363,13 @@
       "records": [
         {
           "label": "tests/installed/finite_feedback_client.cpp",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/finite_feedback_client.cpp"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/finite_feedback_client.cpp",
+          "source_sha256": "7b680850ea44cc450e170a82af2d3c13f9daee3c0eb44d3290a2ff46fd4b8e42"
         },
         {
           "label": "tests/installed/finite_causal_minimax_client.cpp",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/finite_causal_minimax_client.cpp"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/finite_causal_minimax_client.cpp",
+          "source_sha256": "17539fe489915bc96e873b38bfe16452828627984aaae70a74be6bfb61cee308"
         }
       ],
       "mathematical_tables": [
@@ -1482,9 +1494,9 @@
         {
           "source": "tests/installed/finite_feedback_client.cpp",
           "contains": [
-            "Game{2,{Stage{{true,true},1,1,",
-            "{{StateIndex{1}}},{{StateIndex{1}}}",
-            "{true,true},{false,true}"
+            "Game{2,\n                               {Stage{{true, true}, 1, 1,",
+            "{{StateIndex{1}}}, {{StateIndex{1}}}",
+            "{true, true},\n                               {false, true}"
           ]
         },
         {
@@ -1522,7 +1534,8 @@
       "records": [
         {
           "label": "examples/registered_synthesis_comparison.cpp",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/examples/registered_synthesis_comparison.cpp"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/examples/registered_synthesis_comparison.cpp",
+          "source_sha256": "f6593c982a6e1515bdcb9a20982dbe4a105e5d50eacee2db1fd98e405e454ae2"
         },
         {
           "label": "Two-stage integrator scenario",
@@ -1720,19 +1733,23 @@
       "records": [
         {
           "label": "tests/installed/conversion_client.cpp",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/9bbd8cbf0a669c2885ec8b649fc72789386be331/tests/installed/conversion_client.cpp"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/9bbd8cbf0a669c2885ec8b649fc72789386be331/tests/installed/conversion_client.cpp",
+          "source_sha256": "50e734f563b4384dfccc8f2852835e050d9925cb1e8eb9e1f7d7918c3cbb7354"
         },
         {
           "label": "tests/installed/affine_sum_client.cpp",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/affine_sum_client.cpp"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/affine_sum_client.cpp",
+          "source_sha256": "29678634adac501b78deaa1c1f674d69df4ce1f6073fe829b6e03ddfe7be69a2"
         },
         {
           "label": "tests/installed/polyhedral_intersection_client.cpp",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/polyhedral_intersection_client.cpp"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/polyhedral_intersection_client.cpp",
+          "source_sha256": "ca3f5194d072079d394ae5f81b1379ada47a3908d07dafb03fb581a0b79f46ae"
         },
         {
           "label": "tests/installed/projection_predecessor_client.cpp",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/projection_predecessor_client.cpp"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/projection_predecessor_client.cpp",
+          "source_sha256": "d86a941076fa1d9a4d5aacf1721bc069660a18fe9dbabca4f9a16a33e93822f9"
         }
       ],
       "example_sources": [
@@ -1885,33 +1902,33 @@
         {
           "source": "tests/installed/conversion_client.cpp",
           "contains": [
-            "Matrix{4,2,{1,0,-1,0,0,1,0,-1}}",
-            "Vector{1,0,1,0}",
-            "Matrix{4,2,{0,0,1,0,1,1,0,1}}"
+            "Matrix{4, 2, {1, 0, -1, 0, 0, 1, 0, -1}}",
+            "Vector{1, 0, 1, 0}",
+            "Matrix{4, 2, {0, 0, 1, 0, 1, 1, 0, 1}}"
           ]
         },
         {
           "source": "tests/installed/affine_sum_client.cpp",
           "contains": [
-            "Matrix{2,1,{0,1}}",
-            "std::abs(low)<1e-8&&std::abs(high-2)<1e-8"
+            "Matrix{2, 1, {0, 1}}",
+            "std::abs(low) < 1e-8 && std::abs(high - 2) < 1e-8"
           ]
         },
         {
           "source": "tests/installed/polyhedral_intersection_client.cpp",
           "contains": [
-            "Matrix{1,1,{1}}",
-            "Matrix{1,1,{-1}}",
+            "Matrix{1, 1, {1}}",
+            "Matrix{1, 1, {-1}}",
             "inequalities.rows() == 2"
           ]
         },
         {
           "source": "tests/installed/projection_predecessor_client.cpp",
           "contains": [
-            "Vector{1,1}",
+            "Vector{1, 1}",
             "Vector{2}",
-            "!contains(h,1)||!contains(h,3)",
-            "contains(h,0.875)||contains(h,3.125)"
+            "!contains(h, 1) || !contains(h, 3)",
+            "contains(h, 0.875) || contains(h, 3.125)"
           ]
         }
       ]
@@ -1941,7 +1958,8 @@
       "records": [
         {
           "label": "tests/installed/convex_client.cpp",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/convex_client.cpp"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/convex_client.cpp",
+          "source_sha256": "9b9d052ba9bfc12aa3fc2d0e63d9bbc6df5630ef7be60e9dc718d4aa2ef5c9b2"
         }
       ],
       "example_sources": [

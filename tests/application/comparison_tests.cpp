@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/application/comparison.hpp>
 #include <csl/problem/validator.hpp>
@@ -9,35 +8,55 @@
 namespace {
 csl::problem::ResolvedProblem zero_problem() {
     using namespace csl;
-    LinearStage transition{{0,0,{}},{0,0,{}},{0,0,{}},{}};
-    auto model=std::make_shared<const SystemModel>(SystemModel{
-        Dynamics{{0,0,0},TimeDomain::discrete,std::move(transition)}, {}});
-    Problem authored{{"application-test"},std::move(model),{0},KnownInitial{{}},ContinuousDomain{{}},
-        {UniversalSet{0}},{},{},InformationPattern::nominal_open_loop,LinearTerminal{{},0}};
-    auto resolved=problem::resolve(authored,{problem::UncertaintyStructure::stage_product_uncoupled});
+    LinearStage transition{{0, 0, {}}, {0, 0, {}}, {0, 0, {}}, {}};
+    auto model = std::make_shared<const SystemModel>(
+        SystemModel{Dynamics{{0, 0, 0}, TimeDomain::discrete, std::move(transition)}, {}});
+    Problem authored{{"application-test"},
+                     std::move(model),
+                     {0},
+                     KnownInitial{{}},
+                     ContinuousDomain{{}},
+                     {UniversalSet{0}},
+                     {},
+                     {},
+                     InformationPattern::nominal_open_loop,
+                     LinearTerminal{{}, 0}};
+    auto resolved =
+        problem::resolve(authored, {problem::UncertaintyStructure::stage_product_uncoupled});
     REQUIRE(std::holds_alternative<problem::ResolvedProblem>(resolved));
     return std::get<problem::ResolvedProblem>(std::move(resolved));
 }
-csl::application::ComparisonRequest request_for(const csl::problem::ResolvedProblem& problem) {
+csl::application::ComparisonRequest request_for(const csl::problem::ResolvedProblem &problem) {
     using namespace csl;
-    FamilyRequest family;family.profile="ts01_exact_integrator";family.objective=problem.identity();
-    family.target=FamilyTarget::exact_optimal_relation;family.assurance=Assurance::numerical;
-    family.representation={"csl.polyhedron.h"};
-    StrategyConfiguration reach_back;reach_back.strategy={"csl.synthesis.reach-back"};reach_back.representation=family.representation;
-    StrategyConfiguration direct_joint;direct_joint.strategy={"csl.synthesis.strategy-b"};direct_joint.representation=family.representation;
-    return {problem,family,{reach_back,direct_joint}};
+    FamilyRequest family;
+    family.profile = "ts01_exact_integrator";
+    family.objective = problem.identity();
+    family.target = FamilyTarget::exact_optimal_relation;
+    family.assurance = Assurance::numerical;
+    family.representation = {"csl.polyhedron.h"};
+    StrategyConfiguration reach_back;
+    reach_back.strategy = {"csl.synthesis.reach-back"};
+    reach_back.representation = family.representation;
+    StrategyConfiguration direct_joint;
+    direct_joint.strategy = {"csl.synthesis.strategy-b"};
+    direct_joint.representation = family.representation;
+    return {problem, family, {reach_back, direct_joint}};
 }
 
-csl::registry::StrategyRegistration rejecting(std::string id,int& capability_calls,int& planner_calls) {
+csl::registry::StrategyRegistration rejecting(std::string id, int &capability_calls,
+                                              int &planner_calls) {
     using namespace csl;
     registry::StrategyRegistration entry;
-    entry.identity={{std::move(id)},"1"};
-    entry.capabilities=[&capability_calls](const registry::StrategyRequest&,const registry::Requirements&) {
+    entry.identity = {{std::move(id)}, "1"};
+    entry.capabilities = [&capability_calls](const registry::StrategyRequest &,
+                                             const registry::Requirements &) {
         ++capability_calls;
-        return registry::Capability{Diagnostics{{DiagnosticCode::unsupported,"test.capability","deliberate test rejection"}}};
+        return registry::Capability{Diagnostics{
+            {DiagnosticCode::unsupported, "test.capability", "deliberate test rejection"}}};
     };
-    entry.planner=[&planner_calls](const registry::StrategyRequest&,const registry::Requirements&)
-        ->std::variant<registry::StrategyPlan,registry::Rejection> {
+    entry.planner = [&planner_calls](const registry::StrategyRequest &,
+                                     const registry::Requirements &)
+        -> std::variant<registry::StrategyPlan, registry::Rejection> {
         ++planner_calls;
         return registry::Rejection{};
     };
@@ -45,25 +64,30 @@ csl::registry::StrategyRegistration rejecting(std::string id,int& capability_cal
 }
 
 class NoopWorkspace final : public csl::SynthesisWorkspace {
-public:
-    csl::SynthesisResult solve(const csl::problem::ResolvedProblem&,
-        const csl::FamilyRequest&, const csl::ExecutionContext&) override { return {}; }
+  public:
+    csl::SynthesisResult solve(const csl::problem::ResolvedProblem &, const csl::FamilyRequest &,
+                               const csl::ExecutionContext &) override {
+        return {};
+    }
 };
 
 csl::registry::StrategyRegistration accepting(std::string id) {
     using namespace csl;
     registry::StrategyRegistration entry;
-    entry.identity={{std::move(id)},"1"};
-    entry.complete_family_verifier={ModuleId{"csl.verifier.ts01-analytic"},"1"};
-    entry.capabilities=[](const registry::StrategyRequest&,const registry::Requirements& requirements) {
+    entry.identity = {{std::move(id)}, "1"};
+    entry.complete_family_verifier = {ModuleId{"csl.verifier.ts01-analytic"}, "1"};
+    entry.capabilities = [](const registry::StrategyRequest &,
+                            const registry::Requirements &requirements) {
         return registry::Capability{registry::Offer{requirements.output}};
     };
-    entry.planner=[](const registry::StrategyRequest&,const registry::Requirements&)
-        ->std::variant<registry::StrategyPlan,registry::Rejection> {
-        auto checked=registry::check_pipeline();
-        if(auto* rejection=std::get_if<registry::Rejection>(&checked))return *rejection;
-        return registry::compose_strategy(std::get<registry::CheckedPipeline<>>(std::move(checked)),
-            [](auto,const registry::StrategyRequest&,const registry::Requirements&) {
+    entry.planner = [](const registry::StrategyRequest &, const registry::Requirements &)
+        -> std::variant<registry::StrategyPlan, registry::Rejection> {
+        auto checked = registry::check_pipeline();
+        if (auto *rejection = std::get_if<registry::Rejection>(&checked))
+            return *rejection;
+        return registry::compose_strategy(
+            std::get<registry::CheckedPipeline<>>(std::move(checked)),
+            [](auto, const registry::StrategyRequest &, const registry::Requirements &) {
                 return std::make_unique<NoopWorkspace>();
             });
     };
@@ -73,25 +97,29 @@ csl::registry::StrategyRegistration accepting(std::string id) {
 csl::registry::StrategyRegistration throwing_capability(std::string id) {
     using namespace csl;
     registry::StrategyRegistration entry;
-    entry.identity={{std::move(id)},"1"};
-    entry.capabilities=[](const registry::StrategyRequest&,const registry::Requirements&) -> registry::Capability {
+    entry.identity = {{std::move(id)}, "1"};
+    entry.capabilities = [](const registry::StrategyRequest &,
+                            const registry::Requirements &) -> registry::Capability {
         throw std::runtime_error("deliberate capability exception");
     };
-    entry.planner=[](const registry::StrategyRequest&,const registry::Requirements&)
-        ->std::variant<registry::StrategyPlan,registry::Rejection> { return registry::Rejection{}; };
+    entry.planner = [](const registry::StrategyRequest &, const registry::Requirements &)
+        -> std::variant<registry::StrategyPlan, registry::Rejection> {
+        return registry::Rejection{};
+    };
     return entry;
 }
 
 csl::registry::StrategyRegistration throwing_planner(std::string id) {
     using namespace csl;
     registry::StrategyRegistration entry;
-    entry.identity={{std::move(id)},"1"};
-    entry.complete_family_verifier={ModuleId{"csl.verifier.ts01-analytic"},"1"};
-    entry.capabilities=[](const registry::StrategyRequest&,const registry::Requirements& requirements) {
+    entry.identity = {{std::move(id)}, "1"};
+    entry.complete_family_verifier = {ModuleId{"csl.verifier.ts01-analytic"}, "1"};
+    entry.capabilities = [](const registry::StrategyRequest &,
+                            const registry::Requirements &requirements) {
         return registry::Capability{registry::Offer{requirements.output}};
     };
-    entry.planner=[](const registry::StrategyRequest&,const registry::Requirements&)
-        ->std::variant<registry::StrategyPlan,registry::Rejection> {
+    entry.planner = [](const registry::StrategyRequest &, const registry::Requirements &)
+        -> std::variant<registry::StrategyPlan, registry::Rejection> {
         throw std::runtime_error("deliberate planner exception");
     };
     return entry;
@@ -99,173 +127,205 @@ csl::registry::StrategyRegistration throwing_planner(std::string id) {
 }
 
 TEST_CASE("comparison admission rejects unguarded profiles before registry access") {
-    const auto problem=zero_problem();
-    auto request=request_for(problem);request.family.profile="nominal_open_loop";
+    const auto problem = zero_problem();
+    auto request = request_for(problem);
+    request.family.profile = "nominal_open_loop";
     const csl::registry::StrategyRegistry empty;
     csl::application::ComparisonPreparationObservation observation;
-    const auto result=csl::application::prepare_comparison_observed(request,empty,observation);
+    const auto result = csl::application::prepare_comparison_observed(request, empty, observation);
     REQUIRE(std::holds_alternative<csl::application::UnsupportedComparison>(result));
-    const auto& diagnostics=std::get<csl::application::UnsupportedComparison>(result).diagnostics;
-    REQUIRE(diagnostics.size()==1);
-    CHECK(diagnostics[0].field=="comparison.family.profile");
-    CHECK(observation.common_guard_status==csl::application::PreparationObservationStatus::rejected);
-    CHECK(observation.registry_attempts[0].status==csl::registry::PreparationObservationStatus::not_entered);
-    CHECK(observation.registry_attempts[1].status==csl::registry::PreparationObservationStatus::not_entered);
+    const auto &diagnostics = std::get<csl::application::UnsupportedComparison>(result).diagnostics;
+    REQUIRE(diagnostics.size() == 1);
+    CHECK(diagnostics[0].field == "comparison.family.profile");
+    CHECK(observation.common_guard_status ==
+          csl::application::PreparationObservationStatus::rejected);
+    CHECK(observation.registry_attempts[0].status ==
+          csl::registry::PreparationObservationStatus::not_entered);
+    CHECK(observation.registry_attempts[1].status ==
+          csl::registry::PreparationObservationStatus::not_entered);
 }
 
 TEST_CASE("comparison admission allows nominal-open-loop candidate generality requests") {
-    const auto problem=zero_problem();
-    auto request=request_for(problem);
-    request.family.profile="nominal_open_loop";
-    request.family.target=csl::FamilyTarget::candidate_relaxation;
+    const auto problem = zero_problem();
+    auto request = request_for(problem);
+    request.family.profile = "nominal_open_loop";
+    request.family.target = csl::FamilyTarget::candidate_relaxation;
     const csl::registry::StrategyRegistry empty;
     csl::application::ComparisonPreparationObservation observation;
-    const auto result=csl::application::prepare_comparison_observed(request,empty,observation);
+    const auto result = csl::application::prepare_comparison_observed(request, empty, observation);
     REQUIRE(std::holds_alternative<csl::application::RejectedComparison>(result));
-    CHECK(observation.common_guard_status==csl::application::PreparationObservationStatus::passed);
-    CHECK(observation.registry_attempts[0].status==csl::registry::PreparationObservationStatus::rejected);
-    CHECK(observation.registry_attempts[1].status==csl::registry::PreparationObservationStatus::rejected);
+    CHECK(observation.common_guard_status ==
+          csl::application::PreparationObservationStatus::passed);
+    CHECK(observation.registry_attempts[0].status ==
+          csl::registry::PreparationObservationStatus::rejected);
+    CHECK(observation.registry_attempts[1].status ==
+          csl::registry::PreparationObservationStatus::rejected);
 }
 
 TEST_CASE("both capability rejections are reported without planner or workspace creation") {
-    const auto problem=zero_problem();
-    const auto request=request_for(problem);
+    const auto problem = zero_problem();
+    const auto request = request_for(problem);
     csl::registry::StrategyRegistry registry;
-    int capability_calls=0,planner_calls=0;
-    REQUIRE_FALSE(registry.add(rejecting("csl.synthesis.reach-back",capability_calls,planner_calls)));
-    REQUIRE_FALSE(registry.add(rejecting("csl.synthesis.strategy-b",capability_calls,planner_calls)));
+    int capability_calls = 0, planner_calls = 0;
+    REQUIRE_FALSE(
+        registry.add(rejecting("csl.synthesis.reach-back", capability_calls, planner_calls)));
+    REQUIRE_FALSE(
+        registry.add(rejecting("csl.synthesis.strategy-b", capability_calls, planner_calls)));
 
     csl::application::ComparisonPreparationObservation observation;
-    const auto result=csl::application::prepare_comparison_observed(request,registry,observation);
+    const auto result =
+        csl::application::prepare_comparison_observed(request, registry, observation);
     REQUIRE(std::holds_alternative<csl::application::RejectedComparison>(result));
-    const auto& comparison=std::get<csl::application::RejectedComparison>(result);
-    REQUIRE(comparison.strategies.size()==2);
-    CHECK(comparison.strategy_indices==std::vector<std::size_t>{0,1});
-    CHECK(capability_calls==2);
-    CHECK(planner_calls==0);
-    CHECK(observation.common_guard_status==csl::application::PreparationObservationStatus::passed);
-    for (const auto& attempt : observation.registry_attempts) {
-        CHECK(attempt.status==csl::registry::PreparationObservationStatus::rejected);
-        CHECK(attempt.capability_callback_calls==1);
+    const auto &comparison = std::get<csl::application::RejectedComparison>(result);
+    REQUIRE(comparison.strategies.size() == 2);
+    CHECK(comparison.strategy_indices == std::vector<std::size_t>{0, 1});
+    CHECK(capability_calls == 2);
+    CHECK(planner_calls == 0);
+    CHECK(observation.common_guard_status ==
+          csl::application::PreparationObservationStatus::passed);
+    for (const auto &attempt : observation.registry_attempts) {
+        CHECK(attempt.status == csl::registry::PreparationObservationStatus::rejected);
+        CHECK(attempt.capability_callback_calls == 1);
     }
 }
 
 TEST_CASE("observed comparison admission records accepted registry preparation") {
-    const auto problem=zero_problem();
-    const auto request=request_for(problem);
+    const auto problem = zero_problem();
+    const auto request = request_for(problem);
     csl::registry::StrategyRegistry registry;
     REQUIRE_FALSE(registry.add(accepting("csl.synthesis.reach-back")));
     REQUIRE_FALSE(registry.add(accepting("csl.synthesis.strategy-b")));
     csl::application::ComparisonPreparationObservation observation;
 
-    const auto result=csl::application::prepare_comparison_observed(request,registry,observation);
+    const auto result =
+        csl::application::prepare_comparison_observed(request, registry, observation);
 
     REQUIRE(std::holds_alternative<csl::application::PreparedComparison>(result));
-    CHECK(observation.common_guard_status==csl::application::PreparationObservationStatus::passed);
-    for (const auto& attempt : observation.registry_attempts) {
-        CHECK(attempt.status==csl::registry::PreparationObservationStatus::accepted);
-        CHECK(attempt.capability_callback_calls==1);
+    CHECK(observation.common_guard_status ==
+          csl::application::PreparationObservationStatus::passed);
+    for (const auto &attempt : observation.registry_attempts) {
+        CHECK(attempt.status == csl::registry::PreparationObservationStatus::accepted);
+        CHECK(attempt.capability_callback_calls == 1);
     }
 
-    auto invalid_request=request;
-    invalid_request.family.profile="unsupported-profile";
-    const auto rejected=csl::application::prepare_comparison_observed(invalid_request,registry,observation);
+    auto invalid_request = request;
+    invalid_request.family.profile = "unsupported-profile";
+    const auto rejected =
+        csl::application::prepare_comparison_observed(invalid_request, registry, observation);
     CHECK(std::holds_alternative<csl::application::UnsupportedComparison>(rejected));
-    CHECK(observation.common_guard_status==csl::application::PreparationObservationStatus::rejected);
-    CHECK(observation.registry_attempts[0].status==csl::registry::PreparationObservationStatus::not_entered);
-    CHECK(observation.registry_attempts[1].status==csl::registry::PreparationObservationStatus::not_entered);
+    CHECK(observation.common_guard_status ==
+          csl::application::PreparationObservationStatus::rejected);
+    CHECK(observation.registry_attempts[0].status ==
+          csl::registry::PreparationObservationStatus::not_entered);
+    CHECK(observation.registry_attempts[1].status ==
+          csl::registry::PreparationObservationStatus::not_entered);
 }
 
 TEST_CASE("observed registry rejection before capability records no callback") {
-    const auto problem=zero_problem();
-    const auto request=request_for(problem);
+    const auto problem = zero_problem();
+    const auto request = request_for(problem);
     const csl::registry::StrategyRegistry registry;
     csl::application::ComparisonPreparationObservation observation;
 
-    const auto result=csl::application::prepare_comparison_observed(request,registry,observation);
+    const auto result =
+        csl::application::prepare_comparison_observed(request, registry, observation);
 
     REQUIRE(std::holds_alternative<csl::application::RejectedComparison>(result));
-    for (const auto& attempt : observation.registry_attempts) {
-        CHECK(attempt.status==csl::registry::PreparationObservationStatus::rejected);
-        CHECK(attempt.capability_callback_calls==0);
-        CHECK(attempt.capability_callback_ns==0);
+    for (const auto &attempt : observation.registry_attempts) {
+        CHECK(attempt.status == csl::registry::PreparationObservationStatus::rejected);
+        CHECK(attempt.capability_callback_calls == 0);
+        CHECK(attempt.capability_callback_ns == 0);
     }
 }
 
 TEST_CASE("observed registry version rejection records no capability callback") {
-    const auto problem=zero_problem();
-    const auto request=request_for(problem);
+    const auto problem = zero_problem();
+    const auto request = request_for(problem);
     csl::registry::StrategyRegistry registry;
     REQUIRE_FALSE(registry.add(accepting("csl.synthesis.reach-back")));
     csl::registry::StrategyRequest strategy_request{
-        problem,request.strategies[0],request.family,{},{}};
+        problem, request.strategies[0], request.family, {}, {}};
     csl::registry::Requirements requirements;
-    requirements.output.representation=request.family.representation;
-    requirements.output.family=request.family.target;
-    requirements.output.completeness=csl::registry::Completeness::established;
+    requirements.output.representation = request.family.representation;
+    requirements.output.family = request.family.target;
+    requirements.output.completeness = csl::registry::Completeness::established;
     csl::registry::StrategyPreparationObservation observation;
 
-    const auto result=registry.prepare_observed(strategy_request,requirements,std::string{"2"},observation);
+    const auto result =
+        registry.prepare_observed(strategy_request, requirements, std::string{"2"}, observation);
 
     CHECK(std::holds_alternative<csl::registry::Rejection>(result));
-    CHECK(observation.status==csl::registry::PreparationObservationStatus::rejected);
-    CHECK(observation.capability_callback_calls==0);
-    CHECK(observation.capability_callback_ns==0);
+    CHECK(observation.status == csl::registry::PreparationObservationStatus::rejected);
+    CHECK(observation.capability_callback_calls == 0);
+    CHECK(observation.capability_callback_ns == 0);
 }
 
 TEST_CASE("observed planner exception preserves the earlier accepted arm") {
-    const auto problem=zero_problem();
-    const auto request=request_for(problem);
+    const auto problem = zero_problem();
+    const auto request = request_for(problem);
     csl::registry::StrategyRegistry registry;
     REQUIRE_FALSE(registry.add(accepting("csl.synthesis.reach-back")));
     REQUIRE_FALSE(registry.add(throwing_planner("csl.synthesis.strategy-b")));
     csl::application::ComparisonPreparationObservation observation;
 
-    CHECK_THROWS_AS(csl::application::prepare_comparison_observed(request,registry,observation),std::runtime_error);
+    CHECK_THROWS_AS(csl::application::prepare_comparison_observed(request, registry, observation),
+                    std::runtime_error);
 
-    CHECK(observation.common_guard_status==csl::application::PreparationObservationStatus::passed);
-    CHECK(observation.registry_attempts[0].status==csl::registry::PreparationObservationStatus::accepted);
-    CHECK(observation.registry_attempts[0].capability_callback_calls==1);
-    CHECK(observation.registry_attempts[1].status==csl::registry::PreparationObservationStatus::threw);
-    CHECK(observation.registry_attempts[1].capability_callback_calls==1);
+    CHECK(observation.common_guard_status ==
+          csl::application::PreparationObservationStatus::passed);
+    CHECK(observation.registry_attempts[0].status ==
+          csl::registry::PreparationObservationStatus::accepted);
+    CHECK(observation.registry_attempts[0].capability_callback_calls == 1);
+    CHECK(observation.registry_attempts[1].status ==
+          csl::registry::PreparationObservationStatus::threw);
+    CHECK(observation.registry_attempts[1].capability_callback_calls == 1);
 }
 
 TEST_CASE("observed capability exception retains its arm and leaves later arms unentered") {
-    const auto problem=zero_problem();
-    const auto request=request_for(problem);
+    const auto problem = zero_problem();
+    const auto request = request_for(problem);
     csl::registry::StrategyRegistry registry;
     REQUIRE_FALSE(registry.add(throwing_capability("csl.synthesis.reach-back")));
     csl::application::ComparisonPreparationObservation observation;
 
-    CHECK_THROWS_AS(csl::application::prepare_comparison_observed(request,registry,observation),std::runtime_error);
+    CHECK_THROWS_AS(csl::application::prepare_comparison_observed(request, registry, observation),
+                    std::runtime_error);
 
-    CHECK(observation.common_guard_status==csl::application::PreparationObservationStatus::passed);
-    CHECK(observation.registry_attempts[0].status==csl::registry::PreparationObservationStatus::threw);
-    CHECK(observation.registry_attempts[0].capability_callback_calls==1);
-    CHECK(observation.registry_attempts[1].status==csl::registry::PreparationObservationStatus::not_entered);
+    CHECK(observation.common_guard_status ==
+          csl::application::PreparationObservationStatus::passed);
+    CHECK(observation.registry_attempts[0].status ==
+          csl::registry::PreparationObservationStatus::threw);
+    CHECK(observation.registry_attempts[0].capability_callback_calls == 1);
+    CHECK(observation.registry_attempts[1].status ==
+          csl::registry::PreparationObservationStatus::not_entered);
 }
 
 TEST_CASE("comparison preserves the identity of a one-sided capability rejection") {
-    const auto problem=zero_problem();
-    const auto request=request_for(problem);
+    const auto problem = zero_problem();
+    const auto request = request_for(problem);
     csl::registry::StrategyRegistry registry;
     REQUIRE_FALSE(registry.add(accepting("csl.synthesis.reach-back")));
-    int capability_calls=0,planner_calls=0;
-    REQUIRE_FALSE(registry.add(rejecting("csl.synthesis.strategy-b",capability_calls,planner_calls)));
+    int capability_calls = 0, planner_calls = 0;
+    REQUIRE_FALSE(
+        registry.add(rejecting("csl.synthesis.strategy-b", capability_calls, planner_calls)));
 
     csl::application::ComparisonPreparationObservation observation;
-    const auto result=csl::application::prepare_comparison_observed(request,registry,observation);
+    const auto result =
+        csl::application::prepare_comparison_observed(request, registry, observation);
     REQUIRE(std::holds_alternative<csl::application::RejectedComparison>(result));
-    const auto& comparison=std::get<csl::application::RejectedComparison>(result);
-    REQUIRE(comparison.strategies.size()==1);
-    CHECK(comparison.strategy_indices==std::vector<std::size_t>{1});
-    CHECK(comparison.strategies[0].provenance.requested.id==csl::ModuleId{"csl.synthesis.strategy-b"});
-    REQUIRE(comparison.strategies[0].diagnostics.size()==1);
-    CHECK(comparison.strategies[0].diagnostics[0].field=="test.capability");
-    CHECK(capability_calls==1);
-    CHECK(planner_calls==0);
-    CHECK(observation.registry_attempts[0].status==csl::registry::PreparationObservationStatus::accepted);
-    CHECK(observation.registry_attempts[1].status==csl::registry::PreparationObservationStatus::rejected);
-    CHECK(observation.registry_attempts[0].capability_callback_calls==1);
-    CHECK(observation.registry_attempts[1].capability_callback_calls==1);
+    const auto &comparison = std::get<csl::application::RejectedComparison>(result);
+    REQUIRE(comparison.strategies.size() == 1);
+    CHECK(comparison.strategy_indices == std::vector<std::size_t>{1});
+    CHECK(comparison.strategies[0].provenance.requested.id ==
+          csl::ModuleId{"csl.synthesis.strategy-b"});
+    REQUIRE(comparison.strategies[0].diagnostics.size() == 1);
+    CHECK(comparison.strategies[0].diagnostics[0].field == "test.capability");
+    CHECK(capability_calls == 1);
+    CHECK(planner_calls == 0);
+    CHECK(observation.registry_attempts[0].status ==
+          csl::registry::PreparationObservationStatus::accepted);
+    CHECK(observation.registry_attempts[1].status ==
+          csl::registry::PreparationObservationStatus::rejected);
+    CHECK(observation.registry_attempts[0].capability_callback_calls == 1);
+    CHECK(observation.registry_attempts[1].capability_callback_calls == 1);
 }

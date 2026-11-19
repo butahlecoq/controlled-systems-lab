@@ -10,65 +10,81 @@ namespace csl {
 namespace {
 using contracts_detail::Overloaded;
 using contracts_detail::matrix_matches;
-bool exact_zero_row(const LinearStage& stage,std::size_t dimension) {
-    if(dimension==0 || !matrix_matches(stage.A,dimension,dimension)) return false;
-    if(!std::all_of(stage.A.values.begin(),stage.A.values.end(),[](double value){return std::isfinite(value);}))
+bool exact_zero_row(const LinearStage &stage, std::size_t dimension) {
+    if (dimension == 0 || !matrix_matches(stage.A, dimension, dimension))
         return false;
-    for(std::size_t row=0;row<dimension;++row) {
-        const auto first=stage.A.values.begin()+row*dimension;
-        if(std::all_of(first,first+dimension,[](double value){return value==0;})) return true;
+    if (!std::all_of(stage.A.values.begin(), stage.A.values.end(),
+                     [](double value) { return std::isfinite(value); }))
+        return false;
+    for (std::size_t row = 0; row < dimension; ++row) {
+        const auto first = stage.A.values.begin() + row * dimension;
+        if (std::all_of(first, first + dimension, [](double value) { return value == 0; }))
+            return true;
     }
     return false;
 }
-std::optional<std::size_t> first_obviously_singular_stage(const Problem& problem) {
-    if(problem.times.size()<2) return {};
-    const auto horizon=problem.times.size()-1;
-    const auto& dynamics=problem.model->dynamics;
-    const auto dimension=dynamics.dimensions.state;
-    if(const auto* constant=std::get_if<LinearStage>(&dynamics.stages))
-        return exact_zero_row(*constant,dimension)?std::optional<std::size_t>{0}:std::nullopt;
-    const auto& indexed=std::get<std::vector<LinearStage>>(dynamics.stages);
-    if(indexed.size()!=horizon) return {};
-    for(std::size_t stage=0;stage<horizon;++stage)
-        if(exact_zero_row(indexed[stage],dimension)) return stage;
+std::optional<std::size_t> first_obviously_singular_stage(const Problem &problem) {
+    if (problem.times.size() < 2)
+        return {};
+    const auto horizon = problem.times.size() - 1;
+    const auto &dynamics = problem.model->dynamics;
+    const auto dimension = dynamics.dimensions.state;
+    if (const auto *constant = std::get_if<LinearStage>(&dynamics.stages))
+        return exact_zero_row(*constant, dimension) ? std::optional<std::size_t>{0} : std::nullopt;
+    const auto &indexed = std::get<std::vector<LinearStage>>(dynamics.stages);
+    if (indexed.size() != horizon)
+        return {};
+    for (std::size_t stage = 0; stage < horizon; ++stage)
+        if (exact_zero_row(indexed[stage], dimension))
+            return stage;
     return {};
 }
 }
-Diagnostics check_nominal_profile(const Problem& p, bool requires_inverse, Assurance assurance) {
+Diagnostics check_nominal_profile(const Problem &p, bool requires_inverse, Assurance assurance) {
     Diagnostics result;
     auto unsupported = [&](std::string field, std::string explanation) {
-        result.push_back({DiagnosticCode::unsupported,std::move(field),std::move(explanation)});
+        result.push_back({DiagnosticCode::unsupported, std::move(field), std::move(explanation)});
     };
-    if (!p.model) return {{DiagnosticCode::invalid_input,"model","Model snapshot is required"}};
+    if (!p.model)
+        return {{DiagnosticCode::invalid_input, "model", "Model snapshot is required"}};
     if (p.model->dynamics.time_domain != TimeDomain::discrete)
-        unsupported("time_domain","Only supplied discrete transitions are supported");
+        unsupported("time_domain", "Only supplied discrete transitions are supported");
     if (requires_inverse) {
-        if(const auto stage=first_obviously_singular_stage(p))
-            unsupported("dynamics.stages["+std::to_string(*stage)+"].A",
+        if (const auto stage = first_obviously_singular_stage(p))
+            unsupported(
+                "dynamics.stages[" + std::to_string(*stage) + "].A",
                 "A has an exact zero row at this transition; inverse-dependent strategy is unsupported");
         else
-            unsupported("dynamics.inverse","Revision 1 supplies no invertibility proof; choose a pipeline not requiring inverse dynamics");
+            unsupported(
+                "dynamics.inverse",
+                "Revision 1 supplies no invertibility proof; choose a pipeline not requiring inverse dynamics");
     }
     if (!std::holds_alternative<KnownInitial>(p.initial))
-        unsupported("initial","Known initial point required");
+        unsupported("initial", "Known initial point required");
     if (p.information != InformationPattern::nominal_open_loop)
-        unsupported("information","Nominal open-loop profile required");
+        unsupported("information", "Nominal open-loop profile required");
     if (p.external || p.model->dynamics.dimensions.external != 0)
-        unsupported("external","External-input semantics require another capability profile");
+        unsupported("external", "External-input semantics require another capability profile");
     if (p.temporal && p.temporal->joint_map.rows != 0)
-        unsupported("temporal","Nonempty temporal constraints require a compatible lift");
-    auto polyhedral = [](const AdmissibleSet& set) {
+        unsupported("temporal", "Nonempty temporal constraints require a compatible lift");
+    auto polyhedral = [](const AdmissibleSet &set) {
         auto handle = std::get_if<SetHandle>(&set);
-        return !handle || (handle->metadata.convex == SetProperty::yes && handle->metadata.polyhedral == SetProperty::yes);
+        return !handle || (handle->metadata.convex == SetProperty::yes &&
+                           handle->metadata.polyhedral == SetProperty::yes);
     };
     if (auto continuous = std::get_if<ContinuousDomain>(&p.controls)) {
-        for (const auto& set : continuous->stages)
-            if (!polyhedral(set)) unsupported("controls","Convex polyhedral stage sets required");
-    } else unsupported("controls","Continuous controls required; finite/mixed domains are not silently convexified");
-    for (const auto& set : p.states)
-        if (!polyhedral(set)) unsupported("states","Convex polyhedral stage sets required");
+        for (const auto &set : continuous->stages)
+            if (!polyhedral(set))
+                unsupported("controls", "Convex polyhedral stage sets required");
+    } else
+        unsupported(
+            "controls",
+            "Continuous controls required; finite/mixed domains are not silently convexified");
+    for (const auto &set : p.states)
+        if (!polyhedral(set))
+            unsupported("states", "Convex polyhedral stage sets required");
     if (assurance == Assurance::validated)
-        unsupported("assurance","No validated verifier is implemented in revision 1");
+        unsupported("assurance", "No validated verifier is implemented in revision 1");
     return result;
 }
 } // namespace csl

@@ -1,5 +1,5 @@
 add_executable(validator_tests tests/unit/problem/validator_tests.cpp)
-target_link_libraries(validator_tests PRIVATE CSL::resolved_problem CSL::optimization doctest::doctest)
+target_link_libraries(validator_tests PRIVATE CSL::resolved_problem CSL::optimization doctest::doctest_with_main)
 add_test(NAME validator_tests COMMAND validator_tests)
 csl_test_target(validator_tests problem)
 
@@ -14,12 +14,12 @@ add_test(NAME problem_public_client COMMAND problem_public_client)
 csl_test_target(problem_public_client problem)
 
 add_executable(problem_tests tests/unit/problem/data_tests.cpp)
-target_link_libraries(problem_tests PRIVATE CSL::problem doctest::doctest Threads::Threads)
+target_link_libraries(problem_tests PRIVATE CSL::problem doctest::doctest_with_main Threads::Threads)
 add_test(NAME problem_tests COMMAND problem_tests)
 csl_test_target(problem_tests problem)
 
 add_executable(temporal_lift_tests tests/unit/problem/temporal_lifts_tests.cpp)
-target_link_libraries(temporal_lift_tests PRIVATE CSL::resolved_problem CSL::problem doctest::doctest)
+target_link_libraries(temporal_lift_tests PRIVATE CSL::resolved_problem CSL::problem doctest::doctest_with_main)
 add_test(NAME temporal_lift_tests COMMAND temporal_lift_tests)
 csl_test_target(temporal_lift_tests problem)
 

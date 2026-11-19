@@ -18,9 +18,9 @@ struct FiniteActionReplay {
 
 using FiniteActionReplayOutcome = std::variant<FiniteActionReplay, Unsupported, OperationStopped>;
 
-FiniteActionReplayOutcome replay_finite_action_plan(
-    const reachability::FixedPlanRequest& request, const Objective& objective,
-    std::size_t max_points_per_stage, std::size_t max_histories,
-    std::string_view error_prefix, const ExecutionContext& context);
+FiniteActionReplayOutcome
+replay_finite_action_plan(const reachability::FixedPlanRequest &request, const Objective &objective,
+                          std::size_t max_points_per_stage, std::size_t max_histories,
+                          std::string_view error_prefix, const ExecutionContext &context);
 
 } // namespace csl::optimization::detail

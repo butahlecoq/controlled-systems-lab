@@ -6,8 +6,12 @@
 
 namespace csl::artifacts {
 
-struct CoordinateOrdinal { std::size_t value{}; };
-struct CoordinateName { std::string value; };
+struct CoordinateOrdinal {
+    std::size_t value{};
+};
+struct CoordinateName {
+    std::string value;
+};
 using StateCoordinate = std::variant<CoordinateOrdinal, CoordinateName>;
 
 struct StageCoordinatePair {
@@ -64,10 +68,10 @@ struct ValidatedStageProjectionRequest {
     std::vector<ResolvedStageProjectionPair> coordinate_pairs;
 };
 
-using StageProjectionRequestValidation = std::variant<ValidatedStageProjectionRequest,
-    ArtifactError>;
+using StageProjectionRequestValidation =
+    std::variant<ValidatedStageProjectionRequest, ArtifactError>;
 
-StageProjectionRequestValidation validate_stage_projection_request(
-    const StageProjectionCaptureRequest&);
+StageProjectionRequestValidation
+validate_stage_projection_request(const StageProjectionCaptureRequest &);
 
 } // namespace csl::artifacts

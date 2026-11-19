@@ -1,6 +1,6 @@
 if(TARGET CSL::highs_convex)
   add_executable(highs_convex_tests tests/contract/convex/highs_tests.cpp)
-  target_link_libraries(highs_convex_tests PRIVATE CSL::highs_convex doctest::doctest Threads::Threads)
+  target_link_libraries(highs_convex_tests PRIVATE CSL::highs_convex doctest::doctest_with_main Threads::Threads)
   target_compile_definitions(highs_convex_tests PRIVATE
       "CSL_HIGHS_PATCHED_SOURCE_SHA256=\"${CSL_HIGHS_PATCHED_SOURCE_SHA256}\""
       "CSL_HIGHS_THREAD_OBSERVATION_PATCH_SHA256=\"${CSL_HIGHS_THREAD_OBSERVATION_PATCH_SHA256}\"")
@@ -10,7 +10,7 @@ endif()
 
 if(TARGET CSL::highs_convex)
   add_executable(convex_backend_contract tests/contract/optimization/convex_backend_contract.cpp)
-  target_link_libraries(convex_backend_contract PRIVATE CSL::highs_convex doctest::doctest Threads::Threads)
+  target_link_libraries(convex_backend_contract PRIVATE CSL::highs_convex doctest::doctest_with_main Threads::Threads)
   add_test(NAME convex_backend_contract COMMAND convex_backend_contract)
   csl_test_target(convex_backend_contract adapters)
 endif()
@@ -41,7 +41,7 @@ if(TARGET CSL::highs_lp)
     "CSL_HIGHS_THREAD_OBSERVATION_PATCH_SHA256=\"${CSL_HIGHS_THREAD_OBSERVATION_PATCH_SHA256}\"")
   target_link_libraries(csl_highs_lp_test PUBLIC CSL::optimization CSL::registry PRIVATE highs)
   add_executable(highs_lp_tests tests/contract/lp/highs_tests.cpp)
-  target_link_libraries(highs_lp_tests PRIVATE csl_highs_lp_test doctest::doctest Threads::Threads)
+  target_link_libraries(highs_lp_tests PRIVATE csl_highs_lp_test doctest::doctest_with_main Threads::Threads)
   target_include_directories(highs_lp_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests/support)
   target_compile_definitions(highs_lp_tests PRIVATE
       "CSL_HIGHS_PATCHED_SOURCE_SHA256=\"${CSL_HIGHS_PATCHED_SOURCE_SHA256}\""
@@ -52,7 +52,7 @@ endif()
 
 if(TARGET CSL::highs_lp)
   add_executable(lp_backend_contract tests/contract/optimization/lp_backend_contract.cpp)
-  target_link_libraries(lp_backend_contract PRIVATE CSL::highs_lp doctest::doctest)
+  target_link_libraries(lp_backend_contract PRIVATE CSL::highs_lp csl_doctest_runtime)
   add_test(NAME lp_backend_contract COMMAND lp_backend_contract)
   add_test(NAME lp_analytic_catalogue_consistency COMMAND ${CMAKE_COMMAND}
       "-DTEST05_EXE=$<TARGET_FILE:lp_backend_contract>"

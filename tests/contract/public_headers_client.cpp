@@ -44,20 +44,21 @@ using namespace csl;
 using namespace csl::numeric;
 
 static_assert(std::is_same_v<csl::optimization::LPDataResult<LinearProgram>,
-    std::variant<LinearProgram, Diagnostics>>);
-static_assert(std::is_same_v<csl::optimization::Result<csl::optimization::Objective>,
-    std::variant<csl::optimization::Objective, Diagnostic, OperationStopped>>);
+                             std::variant<LinearProgram, Diagnostics>>);
+static_assert(
+    std::is_same_v<csl::optimization::Result<csl::optimization::Objective>,
+                   std::variant<csl::optimization::Objective, Diagnostic, OperationStopped>>);
 static_assert(std::is_same_v<csl::optimization::FiniteActionParallelotopeMinimaxOutcome,
-    std::variant<csl::optimization::FiniteActionParallelotopeMinimaxResult,
-        csl::Unsupported, csl::OperationStopped>>);
+                             std::variant<csl::optimization::FiniteActionParallelotopeMinimaxResult,
+                                          csl::Unsupported, csl::OperationStopped>>);
 
 namespace {
-template<class T> T accepted(Result<T> result) {
-    if (const auto* error = std::get_if<Diagnostic>(&result))
+template <class T> T accepted(Result<T> result) {
+    if (const auto *error = std::get_if<Diagnostic>(&result))
         throw std::runtime_error(error->field + ": " + error->explanation);
     return std::get<T>(std::move(result));
 }
-void check(const MatrixView& matrix, const VectorView& vector, const Vector& expected) {
+void check(const MatrixView &matrix, const VectorView &vector, const Vector &expected) {
     if (accepted(multiply(matrix, vector)) != expected)
         throw std::runtime_error("Public header client literal result differs.");
 }
@@ -68,7 +69,8 @@ int main() {
         const auto retained = [] {
             Vector producer{1, 99, 2, 4, 3, 5, 99, 6};
             Vector input{7, 11, 13};
-            auto matrix = accepted(snapshot(DenseInput{producer, 2, 3, 3, 2, DenseLayout::strided}));
+            auto matrix =
+                accepted(snapshot(DenseInput{producer, 2, 3, 3, 2, DenseLayout::strided}));
             auto vector = accepted(snapshot_vector(input));
             auto moved = std::move(matrix);
             auto moved_vector = std::move(vector);
@@ -87,9 +89,10 @@ int main() {
 #ifdef _MSC_VER
         std::cout << "MSVC=" << _MSC_VER << " iterator=" << _ITERATOR_DEBUG_LEVEL << '\n';
 #endif
-        std::cout << "Public headers client: retained layout, signed oracle and zero ports passed\n";
+        std::cout
+            << "Public headers client: retained layout, signed oracle and zero ports passed\n";
         return 0;
-    } catch (const std::exception& error) {
+    } catch (const std::exception &error) {
         std::cerr << error.what() << '\n';
         return 1;
     }

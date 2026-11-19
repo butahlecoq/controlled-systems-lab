@@ -1,10 +1,10 @@
 add_executable(numeric_tests tests/unit/numeric/data_tests.cpp)
-target_link_libraries(numeric_tests PRIVATE CSL::numeric doctest::doctest Threads::Threads)
+target_link_libraries(numeric_tests PRIVATE CSL::numeric doctest::doctest_with_main Threads::Threads)
 add_test(NAME numeric_tests COMMAND numeric_tests)
 csl_test_target(numeric_tests numeric)
 
 add_executable(numeric_buffer_views_tests tests/unit/numeric/buffer_views_test.cpp)
-target_link_libraries(numeric_buffer_views_tests PRIVATE CSL::numeric doctest::doctest Threads::Threads)
+target_link_libraries(numeric_buffer_views_tests PRIVATE CSL::numeric doctest::doctest_with_main Threads::Threads)
 add_test(NAME numeric_buffer_views_tests COMMAND numeric_buffer_views_tests)
 csl_test_target(numeric_buffer_views_tests numeric)
 

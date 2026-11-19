@@ -38,8 +38,8 @@ struct ZonotopePlanStopped {
     OperationStopped outcome;
 };
 
-using FiniteActionZonotopePlanAttempt = std::variant<ZonotopePlanScored,
-    ZonotopePlanUnscored, ZonotopePlanStopped>;
+using FiniteActionZonotopePlanAttempt =
+    std::variant<ZonotopePlanScored, ZonotopePlanUnscored, ZonotopePlanStopped>;
 
 struct FiniteActionZonotopeReplay {
     double worst_value;
@@ -68,9 +68,9 @@ struct ZonotopeCandidateSearchStopped {
 };
 struct ZonotopeNoScoredCandidate {};
 
-using FiniteActionZonotopeSelectionOutcome = std::variant<ZonotopePlanSelected,
-    ZonotopePlanReplayRefused, ZonotopePlanReplayStopped,
-    ZonotopeCandidateSearchStopped, ZonotopeNoScoredCandidate>;
+using FiniteActionZonotopeSelectionOutcome =
+    std::variant<ZonotopePlanSelected, ZonotopePlanReplayRefused, ZonotopePlanReplayStopped,
+                 ZonotopeCandidateSearchStopped, ZonotopeNoScoredCandidate>;
 
 struct FiniteActionZonotopeMinimaxResult {
     ProblemId problem;
@@ -81,16 +81,17 @@ struct FiniteActionZonotopeMinimaxResult {
     Assurance assurance{Assurance::numerical};
 };
 
-using FiniteActionZonotopeMinimaxOutcome = std::variant<FiniteActionZonotopeMinimaxResult,
-    Unsupported, OperationStopped>;
+using FiniteActionZonotopeMinimaxOutcome =
+    std::variant<FiniteActionZonotopeMinimaxResult, Unsupported, OperationStopped>;
 
 // Ranks fixed open-loop plans by numerical maxima over all terminal zonotope
 // factor corners, then exactly replays only the selected plan over the finite
 // catalogues. Candidate scores are not validated objective bounds or a claim
 // that the selector found a globally minimax plan. A deadline, cancellation or
 // candidate-attempt limit returns completed rows and a typed stopped row.
-FiniteActionZonotopeMinimaxOutcome finite_action_zonotope_minimax(
-    const FiniteActionMinimaxRequest& request, FiniteActionZonotopeMinimaxLimits limits,
-    const ExecutionContext& context = {});
+FiniteActionZonotopeMinimaxOutcome
+finite_action_zonotope_minimax(const FiniteActionMinimaxRequest &request,
+                               FiniteActionZonotopeMinimaxLimits limits,
+                               const ExecutionContext &context = {});
 
 } // namespace csl::optimization

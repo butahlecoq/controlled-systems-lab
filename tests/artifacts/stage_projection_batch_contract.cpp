@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
 #include <csl/artifacts/stage_projection_batch.hpp>
@@ -15,7 +14,7 @@ namespace ar = csl::artifacts;
 namespace geo = csl::geometry::polyhedral;
 namespace reg = csl::registry;
 
-template<class T, class... Rest> T take(std::variant<T, Rest...> value) {
+template <class T, class... Rest> T take(std::variant<T, Rest...> value) {
     REQUIRE(std::holds_alternative<T>(value));
     return std::get<T>(std::move(value));
 }
@@ -32,35 +31,35 @@ reg::PreparedProvider<reg::GeometryPort> provider() {
 }
 
 sets::SetData cube() {
-    Matrix vertices{8, 3, {-1,-1,-1, -1,-1,1, -1,1,-1, -1,1,1,
-                            1,-1,-1, 1,-1,1, 1,1,-1, 1,1,1}};
+    Matrix vertices{
+        8, 3, {-1, -1, -1, -1, -1, 1, -1, 1, -1, -1, 1, 1, 1, -1, -1, 1, -1, 1, 1, 1, -1, 1, 1, 1}};
     Matrix rays{0, 3, {}};
     return take(sets::make_v({{"cube"}, 3, {"x", "y", "z"}},
-        {take(numeric::snapshot(vertices)), take(numeric::snapshot(rays))}));
+                             {take(numeric::snapshot(vertices)), take(numeric::snapshot(rays))}));
 }
 
 sets::SetData line_with_interior_vertex() {
-    Matrix vertices{3, 3, {0,0,0, 1e16,0,1e16+2, 1e16+2,0,1e16+4}};
+    Matrix vertices{3, 3, {0, 0, 0, 1e16, 0, 1e16 + 2, 1e16 + 2, 0, 1e16 + 4}};
     Matrix rays{0, 3, {}};
     return take(sets::make_v({{"line"}, 3, {"x", "y", "z"}},
-        {take(numeric::snapshot(vertices)), take(numeric::snapshot(rays))}));
+                             {take(numeric::snapshot(vertices)), take(numeric::snapshot(rays))}));
 }
 
 sets::SetData point_with_duplicate_vertices() {
-    Matrix vertices{3, 3, {5,0,7, 5,0,7, 5,0,7}};
-    Matrix rays{1, 3, {0,1,0}};
+    Matrix vertices{3, 3, {5, 0, 7, 5, 0, 7, 5, 0, 7}};
+    Matrix rays{1, 3, {0, 1, 0}};
     return take(sets::make_v({{"point"}, 3, {"x", "y", "z"}},
-        {take(numeric::snapshot(vertices)), take(numeric::snapshot(rays))}));
+                             {take(numeric::snapshot(vertices)), take(numeric::snapshot(rays))}));
 }
 
 sets::SetData empty_v_with_ray() {
     Matrix vertices{0, 3, {}};
-    Matrix rays{1, 3, {1,0,0}};
+    Matrix rays{1, 3, {1, 0, 0}};
     return take(sets::make_v({{"empty"}, 3, {"x", "y", "z"}},
-        {take(numeric::snapshot(vertices)), take(numeric::snapshot(rays))}));
+                             {take(numeric::snapshot(vertices)), take(numeric::snapshot(rays))}));
 }
 
-ar::StageProjectionSet projection_source(const sets::SetData& set) {
+ar::StageProjectionSet projection_source(const sets::SetData &set) {
     ar::StageProjectionSet source;
     source.relation = set.as_handle();
     source.owner = {{"fuel"}, set.metadata()->id};
@@ -78,25 +77,43 @@ TEST_CASE("stage projection batch JSON binds source identity and retains 2D geom
     source.relation = source_set.as_handle();
     source.owner = {{"fuel"}, source_set.metadata()->id};
     source.relation_coordinates = {0, 1, 2};
-    ar::StageProjectionCaptureRequest request{{"fuel"}, {"stage-batch"},
-        {{"oxidizer flow", "kg/s", {}, {}}, {"oxidizer stock", "kg", {}, {}}, {"fuel flow", "kg/s", {}, {}}},
+    ar::StageProjectionCaptureRequest request{
+        {"fuel"},
+        {"stage-batch"},
+        {{"oxidizer flow", "kg/s", {}, {}},
+         {"oxidizer stock", "kg", {}, {}},
+         {"fuel flow", "kg/s", {}, {}}},
         {{{ar::CoordinateOrdinal{0}, ar::CoordinateOrdinal{2}}}},
-        {{{0}, 0.0, source}, {{1}, 1.0, projection_source(line_set)},
-            {{2}, 2.0, projection_source(point_set)}, {{3}, 3.0, projection_source(empty_set)}},
-        SetRelation::equivalent, Assurance::numerical};
+        {{{0}, 0.0, source},
+         {{1}, 1.0, projection_source(line_set)},
+         {{2}, 2.0, projection_source(point_set)},
+         {{3}, 3.0, projection_source(empty_set)}},
+        SetRelation::equivalent,
+        Assurance::numerical};
     const auto capture = ar::capture_stage_projections(request, provider());
     REQUIRE(std::holds_alternative<ar::StageProjectionBatchCapture>(capture));
 
-    ar::StageProjectionBatchIdentity identity{{"run-1"}, "fuel-route", "csl.run-statistics/7", std::string(64, 'a'),
-        request.state_coordinates, {{0, 2}}, {ar::PlotAxis::Kind::stage, {0.0, 1.0, 2.0, 3.0}, {}, {}}, {}};
-    identity.trajectory_series.push_back({{"run-1"}, {0, 2}, {{-1.0, -1.0}, {1.0, 1.0}, {5.0, 7.0}, {0.0, 0.0}}, "selected witness only"});
-    const auto encoded = ar::encode_stage_projection_batch_json(identity,
-        std::get<ar::StageProjectionBatchCapture>(capture));
+    ar::StageProjectionBatchIdentity identity{
+        {"run-1"},
+        "fuel-route",
+        "csl.run-statistics/7",
+        std::string(64, 'a'),
+        request.state_coordinates,
+        {{0, 2}},
+        {ar::PlotAxis::Kind::stage, {0.0, 1.0, 2.0, 3.0}, {}, {}},
+        {}};
+    identity.trajectory_series.push_back({{"run-1"},
+                                          {0, 2},
+                                          {{-1.0, -1.0}, {1.0, 1.0}, {5.0, 7.0}, {0.0, 0.0}},
+                                          "selected witness only"});
+    const auto encoded = ar::encode_stage_projection_batch_json(
+        identity, std::get<ar::StageProjectionBatchCapture>(capture));
     REQUIRE(std::holds_alternative<std::string>(encoded));
-    const auto& json = std::get<std::string>(encoded);
+    const auto &json = std::get<std::string>(encoded);
     std::ifstream fixture(CSL_STAGE_PROJECTION_BATCH_FIXTURE);
     REQUIRE(fixture.good());
-    const std::string expected((std::istreambuf_iterator<char>(fixture)), std::istreambuf_iterator<char>());
+    const std::string expected((std::istreambuf_iterator<char>(fixture)),
+                               std::istreambuf_iterator<char>());
     CHECK(json == expected);
     CHECK(json.find("csl.stage-projection-batch/1") != std::string::npos);
     CHECK(json.find("fuel-route") != std::string::npos);
@@ -106,25 +123,32 @@ TEST_CASE("stage projection batch JSON binds source identity and retains 2D geom
     CHECK(json.find("\"kind\": \"point\"") != std::string::npos);
 
     auto partial_batch = std::get<ar::StageProjectionBatchCapture>(capture);
-    auto& first_success = std::get<ar::StageProjectionSuccess>(partial_batch.records.front().outcome);
+    auto &first_success =
+        std::get<ar::StageProjectionSuccess>(partial_batch.records.front().outcome);
     first_success.materialization_outcome = ar::StageProjectionSuccess::MaterializationFailure{
         ar::StageProjectionSuccess::MaterializationFailure::Kind::stopped,
         "converter resource limit", std::nullopt, StopReason::resource_limit};
-    const auto partial = ar::encode_stage_projection_batch_json(identity,
-        partial_batch);
+    const auto partial = ar::encode_stage_projection_batch_json(identity, partial_batch);
     REQUIRE(std::holds_alternative<std::string>(partial));
     const auto partial_json = nlohmann::json::parse(std::get<std::string>(partial));
     CHECK(partial_json["records"][0]["outcome"]["status"] == "success");
     CHECK(partial_json["records"][0]["outcome"]["materialization_failure"]["kind"] == "stopped");
-    CHECK(partial_json["records"][0]["outcome"]["materialization_failure"]["stop_reason"] == "resource_limit");
+    CHECK(partial_json["records"][0]["outcome"]["materialization_failure"]["stop_reason"] ==
+          "resource_limit");
     CHECK(partial_json["records"][0]["outcome"]["components"].empty());
 }
 
 TEST_CASE("stage projection batch JSON rejects reordered pairs and bad source hashes") {
-    ar::StageProjectionBatchCapture empty{{"fuel"}, {"capture"}, SetRelation::equivalent,
-        Assurance::numerical, {}};
-    ar::StageProjectionBatchIdentity identity{{"run"}, "route", "record/1", std::string(64, 'a'),
-        {{"x", {}}, {"y", {}}}, {{0, 1}}, {ar::PlotAxis::Kind::stage, {0.0}, {}, {}}, {}};
+    ar::StageProjectionBatchCapture empty{
+        {"fuel"}, {"capture"}, SetRelation::equivalent, Assurance::numerical, {}};
+    ar::StageProjectionBatchIdentity identity{{"run"},
+                                              "route",
+                                              "record/1",
+                                              std::string(64, 'a'),
+                                              {{"x", {}}, {"y", {}}},
+                                              {{0, 1}},
+                                              {ar::PlotAxis::Kind::stage, {0.0}, {}, {}},
+                                              {}};
     auto encoded = ar::encode_stage_projection_batch_json(identity, empty);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(encoded));
     CHECK(std::get<ar::ArtifactError>(encoded).path == "records");
@@ -143,15 +167,19 @@ TEST_CASE("stage projection batch records and binds optional 2D materialization 
     const auto set = cube();
     auto source = projection_source(set);
     source.owner.problem = {"materialization"};
-    ar::StageProjectionCaptureRequest request{{"materialization"}, {"stage-batch"},
+    ar::StageProjectionCaptureRequest request{
+        {"materialization"},
+        {"stage-batch"},
         {{"x", {}, {}, {}}, {"y", {}, {}, {}}, {"z", {}, {}, {}}},
         {{{ar::CoordinateOrdinal{0}, ar::CoordinateOrdinal{2}}}},
-        {{{0}, 0.0, source}}, SetRelation::equivalent, Assurance::numerical};
+        {{{0}, 0.0, source}},
+        SetRelation::equivalent,
+        Assurance::numerical};
     auto captured = ar::capture_stage_projections(request, provider());
     REQUIRE(std::holds_alternative<ar::StageProjectionBatchCapture>(captured));
     auto batch = std::get<ar::StageProjectionBatchCapture>(std::move(captured));
-    auto& success = std::get<ar::StageProjectionSuccess>(batch.records.front().outcome);
-    const auto& projection = success.projection.projected_relation;
+    auto &success = std::get<ar::StageProjectionSuccess>(batch.records.front().outcome);
+    const auto &projection = success.projection.projected_relation;
     ar::StageProjectionSuccess::Materialization materialization;
     materialization.relation = projection;
     materialization.evidence.reference.identity = {
@@ -163,12 +191,18 @@ TEST_CASE("stage projection batch records and binds optional 2D materialization 
     materialization.provider = success.projection.provider;
     success.materialization_outcome = materialization;
 
-    ar::StageProjectionBatchIdentity identity{{"run"}, "route", "record/1", std::string(64, 'a'),
-        request.state_coordinates, {{0, 2}}, {ar::PlotAxis::Kind::stage, {0.0}, {}, {}}, {}};
+    ar::StageProjectionBatchIdentity identity{{"run"},
+                                              "route",
+                                              "record/1",
+                                              std::string(64, 'a'),
+                                              request.state_coordinates,
+                                              {{0, 2}},
+                                              {ar::PlotAxis::Kind::stage, {0.0}, {}, {}},
+                                              {}};
     const auto encoded = ar::encode_stage_projection_batch_json(identity, batch);
     REQUIRE(std::holds_alternative<std::string>(encoded));
     const auto document = nlohmann::json::parse(std::get<std::string>(encoded));
-    const auto& evidence = document["records"][0]["outcome"]["evidence"];
+    const auto &evidence = document["records"][0]["outcome"]["evidence"];
     REQUIRE(evidence.size() == 2);
     CHECK(evidence[1]["input_set_ids"] == nlohmann::json::array({projection.id.value}));
     CHECK(evidence[1]["ideal_output_id"] == projection.id.value);

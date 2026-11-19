@@ -1,0 +1,40 @@
+{
+  "schema": "csl.cpp-quality-policy/1",
+  "roots": [
+    "include",
+    "src",
+    "tests",
+    "examples"
+  ],
+  "frozen": [
+    {
+      "path": "tests/fixtures/reports/b06-measured-source/b06_exact_oracle.cpp",
+      "owner": "reports/algorithm-results/b06-manifest-correction-v1/manifest-correction.json",
+      "owner_sha256": "e66e0600697474ecabd103a5f5148902e4acafe99d7e6005e93618bee8c15924",
+      "digest_key": "independent_oracle_sha256",
+      "member_key": "independent_oracle_source_snapshot",
+      "member": "measured-source/b06_exact_oracle.cpp"
+    },
+    {
+      "path": "tests/fixtures/reports/b06-measured-source/b06_finite_minimax.cpp",
+      "owner": "reports/algorithm-results/b06-manifest-correction-v1/manifest-correction.json",
+      "owner_sha256": "e66e0600697474ecabd103a5f5148902e4acafe99d7e6005e93618bee8c15924",
+      "digest_key": "measured_driver_sha256",
+      "member_key": "measured_driver_snapshot",
+      "member": "measured-source/b06_finite_minimax.cpp"
+    }
+  ],
+  "expected_compile_failures": [
+    "tests/installed/ts01_issuer_forge_client.cpp",
+    "tests/installed/ts01_callback_forge_client.cpp",
+    "tests/installed/ts01_relation_factory_forge_client.cpp",
+    "tests/installed/farkas_factory_forge_client.cpp"
+  ],
+  "deferred_owners": [
+    "benchmarks",
+    "tools",
+    "probes",
+    "reports/algorithm-results/tooling"
+  ],
+  "scope_note": "These other source-owned queues remain required for full native adoption; this policy gates the retained include/src/tests/examples unit and makes no whole-issue completion claim."
+}

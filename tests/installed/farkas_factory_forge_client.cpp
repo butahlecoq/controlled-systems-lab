@@ -2,13 +2,11 @@
 
 namespace csl::optimization::detail {
 class FarkasEvidenceFactory {
-public:
+  public:
     static csl::ExactFarkasEvidence forge(csl::LinearInfeasibilityCertificate certificate) {
         return csl::ExactFarkasEvidence(std::move(certificate));
     }
 };
 }
 
-int main() {
-    return 0;
-}
+int main() { return 0; }

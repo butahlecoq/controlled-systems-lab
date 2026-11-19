@@ -30,12 +30,15 @@ class HullReducerCatalogue {
     registry::Registry<registry::HullReducerPort> reducers_;
     registry::Registration<registry::LPPort> vertex_lp_;
     HullReducerCatalogue(registry::Registry<registry::HullReducerPort> reducers,
-            registry::Registration<registry::LPPort> vertex_lp)
-        :reducers_(std::move(reducers)),vertex_lp_(std::move(vertex_lp)) {}
-    friend HullReducerCatalogue make_hull_reducer_catalogue(registry::Registration<registry::LPPort>);
-    friend std::variant<PreparedHullCandidate,registry::Rejection> prepare_hull_candidate(
-        const HullReducerCatalogue&,const HullCandidateGraph&,const PointCloud&);
-public:
+                         registry::Registration<registry::LPPort> vertex_lp)
+        : reducers_(std::move(reducers)), vertex_lp_(std::move(vertex_lp)) {}
+    friend HullReducerCatalogue
+        make_hull_reducer_catalogue(registry::Registration<registry::LPPort>);
+    friend std::variant<PreparedHullCandidate, registry::Rejection>
+    prepare_hull_candidate(const HullReducerCatalogue &, const HullCandidateGraph &,
+                           const PointCloud &);
+
+  public:
     std::vector<registry::Identity> reducer_identities() const { return reducers_.identities(); }
     registry::Identity vertex_lp_identity() const { return vertex_lp_.identity; }
 };
@@ -44,12 +47,13 @@ HullReducerCatalogue make_hull_reducer_catalogue(registry::Registration<registry
 // Source-index methods have an independent port and do not masquerade as
 // HullReducerPort implementations. Both compiled methods are supported only
 // for admitted 2D point clouds; callers still select one explicitly.
-registry::Registry<registry::SourceIndexHullPort> make_source_index_hull_catalogue(
-    LegacyKpabepOptions = {});
-std::vector<HullCandidateGraph> enumerate_hull_candidates(const HullReducerCatalogue&,
-    std::size_t input_dimension);
-std::variant<PreparedHullCandidate,registry::Rejection> prepare_hull_candidate(
-    const HullReducerCatalogue&,const HullCandidateGraph&,const PointCloud&);
+registry::Registry<registry::SourceIndexHullPort>
+    make_source_index_hull_catalogue(LegacyKpabepOptions = {});
+std::vector<HullCandidateGraph> enumerate_hull_candidates(const HullReducerCatalogue &,
+                                                          std::size_t input_dimension);
+std::variant<PreparedHullCandidate, registry::Rejection>
+prepare_hull_candidate(const HullReducerCatalogue &, const HullCandidateGraph &,
+                       const PointCloud &);
 
 struct HullCandidateExecution {
     HullCandidateGraph graph;
@@ -62,6 +66,6 @@ struct HullCandidateExecution {
     std::vector<registry::LPQueryRecord> outer_lp_runner_queries;
 };
 
-HullCandidateExecution run_hull_candidate(PreparedHullCandidate, const ExecutionContext& = {});
+HullCandidateExecution run_hull_candidate(PreparedHullCandidate, const ExecutionContext & = {});
 
 } // namespace csl::geometry

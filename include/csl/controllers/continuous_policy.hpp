@@ -29,49 +29,49 @@ struct JointUncertaintyLayout {
 };
 
 class JointVUncertainty {
-public:
-    JointVUncertainty(const JointVUncertainty&) = default;
-    JointVUncertainty& operator=(const JointVUncertainty&) = default;
-    JointVUncertainty(JointVUncertainty&&) noexcept = default;
-    JointVUncertainty& operator=(JointVUncertainty&&) noexcept = default;
+  public:
+    JointVUncertainty(const JointVUncertainty &) = default;
+    JointVUncertainty &operator=(const JointVUncertainty &) = default;
+    JointVUncertainty(JointVUncertainty &&) noexcept = default;
+    JointVUncertainty &operator=(JointVUncertainty &&) noexcept = default;
     std::span<const Vector> generators() const noexcept { return generators_; }
-    const JointUncertaintyLayout& layout() const noexcept { return layout_; }
+    const JointUncertaintyLayout &layout() const noexcept { return layout_; }
 
-private:
+  private:
     JointVUncertainty(std::vector<Vector> generators, JointUncertaintyLayout layout)
         : generators_(std::move(generators)), layout_(std::move(layout)) {}
 
     std::vector<Vector> generators_;
     JointUncertaintyLayout layout_;
-    friend std::variant<JointVUncertainty, Diagnostic> make_joint_v_uncertainty(
-        const model::LinearSystem&, std::vector<Vector>);
+    friend std::variant<JointVUncertainty, Diagnostic>
+    make_joint_v_uncertainty(const model::LinearSystem &, std::vector<Vector>);
 };
 
 using JointVUncertaintyResult = std::variant<JointVUncertainty, Diagnostic>;
-JointVUncertaintyResult make_joint_v_uncertainty(
-    const model::LinearSystem&, std::vector<Vector> joint_generators);
+JointVUncertaintyResult make_joint_v_uncertainty(const model::LinearSystem &,
+                                                 std::vector<Vector> joint_generators);
 
 class JointHUncertainty {
-public:
-    JointHUncertainty(const JointHUncertainty&) = default;
-    JointHUncertainty& operator=(const JointHUncertainty&) = default;
-    JointHUncertainty(JointHUncertainty&&) noexcept = default;
-    JointHUncertainty& operator=(JointHUncertainty&&) noexcept = default;
-    const sets::SetData& set() const noexcept { return set_; }
-    const JointUncertaintyLayout& layout() const noexcept { return layout_; }
+  public:
+    JointHUncertainty(const JointHUncertainty &) = default;
+    JointHUncertainty &operator=(const JointHUncertainty &) = default;
+    JointHUncertainty(JointHUncertainty &&) noexcept = default;
+    JointHUncertainty &operator=(JointHUncertainty &&) noexcept = default;
+    const sets::SetData &set() const noexcept { return set_; }
+    const JointUncertaintyLayout &layout() const noexcept { return layout_; }
 
-private:
+  private:
     JointHUncertainty(sets::SetData set, JointUncertaintyLayout layout)
         : set_(std::move(set)), layout_(std::move(layout)) {}
     sets::SetData set_;
     JointUncertaintyLayout layout_;
-    friend std::variant<JointHUncertainty, Diagnostic> make_joint_h_uncertainty(
-        const model::LinearSystem&, sets::SetData);
+    friend std::variant<JointHUncertainty, Diagnostic>
+    make_joint_h_uncertainty(const model::LinearSystem &, sets::SetData);
 };
 
 using JointHUncertaintyResult = std::variant<JointHUncertainty, Diagnostic>;
-JointHUncertaintyResult make_joint_h_uncertainty(
-    const model::LinearSystem&, sets::SetData joint_domain);
+JointHUncertaintyResult make_joint_h_uncertainty(const model::LinearSystem &,
+                                                 sets::SetData joint_domain);
 
 struct ObservationComponentRef {
     model::ObservationIndex channel;
@@ -90,26 +90,25 @@ struct AffineStagePolicy {
 };
 
 class AffineObservationPolicy {
-public:
-    AffineObservationPolicy(const AffineObservationPolicy&) = default;
-    AffineObservationPolicy& operator=(const AffineObservationPolicy&) = default;
-    AffineObservationPolicy(AffineObservationPolicy&&) noexcept = default;
-    AffineObservationPolicy& operator=(AffineObservationPolicy&&) noexcept = default;
+  public:
+    AffineObservationPolicy(const AffineObservationPolicy &) = default;
+    AffineObservationPolicy &operator=(const AffineObservationPolicy &) = default;
+    AffineObservationPolicy(AffineObservationPolicy &&) noexcept = default;
+    AffineObservationPolicy &operator=(AffineObservationPolicy &&) noexcept = default;
     std::span<const AffineStagePolicy> stages() const noexcept { return stages_; }
 
-private:
+  private:
     explicit AffineObservationPolicy(std::vector<AffineStagePolicy> stages)
         : stages_(std::move(stages)) {}
 
     std::vector<AffineStagePolicy> stages_;
     friend std::variant<AffineObservationPolicy, Diagnostic>
-        make_affine_observation_policy(const model::LinearSystem&,
-            std::vector<AffineStagePolicy>);
+    make_affine_observation_policy(const model::LinearSystem &, std::vector<AffineStagePolicy>);
 };
 
 using AffineObservationPolicyResult = std::variant<AffineObservationPolicy, Diagnostic>;
-AffineObservationPolicyResult make_affine_observation_policy(
-    const model::LinearSystem&, std::vector<AffineStagePolicy> stages);
+AffineObservationPolicyResult make_affine_observation_policy(const model::LinearSystem &,
+                                                             std::vector<AffineStagePolicy> stages);
 
 struct LinearSafetyConstraints {
     Matrix inequalities;
@@ -150,11 +149,10 @@ struct ContinuousPolicyEvidence {
     std::vector<ContinuousGeneratorEvidence> trajectories;
 };
 
-using ContinuousPolicyResult =
-    std::variant<ContinuousPolicyEvidence, Diagnostic, OperationStopped>;
+using ContinuousPolicyResult = std::variant<ContinuousPolicyEvidence, Diagnostic, OperationStopped>;
 
-ContinuousPolicyResult evaluate_continuous_policy(
-    const model::LinearSystem&, const ContinuousPolicyRequest&);
+ContinuousPolicyResult evaluate_continuous_policy(const model::LinearSystem &,
+                                                  const ContinuousPolicyRequest &);
 
 enum class SafetyFamily { state, action };
 
@@ -194,8 +192,8 @@ struct HContinuousPolicyEvidence {
     std::vector<HPolicyConstraintEvidence> constraints;
 };
 
-using HContinuousPolicyResult = std::variant<
-    HContinuousPolicyEvidence, Diagnostic, OperationStopped>;
+using HContinuousPolicyResult =
+    std::variant<HContinuousPolicyEvidence, Diagnostic, OperationStopped>;
 
 // Checks an affine policy over a joint H-polytope using a dual support LP per
 // safety row and a primal LP when a counterexample is needed. Domain points
@@ -203,9 +201,9 @@ using HContinuousPolicyResult = std::variant<
 // dyadics; the affine activity rows are still derived by numerical replay, so
 // overall assurance remains numerical. Incomplete witnesses and tolerance
 // band results remain inconclusive.
-HContinuousPolicyResult evaluate_h_continuous_policy(
-    const model::LinearSystem&, const HContinuousPolicyRequest&,
-    LPWorkspace&, const ExecutionContext&);
+HContinuousPolicyResult evaluate_h_continuous_policy(const model::LinearSystem &,
+                                                     const HContinuousPolicyRequest &,
+                                                     LPWorkspace &, const ExecutionContext &);
 
 struct OneStageAffineSynthesisRequest {
     ProgramIdentity feasibility_program;
@@ -237,16 +235,17 @@ struct AffineSynthesisInconclusive {
     std::optional<ProgramResult> feasibility_solve;
 };
 
-using OneStageAffineSynthesisResult = std::variant<
-    SynthesizedAffinePolicy, AffineSynthesisInconclusive,
-    Diagnostic, OperationStopped>;
+using OneStageAffineSynthesisResult =
+    std::variant<SynthesizedAffinePolicy, AffineSynthesisInconclusive, Diagnostic,
+                 OperationStopped>;
 
 // Synthesizes an action affine in the named before-decision observations for
 // one transition. A successful result is numerically checked over every point
 // of the authored joint V-hull. LP workspace/provider choice belongs to the
 // caller; a numerical infeasibility status is not a no-policy proof.
-OneStageAffineSynthesisResult synthesize_one_stage_affine_policy(
-    const model::LinearSystem&, const OneStageAffineSynthesisRequest&,
-    LPWorkspace&, const ExecutionContext&);
+OneStageAffineSynthesisResult
+synthesize_one_stage_affine_policy(const model::LinearSystem &,
+                                   const OneStageAffineSynthesisRequest &, LPWorkspace &,
+                                   const ExecutionContext &);
 
 } // namespace csl::controllers

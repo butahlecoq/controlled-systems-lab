@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
 #include <csl/artifacts/plot_request.hpp>
@@ -24,44 +23,40 @@ namespace geo = csl::geometry::polyhedral;
 namespace reg = csl::registry;
 namespace sets = csl::sets;
 
-template<class T, class... Rest>
-T take(std::variant<T, Rest...> value) {
+template <class T, class... Rest> T take(std::variant<T, Rest...> value) {
     REQUIRE(std::holds_alternative<T>(value));
     return std::get<T>(std::move(value));
 }
 
 sets::SetData h_set(std::string id, std::size_t dimension, Matrix a, Vector b,
-    Matrix e = {0, 0, {}}, Vector f = {}, std::vector<std::string> labels = {}) {
+                    Matrix e = {0, 0, {}}, Vector f = {}, std::vector<std::string> labels = {}) {
     return take(sets::make_h({std::move(id), dimension, std::move(labels)},
-        {take(numeric::snapshot(a)), take(numeric::snapshot_vector(b)),
-         take(numeric::snapshot(e)), take(numeric::snapshot_vector(f))}));
+                             {take(numeric::snapshot(a)), take(numeric::snapshot_vector(b)),
+                              take(numeric::snapshot(e)), take(numeric::snapshot_vector(f))}));
 }
 
 sets::SetData box4(std::string id = "fuel-like-box") {
-    return h_set(std::move(id), 4,
-        {8, 4, {1,0,0,0, -1,0,0,0, 0,1,0,0, 0,-1,0,0,
-                  0,0,1,0, 0,0,-1,0, 0,0,0,1, 0,0,0,-1}},
-        {2,0,1,1,2,0,1,1}, {0,4,{}}, {},
-        {"oxidizer flow", "oxidizer stock", "fuel flow", "fuel stock"});
+    return h_set(std::move(id), 4, {8, 4, {1, 0, 0, 0, -1, 0, 0,  0, 0, 1, 0, 0, 0, -1, 0, 0,
+                                           0, 0, 1, 0, 0,  0, -1, 0, 0, 0, 0, 1, 0, 0,  0, -1}},
+                 {2, 0, 1, 1, 2, 0, 1, 1}, {0, 4, {}}, {},
+                 {"oxidizer flow", "oxidizer stock", "fuel flow", "fuel stock"});
 }
 
 sets::SetData line4() {
-    return h_set("fuel-like-line", 4,
-        {2, 4, {1,0,0,0, -1,0,0,0}}, {1,1},
-        {3, 4, {-2,1,0,0, -3,0,1,0, -4,0,0,1}}, {0,0,0},
-        {"oxidizer flow", "oxidizer stock", "fuel flow", "fuel stock"});
+    return h_set("fuel-like-line", 4, {2, 4, {1, 0, 0, 0, -1, 0, 0, 0}}, {1, 1},
+                 {3, 4, {-2, 1, 0, 0, -3, 0, 1, 0, -4, 0, 0, 1}}, {0, 0, 0},
+                 {"oxidizer flow", "oxidizer stock", "fuel flow", "fuel stock"});
 }
 
 sets::SetData unit_box3() {
     return h_set("unit-box-three-state", 3,
-        {6, 3, {1,0,0, -1,0,0, 0,1,0, 0,-1,0, 0,0,1, 0,0,-1}},
-        {1,0,1,0,1,0}, {0,3,{}}, {}, {"x0", "x1", "x2"});
+                 {6, 3, {1, 0, 0, -1, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 1, 0, 0, -1}},
+                 {1, 0, 1, 0, 1, 0}, {0, 3, {}}, {}, {"x0", "x1", "x2"});
 }
 
 sets::SetData affine_segment3() {
-    return h_set("affine-segment-three-state", 3,
-        {2, 3, {1,0,0, -1,0,0}}, {1,0},
-        {2, 3, {1,1,0, -2,0,1}}, {1,0}, {"x0", "x1", "x2"});
+    return h_set("affine-segment-three-state", 3, {2, 3, {1, 0, 0, -1, 0, 0}}, {1, 0},
+                 {2, 3, {1, 1, 0, -2, 0, 1}}, {1, 0}, {"x0", "x1", "x2"});
 }
 
 sets::SetData unit_box3_v() {
@@ -71,14 +66,16 @@ sets::SetData unit_box3_v() {
             vertices.values[mask * 3 + coordinate] = (mask & (1U << coordinate)) ? 1.0 : 0.0;
         }
     }
-    return take(sets::make_v({{"unit-box-three-state-v"}, 3, {"x0", "x1", "x2"}},
-        {take(numeric::snapshot(vertices)), take(numeric::snapshot(Matrix{0,3,{}}))}));
+    return take(sets::make_v(
+        {{"unit-box-three-state-v"}, 3, {"x0", "x1", "x2"}},
+        {take(numeric::snapshot(vertices)), take(numeric::snapshot(Matrix{0, 3, {}}))}));
 }
 
 sets::SetData affine_segment3_v() {
-    Matrix vertices{2, 3, {0,1,0, 1,0,2}};
-    return take(sets::make_v({{"affine-segment-three-state-v"}, 3, {"x0", "x1", "x2"}},
-        {take(numeric::snapshot(vertices)), take(numeric::snapshot(Matrix{0,3,{}}))}));
+    Matrix vertices{2, 3, {0, 1, 0, 1, 0, 2}};
+    return take(sets::make_v(
+        {{"affine-segment-three-state-v"}, 3, {"x0", "x1", "x2"}},
+        {take(numeric::snapshot(vertices)), take(numeric::snapshot(Matrix{0, 3, {}}))}));
 }
 
 sets::SetData box4_v() {
@@ -89,9 +86,9 @@ sets::SetData box4_v() {
         vertices.values[mask * 4 + 2] = (mask & 4) ? 2.0 : 0.0;
         vertices.values[mask * 4 + 3] = (mask & 8) ? 1.0 : -1.0;
     }
-    return take(sets::make_v({{"fuel-like-box-v"}, 4,
-        {"oxidizer flow", "oxidizer stock", "fuel flow", "fuel stock"}},
-        {take(numeric::snapshot(vertices)), take(numeric::snapshot(Matrix{0,4,{}}))}));
+    return take(sets::make_v(
+        {{"fuel-like-box-v"}, 4, {"oxidizer flow", "oxidizer stock", "fuel flow", "fuel stock"}},
+        {take(numeric::snapshot(vertices)), take(numeric::snapshot(Matrix{0, 4, {}}))}));
 }
 
 ar::PlotData plot_data() {
@@ -105,45 +102,54 @@ ar::PlotData plot_data() {
     data.control_axis.kind = ar::PlotAxis::Kind::stage;
     data.control_axis.points = {0.0};
     data.control_axis.interval_ends = {1.0};
-    data.states.coordinates = {
-        {"oxidizer flow", "kg/s", {}, {}},
-        {"oxidizer working-stock balance", "kg", {}, {}},
-        {"fuel flow", "kg/s", {}, {}},
-        {"fuel working-stock balance", "kg", {}, {}}};
+    data.states.coordinates = {{"oxidizer flow", "kg/s", {}, {}},
+                               {"oxidizer working-stock balance", "kg", {}, {}},
+                               {"fuel flow", "kg/s", {}, {}},
+                               {"fuel working-stock balance", "kg", {}, {}}};
     data.controls.coordinates.resize(1);
-    ar::PlotEvidence evidence{
-        verification::CheckStatus::numerical_pass,
-        verification::CheckStatus::numerical_pass,
-        verification::CheckStatus::numerical_pass,
-        verification::CheckStatus::unsupported,
-        verification::CheckStatus::unsupported,
-        verification::CheckStatus::unsupported, {}};
-    data.paths.push_back({data.run, 0, data.strategy, "1",
-        {{1.0, 2.0, 3.0, -0.5}, {1.5, 1.0, 2.5, -1.5}},
-        {{0.0}}, 5.0, std::move(evidence)});
+    ar::PlotEvidence evidence{verification::CheckStatus::numerical_pass,
+                              verification::CheckStatus::numerical_pass,
+                              verification::CheckStatus::numerical_pass,
+                              verification::CheckStatus::unsupported,
+                              verification::CheckStatus::unsupported,
+                              verification::CheckStatus::unsupported,
+                              {}};
+    data.paths.push_back({data.run,
+                          0,
+                          data.strategy,
+                          "1",
+                          {{1.0, 2.0, 3.0, -0.5}, {1.5, 1.0, 2.5, -1.5}},
+                          {{0.0}},
+                          5.0,
+                          std::move(evidence)});
     return data;
 }
 
 ar::PlotData three_coordinate_plot_data() {
     auto data = plot_data();
     data.problem = {"generic-three-coordinate-fixture"};
-    data.states.coordinates = {{"x0", "unit", {}, {}}, {"x1", "unit", {}, {}},
-        {"x2", "unit", {}, {}}};
+    data.states.coordinates = {
+        {"x0", "unit", {}, {}}, {"x1", "unit", {}, {}}, {"x2", "unit", {}, {}}};
     return data;
 }
 
 std::shared_ptr<const OptimalFamily> verified_one_state_family() {
-    auto control_set = h_set("fuel-family-control", 1,
-        {2, 1, {1, -1}}, {1, 0}, {0, 1, {}}, {}, {"u"}).as_handle();
-    Dynamics dynamics{{1,1,0}, TimeDomain::discrete,
-        LinearStage{{1,1,{1}}, {1,1,{1}}, {1,0,{}}, {0}}};
+    auto control_set =
+        h_set("fuel-family-control", 1, {2, 1, {1, -1}}, {1, 0}, {0, 1, {}}, {}, {"u"}).as_handle();
+    Dynamics dynamics{
+        {1, 1, 0}, TimeDomain::discrete, LinearStage{{1, 1, {1}}, {1, 1, {1}}, {1, 0, {}}, {0}}};
     Problem input{{"fuel-family-fixture"},
-        std::make_shared<const SystemModel>(SystemModel{std::move(dynamics), {}}),
-        {0,1,2}, KnownInitial{{0}}, ContinuousDomain{{control_set, control_set}},
-        {UniversalSet{1}, UniversalSet{1}, UniversalSet{1}}, {}, {},
-        InformationPattern::nominal_open_loop, QuadraticTerminal{{1,1,{2}}, {-2}, 1}};
-    auto problem = take(problem::resolve(input,
-        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}));
+                  std::make_shared<const SystemModel>(SystemModel{std::move(dynamics), {}}),
+                  {0, 1, 2},
+                  KnownInitial{{0}},
+                  ContinuousDomain{{control_set, control_set}},
+                  {UniversalSet{1}, UniversalSet{1}, UniversalSet{1}},
+                  {},
+                  {},
+                  InformationPattern::nominal_open_loop,
+                  QuadraticTerminal{{1, 1, {2}}, {-2}, 1}};
+    auto problem = take(
+        problem::resolve(input, {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}));
 
     FamilyRequest family;
     family.profile = synthesis::strategy_ts01::profile_id;
@@ -153,7 +159,8 @@ std::shared_ptr<const OptimalFamily> verified_one_state_family() {
     StrategyConfiguration configuration;
     configuration.strategy = {synthesis::strategy_ts01::strategy_id};
     configuration.representation = family.representation;
-    registry::StrategyRequest request{std::move(problem), std::move(configuration), std::move(family), {}, {}};
+    registry::StrategyRequest request{
+        std::move(problem), std::move(configuration), std::move(family), {}, {}};
     registry::StrategyRegistry strategies;
     REQUIRE_FALSE(strategies.add(synthesis::strategy_ts01::make_registration()).has_value());
     registry::Requirements requirements;
@@ -169,13 +176,15 @@ std::shared_ptr<const OptimalFamily> verified_one_state_family() {
     return std::make_shared<const OptimalFamily>(std::move(*result.family));
 }
 
-ar::PlotProjectionSource const* source_ptr(const std::shared_ptr<const ar::PlotProjectionSource>& source) {
+ar::PlotProjectionSource const *
+source_ptr(const std::shared_ptr<const ar::PlotProjectionSource> &source) {
     return source.get();
 }
 
-std::shared_ptr<const ar::PlotProjectionSource> set_source(const sets::SetData& data) {
-    ar::StateRelationCoordinates map{{{0,1,2,3}, {0,1,2,3}}};
-    auto result = ar::make_reachable_set_source(data.as_handle(), {"fuel-like-analytic-fixture"}, std::move(map));
+std::shared_ptr<const ar::PlotProjectionSource> set_source(const sets::SetData &data) {
+    ar::StateRelationCoordinates map{{{0, 1, 2, 3}, {0, 1, 2, 3}}};
+    auto result = ar::make_reachable_set_source(data.as_handle(), {"fuel-like-analytic-fixture"},
+                                                std::move(map));
     REQUIRE(std::holds_alternative<std::shared_ptr<const ar::PlotProjectionSource>>(result));
     return std::get<std::shared_ptr<const ar::PlotProjectionSource>>(std::move(result));
 }
@@ -199,50 +208,63 @@ reg::PreparedProvider<reg::GeometryPort> support_provider() {
     return take(reg::prepare_provider(reg::select_provider(registry, method)));
 }
 
-bool contains_h2(const SetHandle& handle, const std::array<double, 2>& point) {
+bool contains_h2(const SetHandle &handle, const std::array<double, 2> &point) {
     const auto imported = sets::from_handle(handle);
-    if (!std::holds_alternative<sets::SetData>(imported)) return false;
-    const auto& data = std::get<sets::SetData>(imported);
+    if (!std::holds_alternative<sets::SetData>(imported))
+        return false;
+    const auto &data = std::get<sets::SetData>(imported);
     const auto representation = data.representation();
-    const auto* h = std::get_if<sets::HRepresentation>(&representation);
-    if (!h) return false;
+    const auto *h = std::get_if<sets::HRepresentation>(&representation);
+    if (!h)
+        return false;
     for (std::size_t row = 0; row < h->inequalities.rows(); ++row) {
         double value = 0;
-        for (std::size_t col = 0; col < 2; ++col) value += h->inequalities(row, col) * point[col];
-        if (value > h->upper_bounds[row]) return false;
+        for (std::size_t col = 0; col < 2; ++col)
+            value += h->inequalities(row, col) * point[col];
+        if (value > h->upper_bounds[row])
+            return false;
     }
     for (std::size_t row = 0; row < h->equalities.rows(); ++row) {
         double value = 0;
-        for (std::size_t col = 0; col < 2; ++col) value += h->equalities(row, col) * point[col];
-        if (value != h->equality_values[row]) return false;
+        for (std::size_t col = 0; col < 2; ++col)
+            value += h->equalities(row, col) * point[col];
+        if (value != h->equality_values[row])
+            return false;
     }
     return true;
 }
 
-bool contains_h2_near(const SetHandle& handle, const std::array<double, 2>& point,
-    double tolerance = 1e-9) {
+bool contains_h2_near(const SetHandle &handle, const std::array<double, 2> &point,
+                      double tolerance = 1e-9) {
     const auto imported = sets::from_handle(handle);
-    if (!std::holds_alternative<sets::SetData>(imported)) return false;
-    const auto& data = std::get<sets::SetData>(imported);
+    if (!std::holds_alternative<sets::SetData>(imported))
+        return false;
+    const auto &data = std::get<sets::SetData>(imported);
     const auto representation = data.representation();
-    const auto* h = std::get_if<sets::HRepresentation>(&representation);
-    if (!h) return false;
+    const auto *h = std::get_if<sets::HRepresentation>(&representation);
+    if (!h)
+        return false;
     for (std::size_t row = 0; row < h->inequalities.rows(); ++row) {
         double value = 0;
-        for (std::size_t col = 0; col < 2; ++col) value += h->inequalities(row, col) * point[col];
-        if (value > h->upper_bounds[row] + tolerance) return false;
+        for (std::size_t col = 0; col < 2; ++col)
+            value += h->inequalities(row, col) * point[col];
+        if (value > h->upper_bounds[row] + tolerance)
+            return false;
     }
     for (std::size_t row = 0; row < h->equalities.rows(); ++row) {
         double value = 0;
-        for (std::size_t col = 0; col < 2; ++col) value += h->equalities(row, col) * point[col];
-        if (std::abs(value - h->equality_values[row]) > tolerance) return false;
+        for (std::size_t col = 0; col < 2; ++col)
+            value += h->equalities(row, col) * point[col];
+        if (std::abs(value - h->equality_values[row]) > tolerance)
+            return false;
     }
     return true;
 }
 
 json projection_oracles() {
     std::ifstream input(CSL_FUEL_PROJECTION_ORACLES);
-    if (!input) throw std::runtime_error("could not open fuel projection oracle fixture");
+    if (!input)
+        throw std::runtime_error("could not open fuel projection oracle fixture");
     return json::parse(input);
 }
 
@@ -251,25 +273,29 @@ struct Spy {
     int applied{};
 };
 class SpyWorkspace final : public SetOperatorWorkspace {
-    Spy& spy_;
-public:
-    explicit SpyWorkspace(Spy& spy) : spy_(spy) {}
-    OperationOutcome apply(const OperationRequest&, const ExecutionContext&) override {
+    Spy &spy_;
+
+  public:
+    explicit SpyWorkspace(Spy &spy) : spy_(spy) {}
+    OperationOutcome apply(const OperationRequest &, const ExecutionContext &) override {
         ++spy_.applied;
-        return Unsupported{{{DiagnosticCode::unsupported, "spy", "not used by trajectory request"}}};
+        return Unsupported{
+            {{DiagnosticCode::unsupported, "spy", "not used by trajectory request"}}};
     }
 };
-reg::PreparedProvider<reg::GeometryPort> spy_provider(Spy& spy) {
+reg::PreparedProvider<reg::GeometryPort> spy_provider(Spy &spy) {
     reg::Registry<reg::GeometryPort> registry;
     reg::Registration<reg::GeometryPort> entry{
         {{"test.geometry.spy"}, "1"},
-        [](const OperationRequest& request, const reg::Requirements&) -> reg::Capability {
-            return reg::Offer{{{"test.projection"}, request.assurance, request.required_relation, {}, {}}};
+        [](const OperationRequest &request, const reg::Requirements &) -> reg::Capability {
+            return reg::Offer{
+                {{"test.projection"}, request.assurance, request.required_relation, {}, {}}};
         },
-        [&spy](const OperationRequest&) {
+        [&spy](const OperationRequest &) {
             ++spy.created;
             return std::make_unique<SpyWorkspace>(spy);
-        }, {}};
+        },
+        {}};
     const auto method = reg::Method{entry.identity.id, entry.identity.version};
     REQUIRE_FALSE(registry.add(std::move(entry)).has_value());
     return take(reg::prepare_provider(reg::select_provider(registry, method)));
@@ -280,16 +306,15 @@ TEST_CASE("ordinary selected-witness pair plots never call the geometry provider
     auto data = plot_data();
     Spy spy;
     auto provider = spy_provider(spy);
-    const auto outcome = ar::make_plot(data,
-        ar::PlotRequest::trajectory_pair({1,3}), provider);
+    const auto outcome = ar::make_plot(data, ar::PlotRequest::trajectory_pair({1, 3}), provider);
     REQUIRE(std::holds_alternative<ar::PlotTrajectoryPair>(outcome));
-    const auto& plotted = std::get<ar::PlotTrajectoryPair>(outcome);
+    const auto &plotted = std::get<ar::PlotTrajectoryPair>(outcome);
     CHECK(plotted.kind == ar::PlotSampleKind::selected_witnesses);
     CHECK(plotted.kind != ar::PlotSampleKind::support_samples);
     REQUIRE(plotted.paths.size() == 1);
-    CHECK(plotted.paths[0].points == std::vector<std::array<double,2>>{{2.0,-0.5},{1.0,-1.5}});
+    CHECK(plotted.paths[0].points == std::vector<std::array<double, 2>>{{2.0, -0.5}, {1.0, -1.5}});
     REQUIRE(plotted.terminal_samples.size() == 1);
-    CHECK(plotted.terminal_samples[0].point == std::array<double,2>{1.0,-1.5});
+    CHECK(plotted.terminal_samples[0].point == std::array<double, 2>{1.0, -1.5});
     CHECK(spy.created == 0);
     CHECK(spy.applied == 0);
 }
@@ -300,16 +325,19 @@ TEST_CASE("every ordered pair of distinct 4D fuel coordinates projects to its an
     auto provider = h_projection_provider();
     for (std::size_t first = 0; first < 4; ++first) {
         for (std::size_t second = 0; second < 4; ++second) {
-            if (first == second) continue;
-            const auto request = ar::PlotRequest::set_projection(source, StageIndex{1},
-                {first, second}, SetRelation::equivalent, Assurance::numerical,
+            if (first == second)
+                continue;
+            const auto request = ar::PlotRequest::set_projection(
+                source, StageIndex{1}, {first, second}, SetRelation::equivalent,
+                Assurance::numerical,
                 {"rectangle-" + std::to_string(first) + "-" + std::to_string(second)},
                 {"rectangle-projection"});
             const auto outcome = ar::make_plot(data, request, provider);
             REQUIRE(std::holds_alternative<ar::PlotSetProjection>(outcome));
-            const auto& projection = std::get<ar::PlotSetProjection>(outcome);
+            const auto &projection = std::get<ar::PlotSetProjection>(outcome);
             CHECK(projection.reference.identity.problem == data.problem);
-            CHECK(projection.reference.identity.request == std::get<ar::SetProjectionRequest>(request.source).request);
+            CHECK(projection.reference.identity.request ==
+                  std::get<ar::SetProjectionRequest>(request.source).request);
             CHECK(projection.reference.inputs == std::vector<SetId>{box4().metadata()->id});
             CHECK(projection.relation == SetRelation::equivalent);
             CHECK(std::holds_alternative<Unestablished>(projection.support));
@@ -318,16 +346,19 @@ TEST_CASE("every ordered pair of distinct 4D fuel coordinates projects to its an
             CHECK(projection.coordinates[0].unit == data.states.coordinates[first].unit);
             CHECK(projection.coordinates[1].unit == data.states.coordinates[second].unit);
             CHECK(projection.cost.geometry_operation_elapsed.count() >= 0);
-            const auto lower = [](std::size_t coordinate) { return coordinate % 2 == 0 ? 0.0 : -1.0; };
-            const auto upper = [](std::size_t coordinate) { return coordinate % 2 == 0 ? 2.0 : 1.0; };
-            CHECK(contains_h2(projection.projected_relation,
-                {lower(first), lower(second)}));
-            CHECK(contains_h2(projection.projected_relation,
-                {(lower(first) + upper(first)) / 2, (lower(second) + upper(second)) / 2}));
-            CHECK(contains_h2(projection.projected_relation,
-                {upper(first), upper(second)}));
+            const auto lower = [](std::size_t coordinate) {
+                return coordinate % 2 == 0 ? 0.0 : -1.0;
+            };
+            const auto upper = [](std::size_t coordinate) {
+                return coordinate % 2 == 0 ? 2.0 : 1.0;
+            };
+            CHECK(contains_h2(projection.projected_relation, {lower(first), lower(second)}));
+            CHECK(
+                contains_h2(projection.projected_relation, {(lower(first) + upper(first)) / 2,
+                                                            (lower(second) + upper(second)) / 2}));
+            CHECK(contains_h2(projection.projected_relation, {upper(first), upper(second)}));
             CHECK_FALSE(contains_h2(projection.projected_relation,
-                {upper(first) + 0.01, (lower(second) + upper(second)) / 2}));
+                                    {upper(first) + 0.01, (lower(second) + upper(second)) / 2}));
         }
     }
 }
@@ -336,75 +367,77 @@ TEST_CASE("a lower-dimensional 4D relation projects to the hand-derived line") {
     auto data = plot_data();
     auto source = set_source(line4());
     auto provider = h_projection_provider();
-    const auto request = ar::PlotRequest::set_projection(source, StageIndex{1}, {1,3},
-        SetRelation::equivalent, Assurance::numerical, {"line-projection"}, {"line-pair"});
+    const auto request =
+        ar::PlotRequest::set_projection(source, StageIndex{1}, {1, 3}, SetRelation::equivalent,
+                                        Assurance::numerical, {"line-projection"}, {"line-pair"});
     const auto outcome = ar::make_plot(data, request, provider);
     REQUIRE(std::holds_alternative<ar::PlotSetProjection>(outcome));
-    const auto& projection = std::get<ar::PlotSetProjection>(outcome);
-    CHECK(contains_h2(projection.projected_relation, {-2.0,-4.0}));
-    CHECK(contains_h2(projection.projected_relation, {0.0,0.0}));
-    CHECK(contains_h2(projection.projected_relation, {2.0,4.0}));
-    CHECK_FALSE(contains_h2(projection.projected_relation, {0.0,1.0}));
-    CHECK_FALSE(contains_h2(projection.projected_relation, {3.0,6.0}));
+    const auto &projection = std::get<ar::PlotSetProjection>(outcome);
+    CHECK(contains_h2(projection.projected_relation, {-2.0, -4.0}));
+    CHECK(contains_h2(projection.projected_relation, {0.0, 0.0}));
+    CHECK(contains_h2(projection.projected_relation, {2.0, 4.0}));
+    CHECK_FALSE(contains_h2(projection.projected_relation, {0.0, 1.0}));
+    CHECK_FALSE(contains_h2(projection.projected_relation, {3.0, 6.0}));
 }
 
-TEST_CASE("a 3D unit box projected through a 2x3 coordinate selector has analytic rectangle extrema") {
+TEST_CASE(
+    "a 3D unit box projected through a 2x3 coordinate selector has analytic rectangle extrema") {
     const auto oracle = projection_oracles()["cases"][0];
     auto data = three_coordinate_plot_data();
     auto relation = unit_box3();
-    auto source_result = ar::make_reachable_set_source(relation.as_handle(), data.problem,
-        {{{0,1,2}, {0,1,2}}});
+    auto source_result =
+        ar::make_reachable_set_source(relation.as_handle(), data.problem, {{{0, 1, 2}, {0, 1, 2}}});
     REQUIRE(std::holds_alternative<std::shared_ptr<const ar::PlotProjectionSource>>(source_result));
     auto provider = h_projection_provider();
     const auto request = ar::PlotRequest::set_projection(
         std::get<std::shared_ptr<const ar::PlotProjectionSource>>(std::move(source_result)),
-        StageIndex{1}, {2,0}, SetRelation::equivalent, Assurance::numerical,
-        {"unit-box-x2-x0"}, {"unit-box-projection"});
+        StageIndex{1}, {2, 0}, SetRelation::equivalent, Assurance::numerical, {"unit-box-x2-x0"},
+        {"unit-box-projection"});
     const auto outcome = ar::make_plot(data, request, provider);
     REQUIRE(std::holds_alternative<ar::PlotSetProjection>(outcome));
-    const auto& projection = std::get<ar::PlotSetProjection>(outcome);
+    const auto &projection = std::get<ar::PlotSetProjection>(outcome);
     const auto first = oracle["projection_coordinates"][0].get<std::size_t>();
     const auto second = oracle["projection_coordinates"][1].get<std::size_t>();
     CHECK(projection.coordinates[0].label == data.states.coordinates[first].label);
     CHECK(projection.coordinates[1].label == data.states.coordinates[second].label);
     CHECK(projection.reference.identity.problem == data.problem);
-    for (const auto& vertex : oracle["projected_vertices"]) {
+    for (const auto &vertex : oracle["projected_vertices"]) {
         CHECK(contains_h2_near(projection.projected_relation,
-            {vertex[0].get<double>(), vertex[1].get<double>()}));
+                               {vertex[0].get<double>(), vertex[1].get<double>()}));
     }
-    CHECK_FALSE(contains_h2_near(projection.projected_relation, {-1e-4,0.5}));
-    CHECK_FALSE(contains_h2_near(projection.projected_relation, {0.5,1.0001}));
+    CHECK_FALSE(contains_h2_near(projection.projected_relation, {-1e-4, 0.5}));
+    CHECK_FALSE(contains_h2_near(projection.projected_relation, {0.5, 1.0001}));
 }
 
 TEST_CASE("a 3D affine segment projects to the analytic (s, 2s) segment") {
     const auto oracle = projection_oracles()["cases"][1];
     auto data = three_coordinate_plot_data();
     auto relation = affine_segment3();
-    auto source_result = ar::make_reachable_set_source(relation.as_handle(), data.problem,
-        {{{0,1,2}, {0,1,2}}});
+    auto source_result =
+        ar::make_reachable_set_source(relation.as_handle(), data.problem, {{{0, 1, 2}, {0, 1, 2}}});
     REQUIRE(std::holds_alternative<std::shared_ptr<const ar::PlotProjectionSource>>(source_result));
     auto provider = h_projection_provider();
     const auto request = ar::PlotRequest::set_projection(
         std::get<std::shared_ptr<const ar::PlotProjectionSource>>(std::move(source_result)),
-        StageIndex{1}, {0,2}, SetRelation::equivalent, Assurance::numerical,
+        StageIndex{1}, {0, 2}, SetRelation::equivalent, Assurance::numerical,
         {"affine-segment-x0-x2"}, {"affine-segment-projection"});
     const auto outcome = ar::make_plot(data, request, provider);
     REQUIRE(std::holds_alternative<ar::PlotSetProjection>(outcome));
-    const auto& projection = std::get<ar::PlotSetProjection>(outcome);
+    const auto &projection = std::get<ar::PlotSetProjection>(outcome);
     const auto first = oracle["projection_coordinates"][0].get<std::size_t>();
     const auto second = oracle["projection_coordinates"][1].get<std::size_t>();
     CHECK(projection.coordinates[0].label == data.states.coordinates[first].label);
     CHECK(projection.coordinates[1].label == data.states.coordinates[second].label);
-    for (const auto& endpoint : oracle["projected_endpoints"]) {
+    for (const auto &endpoint : oracle["projected_endpoints"]) {
         CHECK(contains_h2_near(projection.projected_relation,
-            {endpoint[0].get<double>(), endpoint[1].get<double>()}));
+                               {endpoint[0].get<double>(), endpoint[1].get<double>()}));
     }
-    const auto& witness = oracle["interior_witness"];
+    const auto &witness = oracle["interior_witness"];
     CHECK(contains_h2_near(projection.projected_relation,
-        {witness[0].get<double>(), witness[1].get<double>()}));
-    CHECK_FALSE(contains_h2_near(projection.projected_relation, {0.5,1.001}));
-    CHECK_FALSE(contains_h2_near(projection.projected_relation, {-1e-4,-2e-4}));
-    CHECK_FALSE(contains_h2_near(projection.projected_relation, {1.0001,2.0002}));
+                           {witness[0].get<double>(), witness[1].get<double>()}));
+    CHECK_FALSE(contains_h2_near(projection.projected_relation, {0.5, 1.001}));
+    CHECK_FALSE(contains_h2_near(projection.projected_relation, {-1e-4, -2e-4}));
+    CHECK_FALSE(contains_h2_near(projection.projected_relation, {1.0001, 2.0002}));
 }
 
 TEST_CASE("analytic 3D projections match fixture support extrema on both ordered axes") {
@@ -412,22 +445,23 @@ TEST_CASE("analytic 3D projections match fixture support extrema on both ordered
     auto data = three_coordinate_plot_data();
     auto provider = support_provider();
     const std::vector<ar::SupportSampleDirection> directions{
-        {{{1,0}}, {"axis-0-positive"}, {"axis-0-positive-support"}},
-        {{{-1,0}}, {"axis-0-negative"}, {"axis-0-negative-support"}},
-        {{{0,1}}, {"axis-1-positive"}, {"axis-1-positive-support"}},
-        {{{0,-1}}, {"axis-1-negative"}, {"axis-1-negative-support"}}};
+        {{{1, 0}}, {"axis-0-positive"}, {"axis-0-positive-support"}},
+        {{{-1, 0}}, {"axis-0-negative"}, {"axis-0-negative-support"}},
+        {{{0, 1}}, {"axis-1-positive"}, {"axis-1-positive-support"}},
+        {{{0, -1}}, {"axis-1-negative"}, {"axis-1-negative-support"}}};
 
-    const auto check_extrema = [&](const sets::SetData& relation, const json& oracle,
+    const auto check_extrema = [&](const sets::SetData &relation, const json &oracle,
                                    ar::CoordinatePair coordinates) {
         auto source_result = ar::make_reachable_set_source(relation.as_handle(), data.problem,
-            {{{0,1,2}, {0,1,2}}});
-        REQUIRE(std::holds_alternative<std::shared_ptr<const ar::PlotProjectionSource>>(source_result));
+                                                           {{{0, 1, 2}, {0, 1, 2}}});
+        REQUIRE(
+            std::holds_alternative<std::shared_ptr<const ar::PlotProjectionSource>>(source_result));
         const auto request = ar::PlotRequest::support_samples(
             std::get<std::shared_ptr<const ar::PlotProjectionSource>>(std::move(source_result)),
             StageIndex{1}, coordinates, directions, Assurance::numerical);
         const auto outcome = ar::make_plot(data, request, provider);
         REQUIRE(std::holds_alternative<ar::PlotSupportSamples>(outcome));
-        const auto& samples = std::get<ar::PlotSupportSamples>(outcome).samples;
+        const auto &samples = std::get<ar::PlotSupportSamples>(outcome).samples;
         REQUIRE(samples.size() == 4);
         for (std::size_t axis = 0; axis < 2; ++axis) {
             const auto key = "coordinate_" + std::to_string(axis);
@@ -440,28 +474,30 @@ TEST_CASE("analytic 3D projections match fixture support extrema on both ordered
         }
     };
 
-    check_extrema(unit_box3_v(), oracles[0], {2,0});
-    check_extrema(affine_segment3_v(), oracles[1], {0,2});
+    check_extrema(unit_box3_v(), oracles[0], {2, 0});
+    check_extrema(affine_segment3_v(), oracles[1], {0, 2});
 }
 
 TEST_CASE("support queries return explicitly tagged finite 2D support samples") {
     auto data = plot_data();
     const auto relation = box4_v();
-    auto map = ar::StateRelationCoordinates{{{0,1,2,3},{0,1,2,3}}};
-    auto source_result = ar::make_reachable_set_source(relation.as_handle(), data.problem, std::move(map));
+    auto map = ar::StateRelationCoordinates{{{0, 1, 2, 3}, {0, 1, 2, 3}}};
+    auto source_result =
+        ar::make_reachable_set_source(relation.as_handle(), data.problem, std::move(map));
     REQUIRE(std::holds_alternative<std::shared_ptr<const ar::PlotProjectionSource>>(source_result));
-    auto source = std::get<std::shared_ptr<const ar::PlotProjectionSource>>(std::move(source_result));
+    auto source =
+        std::get<std::shared_ptr<const ar::PlotProjectionSource>>(std::move(source_result));
     auto provider = support_provider();
     std::vector<ar::SupportSampleDirection> directions{
-        {{{1.0,0.0}}, {"support-east"}, {"support-east-value"}},
-        {{{-1.0,0.0}}, {"support-west"}, {"support-west-value"}},
-        {{{0.0,1.0}}, {"support-north"}, {"support-north-value"}},
-        {{{0.0,-1.0}}, {"support-south"}, {"support-south-value"}}};
-    const auto request = ar::PlotRequest::support_samples(source, StageIndex{1}, {2,3},
-        std::move(directions), Assurance::numerical);
+        {{{1.0, 0.0}}, {"support-east"}, {"support-east-value"}},
+        {{{-1.0, 0.0}}, {"support-west"}, {"support-west-value"}},
+        {{{0.0, 1.0}}, {"support-north"}, {"support-north-value"}},
+        {{{0.0, -1.0}}, {"support-south"}, {"support-south-value"}}};
+    const auto request = ar::PlotRequest::support_samples(
+        source, StageIndex{1}, {2, 3}, std::move(directions), Assurance::numerical);
     const auto outcome = ar::make_plot(data, request, provider);
     REQUIRE(std::holds_alternative<ar::PlotSupportSamples>(outcome));
-    const auto& samples = std::get<ar::PlotSupportSamples>(outcome);
+    const auto &samples = std::get<ar::PlotSupportSamples>(outcome);
     CHECK(samples.kind == ar::PlotSampleKind::support_samples);
     REQUIRE(samples.samples.size() == 4);
     CHECK(std::get<double>(samples.samples[0].value) == 2.0);
@@ -481,8 +517,9 @@ TEST_CASE("support queries return explicitly tagged finite 2D support samples") 
     CHECK(samples.cost.geometry_operation_elapsed.count() >= 0);
 
     auto h_source = set_source(box4());
-    const auto unsupported = ar::PlotRequest::support_samples(h_source, StageIndex{1}, {2,3},
-        {{{{1.0,0.0}}, {"unsupported-h-support"}, {"unsupported-h-support-value"}}},
+    const auto unsupported = ar::PlotRequest::support_samples(
+        h_source, StageIndex{1}, {2, 3},
+        {{{{1.0, 0.0}}, {"unsupported-h-support"}, {"unsupported-h-support-value"}}},
         Assurance::numerical);
     const auto unsupported_outcome = ar::make_plot(data, unsupported, provider);
     REQUIRE(std::holds_alternative<ar::PlotRequestFailure>(unsupported_outcome));
@@ -490,9 +527,11 @@ TEST_CASE("support queries return explicitly tagged finite 2D support samples") 
         std::get<ar::PlotRequestFailure>(unsupported_outcome).cause));
     CHECK_FALSE(std::get<ar::PlotRequestFailure>(unsupported_outcome).cost.has_value());
 
-    const auto duplicate_ids = ar::PlotRequest::support_samples(source, StageIndex{1}, {2,3},
-        {{{{1.0,0.0}}, {"duplicate-sample"}, {"first-output"}},
-         {{{0.0,1.0}}, {"duplicate-sample"}, {"second-output"}}}, Assurance::numerical);
+    const auto duplicate_ids =
+        ar::PlotRequest::support_samples(source, StageIndex{1}, {2, 3},
+                                         {{{{1.0, 0.0}}, {"duplicate-sample"}, {"first-output"}},
+                                          {{{0.0, 1.0}}, {"duplicate-sample"}, {"second-output"}}},
+                                         Assurance::numerical);
     const auto duplicate_outcome = ar::make_plot(data, duplicate_ids, provider);
     REQUIRE(std::holds_alternative<ar::PlotRequestFailure>(duplicate_outcome));
     CHECK(std::holds_alternative<ar::ArtifactError>(
@@ -506,15 +545,18 @@ TEST_CASE("a registry-verified complete optimal family binds its native relation
     ar::StateRelationCoordinates map{{{0}, {2}, {4}}};
     auto source = ar::make_optimal_family_source(*family, std::move(map));
     REQUIRE(std::holds_alternative<std::shared_ptr<const ar::PlotProjectionSource>>(source));
-    const auto& projected_source = *std::get<std::shared_ptr<const ar::PlotProjectionSource>>(source);
+    const auto &projected_source =
+        *std::get<std::shared_ptr<const ar::PlotProjectionSource>>(source);
     CHECK(projected_source.coordinates().by_stage ==
-        std::vector<std::vector<std::size_t>>{{0}, {2}, {4}});
+          std::vector<std::vector<std::size_t>>{{0}, {2}, {4}});
     CHECK(std::get<FamilyIdentity>(projected_source.owner().identity) == family->identity());
     REQUIRE(projected_source.family_evidence().has_value());
     CHECK(projected_source.family_evidence()->family == family->identity());
     CHECK(projected_source.family_evidence()->registry_verified);
-    CHECK(projected_source.relation().id == std::get<CompleteOptimalFamily>(family->outcome()).relation.payload
-        ->h_relation_for_recording()->metadata()->id);
+    CHECK(projected_source.relation().id == std::get<CompleteOptimalFamily>(family->outcome())
+                                                .relation.payload->h_relation_for_recording()
+                                                ->metadata()
+                                                ->id);
 }
 
 TEST_CASE("an unverified family is rejected as a projection source") {
@@ -524,12 +566,14 @@ TEST_CASE("an unverified family is rejected as a projection source") {
     request.objective = id;
     request.target = FamilyTarget::candidate_relaxation;
     request.representation = {"csl.polyhedron.h"};
-    FamilyIdentity identity{id, request, {{1,0,0}, 1}, {"fixture.strategy"}, "1", {}};
+    FamilyIdentity identity{id, request, {{1, 0, 0}, 1}, {"fixture.strategy"}, "1", {}};
     CandidateFamily candidate{{identity.coordinates, request.representation,
-        std::make_shared<const JointRelationPayload>()}, HeuristicRelationEvidence{"fixture"}, Unestablished{}};
+                               std::make_shared<const JointRelationPayload>()},
+                              HeuristicRelationEvidence{"fixture"},
+                              Unestablished{}};
     auto published = FamilyPublisher::publish(identity, OptimalFamilyOutcome{std::move(candidate)});
     REQUIRE(std::holds_alternative<OptimalFamily>(published));
-    auto source = ar::make_optimal_family_source(std::get<OptimalFamily>(published), {{{0},{0}}});
+    auto source = ar::make_optimal_family_source(std::get<OptimalFamily>(published), {{{0}, {0}}});
     REQUIRE(std::holds_alternative<Diagnostics>(source));
     CHECK(std::get<Diagnostics>(source).front().code == DiagnosticCode::unsupported);
 }
@@ -537,48 +581,64 @@ TEST_CASE("an unverified family is rejected as a projection source") {
 TEST_CASE("empty and unbounded 4D sets retain their projected set semantics") {
     auto data = plot_data();
     auto provider = h_projection_provider();
-    const auto map = ar::StateRelationCoordinates{{{0,1,2,3},{0,1,2,3}}};
-    const auto empty = take(sets::make_empty({{"empty-four-state"},4,{}}));
+    const auto map = ar::StateRelationCoordinates{{{0, 1, 2, 3}, {0, 1, 2, 3}}};
+    const auto empty = take(sets::make_empty({{"empty-four-state"}, 4, {}}));
     auto empty_source_result = ar::make_reachable_set_source(empty.as_handle(), data.problem, map);
-    REQUIRE(std::holds_alternative<std::shared_ptr<const ar::PlotProjectionSource>>(empty_source_result));
-    auto empty_source = std::get<std::shared_ptr<const ar::PlotProjectionSource>>(std::move(empty_source_result));
-    const auto empty_request = ar::PlotRequest::set_projection(empty_source, StageIndex{1}, {0,3},
-        SetRelation::equivalent, Assurance::numerical, {"empty-projection"}, {"empty-projection-output"});
+    REQUIRE(std::holds_alternative<std::shared_ptr<const ar::PlotProjectionSource>>(
+        empty_source_result));
+    auto empty_source =
+        std::get<std::shared_ptr<const ar::PlotProjectionSource>>(std::move(empty_source_result));
+    const auto empty_request = ar::PlotRequest::set_projection(
+        empty_source, StageIndex{1}, {0, 3}, SetRelation::equivalent, Assurance::numerical,
+        {"empty-projection"}, {"empty-projection-output"});
     const auto empty_outcome = ar::make_plot(data, empty_request, provider);
     REQUIRE(std::holds_alternative<ar::PlotSetProjection>(empty_outcome));
-    CHECK_FALSE(contains_h2(std::get<ar::PlotSetProjection>(empty_outcome).projected_relation, {0.0,0.0}));
+    CHECK_FALSE(
+        contains_h2(std::get<ar::PlotSetProjection>(empty_outcome).projected_relation, {0.0, 0.0}));
 
-    const auto universal = take(sets::make_universal({{"universal-four-state"},4,{}}));
-    auto universal_source_result = ar::make_reachable_set_source(universal.as_handle(), data.problem, map);
-    REQUIRE(std::holds_alternative<std::shared_ptr<const ar::PlotProjectionSource>>(universal_source_result));
-    auto universal_source = std::get<std::shared_ptr<const ar::PlotProjectionSource>>(std::move(universal_source_result));
-    const auto universal_request = ar::PlotRequest::set_projection(universal_source, StageIndex{1}, {0,3},
-        SetRelation::equivalent, Assurance::numerical, {"universal-projection"}, {"universal-projection-output"});
+    const auto universal = take(sets::make_universal({{"universal-four-state"}, 4, {}}));
+    auto universal_source_result =
+        ar::make_reachable_set_source(universal.as_handle(), data.problem, map);
+    REQUIRE(std::holds_alternative<std::shared_ptr<const ar::PlotProjectionSource>>(
+        universal_source_result));
+    auto universal_source = std::get<std::shared_ptr<const ar::PlotProjectionSource>>(
+        std::move(universal_source_result));
+    const auto universal_request = ar::PlotRequest::set_projection(
+        universal_source, StageIndex{1}, {0, 3}, SetRelation::equivalent, Assurance::numerical,
+        {"universal-projection"}, {"universal-projection-output"});
     const auto universal_outcome = ar::make_plot(data, universal_request, provider);
     REQUIRE(std::holds_alternative<ar::PlotSetProjection>(universal_outcome));
-    CHECK(contains_h2(std::get<ar::PlotSetProjection>(universal_outcome).projected_relation, {-100.0,75.0}));
+    CHECK(contains_h2(std::get<ar::PlotSetProjection>(universal_outcome).projected_relation,
+                      {-100.0, 75.0}));
 }
 
-TEST_CASE("invalid coordinate pairs and unsupported exact evidence fail before geometry execution") {
+TEST_CASE(
+    "invalid coordinate pairs and unsupported exact evidence fail before geometry execution") {
     auto data = plot_data();
     auto source = set_source(box4());
     auto provider = h_projection_provider();
-    const auto duplicate = ar::PlotRequest::set_projection(source, StageIndex{1}, {2,2},
-        SetRelation::equivalent, Assurance::numerical, {"duplicate-pair"}, {"duplicate-output"});
+    const auto duplicate = ar::PlotRequest::set_projection(
+        source, StageIndex{1}, {2, 2}, SetRelation::equivalent, Assurance::numerical,
+        {"duplicate-pair"}, {"duplicate-output"});
     const auto duplicate_outcome = ar::make_plot(data, duplicate, provider);
     REQUIRE(std::holds_alternative<ar::PlotRequestFailure>(duplicate_outcome));
-    CHECK(std::holds_alternative<ar::ArtifactError>(std::get<ar::PlotRequestFailure>(duplicate_outcome).cause));
+    CHECK(std::holds_alternative<ar::ArtifactError>(
+        std::get<ar::PlotRequestFailure>(duplicate_outcome).cause));
 
-    const auto out_of_range = ar::PlotRequest::set_projection(source, StageIndex{1}, {0,4},
-        SetRelation::equivalent, Assurance::numerical, {"out-of-range"}, {"out-of-range-output"});
+    const auto out_of_range = ar::PlotRequest::set_projection(
+        source, StageIndex{1}, {0, 4}, SetRelation::equivalent, Assurance::numerical,
+        {"out-of-range"}, {"out-of-range-output"});
     const auto out_of_range_outcome = ar::make_plot(data, out_of_range, provider);
     REQUIRE(std::holds_alternative<ar::PlotRequestFailure>(out_of_range_outcome));
-    CHECK(std::holds_alternative<ar::ArtifactError>(std::get<ar::PlotRequestFailure>(out_of_range_outcome).cause));
+    CHECK(std::holds_alternative<ar::ArtifactError>(
+        std::get<ar::PlotRequestFailure>(out_of_range_outcome).cause));
 
-    const auto exact = ar::PlotRequest::set_projection(source, StageIndex{1}, {0,3},
-        SetRelation::equivalent, Assurance::validated, {"validated-exact"}, {"validated-exact-output"});
+    const auto exact = ar::PlotRequest::set_projection(
+        source, StageIndex{1}, {0, 3}, SetRelation::equivalent, Assurance::validated,
+        {"validated-exact"}, {"validated-exact-output"});
     const auto exact_outcome = ar::make_plot(data, exact, provider);
     REQUIRE(std::holds_alternative<ar::PlotRequestFailure>(exact_outcome));
-    CHECK(std::holds_alternative<reg::Rejection>(std::get<ar::PlotRequestFailure>(exact_outcome).cause));
+    CHECK(std::holds_alternative<reg::Rejection>(
+        std::get<ar::PlotRequestFailure>(exact_outcome).cause));
     CHECK_FALSE(std::get<ar::PlotRequestFailure>(exact_outcome).cost.has_value());
 }

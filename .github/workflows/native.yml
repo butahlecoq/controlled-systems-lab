@@ -126,7 +126,7 @@ jobs:
           configuration: Debug
           generator: Ninja
           options: >-
-            -DCSL_DEPENDENCY_PROBES=OFF
+            -DCSL_DEPENDENCY_PROBES=OFF -DCSL_BUILD_PARALLELISM=2
             -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer -g1"
             -DCMAKE_CXX_FLAGS_DEBUG="-O0 -g1"
             -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined"
@@ -134,7 +134,7 @@ jobs:
       - name: Configure instrumented public modules and consumers
         run: >-
           cmake -S . -B tmp/sanitizers -G Ninja -DCMAKE_BUILD_TYPE=Debug
-          -DCSL_DEPENDENCY_PROBES=OFF
+          -DCSL_DEPENDENCY_PROBES=OFF -DCSL_BUILD_PARALLELISM=2
           -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer -g1"
           -DCMAKE_CXX_FLAGS_DEBUG="-O0 -g1"
           -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined"

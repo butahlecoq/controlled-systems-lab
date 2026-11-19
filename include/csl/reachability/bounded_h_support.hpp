@@ -29,9 +29,9 @@ struct SupportUpperBound {
 // Any nonnegative inequality multipliers and unrestricted equality multipliers
 // provide a bound after the dual residual is maximized over the carrier.
 // Arithmetic is rounded outward; no optimality or nonemptiness is inferred.
-std::variant<SupportUpperBound, Diagnostics> residual_corrected_support(
-    const BoundedHSupportInput&, const Vector& inequality_multipliers,
-    const Vector& equality_multipliers);
+std::variant<SupportUpperBound, Diagnostics>
+residual_corrected_support(const BoundedHSupportInput &, const Vector &inequality_multipliers,
+                           const Vector &equality_multipliers);
 
 struct BoundedHSupportResult {
     SupportUpperBound bound;
@@ -46,9 +46,9 @@ using BoundedHSupportOutcome = std::variant<BoundedHSupportResult, BoundedHSuppo
 // Solves a dual candidate as a separate registered LP, then independently
 // corrects its residual over the explicit carrier. LP records identify that
 // actual solve; the backend is not assumed to return dual multipliers.
-BoundedHSupportOutcome bounded_h_support(const BoundedHSupportInput&,
-    ProgramIdentity, const registry::PreparedProvider<registry::LPPort>&,
-    const ExecutionContext&);
+BoundedHSupportOutcome bounded_h_support(const BoundedHSupportInput &, ProgramIdentity,
+                                         const registry::PreparedProvider<registry::LPPort> &,
+                                         const ExecutionContext &);
 
 struct SupportBoundCertificate {
     std::optional<SetId> input_set;
@@ -70,8 +70,8 @@ struct BoundedHAxisFailure {
 using BoundedHAxisOutcome = std::variant<BoundedHAxisCover, BoundedHAxisFailure>;
 // General-dimensional axis cover. The carrier remains part of the actual
 // intersection; a stopped or inconsistent numerical result is not emptiness.
-BoundedHAxisOutcome bounded_h_axis_cover(const BoundedHSupportInput&,
-    ProgramIdentity, const registry::PreparedProvider<registry::LPPort>&,
-    const ExecutionContext&);
+BoundedHAxisOutcome bounded_h_axis_cover(const BoundedHSupportInput &, ProgramIdentity,
+                                         const registry::PreparedProvider<registry::LPPort> &,
+                                         const ExecutionContext &);
 
 } // namespace csl::reachability

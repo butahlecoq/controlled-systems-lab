@@ -8,8 +8,14 @@
 
 namespace csl::reachability::finite_feedback {
 
-struct StateIndex { std::size_t value; bool operator==(const StateIndex&) const = default; };
-struct ActionIndex { std::size_t value; bool operator==(const ActionIndex&) const = default; };
+struct StateIndex {
+    std::size_t value;
+    bool operator==(const StateIndex &) const = default;
+};
+struct ActionIndex {
+    std::size_t value;
+    bool operator==(const ActionIndex &) const = default;
+};
 
 // One exact state is available before the action. The disturbance index is
 // chosen afterward; its nonempty domain is identical for all state/action
@@ -34,11 +40,11 @@ struct Policy {
     // All robustly feasible actions, in authored order. The first is a
     // deterministic causal selector; this makes no cost-optimality claim.
     std::vector<std::vector<std::vector<ActionIndex>>> admissible_actions;
-    bool operator==(const Policy&) const = default;
+    bool operator==(const Policy &) const = default;
 };
 
-using Result = std::variant<Policy,Diagnostic>;
-std::optional<Diagnostic> validate(const Game& game);
-Result solve(const Game& game);
+using Result = std::variant<Policy, Diagnostic>;
+std::optional<Diagnostic> validate(const Game &game);
+Result solve(const Game &game);
 
 } // namespace csl::reachability::finite_feedback

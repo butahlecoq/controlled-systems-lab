@@ -33,7 +33,7 @@ using InnerTemplateResult = std::variant<InnerTemplate, Diagnostic>;
 // Maximal uniform scale at the supplied center/template, rounded inward and
 // independently admitted against every stored H row using outward arithmetic.
 // This establishes stored-row containment, not feasibility of a nonlinear plant.
-InnerTemplateResult inscribe_template(const InnerTemplateInput&);
-Diagnostics check_inner_template(const InnerTemplateInput&, const InnerTemplate&);
+InnerTemplateResult inscribe_template(const InnerTemplateInput &);
+Diagnostics check_inner_template(const InnerTemplateInput &, const InnerTemplate &);
 
 } // namespace csl::reachability

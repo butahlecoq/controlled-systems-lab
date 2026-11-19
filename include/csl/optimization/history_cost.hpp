@@ -44,12 +44,13 @@ using HistoryCostResult = std::variant<HistoryCostEvaluation, Diagnostics, Opera
 // Compiles the source objective over canonical [x0,...,xT,u0,...,u(T-1)]
 // history coordinates. The supplied relation must be the full feasible
 // history domain, not a prefiltered terminal-optimal fiber.
-HistoryCostCompilation compile_history_cost(const synthesis::JointHistoryRelation&,
-    const TerminalObjective&, const RunningControlCost&, std::size_t absolute_stage_offset);
+HistoryCostCompilation compile_history_cost(const synthesis::JointHistoryRelation &,
+                                            const TerminalObjective &, const RunningControlCost &,
+                                            std::size_t absolute_stage_offset);
 
 // Evaluates the authored terminal and running formulas separately on a full
 // history, then returns their sum.
-HistoryCostResult evaluate_history_cost(const HistoryCostProgram&,
-    std::span<const Vector> states, std::span<const Vector> controls);
+HistoryCostResult evaluate_history_cost(const HistoryCostProgram &, std::span<const Vector> states,
+                                        std::span<const Vector> controls);
 
 } // namespace csl::optimization
