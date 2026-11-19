@@ -60,10 +60,15 @@ temporary CI outputs, not stable release URLs.
 After the gates below pass, create an annotated tag at the reviewed commit on
 `main` and push only that tag. Verify that the remote tag resolves to the
 reviewed commit before creating the GitHub Release. Publish the source release
-with the tag as its title, the reviewed release notes and
-`gh release create <tag> --repo butahlecoq/controlled-systems-lab --verify-tag
---title <tag> --notes-file <file> --latest`. Each version identifies one commit.
-Use a new version for a source correction.
+with the tag as its title and the reviewed release notes. Set `tag` to the
+verified tag and `release_notes` to the notes file.
+
+```sh
+gh release create "$tag" --repo butahlecoq/controlled-systems-lab --verify-tag \
+  --title "$tag" --notes-file "$release_notes" --latest
+```
+
+Each version identifies one commit. Use a new version for a source correction.
 
 For a source release, GitHub supplies the tag's source archive. Include the
 source commit, tested profiles, validation links, and the README Quick start
@@ -84,9 +89,10 @@ adding install archives or other binaries.
    Reuse reviewed CI outputs from the exact candidate when their provenance and
    retention permit; rebuild when source/configuration differs or artifacts
    cannot be verified. Documentation publication alone needs no native matrix.
-3. Stage only the intended install tree and public sources. Include required
-   dependency notices, checksums and a manifest mapping each archive to its
-   source commit, configuration and validation run. Inspect archives for local
+3. When shipping install archives, stage only the intended install tree and
+   public sources. Include required dependency notices, checksums and a
+   manifest mapping each archive to its source commit, configuration and
+   validation run. Inspect archives for local
    paths, credentials and private research materials. Keep platform/toolchain
    incompatibilities explicit; an MSVC static library is not a portable binary.
 4. Preserve the existing owner decision on project licensing. Before publishing
@@ -96,9 +102,11 @@ adding install archives or other binaries.
    gate recorded; it does not authorize inventing a project license.
 5. Publish only after the issue's tests and independent review pass. Link the
    [GitHub Release](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases),
-   exact tag/commit, checksums, example commands and verified Pages URLs. Check
-   that public downloads work and that a clean installed consumer can use the
-   published archive. Record the evidence in the release issue/PR.
+   exact tag/commit, install archive checksums if applicable, example commands
+   and verified Pages URLs. Check that public downloads work. For a source
+   release, build and install from the downloaded source and run the external
+   consumer against that installation. For an install archive, run the consumer
+   against the extracted package. Record the evidence in the release issue/PR.
 
 PR validation uses read permissions and receives no release credentials. Scope
 `contents: write` to a release publisher, and `packages: write` only to an actual
