@@ -35,9 +35,9 @@ cmake --build build/examples --config Release --target discrete_mpc_2d --paralle
 ctest --test-dir build/examples -C Release -R '^discrete_mpc_2d_matched_open_loop_and_feedback$' --no-tests=error -V
 ```
 
-Expect one passing test. In the published example, the actions first diverge
-at stage 4. The first control coordinate is 0 for the open-loop plan and
-about 1.05 for observed-state MPC. The state and control histories are in
+Expect one passing test. In the published example, the first control coordinate
+differs for the first time at stage 4. It is 0 for the open-loop plan and about
+1.05 for observed-state MPC. The state and control histories are in
 `build/examples/discrete-mpc-2d-test-output/episode.csv`. This is a numerical
 check on the example's eight-stage task.
 
