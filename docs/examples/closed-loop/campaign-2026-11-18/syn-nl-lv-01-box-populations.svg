@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 820" role="img">
+<title>Lotka–Volterra · box · populations projection</title><rect width="100%" height="100%" fill="white"/>
+<style>text{font:14px system-ui,sans-serif;fill:#253047}.title{font-size:23px;font-weight:700}.axis{font-size:15px;font-weight:600}</style>
+<text x="110" y="42" class="title">Lotka–Volterra · box · populations projection</text>
+<text x="110" y="68">Outer fixed-plan trajectory enclosures · box representation</text>
+<line x1="110.00" y1="100" x2="110.00" y2="670" stroke="#e2e8f0"/>
+<line x1="110" y1="670.00" x2="1060" y2="670.00" stroke="#e2e8f0"/>
+<text x="110.00" y="692" text-anchor="middle">107.69</text>
+<text x="100" y="674.00" text-anchor="end">56.835</text>
+<line x1="300.00" y1="100" x2="300.00" y2="670" stroke="#e2e8f0"/>
+<line x1="110" y1="556.00" x2="1060" y2="556.00" stroke="#e2e8f0"/>
+<text x="300.00" y="692" text-anchor="middle">113.81</text>
+<text x="100" y="560.00" text-anchor="end">66.014</text>
+<line x1="490.00" y1="100" x2="490.00" y2="670" stroke="#e2e8f0"/>
+<line x1="110" y1="442.00" x2="1060" y2="442.00" stroke="#e2e8f0"/>
+<text x="490.00" y="692" text-anchor="middle">119.92</text>
+<text x="100" y="446.00" text-anchor="end">75.194</text>
+<line x1="680.00" y1="100" x2="680.00" y2="670" stroke="#e2e8f0"/>
+<line x1="110" y1="328.00" x2="1060" y2="328.00" stroke="#e2e8f0"/>
+<text x="680.00" y="692" text-anchor="middle">126.04</text>
+<text x="100" y="332.00" text-anchor="end">84.373</text>
+<line x1="870.00" y1="100" x2="870.00" y2="670" stroke="#e2e8f0"/>
+<line x1="110" y1="214.00" x2="1060" y2="214.00" stroke="#e2e8f0"/>
+<text x="870.00" y="692" text-anchor="middle">132.16</text>
+<text x="100" y="218.00" text-anchor="end">93.553</text>
+<line x1="1060.00" y1="100" x2="1060.00" y2="670" stroke="#e2e8f0"/>
+<line x1="110" y1="100.00" x2="1060" y2="100.00" stroke="#e2e8f0"/>
+<text x="1060.00" y="692" text-anchor="middle">138.28</text>
+<text x="100" y="104.00" text-anchor="end">102.73</text>
+<rect x="492.34" y="630.69" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="545.16" y="618.26" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="594.75" y="604.84" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="640.86" y="590.50" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="683.28" y="575.32" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="721.81" y="559.35" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="756.25" y="542.69" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="786.45" y="525.41" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="812.25" y="507.58" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="833.54" y="489.31" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="850.21" y="470.67" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="862.19" y="451.76" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="869.41" y="432.66" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="871.83" y="413.47" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="869.46" y="394.28" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="862.30" y="375.18" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="850.38" y="356.27" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="833.77" y="337.62" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="812.53" y="319.34" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="786.78" y="301.52" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="756.63" y="284.23" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="722.24" y="267.55" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="683.76" y="251.58" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="641.39" y="236.39" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="595.32" y="222.04" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="545.77" y="208.61" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="492.99" y="196.17" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="437.22" y="184.76" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="378.74" y="174.45" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="317.82" y="165.29" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="254.76" y="157.32" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<polyline points="492.34,630.69 545.16,618.26 594.75,604.84 640.86,590.50 683.28,575.32 721.81,559.35 756.25,542.69 786.45,525.41 812.25,507.58 833.54,489.31 850.21,470.67 862.19,451.76 869.41,432.66 871.83,413.47 869.46,394.28 862.30,375.18 850.38,356.27 833.77,337.62 812.53,319.34 786.78,301.52 756.63,284.23 722.24,267.55 683.76,251.58 641.39,236.39 595.32,222.04 545.77,208.61 492.99,196.17 437.22,184.76 378.74,174.45 317.82,165.29 254.76,157.32" fill="none" stroke="#dc2626" stroke-width="3"/>
+<polyline points="492.34,630.69 556.72,621.22 619.11,610.70 679.04,599.11 736.02,586.45 789.56,572.74 839.15,557.96 884.27,542.16 924.42,525.34 959.12,507.56 977.36,488.95 989.24,469.68 994.48,449.84 992.89,429.53 984.33,408.87 968.74,387.99 946.16,367.03 916.70,346.14 880.55,325.49 848.18,305.13 809.48,285.13 764.79,265.65 714.49,246.86 659.06,228.92 599.01,211.99 534.93,196.24 467.41,181.79 397.08,168.77 324.56,157.29 250.51,147.45 175.52,139.31" fill="none" stroke="#2563eb" stroke-width="3" stroke-dasharray="8 5"/>
+<text x="110" y="758">Amber: numerical outer fixed-plan tube · red: selected plan · blue dashed: observed closed-loop replay</text>
+<text x="110" y="785" class="axis">Prey P (thousand individuals)</text>
+<text x="34" y="385.0" class="axis" transform="rotate(-90 34 385.0)">Predator R (thousand individuals)</text></svg>

@@ -146,3 +146,25 @@ so each OPT07/OPT11 namespace retains its local imports and direct CLI behavior.
 The same default Ruff and ty scope covers the maintained discrete MPC 2D
 stager and the focused discrete-MPC stager tests. The workflow runs the gallery test, which
 also verifies the example's saved native output and source-owned route entry.
+
+## Run a research driver against an installed SDK
+
+Native C++ implementation and public header changes start in the [CSL SDK](https://github.com/butahlecoq/csl-sdk). Research owns the experiment drivers, independent checkers, reports, learning materials and publication. For historical drivers that build the library in this tree, the native source files under `src/` and public headers under `include/csl/` mirror the pinned upstream files. Each repository owns its CMake registrations. CI compares the two source trees by path, mode and Git blob.
+
+For a native change, merge its SDK PR, update [the research revision](benchmarks/sdk-revision) and mirror the affected C++ files. Review the package version in [the research CMake project](benchmarks/CMakeLists.txt) when updating the pin. The original evidence tags, publications and commit-addressed source remain available here.
+
+From this research checkout, build the pinned SDK and run the two-point report with its independent numerical checker. The commands below use a POSIX shell, a C++20 compiler, CMake 3.31 or newer, and Python 3.11 or newer.
+
+```sh
+git clone https://github.com/butahlecoq/csl-sdk.git build/upstream
+git -C build/upstream checkout --detach "$(cat benchmarks/sdk-revision)"
+cmake -S build/upstream -B build/sdk -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF
+cmake --build build/sdk --config Release --parallel 4
+cmake --install build/sdk --config Release --prefix "$PWD/build/research-sdk"
+cmake --fresh -S benchmarks -B build/research -DCMAKE_BUILD_TYPE=Release "-DCMAKE_PREFIX_PATH=$PWD/build/research-sdk"
+cmake --build build/research --config Release
+ctest --test-dir build/research -C Release --output-on-failure --no-tests=error
+```
+
+The check leaves the driver's JSON output at
+`build/research/issue824-nominal-result.json`.

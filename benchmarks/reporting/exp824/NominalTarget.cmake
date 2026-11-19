@@ -1,0 +1,12 @@
+function(csl_add_issue824_nominal_report json_include_dir)
+  add_executable(csl_issue824_nominal_report "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/two_points_nominal.cpp")
+  target_link_libraries(csl_issue824_nominal_report PRIVATE
+    CSL::finite_action_nominal CSL::finite_action_minimax)
+  target_include_directories(csl_issue824_nominal_report SYSTEM PRIVATE "${json_include_dir}")
+  target_compile_features(csl_issue824_nominal_report PRIVATE cxx_std_20)
+  if(MSVC)
+    target_compile_options(csl_issue824_nominal_report PRIVATE /W4 /WX /permissive-)
+  else()
+    target_compile_options(csl_issue824_nominal_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+  endif()
+endfunction()

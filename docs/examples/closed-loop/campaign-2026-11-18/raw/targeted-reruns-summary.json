@@ -1,0 +1,13 @@
+{
+  "base_freeze_sha256": "a88c0f04816ebb6d90977852b088efb2118240540b385cd63b3c33c69d546180",
+  "campaign_outcome_files": "/home/butahlecoq/.local/share/codex/benchmark-runs/947-representation-matrix-20261117/fixed-tail-compatible-profile/targeted-reruns/targeted-rerun-events.jsonl",
+  "compatible_profile_freeze_sha256": "21d68dbca35228b24e8dc829a1f985d377a6e2170a6e0e110a98c60a02803d83",
+  "outcomes": {
+    "complete": 15
+  },
+  "plan_sha256": "30ddb98461bce80f5e99c142eba311daabf04ef2a9fca5665fee1e31b84bd32f",
+  "rerun_attempt_count": 15,
+  "schema": "csl.closed-loop-targeted-profile-rerun-summary/1",
+  "selected_graph_count": 15,
+  "source_commit": "08af99d6f982235c22a15d4e9307fd032dfb1adb"
+}

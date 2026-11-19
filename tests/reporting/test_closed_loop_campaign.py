@@ -291,6 +291,47 @@ class ClosedLoopCampaignTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "at least one measured repetition"):
             run_campaign.paired_method_schedule(0)
 
+    def test_fixed_tail_representation_matrix_contains_each_unordered_pair_once(self):
+        pairs = run_campaign.fixed_tail_representation_pairs()
+
+        self.assertEqual(len(pairs), 10)
+        self.assertEqual(len(set(pairs)), 10)
+        self.assertIn(("polytope", "zonotope"), pairs)
+        self.assertNotIn(("zonotope", "polytope"), pairs)
+
+    def test_paired_graph_selection_requires_matched_task_action_and_solver(self):
+        tasks = ("syn-nl-lv-01", "earth-orbit", "syn-nl-fuel-01")
+        graphs = []
+        for task in tasks:
+            for side, representation in (("A", "box"), ("B", "ellipsoid")):
+                graphs.append(
+                    {
+                        "task_name": task,
+                        "task_id": task + "/1",
+                        "graph_id": f"{task}/{side}",
+                        "task_sha256": "task-hash",
+                        "action_profile_id": "continuous-action/1",
+                        "execution": {"id": "rk4/1"},
+                        "controller": {
+                            "id": f"method-{side}/1",
+                            "solver": {"provider": "ipopt"},
+                        },
+                        "role_bindings": {
+                            "control_optimizer": {"id": "ipopt"},
+                            "representation": {"id": representation},
+                        },
+                    }
+                )
+        record = {"graphs": graphs}
+
+        selected = run_campaign.select_paired_graphs(record, "method-A/1", "method-B/1")
+
+        self.assertEqual(set(selected), set(tasks))
+        self.assertEqual(selected[tasks[0]]["A"]["graph_id"], tasks[0] + "/A")
+        record["graphs"][-1]["action_profile_id"] = "different-action/1"
+        with self.assertRaisesRegex(ValueError, "do not share task, action, execution and solver"):
+            run_campaign.select_paired_graphs(record, "method-A/1", "method-B/1")
+
     def test_comparison_pack_request_maps_completed_run_to_passed_measurement(self):
         task_name = "syn-nl-lv-01"
         methods = {
@@ -367,11 +408,14 @@ class ClosedLoopCampaignTests(unittest.TestCase):
         graphs = [
             {
                 "task_name": task,
+                "task_id": task + "/1",
                 "graph_id": f"{task}/{side}",
                 "graph_fingerprint": "a" * 64,
                 "task_sha256": "b" * 64,
                 "action_profile_id": "same-profile",
-                "controller": {"id": controller},
+                "execution": {"id": "rk4/1"},
+                "controller": {"id": controller, "solver": {"provider": "ipopt"}},
+                "role_bindings": {"control_optimizer": {"id": "ipopt"}},
             }
             for task in tasks
             for side, controller in controllers.items()

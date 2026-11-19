@@ -415,6 +415,111 @@
       "owner": "scripts/reports/stage_closed_loop_pilot.py"
     },
     {
+      "route": "examples/closed-loop/campaign-2026-11-18/earth-orbit-box-orbit.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/render_full_profile_campaign.py"
+    },
+    {
+      "route": "examples/closed-loop/campaign-2026-11-18/earth-orbit-ellipsoid-orbit.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/render_full_profile_campaign.py"
+    },
+    {
+      "route": "examples/closed-loop/campaign-2026-11-18/earth-orbit-exact-polytope-orbit.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/render_full_profile_campaign.py"
+    },
+    {
+      "route": "examples/closed-loop/campaign-2026-11-18/earth-orbit-parallelotope-orbit.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/render_full_profile_campaign.py"
+    },
+    {
+      "route": "examples/closed-loop/campaign-2026-11-18/earth-orbit-zonotope-orbit.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/render_full_profile_campaign.py"
+    },
+    {
+      "route": "examples/closed-loop/campaign-2026-11-18/index.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/render_full_profile_campaign.py"
+    },
+    {
+      "route": "examples/closed-loop/campaign-2026-11-18/syn-nl-fuel-01-box-fuel.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/render_full_profile_campaign.py"
+    },
+    {
+      "route": "examples/closed-loop/campaign-2026-11-18/syn-nl-fuel-01-box-oxidizer.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/render_full_profile_campaign.py"
+    },
+    {
+      "route": "examples/closed-loop/campaign-2026-11-18/syn-nl-fuel-01-ellipsoid-fuel.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/render_full_profile_campaign.py"
+    },
+    {
+      "route": "examples/closed-loop/campaign-2026-11-18/syn-nl-fuel-01-ellipsoid-oxidizer.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/render_full_profile_campaign.py"
+    },
+    {
+      "route": "examples/closed-loop/campaign-2026-11-18/syn-nl-fuel-01-exact-polytope-fuel.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/render_full_profile_campaign.py"
+    },
+    {
+      "route": "examples/closed-loop/campaign-2026-11-18/syn-nl-fuel-01-exact-polytope-oxidizer.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/render_full_profile_campaign.py"
+    },
+    {
+      "route": "examples/closed-loop/campaign-2026-11-18/syn-nl-fuel-01-parallelotope-fuel.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/render_full_profile_campaign.py"
+    },
+    {
+      "route": "examples/closed-loop/campaign-2026-11-18/syn-nl-fuel-01-parallelotope-oxidizer.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/render_full_profile_campaign.py"
+    },
+    {
+      "route": "examples/closed-loop/campaign-2026-11-18/syn-nl-fuel-01-zonotope-fuel.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/render_full_profile_campaign.py"
+    },
+    {
+      "route": "examples/closed-loop/campaign-2026-11-18/syn-nl-fuel-01-zonotope-oxidizer.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/render_full_profile_campaign.py"
+    },
+    {
+      "route": "examples/closed-loop/campaign-2026-11-18/syn-nl-lv-01-box-populations.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/render_full_profile_campaign.py"
+    },
+    {
+      "route": "examples/closed-loop/campaign-2026-11-18/syn-nl-lv-01-ellipsoid-populations.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/render_full_profile_campaign.py"
+    },
+    {
+      "route": "examples/closed-loop/campaign-2026-11-18/syn-nl-lv-01-exact-polytope-populations.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/render_full_profile_campaign.py"
+    },
+    {
+      "route": "examples/closed-loop/campaign-2026-11-18/syn-nl-lv-01-parallelotope-populations.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/render_full_profile_campaign.py"
+    },
+    {
+      "route": "examples/closed-loop/campaign-2026-11-18/syn-nl-lv-01-zonotope-populations.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/render_full_profile_campaign.py"
+    },
+    {
       "route": "examples/closed-loop/campaign-v2/index.html",
       "disposition": "maintained",
       "owner": "scripts/reports/campaign_graph_figures.py"
@@ -1391,6 +1496,11 @@
     },
     {
       "route": "learn/module-catalogue.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
+      "route": "learn/model-tracks.html",
       "disposition": "maintained",
       "owner": "scripts/reports/learning_book.py"
     },

@@ -374,6 +374,19 @@ def _producer_record(site: Path, route: str, catalog: dict[str, dict], source_id
                                for chapter in data.get("chapters", []))
         elif route == "learn/module-catalogue.html":
             sources.append("docs/catalogue/module-composition-inventory-v1.json")
+        elif route == "learn/model-tracks.html":
+            manifest = repo / "docs/catalogue/learning-book-v1.json"
+            if manifest.is_file():
+                data = json.loads(manifest.read_text(encoding="utf-8"))
+                for chapter in data.get("chapters", []):
+                    for source in chapter.get("example_sources", []):
+                        source_path = repo / source
+                        if source_path.suffix != ".json" or not source_path.is_file():
+                            continue
+                        task = json.loads(source_path.read_text(encoding="utf-8"))
+                        if task.get("schema") == "csl.closed-loop.task/1":
+                            sources.append(source)
+            sources.append("docs/examples/closed-loop/figure-index.json")
         elif len(parts) == 2 and parts[1].endswith(".html"):
             sources.append("docs/examples/learning/chapters/" + parts[1][:-5] + ".html")
         return {"files": sources, "owner_status": "chapter-manifest-producer"}

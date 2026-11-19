@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 820" role="img">
+<title>Fuel transfer · box · fuel projection</title><rect width="100%" height="100%" fill="white"/>
+<style>text{font:14px system-ui,sans-serif;fill:#253047}.title{font-size:23px;font-weight:700}.axis{font-size:15px;font-weight:600}</style>
+<text x="110" y="42" class="title">Fuel transfer · box · fuel projection</text>
+<text x="110" y="68">Outer fixed-plan trajectory enclosures · box representation</text>
+<line x1="110.00" y1="100" x2="110.00" y2="670" stroke="#e2e8f0"/>
+<line x1="110" y1="670.00" x2="1060" y2="670.00" stroke="#e2e8f0"/>
+<text x="110.00" y="692" text-anchor="middle">21.021</text>
+<text x="100" y="674.00" text-anchor="end">-0.026965</text>
+<line x1="300.00" y1="100" x2="300.00" y2="670" stroke="#e2e8f0"/>
+<line x1="110" y1="556.00" x2="1060" y2="556.00" stroke="#e2e8f0"/>
+<text x="300.00" y="692" text-anchor="middle">22.949</text>
+<text x="100" y="560.00" text-anchor="end">0.16613</text>
+<line x1="490.00" y1="100" x2="490.00" y2="670" stroke="#e2e8f0"/>
+<line x1="110" y1="442.00" x2="1060" y2="442.00" stroke="#e2e8f0"/>
+<text x="490.00" y="692" text-anchor="middle">24.878</text>
+<text x="100" y="446.00" text-anchor="end">0.35923</text>
+<line x1="680.00" y1="100" x2="680.00" y2="670" stroke="#e2e8f0"/>
+<line x1="110" y1="328.00" x2="1060" y2="328.00" stroke="#e2e8f0"/>
+<text x="680.00" y="692" text-anchor="middle">26.807</text>
+<text x="100" y="332.00" text-anchor="end">0.55232</text>
+<line x1="870.00" y1="100" x2="870.00" y2="670" stroke="#e2e8f0"/>
+<line x1="110" y1="214.00" x2="1060" y2="214.00" stroke="#e2e8f0"/>
+<text x="870.00" y="692" text-anchor="middle">28.736</text>
+<text x="100" y="218.00" text-anchor="end">0.74542</text>
+<line x1="1060.00" y1="100" x2="1060.00" y2="670" stroke="#e2e8f0"/>
+<line x1="110" y1="100.00" x2="1060" y2="100.00" stroke="#e2e8f0"/>
+<text x="1060.00" y="692" text-anchor="middle">30.665</text>
+<text x="100" y="104.00" text-anchor="end">0.93852</text>
+<rect x="994.48" y="299.85" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="968.34" y="378.19" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="947.97" y="439.11" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="932.09" y="486.40" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="919.70" y="523.01" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="909.99" y="551.26" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="902.36" y="572.96" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="896.31" y="589.52" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="891.48" y="602.06" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="887.55" y="611.44" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="884.29" y="618.35" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="881.53" y="623.30" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="879.11" y="626.72" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="876.93" y="628.93" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="874.89" y="630.19" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="872.92" y="630.69" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="870.97" y="630.59" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="868.99" y="630.01" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="866.94" y="629.05" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="864.80" y="627.78" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="862.55" y="626.25" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="860.15" y="624.51" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="852.58" y="506.93" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="836.34" y="415.69" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="813.39" y="345.10" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="785.25" y="290.68" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="753.12" y="248.94" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="717.94" y="217.14" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="680.45" y="193.14" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="641.22" y="175.25" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="600.70" y="162.15" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="559.25" y="152.81" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="517.16" y="146.43" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="474.63" y="142.36" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="431.84" y="140.12" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="388.93" y="139.31" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="346.00" y="139.63" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="303.13" y="140.83" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="260.40" y="142.74" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="217.85" y="145.20" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<rect x="175.52" y="148.10" width="1.00" height="1.00" fill="#d97706" fill-opacity=".22" stroke="#b45309" stroke-width="1"/>
+<polyline points="994.48,299.85 968.34,378.19 947.97,439.11 932.09,486.40 919.70,523.01 909.99,551.26 902.36,572.96 896.31,589.52 891.48,602.06 887.55,611.44 884.29,618.35 881.53,623.30 879.11,626.72 876.93,628.93 874.89,630.19 872.92,630.69 870.97,630.59 868.99,630.01 866.94,629.05 864.80,627.78 862.55,626.25 860.15,624.51 852.58,506.93 836.34,415.69 813.39,345.10 785.25,290.68 753.12,248.94 717.94,217.14 680.45,193.14 641.22,175.25 600.70,162.15 559.25,152.81 517.16,146.43 474.63,142.36 431.84,140.12 388.93,139.31 346.00,139.63 303.13,140.83 260.40,142.74 217.85,145.20 175.52,148.10" fill="none" stroke="#dc2626" stroke-width="3"/>
+<polyline points="994.48,299.85 968.34,378.21 947.97,439.23 932.12,486.76 919.77,523.77 910.15,552.59 897.07,446.46 876.17,364.20 849.22,300.68 817.62,251.88 787.93,340.84 759.35,284.52 732.07,366.27 710.82,429.93 694.28,479.51 681.39,518.13 671.36,548.20 663.54,571.62 657.46,589.86 652.72,604.07 649.03,615.13 646.15,623.75 638.58,507.88 627.79,540.22 614.08,443.34 598.53,489.95 581.14,404.93 562.75,460.04 543.19,382.52 523.14,442.59 502.34,369.90 481.36,432.76 459.88,363.26 438.41,427.59 416.59,360.29 394.90,425.28 372.96,359.57 346.19,309.01 320.72,385.34 295.90,330.36 272.01,401.96" fill="none" stroke="#2563eb" stroke-width="3" stroke-dasharray="8 5"/>
+<text x="110" y="758">Amber: numerical outer fixed-plan tube · red: selected plan · blue dashed: observed closed-loop replay</text>
+<text x="110" y="785" class="axis">Fuel mass m_f (kg)</text>
+<text x="34" y="385.0" class="axis" transform="rotate(-90 34 385.0)">Fuel flow q_f (kg/s)</text></svg>

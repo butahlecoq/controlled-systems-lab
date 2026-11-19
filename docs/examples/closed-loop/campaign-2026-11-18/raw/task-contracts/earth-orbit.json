@@ -1,0 +1,241 @@
+{
+  "control_domains": {
+    "continuous": {
+      "bounds": [
+        [
+          -0.5,
+          0.5
+        ],
+        [
+          -0.5,
+          0.5
+        ]
+      ],
+      "problem_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
+      "semantics": "independent continuous force pair in [-0.5,0.5]^2 N at every one of 20 intervals"
+    },
+    "finite": {
+      "actions": [
+        [
+          -0.5,
+          -0.5
+        ],
+        [
+          -0.5,
+          0.0
+        ],
+        [
+          -0.5,
+          0.5
+        ],
+        [
+          0.0,
+          -0.5
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.5
+        ],
+        [
+          0.5,
+          -0.5
+        ],
+        [
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          0.5
+        ]
+      ],
+      "problem_id": "env717-earth-orbit/finite-nine-action-per-step-adaptation/1",
+      "semantics": "independent choice among source force pairs at each interval; not the legacy block-plan schedule"
+    }
+  },
+  "episode": {
+    "closed_loop": {
+      "apply": "first-zero-order-held-input",
+      "failure": "stop-before-next-input-no-fallback",
+      "observation": "exact-full-execution-state",
+      "optimization_horizon": "shrinking-to-fixed-terminal",
+      "players": 1,
+      "second_player": false,
+      "warm_start": "shift-prior-primal-drop-applied-stage-no-terminal-repeat;zero-duals"
+    },
+    "dt": 100.0,
+    "execution": {
+      "abstol": 1e-10,
+      "method": "CSL adaptive RK4 step doubling",
+      "profile_id": "common-adaptive-replay/CSL-simulation-rk4-step-doubling/1",
+      "reltol": 1e-09,
+      "source_execution_difference": "The source pilot uses 100 classical RK4 substeps per 100-second hold. This task uses the common CSL adaptive RK4 step-doubling replay adapter; no equivalence claim is made."
+    },
+    "final_time": 2000.0,
+    "hold": "zero-order",
+    "intervals": 20,
+    "time_unit": "s"
+  },
+  "legacy_source_case": {
+    "action_catalogue": "nine force pairs in {-0.5,0,0.5}^2 N",
+    "do_not_conflate_with": "continuous or independent finite per-step control task",
+    "objective": "same source terminal hypot and 0.001*norm(u)*100 running cost on first 19 stages",
+    "problem_id": "env717-earth-orbit/finite-nine-action-three-block-plan/1",
+    "schedule": {
+      "block_lengths": [
+        7,
+        7,
+        6
+      ],
+      "decision_count": 3,
+      "plan_count": 729
+    }
+  },
+  "model": {
+    "case_id": "ENV717-EARTH-ORBIT-CONTINUOUS-01",
+    "controls": [
+      {
+        "bounds": [
+          -0.5,
+          0.5
+        ],
+        "name": "u_r",
+        "unit": "N"
+      },
+      {
+        "bounds": [
+          -0.5,
+          0.5
+        ],
+        "name": "u_t",
+        "unit": "N"
+      }
+    ],
+    "domain": "all coordinates and controls finite; r>0; no authored physical state-bound constraints in source pilot",
+    "equations": [
+      "dr/dt=v",
+      "dv/dt=r*omega^2-G*M/r^2+u_r/(1000*m_vehicle)",
+      "dtheta/dt=omega",
+      "domega/dt=-2*omega*v/r+u_t/(1000*m_vehicle*r)"
+    ],
+    "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
+    "parameters": {
+      "G": {
+        "unit": "km^3 kg^-1 s^-2",
+        "value": 6.67448478e-20
+      },
+      "M_earth": {
+        "unit": "kg",
+        "value": 5.9726e+24
+      },
+      "m_vehicle": {
+        "unit": "kg",
+        "value": 50.0
+      }
+    },
+    "states": [
+      {
+        "bounds": null,
+        "initial": 7000.0,
+        "name": "r",
+        "scale": 1000.0,
+        "unit": "km"
+      },
+      {
+        "bounds": null,
+        "initial": 0.0,
+        "name": "v",
+        "scale": 1.0,
+        "unit": "km/s"
+      },
+      {
+        "bounds": null,
+        "initial": 0.0,
+        "name": "theta",
+        "scale": 1.0,
+        "unit": "rad"
+      },
+      {
+        "bounds": null,
+        "initial": 0.0010780614796240577,
+        "name": "omega",
+        "scale": 0.001,
+        "unit": "rad/s"
+      }
+    ]
+  },
+  "objective": {
+    "kind": "source-euclidean-terminal-plus-running-force-norm",
+    "objective_id": "env717-earth-orbit/source-cost-continuous/1",
+    "running_formula": "0.001*100 seconds*hypot(u_r,u_t) for stages 0 through 18; zero running term at stage 19",
+    "running_stage_range": [
+      0,
+      18
+    ],
+    "smoothness": "running norm is nonsmooth at zero force; do not replace or smooth it",
+    "target": {
+      "angular_rate_rad_s": 0.0011015823082230797,
+      "radius_km": 6900.0
+    },
+    "terminal_formula": "hypot(6900-r_N,100000*(omega_target-omega_N))",
+    "units": "source scalar score; radius contribution km and rate contribution scaled by 100000 s"
+  },
+  "prediction": {
+    "affine_model_id": "env717-earth-orbit/local-tangent-zoh/1",
+    "discretization": "zero-order hold matrix exponential of local affine tangent",
+    "plant": "original nonlinear two-body ODE",
+    "producer": "analytic orbit Jacobian and offset, then augmented matrix exponential",
+    "receipt_fields": [
+      "physical A,B,c",
+      "scaled A,B,c",
+      "linearization state and input",
+      "analytic continuous Jacobians",
+      "discretization method and version",
+      "local validity point and scope"
+    ],
+    "validity": "point linearization in binary64; no nonlinear enclosure or off-reference error bound"
+  },
+  "roles": {
+    "backward_feasibility": "predecessors-of-terminal-model-domain-r-positive",
+    "forward_reachability": "all-admissible-control-family",
+    "off_trajectory_policy_queries": "any state in the declared model domain and physical state bounds; do not restrict to recorded nominal trajectory",
+    "off_trajectory_query_fixtures": [
+      {
+        "control": [
+          0.21,
+          -0.17
+        ],
+        "purpose": "off-nominal policy query away from initial state",
+        "state": [
+          7130.0,
+          0.012,
+          0.2,
+          0.0011
+        ]
+      }
+    ],
+    "policy_trajectory": "one-deterministic-policy-trajectory"
+  },
+  "schema": "csl.closed-loop.task/1",
+  "source": {
+    "execution_profile": {
+      "method": "classical fixed-step RK4",
+      "source_hold_seconds": 100.0,
+      "substeps_per_source_hold": 100
+    },
+    "kind": "earth-orbit-source-file",
+    "path": "benchmarks/reporting/env717/earth_orbit.cpp",
+    "pilot_driver": "csl.env717-earth-orbit/1",
+    "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c",
+    "source_profile_id": "env717-earth-orbit/finite-nine-action-three-block-plan/1"
+  },
+  "task_id": "env717-earth-orbit/continuous-receding/1",
+  "terminal_condition": {
+    "kind": "positive-radius-model-domain",
+    "objective_target_is_feasibility_constraint": false
+  }
+}
