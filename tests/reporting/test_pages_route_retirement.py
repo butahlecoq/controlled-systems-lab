@@ -310,6 +310,13 @@ class PagesRouteRetirementTests(unittest.TestCase):
             self.assertIn("scripts/reports/learning_book.py", record["files"])
             self.assertIn("docs/catalogue/learning-book-v1.json", record["files"])
             self.assertIn("docs/examples/closed-loop/figure-index.json", record["files"])
+            self.assertIn("scripts/reports/learning_model_tracks.py", record["files"])
+            self.assertIn("reports/algorithm-results/native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip", record["files"])
+            manifest = json.loads((repo / "docs/catalogue/learning-book-v1.json").read_bytes())
+            for chapter in manifest["chapters"]:
+                for item in chapter.get("records", []):
+                    if "formulation_record" in item:
+                        self.assertIn("reports/algorithm-results/" + item["formulation_record"], record["files"])
             for task_contract in (
                 "docs/contracts/closed-loop/syn-nl-lv-01.json",
                 "docs/contracts/closed-loop/earth-orbit.json",

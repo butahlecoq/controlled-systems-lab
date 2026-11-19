@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import csv
 import hashlib
+import io
 import importlib.util
 import json
 import subprocess
@@ -10,6 +12,7 @@ import unittest
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
+from zipfile import ZipFile
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts/reports/learning_book.py"
@@ -110,6 +113,55 @@ class LearningBookTests(unittest.TestCase):
                     else:
                         self.assertEqual(result.stdout, (ROOT / source).read_bytes(),
                                          "Source permalink differs from the executed example")
+
+    def test_native_tracks_link_existing_formulations_and_actual_outcomes(self):
+        chapters = learning_book.validate(self.manifest, self.inventory, self.figures)
+        page = learning_book._model_tracks_page(chapters, self.figures)
+        links = PageElements()
+        links.feed(page)
+        root = ROOT / "reports/algorithm-results"
+        expected = json.loads((root / "native-discrete-models-v1/catalogue.json").read_text())["models"]
+        route = "native-model-tracking-first-pass-v1"
+        with ZipFile(root / route / (route + ".zip")) as bundle:
+            results = list(csv.DictReader(io.StringIO(bundle.read("checks/independent_results.csv").decode())))
+            self.assertEqual({r["model"] for r in results}, {m["id"] for m in expected})
+            for key in links.links:
+                if key.startswith(f"../examples/{route}/"):
+                    self.assertIn(urlsplit(key).path.removeprefix(f"../examples/{route}/"), bundle.namelist())
+        catalogue = PageElements()
+        catalogue.feed((ROOT / "docs/examples/native-discrete-models.html").read_text())
+        for model in expected:
+            anchor = model["id"].split("/")[1]
+            self.assertIn(anchor, catalogue.ids)
+            self.assertIn("../examples/native-discrete-models.html#" + anchor, links.links)
+            self.assertIn(model["id"], page)
+        self.assertEqual(page.count("Nominal external input: supplied by the source"), 22)
+        self.assertEqual(page.count("Nominal external input: unspecified by the source"), 13)
+        self.assertIn("Preserved solver refusal", page)
+        self.assertIn("Source-defined MPC task", page)
+        self.assertTrue(any("Ten%2Dgenerator" in link for link in links.links))
+        self.assertTrue(any("Twenty%2Dzone" in link for link in links.links))
+        self.assertIn("flexible-pitch/synthetic-12-state/1", page)
+        self.assertIn("bulaev-2016-slide33/literal-eight/1", page)
+        self.assertIn("../examples/native-four-state-reachability.html", links.links)
+        self.assertIn("bulaev-2016-slide50/authored-box/literal-six/1", page)
+        self.assertIn("spatial-flight/b-consistent-body9-synthetic/1", page)
+        self.assertIn("reachability-formulations", links.ids)
+        self.assertIn("discrete-formulations", links.ids)
+        self.assertIn("discrete-model-21", links.ids)
+
+    def test_native_formulation_receipt_must_be_contained_in_report_root(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            root = repo / "reports/algorithm-results"
+            root.mkdir(parents=True)
+            untracked = repo / "untracked.txt"
+            untracked.write_text("case=untracked")
+            (root / "link.txt").symlink_to(untracked)
+            for path in (str(untracked), "../../untracked.txt", "link.txt"):
+                chapter = {"id": "native-forward-models", "records": [{"formulation_record": path}]}
+                with self.subTest(path=path), self.assertRaisesRegex(ValueError, "unsafe native formulation"):
+                    learning_book.learning_model_tracks.native_sections(repo, [chapter])
 
     def test_model_tracks_are_generated_from_contracts_and_saved_results(self):
         chapters = learning_book.validate(self.manifest, self.inventory, self.figures)

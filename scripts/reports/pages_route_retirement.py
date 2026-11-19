@@ -375,10 +375,16 @@ def _producer_record(site: Path, route: str, catalog: dict[str, dict], source_id
         elif route == "learn/module-catalogue.html":
             sources.append("docs/catalogue/module-composition-inventory-v1.json")
         elif route == "learn/model-tracks.html":
+            sources.append("scripts/reports/learning_model_tracks.py")
             manifest = repo / "docs/catalogue/learning-book-v1.json"
             if manifest.is_file():
                 data = json.loads(manifest.read_text(encoding="utf-8"))
                 for chapter in data.get("chapters", []):
+                    for row in chapter.get("records", []):
+                        if "formulation_record" in row:
+                            sources.append("reports/algorithm-results/" + row["formulation_record"])
+                    if chapter["id"] == "native-model-tracking-first-pass":
+                        sources.append("reports/algorithm-results/native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip")
                     for source in chapter.get("example_sources", []):
                         source_path = repo / source
                         if source_path.suffix != ".json" or not source_path.is_file():

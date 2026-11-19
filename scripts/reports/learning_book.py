@@ -14,13 +14,20 @@ from pathlib import Path
 from urllib.parse import quote
 
 try:
+    import learning_model_tracks
     import mathematical_notation
     import site_additions
     import site_design
 except ModuleNotFoundError as error:
-    if error.name not in {"site_design", "site_additions", "mathematical_notation"}:
+    if error.name not in {
+        "site_design",
+        "site_additions",
+        "mathematical_notation",
+        "learning_model_tracks",
+    }:
         raise
     sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import learning_model_tracks
     import mathematical_notation
     import site_additions
     import site_design
@@ -790,9 +797,25 @@ def _model_tracks_page(chapters: list[dict], figure_index: dict | None = None) -
             current_href="model-tracks.html",
         ),
         '<p class="eyebrow">Generated reference · source contracts</p><h1>System formulations and model tracks</h1>',
-        "<p>Each row is derived from a closed-loop task contract already used by a capstone. The plant model, prediction model and objective have separate identities; reachable-set families are not physical model tracks. Open a lesson for ordered coordinates, equations, parameters, input bounds, time grid and qualification notes.</p>",
-        '<div class="scroll" tabindex="0" role="region" aria-label="System model track comparison"><table><caption>System model track comparison</caption><thead><tr><th>System / task</th><th>Plant track</th><th>Prediction track</th><th>State/control dimensions</th><th>Prediction transformation</th><th>Task contract</th></tr></thead><tbody>',
+        "<p>Compare the dynamics before comparing controllers. The capstone contracts identify the plant, the model used to predict its motion and the objective. Below them, the native catalogues link forward reachability cases and discrete tracking models to their equations, inputs and recorded checks.</p>",
     ]
+    sections = [("capstone-formulations", "Closed-loop capstones")]
+    available = {chapter["id"] for chapter in chapters}
+    if "native-forward-models" in available:
+        sections.append(("reachability-formulations", "Forward reachability cases"))
+    if "native-model-tracking-first-pass" in available:
+        sections.append(("discrete-formulations", "Discrete linear models"))
+    page.append(
+        '<nav aria-label="Model families">'
+        + " · ".join(f'<a href="#{anchor}">{label}</a>' for anchor, label in sections)
+        + "</nav>"
+    )
+    page.extend(
+        [
+            '<h2 id="capstone-formulations">Closed-loop capstones</h2>',
+            '<div class="scroll" tabindex="0" role="region" aria-label="System model track comparison"><table><caption>System model track comparison</caption><thead><tr><th>System / task</th><th>Plant track</th><th>Prediction track</th><th>State/control dimensions</th><th>Prediction transformation</th><th>Task contract</th></tr></thead><tbody>',
+        ]
+    )
     figures_by_id: dict[str, dict] = {}
     figures_by_task: dict[str, list[dict]] = {}
     for figure in (figure_index or {}).get("figures", []):
@@ -868,6 +891,7 @@ def _model_tracks_page(chapters: list[dict], figure_index: dict | None = None) -
     page.append(
         "</tbody></table></div><p>Identical mathematics requires matching the plant and predictor track IDs and their definitions, along with the task’s controls, time grid and objective. A shared system name alone does not establish equivalence.</p>"
     )
+    page.append(learning_model_tracks.native_sections(ROOT, chapters))
     page.append(site_design.page_end())
     return "".join(page)
 
