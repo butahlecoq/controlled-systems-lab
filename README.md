@@ -1,4 +1,4 @@
-<a id="controlled-systems-lab"></a>
+<a name="controlled-systems-lab"></a>
 
 # Reachability and predictive control in C++
 
@@ -42,8 +42,10 @@ about 1.05. The state and control histories are in
 check on the example's eight-stage task.
 
 To try another forecast or disturbance, edit `make_task` in the
-[example source](examples/discrete_mpc_2d.cpp). For the supported input bounds
-and the underlying model, see the source data section of the
+[example source](examples/discrete_mpc_2d.cpp). To supply your own
+model and bounds, use the public
+[`NominalMpcTask` fields](include/csl/controllers/discrete_mpc.hpp). The source
+data section shows the model and bounds used in this
 [example page](https://butahlecoq.github.io/controlled-systems-lab/examples/discrete-mpc-2d.html).
 
 ### More examples
