@@ -152,7 +152,9 @@ also verifies the example's saved native output and source-owned route entry.
 Build and install CSL using the [README Quick start](README.md#quick-start).
 From the research checkout, run the standalone two-point report driver and its
 independent numerical check. The research build requires Python 3.11 or newer
-for CTest and uses the installed CSL 0.1.0 CMake package.
+for CTest and uses the installed CSL 0.1.0 CMake package. When the root SDK
+version changes, review the research compatibility pin and explicitly select
+which SDK version the research CI job installs.
 
 ```sh
 cmake -S benchmarks -B build/research -DCMAKE_BUILD_TYPE=Release "-DCMAKE_PREFIX_PATH=$PWD/build/quickstart/install"
