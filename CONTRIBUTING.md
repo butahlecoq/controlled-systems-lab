@@ -149,15 +149,19 @@ also verifies the example's saved native output and source-owned route entry.
 
 ## Run a research driver against an installed SDK
 
-Build and install CSL using the [README Quick start](README.md#quick-start).
-From the research checkout, run the standalone two-point report driver and its
-independent numerical check. The research build requires Python 3.11 or newer
-for CTest and uses the installed CSL 0.1.0 CMake package. When the root SDK
-version changes, review the research compatibility pin and explicitly select
-which SDK version the research CI job installs.
+Native C++ implementation and public header changes start in the [CSL SDK](https://github.com/butahlecoq/csl-sdk). Research owns the experiment drivers, independent checkers, reports, learning materials and publication. For historical drivers that build the library in this tree, the native source files under `src/` and public headers under `include/csl/` mirror the pinned upstream files. Each repository owns its CMake registrations. CI compares the two source trees by path, mode and Git blob.
+
+For a native change, merge its SDK PR, update [the research revision](benchmarks/sdk-revision) and mirror the affected C++ files. Review the package version in [the research CMake project](benchmarks/CMakeLists.txt) when updating the pin. The original evidence tags, publications and commit-addressed source remain available here.
+
+From this research checkout, build the pinned SDK and run the two-point report with its independent numerical checker. The commands below use a POSIX shell, a C++20 compiler, CMake 3.31 or newer, and Python 3.11 or newer.
 
 ```sh
-cmake -S benchmarks -B build/research -DCMAKE_BUILD_TYPE=Release "-DCMAKE_PREFIX_PATH=$PWD/build/quickstart/install"
+git clone https://github.com/butahlecoq/csl-sdk.git build/upstream
+git -C build/upstream checkout --detach "$(cat benchmarks/sdk-revision)"
+cmake -S build/upstream -B build/sdk -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF
+cmake --build build/sdk --config Release --parallel 4
+cmake --install build/sdk --config Release --prefix "$PWD/build/research-sdk"
+cmake --fresh -S benchmarks -B build/research -DCMAKE_BUILD_TYPE=Release "-DCMAKE_PREFIX_PATH=$PWD/build/research-sdk"
 cmake --build build/research --config Release
 ctest --test-dir build/research -C Release --output-on-failure --no-tests=error
 ```
