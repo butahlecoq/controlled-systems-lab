@@ -146,3 +146,21 @@ so each OPT07/OPT11 namespace retains its local imports and direct CLI behavior.
 The same default Ruff and ty scope covers the maintained discrete MPC 2D
 stager and the focused discrete-MPC stager tests. The workflow runs the gallery test, which
 also verifies the example's saved native output and source-owned route entry.
+
+## Run a research driver against an installed SDK
+
+Build and install CSL using the [README Quick start](README.md#quick-start).
+From the research checkout, run the standalone two-point report driver and its
+independent numerical check. The research build requires Python 3.11 or newer
+for CTest and uses the installed CSL 0.1.0 CMake package. When the root SDK
+version changes, review the research compatibility pin and explicitly select
+which SDK version the research CI job installs.
+
+```sh
+cmake -S benchmarks -B build/research -DCMAKE_BUILD_TYPE=Release "-DCMAKE_PREFIX_PATH=$PWD/build/quickstart/install"
+cmake --build build/research --config Release
+ctest --test-dir build/research -C Release --output-on-failure --no-tests=error
+```
+
+The check leaves the driver's JSON output at
+`build/research/issue824-nominal-result.json`.
