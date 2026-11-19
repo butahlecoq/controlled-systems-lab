@@ -1,6 +1,7 @@
 """Verify the same frozen study is reachable from the gallery and evidence archive."""
 
 import importlib
+import json
 import sys
 import tempfile
 import unittest
@@ -25,6 +26,10 @@ class CrossoverPublicationTests(unittest.TestCase):
                 path = site / "examples" / name
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_bytes(content)
+            presentation = importlib.import_module("audit_mathematical_presentation")
+            ledger = json.loads(presentation.REGISTRY.read_bytes())
+            audit = presentation.audit_site(site, {"routes": ledger["routes"]})
+            self.assertTrue(audit["passed"], audit["findings"])
             index = site / "index.html"
             index.write_text("<ul></ul>", encoding="utf-8")
             (site / "archive.html").touch()
