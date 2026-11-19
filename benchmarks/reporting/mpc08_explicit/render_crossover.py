@@ -32,7 +32,9 @@ def draw(ref, workload, raw_path, summary, dest):
         deployment = next(
             r
             for line in stream
-            if (r := json.loads(line)).get("controller") == "explicit" and r["repetition"] == 0
+            if (r := json.loads(line)).get("type") == "deployment"
+            and r["controller"] == "explicit"
+            and r["repetition"] == 0
         )
     episode = deployment["data"]["episodes"][0]
     x0 = workload["deployment_states"][0]
