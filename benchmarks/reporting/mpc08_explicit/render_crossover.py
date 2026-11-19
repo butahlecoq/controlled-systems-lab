@@ -19,7 +19,7 @@ def draw_set(ax, poly, **style):
     if len(pts) > 2:
         ax.fill(*zip(*(pts + [pts[0]]), strict=True), **style)
     elif pts:
-        ax.plot(*zip(*pts, strict=True), color=style.get("edgecolor"), linewidth=2)
+        ax.plot(*zip(*pts, strict=True), color=style.get("edgecolor"), linewidth=2, marker="o" if len(pts) == 1 else None)
 
 
 def draw(ref, workload, raw_path, summary, dest):
@@ -72,7 +72,9 @@ def draw(ref, workload, raw_path, summary, dest):
             ),
             Line2D([], [], color="#181818", marker="o", label="Optimal trajectory (stage 0–3)"),
         ],
-        loc="upper left",
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.23),
+        ncol=2,
         fontsize=8,
     )
     cells = horizons[3]["cells"]
@@ -93,7 +95,18 @@ def draw(ref, workload, raw_path, summary, dest):
     bx.scatter(
         *zip(*samples, strict=True), s=8, color="#1f2224", label="Checked feasible states", zorder=3
     )
-    bx.legend(loc="upper left", fontsize=8)
+    misses = [
+        q["state"] for q in workload["queries"] if q["remaining"] == 3 and q["expected"] is None
+    ]
+    bx.scatter(
+        *zip(*misses, strict=True), s=48, marker="x", color="#782d14", linewidths=2,
+        label="Checked infeasible states", zorder=4,
+    )
+    bx.plot(
+        *zip(*path, strict=True), "o-", color="#111111", markerfacecolor="white",
+        lw=2, ms=4, label="Shrinking-horizon trajectory", zorder=5,
+    )
+    bx.legend(loc="upper center", bbox_to_anchor=(0.5, -0.53), fontsize=8, ncol=2)
     bx.set_title("First control for three remaining steps")
     fig.colorbar(
         coll, ax=bx, orientation="horizontal", shrink=0.85, label="Acceleration at region centroid"
@@ -107,6 +120,7 @@ def draw(ref, workload, raw_path, summary, dest):
             ylabel="Velocity",
         )
         panel.grid(alpha=0.15)
+    bx.set_xlim(-3.15, max(p for p, _ in misses) + 0.3)
     fig.savefig(dest / "feedback-geometry.svg", metadata={"Date": None})
     plt.close(fig)
     fig, ax = plt.subplots(figsize=(7.6, 4.3), layout="constrained")
