@@ -211,6 +211,18 @@ jobs:
           fi
       - run: cmake --build --preset ${{ matrix.preset }}
       - run: ctest --preset ${{ matrix.preset }}
+      - name: Build research driver against the installed core SDK
+        if: matrix.preset == 'core'
+        shell: bash
+        run: |
+          cmake --install build/core --config Release --prefix "$PWD/build/research-sdk"
+          mkdir -p build/research-source
+          git archive HEAD -- benchmarks/CMakeLists.txt benchmarks/reporting/exp824 \
+            scripts/reports/exp824/check_nominal.py | tar -x -C build/research-source
+          cmake -S build/research-source/benchmarks -B build/research-client -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release "-DCMAKE_PREFIX_PATH=$PWD/build/research-sdk"
+          cmake --build build/research-client --parallel 2
+          ctest --test-dir build/research-client --output-on-failure --no-tests=error
       - name: Preserve package cache evidence and permitted snapshots
         if: always() && steps.cache.outputs.archive_key != ''
         uses: ./.github/actions/native-cache-finish
