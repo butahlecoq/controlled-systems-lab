@@ -28,6 +28,13 @@ def _discrete_models(report_root: Path) -> str:
         models = rows("raw/catalogue.csv")
         outcome_rows = rows("checks/independent_results.csv")
         results = {row["model"]: row for row in outcome_rows}
+        with (
+            archive.open("raw/models.csv") as raw,
+            io.TextIOWrapper(raw, encoding="utf-8", newline="") as text,
+        ):
+            nominal_inputs = {
+                row["model"] for row in csv.DictReader(text) if row["kind"] == "nominal_w"
+            }
         members = set(archive.namelist())
     ids = [model["model"] for model in models]
     if len(ids) != len(set(ids)) or len(results) != len(outcome_rows) or set(ids) != results.keys():
@@ -55,7 +62,10 @@ def _discrete_models(report_root: Path) -> str:
             raise ValueError(f"tracking outcome link is missing for {ident}")
         plot = figures.get(folder)
         plot_link = f' · <a href="{route}/{escape(plot)}">Observed trajectory</a>' if plot else ""
-        matrix_label = quote(f"{index}. {model['title']} · {model['source_title']}", safe="")
+        matrix_label = quote(re.sub(r"\W+$", "", f"{index}. {model['title']}"), safe="")
+        nominal = (
+            "supplied by the source" if ident in nominal_inputs else "unspecified by the source"
+        )
         profile = {
             "authored nominal tracking": "Authored tracking task",
             "source21 literal": "Source-defined MPC task",
@@ -64,7 +74,7 @@ def _discrete_models(report_root: Path) -> str:
             f'<details id="discrete-model-{index}"><summary>{escape(model["title"])} · '
             f"{escape(result['state_dimension'])} states, {escape(result['control_dimension'])} controls</summary>"
             f"<p><code>{escape(ident)}</code> · Δt = {escape(model['time_step'])} {escape(model['time_unit'])}. "
-            f'<a href="../examples/native-discrete-models.html#model-{index}">Coordinates and source qualification</a>.</p>'
+            f'Nominal external input: {nominal}. <a href="../examples/native-discrete-models.html#model-{index}">Coordinates and source qualification</a>.</p>'
             f'<p><a href="{route}/index.html#:~:text={matrix_label}">Matrices and initial vectors</a> · '
             f'{escape(profile)} · <a href="{route}/{record}">'
             f"{'Checked run' if passed else 'Preserved solver refusal'}</a>{plot_link}.</p></details>"
@@ -72,7 +82,7 @@ def _discrete_models(report_root: Path) -> str:
     return (
         '<section id="discrete-formulations"><h2>Discrete linear models</h2>'
         "<p>Each model supplies xₖ₊₁ = Axₖ + Buₖ + Gwₖ + a, its initial state and its time step. "
-        "The model records carry discrete coefficients. A continuous-time approximation error requires separate evidence. Each tracking task specifies its own objective, horizon and observations. "
+        "The model records carry discrete coefficients. A continuous-time approximation error requires separate evidence. Each tracking task specifies its own objective, horizon and observations. A task can select a zero external input even when the source model leaves it unspecified. "
         "Open a model to see the task used and its outcome.</p>"
         f'<p><a href="{route}/index.html">Matrices and initial vectors for all models</a> · '
         f'<a href="{route}/raw/coordinates.csv">Ordered coordinates and units</a> · '
@@ -95,7 +105,14 @@ def native_sections(repository_root: Path, chapters: list[dict]) -> str:
             relative = record.get("formulation_record")
             if not relative:
                 continue
-            path = report_root / relative
+            path = (report_root / relative).resolve()
+            if (
+                Path(relative).is_absolute()
+                or ".." in Path(relative).parts
+                or not path.is_relative_to(report_root.resolve())
+                or not path.is_file()
+            ):
+                raise ValueError(f"missing or unsafe native formulation record {relative}")
             if path.suffix == ".json":
                 ids = json.loads(path.read_bytes())["case_ids"]
             else:

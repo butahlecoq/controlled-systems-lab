@@ -135,6 +135,8 @@ class LearningBookTests(unittest.TestCase):
             self.assertIn(anchor, catalogue.ids)
             self.assertIn("../examples/native-discrete-models.html#" + anchor, links.links)
             self.assertIn(model["id"], page)
+        self.assertEqual(page.count("Nominal external input: supplied by the source"), 22)
+        self.assertEqual(page.count("Nominal external input: unspecified by the source"), 13)
         self.assertIn("Preserved solver refusal", page)
         self.assertIn("Source-defined MPC task", page)
         self.assertIn("flexible-pitch/synthetic-12-state/1", page)
@@ -145,6 +147,19 @@ class LearningBookTests(unittest.TestCase):
         self.assertIn("reachability-formulations", links.ids)
         self.assertIn("discrete-formulations", links.ids)
         self.assertIn("discrete-model-21", links.ids)
+
+    def test_native_formulation_receipt_must_be_contained_in_report_root(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            root = repo / "reports/algorithm-results"
+            root.mkdir(parents=True)
+            untracked = repo / "untracked.txt"
+            untracked.write_text("case=untracked")
+            (root / "link.txt").symlink_to(untracked)
+            for path in (str(untracked), "../../untracked.txt", "link.txt"):
+                chapter = {"id": "native-forward-models", "records": [{"formulation_record": path}]}
+                with self.subTest(path=path), self.assertRaisesRegex(ValueError, "unsafe native formulation"):
+                    learning_book.learning_model_tracks.native_sections(repo, [chapter])
 
     def test_model_tracks_are_generated_from_contracts_and_saved_results(self):
         chapters = learning_book.validate(self.manifest, self.inventory, self.figures)

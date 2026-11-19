@@ -50,6 +50,7 @@ PAGES_PUBLICATION_FILES = {
     "docs/catalogue/learning-book-v1.json",
     "docs/examples/learning/chapters/native-substitution-matrix.html",
     "scripts/reports/learning_book.py",
+    "scripts/reports/learning_model_tracks.py",
     "scripts/reports/render_full_profile_campaign.py",
     "scripts/reports/audit_published_route_preservation.py",
     "scripts/reports/preserve_published_routes.py",
