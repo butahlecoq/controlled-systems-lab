@@ -161,7 +161,7 @@ git -C build/upstream checkout --detach "$(cat benchmarks/sdk-revision)"
 cmake -S build/upstream -B build/sdk -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF
 cmake --build build/sdk --config Release --parallel 4
 cmake --install build/sdk --config Release --prefix "$PWD/build/research-sdk"
-cmake -S benchmarks -B build/research -DCMAKE_BUILD_TYPE=Release "-DCMAKE_PREFIX_PATH=$PWD/build/research-sdk"
+cmake --fresh -S benchmarks -B build/research -DCMAKE_BUILD_TYPE=Release "-DCMAKE_PREFIX_PATH=$PWD/build/research-sdk"
 cmake --build build/research --config Release
 ctest --test-dir build/research -C Release --output-on-failure --no-tests=error
 ```
