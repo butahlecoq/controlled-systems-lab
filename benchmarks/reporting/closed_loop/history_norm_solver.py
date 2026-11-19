@@ -124,6 +124,7 @@ def solve(relation: dict, objective: dict, *, initial, positive_indices=(), geom
         objective_value = float(solution.value(cost))
         if not np.isfinite(primal).all() or not np.isfinite(objective_value):
             return {"warm_start": warm_start, "success": False, "status": "nonfinite-solution",
+                    "numerical_profile": profile,
                     "solver": "casadi-ipopt/full-history-separate-norm-epigraphs/1",
                     "provider": "casadi-ipopt", "version": f"casadi {ca.__version__}; IPOPT version unavailable"}
         witnesses = dict(fixed_witnesses)
