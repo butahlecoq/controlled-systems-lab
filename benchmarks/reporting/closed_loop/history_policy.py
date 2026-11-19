@@ -296,11 +296,13 @@ class HistoryPolicy:
                 if (np.isfinite(reintegrated).all() and np.all(reintegrated[positive] > 0)
                         and not np.array_equal(reintegrated, initial)):
                     start_recovery = {"policy": "rollout-shifted-controls-from-observation",
+                                      "state": "started", "initial_primal": reintegrated.tolist(),
                                       "original_solver": solver_receipt}
                     self.last_query_capture["start_recovery"] = start_recovery
                     self._capture()
                     solver_receipt = solve(relation, compiled, initial=reintegrated, positive_indices=positive,
                                            geometry_memberships=memberships or ())
+                    start_recovery.update(state="returned", retry_solver_status=solver_receipt["status"])
                     result["invocations"].append({"operation": "controller.solve", "module_id": "continuous-history-mpc",
                         "profile_id": self.controller_id, "provider": "casadi-ipopt",
                         "version": solver_receipt.get("version", "unknown"), "reason": start_recovery["policy"]})
