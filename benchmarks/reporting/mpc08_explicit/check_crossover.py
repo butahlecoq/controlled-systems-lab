@@ -91,9 +91,19 @@ def check_episode(ep, start, cells, spec):
 
 def same_vertices(cell, pts):
     vertices = cell["vertices"]
-    return all(
-        any(hypot(x - float(p), y - float(v)) < 1e-8 for p, v in vertices) for x, y in pts
-    ) and all(any(hypot(float(p) - x, float(v) - y) < 1e-8 for x, y in pts) for p, v in vertices)
+    if len(vertices) != len(pts):
+        return False
+    for offset in range(len(pts)):
+        if all(
+            hypot(
+                pts[(i + offset) % len(pts)][0] - float(p),
+                pts[(i + offset) % len(pts)][1] - float(v),
+            )
+            < 1e-8
+            for i, (p, v) in enumerate(vertices)
+        ):
+            return True
+    return False
 
 
 def check(workload_path, results_path):
@@ -102,7 +112,8 @@ def check(workload_path, results_path):
     require(spec == make_workload(reference), "workload differs from exact construction")
     cells = policy(reference)
     records = [json.loads(s) for s in results_path.read_text().splitlines()]
-    validation = records[0]
+    require(records[0] == {"type": "validation_started"}, "missing validation start")
+    validation = records[1]
     require(validation["type"] == "validation", "missing validation")
     for q, row in zip(spec["queries"], validation["data"]["queries"], strict=True):
         require(q["id"] == row["id"] and "error" not in row, f"failed query {q['id']}: {row}")
@@ -139,9 +150,19 @@ def check(workload_path, results_path):
                 "native affine map",
             )
         require(not remaining, "missing native region")
+    require(len(records) >= 2 and records[1]["type"] == "validation", "validation did not complete")
     keys = set()
     grouped = {}
-    for rec in records[1:]:
+    entries = iter(records[2:])
+    for started, rec in zip(entries, entries, strict=True):
+        require(
+            started
+            == {
+                **{k: rec[k] for k in ("count", "repetition", "position", "controller")},
+                "type": "started",
+            },
+            "attempt identity",
+        )
         count, rep, pos, method = (
             rec[k] for k in ("count", "repetition", "position", "controller")
         )
@@ -167,7 +188,18 @@ def check(workload_path, results_path):
             "timing",
         )
         require(len(data["episodes"]) == count, "work count")
+        durations = [step["latency_ns"] for ep in data["episodes"] for step in ep["steps"]]
+        require(
+            all(type(t) is int and t >= 0 for t in durations)
+            and sum(durations) <= data["service_ns"] + len(durations),
+            "decision timing",
+        )
         if method == "online":
+            completed = sum(ep["status"] == "completed" for ep in data["episodes"])
+            require(
+                data["supplied_warm_starts"] == [completed, completed, 0],
+                "shifted primal/basis counts",
+            )
             require(data["observed_scheduler_width"] == [1, 1, 1], "thread widths")
         for i, episode in enumerate(data["episodes"]):
             check_episode(

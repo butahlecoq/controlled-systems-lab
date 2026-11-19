@@ -4,6 +4,7 @@
 #include <nlohmann/json.hpp>
 #include <chrono>
 #include <ctime>
+#include <cstdio>
 #include <type_traits>
 #include <fstream>
 #include <iostream>
@@ -139,6 +140,7 @@ template <class Policy> Json deploy(const std::vector<Point> &states, int count)
     } else {
         for (int n = 1; n <= 3; ++n) {
             result["observed_scheduler_width"].push_back(controller.at(n).scheduler_threads());
+            result["supplied_warm_starts"].push_back(controller.at(n).supplied_warm_starts());
             result["cold_retries"].push_back(controller.at(n).cold_retries());
         }
     }
@@ -155,28 +157,48 @@ int main(int argc, char **argv) {
         const auto states = spec.at("deployment_states").get<std::vector<Point>>();
         if (states.empty())
             throw std::invalid_argument("empty deployment workload");
-        std::ofstream output(argv[2], std::ios::out | std::ios::trunc);
-        output.exceptions(std::ios::badbit | std::ios::failbit);
-        output << Json{{"type", "validation"}, {"data", paired_queries(spec.at("queries"))}}.dump()
-               << '\n';
+        auto close_file = [](std::FILE *file) { std::fclose(file); };
+        std::unique_ptr<std::FILE, decltype(close_file)> output(std::fopen(argv[2], "wbx"),
+                                                                close_file);
+        if (!output)
+            throw std::runtime_error("cannot exclusively create output JSONL");
+        auto save = [&](const Json &row) {
+            auto line = row.dump() + "\n";
+            if (std::fwrite(line.data(), 1, line.size(), output.get()) != line.size() ||
+                std::fflush(output.get()) != 0)
+                throw std::runtime_error("failed writing attempt record");
+        };
+        save({{"type", "validation_started"}});
+        try {
+            save({{"type", "validation"}, {"data", paired_queries(spec.at("queries"))}});
+        } catch (const std::exception &e) {
+            save({{"type", "validation_error"}, {"error", e.what()}});
+            throw;
+        }
         for (int count : spec.at("counts").get<std::vector<int>>()) {
             if (count < 1 || count > 65536)
                 throw std::invalid_argument("invalid trajectory count");
             for (int rep = -1; rep < 5; ++rep) {
                 for (int position = 0; position < 2; ++position) {
                     const bool offline = (rep % 2 == 0) == (position == 0);
-                    Json data = offline ? deploy<ExplicitController>(states, count)
-                                        : deploy<OnlineController>(states, count);
-                    output << Json{{"type", "deployment"},
-                                   {"count", count},
-                                   {"repetition", rep},
-                                   {"position", position},
-                                   {"controller", offline ? "explicit" : "online"},
-                                   {"data", std::move(data)}}
-                                  .dump()
-                           << '\n';
+                    Json row{{"type", "started"},
+                             {"count", count},
+                             {"repetition", rep},
+                             {"position", position},
+                             {"controller", offline ? "explicit" : "online"}};
+                    save(row);
+                    try {
+                        row["data"] = offline ? deploy<ExplicitController>(states, count)
+                                              : deploy<OnlineController>(states, count);
+                        row["type"] = "deployment";
+                    } catch (const std::exception &e) {
+                        row["type"] = "error";
+                        row["error"] = e.what();
+                        save(row);
+                        throw;
+                    }
+                    save(row);
                 }
-                output.flush();
             }
         }
     } catch (const std::exception &err) {

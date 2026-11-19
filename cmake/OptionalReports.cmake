@@ -21,7 +21,7 @@ if(CSL_BUILD_MPC08_REPORT)
 add_executable(csl_mpc08_crossover benchmarks/reporting/mpc08_explicit/crossover_driver.cpp)
 target_link_libraries(csl_mpc08_crossover PRIVATE highs)
 target_include_directories(csl_mpc08_crossover SYSTEM PRIVATE
-  ${csl_highs_SOURCE_DIR}/highs ${csl_highs_BINARY_DIR} ${csl_json_SOURCE_DIR}/include)
+  ${csl_json_SOURCE_DIR}/include)
 target_compile_features(csl_mpc08_crossover PRIVATE cxx_std_20)
 csl_strict_warnings(csl_mpc08_crossover)
 

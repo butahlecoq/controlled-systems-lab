@@ -76,6 +76,17 @@ class OnlineController {
             start.col_value = warm_controls;
             start.value_valid = true;
             require(solver_.setSolution(start));
+            // The QP initializer accepts a feasible point only alongside a basis.
+            // Basic slack rows supply an identity basis. Nonbasic columns remain
+            // inactive directions, so an interior acceleration is permitted.
+            HighsBasis basis;
+            basis.alien = false;
+            basis.row_status.assign(rows_.size(), HighsBasisStatus::kBasic);
+            basis.col_status.assign(stages_, HighsBasisStatus::kNonbasic);
+            require(solver_.setBasis(basis, "shifted control history"));
+            if (!solver_.getBasis().valid || !solver_.getSolution().value_valid)
+                throw std::runtime_error("warm primal or logical basis rejected");
+            ++supplied_warm_starts_;
         }
         auto run_status = solver_.run();
         if (run_status == HighsStatus::kError) {
@@ -94,6 +105,7 @@ class OnlineController {
         return solver_.getSolution().col_value;
     }
 
+    int supplied_warm_starts() const { return supplied_warm_starts_; }
     int cold_retries() const { return cold_retries_; }
 
     HighsInt scheduler_threads() const { return solver_.getNumSchedulerThreads(); }
@@ -127,6 +139,7 @@ class OnlineController {
     int stages_;
     Highs solver_;
     int cold_retries_{};
+    int supplied_warm_starts_{};
 };
 
 } // namespace mpc_crossover
