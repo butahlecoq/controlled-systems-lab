@@ -33,5 +33,6 @@
     "measurement_binary_instrumented": false
   },
   "figure_renderer": "Matplotlib 3.11.2",
-  "independent_solver": "SciPy SLSQP 1.18.1"
+  "independent_solver": "SciPy SLSQP 1.18.1",
+  "figure_renderer_commit": "e15d456bf8525f94c62c106c49ba868cd3b2d745"
 }

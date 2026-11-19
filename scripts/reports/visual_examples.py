@@ -31,9 +31,9 @@ import stage_buryatia_volterra
 import stage_discrete_mpc_2d
 import stage_ext07
 import stage_four_state_projection_approximations
-import stage_mpc_crossover
 import stage_history_membership_2d
 import stage_history_optimizer_native
+import stage_mpc_crossover
 import stage_native_discrete_models
 import stage_native_extended_models
 import stage_native_flexible_pitch
@@ -1378,7 +1378,9 @@ def build(catalog, site):
         stage_four_state_projection_approximations.build(Path(__file__).resolve().parents[2])
     )
     saved_figures += approximation_cards
-    crossover_files, crossover_inventory, crossover_card = stage_mpc_crossover.build(Path(__file__).resolve().parents[2])
+    crossover_files, crossover_inventory, crossover_card = stage_mpc_crossover.build(
+        Path(__file__).resolve().parents[2]
+    )
     saved_figures += crossover_card
     buryatia_files, buryatia_inventory, buryatia_card = stage_buryatia_dim4.build(
         Path(__file__).resolve().parents[2]
