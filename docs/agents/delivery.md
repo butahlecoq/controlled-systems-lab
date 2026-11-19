@@ -45,6 +45,31 @@ and does not provide a generic CMake/C++ package registry. Do not add a containe
 or another ecosystem solely to populate the Packages tab. Actions artifacts are
 temporary CI outputs, not stable release URLs.
 
+## SDK and evidence release identities
+
+- **SDK releases** use the tag and title `vMAJOR.MINOR.PATCH`, with all three
+  numbers matching `project(CSL VERSION ...)` in the tagged `CMakeLists.txt`.
+  Choose the next version before preparing the candidate. Keep initial
+  development releases in the `0.x` series until the public API is declared
+  stable.
+- **Evidence releases** retain their `evidence/` tags and descriptive titles.
+  Preserve existing download URLs. Set new evidence releases to
+  `--latest=false` so the latest SDK release remains the entry point for
+  library users.
+
+After the gates below pass, create an annotated tag at the reviewed commit on
+`main` and push only that tag. Verify that the remote tag resolves to the
+reviewed commit before creating the GitHub Release. Publish the source release
+with the tag as its title, the reviewed release notes and
+`gh release create <tag> --repo butahlecoq/controlled-systems-lab --verify-tag
+--title <tag> --notes-file <file> --latest`. Each version identifies one commit.
+Use a new version for a source correction.
+
+For a source release, GitHub supplies the tag's source archive. Include the
+source commit, tested profiles, validation links, and the README Quick start
+at that tag in the release notes. Apply the distribution gate below before
+adding install archives or other binaries.
+
 ## Prepare a release candidate
 
 1. Identify the exact reviewed source commit and proposed version/tag. Describe
