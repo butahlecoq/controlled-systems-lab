@@ -143,6 +143,11 @@ def is_working_document_path(path: str) -> bool:
 def is_functional_doc_asset(path: str) -> bool:
     if path in FUNCTIONAL_DOC_EXACT_ASSETS:
         return True
+    if (
+        path.startswith("docs/examples/closed-loop/campaign-2026-11-18/")
+        and path.endswith(".json.sha256")
+    ):
+        return True
     if path.startswith("docs/research/evidence/") and Path(path).name in {
         "SHA256SUMS",
         "exit-code",

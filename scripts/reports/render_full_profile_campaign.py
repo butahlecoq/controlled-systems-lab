@@ -487,9 +487,9 @@ def main() -> int:
         "published evidence release" if release_is_published else "planned release URL"
     )
     release_status_text = (
-        "The immutable evidence release is published."
+        "The evidence release is published with hashes recorded for verification."
         if release_is_published
-        else "The immutable evidence release is pending publication with this report."
+        else "The evidence release is pending publication with this report."
     )
     page = [page_start(title, stylesheet_href="../../examples.css", crumbs=crumbs)]
     page.append(

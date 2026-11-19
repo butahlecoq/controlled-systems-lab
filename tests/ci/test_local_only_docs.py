@@ -193,6 +193,25 @@ class LocalOnlyDocsTests(unittest.TestCase):
             result = self.run_checker(root, base)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
+    def test_allows_campaign_json_checksum_sidecars(self) -> None:
+        temporary, root, base = self.repository()
+        with temporary:
+            assets = {
+                "docs/examples/closed-loop/campaign-2026-11-18/provenance-manifest.json.sha256": "hash  provenance-manifest.json\n",
+                "docs/examples/closed-loop/campaign-2026-11-18/raw/archive-manifest.json.sha256": "hash  archive-manifest.json\n",
+            }
+            for relative, content in assets.items():
+                path = root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(content, encoding="utf-8")
+            subprocess.run(["git", "-C", str(root), "add", *assets], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "commit", "-qm", "add campaign checksum sidecars"],
+                check=True,
+            )
+            result = self.run_checker(root, base)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_rejects_the_local_research_decision_log(self) -> None:
         temporary, root, base = self.repository()
         with temporary:
