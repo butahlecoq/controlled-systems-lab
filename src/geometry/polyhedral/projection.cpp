@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <numeric>
 
 namespace csl::geometry::polyhedral {
 namespace {
@@ -93,6 +94,36 @@ SetHandle make_h(const sets::Description& description,const std::vector<Vector>&
         take(numeric::snapshot(e)),take(numeric::snapshot_vector(values))})).as_handle();
 }
 struct Rows { std::vector<Vector> a,e; Vector b,f; };
+
+void reduce_duplicate_inequalities(Rows& rows) {
+    std::vector<std::size_t> order(rows.a.size());
+    std::iota(order.begin(), order.end(), std::size_t{0});
+    std::stable_sort(order.begin(), order.end(),
+                     [&](std::size_t left, std::size_t right) {
+                         return rows.a[left] < rows.a[right];
+                     });
+    std::vector<bool> redundant(rows.a.size(), false);
+    for (std::size_t i = 0; i < order.size();) {
+        const auto first = order[i++];
+        while (i < order.size() && rows.a[order[i]] == rows.a[first]) {
+            const auto duplicate = order[i++];
+            rows.b[first] = std::min(rows.b[first], rows.b[duplicate]);
+            redundant[duplicate] = true;
+        }
+    }
+
+    std::size_t kept = 0;
+    for (std::size_t i = 0; i < rows.a.size(); ++i) {
+        if (redundant[i])
+            continue;
+        if (kept != i)
+            rows.a[kept] = std::move(rows.a[i]);
+        rows.b[kept++] = rows.b[i];
+    }
+    rows.a.resize(kept);
+    rows.b.resize(kept);
+}
+
 bool finite(const Vector& row) {
     return std::all_of(row.begin(),row.end(),[](double value){return std::isfinite(value);});
 }
@@ -144,6 +175,7 @@ Materialized materialize_h(const LazyProjectionDescription& data,SetId id,
         for(std::size_t c=0;c<n;++c) {Vector row(n,0.0);row[c]=1;rows.e.push_back(std::move(row));rows.f.push_back(singleton->point[c]);}
     }
     if(contradiction(rows)) return empty();
+    reduce_duplicate_inequalities(rows);
     std::vector<bool> keep(n,false);
     for(auto index:data.coordinates) keep[index]=true;
     for(std::size_t k=0;k<n;++k) {
@@ -191,6 +223,7 @@ Materialized materialize_h(const LazyProjectionDescription& data,SetId id,
             rows.a=std::move(combined);rows.b=std::move(bounds);
         }
         if(contradiction(rows)) return empty();
+        reduce_duplicate_inequalities(rows);
     }
     const auto select=[&](std::vector<Vector>& matrix) {
         for(auto& row:matrix) {Vector selected;for(auto index:data.coordinates) selected.push_back(row[index]);row=std::move(selected);}

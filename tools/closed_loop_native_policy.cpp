@@ -41,6 +41,7 @@
 #include <numeric>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <variant>
 
@@ -974,9 +975,14 @@ Json feedback_export(const problem::ResolvedProblem& resolved, const Json& in,
     auto intersection = feedback_provider(geometry::polyhedral::make_intersection_registration(), "csl.polyhedron.h");
     std::vector<StrictCoordinateLowerBound> strict;
     if(in.at("task_id") == "env717-earth-orbit/continuous-receding/1") strict.push_back({0, 0});
+    const auto history_method = in.value("polytope_history", std::string{"stagewise"});
+    if(history_method != "stagewise" && history_method != "certified_whole_history")
+        throw std::runtime_error("unknown polytope history method");
+    const auto polytope_history = history_method == "certified_whole_history"
+        ? FeedbackPolytopeHistory::certified_whole_history : FeedbackPolytopeHistory::stagewise;
     auto outcome = feedback_geometry(resolved, {in.at("request_id").get<std::string>()},
         terminal.as_handle(), found->second, strict,
-        {{forward, intersection}, feedback_provider(lp, "csl.program-result.v1"), max_generators}, {});
+        {{forward, intersection}, feedback_provider(lp, "csl.program-result.v1"), max_generators}, polytope_history, {});
     const auto* failure = std::get_if<FeedbackGeometryFailure>(&outcome);
     const auto& geometry = failure ? failure->prefix : std::get<FeedbackGeometry>(outcome);
     Json result{{"family", name}, {"scope", "forward_relevant_from_observation"},
@@ -1151,6 +1157,50 @@ Json fixed_tail_query(const Json& in,const problem::ResolvedProblem& source,
 }
 #endif
 
+Json lifted_feedback_export(const synthesis::JointHistoryRelation& history,
+        const std::vector<synthesis::HistoryPrefixProjection>& prefixes, const Json& in) {
+    const auto encode_ranges = [](const std::vector<synthesis::HistoryIndexRange>& ranges) {
+        Json output = Json::array();
+        for (const auto& range : ranges)
+            output.push_back({range.begin, range.end});
+        return output;
+    };
+    const auto& history_id = history.relation.metadata()->id.value;
+    const auto request = in.at("request_id").get<std::string>();
+    Json strict = Json::array();
+    if (in.at("task_id") == "env717-earth-orbit/continuous-receding/1")
+        strict.push_back({{"coordinate", 0}, {"lower_bound", 0}, {"strict", true}});
+    Json stages = Json::array();
+    for (const auto& prefix : prefixes) {
+        std::vector<std::size_t> indices(prefix.state_columns.end - prefix.state_columns.begin);
+        std::iota(indices.begin(), indices.end(), prefix.state_columns.begin);
+        std::vector<std::size_t> coordinates(indices.size());
+        std::iota(coordinates.begin(), coordinates.end(), 0);
+        Json members = Json::array();
+        for (const std::string_view role : {"forward", "backward", "intersection"}) {
+            const auto id = "feedback/" + request + "/" + std::to_string(prefix.stage.value) +
+                            "/lifted/" + std::string(role);
+            Json member{{"set_id", id}, {"role", role}, {"indices", indices},
+                {"kind", "lifted-h"}, {"history_set_id", history_id},
+                {"scope", "forward_relevant_from_observation"}, {"relation", "equivalent"},
+                {"assurance", "validated"}, {"strict_source_domain", strict},
+                {"source_sets", {history_id}}, {"requests", Json::array()},
+                {"providers", Json::array()}, {"support_calls", Json::array()}};
+            member["row_selection"] = role == "forward"
+                ? Json{{"kind", "prefix"}, {"inequalities", encode_ranges(prefix.inequality_rows)},
+                       {"equalities", encode_ranges(prefix.equality_rows)}}
+                : Json{{"kind", "full"}};
+            members.push_back(std::move(member));
+        }
+        stages.push_back({{"stage", prefix.stage.value}, {"coordinates", coordinates},
+                          {"memberships", std::move(members)}});
+    }
+    return {{"family", "polytope"}, {"scope", "forward_relevant_from_observation"},
+            {"status", "complete"}, {"polytope_history", "lifted_whole_history"},
+            {"implementation", "csl.synthesis.lifted-history-projection"},
+            {"stages", std::move(stages)}};
+}
+
 Json continuous_history_query(const Json& in) {
     const auto solver = in.at("history_solver").get<std::string>();
     if (solver != "csl.convex.highs" && solver != "casadi-ipopt")
@@ -1184,7 +1234,19 @@ Json continuous_history_query(const Json& in) {
     const auto resolved = take_history(problem::resolve(source,
         {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}), "resolve");
     const auto universal = take(sets::make_universal({{"history-universal-terminal"}, n, {}}), "terminal-domain");
-    const auto history = take_history(synthesis::recover_joint_history(resolved, universal), "recover-history");
+    const bool lifted = in.value("polytope_history", std::string{}) == "lifted_whole_history";
+    if (lifted && (solver != "casadi-ipopt" || in.value("geometry_family", std::string{}) != "polytope" ||
+                   in.value("mode", std::string{}) != "continuous-history/1"))
+        throw std::runtime_error("lifted history requires continuous-history polytope with casadi-ipopt");
+    std::vector<synthesis::HistoryPrefixProjection> prefixes;
+    const auto history = [&] {
+        if (!lifted)
+            return take_history(synthesis::recover_joint_history(resolved, universal), "recover-history");
+        auto result = take_history(synthesis::recover_lifted_history_projections(resolved, universal),
+                                   "recover-lifted-history");
+        prefixes = std::move(result.prefixes);
+        return std::move(result.history);
+    }();
     const auto cost = running_cost(in.at("running_cost"), original, m);
     const auto program = take_history(optimization::compile_history_cost(history, terminal, cost, stage), "compile-history-cost");
     if(in.value("mode",std::string{})=="fixed-tail-policy/1") {
@@ -1215,6 +1277,11 @@ Json continuous_history_query(const Json& in) {
             {"layout", "x0..xT,u0..u(T-1)"}}}, {"geometry", "not_used"},
         {"assurance", "numerical affine history; no validated completeness or nonlinear safety claim"}};
     response["requested_solver"] = solver;
+    if (lifted) {
+        response["history_relation"]["set_id"] = history.relation.metadata()->id.value;
+        response["geometry"] = lifted_feedback_export(history, prefixes, in);
+        return response;
+    }
     if(in.contains("geometry_family")) {
         if(solver != "casadi-ipopt") throw std::runtime_error("feedback family requires explicitly selected casadi-ipopt");
 #if CSL_NATIVE_HAS_HIGHS && CSL_NATIVE_HAS_QHULL

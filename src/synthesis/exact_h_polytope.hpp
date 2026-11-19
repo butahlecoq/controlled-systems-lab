@@ -402,6 +402,50 @@ inline bool normalize_rows(std::vector<Row>& rows, std::size_t max_rows) {
     return true;
 }
 
+inline void negate(Row& row) {
+    const auto negate_value = [](Integer& value) {
+        value.negative = !is_zero(value) && !value.negative;
+    };
+    for (auto& coefficient : row.coefficients)
+        negate_value(coefficient);
+    negate_value(row.bound);
+}
+
+inline bool substitute_equality(Row& row, const Row& equation, std::size_t variable,
+                                std::size_t max_bits, std::size_t& observed_bits) {
+    const auto& pivot = equation.coefficients[variable];
+    Integer factor = row.coefficients[variable];
+    if (!is_zero(factor)) {
+        Integer scale = pivot;
+        scale.negative = false;
+        factor.negative = factor.negative == pivot.negative;
+        // Multiply the inequality by |pivot| before adding the scaled equality.
+        const auto combine = [&](Integer& value, const Integer& equality_value) {
+            Integer scaled_value, correction;
+            if (!multiply(value, scale, max_bits, scaled_value) ||
+                !multiply(equality_value, factor, max_bits, correction))
+                return false;
+            observed_bits = std::max({observed_bits, bit_length(scaled_value),
+                                      bit_length(correction)});
+            if (!add(scaled_value, correction, max_bits))
+                return false;
+            observed_bits = std::max(observed_bits, bit_length(scaled_value));
+            value = std::move(scaled_value);
+            return true;
+        };
+        for (std::size_t column = 0; column < row.coefficients.size(); ++column) {
+            if (column != variable && !combine(row.coefficients[column],
+                                               equation.coefficients[column]))
+                return false;
+        }
+        if (!combine(row.bound, equation.bound))
+            return false;
+    }
+    row.coefficients.erase(row.coefficients.begin() + static_cast<std::ptrdiff_t>(variable));
+    normalize_power_of_two(row);
+    return true;
+}
+
 } // namespace exact_detail
 
 inline bool make_row(std::span<const double> coefficients, double bound,
@@ -418,11 +462,7 @@ inline bool append_equality(std::span<const double> coefficients, double value,
     if (!make_row(coefficients, value, false, max_integer_bits, positive))
         return false;
     Row negative = positive;
-    for (auto& coefficient : negative.coefficients)
-        coefficient.negative = !exact_detail::is_zero(coefficient) &&
-                                !coefficient.negative;
-    negative.bound.negative = !exact_detail::is_zero(negative.bound) &&
-                              !negative.bound.negative;
+    exact_detail::negate(negative);
     rows.push_back(std::move(positive));
     rows.push_back(std::move(negative));
     return true;
@@ -445,7 +485,8 @@ inline FeasibilityResult feasible(std::vector<Row> rows,
                                   Limits limits = {},
                                   Cancellation cancellation = {},
                                   std::size_t retained_variables = 0,
-                                  std::vector<Row>* projected_rows = nullptr) {
+                                  std::vector<Row>* projected_rows = nullptr,
+                                  std::vector<Row> equalities = {}) {
     if (projected_rows)
         projected_rows->clear();
     FeasibilityResult result;
@@ -458,35 +499,82 @@ inline FeasibilityResult feasible(std::vector<Row> rows,
         return unsupported("Variable count exceeds the exact feasibility limit");
     if (retained_variables > variables)
         return unsupported("Retained variable count exceeds the relation dimension");
-    if (rows.size() > limits.max_rows)
+    if (rows.size() > limits.max_rows || equalities.size() > limits.max_rows - rows.size())
         return unsupported("Initial row count exceeds the exact feasibility limit");
-    if (cancellation.stop_requested()) {
+    const auto cancelled = [&] {
         result.state = FeasibilityState::cancelled;
         result.reason = "Exact feasibility was cancelled";
         return result;
-    }
-    for (auto& row : rows) {
-        if (row.coefficients.size() != variables)
-            return unsupported("Constraint row dimensions do not match");
-        exact_detail::trim(row.bound);
-        result.maximum_integer_bits = std::max(
-            result.maximum_integer_bits, exact_detail::bit_length(row.bound));
-        for (auto& coefficient : row.coefficients) {
-            exact_detail::trim(coefficient);
-            result.maximum_integer_bits = std::max(
-                result.maximum_integer_bits,
-                exact_detail::bit_length(coefficient));
+    };
+    if (cancellation.stop_requested())
+        return cancelled();
+    for (auto* relation : {&rows, &equalities}) {
+        for (auto& row : *relation) {
+            if (row.coefficients.size() != variables)
+                return unsupported("Constraint row dimensions do not match");
+            exact_detail::trim(row.bound);
+            result.maximum_integer_bits = std::max(result.maximum_integer_bits,
+                                                   exact_detail::bit_length(row.bound));
+            for (auto& coefficient : row.coefficients) {
+                exact_detail::trim(coefficient);
+                result.maximum_integer_bits = std::max(result.maximum_integer_bits,
+                                                       exact_detail::bit_length(coefficient));
+            }
+            if (result.maximum_integer_bits > limits.max_integer_bits)
+                return unsupported("Input integer bit limit exceeded");
         }
-        if (result.maximum_integer_bits > limits.max_integer_bits)
-            return unsupported("Input integer bit limit exceeded");
+    }
+    if (std::any_of(equalities.begin(), equalities.end(), [](const Row& row) { return row.strict; }))
+        return unsupported("Exact feasibility requires non-strict equality rows");
+
+    std::size_t operations = 0;
+    if (!equalities.empty())
+        result.peak_rows = rows.size() + equalities.size();
+    for (std::size_t variable = retained_variables;
+         variable < variables && !equalities.empty();) {
+        if (cancellation.stop_requested())
+            return cancelled();
+        const auto pivot = std::find_if(equalities.begin(), equalities.end(), [&](const Row& row) {
+            return !exact_detail::is_zero(row.coefficients[variable]);
+        });
+        if (pivot == equalities.end()) {
+            ++variable;
+            continue;
+        }
+        Row equation = std::move(*pivot);
+        equalities.erase(pivot);
+        for (auto* relation : {&rows, &equalities}) {
+            for (auto& row : *relation) {
+                if (cancellation.stop_requested())
+                    return cancelled();
+                if (!exact_detail::is_zero(row.coefficients[variable])) {
+                    // Two products and an addition per remaining entry, including the bound.
+                    if (variables > (limits.max_operations - operations) / 3)
+                        return unsupported("Exact equality substitution operation limit exceeded");
+                    operations += 3 * variables;
+                }
+                if (!exact_detail::substitute_equality(row, equation, variable,
+                                                       limits.max_integer_bits,
+                                                       result.maximum_integer_bits))
+                    return unsupported("Exact equality substitution integer bit limit exceeded");
+            }
+        }
+        --variables;
+    }
+    // Equalities involving only retained coordinates remain as opposing inequalities.
+    if (equalities.size() > (limits.max_rows - rows.size()) / 2)
+        return unsupported("Remaining equality rows exceed the exact feasibility limit");
+    for (auto& equation : equalities) {
+        rows.push_back(equation);
+        exact_detail::negate(equation);
+        rows.push_back(std::move(equation));
     }
     if (!exact_detail::normalize_rows(rows, limits.max_rows)) {
         result.state = FeasibilityState::infeasible;
-        result.peak_rows = rows.size();
+        result.peak_rows = std::max(result.peak_rows, rows.size());
         return result;
     }
-    result.peak_rows = rows.size();
-    std::size_t operations = 0;
+    result.peak_rows = std::max(result.peak_rows, rows.size());
     for (std::size_t eliminated = 0;
          eliminated < variables - retained_variables; ++eliminated) {
         if (cancellation.stop_requested()) {
@@ -690,16 +778,21 @@ inline bool compare_scaled_rationals(const ExactRational& lhs,
     return true;
 }
 
-inline bool exact_rational_to_double(const ExactRational& value,
-                                     std::size_t max_bits, double& result) {
-    if (exact_detail::is_zero(value.numerator)) {
-        result = 0.0;
-        return true;
-    }
-    if (value.denominator.negative || exact_detail::is_zero(value.denominator))
-        return false;
+enum class Binary64BracketStatus { finite, invalid, outside_finite_range, arithmetic_budget };
 
-    ExactRational magnitude = value;
+struct Binary64Bracket {
+    Binary64BracketStatus status;
+    double lower{};
+    double upper{};
+};
+
+inline Binary64Bracket bracket_binary64(ExactRational magnitude, std::size_t max_bits) {
+    using Status = Binary64BracketStatus;
+    if (magnitude.denominator.negative || exact_detail::is_zero(magnitude.denominator))
+        return {Status::invalid};
+    if (exact_detail::is_zero(magnitude.numerator))
+        return {Status::finite};
+
     const bool negative = magnitude.numerator.negative;
     magnitude.numerator.negative = false;
     constexpr std::uint64_t max_finite_bits = 0x7fefffffffffffffULL;
@@ -709,27 +802,39 @@ inline bool exact_rational_to_double(const ExactRational& value,
         const auto bits = low + (high - low) / 2;
         const auto candidate = std::bit_cast<double>(bits);
         const auto dyadic = exact_detail::decode(candidate);
-        ExactRational candidate_rational;
-        candidate_rational.numerator = exact_detail::from_u64(dyadic.significand);
-        candidate_rational.binary_exponent = dyadic.exponent;
+        const ExactRational candidate_rational{
+            exact_detail::from_u64(dyadic.significand),
+            exact_detail::from_u64(1), dyadic.exponent};
         int order = 0;
-        if (!compare_scaled_rationals(magnitude, candidate_rational,
-                                      max_bits, order))
-            return false;
+        if (!compare_scaled_rationals(magnitude, candidate_rational, max_bits, order))
+            return {Status::arithmetic_budget};
         if (order == 0) {
-            const auto signed_bits = bits | (negative ? (std::uint64_t{1} << 63) : 0);
-            result = std::bit_cast<double>(signed_bits);
-            return true;
+            const double value = negative ? -candidate : candidate;
+            return {Status::finite, value, value};
         }
         if (order > 0) {
-            if (bits == max_finite_bits) break;
             low = bits + 1;
         } else {
-            if (bits == 0) break;
+            // Zero is the first candidate, and magnitude is positive.
             high = bits - 1;
         }
     }
-    return false;
+
+    if (low > max_finite_bits)
+        return {Status::outside_finite_range};
+    const auto lower = std::bit_cast<double>(high);
+    const auto upper = std::bit_cast<double>(low);
+    return negative ? Binary64Bracket{Status::finite, -upper, -lower}
+                    : Binary64Bracket{Status::finite, lower, upper};
+}
+
+inline bool exact_rational_to_double(const ExactRational& value,
+                                     std::size_t max_bits, double& result) {
+    const auto bracket = bracket_binary64(value, max_bits);
+    if (bracket.status != Binary64BracketStatus::finite || bracket.lower != bracket.upper)
+        return false;
+    result = bracket.lower;
+    return true;
 }
 
 // Project an exact H-relation onto the integer-scaled value of a binary64

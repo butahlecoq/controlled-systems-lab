@@ -31,6 +31,20 @@ struct SparseEntry {
     double value;
 };
 
+struct RowCounts {
+    std::size_t inequalities{};
+    std::size_t equalities{};
+};
+
+void append_range(std::vector<HistoryIndexRange>& ranges, std::size_t begin, std::size_t end) {
+    if (begin == end)
+        return;
+    if (!ranges.empty() && ranges.back().end == begin)
+        ranges.back().end = end;
+    else
+        ranges.push_back({begin, end});
+}
+
 class JointRows {
     std::size_t columns_;
     SparseMatrix inequalities_;
@@ -123,6 +137,10 @@ public:
         return false;
     }
 
+    RowCounts row_counts() const noexcept {
+        return {inequalities_.rows, equalities_.rows};
+    }
+
     sets::Result<sets::SetData> finish(SetId id, std::size_t dimension) const {
         auto inequalities = numeric::snapshot(inequalities_);
         if (const auto* failure = std::get_if<Diagnostic>(&inequalities)) return *failure;
@@ -161,10 +179,8 @@ std::variant<sets::SetData, Diagnostic> state_or_control_data(const AdmissibleSe
     }, input);
 }
 
-} // namespace
-
-ControlRecoveryOutcome recover_joint_history(const problem::ResolvedProblem& resolved,
-        const sets::SetData& terminal_relation) {
+ControlRecoveryOutcome recover_history(const problem::ResolvedProblem& resolved,
+        const sets::SetData& terminal_relation, std::vector<HistoryPrefixProjection>* prefixes) {
     const auto source = resolved.description();
     const auto system = resolved.model();
     const auto dimensions = system.dimensions();
@@ -215,6 +231,7 @@ ControlRecoveryOutcome recover_joint_history(const problem::ResolvedProblem& res
             "Resolved state/control stage counts do not match the dynamics horizon."});
 
     JointRows rows(width);
+    std::vector<RowCounts> state_ends, control_ends, dynamics_ends;
     if (initial->point.size() != n || !finite(initial->point))
         return fail(invalid("recovery.initial", "Known initial point has an invalid dimension or nonfinite value."));
     for (std::size_t column = 0; column < n; ++column) {
@@ -237,8 +254,12 @@ ControlRecoveryOutcome recover_joint_history(const problem::ResolvedProblem& res
             return fail(unsupported("recovery.capacity", "State coordinate offset overflows size_t."));
         if (!rows.append_set(state_set, stage * n))
             return fail(unsupported("recovery.arithmetic", "Could not append a state constraint to the joint history."));
+        if (prefixes)
+            state_ends.push_back(rows.row_counts());
     }
 
+    if (prefixes)
+        control_ends.push_back(rows.row_counts());
     for (std::size_t stage = 0; stage < horizon; ++stage) {
         auto imported = state_or_control_data(controls->stages[stage],
             {"recovery/control/" + std::to_string(stage)});
@@ -254,8 +275,12 @@ ControlRecoveryOutcome recover_joint_history(const problem::ResolvedProblem& res
         const auto offset = state_width + stage * m;
         if (!rows.append_set(control_set, offset))
             return fail(unsupported("recovery.arithmetic", "Could not append a control constraint to the joint history."));
+        if (prefixes)
+            control_ends.push_back(rows.row_counts());
     }
 
+    if (prefixes)
+        dynamics_ends.push_back(rows.row_counts());
     for (std::size_t stage = 0; stage < horizon; ++stage) {
         const auto dynamics = system.stage({stage});
         if (const auto* diagnostic = std::get_if<Diagnostic>(&dynamics)) return fail(*diagnostic);
@@ -280,6 +305,8 @@ ControlRecoveryOutcome recover_joint_history(const problem::ResolvedProblem& res
             if (!rows.append(std::move(coefficients), step.offset[row], true))
                 return fail(unsupported("recovery.arithmetic", "Could not encode a finite dynamics equality."));
         }
+        if (prefixes)
+            dynamics_ends.push_back(rows.row_counts());
     }
 
     if (!rows.append_set(terminal_relation, horizon * n))
@@ -290,7 +317,39 @@ ControlRecoveryOutcome recover_joint_history(const problem::ResolvedProblem& res
         identity_field(terminal_relation.metadata()->id.value);
     auto result = rows.finish({output_id}, width);
     if (const auto* diagnostic = std::get_if<Diagnostic>(&result)) return fail(*diagnostic);
+    if (prefixes) {
+        prefixes->reserve(horizon + 1);
+        for (std::size_t k = 0; k <= horizon; ++k) {
+            HistoryPrefixProjection prefix{{k}, {k * n, (k + 1) * n}, {}, {}};
+            append_range(prefix.inequality_rows, 0, state_ends[k].inequalities);
+            append_range(prefix.inequality_rows, control_ends.front().inequalities,
+                         control_ends[k].inequalities);
+            append_range(prefix.equality_rows, 0, state_ends[k].equalities);
+            append_range(prefix.equality_rows, control_ends.front().equalities,
+                         control_ends[k].equalities);
+            append_range(prefix.equality_rows, dynamics_ends.front().equalities,
+                         dynamics_ends[k].equalities);
+            prefixes->push_back(std::move(prefix));
+        }
+    }
     return JointHistoryRelation{coordinates, std::get<sets::SetData>(std::move(result))};
+}
+
+} // namespace
+
+ControlRecoveryOutcome recover_joint_history(const problem::ResolvedProblem& resolved,
+        const sets::SetData& terminal_relation) {
+    return recover_history(resolved, terminal_relation, nullptr);
+}
+
+LiftedHistoryProjectionOutcome recover_lifted_history_projections(
+        const problem::ResolvedProblem& resolved, const sets::SetData& terminal_relation) {
+    std::vector<HistoryPrefixProjection> prefixes;
+    auto history = recover_history(resolved, terminal_relation, &prefixes);
+    if (auto* failure = std::get_if<Diagnostics>(&history))
+        return std::move(*failure);
+    return LiftedHistoryProjections{std::get<JointHistoryRelation>(std::move(history)),
+                                    std::move(prefixes)};
 }
 
 } // namespace csl::synthesis

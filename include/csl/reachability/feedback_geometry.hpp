@@ -82,6 +82,8 @@ struct FeedbackGeometryFailure {
     std::vector<SetHandle> pending_input_carriers;
 };
 using FeedbackGeometryOutcome = std::variant<FeedbackGeometry, FeedbackGeometryFailure>;
+enum class FeedbackPolytopeHistory { stagewise, certified_whole_history };
+
 struct FeedbackGeometryDependencies {
     NominalTubeDependencies geometry;
     registry::PreparedProvider<registry::LPPort> support;
@@ -99,5 +101,11 @@ FeedbackGeometryOutcome feedback_geometry(const problem::ResolvedProblem&, Reque
     const SetHandle& terminal_feasibility, FeedbackFamily,
     const std::vector<StrictCoordinateLowerBound>& strict_source_domain,
     const FeedbackGeometryDependencies&, const ExecutionContext&);
+
+// Certified whole-history mode is an opt-in outer H enclosure of the original affine history.
+FeedbackGeometryOutcome feedback_geometry(const problem::ResolvedProblem&, RequestId,
+    const SetHandle& terminal_feasibility, FeedbackFamily,
+    const std::vector<StrictCoordinateLowerBound>& strict_source_domain,
+    const FeedbackGeometryDependencies&, FeedbackPolytopeHistory, const ExecutionContext&);
 
 } // namespace csl::reachability

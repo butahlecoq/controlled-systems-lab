@@ -23,4 +23,31 @@ using ControlRecoveryOutcome = std::variant<JointHistoryRelation, Diagnostics>;
 ControlRecoveryOutcome recover_joint_history(const problem::ResolvedProblem&,
     const sets::SetData& terminal_relation);
 
+struct HistoryIndexRange {
+    std::size_t begin, end; // Half-open range in the canonical H relation.
+    bool operator==(const HistoryIndexRange&) const = default;
+};
+
+struct HistoryPrefixProjection {
+    StageIndex stage;
+    HistoryIndexRange state_columns;
+    std::vector<HistoryIndexRange> inequality_rows;
+    std::vector<HistoryIndexRange> equality_rows;
+};
+
+struct LiftedHistoryProjections {
+    JointHistoryRelation history;
+    // One view per stage. Project the listed rows onto state_columns for the
+    // forward set. Project all rows onto the same columns for the
+    // forward-relevant terminal-feasible set and its intersection with forward.
+    std::vector<HistoryPrefixProjection> prefixes;
+};
+
+using LiftedHistoryProjectionOutcome = std::variant<LiftedHistoryProjections, Diagnostics>;
+
+// Construct shared lifted descriptions of the stage marginals of the stored
+// affine problem. The views need no variable elimination or copied H matrices.
+LiftedHistoryProjectionOutcome recover_lifted_history_projections(
+    const problem::ResolvedProblem&, const sets::SetData& terminal_relation);
+
 } // namespace csl::synthesis
