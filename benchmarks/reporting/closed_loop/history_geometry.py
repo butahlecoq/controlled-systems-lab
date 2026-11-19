@@ -14,9 +14,43 @@ def _array(value, shape, name):
     return result
 
 
-def parse(entries, dimension):
+def _lifted_rows(relation, dimension):
+    result = []
+    for rows_key, values_key in (("inequalities", "upper_bounds"), ("equalities", "equality_values")):
+        rows = relation[rows_key]
+        matrix = _array(rows, (len(rows), dimension), rows_key) if rows else np.empty((0, dimension))
+        values = _array(relation[values_key], (len(rows),), values_key)
+        result.append((rows_key, matrix, values))
+    return result
+
+
+def _lifted_slices(selection, rows):
+    if selection == {"kind": "full"}:
+        return [(matrix, rhs, key == "equalities") for key, matrix, rhs in rows]
+    if not isinstance(selection, dict) or selection.get("kind") != "prefix":
+        raise ValueError("invalid lifted history row selection")
+    result = []
+    for key, matrix, rhs in rows:
+        ranges = selection.get(key)
+        if not isinstance(ranges, list):
+            raise ValueError("invalid lifted history row ranges")
+        last_end = 0
+        for interval in ranges:
+            if (not isinstance(interval, list) or len(interval) != 2
+                    or any(type(i) is not int for i in interval)):
+                raise ValueError("invalid lifted history row range")
+            lo, hi = interval
+            if not last_end <= lo < hi <= len(matrix):
+                raise ValueError("invalid lifted history row range bounds")
+            result.append((matrix[lo:hi], rhs[lo:hi], key == "equalities"))
+            last_end = hi
+    return result
+
+
+def parse(entries, dimension, *, relation=None, history_dimension=None):
     """Validate portable memberships; indices refer to canonical history state coordinates."""
     result = []
+    reuse_rows = None
     for entry in entries:
         kind = entry["kind"]
         indices = entry["indices"]
@@ -24,7 +58,14 @@ def parse(entries, dimension):
                                for i in indices) or len(set(indices)) != len(indices)):
             raise ValueError("invalid geometry coordinate indices")
         count = len(indices)
-        if kind == "h":
+        if kind == "lifted-h":
+            if (not relation or relation.get("representation") != "polytope-h"
+                    or not relation.get("set_id") or relation["set_id"] != entry.get("history_set_id")):
+                raise ValueError("lifted projection must refer to the mandatory original H history")
+            if reuse_rows is None:
+                reuse_rows = _lifted_rows(relation, history_dimension or dimension)
+            result.append((kind, indices, _lifted_slices(entry.get("row_selection"), reuse_rows)))
+        elif kind == "h":
             inequalities = entry["inequalities"]
             equalities = entry["equalities"]
             result.append((kind, indices,
@@ -77,6 +118,10 @@ def constrain(opti, z, entries, initial, *, physical_scales=None):
     factors = []
     for entry in entries:
         kind, indices, *data = entry
+        if kind == "lifted-h":
+            # The original full H constraints already include every selected row.
+            factors.append(None)
+            continue
         x = ca.vertcat(*(z[i] for i in indices))
         if kind == "h":
             A, b, E, e = data
@@ -116,7 +161,17 @@ def verify(entries, primal, factors, *, tolerance=1e-7):
     for entry, witness in zip(entries, factors):
         kind, indices, *data = entry
         x = z[indices]
-        if kind == "h":
+        if kind == "lifted-h":
+            _array(witness, (0,), "lifted witness")
+            residual = 0.0
+            for matrix, rhs, equality in data[0]:
+                delta = matrix @ z - rhs
+                if not np.isfinite(delta).all():
+                    raise ValueError("nonfinite lifted membership residual")
+                if equality:
+                    delta = np.abs(delta)
+                residual = max(residual, float(np.max(delta, initial=0)))
+        elif kind == "h":
             A, b, E, e = data
             residual = max(float(np.max(A @ x - b, initial=0)),
                            float(np.max(np.abs(E @ x - e), initial=0)))

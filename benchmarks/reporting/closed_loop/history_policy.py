@@ -5,7 +5,10 @@ from native_graph_policy import _prediction_stages, _source_cost, _terminal_obje
 
 
 FAMILIES = ("polytope", "box", "zonotope", "parallelotope", "ellipsoid")
+LIFTED_POLYTOPE_CONTROLLER = "native-continuous-history-lifted-polytope-ipopt/1"
+LIFTED_POLYTOPE_IMPLEMENTATION = "csl.synthesis.lifted-history-projection"
 GEOMETRY_IDS = {f"native-continuous-history-{family}-ipopt/1": family for family in FAMILIES}
+GEOMETRY_IDS[LIFTED_POLYTOPE_CONTROLLER] = "polytope"
 
 
 def should_refine_epigraph(checks, solver, compiled):
@@ -16,10 +19,13 @@ def should_refine_epigraph(checks, solver, compiled):
             and all(value.get("passed", False) for key, value in rows.items() if key != "source_cost"))
 
 
-def geometry_memberships(export, family, state_dimension, horizon, strict_source_domain=None):
+def geometry_memberships(export, family, state_dimension, horizon, strict_source_domain=None, *, lifted=False):
     if (not isinstance(export, dict) or export.get("status") != "complete"
             or export.get("family") != family or export.get("scope") != "forward_relevant_from_observation"):
         raise ValueError("feedback geometry does not match the selected family and scope")
+    if lifted and (family != "polytope" or export.get("polytope_history") != "lifted_whole_history"
+                   or export.get("implementation") != LIFTED_POLYTOPE_IMPLEMENTATION):
+        raise ValueError("feedback geometry does not use the requested lifted polytope representation")
     stages = export.get("stages")
     if not isinstance(stages, list) or len(stages) != horizon + 1:
         raise ValueError("feedback geometry must cover every history stage")
@@ -33,13 +39,19 @@ def geometry_memberships(export, family, state_dimension, horizon, strict_source
         for row in rows:
             if row.get("indices") != list(range(k * state_dimension, (k + 1) * state_dimension)):
                 raise ValueError("feedback geometry membership has wrong history coordinates")
-            expected = "h" if family in {"polytope", "box", "parallelotope"} else family
+            expected = "lifted-h" if lifted else "h" if family in {"polytope", "box", "parallelotope"} else family
             if row.get("kind") != expected:
                 raise ValueError("feedback geometry membership differs from requested family")
             if strict_source_domain is not None and row.get("strict_source_domain") != strict_source_domain:
                 raise ValueError("feedback geometry strict source domain differs from the task")
             if row.get("relation") not in {"outer", "equivalent"}:
                 raise ValueError("feedback geometry is not an outer set")
+            if lifted:
+                selection = row.get("row_selection")
+                expected_selection = "prefix" if row["role"] == "forward" else "full"
+                if (row["relation"] != "equivalent" or not isinstance(selection, dict)
+                        or selection.get("kind") != expected_selection):
+                    raise ValueError("invalid lifted polytope projection claim")
             memberships.append(row)
     return memberships
 
@@ -141,6 +153,7 @@ class HistoryPolicy:
                 and task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01"):
             raise ValueError("orbit already selects the IPOPT history solver in the original profile")
         self.geometry_family = GEOMETRY_IDS.get(controller_id)
+        self.lifted_polytope = controller_id == LIFTED_POLYTOPE_CONTROLLER
         self.history_solver = ("casadi-ipopt" if self.geometry_family is not None or controller_id == "native-continuous-affine-history-ipopt/1"
             or task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01" else "csl.convex.highs")
         if action_profile_id != task["control_domains"]["continuous"]["problem_id"]:
@@ -165,6 +178,8 @@ class HistoryPolicy:
             "geometry": self.geometry_family or "not_used", "history_solver": self.history_solver,
             "controller_semantics": ("observed-state affine-history MPC with F/B/I family memberships"
                 if self.geometry_family else "observed-state direct affine-history MPC")}
+        if self.lifted_polytope:
+            self.preparation_receipt["polytope_history"] = "lifted_whole_history"
 
     def set_query_capture_callback(self, callback):
         self.query_capture_callback = callback
@@ -190,6 +205,8 @@ class HistoryPolicy:
                                observed_physical_state, absolute_update_index, history_solver=self.history_solver,
                                geometry_family=self.geometry_family)
         request["controller_id"] = self.controller_id
+        if self.lifted_polytope:
+            request["polytope_history"] = "lifted_whole_history"
         initial, warm_start = initial_history(request, self.previous_history)
         request["initial_primal"] = initial.tolist()
         request["warm_start"] = warm_start
@@ -232,7 +249,8 @@ class HistoryPolicy:
                   "native_query_capture": self.last_query_capture}
         if "history_relation" in response and "history_objective" in response:
             result["invocations"].extend([
-                {"operation": "history.recover", "module_id": "csl::synthesis::recover_joint_history",
+                {"operation": "history.recover", "module_id": ("csl::synthesis::recover_lifted_history_projections"
+                    if self.lifted_polytope else "csl::synthesis::recover_joint_history"),
                  "profile_id": self.controller_id, "provider": "public-function"},
                 {"operation": "history.compile-cost", "module_id": "csl::optimization::compile_history_cost",
                  "profile_id": self.controller_id, "provider": "public-function"}])
@@ -254,6 +272,12 @@ class HistoryPolicy:
                                 "absolute_stage": absolute_update_index + stage_record["stage"],
                                 "geometry_role": membership["role"], "program_id": call["program"],
                                 "outcome": call["status"]})
+        if (self.lifted_polytope and isinstance(response.get("geometry"), dict)
+                and response["geometry"].get("implementation") == LIFTED_POLYTOPE_IMPLEMENTATION):
+            result.setdefault("geometry_invocations", []).append({
+                "operation": "feedback.geometry", "actual_method_id": LIFTED_POLYTOPE_IMPLEMENTATION,
+                "version": "1", "role": "reachable_set_method", "absolute_stage": absolute_update_index,
+                "request_id": request["request_id"]})
         if response.get("status") not in {"solved", "exported"}:
             result["status"] = response.get("status", "failed")
             result["reason"] = response.get("reason", "native history export failed")
@@ -272,7 +296,8 @@ class HistoryPolicy:
         memberships = (geometry_memberships(response.get("geometry"), self.geometry_family,
             len(observed_physical_state), len(request["predictor_stages"]),
             [{"coordinate": 0, "lower_bound": 0, "strict": True}]
-                if self.task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01" else [])
+                if self.task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01" else [],
+            lifted=self.lifted_polytope)
             if self.geometry_family is not None else None)
         start_recovery = None
         if response["status"] == "solved":
@@ -373,6 +398,8 @@ class HistoryPolicy:
                 if self.geometry_family else "not_applicable")})
         if self.geometry_family:
             result["selected_representation"] = self.geometry_family
+        if self.lifted_polytope:
+            result["coverage"] = "exact lifted stage projections of the stored closed affine history"
         return result
 
     def close(self):

@@ -69,7 +69,7 @@ def validate(task, stage, observed, predictor_stages, relation, primal, solver_c
         if geometry_memberships is None or geometry_factors is None or not geometry_memberships:
             raise ValueError("geometry memberships and factor witnesses are required together")
         from history_geometry import parse, verify
-        parsed = parse(geometry_memberships, (horizon + 1) * n)
+        parsed = parse(geometry_memberships, (horizon + 1) * n, relation=relation, history_dimension=len(z))
         geometry = verify(parsed, z, geometry_factors, tolerance=absolute_tolerance)
         checks["geometry"] = {"passed": geometry["accepted"], "memberships": geometry["checks"]}
     source_cost = objective(task, states, controls, absolute_stage_offset=stage)
