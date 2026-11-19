@@ -482,6 +482,15 @@ def main() -> int:
     )
     title = "Closed-loop composition campaign · full profile"
     crumbs = (("Examples", "../../index.html"), ("Campaign evidence", ""))
+    release_is_published = archive["release_status"] == "published"
+    release_link_label = (
+        "published evidence release" if release_is_published else "planned release URL"
+    )
+    release_status_text = (
+        "The immutable evidence release is published."
+        if release_is_published
+        else "The immutable evidence release is pending publication with this report."
+    )
     page = [page_start(title, stylesheet_href="../../examples.css", crumbs=crumbs)]
     page.append(
         f"<header class='notice'><p>Single-player closed-loop · Lotka–Volterra · Earth orbit · fuel transfer</p><h1>Full-profile module composition</h1><p>Every admitted graph was attempted. Failed, unsupported and inconclusive outcomes remain visible below and in the raw coverage record.</p><div class='cards'><ul><li><strong>{admitted}</strong> admitted graph configurations</li><li><strong>{latest_complete}</strong> complete</li><li><strong>{latest_failed}</strong> failed</li><li><strong>{latest_unsupported}</strong> unsupported</li><li><strong>{latest_inconclusive}</strong> inconclusive</li></ul></div><p>{attempt_rows} total attempt records include retries.</p></header>"
@@ -492,7 +501,7 @@ def main() -> int:
         f"<p>Candidate ledger: {outcomes['canonical_active_graphs']} canonical active and admitted graphs; {outcomes['attempted_graphs']} attempted; {outcomes['pending_graphs']} pending. The source catalogues contain {outcomes['source_candidates']} composition candidates ({outcomes['by_candidate_status'].get('requestable', 0)} requestable and {outcomes['incompatible_candidates']} incompatible), {outcomes['canonical_catalogue_references']} graph references ({outcomes['duplicate_catalogue_references']} duplicate references), {outcomes['backend_unavailable_candidates']} backend-unavailable candidates and {outcomes['implementation_missing_candidates']} implementation-missing candidates. Full reasons are retained in the coverage record.</p>"
         f"<p>Of the {latest_inconclusive} latest inconclusive full-profile graph outcomes, {compatible_reruns} have completed reruns under a separate compatible profile; those reruns are supplemental, not merged into full-profile totals.</p>"
         "<p><a href='raw/coverage.json'>Download exhaustive graph and attempt coverage</a> · <a href='raw/freeze.json'>Frozen candidate universe</a> · <a href='raw/campaign-events.jsonl'>Full-profile event ledger</a> · <a href='raw/targeted-rerun-events.jsonl'>Compatible-profile rerun events</a> · <a href='raw/archive-manifest.json'>Raw archive manifest</a></p>"
-        f"<p>The full attempt tree is a {archive['archive_bytes'] / 1_000_000_000:.2f} GB archive in {len(archive['parts'])} parts. The immutable evidence release is pending publication with this report. After publication, download each part in manifest order, concatenate the bytes, and verify the archive SHA-256 before extraction. The <a href='{esc(archive['release_url'])}'>planned release URL</a> is recorded in the manifest.</p></section>"
+        f"<p>The full attempt tree is a {archive['archive_bytes'] / 1_000_000_000:.2f} GB archive in {len(archive['parts'])} parts. {release_status_text} Download each part in manifest order, concatenate the bytes, and verify the archive SHA-256 before extraction. The <a href='{esc(archive['release_url'])}'>{release_link_label}</a> is recorded in the manifest.</p></section>"
     )
     page.append(
         "<section><h2>Representation outcomes on finite-action profiles</h2>"

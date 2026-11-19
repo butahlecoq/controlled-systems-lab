@@ -304,7 +304,7 @@
     }
   ],
   "reconstruction": "Download every listed part in numerical filename order, concatenate their bytes into csl-947-full-evidence.tar.zst, then verify archive_sha256.",
-  "release_status": "pending-reviewed-main-merge-and-upload",
+  "release_status": "published",
   "release_tag": "evidence/closed-loop-campaign-947-full-20261118",
   "release_url": "https://github.com/butahlecoq/controlled-systems-lab/releases/tag/evidence%2Fclosed-loop-campaign-947-full-20261118",
   "schema": "csl.closed-loop-campaign-archive/1",
