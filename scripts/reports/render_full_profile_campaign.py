@@ -483,14 +483,21 @@ def main() -> int:
     title = "Closed-loop composition campaign · full profile"
     crumbs = (("Examples", "../../index.html"), ("Campaign evidence", ""))
     release_is_published = archive["release_status"] == "published"
-    release_link_label = (
-        "published evidence release" if release_is_published else "planned release URL"
-    )
-    release_status_text = (
-        "The evidence release is published with hashes recorded for verification."
-        if release_is_published
-        else "The evidence release is pending publication with this report."
-    )
+    release_is_immutable = release_is_published and archive.get("release_immutable") is True
+    if release_is_immutable:
+        release_link_label = "immutable GitHub evidence release"
+        release_status_text = (
+            "This evidence release is immutable on GitHub; use the recorded SHA-256 hashes "
+            "to verify its contents."
+        )
+    elif release_is_published:
+        release_link_label = "published evidence release"
+        release_status_text = (
+            "The evidence release is published with hashes recorded for verification."
+        )
+    else:
+        release_link_label = "planned release URL"
+        release_status_text = "The evidence release is pending publication with this report."
     page = [page_start(title, stylesheet_href="../../examples.css", crumbs=crumbs)]
     page.append(
         f"<header class='notice'><p>Single-player closed-loop · Lotka–Volterra · Earth orbit · fuel transfer</p><h1>Full-profile module composition</h1><p>Every admitted graph was attempted. Failed, unsupported and inconclusive outcomes remain visible below and in the raw coverage record.</p><div class='cards'><ul><li><strong>{admitted}</strong> admitted graph configurations</li><li><strong>{latest_complete}</strong> complete</li><li><strong>{latest_failed}</strong> failed</li><li><strong>{latest_unsupported}</strong> unsupported</li><li><strong>{latest_inconclusive}</strong> inconclusive</li></ul></div><p>{attempt_rows} total attempt records include retries.</p></header>"
