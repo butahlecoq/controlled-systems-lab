@@ -1,6 +1,8 @@
 """Full-state membership constraints for an exported affine history."""
 from __future__ import annotations
 
+from fractions import Fraction
+
 import casadi as ca
 import numpy as np
 
@@ -40,6 +42,28 @@ def parse(entries, dimension):
         else:
             raise ValueError("unknown geometry membership kind")
     return result
+
+
+def fixed_axis_ellipsoid_witnesses(entries, fixed):
+    """Prove which axis ellipsoids already contain a fixed original H block."""
+    witnesses = {}
+    for position, (kind, indices, *data) in enumerate(entries):
+        if kind != "ellipsoid" or any(index not in fixed for index in indices):
+            continue
+        center, factor = data
+        if factor.shape != (len(indices), len(indices)) or np.any(factor != np.diag(np.diag(factor))):
+            continue
+
+        values = []
+        for column, index in enumerate(indices):
+            residual = Fraction(fixed[index]) - Fraction(float(center[column]))
+            scale = Fraction(float(factor[column, column]))
+            if scale == 0 and residual != 0:
+                break
+            values.append(residual / scale if scale else Fraction(0))
+        if len(values) == len(indices) and sum(value * value for value in values) <= 1:
+            witnesses[position] = list(map(float, values))
+    return witnesses
 
 
 def constrain(opti, z, entries, initial):

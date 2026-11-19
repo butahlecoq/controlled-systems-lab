@@ -54,6 +54,27 @@ class GeometryMembershipTests(unittest.TestCase):
         self.assertAlmostEqual(answer["primal"][1], 2)
         self.assertEqual(answer["geometry_factors"], [[]])
 
+    def test_fixed_axis_ellipsoid_retains_exact_witness_without_repeated_equalities(self):
+        relation = {"inequalities": [], "upper_bounds": [], "equalities": [[1, 0]],
+                    "equality_values": [1]}
+        objective = {"quadratic": {"Q": [[0, 0], [0, 2]], "linear": [0, -2], "offset": 1},
+                     "residual_norms": []}
+        point = {"kind": "ellipsoid", "indices": [0], "center": [1],
+                 "factor_count": 1, "factor": [[0]]}
+        small = {**point, "center": [1 + 2**-45], "factor": [[2**-44]]}
+        answer = solve(relation, objective, initial=[1, 0], positive_indices=[0],
+                       geometry_memberships=[point, small, small])
+        self.assertTrue(answer["success"], answer)
+        self.assertEqual(answer["warm_start"]["fixed_geometry_witnesses"], [0, 1, 2])
+        self.assertEqual(answer["geometry_factors"], [[0.0], [-0.5], [-0.5]])
+        self.assertAlmostEqual(answer["primal"][1], 1.0)
+        self.assertTrue(answer["geometry_validation"]["accepted"])
+
+        outside = {**small, "factor": [[2**-46]]}
+        impossible = solve(relation, objective, initial=[1, 0], positive_indices=[0],
+                           geometry_memberships=[outside])
+        self.assertNotIn("fixed_geometry_witnesses", impossible["warm_start"])
+
     def test_source_acceptance_independently_checks_geometry_witness(self):
         from history_validation import validate
         task = {"episode": {"intervals": 1},

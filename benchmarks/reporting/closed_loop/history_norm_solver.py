@@ -26,6 +26,7 @@ def solve(relation: dict, objective: dict, *, initial, positive_indices=(), geom
     for index in positive:
         start[index] = np.log(start[index])
     opti.set_initial(raw, start)
+    fixed = {}
     for matrix_key, bound_key, equality in (("inequalities", "upper_bounds", False),
                                             ("equalities", "equality_values", True)):
         rows = relation[matrix_key]
@@ -39,9 +40,17 @@ def solve(relation: dict, objective: dict, *, initial, positive_indices=(), geom
                 raise ValueError("invalid history relation")
             expression = ca.DM(matrix) @ z
             opti.subject_to(expression == ca.DM(bound) if equality else expression <= ca.DM(bound))
-    from history_geometry import constrain, parse, verify
+            if equality and geometry_memberships:
+                for i in np.flatnonzero(np.count_nonzero(matrix, axis=1) == 1):
+                    coordinate = int(np.flatnonzero(matrix[i])[0])
+                    coefficient = matrix[i, coordinate]
+                    if abs(coefficient) == 1:
+                        fixed[coordinate] = float(bound[i] * coefficient)
+    from history_geometry import constrain, fixed_axis_ellipsoid_witnesses, parse, verify
     geometry = parse(geometry_memberships, dimension)
-    factor_variables = constrain(opti, z, geometry, initial)
+    fixed_witnesses = fixed_axis_ellipsoid_witnesses(geometry, fixed)
+    active = [index for index in range(len(geometry)) if index not in fixed_witnesses]
+    factor_variables = constrain(opti, z, [geometry[index] for index in active], initial)
     quadratic = objective["quadratic"]
     q = np.asarray(quadratic["Q"], dtype=float)
     linear = np.asarray(quadratic["linear"], dtype=float)
@@ -74,6 +83,8 @@ def solve(relation: dict, objective: dict, *, initial, positive_indices=(), geom
                   "provider_initial_primal": np.asarray(opti.debug.value(z, opti.initial()), dtype=float).reshape(-1).tolist(),
                   "provider_initial_duals": np.asarray(opti.debug.value(opti.lam_g, opti.initial()), dtype=float).reshape(-1).tolist(),
                   "initialization_status": "submitted-and-read-back"}
+    if fixed_witnesses:
+        warm_start["fixed_geometry_witnesses"] = list(fixed_witnesses)
     options = {"warm_start_init_point": "yes", "print_level": 0, "max_iter": 3000, "tol": 1e-9,
                "acceptable_tol": 1e-8, "bound_relax_factor": 0.0}
     if tighten_epigraph:
@@ -90,8 +101,11 @@ def solve(relation: dict, objective: dict, *, initial, positive_indices=(), geom
             return {"warm_start": warm_start, "success": False, "status": "nonfinite-solution",
                     "solver": "casadi-ipopt/full-history-separate-norm-epigraphs/1",
                     "provider": "casadi-ipopt", "version": f"casadi {ca.__version__}; IPOPT version unavailable"}
-        factor_values = [([] if variable is None else np.asarray(solution.value(variable), dtype=float).reshape(-1).tolist())
-                         for variable in factor_variables]
+        witnesses = dict(fixed_witnesses)
+        for index, variable in zip(active, factor_variables, strict=True):
+            witnesses[index] = ([] if variable is None else
+                np.asarray(solution.value(variable), dtype=float).reshape(-1).tolist())
+        factor_values = [witnesses[index] for index in range(len(geometry))]
         geometry_check = verify(geometry, primal, factor_values)
         return {"warm_start": warm_start, "success": bool(stats.get("success")) and geometry_check["accepted"],
                 "geometry_factors": factor_values, "geometry_validation": geometry_check,
