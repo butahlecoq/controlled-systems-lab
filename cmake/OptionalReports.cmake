@@ -18,6 +18,13 @@ endif()
 # Non-installed measurement targets; each option requires the declared adapters.
 
 if(CSL_BUILD_MPC08_REPORT)
+add_executable(csl_mpc08_crossover benchmarks/reporting/mpc08_explicit/crossover_driver.cpp)
+target_link_libraries(csl_mpc08_crossover PRIVATE highs)
+target_include_directories(csl_mpc08_crossover SYSTEM PRIVATE
+  ${csl_highs_SOURCE_DIR}/highs ${csl_highs_BINARY_DIR} ${csl_json_SOURCE_DIR}/include)
+target_compile_features(csl_mpc08_crossover PRIVATE cxx_std_20)
+csl_strict_warnings(csl_mpc08_crossover)
+
 add_executable(csl_mpc08_explicit_compare benchmarks/reporting/mpc08_explicit/mpc08_strategy_comparison.cpp)
 target_compile_features(csl_mpc08_explicit_compare PRIVATE cxx_std_20)
 target_compile_definitions(csl_mpc08_explicit_compare PRIVATE $<$<CONFIG:Release>:NDEBUG>)
