@@ -1979,6 +1979,14 @@
       "role_and_disposition_reason": "Rechecks immutable mesh and repeated-controller archives, builds labelled saved-data study companions and copies complete source/raw inputs; no optimization or integration runs."
     },
     {
+      "source": "scripts/reports/stage_mpc_crossover.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "feedback-geometry.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_native_discrete_models.py",
       "signal_count": 1,
       "asset_name_literals": [
@@ -2570,6 +2578,16 @@
       ],
       "disposition": "reviewed-static-diagram-exception",
       "role_and_disposition_reason": "Draws the exact initial-state rectangle and one full two-control optimal fiber with a distinct minimum-norm selector; solver candidates are not presented as complete-family evidence."
+    },
+    {
+      "source": "benchmarks/reporting/mpc08_explicit/render_crossover.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "deployment-time.svg",
+        "feedback-geometry.svg"
+      ],
+      "disposition": "saved-data-illustration-renderer",
+      "role_and_disposition_reason": "Plots the saved double-integrator feedback trajectory, exact feasible sets and paired deployment timings."
     },
     {
       "source": "benchmarks/reporting/mpc10/figures.py",
@@ -3792,6 +3810,17 @@
       "follow_up_issue": 669
     },
     {
+      "route": "mpc-crossover-6b7308c4",
+      "source_bundle": "mpc-crossover-6b7308c4",
+      "assets": [
+        "deployment-time.svg",
+        "feedback-geometry.svg"
+      ],
+      "index_sha256": "877dd26e29742806d37636cbc7134c4849333e7e52230c8753f08c4c4edecdd3",
+      "disposition": "reviewed: saved plots distinguish feasible and infeasible states, show the three-step trajectory and compare paired deployment timings",
+      "companion_route": "examples/mpc-crossover-6b7308c4/index.html"
+    },
+    {
       "route": "mpc03-b08-l04-miQCP-v1",
       "source_bundle": "mpc03-b08-l04-miQCP-v1",
       "assets": [
@@ -4308,6 +4337,9 @@
         "positive_part_budget_2d_native-solution.csv",
         "positive_part_budget_2d_run.txt",
         "positive_part_budget_2d_native-example.stdout",
+        "mpc-crossover-6b7308c4/index.html",
+        "mpc-crossover-6b7308c4/feedback-geometry.svg",
+        "mpc-crossover-6b7308c4/deployment-time.svg",
         "discrete-mpc-2d.html",
         "discrete-mpc-2d.svg",
         "discrete-mpc-2d.json",

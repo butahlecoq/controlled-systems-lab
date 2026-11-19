@@ -1,0 +1,208 @@
+{
+  "queries": 155,
+  "retained_pairs": 25,
+  "sizes": [
+    {
+      "count": 1,
+      "explicit": {
+        "setup_ns": {
+          "min": 879588,
+          "median": 908642,
+          "max": 1093513
+        },
+        "total_ns": {
+          "min": 893067,
+          "median": 921632,
+          "max": 1109577
+        },
+        "service_ns": {
+          "min": 12711,
+          "median": 13131,
+          "max": 16064
+        },
+        "p99_decision_ns": 4749
+      },
+      "online": {
+        "setup_ns": {
+          "min": 291659,
+          "median": 341107,
+          "max": 393628
+        },
+        "total_ns": {
+          "min": 1247584,
+          "median": 1400886,
+          "max": 1511167
+        },
+        "service_ns": {
+          "min": 955925,
+          "median": 1059779,
+          "max": 1125571
+        },
+        "p99_decision_ns": 884616
+      },
+      "explicit_faster_pairs": 5
+    },
+    {
+      "count": 4,
+      "explicit": {
+        "setup_ns": {
+          "min": 877143,
+          "median": 913810,
+          "max": 1027442
+        },
+        "total_ns": {
+          "min": 922401,
+          "median": 959557,
+          "max": 1078008
+        },
+        "service_ns": {
+          "min": 44908,
+          "median": 45747,
+          "max": 50566
+        },
+        "p99_decision_ns": 2445
+      },
+      "online": {
+        "setup_ns": {
+          "min": 289983,
+          "median": 368276,
+          "max": 542391
+        },
+        "total_ns": {
+          "min": 4090983,
+          "median": 4284584,
+          "max": 5401075
+        },
+        "service_ns": {
+          "min": 3722707,
+          "median": 3950601,
+          "max": 4858684
+        },
+        "p99_decision_ns": 1304924
+      },
+      "explicit_faster_pairs": 5
+    },
+    {
+      "count": 16,
+      "explicit": {
+        "setup_ns": {
+          "min": 899562,
+          "median": 976249,
+          "max": 1101894
+        },
+        "total_ns": {
+          "min": 1090859,
+          "median": 1186263,
+          "max": 1407870
+        },
+        "service_ns": {
+          "min": 188992,
+          "median": 210014,
+          "max": 305976
+        },
+        "p99_decision_ns": 4819
+      },
+      "online": {
+        "setup_ns": {
+          "min": 338523,
+          "median": 361711,
+          "max": 693460
+        },
+        "total_ns": {
+          "min": 15414922,
+          "median": 20026436,
+          "max": 20992068
+        },
+        "service_ns": {
+          "min": 15076399,
+          "median": 19332976,
+          "max": 20630357
+        },
+        "p99_decision_ns": 1603428
+      },
+      "explicit_faster_pairs": 5
+    },
+    {
+      "count": 64,
+      "explicit": {
+        "setup_ns": {
+          "min": 846552,
+          "median": 886013,
+          "max": 918070
+        },
+        "total_ns": {
+          "min": 1602520,
+          "median": 1654622,
+          "max": 1712730
+        },
+        "service_ns": {
+          "min": 746259,
+          "median": 768609,
+          "max": 794660
+        },
+        "p99_decision_ns": 3841
+      },
+      "online": {
+        "setup_ns": {
+          "min": 329653,
+          "median": 358358,
+          "max": 433578
+        },
+        "total_ns": {
+          "min": 57278721,
+          "median": 60057587,
+          "max": 62235673
+        },
+        "service_ns": {
+          "min": 56920363,
+          "median": 59624009,
+          "max": 61906020
+        },
+        "p99_decision_ns": 1120961
+      },
+      "explicit_faster_pairs": 5
+    },
+    {
+      "count": 256,
+      "explicit": {
+        "setup_ns": {
+          "min": 897747,
+          "median": 917512,
+          "max": 1343197
+        },
+        "total_ns": {
+          "min": 3773482,
+          "median": 4203218,
+          "max": 5590975
+        },
+        "service_ns": {
+          "min": 2855970,
+          "median": 3297929,
+          "max": 4247778
+        },
+        "p99_decision_ns": 4819
+      },
+      "online": {
+        "setup_ns": {
+          "min": 323228,
+          "median": 381755,
+          "max": 621941
+        },
+        "total_ns": {
+          "min": 217577790,
+          "median": 233316498,
+          "max": 248112901
+        },
+        "service_ns": {
+          "min": 217254562,
+          "median": 232694557,
+          "max": 247731146
+        },
+        "p99_decision_ns": 956693
+      },
+      "explicit_faster_pairs": 5
+    }
+  ],
+  "first_observed_crossover": 1,
+  "policy_owned_bytes": 4800
+}

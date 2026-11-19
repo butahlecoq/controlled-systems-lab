@@ -65,6 +65,7 @@ FROZEN_DIAGRAM_EXCEPTIONS = {
     "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py",
 }
 PUBLICATION_EXPORT_ROUTES = {
+    "scripts/reports/stage_mpc_crossover.py",
     "scripts/reports/stage_native_model_tracking_first_pass.py",
     "scripts/reports/stage_native_row_scaling_diagnostic.py",
     "scripts/reports/stage_native_extended_models.py",
@@ -188,6 +189,8 @@ SAVED_DATA_COMPANION_COLLECTORS = {
     "scripts/reports/capture_history_membership_2d.py",
 }
 SAVED_DATA_ILLUSTRATION_RENDERERS = {
+    "benchmarks/reporting/mpc08_explicit/render_crossover.py": (
+        "Plots the saved double-integrator feedback trajectory, exact feasible sets and paired deployment timings."),
     "scripts/reports/render_native_model_tracking_first_pass.py": (
         "Projects independently checked, immutable all-stage native trajectories into two-dimensional views; it reruns neither the controller nor its optimizer."),
     "scripts/reports/native_fixed_tail_geometry.py": (
@@ -260,6 +263,7 @@ SAVED_DATA_COMPANION_RENDERERS = {
     "benchmarks/reporting/review05/render_constraint_ladder.py",
 }
 FROZEN_COMPANIONS = {
+    "mpc-crossover-6b7308c4": "examples/mpc-crossover-6b7308c4/index.html",
     "mpc06-online-anchor-v1": "mpc06-complete-6b7059d62473d32d4210/index.html",
     "mpc06-online-anchor-checked-v2": "mpc06-complete-6b7059d62473d32d4210/index.html",
     "mpc06-online-anchor-portable-v3": "mpc06-complete-6b7059d62473d32d4210/index.html",
@@ -285,6 +289,8 @@ FROZEN_COMPANIONS = {
     "lotka-volterra-sampled-20261023": "examples/lotka-volterra-sampled-v1.html",
 }
 FROZEN_REVIEWED_ROUTES = {
+    "mpc-crossover-6b7308c4":
+        "reviewed: saved plots distinguish feasible and infeasible states, show the three-step trajectory and compare paired deployment timings",
     "review05-family-query-20261110-3b98f5b0":
         "reviewed: root inspected the shared-policy scalar control projection and recorded state paths; exact family coverage is checked separately",
     "exp02-paired-profiles-20261027-r1":
@@ -503,6 +509,9 @@ def build(root: Path = ROOT) -> dict:
                     "positive-part-budget-2d.json", "positive_part_budget_2d_vertices.csv",
                     "positive_part_budget_2d_native-solution.csv", "positive_part_budget_2d_run.txt",
                     "positive_part_budget_2d_native-example.stdout",
+                    "mpc-crossover-6b7308c4/index.html",
+                    "mpc-crossover-6b7308c4/feedback-geometry.svg",
+                    "mpc-crossover-6b7308c4/deployment-time.svg",
                     "discrete-mpc-2d.html", "discrete-mpc-2d.svg", "discrete-mpc-2d.json",
                     "discrete_mpc_2d-output.csv", "discrete_mpc_2d-output.txt",
                     "app02-diamond-v1.html", "app02-diamond-v1.svg",

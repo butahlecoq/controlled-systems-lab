@@ -1,0 +1,26 @@
+[
+  {
+    "remaining": 1,
+    "regions": 7,
+    "boundaries_sampled": 10,
+    "queries": 37,
+    "max_history_difference": 7.449124983516242e-09,
+    "max_cost_difference": 8.881784197001252e-16
+  },
+  {
+    "remaining": 2,
+    "regions": 11,
+    "boundaries_sampled": 16,
+    "queries": 59,
+    "max_history_difference": 8.555872788029717e-09,
+    "max_cost_difference": 1.7763568394002505e-15
+  },
+  {
+    "remaining": 3,
+    "regions": 11,
+    "boundaries_sampled": 14,
+    "queries": 53,
+    "max_history_difference": 4.2518379150813246e-08,
+    "max_cost_difference": 1.1901590823981678e-13
+  }
+]

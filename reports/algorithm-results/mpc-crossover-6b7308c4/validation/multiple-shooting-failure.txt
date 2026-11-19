@@ -1,0 +1,22 @@
+Native HiGHS diagnostic. 34 one-step queries in workload order, ending N1-edge-16-side-1.
+          0        1.0632573                0      0.02s
+Model status        : Optimal
+Objective value     :  1.0632572818e+00
+P-D objective error :  3.9993135331e-08
+HiGHS run time      :          0.02
+-0.49951171875000006 threads=1
+QP   has 4 rows; 3 cols; 7 matrix nonzeros; 3 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 2e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 3e+00]
+  RHS    [5e-01, 1e+00]
+  Iteration        Objective     NullspaceDim
+          0        1.0622153                0      0.02s
+          0        1.0622153                0      0.02s
+ERROR:   QP solver claims optimality, but with num/max/sum primal(1/8.13802e-05/8.13802e-05) infeasibilities
+ERROR:   Setting model status to Solve error
+Model status        : Solve error
+HiGHS run time      :          0.02
+terminate called after throwing an instance of 'std::runtime_error'
+  what():  HiGHS status -1 at line 80
