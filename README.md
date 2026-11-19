@@ -1,3 +1,5 @@
+<a id="controlled-systems-lab"></a>
+
 # Reachability and predictive control in C++
 
 Use CSL to compute reachable sets for constrained discrete-time systems and
@@ -18,7 +20,7 @@ action. The page shows the trajectories and the model assumptions.
 
 ## Quick start
 
-Choose a `vMAJOR.MINOR.PATCH` source tag from [GitHub Releases](https://github.com/butahlecoq/controlled-systems-lab/releases) to build a specific SDK version. Releases tagged under `evidence/` contain numerical records and reproduction artifacts.
+Start from a [checkout of the current source](https://github.com/butahlecoq/controlled-systems-lab/tree/main) or choose a `vMAJOR.MINOR.PATCH` tag from [GitHub Releases](https://github.com/butahlecoq/controlled-systems-lab/releases) for a specific SDK version. Releases tagged under `evidence/` contain numerical records and reproduction artifacts.
 
 Requires Git, CMake/CTest 3.31 or newer and a C++20 compiler (MSVC 2022, GCC 13 or Clang 18 are CI toolchains). Put CMake on PATH; on Windows a Visual Studio developer shell with its CMake component installed provides the tools. Run from the repository root and stop on any nonzero exit. The first configure downloads the existing pinned dependencies; no Python is needed with `BUILD_TESTING=OFF`. Installation is a local development check, not a binary distribution license grant.
 
@@ -33,8 +35,9 @@ cmake --build build/examples --config Release --target discrete_mpc_2d --paralle
 ctest --test-dir build/examples -C Release -R '^discrete_mpc_2d_matched_open_loop_and_feedback$' --no-tests=error -V
 ```
 
-Expect one passing test. The summary gives the first stage where the actions
-diverge and shows both controls. The state and control histories are in
+Expect one passing test. In the published example, the actions first diverge
+at stage 4. The open-loop action is 0 and the observed-state MPC action is
+about 1.05. The state and control histories are in
 `build/examples/discrete-mpc-2d-test-output/episode.csv`. This is a numerical
 check on the example's eight-stage task.
 
