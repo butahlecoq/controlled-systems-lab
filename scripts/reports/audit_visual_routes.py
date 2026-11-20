@@ -291,6 +291,8 @@ FROZEN_COMPANIONS = {
     "lotka-volterra-sampled-20261023": "examples/lotka-volterra-sampled-v1.html",
 }
 FROZEN_REVIEWED_ROUTES = {
+    "native-catalogue-convex-backends-v1":
+        "reviewed: recovered episode figures show all four labelled states and both replay policies",
     "catalogue-forward-reachability-v1":
         "reviewed: physical and centred coordinates show the same stagewise platoon projection",
     "mpc-crossover-6b7308c4":
@@ -519,6 +521,9 @@ def build(root: Path = ROOT) -> dict:
                     "mpc-crossover-6b7308c4/index.html",
                     "native-source-constrained-mpc-v1/index.html",
                     "native-source-constrained-mpc-v1/platoon.svg",
+                    "native-catalogue-convex-backends-v1/index.html",
+                    "native-catalogue-convex-backends-v1/bicycle-row-scaling.svg",
+                    "native-catalogue-convex-backends-v1/twenty-zone-ipopt.svg",
                     "mpc-crossover-6b7308c4/feedback-geometry.svg",
                     "mpc-crossover-6b7308c4/deployment-time.svg",
                     "discrete-mpc-2d.html", "discrete-mpc-2d.svg", "discrete-mpc-2d.json",

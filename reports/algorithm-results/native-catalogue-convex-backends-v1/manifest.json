@@ -1,0 +1,29 @@
+{
+  "schema": "csl.native-catalogue-convex-backends/1",
+  "source_commit": "4bec054f8012b04a2a7108bb14dcdd83cab329ee",
+  "baseline": {
+    "route": "native-source-constrained-mpc-v1",
+    "archive_sha256": "47c04cfb692a362112d7154af42c777e7eb23d8c29b015c0112cc137316998aa",
+    "sdk_release": "v0.1.1",
+    "sdk_commit": "dc6801dc5f02c4000b4f1272361752581a55873a",
+    "provider": "csl.convex.highs"
+  },
+  "row_scaled": {
+    "sdk_commit": "389a93a78cd62ec81c6b99a1c2aa58a656d658bf",
+    "provider": "csl.convex.highs.row-scaled"
+  },
+  "installed_ipopt": {
+    "sdk_commit": "f53e770462e323f9e0ff3c844e6fa3882fd82966",
+    "provider": "csl.convex.ipopt"
+  },
+  "files_sha256": {
+    "bicycle-row-scaling.svg": "66e6da365f7c5261d76a56872b9b41027c6da78c7fb4158e4a875d7c47b56957",
+    "catalogue-installed-ipopt-evidence.zip": "ccb4f19b43341b25c51cd56138f3f2c8c1c2ab3d7b249d45ced215abbd1e9900",
+    "catalogue-ipopt-source-qp-evidence.zip": "318431c197fd4324f561c80f7a06aa48860bb7ec599b87bbd118ee23e5c7e757",
+    "catalogue-row-scaled-highs-evidence.zip": "35e21550dfdaa8b6a8aef2c096174d83de597bbe4e852f42745589d952800f35",
+    "index.html": "4845d44691c4a805cbc34c453b81df0b6736bf16e8279fe9df88f3d7ba858a8b",
+    "installed-ipopt-audit.json": "56e463ba7e0d0fd92cf92ad26bb959c8e58f129552a9cc3330c21ce251ec113b",
+    "offline-examples.css": "11ded2b69cec694ff61ecad0493f175becbfc47bce3d641f2ee512543bb82cf4",
+    "twenty-zone-ipopt.svg": "8d007542239f157f23d7c30aaa207e0a3b5d5d2bcd3af3f7479691964ae3bf2e"
+  }
+}

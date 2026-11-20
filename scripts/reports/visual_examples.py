@@ -1412,6 +1412,12 @@ def build(catalog, site):
         Path(__file__).resolve().parents[2]
     )
     saved_figures += matched_card
+    backend_files, backend_inventory, backend_card = (
+        stage_native_source_constrained_mpc.build_convex_backends(
+            Path(__file__).resolve().parents[2]
+        )
+    )
+    saved_figures += backend_card
     row_scaling_files, row_scaling_inventory, row_scaling_card = (
         stage_native_row_scaling_diagnostic.build(Path(__file__).resolve().parents[2])
     )
@@ -1499,6 +1505,7 @@ def build(catalog, site):
     outputs.update(forward_files)
     outputs.update(crossover_files)
     outputs.update(matched_files)
+    outputs.update(backend_files)
     outputs.update(buryatia_files)
     outputs.update(volterra_files)
     outputs.update(pitch_files)
@@ -1717,6 +1724,7 @@ def build(catalog, site):
     gallery_inventory.extend(forward_inventory)
     gallery_inventory.extend(crossover_inventory)
     gallery_inventory.extend(matched_inventory)
+    gallery_inventory.extend(backend_inventory)
     gallery_inventory.extend(buryatia_inventory)
     gallery_inventory.extend(volterra_inventory)
     gallery_inventory.extend(pitch_inventory)
