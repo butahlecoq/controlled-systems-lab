@@ -347,12 +347,6 @@ jobs:
 
       - name: Check the locked source-only native row-scaling publication
         run: python -m unittest discover -s tests/reporting -p 'test_stage_native_row_scaling_diagnostic.py'
-      - name: Check four frozen environment report routes and offline ZIPs
-        run: >-
-          python -m unittest tests.reporting.test_env717_dubins_car_publication
-          tests.reporting.test_env717_vanderpol_publication
-          tests.reporting.test_env717_earth_orbit_publication
-          tests.reporting.test_stage_env717_pendulum_terminal
       - name: Check the saved native whole-history optimizer route
         run: python -m unittest discover -s tests/reporting -p 'test_history_optimizer_native.py'
       - name: Check the saved typed-membership 2D example
@@ -373,6 +367,12 @@ jobs:
 
       - name: Check closed-loop catalogues, campaign resume and common runner failure paths
         run: python -m unittest tests.reporting.test_native_compositions tests.reporting.test_closed_loop_campaign tests.reporting.test_closed_loop_native_capabilities tests.reporting.test_closed_loop_runner_failures tests.reporting.test_closed_loop_tracing tests.reporting.test_native_vertex_lp_priority_policy
+      - name: Check four frozen environment report routes and offline ZIPs
+        run: >-
+          python -m unittest tests.reporting.test_env717_dubins_car_publication
+          tests.reporting.test_env717_vanderpol_publication
+          tests.reporting.test_env717_earth_orbit_publication
+          tests.reporting.test_stage_env717_pendulum_terminal
       - name: Check architecture boundaries and decoded perf sample parsing
         run: |
           python tests/architecture/check_numeric_dependencies.py
