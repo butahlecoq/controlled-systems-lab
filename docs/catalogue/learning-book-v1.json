@@ -2115,6 +2115,10 @@
           "href": "../examples/native-model-tracking-first-pass-v1/source-binding.json"
         },
         {
+          "label": "Finite-action control across 35 catalogue models",
+          "href": "../examples/catalogue-finite-action-v1/index.html"
+        },
+        {
           "label": "Model equations, task profiles and outcomes",
           "href": "model-tracks.html#discrete-formulations"
         }
