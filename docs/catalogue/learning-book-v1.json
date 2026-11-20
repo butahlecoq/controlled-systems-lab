@@ -2405,7 +2405,7 @@
       "command": "set -euo pipefail\nREPO_ROOT=\"$(git rev-parse --show-toplevel)\"\nMANIFEST=\"$REPO_ROOT/docs/examples/closed-loop/campaign-2026-11-18/raw/archive-manifest.json\"\nBASE=https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-immutable-20261119\nROOT=\"$REPO_ROOT/build/campaign-2026-11-18\"\nPARTS=\"$ROOT/parts\"\nmkdir -p \"$PARTS\" \"$ROOT/extracted\"\njq -r '.parts[].name' \"$MANIFEST\" | while IFS= read -r part; do\n  curl -fL \"$BASE/$part\" -o \"$PARTS/$part\"\ndone\nARCHIVE=\"$PARTS/$(jq -r '.archive' \"$MANIFEST\")\"\njq -r '\"\\(.archive_sha256)  \\(.archive)\"' \"$MANIFEST\" > \"$PARTS/archive.sha256\"\n(\n  cd \"$PARTS\"\n  archive_name=\"$(basename \"$ARCHIVE\")\"\n  : > \"$archive_name\"\n  while IFS= read -r part; do cat \"$part\" >> \"$archive_name\"; done < <(jq -r '.parts[].name' \"$MANIFEST\")\n  sha256sum --check archive.sha256\n)\ntar -I 'zstd -T0 -d' -xf \"$ARCHIVE\" -C \"$ROOT/extracted\"\npython scripts/reports/render_full_profile_campaign.py \\\n  --freeze \"$ROOT/extracted/full-profile/freeze.json\" \\\n  --coverage \"$ROOT/extracted/full-profile/full-outcomes/campaign-coverage-20261118T142500Z-post-retry-reconciled.json\" \\\n  --outcomes \"$ROOT/extracted/full-profile/full-outcomes\" \\\n  --targeted-reruns \"$ROOT/extracted/fixed-tail-compatible-profile/targeted-reruns\" \\\n  --archive-manifest \"$MANIFEST\" \\\n  --output \"$ROOT/rendered\"",
       "expected_output": "The full-profile capture records 513/513 graph outcomes: 483 complete, 7 failed, 8 unsupported and 15 inconclusive; no graph is pending. Its 516 attempt records include retries. Fifteen compatible-profile reruns completed and remain supplemental. The source catalogue contains 480 candidates: 460 requestable and 20 incompatible, with zero candidates classified as backend-unavailable or implementation-missing.",
       "intermediate_geometry": "The current dashboard shows five representations for each task. Graph figures overlay retained finite-action states at every prediction stage, backward-viable states, the selected plan and observed replay. The box controller instead displays its numerical fixed-plan outer tube and does not claim a full reachable set. Fuel uses oxidizer (mass, flow) and fuel (mass, flow) projections.",
-      "support_limits": "No five alternating timing repetitions were run, so this is not a performance ranking. Beam width is 8 and finite-action search coverage is incomplete; projected points are not continuous reachable-set boundaries and graph plans are optimal only over retained nodes. Box tubes enclose one selected fixed plan. Numerical checks use binary64. Fifteen completed compatible-profile reruns remain separate from full-profile totals.",
+      "support_limits": "The full-profile campaign uses one-pass descriptive timings. The separate matched fixed-tail timing study reports five alternating measured repetitions per side and an inconclusive comparison. Beam width is 8 and finite-action search coverage is incomplete; projected points are not continuous reachable-set boundaries and graph plans are optimal only over retained nodes. Box tubes enclose one selected fixed plan. Numerical checks use binary64. Fifteen completed compatible-profile reruns remain separate from full-profile totals.",
       "figure_ids": [
         "campaign-syn-nl-lv-01-lotka",
         "campaign-earth-orbit-orbit",
@@ -2416,6 +2416,10 @@
         {
           "label": "Current full-profile dashboard and graph-by-graph coverage",
           "href": "../examples/closed-loop/campaign-2026-11-18/index.html"
+        },
+        {
+          "label": "Raw full-profile outcome ledger",
+          "href": "../examples/closed-loop/campaign-2026-11-18/raw/coverage.json"
         },
         {
           "label": "Current publication provenance and file hashes",
@@ -2442,8 +2446,8 @@
           "href": "https://github.com/butahlecoq/controlled-systems-lab/tree/9140e2a6fde55697b2035349a0996941be80297c/docs/contracts/closed-loop"
         },
         {
-          "label": "Issue #947 and remaining gates",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/issues/947"
+          "label": "Campaign completion and matched fixed-tail timing disposition",
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/issues/947#issuecomment-7001015847"
         },
         {
           "label": "Campaign index archive",
@@ -2505,47 +2509,42 @@
             "task",
             "admitted",
             "complete",
-            "incorrect",
             "failed",
-            "timed out",
+            "inconclusive",
             "unsupported"
           ],
           "rows": [
             [
               "Lotka–Volterra",
               "178",
-              "171",
-              "5",
-              "0",
+              "166",
               "1",
-              "1"
+              "5",
+              "6"
             ],
             [
               "Earth orbit",
               "167",
-              "161",
-              "0",
+              "156",
               "5",
-              "0",
+              "5",
               "1"
             ],
             [
               "Fuel transfer",
               "168",
-              "166",
-              "0",
+              "161",
               "1",
-              "0",
+              "5",
               "1"
             ],
             [
               "Total",
               "513",
-              "498",
-              "5",
-              "6",
-              "1",
-              "3"
+              "483",
+              "7",
+              "15",
+              "8"
             ]
           ]
         },
@@ -2557,15 +2556,15 @@
           ],
           "rows": [
             [
-              "admitted and attempted graph configurations",
+              "admitted and attempted full-profile graphs",
               "513"
             ],
             [
-              "recorded attempt rows",
-              "528"
+              "full-profile attempt records including retries",
+              "516"
             ],
             [
-              "historical inconclusive attempt rows",
+              "completed reruns in the separate compatible profile",
               "15"
             ],
             [
