@@ -1,0 +1,14 @@
+{
+  "schema": "csl.catalogue-exact-support-capture/1",
+  "source_commit": "e7ebf482480271e0d79ec5e2d5167a27849528f9",
+  "input_commit": "f4e58932c995d5b11242cb9beaeef398a2f0ce06",
+  "prior_sdk_commit": "dc6801dc5f02c4000b4f1272361752581a55873a",
+  "prior_evidence_sha256": "b393255e8c91049363a8e718e2063e04fc2f31c0f56e69e4e587a99a5926c92a",
+  "files_sha256": {
+    "building-budget-projection.svg": "03e37e71b27f5f1153057611994a3d18b89db440dcc74e66b5284d202b08e4d7",
+    "catalogue-exact-support-evidence.zip": "a9a13868cc42fb8cecc22441c938129e0983fbc7e4def0214f2d42ef145c5c8e",
+    "exact_support.cpp": "288d40ea2eb02044501e51a8f904584d3c31e09d473d151eef82279396f49bc8",
+    "examples.css": "11ded2b69cec694ff61ecad0493f175becbfc47bce3d641f2ee512543bb82cf4",
+    "index.html": "3ac34047bbaeeabea8ca9e428de5f80cf1ae3d995f197ff7c50a234bbef9d461"
+  }
+}

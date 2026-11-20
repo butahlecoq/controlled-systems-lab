@@ -4365,7 +4365,7 @@
   "learning_navigation_insertions_reviewed_separately": [
     {
       "chapter_id": "native-forward-models",
-      "chapter_sha256": "e1c2da04d942293be7674926bb8e059e82b7940fe3a7173282e99fb955e8550f",
+      "chapter_sha256": "2fd823476686e15d6da45509c1a9e1c0e79706bf7ea02bb12034f8e081d83122",
       "previous_chapter_id": "representation-consumers",
       "next_chapter_id": "closed-loop-semantics",
       "qualification": "Reviewed native forward-models lesson insertion for issue #991. Only its exact source-catalogue index entry and the adjacent lessons' previous/next link fragments may change; every other byte remains baseline-identical."

@@ -132,6 +132,13 @@ FAMILIES = {
         "Compares complete three-step feasible histories with control-interval-only histories "
         "on 35 matched catalogue models. The battery figure overlays both profiles at each stage.",
     ),
+    "catalogue-exact-support-v1": Family(
+        r"examples/catalogue-exact-support-v1",
+        "geometry",
+        "Exact support certificates for three catalogue models",
+        "Checks a rational primal witness and upper bound for each of 192 saved direction-stage samples. "
+        "The building figure shows the exact support lost to the control budget.",
+    ),
     "mpc-crossover": Family(
         r"examples/mpc-crossover-6b7308c4",
         "synthesis",
@@ -1293,6 +1300,22 @@ def build(site: Path) -> None:
                 links=(
                     ("Source and hashes", history + "/manifest.json"),
                     ("Offline evidence", history + "/catalogue-feasible-history-evidence.zip"),
+                ),
+            )
+        )
+    exact_support = "examples/catalogue-exact-support-v1"
+    if (site / exact_support / "index.html").is_file():
+        manifest = json.loads((site / exact_support / "manifest.json").read_text(encoding="utf-8"))
+        detailed = [entry for entry in detailed if entry.report_id != exact_support]
+        detailed.append(
+            Entry(
+                report_id=exact_support,
+                scope="192 exact support certificates across three archived model fixtures and two profiles.",
+                limits="Eight sampled directions at four stages per profile and model.",
+                commit=manifest["source_commit"],
+                links=(
+                    ("Source and hashes", exact_support + "/manifest.json"),
+                    ("Offline evidence", exact_support + "/catalogue-exact-support-evidence.zip"),
                 ),
             )
         )

@@ -1480,9 +1480,10 @@
     },
     {
       "source": "scripts/reports/stage_catalogue_forward_reachability.py",
-      "signal_count": 2,
+      "signal_count": 3,
       "asset_name_literals": [
         "battery-history-projections.svg",
+        "building-budget-projection.svg",
         "platoon-forward.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
@@ -2805,6 +2806,16 @@
       "index_sha256": "f02785bb85f72e1d8260a34b80a08a87006d036ce6377a8ef88ddcba1beee75f",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
+    },
+    {
+      "route": "catalogue-exact-support-v1",
+      "source_bundle": "catalogue-exact-support-v1",
+      "assets": [
+        "building-budget-projection.svg"
+      ],
+      "index_sha256": "3ac34047bbaeeabea8ca9e428de5f80cf1ae3d995f197ff7c50a234bbef9d461",
+      "disposition": "reviewed: sampled building projections and positive support deficits from exact certificates",
+      "companion_route": "examples/catalogue-exact-support-v1/index.html"
     },
     {
       "route": "catalogue-feasible-history-v1",
@@ -4376,6 +4387,8 @@
         "catalogue-forward-reachability-v1/platoon-forward.svg",
         "catalogue-feasible-history-v1/index.html",
         "catalogue-feasible-history-v1/battery-history-projections.svg",
+        "catalogue-exact-support-v1/index.html",
+        "catalogue-exact-support-v1/building-budget-projection.svg",
         "mpc-crossover-6b7308c4/index.html",
         "mpc-crossover-6b7308c4/feedback-geometry.svg",
         "mpc-crossover-6b7308c4/deployment-time.svg",

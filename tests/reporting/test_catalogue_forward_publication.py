@@ -116,3 +116,58 @@ class CatalogueForwardPublicationTests(unittest.TestCase):
             self.assertEqual(archive_entry.commit, stage.FEASIBLE_HISTORY.source_commit)
             for _, path in archive_entry.links:
                 self.assertTrue((site / path).is_file(), path)
+
+    def test_exact_support_keeps_the_refusals_and_primal_dual_certificates(self) -> None:
+        files, [entry], card = stage.build_exact_support(ROOT)
+        route = stage.EXACT_SUPPORT.route
+        original = route + "/catalogue-exact-support-evidence.zip"
+        for path in (entry["page"], entry["figure"], original):
+            self.assertIn(path, files)
+            self.assertIn(path, card)
+        with ZipFile(BytesIO(files[original])) as archive:
+            self.assertEqual(files[entry["figure"]], archive.read("building-budget-projection.svg"))
+            self.assertEqual(files[f"{route}/exact_support.cpp"], archive.read("exact_support.cpp"))
+            audit = json.loads(archive.read("independent-exact-audit.json"))
+            self.assertEqual(set(audit), {"23", "27", "28"})
+            for model, strict in (("23", 0), ("27", 0), ("28", 12)):
+                input_data = json.loads(archive.read(f"input/raw/{model}.json"))
+                certificates = json.loads(archive.read(f"results/{model}.json"))
+                self.assertEqual(audit[model]["budget_effect"]["strict_support_reductions"], strict)
+                for profile in ("full_history", "intervals_only"):
+                    self.assertEqual(audit[model][profile]["statuses"], {"exact-optimal": 32})
+                    self.assertEqual(len(certificates[profile]), 32)
+                    for original_row, row in zip(
+                        input_data[profile]["samples"], certificates[profile], strict=True
+                    ):
+                        self.assertEqual(row["stage"], original_row["stage"])
+                        self.assertEqual(row["direction"], original_row["direction"])
+                        self.assertEqual(original_row["status"], "unsupported")
+                        self.assertEqual(row["prior_native_status"], original_row["status"])
+                        self.assertEqual(row["status"], "exact-optimal")
+            self.assertAlmostEqual(
+                audit["28"]["budget_effect"]["max_support_reduction_decimal"] * 1e13,
+                1.2697696340859817,
+            )
+        book = json.loads((ROOT / "docs/catalogue/learning-book-v1.json").read_bytes())
+        [chapter] = [item for item in book["chapters"] if item["id"] == "native-forward-models"]
+        page = "examples/" + entry["page"]
+        self.assertIn("../" + page, {item["href"] for item in chapter["records"]})
+        with tempfile.TemporaryDirectory() as directory:
+            site = Path(directory)
+            for name, content in files.items():
+                target = site / "examples" / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(content)
+            ledger = json.loads(presentation.REGISTRY.read_bytes())
+            [record] = [item for item in ledger["routes"] if item["route"] == page]
+            report = presentation.audit_site(site, {"routes": [record]})
+            self.assertTrue(report["passed"], report["findings"])
+            index = site / "index.html"
+            index.write_text("<ul></ul>", encoding="utf-8")
+            (site / "archive.html").touch()
+            landing.build(site)
+            [archive_entry], _ = landing.parse_index(index.read_text(encoding="utf-8"))
+            self.assertEqual(archive_entry.report_id + "/index.html", page)
+            self.assertEqual(archive_entry.commit, stage.EXACT_SUPPORT.source_commit)
+            for _, path in archive_entry.links:
+                self.assertTrue((site / path).is_file(), path)
