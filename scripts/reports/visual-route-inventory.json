@@ -1479,6 +1479,14 @@
       "role_and_disposition_reason": "Authenticates the frozen v2 manifest and native 35a708df producer identity, then copies all current and superseded two-state affine lesson assets byte exactly into the Pages gallery; no numerical execution or historical relabelling."
     },
     {
+      "source": "scripts/reports/stage_catalogue_forward_reachability.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "platoon-forward.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_discrete_mpc_2d.py",
       "signal_count": 2,
       "asset_name_literals": [
@@ -2798,6 +2806,16 @@
       "follow_up_issue": 669
     },
     {
+      "route": "catalogue-forward-reachability-v1",
+      "source_bundle": "catalogue-forward-reachability-v1",
+      "assets": [
+        "platoon-forward.svg"
+      ],
+      "index_sha256": "a2dccc7b3c2f84a61c2f05c6a60be39d37faf3b55e2006f9fbdbb43447415906",
+      "disposition": "reviewed: physical and centred coordinates show the same stagewise platoon projection",
+      "companion_route": "examples/catalogue-forward-reachability-v1/index.html"
+    },
+    {
       "route": "convex-20261012T041854Z-4d54a407c9b2",
       "source_bundle": "convex-20261012T041854Z-4d54a407c9b2",
       "assets": [
@@ -3814,16 +3832,6 @@
       "index_sha256": "2b7d31cb884861fdab7abe2d1fad8dadb4be1489f5e1edda4afdc8b05b3c22c2",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
-    },
-    {
-      "route": "catalogue-forward-reachability-v1",
-      "source_bundle": "catalogue-forward-reachability-v1",
-      "assets": [
-        "platoon-forward.svg"
-      ],
-      "index_sha256": "a2dccc7b3c2f84a61c2f05c6a60be39d37faf3b55e2006f9fbdbb43447415906",
-      "disposition": "reviewed: physical and centred coordinates show the same stagewise platoon projection",
-      "companion_route": "examples/catalogue-forward-reachability-v1/index.html"
     },
     {
       "route": "mpc-crossover-6b7308c4",
