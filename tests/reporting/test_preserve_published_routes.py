@@ -126,6 +126,23 @@ class PublishedRoutePreservationTests(unittest.TestCase):
                             else:
                                 self.assertEqual((site / name).read_bytes(), bundle.read(name))
 
+    def test_stage_reads_manifest_and_each_archive_once(self):
+        source = preservation.SOURCE
+        manifest = source / "manifest.json"
+        archives = [
+            source / archive["path"] for archive in json.loads(manifest.read_bytes())["archives"]
+        ]
+        with tempfile.TemporaryDirectory() as directory, patch("io.open", wraps=io.open) as opened:
+            preservation.stage(Path(directory), source)
+        sources_read = [str(call.args[0]) for call in opened.call_args_list]
+        self.assertEqual(
+            {
+                source_file: sources_read.count(str(source_file))
+                for source_file in [manifest, *archives]
+            },
+            dict.fromkeys([manifest, *archives], 1),
+        )
+
     def test_tampered_archive_rejected_before_writes(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
