@@ -34,10 +34,20 @@ CSL_SELECTOR_NOINLINE void* operator new(std::size_t size) {
     throw std::bad_alloc{};
 }
 CSL_SELECTOR_NOINLINE void* operator new[](std::size_t size){return ::operator new(size);}
+// Keep nothrow temporary buffers on the same allocator as the replacement delete.
+CSL_SELECTOR_NOINLINE void* operator new(std::size_t size,const std::nothrow_t&)noexcept {
+    try {return ::operator new(size);}
+    catch(const std::bad_alloc&) {return nullptr;}
+}
+CSL_SELECTOR_NOINLINE void* operator new[](std::size_t size,const std::nothrow_t& tag)noexcept {
+    return ::operator new(size,tag);
+}
 CSL_SELECTOR_NOINLINE void operator delete(void* p)noexcept{std::free(p);}
 CSL_SELECTOR_NOINLINE void operator delete[](void* p)noexcept{std::free(p);}
 CSL_SELECTOR_NOINLINE void operator delete(void* p,std::size_t)noexcept{std::free(p);}
 CSL_SELECTOR_NOINLINE void operator delete[](void* p,std::size_t)noexcept{std::free(p);}
+CSL_SELECTOR_NOINLINE void operator delete(void* p,const std::nothrow_t&)noexcept{std::free(p);}
+CSL_SELECTOR_NOINLINE void operator delete[](void* p,const std::nothrow_t&)noexcept{std::free(p);}
 #undef CSL_SELECTOR_NOINLINE
 using namespace csl;
 using namespace csl::registry;
