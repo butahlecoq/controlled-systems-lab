@@ -3,6 +3,12 @@
 #endif
 #if CSL_NATIVE_HAS_CASADI
 #include <csl/adapters/nlp/casadi_fixed_tail.hpp>
+#if CSL_NATIVE_HAS_HIGHS && CSL_NATIVE_HAS_QHULL
+#include <csl/adapters/nlp/casadi_history_optimizer.hpp>
+#include <csl/geometry/ellipsoidal.hpp>
+#include <csl/synthesis/strategy_a/strategy.hpp>
+#include <csl/synthesis/strategy_b/direct_joint.hpp>
+#endif
 #endif
 #include <csl/model/linear_system.hpp>
 #include <csl/geometry/polyhedral_projection.hpp>
@@ -40,6 +46,7 @@
 #include <map>
 #include <numeric>
 #include <stdexcept>
+#include <tuple>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -1201,6 +1208,418 @@ Json lifted_feedback_export(const synthesis::JointHistoryRelation& history,
             {"stages", std::move(stages)}};
 }
 
+#if CSL_NATIVE_HAS_CASADI && CSL_NATIVE_HAS_HIGHS && CSL_NATIVE_HAS_QHULL
+Json history_diagnostics(const Diagnostics &diagnostics) {
+    Json rows = Json::array();
+    for (const auto &item : diagnostics)
+        rows.push_back({{"field", item.field}, {"message", item.explanation}});
+    return rows;
+}
+
+std::pair<Vector, Vector> history_axis_bounds(const Json &member, std::size_t dimension) {
+    Vector lower(dimension, -std::numeric_limits<double>::infinity());
+    Vector upper(dimension, std::numeric_limits<double>::infinity());
+    const auto add_rows = [&](const Json &rows, const Json &bounds, bool equality) {
+        for (std::size_t i = 0; i < rows.size(); ++i) {
+            const auto coefficients = vector(rows.at(i));
+            if (coefficients.size() != dimension)
+                throw std::runtime_error("Feedback axis row has the wrong dimension.");
+            const auto first = std::find_if(coefficients.begin(), coefficients.end(),
+                                            [](double value) { return value != 0; });
+            if (first == coefficients.end() ||
+                std::any_of(first + 1, coefficients.end(), [](double value) { return value != 0; }))
+                throw std::runtime_error("Feedback axis family requires axis-aligned bounds.");
+            const auto axis = static_cast<std::size_t>(first - coefficients.begin());
+            const auto value = bounds.at(i).get<double>() / *first;
+            if (equality || *first < 0)
+                lower[axis] = std::max(lower[axis], value);
+            if (equality || *first > 0)
+                upper[axis] = std::min(upper[axis], value);
+        }
+    };
+    add_rows(member.at("inequalities"), member.at("upper_bounds"), false);
+    add_rows(member.at("equalities"), member.at("equality_values"), true);
+    for (std::size_t i = 0; i < dimension; ++i)
+        if (!std::isfinite(lower[i]) || !std::isfinite(upper[i]) || lower[i] > upper[i])
+            throw std::runtime_error("Feedback axis bounds must be finite and ordered.");
+    return {std::move(lower), std::move(upper)};
+}
+
+optimization::HistoryHMembership feedback_h_membership(const Json &member, const SetId &id,
+                                                       std::size_t dimension) {
+    const auto rows = [&](const char *field) {
+        auto values = matrix(member.at(field));
+        if (!values.rows)
+            values.cols = dimension;
+        return take(numeric::snapshot(values), field);
+    };
+    const auto rhs = [&](const char *field) {
+        return take(numeric::snapshot_vector(vector(member.at(field))), field);
+    };
+    return {take(sets::make_h({id, dimension, {}}, {rows("inequalities"), rhs("upper_bounds"),
+                                                    rows("equalities"), rhs("equality_values")}),
+                 "feedback H region")};
+}
+
+using NativeMembership =
+    std::tuple<optimization::HistorySetFamily, optimization::HistoryMembershipShape,
+               optimization::HistoryMembershipWitness>;
+
+NativeMembership native_history_membership(const Json &member, const std::string &family,
+                                           const SetId &id, std::span<const double> state,
+                                           Vector supplied_factor, const SetId &carrier,
+                                           const sets::HRepresentation &history) {
+    using namespace optimization;
+    const auto kind = member.at("kind").get<std::string>();
+    const auto n = state.size();
+    if (kind == "zonotope")
+        return {HistorySetFamily::zonotope,
+                HistoryZonotopeMembership{vector(member.at("center")), matrix(member.at("factor"))},
+                HistoryZonotopeWitness{std::move(supplied_factor)}};
+    if (kind == "ellipsoid")
+        return {HistorySetFamily::ellipsoid,
+                HistoryBallFactorMembership{
+                    take_history(geometry::ellipsoidal::make_factor_ellipsoid(
+                                     vector(member.at("center")), matrix(member.at("factor"))),
+                                 "feedback ellipsoid")},
+                HistoryBallFactorWitness{std::move(supplied_factor)}};
+    if (family == "polytope" && !supplied_factor.empty())
+        throw std::runtime_error("H feedback expects no caller-supplied latent coefficients.");
+    if (kind == "lifted-h") {
+        HistoryLiftedHMembership projection{carrier, {}, {}};
+        const auto &selection = member.at("row_selection");
+        if (selection.at("kind") == "full") {
+            if (history.inequalities.rows())
+                projection.inequality_rows.push_back({0, history.inequalities.rows()});
+            if (history.equalities.rows())
+                projection.equality_rows.push_back({0, history.equalities.rows()});
+        } else {
+            const auto ranges = [&](const char *field, auto &result) {
+                for (const auto &pair : selection.at(field))
+                    result.push_back(
+                        {pair.at(0).get<std::size_t>(), pair.at(1).get<std::size_t>()});
+            };
+            ranges("inequalities", projection.inequality_rows);
+            ranges("equalities", projection.equality_rows);
+        }
+        return {HistorySetFamily::polytope, std::move(projection), HistoryHWitness{}};
+    }
+    if (family == "polytope")
+        return {HistorySetFamily::polytope, feedback_h_membership(member, id, n),
+                HistoryHWitness{}};
+    auto [lower, upper] = history_axis_bounds(member, n);
+    if (family == "parallelotope") {
+        auto frame = matrix(member.at("parallelotope_frame"));
+        // Current feedback producer exports its axis frame. A nonaxis frame
+        // requires bounds and witnesses in that frame before it can be admitted.
+        Matrix axis{n, n, Vector(n * n, 0)};
+        for (std::size_t i = 0; i < n; ++i)
+            axis.values[i * n + i] = 1;
+        if (frame.rows != n || frame.cols != n || frame.values != axis.values)
+            throw std::runtime_error("Native feedback parallelotope requires the axis frame.");
+        return {HistorySetFamily::parallelotope,
+                HistoryParallelotopeMembership{Vector(n, 0), std::move(frame), std::move(lower),
+                                               std::move(upper)},
+                HistoryParallelotopeWitness{supplied_factor.empty()
+                                                ? Vector(state.begin(), state.end())
+                                                : std::move(supplied_factor)}};
+    }
+    Vector center(n), radii(n), coefficients(n);
+    for (std::size_t i = 0; i < n; ++i) {
+        center[i] = std::midpoint(lower[i], upper[i]);
+        radii[i] = std::max(center[i] - lower[i], upper[i] - center[i]);
+        if (radii[i] > 0)
+            coefficients[i] = std::clamp((state[i] - center[i]) / radii[i], -1.0, 1.0);
+    }
+    return {HistorySetFamily::box, HistoryAxisBoxMembership{std::move(center), std::move(radii)},
+            HistoryAxisBoxWitness{supplied_factor.empty() ? std::move(coefficients)
+                                                          : std::move(supplied_factor)}};
+}
+
+auto native_history_provider(const Json &input) {
+    using namespace adapters::nlp;
+    const auto provider = input.at("native_history_optimizer").get<std::string>();
+    std::optional<CasadiHistoryScaling> scaling;
+    if (input.contains("native_history_scaling")) {
+        const auto &data = input.at("native_history_scaling");
+        scaling = CasadiHistoryScaling{vector(data.at("state")), vector(data.at("control"))};
+    }
+    if (provider == "csl.nlp.casadi-ipopt.history-cost" && !scaling)
+        return make_casadi_history_optimizer_registration();
+    if (provider == "csl.nlp.casadi-ipopt.scaled-history-cost" && scaling)
+        return make_casadi_scaled_history_optimizer_registration(std::move(*scaling));
+    if (provider == "csl.nlp.casadi-ipopt.mumps-history-cost")
+        return make_casadi_mumps_history_optimizer_registration(std::move(scaling));
+    throw std::runtime_error("Unknown native history optimizer or incompatible physical scales.");
+}
+
+Json solve_native_history(const Json &input, const problem::ResolvedProblem &problem,
+                          const synthesis::JointHistoryRelation &exported,
+                          const optimization::RunningControlCost &cost, std::size_t offset,
+                          Json response) {
+    using namespace optimization;
+    const auto strategy = input.at("native_history_strategy").get<std::string>();
+    if (strategy != "A" && strategy != "B")
+        return query_failure(input, "rejected", "Native history strategy must be A or B.");
+    const auto n = exported.coordinates.dimensions.state;
+    const auto m = exported.coordinates.dimensions.control;
+    const auto horizon = exported.coordinates.horizon;
+    const auto &geometry = response.at("geometry");
+    const auto family_name = geometry.at("family").get<std::string>();
+    auto start = vector(input.at("initial_primal"));
+    const auto &factors = input.at("initial_geometry_factors");
+    if (start.size() != n * (horizon + 1) + m * horizon || !factors.is_array() ||
+        factors.size() != 3 * (horizon + 1))
+        return query_failure(input, "rejected",
+                             "Wrong supplied native history or membership witness count.");
+
+    const auto universal =
+        take(sets::make_universal({{"strategy-a/lifted-history/terminal-domain"}, n, {}}),
+             "Strategy A history carrier");
+    const auto carrier =
+        strategy == "A"
+            ? take_history(synthesis::recover_lifted_history_projections(problem, universal),
+                           "Strategy A history carrier")
+                  .history.relation.metadata()
+                  ->id
+            : SetId{"syn04-feasible:" + problem.identity().value};
+    const auto original_h = std::get<sets::HRepresentation>(exported.relation.representation());
+    std::vector<HistoryMembership> memberships;
+    std::vector<HistoryMembershipWitness> witnesses;
+    std::vector<std::pair<std::size_t, double>> strict_coordinates;
+    Json binding_receipts = Json::array();
+    for (const auto &stage : geometry.at("stages")) {
+        const auto k = stage.at("stage").get<std::size_t>();
+        const auto &members = stage.at("memberships");
+        if (k > horizon || k != witnesses.size() / 3 || members.size() != 3)
+            return query_failure(input, "failed", "Incomplete or unordered native stage geometry.");
+        const auto state = std::span<const double>{start}.subspan(k * n, n);
+        for (const auto &member : members) {
+            const SetId id{member.at("set_id").get<std::string>()};
+            auto [family, shape, witness] = native_history_membership(
+                member, family_name, id, state, vector(factors.at(witnesses.size())), carrier,
+                original_h);
+            for (const auto &predicate : member.at("strict_source_domain")) {
+                const auto coordinate = predicate.at("coordinate").get<std::size_t>();
+                const auto lower = predicate.at("lower_bound").get<double>();
+                if (coordinate >= n || predicate.at("strict") != true || !std::isfinite(lower))
+                    return query_failure(input, "rejected", "Unsupported source-domain predicate.");
+                if (k == 0 &&
+                    !(input.at("observed_physical_state").at(coordinate).get<double>() > lower))
+                    return query_failure(input, "rejected",
+                                         "Observation violates the strict source domain.");
+                strict_coordinates.emplace_back(k * n + coordinate, lower);
+            }
+            const auto role = member.at("role").get<std::string>();
+            const auto &relation_name = member.at("relation");
+            if (relation_name != "outer" && relation_name != "equivalent")
+                return query_failure(input, "rejected", "Unsupported native geometry relation.");
+            const auto relation =
+                relation_name == "outer" ? SetRelation::outer : SetRelation::equivalent;
+            HistorySourceGeometry origin = [&]() -> HistorySourceGeometry {
+                if (const auto *lifted = std::get_if<HistoryLiftedHMembership>(&shape))
+                    return {id, HistorySetFamily::polytope, *lifted};
+                const auto &source = stage.at(role + "_h");
+                const SetId reference{source.at("set_id").get<std::string>()};
+                return {reference, HistorySetFamily::polytope,
+                        feedback_h_membership(source, reference, n)};
+            }();
+            binding_receipts.push_back({{"stage", k},
+                                        {"role", role},
+                                        {"selected", id.value},
+                                        {"reference", origin.id.value},
+                                        {"relation", member.at("relation")}});
+            memberships.push_back(
+                {{k},
+                 {origin.id, id, family, relation, "source-state",
+                  member.at("indices").get<std::vector<std::size_t>>(), std::move(origin)},
+                 std::move(shape)});
+            witnesses.push_back(std::move(witness));
+        }
+    }
+
+    if (witnesses.size() != factors.size())
+        return query_failure(input, "failed",
+                             "Native stage geometry did not cover the full horizon.");
+    const auto holds_strict_domain = [&](std::span<const double> history) {
+        return std::all_of(
+            strict_coordinates.begin(), strict_coordinates.end(),
+            [&](const auto &predicate) { return history[predicate.first] > predicate.second; });
+    };
+    if (!holds_strict_domain(start))
+        return query_failure(input, "rejected",
+                             "Supplied history violates the strict source domain.");
+
+    auto registration = native_history_provider(input);
+    StrategyConfiguration configuration;
+    configuration.history_optimizer = registration.identity.id;
+    configuration.representation = {"csl.polyhedron.h"};
+    auto optimizer = feedback_provider(std::move(registration), "csl.whole-history-source-cost.v1");
+    auto lp = take_history(adapters::lp::make_highs_registration(), "native history HiGHS LP");
+    auto qp = take_history(adapters::convex::make_highs_registration(), "native history HiGHS QP");
+    registry::Registry<registry::LPPort> lps;
+    registry::Registry<registry::ConvexPort> qps;
+    registry::Registry<registry::GeometryPort> projections, affines;
+    registry::Registry<registry::ConversionPort> conversions;
+    const auto add = [](auto &providers, auto registered) {
+        const registry::Method method{registered.identity.id, registered.identity.version};
+        if (providers.add(std::move(registered)))
+            throw std::runtime_error("Could not register a history provider.");
+        return method;
+    };
+    const auto lm = add(lps, lp);
+    const auto qm = add(qps, qp);
+    if (strategy == "B") {
+        configuration.lp = lm.id;
+        configuration.convex = qm.id;
+    }
+    registry::StrategyRegistry strategies;
+    auto strategy_registration = [&] {
+        if (strategy == "B")
+            return synthesis::strategy_b::make_registration(lps, qps, optimizer);
+        auto converter =
+            take_history(adapters::polyhedral::make_qhull_registration(lp), "native history Qhull");
+        auto affine = geometry::make_affine_sum_registration(
+            {feedback_provider(geometry::make_lp_hull_reducer_registration(), ""),
+             feedback_provider(lp, "csl.program-result.v1"),
+             feedback_provider(converter, "csl.polyhedron.v")});
+        const auto pm = add(projections, geometry::polyhedral::make_projection_registration());
+        const auto am = add(affines, std::move(affine));
+        const auto cm = add(conversions, std::move(converter));
+        registry::Requirements h, v, numerical;
+        h.output.representation = {"csl.polyhedron.h"};
+        h.output.relation = SetRelation::equivalent;
+        v.output.representation = {"csl.polyhedron.v"};
+        v.output.relation = SetRelation::equivalent;
+        numerical.output.representation = {"csl.program-result.v1"};
+        auto checked =
+            take_history(registry::check_providers(registry::select_provider(projections, pm, h),
+                                                   registry::select_provider(affines, am, v),
+                                                   registry::select_provider(conversions, cm, h),
+                                                   registry::select_provider(lps, lm, numerical),
+                                                   registry::select_provider(qps, qm, numerical)),
+                         "Strategy A history providers");
+        return synthesis::strategy_a::make_registration(std::move(checked), optimizer);
+    }();
+    configuration.strategy = strategy_registration.identity.id;
+    if (strategies.add(std::move(strategy_registration)))
+        throw std::runtime_error("Could not register the requested history strategy.");
+    FamilyRequest family;
+    family.profile =
+        strategy == "A" ? synthesis::strategy_a::lifted_nominal_profile : "nominal_open_loop";
+    family.objective = problem.identity();
+    family.representation = configuration.representation;
+    registry::StrategyRequest query{problem, configuration, family, "1", {}};
+    query.history_optimization = std::make_shared<const StrategyHistoryOptimizationProfile>(
+        StrategyHistoryOptimizationProfile{{input.at("request_id").get<std::string>()},
+                                           cost,
+                                           offset,
+                                           "source-state",
+                                           std::move(memberships),
+                                           SuppliedStart{std::move(start), std::move(witnesses)}});
+    registry::Requirements requirements;
+    requirements.output.representation = family.representation;
+    requirements.output.family = family.target;
+    requirements.output.completeness = registry::Completeness::unestablished;
+    auto prepared = strategies.prepare(query, requirements);
+    response["status"] = "failed";
+    if (const auto *rejection = std::get_if<registry::Rejection>(&prepared)) {
+        response["reason"] = "Native history strategy rejected the request.";
+        response["strategy_diagnostics"] = history_diagnostics(rejection->diagnostics);
+        return response;
+    }
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    const auto execution =
+        std::get<registry::PreparedStrategy>(std::move(prepared)).create()->run(context);
+    if (const auto *unsupported = std::get_if<Unsupported>(&execution)) {
+        response["reason"] = "Native history strategy declined the request.";
+        response["strategy_diagnostics"] = history_diagnostics(unsupported->diagnostics);
+        return response;
+    }
+    const auto &result = std::get<SynthesisResult>(execution);
+    response["strategy_termination"] = static_cast<int>(result.termination);
+    if (const auto *failure = std::get_if<ContractValidationFailure>(&result.stop))
+        response["strategy_diagnostics"] = history_diagnostics(failure->diagnostics);
+    if (const auto *failure = std::get_if<ScopedRequestRejection>(&result.stop))
+        response["strategy_diagnostics"] = history_diagnostics(failure->diagnostics);
+    if (const auto *failure = std::get_if<ScopedOperationStopped>(&result.stop))
+        response["reason"] = failure->stop.diagnostics;
+    if (!result.history_optimization || !result.history_optimization->result) {
+        if (!response.contains("reason"))
+            response["reason"] = "Native history strategy returned no checked solve.";
+        return response;
+    }
+    const auto &call = *result.history_optimization;
+    const auto &plan = *call.result;
+    Json latent = Json::array();
+    for (const auto &witness : plan.membership_witnesses)
+        latent.push_back(std::visit(
+            [](const auto &coefficients) -> Json {
+                if constexpr (std::is_same_v<std::decay_t<decltype(coefficients)>, HistoryHWitness>)
+                    return Json::array();
+                else
+                    return coefficients.coefficients;
+            },
+            witness));
+    response["solver_receipt"] = {
+        {"provider",
+         call.provider.actual_module ? Json(call.provider.actual_module->value) : Json(nullptr)},
+        {"requested", call.provider.requested_module.value},
+        {"version",
+         call.provider.actual_version ? Json(*call.provider.actual_version) : Json(nullptr)},
+        {"strategy", strategy},
+        {"strategy_module", configuration.strategy.value},
+        {"program_id", call.program.value},
+        {"objective", plan.reported_objective},
+        {"maximum_history_violation", plan.maximum_history_violation},
+        {"raw_diagnostics", plan.diagnostics},
+        {"geometry_bindings", std::move(binding_receipts)},
+        {"geometry_factors", std::move(latent)},
+        {"supplied_readback", std::holds_alternative<VerifiedSuppliedStart>(plan.initialization)}};
+    const auto *candidate =
+        result.family ? std::get_if<CandidateFamily>(&result.family->outcome()) : nullptr;
+    const auto *actual = candidate && candidate->relation.payload
+                             ? candidate->relation.payload->h_relation_for_recording()
+                             : nullptr;
+    const auto same_rows = [](const numeric::MatrixView &lhs, const numeric::MatrixView &rhs) {
+        if (lhs.rows() != rhs.rows() || lhs.cols() != rhs.cols())
+            return false;
+        for (std::size_t i = 0; i < lhs.rows(); ++i)
+            for (std::size_t j = 0; j < lhs.cols(); ++j)
+                if (lhs(i, j) != rhs(i, j))
+                    return false;
+        return true;
+    };
+    const bool same_carrier = [&] {
+        if (!actual)
+            return false;
+        const auto representation = actual->representation();
+        const auto *h = std::get_if<sets::HRepresentation>(&representation);
+        return h && same_rows(h->inequalities, original_h.inequalities) &&
+               same_rows(h->equalities, original_h.equalities) &&
+               std::ranges::equal(h->upper_bounds.values(), original_h.upper_bounds.values()) &&
+               std::ranges::equal(h->equality_values.values(), original_h.equality_values.values());
+    }();
+    if (!same_carrier) {
+        response["reason"] = "Strategy carrier differs from the exported history rows.";
+        return response;
+    }
+    if (!holds_strict_domain(plan.history)) {
+        response["reason"] = "Returned history violates the strict source domain.";
+        return response;
+    }
+    if (result.termination == Termination::completed) {
+        response["status"] = "solved";
+        response["primal"] = plan.history;
+        response["source_cost"] = {{"terminal", plan.source_cost.terminal},
+                                   {"running", plan.source_cost.running},
+                                   {"total", plan.source_cost.total}};
+    }
+    return response;
+}
+#endif
+
 Json continuous_history_query(const Json& in) {
     const auto solver = in.at("history_solver").get<std::string>();
     if (solver != "csl.convex.highs" && solver != "casadi-ipopt")
@@ -1277,12 +1696,13 @@ Json continuous_history_query(const Json& in) {
             {"layout", "x0..xT,u0..u(T-1)"}}}, {"geometry", "not_used"},
         {"assurance", "numerical affine history; no validated completeness or nonlinear safety claim"}};
     response["requested_solver"] = solver;
+    const bool native_strategy = in.contains("native_history_strategy");
+    if (native_strategy && (solver != "casadi-ipopt" || !in.contains("geometry_family")))
+        return query_failure(in, "rejected", "Native history strategy requires an explicit CasADi geometry family.");
     if (lifted) {
         response["history_relation"]["set_id"] = history.relation.metadata()->id.value;
         response["geometry"] = lifted_feedback_export(history, prefixes, in);
-        return response;
-    }
-    if(in.contains("geometry_family")) {
+    } else if(in.contains("geometry_family")) {
         if(solver != "casadi-ipopt") throw std::runtime_error("feedback family requires explicitly selected casadi-ipopt");
 #if CSL_NATIVE_HAS_HIGHS && CSL_NATIVE_HAS_QHULL
         response["geometry"] = feedback_export(resolved, in, universal, n);
@@ -1295,6 +1715,13 @@ Json continuous_history_query(const Json& in) {
         response["status"] = "unavailable";
         response["reason"] = "feedback geometry requires registered HiGHS and Qhull";
         return response;
+#endif
+    }
+    if (native_strategy) {
+#if CSL_NATIVE_HAS_CASADI && CSL_NATIVE_HAS_HIGHS && CSL_NATIVE_HAS_QHULL
+        return solve_native_history(in, resolved, history, cost, stage, std::move(response));
+#else
+        return query_failure(in, "unavailable", "Native history strategies require CasADi, HiGHS and Qhull.");
 #endif
     }
     if (solver == "casadi-ipopt") return response;

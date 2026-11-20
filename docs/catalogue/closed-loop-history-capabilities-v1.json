@@ -63,8 +63,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "fe21a7d4dbccbadb52568c5803d5c47253e15a230c96cc7a21763ac01ea714f8",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-mpc/1/cfg-fe21a7d4dbccbadb",
+      "graph_fingerprint": "696c6fe1682d9dc91f2bf7213702aa8bf74b069195ad14d07616a7850cbf2ae4",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-mpc/1/cfg-696c6fe1682d9dc9",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -82,7 +82,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -174,7 +174,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -241,8 +241,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "e3f34965fdb3f6570165f6d3fbdc1eb9d103806d9dec92bcd9818862281a8e8e",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ipopt/1/cfg-e3f34965fdb3f657",
+      "graph_fingerprint": "0f99b2b3de02cceb0d2a68849b7b22345ab8182d2c5c0df6ac22d07471188195",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ipopt/1/cfg-0f99b2b3de02cceb",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -260,7 +260,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -352,7 +352,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -438,8 +438,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "205d6e6898a48adb39d4cacc9bd2f98b674c15c07dac3745baa7f73fe3cc359a",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-box-ipopt/1/cfg-205d6e6898a48adb",
+      "graph_fingerprint": "a3c379c12e0d310ae47316ca2326ea4cf3a5ff76b5d2d8915b0cb38e3e615155",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-box-ipopt/1/cfg-a3c379c12e0d310a",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -464,7 +464,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -632,7 +632,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -718,8 +718,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "a03784f0c646b77c5b25fd9a6c7cba3fe6f5b99c927a088975b289267b321ab5",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-polytope-ipopt/1/cfg-a03784f0c646b77c",
+      "graph_fingerprint": "b914b161e161d21f7c8dbe1647c54f85147f98d7f9b78e913492f1c31df9afa9",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-polytope-ipopt/1/cfg-b914b161e161d21f",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -744,7 +744,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -912,7 +912,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -998,8 +998,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "b12fdac85b0401ee165a6b4f9e14d0fb74d6b81fe77b3ef8d2ff0a05c3e07dfe",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-zonotope-ipopt/1/cfg-b12fdac85b0401ee",
+      "graph_fingerprint": "584115cc85895c69115ad9c1c37e6417f18fc7612e80b17804e51d494221150b",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-zonotope-ipopt/1/cfg-584115cc85895c69",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1024,7 +1024,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -1192,7 +1192,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -1278,8 +1278,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "2f9ea444cbff84cee785cc8a936d633d0d29a66ddf9ece52bf2fc7d0335ed488",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-parallelotope-ipopt/1/cfg-2f9ea444cbff84ce",
+      "graph_fingerprint": "b8b235f91f25dba31f8c75fa4e2c0775a18f7987cc79b2f1bae98c54a2d27044",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-parallelotope-ipopt/1/cfg-b8b235f91f25dba3",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1304,7 +1304,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -1472,7 +1472,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -1558,8 +1558,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "92c73fade9c430758d80235361a3c44a4690dc2b0ac07480803d51828731450d",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ellipsoid-ipopt/1/cfg-92c73fade9c43075",
+      "graph_fingerprint": "18da2dcc2ac72c3042542be9db0687497c82eee5fbe5da4a6696a7856f38c425",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ellipsoid-ipopt/1/cfg-18da2dcc2ac72c30",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1584,7 +1584,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -1752,7 +1752,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -1839,8 +1839,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "f6dcb3974fd3c418c6335b34c927980f7ab6113c34ce1a40ab28912ce805117d",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-lifted-polytope-ipopt/1/cfg-f6dcb3974fd3c418",
+      "graph_fingerprint": "d30dfd4866f484cf306bc87de9eccca94b2f645855e3f420fa9b40c5ee4b8634",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-lifted-polytope-ipopt/1/cfg-d30dfd4866f484cf",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1863,7 +1863,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -2035,7 +2035,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -2138,8 +2138,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "d1579f9535789bb92384ea045451b693bed4edcaf0106b7aaf8043b14691bb2b",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-strategy-a-history-polytope/1/cfg-d1579f9535789bb9",
+      "graph_fingerprint": "40d58ce985cc1618760ad4750d052df6466242b75e0e136b312784706f4a6a84",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-strategy-a-history-polytope/1/cfg-40d58ce985cc1618",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -2165,7 +2165,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -2213,7 +2213,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -2229,7 +2229,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -2261,7 +2261,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -2281,7 +2281,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -2313,7 +2313,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -2377,15 +2377,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -2488,8 +2488,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "0fb7717098d515ba073e6f726529c769e282fc3554488c4eda0e3a8185aa3dc7",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-strategy-b-history-polytope/1/cfg-0fb7717098d515ba",
+      "graph_fingerprint": "cc9189b51f0a8ebdf9b969b0c4df8180eef0f9b19170fed5c2b8db979f545aa9",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-strategy-b-history-polytope/1/cfg-cc9189b51f0a8ebd",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -2515,7 +2515,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -2563,7 +2563,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -2579,7 +2579,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -2611,7 +2611,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -2631,7 +2631,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -2663,7 +2663,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -2727,15 +2727,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -2837,8 +2837,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "0c8ee29a6b62f6d367fbb47b7a867db3719d06611e572ede25d8440e0091f42c",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-strategy-a-history-box/1/cfg-0c8ee29a6b62f6d3",
+      "graph_fingerprint": "2cefbb314656e0fb64f11a0f6fc44874299583b4a4551df591ddb0baf30426fb",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-strategy-a-history-box/1/cfg-2cefbb314656e0fb",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -2866,7 +2866,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -2914,7 +2914,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -2930,7 +2930,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -2958,7 +2958,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -2978,7 +2978,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -3010,7 +3010,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -3074,15 +3074,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -3184,8 +3184,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "2b201012c55b775c8c5932f1f0450f364ad44032c2b97c0132038d54930172aa",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-strategy-b-history-box/1/cfg-2b201012c55b775c",
+      "graph_fingerprint": "f6509c658b52e3747c623ed84a09cc5c3f6de317b663cd45635bcfb02f9e5f27",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-strategy-b-history-box/1/cfg-f6509c658b52e374",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -3213,7 +3213,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -3261,7 +3261,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -3277,7 +3277,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -3305,7 +3305,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -3325,7 +3325,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -3357,7 +3357,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -3421,15 +3421,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -3531,8 +3531,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "0c7d92c1947bdf3410324767920c9729b00f7ccf265043442280d9e4535d45b9",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-strategy-a-history-zonotope/1/cfg-0c7d92c1947bdf34",
+      "graph_fingerprint": "648d716500aa1b7ab9cb3015a762fe2592303f0a6db82b2f514bcb4f198f17a9",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-strategy-a-history-zonotope/1/cfg-648d716500aa1b7a",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -3560,7 +3560,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -3608,7 +3608,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -3624,7 +3624,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -3652,7 +3652,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -3672,7 +3672,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -3704,7 +3704,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -3768,15 +3768,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -3878,8 +3878,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "3d4eba94596e12737b4b36b0e47097593430ac8ce08b9cfd39f5f5ba88d59750",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-strategy-b-history-zonotope/1/cfg-3d4eba94596e1273",
+      "graph_fingerprint": "fb5b0db6c9f7beb405da6556c8db9b9b9737c9e433622209431c9dfaa4c5433a",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-strategy-b-history-zonotope/1/cfg-fb5b0db6c9f7beb4",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -3907,7 +3907,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -3955,7 +3955,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -3971,7 +3971,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -3999,7 +3999,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -4019,7 +4019,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -4051,7 +4051,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -4115,15 +4115,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -4225,8 +4225,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "85f42c59f601e98d701b4146797071d306a0f140a0373afa2fb8212c68a9debf",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-strategy-a-history-parallelotope/1/cfg-85f42c59f601e98d",
+      "graph_fingerprint": "1e2f501bd7bfbdd0f5f186ad77271a24e8f4b949d3d9625cf2c4ab13c9f47646",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-strategy-a-history-parallelotope/1/cfg-1e2f501bd7bfbdd0",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4254,7 +4254,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -4302,7 +4302,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -4318,7 +4318,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -4346,7 +4346,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -4366,7 +4366,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -4398,7 +4398,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -4462,15 +4462,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -4572,8 +4572,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "7f522f8994bad3bb564cd1984d40213e742d0e380fdb558dc636f96ddd278822",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-strategy-b-history-parallelotope/1/cfg-7f522f8994bad3bb",
+      "graph_fingerprint": "a6ff89e9f88b578b47414a3bb091ee62c1ad993f441f59198a06ba0db5c69527",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-strategy-b-history-parallelotope/1/cfg-a6ff89e9f88b578b",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4601,7 +4601,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -4649,7 +4649,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -4665,7 +4665,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -4693,7 +4693,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -4713,7 +4713,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -4745,7 +4745,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -4809,15 +4809,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -4919,8 +4919,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "ab15e4bcea4adae1dc7e1fd53a748aecc80c5ac04fa0541bc9f4c812cd561d7d",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-strategy-a-history-ellipsoid/1/cfg-ab15e4bcea4adae1",
+      "graph_fingerprint": "d0e10f1eddc6d5ac7cfa2c19f19101ed89536a9ae336cea7b7cdc9c181c20527",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-strategy-a-history-ellipsoid/1/cfg-d0e10f1eddc6d5ac",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4948,7 +4948,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -4996,7 +4996,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -5012,7 +5012,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -5040,7 +5040,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -5060,7 +5060,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -5092,7 +5092,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -5156,15 +5156,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -5266,8 +5266,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "0f1f0836f8c257b08ee23554812ff6a195d01579f429d79dc3a20f27301c7f1d",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-strategy-b-history-ellipsoid/1/cfg-0f1f0836f8c257b0",
+      "graph_fingerprint": "21db67a2fa28762eea632be9251eef8ce305857e8d4e611431135e667005f00b",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-strategy-b-history-ellipsoid/1/cfg-21db67a2fa28762e",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -5295,7 +5295,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -5343,7 +5343,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -5359,7 +5359,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -5387,7 +5387,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -5407,7 +5407,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -5439,7 +5439,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -5503,15 +5503,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -5578,8 +5578,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "616db8eb0bbbe6df18fbf76e8f48c1fd797a17d7c7d36b382761047a5663f7bf",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-mpc/1/cfg-616db8eb0bbbe6df",
+      "graph_fingerprint": "18bcf92ad63d00b9500f718820aaf37d2d1910da6de4459ce2b2943b2535b39d",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-mpc/1/cfg-18bcf92ad63d00b9",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -5597,7 +5597,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -5685,7 +5685,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -5771,8 +5771,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "7bf36552d09ea5ee0b913f8f1226f06793924a029f03351b047c7f17fc58f885",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-box-ipopt/1/cfg-7bf36552d09ea5ee",
+      "graph_fingerprint": "af2543d3145b3bb0d05d0f8ea3d41114d8d2dc364eed555d4fd8d61db395c4ca",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-box-ipopt/1/cfg-af2543d3145b3bb0",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -5797,7 +5797,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -5961,7 +5961,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -6047,8 +6047,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "4119e74a3a3891f01da0989446c2b8adc62d6996463a6a8b8807f9b3d7e01894",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-polytope-ipopt/1/cfg-4119e74a3a3891f0",
+      "graph_fingerprint": "fe186b53a66744576173af1f830c64500c2720690024da88ad4f9db54c4485b0",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-polytope-ipopt/1/cfg-fe186b53a6674457",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -6073,7 +6073,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -6237,7 +6237,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -6323,8 +6323,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "3eb9ff59e6301489b5cb5ee2530c35c6f5114ccc5df79734a846ef8b2323f4f4",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-zonotope-ipopt/1/cfg-3eb9ff59e6301489",
+      "graph_fingerprint": "78f787e33ac85a1306a410ff066306995e4c1b5451fa337b41a6ccfc5cd9530b",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-zonotope-ipopt/1/cfg-78f787e33ac85a13",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -6349,7 +6349,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -6513,7 +6513,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -6599,8 +6599,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "a7da9c7d2192e31c51130b0ff51eb01fdcadd11f2412e1396fad510022a268ad",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-parallelotope-ipopt/1/cfg-a7da9c7d2192e31c",
+      "graph_fingerprint": "c5d6a746ef9fbf4dfd49398ec70d33a6d1d1145cd4a08aafc62c691b2a6e0c1f",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-parallelotope-ipopt/1/cfg-c5d6a746ef9fbf4d",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -6625,7 +6625,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -6789,7 +6789,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -6875,8 +6875,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "8d4297c9b9f45d75fee91bdecb7303f5572e7e7014a881f3b52089289f632019",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-ellipsoid-ipopt/1/cfg-8d4297c9b9f45d75",
+      "graph_fingerprint": "7fa71394d2fd84481fe543eab0d0f811f90fc01b78ac018638c6da4f210c86c6",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-ellipsoid-ipopt/1/cfg-7fa71394d2fd8448",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -6901,7 +6901,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -7065,7 +7065,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -7152,8 +7152,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "0e59a6551d6ce7955c387cd3bd283fd2d191c3e3cedddb780744439588d9b169",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-lifted-polytope-ipopt/1/cfg-0e59a6551d6ce795",
+      "graph_fingerprint": "0dd3c3b530e2a2c075cf25db806647157f299b245c1333dee9e489c886c32bce",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-lifted-polytope-ipopt/1/cfg-0dd3c3b530e2a2c0",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -7176,7 +7176,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -7344,7 +7344,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -7448,8 +7448,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "ad59c6f753b8fc7b4326924ed4619d2510bfd83b1e790854e26d53c8b079595d",
-      "graph_id": "closed-loop/earth-orbit/native-strategy-a-history-polytope/1/cfg-ad59c6f753b8fc7b",
+      "graph_fingerprint": "9a64020d52920a2ed092309fe801786a1c1cf4b93dd6191e2d3ccfb6b11c6c95",
+      "graph_id": "closed-loop/earth-orbit/native-strategy-a-history-polytope/1/cfg-9a64020d52920a2e",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -7476,7 +7476,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -7520,7 +7520,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -7536,7 +7536,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -7568,7 +7568,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -7588,7 +7588,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -7620,7 +7620,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -7684,15 +7684,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -7796,8 +7796,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "3193169754fb74ffdd25b70931aa4c3d8804034a719d5bf491f8a867f5d98f47",
-      "graph_id": "closed-loop/earth-orbit/native-strategy-b-history-polytope/1/cfg-3193169754fb74ff",
+      "graph_fingerprint": "b3895960e5f4851b3dc003ee88e44e780466019a8f7c0042234b444aa2179c65",
+      "graph_id": "closed-loop/earth-orbit/native-strategy-b-history-polytope/1/cfg-b3895960e5f4851b",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -7824,7 +7824,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -7868,7 +7868,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -7884,7 +7884,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -7916,7 +7916,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -7936,7 +7936,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -7968,7 +7968,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -8032,15 +8032,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -8143,8 +8143,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "733d3ef74cc5525c996d2083aa5a784141b16601bbae8cec3974d69b569f25bc",
-      "graph_id": "closed-loop/earth-orbit/native-strategy-a-history-box/1/cfg-733d3ef74cc5525c",
+      "graph_fingerprint": "8c9b52b79046e9ef0f8130b4c256ff8cfd24f7ae4f7f4a928c860d0723548292",
+      "graph_id": "closed-loop/earth-orbit/native-strategy-a-history-box/1/cfg-8c9b52b79046e9ef",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -8173,7 +8173,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -8217,7 +8217,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -8233,7 +8233,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -8261,7 +8261,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -8281,7 +8281,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -8313,7 +8313,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -8377,15 +8377,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -8488,8 +8488,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "76e1a1804c1cfe1ea1fdde1b688d435c878b5b28601fbc2dd70b12765ace6c3c",
-      "graph_id": "closed-loop/earth-orbit/native-strategy-b-history-box/1/cfg-76e1a1804c1cfe1e",
+      "graph_fingerprint": "14f5f600ecd78d2f9e5ab27ab1228889086a430deb11b7ddc5c190b0579f0ead",
+      "graph_id": "closed-loop/earth-orbit/native-strategy-b-history-box/1/cfg-14f5f600ecd78d2f",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -8518,7 +8518,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -8562,7 +8562,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -8578,7 +8578,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -8606,7 +8606,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -8626,7 +8626,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -8658,7 +8658,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -8722,15 +8722,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -8833,8 +8833,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "00e31ad57f6382242c7d56ea1a0f27ee8fa24bfc54a203301c9bff0fd45277c2",
-      "graph_id": "closed-loop/earth-orbit/native-strategy-a-history-zonotope/1/cfg-00e31ad57f638224",
+      "graph_fingerprint": "fbf0e7844b3b96c3e0c91cbb1f5319efe019d47265ac41d024916e5a28437ff6",
+      "graph_id": "closed-loop/earth-orbit/native-strategy-a-history-zonotope/1/cfg-fbf0e7844b3b96c3",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -8863,7 +8863,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -8907,7 +8907,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -8923,7 +8923,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -8951,7 +8951,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -8971,7 +8971,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -9003,7 +9003,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -9067,15 +9067,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -9178,8 +9178,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "591e1da3a57502fe22e20437a74afd16101745ccfb1cd23453fe81d06e974c6d",
-      "graph_id": "closed-loop/earth-orbit/native-strategy-b-history-zonotope/1/cfg-591e1da3a57502fe",
+      "graph_fingerprint": "a60a08f20f798debc0c05e1e19737ba48bde908868c925d4ea9422e7b22dc93a",
+      "graph_id": "closed-loop/earth-orbit/native-strategy-b-history-zonotope/1/cfg-a60a08f20f798deb",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -9208,7 +9208,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -9252,7 +9252,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -9268,7 +9268,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -9296,7 +9296,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -9316,7 +9316,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -9348,7 +9348,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -9412,15 +9412,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -9523,8 +9523,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "e17c6d7fc65faa54a05189b36705d2e30e1b78187d46dadf7b9e661d3367b7d4",
-      "graph_id": "closed-loop/earth-orbit/native-strategy-a-history-parallelotope/1/cfg-e17c6d7fc65faa54",
+      "graph_fingerprint": "56ba42dbb8a7adfd1c060727b7c1991d7350305a0f7fe65c1b59593290d36681",
+      "graph_id": "closed-loop/earth-orbit/native-strategy-a-history-parallelotope/1/cfg-56ba42dbb8a7adfd",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -9553,7 +9553,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -9597,7 +9597,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -9613,7 +9613,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -9641,7 +9641,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -9661,7 +9661,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -9693,7 +9693,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -9757,15 +9757,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -9868,8 +9868,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "c333ddb9df911cfe1236db7c29d532b91eca5bc54c728b13f43c7839c6cee51e",
-      "graph_id": "closed-loop/earth-orbit/native-strategy-b-history-parallelotope/1/cfg-c333ddb9df911cfe",
+      "graph_fingerprint": "38e780052429ecf260b1650fb302933ae6216e9e19ced706354842f2a8ed542e",
+      "graph_id": "closed-loop/earth-orbit/native-strategy-b-history-parallelotope/1/cfg-38e780052429ecf2",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -9898,7 +9898,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -9942,7 +9942,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -9958,7 +9958,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -9986,7 +9986,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -10006,7 +10006,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -10038,7 +10038,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -10102,15 +10102,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -10213,8 +10213,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "9419c00e65dcb87ebda03113181ce2aba6b7a830e6edb74330646e44726d4bd9",
-      "graph_id": "closed-loop/earth-orbit/native-strategy-a-history-ellipsoid/1/cfg-9419c00e65dcb87e",
+      "graph_fingerprint": "ca19eb4674d7d0ddb5deaeae86c4a37d44ab4c0d302f72550348c4f00c745da3",
+      "graph_id": "closed-loop/earth-orbit/native-strategy-a-history-ellipsoid/1/cfg-ca19eb4674d7d0dd",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -10243,7 +10243,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -10287,7 +10287,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -10303,7 +10303,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -10331,7 +10331,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -10351,7 +10351,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -10383,7 +10383,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -10447,15 +10447,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -10558,8 +10558,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "6c1ed87a7ff6ebf1902a101ae7ae33988017e3b4ed88e537acead265684363d0",
-      "graph_id": "closed-loop/earth-orbit/native-strategy-b-history-ellipsoid/1/cfg-6c1ed87a7ff6ebf1",
+      "graph_fingerprint": "19c593bce1292cedb6b1bff10125703b7dcd409efb583eb83024a1971383cb81",
+      "graph_id": "closed-loop/earth-orbit/native-strategy-b-history-ellipsoid/1/cfg-19c593bce1292ced",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -10588,7 +10588,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -10632,7 +10632,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -10648,7 +10648,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -10676,7 +10676,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -10696,7 +10696,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -10728,7 +10728,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -10792,15 +10792,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -10867,8 +10867,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "27a328e6efa8c1c1e5a2cc6c1899ac08400f873c83b7e02f32ea8ae6aaf31457",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-mpc/1/cfg-27a328e6efa8c1c1",
+      "graph_fingerprint": "d587d77836271ddddd79acdb757b46d67b8a1c582d63c6b42e4b80ad781dfec7",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-mpc/1/cfg-d587d77836271ddd",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -10886,7 +10886,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -10978,7 +10978,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -11045,8 +11045,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "e7069fe21822e9a7b59a2b374c7449d3e8de34bb2b0a77d21732788b0b437820",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ipopt/1/cfg-e7069fe21822e9a7",
+      "graph_fingerprint": "1312debbb22c6d1002ff0586cd405ac4867bfd2407d1a0c68a44e6a817010ddc",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ipopt/1/cfg-1312debbb22c6d10",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -11064,7 +11064,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -11156,7 +11156,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -11242,8 +11242,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "1f1498f922f153ae86599b3316d01e59899f3c21992136588335fffb9533a18d",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-box-ipopt/1/cfg-1f1498f922f153ae",
+      "graph_fingerprint": "6b6f08e53abe6731e20a972e686faac6c45d36b3aba3b83fc57d0c39d85061f1",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-box-ipopt/1/cfg-6b6f08e53abe6731",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -11268,7 +11268,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -11436,7 +11436,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -11522,8 +11522,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "0357c5847411c8ba01fb3ceb144c2f8c8b0fb07f9dd2a7162b3abc623cf29d8b",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-polytope-ipopt/1/cfg-0357c5847411c8ba",
+      "graph_fingerprint": "e0b52d313af6ecc0d8b17161b5f6d65eaa71932b15b02be27d92a321b68eae58",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-polytope-ipopt/1/cfg-e0b52d313af6ecc0",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -11548,7 +11548,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -11716,7 +11716,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -11802,8 +11802,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "40a9ee2f4d93a0992efc853517eb0b348b6d7904285f91d55d1382a35ddaa394",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-zonotope-ipopt/1/cfg-40a9ee2f4d93a099",
+      "graph_fingerprint": "d3b52bad0e6f89f495a0e3197f5bdffddf36aebc18c019d312377a9fbac06316",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-zonotope-ipopt/1/cfg-d3b52bad0e6f89f4",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -11828,7 +11828,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -11996,7 +11996,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -12082,8 +12082,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "d980ca64f3229c3b51c406922ffb6dac0709fae1c2f323d5136053cb8ceb2130",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-parallelotope-ipopt/1/cfg-d980ca64f3229c3b",
+      "graph_fingerprint": "781ae50e3825a8ab54b0bd1bc89d7bff4333398064851ac16fdfc8ec4a268de8",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-parallelotope-ipopt/1/cfg-781ae50e3825a8ab",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -12108,7 +12108,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -12276,7 +12276,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -12362,8 +12362,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "eb3a01f69affe0529be5d3455fd99cd0aaadafd451d7613648bed63ad44c85ee",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ellipsoid-ipopt/1/cfg-eb3a01f69affe052",
+      "graph_fingerprint": "83e2d71de3cee6443f514938a99a16bc6393463c28b1ced302b8ea1e23a79b03",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ellipsoid-ipopt/1/cfg-83e2d71de3cee644",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -12388,7 +12388,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -12556,7 +12556,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -12643,8 +12643,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "b1857d7956efe7d1ace8e6c98c727d12db50be6e452e3b255e247a2a83153fa6",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-lifted-polytope-ipopt/1/cfg-b1857d7956efe7d1",
+      "graph_fingerprint": "48fae863b45675783677c7e366eaf5d6c6d85d0db1b74de0112d367a24b15e44",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-lifted-polytope-ipopt/1/cfg-48fae863b4567578",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -12667,7 +12667,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -12839,7 +12839,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -12942,8 +12942,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "1706ca1831d3c1bbc11ef225fb1e22e8963399231a8ea69c4bfbf81f4435b6ca",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-strategy-a-history-polytope/1/cfg-1706ca1831d3c1bb",
+      "graph_fingerprint": "685fb99896eed408ebe8c9b0a86e9f40d8b3884455c6d36624dffa59aa8ad59d",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-strategy-a-history-polytope/1/cfg-685fb99896eed408",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -12969,7 +12969,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -13017,7 +13017,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -13033,7 +13033,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -13065,7 +13065,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -13085,7 +13085,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -13117,7 +13117,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -13181,15 +13181,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -13292,8 +13292,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "bffb75140cf9f3fa94158239392f0fac75e277a4101b2986422019461e9b0f2b",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-strategy-b-history-polytope/1/cfg-bffb75140cf9f3fa",
+      "graph_fingerprint": "7c36d309d8e8d48ed1cd5ed7063ce5d5f1a96adccdd637e13b6934c4f934cd96",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-strategy-b-history-polytope/1/cfg-7c36d309d8e8d48e",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -13319,7 +13319,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -13367,7 +13367,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -13383,7 +13383,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -13415,7 +13415,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -13435,7 +13435,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -13467,7 +13467,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -13531,15 +13531,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -13641,8 +13641,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "80d5546d5648d3e5b6cfe13d862c70bdb9e701d035b4e89272ebd7afa25e1333",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-strategy-a-history-box/1/cfg-80d5546d5648d3e5",
+      "graph_fingerprint": "81564cd42d01a988d677efbd657817485869db442079b038407792d77ee85d8f",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-strategy-a-history-box/1/cfg-81564cd42d01a988",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -13670,7 +13670,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -13718,7 +13718,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -13734,7 +13734,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -13762,7 +13762,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -13782,7 +13782,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -13814,7 +13814,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -13878,15 +13878,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -13988,8 +13988,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "b6516230e9d18b1a53a6428a96bf52e64c134d46ba99dfb27633105f316b93a5",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-strategy-b-history-box/1/cfg-b6516230e9d18b1a",
+      "graph_fingerprint": "893aa662da24a22fab756b4c3b1aa817ebd126ea70021b29c277fc432aadc8dd",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-strategy-b-history-box/1/cfg-893aa662da24a22f",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -14017,7 +14017,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -14065,7 +14065,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -14081,7 +14081,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -14109,7 +14109,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -14129,7 +14129,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -14161,7 +14161,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -14225,15 +14225,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -14335,8 +14335,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "3c6a146f89d8b5fb005f4c6aaf2203531dafa4c83445bb4d9bb8e586774710db",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-strategy-a-history-zonotope/1/cfg-3c6a146f89d8b5fb",
+      "graph_fingerprint": "240b2e43dc72ffcc44b6020f4df2a83e5c484ce5972861547d5a3bed46ae7882",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-strategy-a-history-zonotope/1/cfg-240b2e43dc72ffcc",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -14364,7 +14364,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -14412,7 +14412,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -14428,7 +14428,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -14456,7 +14456,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -14476,7 +14476,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -14508,7 +14508,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -14572,15 +14572,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -14682,8 +14682,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "c732693c903a7636b14418708e7cb9f944492f369401e93ce8abdbf67b4d4336",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-strategy-b-history-zonotope/1/cfg-c732693c903a7636",
+      "graph_fingerprint": "e53a19155188f86b480f38349b705098e7f50dc26720056b1b7d6af18cb61508",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-strategy-b-history-zonotope/1/cfg-e53a19155188f86b",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -14711,7 +14711,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -14759,7 +14759,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -14775,7 +14775,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -14803,7 +14803,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -14823,7 +14823,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -14855,7 +14855,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -14919,15 +14919,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -15029,8 +15029,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "af1ae3ffbe624e416190a292fb195826ea770f9e5fa1e10b35fbc63783aa02a2",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-strategy-a-history-parallelotope/1/cfg-af1ae3ffbe624e41",
+      "graph_fingerprint": "2d4ed6dd81e53e662355110f610777285b1cbe763fe7dc178589c7ae48d3d4a2",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-strategy-a-history-parallelotope/1/cfg-2d4ed6dd81e53e66",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -15058,7 +15058,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -15106,7 +15106,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -15122,7 +15122,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -15150,7 +15150,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -15170,7 +15170,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -15202,7 +15202,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -15266,15 +15266,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -15376,8 +15376,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "47ab3c370474f75fc55bf6893e174f008b5c0ad06423b7f96989d013a8abd9ca",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-strategy-b-history-parallelotope/1/cfg-47ab3c370474f75f",
+      "graph_fingerprint": "1d2000c4402e6241afe639bd10c7523cb36fd183bed6aefc73338c444fe28199",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-strategy-b-history-parallelotope/1/cfg-1d2000c4402e6241",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -15405,7 +15405,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -15453,7 +15453,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -15469,7 +15469,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -15497,7 +15497,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -15517,7 +15517,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -15549,7 +15549,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -15613,15 +15613,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -15723,8 +15723,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "c75a3d607027827ae66be52ad5a3d7f005e48dd8c12133bfd1e60f6f2433959c",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-strategy-a-history-ellipsoid/1/cfg-c75a3d607027827a",
+      "graph_fingerprint": "b4e0b02d5e70e9bf84b2be0304788dc50858dd99b901f4e1aac4cd41e1aacbf1",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-strategy-a-history-ellipsoid/1/cfg-b4e0b02d5e70e9bf",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -15752,7 +15752,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -15800,7 +15800,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -15816,7 +15816,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -15844,7 +15844,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -15864,7 +15864,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -15896,7 +15896,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -15960,15 +15960,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -16070,8 +16070,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "58d4e64bf933ea78cbadff164c5f133cebd8007dd68b0a5a9f40479588f02203",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-strategy-b-history-ellipsoid/1/cfg-58d4e64bf933ea78",
+      "graph_fingerprint": "f5f56efc27c60cce20a972341f0e704ed04350a103142973b0f249ee85e6c8cf",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-strategy-b-history-ellipsoid/1/cfg-f5f56efc27c60cce",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -16099,7 +16099,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/attempt_records.py",
@@ -16147,7 +16147,7 @@
         },
         {
           "path": "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
-          "sha256": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7"
+          "sha256": "4ba4d2ef9709358d5e67634094fa7af20609c75b885e46022c537e983716e966"
         },
         {
           "path": "include/csl/optimization/contracts.hpp",
@@ -16163,7 +16163,7 @@
         },
         {
           "path": "include/csl/optimization/history_domain.hpp",
-          "sha256": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640"
+          "sha256": "cfa6a85020d4edfeca9d6dce0e8e4374522d86ca00ba773236846a68496d775e"
         },
         {
           "path": "include/csl/optimization/history_optimizer.hpp",
@@ -16191,7 +16191,7 @@
         },
         {
           "path": "include/csl/synthesis/strategy_a/strategy.hpp",
-          "sha256": "550a21473c4d5004eef0cfe73ed2aff013295943dfe38bfc8b55fc88613a7eed"
+          "sha256": "75eb064a85769600ac2372e5924472893055bf0c708821d3374d21c50cbe5df9"
         },
         {
           "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
@@ -16211,7 +16211,7 @@
         },
         {
           "path": "src/adapters/nlp/casadi_history_optimizer.cpp",
-          "sha256": "ba240b18d3599786c2a61e1f4a52ee9e5702cafabb337116004f7f7a2702549d"
+          "sha256": "aeeedf889eaaf2848fdd2ab489a7cc94f7144203e1217bead8063b8fb09190c2"
         },
         {
           "path": "src/adapters/polyhedral/qhull.cpp",
@@ -16243,7 +16243,7 @@
         },
         {
           "path": "src/optimization/history_domain.cpp",
-          "sha256": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5"
+          "sha256": "a03496d449c9a02e7964a963490aade922c78d60f545397afa9e7fbc1da786b3"
         },
         {
           "path": "src/optimization/history_optimizer.cpp",
@@ -16307,15 +16307,15 @@
         },
         {
           "path": "src/synthesis/strategy_a/strategy.cpp",
-          "sha256": "2f2f8c1f0b1d436ea163c027153ab78deed9589bf2f3fd000f27132ace17bebc"
+          "sha256": "52d5d6e3c20223694378b4b317a4b21a4fb846c0f073070114c1b728236cc5e3"
         },
         {
           "path": "src/synthesis/strategy_b/direct_joint.cpp",
-          "sha256": "df80309c64f7ccf1e8cd3a58341b1b954edb91c8ca5694d876b9f11c21247aa5"
+          "sha256": "afbd58b3a93e192085ef15aa3d30b01f3f6c594a858881e9f0d996d50ae5c6a3"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -16401,8 +16401,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "1cf1c6128c59db74b527abb8506e515ca904f6cb4e452234a2101248effcaef2",
-      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-polytope-ipopt/1/cfg-1cf1c6128c59db74",
+      "graph_fingerprint": "10d0add70907d0f2563078677f2b457b44a32bed18dd1cfeb42fdc6a4084773b",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-polytope-ipopt/1/cfg-10d0add70907d0f2",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -16429,7 +16429,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
@@ -16525,7 +16525,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -16611,8 +16611,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "373623c2d7975ea6b365e0fe2bd7ca59115bf24af5a88daaca289a74095f85c8",
-      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-box-ipopt/1/cfg-373623c2d7975ea6",
+      "graph_fingerprint": "8931b61561b21939ac77ff6b1556512b9113e531ba2f6d1e3f7ae7855a46d297",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-box-ipopt/1/cfg-8931b61561b21939",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -16639,7 +16639,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
@@ -16735,7 +16735,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -16821,8 +16821,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "757f279041920a23eab114eca6962eaa982783dea80b67df78610a501d3f2956",
-      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-zonotope-ipopt/1/cfg-757f279041920a23",
+      "graph_fingerprint": "e9bdd77c296c721a29392f3da6543b3972227dbaa4b9b8a7210caf8f3fca1ad7",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-zonotope-ipopt/1/cfg-e9bdd77c296c721a",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -16849,7 +16849,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
@@ -16945,7 +16945,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -17031,8 +17031,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "747898f2a72603f3acd4577037528a571dfe65f4ab6f937b437ee2f3a8a47ae6",
-      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-parallelotope-ipopt/1/cfg-747898f2a72603f3",
+      "graph_fingerprint": "22ed5c4d1e8e63ea9d375d37daa476a137ec92c56185a486b70bc74ddb836d3a",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-parallelotope-ipopt/1/cfg-22ed5c4d1e8e63ea",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -17059,7 +17059,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
@@ -17155,7 +17155,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -17241,8 +17241,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "f791477594571b3eab7f7f8a591979e124391b6f9527be72a919b0d4f201ce8a",
-      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-ellipsoid-ipopt/1/cfg-f791477594571b3e",
+      "graph_fingerprint": "15d6b5021b036105a4017d72c76ab96a3f24f87440308ea0e2fa6ebcec02ac70",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-ellipsoid-ipopt/1/cfg-15d6b5021b036105",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -17269,7 +17269,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
@@ -17365,7 +17365,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -17451,8 +17451,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "080950df2f01bc421e1a86efd6457f696f2363415681ea011351612bbb32fd6b",
-      "graph_id": "closed-loop/earth-orbit/fixed-tail-polytope-ipopt/1/cfg-080950df2f01bc42",
+      "graph_fingerprint": "dec848d4b48db9eff53029ab2383d1f78ea61edcc5d500681ac28f12576f6d99",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-polytope-ipopt/1/cfg-dec848d4b48db9ef",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -17479,7 +17479,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
@@ -17571,7 +17571,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -17657,8 +17657,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "46a8de23e3088f8dfe0565c0d059b1d739f40870ff33d97f735e8fe780d95e36",
-      "graph_id": "closed-loop/earth-orbit/fixed-tail-box-ipopt/1/cfg-46a8de23e3088f8d",
+      "graph_fingerprint": "f1996e00f10b5a208663094d176ace52dbb818451a1035be30d71471a4fd4a44",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-box-ipopt/1/cfg-f1996e00f10b5a20",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -17685,7 +17685,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
@@ -17777,7 +17777,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -17863,8 +17863,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "ad7b291a8b0941fc59fc6d4da6a8b9773e71c5d89a9556a436cc74f8c97250a3",
-      "graph_id": "closed-loop/earth-orbit/fixed-tail-zonotope-ipopt/1/cfg-ad7b291a8b0941fc",
+      "graph_fingerprint": "7943767c1c09695a2adf35a9da18c5d30dd774cdf5b2789d5048e7d9277c3c8e",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-zonotope-ipopt/1/cfg-7943767c1c09695a",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -17891,7 +17891,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
@@ -17983,7 +17983,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -18069,8 +18069,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "18d8a5ce8333c65853ba97ded9e7f4587f73e26e9be75a80e2a74e265d39c54b",
-      "graph_id": "closed-loop/earth-orbit/fixed-tail-parallelotope-ipopt/1/cfg-18d8a5ce8333c658",
+      "graph_fingerprint": "20eb66bd57dc2eb159ac5331eddec7ebecce840520956aadc82eca39118e967b",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-parallelotope-ipopt/1/cfg-20eb66bd57dc2eb1",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -18097,7 +18097,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
@@ -18189,7 +18189,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -18275,8 +18275,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "7ff907b32a3e2fe0589d4caedbb839dc8809dd4eee64347fd4a46f9ff613dc90",
-      "graph_id": "closed-loop/earth-orbit/fixed-tail-ellipsoid-ipopt/1/cfg-7ff907b32a3e2fe0",
+      "graph_fingerprint": "4f4a0f4f2b772e259353ffaf855f832c3e49fb24610914131ebe3043e7d65ece",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-ellipsoid-ipopt/1/cfg-4f4a0f4f2b772e25",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -18303,7 +18303,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
@@ -18395,7 +18395,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -18481,8 +18481,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "1e42b2f36f5f70be0657ac786ee084f6df9cbf6d16b439e90bba5df28892075a",
-      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-polytope-ipopt/1/cfg-1e42b2f36f5f70be",
+      "graph_fingerprint": "d050faf7ccf9e5731eb180fbaf5f40ae3863fe5a873fa4b5a17b60cda92bc8e8",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-polytope-ipopt/1/cfg-d050faf7ccf9e573",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -18509,7 +18509,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
@@ -18605,7 +18605,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -18691,8 +18691,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "c9625cf8c66b605a919f8b6f8d01dd7f8fee7f255701e0ad93ca4b5103b7c0e0",
-      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-box-ipopt/1/cfg-c9625cf8c66b605a",
+      "graph_fingerprint": "790d45d9bd0318d5c45a5283b9b2eb61868b4e2142f579a804e4d177227c46fe",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-box-ipopt/1/cfg-790d45d9bd0318d5",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -18719,7 +18719,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
@@ -18815,7 +18815,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -18901,8 +18901,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "618daba183c3c4c6014065048130bbc80ac66ef0910be9dfb2e518b146e4302f",
-      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-zonotope-ipopt/1/cfg-618daba183c3c4c6",
+      "graph_fingerprint": "9345b66ab8d84611df8029f1a7aba6ef1857e94dfaa4de87ebe4cc1d0878683c",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-zonotope-ipopt/1/cfg-9345b66ab8d84611",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -18929,7 +18929,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
@@ -19025,7 +19025,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -19111,8 +19111,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "f79c1353a1fcc9b9abcfe3d588ea7b468732deba1c9d54f828f2f32b103ad3c0",
-      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-parallelotope-ipopt/1/cfg-f79c1353a1fcc9b9",
+      "graph_fingerprint": "995cad8c4b13e82656a2f71bde85983b0eb12bc14782ebc98cf812e0f2290f34",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-parallelotope-ipopt/1/cfg-995cad8c4b13e826",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -19139,7 +19139,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
@@ -19235,7 +19235,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -19321,8 +19321,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "6b928f69afd6d41e52d699696bdc2cc8378d0a8190f55719cbb922b81489a48e",
-      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-ellipsoid-ipopt/1/cfg-6b928f69afd6d41e",
+      "graph_fingerprint": "0ff03e4a87d663eae499333d81fe29ce377b0733430f884cdd1e07ce21c1572a",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-ellipsoid-ipopt/1/cfg-0ff03e4a87d663ea",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -19349,7 +19349,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1"
+          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
@@ -19445,7 +19445,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "52e736fe7a5fbb8cc40d991a1c7bfbe7069f1272122743afca1c24ab57aea951"
+          "sha256": "806a4d4b2c108a1a8a3cf642d4a2aabc2d9fa96c6efde402666b6de671917984"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
