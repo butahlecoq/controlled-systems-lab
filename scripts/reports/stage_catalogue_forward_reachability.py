@@ -115,8 +115,8 @@ BACKWARD_REACHABILITY = FrozenNativeBundle(
     route="catalogue-backward-reachability-v1",
     source_commit="4e2e332b6dffd697febfd53c3d7fb3a6b20f90ef",
     schema="csl.catalogue-backward-reachability-capture/1",
-    manifest_sha256="5b175b103da6f9734f40840410d5276bdb23b841268ca81aec622ca6518c102f",
-    archive_sha256="6534fedbf242917c432a481e897953354b6365eb22cd5dd0488b9438af5ae8f7",
+    manifest_sha256="397c07a65fb01ef3b0f1e657bcb105e3e1f7329647d64c8d5a246b1d8772425e",
+    archive_sha256="8895be0afce61cfa0ba6653ab437d2187d65613cb4de79fa01afc61867ebd4a6",
 )
 
 
