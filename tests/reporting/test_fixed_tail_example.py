@@ -44,7 +44,10 @@ class FixedTailExampleTests(unittest.TestCase):
                     )
                     for family in example.FAMILIES
                 }
-                responses["box"][field].append(0)
+                box = responses["box"]
+                box[field].append(0)
+                if field == "control":
+                    box["history"] = [0, 0, *box["control"], *box["control"]]
                 with self.assertRaisesRegex(ValueError, "coordinate count"):
                     example.audit(responses)
 
