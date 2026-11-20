@@ -220,7 +220,8 @@ jobs:
           git archive HEAD -- benchmarks/CMakeLists.txt benchmarks/reporting/exp824 \
             scripts/reports/exp824/check_nominal.py | tar -x -C build/research-source
           cmake -S build/research-source/benchmarks -B build/research-client -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release "-DCMAKE_PREFIX_PATH=$PWD/build/research-sdk"
+            -DCMAKE_BUILD_TYPE=Release -DCSL_RESEARCH_SDK_VERSION=0.1.0 \
+            "-DCMAKE_PREFIX_PATH=$PWD/build/research-sdk"
           cmake --build build/research-client --parallel 2
           ctest --test-dir build/research-client --output-on-failure --no-tests=error
       - name: Preserve package cache evidence and permitted snapshots
