@@ -37,6 +37,7 @@ import stage_mpc_crossover
 import stage_native_discrete_models
 import stage_native_extended_models
 import stage_native_flexible_pitch
+import stage_native_history_strategies
 import stage_native_model_catalogue
 import stage_native_model_tracking_first_pass
 import stage_native_row_scaling_diagnostic
@@ -1402,6 +1403,10 @@ def build(catalog, site):
         stage_native_model_tracking_first_pass.build(Path(__file__).resolve().parents[2])
     )
     saved_figures += tracking_card
+    strategy_files, strategy_inventory, strategy_card = stage_native_history_strategies.build(
+        Path(__file__).resolve().parents[2]
+    )
+    saved_figures += strategy_card
     row_scaling_files, row_scaling_inventory, row_scaling_card = (
         stage_native_row_scaling_diagnostic.build(Path(__file__).resolve().parents[2])
     )
@@ -1487,6 +1492,7 @@ def build(catalog, site):
     outputs.update(native_files)
     outputs.update(approximation_files)
     outputs.update(crossover_files)
+    outputs.update(strategy_files)
     outputs.update(buryatia_files)
     outputs.update(volterra_files)
     outputs.update(pitch_files)
@@ -1703,6 +1709,7 @@ def build(catalog, site):
     gallery_inventory.extend(native_inventory)
     gallery_inventory.extend(approximation_inventory)
     gallery_inventory.extend(crossover_inventory)
+    gallery_inventory.extend(strategy_inventory)
     gallery_inventory.extend(buryatia_inventory)
     gallery_inventory.extend(volterra_inventory)
     gallery_inventory.extend(pitch_inventory)

@@ -742,6 +742,13 @@
       "owner": "scripts/reports/stage_mpc_crossover.py"
     },
     {
+      "route": "examples/native-history-strategies-d57739b3/index.html",
+      "disposition": "frozen",
+      "owner": "scripts/reports/stage_native_history_strategies.py",
+      "sha256": "835ef1022131ab003f8ec405348d91b5de04af7a10c8adb5c4625e63fca59f1d",
+      "witness": "Byte-identical HTML in the native-history-strategies-d57739b3 offline archive"
+    },
+    {
       "route": "examples/native-discrete-models.html",
       "disposition": "maintained",
       "owner": "docs/examples/native-discrete-models.html"
