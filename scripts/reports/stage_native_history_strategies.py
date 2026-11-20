@@ -11,7 +11,7 @@ from frozen_native_bundle import checked_file
 ROUTE = "native-history-strategies-d57739b3"
 SOURCE = "d57739b300e26810f02240c4029bde68028fdb3d"
 SDK = "b1aee9c1caa9ccfb245cc966eb8c1ef79978cdd0"
-ARCHIVE_SHA256 = "99c1bad9e468372b08bc5f81e0f77282319905bdb394318487fd1f93ae784c75"
+ARCHIVE_SHA256 = "0bc9536f12303dd4b94a733a655852600b0e8ddc7fb85bb0aa8ab9cea369b43a"
 FIGURES = (
     "syn-nl-lv-01-x1-x2",
     "earth-orbit-x1-x2",
@@ -84,6 +84,8 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
         f'{entry["title"]}</a></h3><a href="{entry["page"]}"><img src="{entry["figure"]}" '
         'alt="All Lotka–Volterra stage projections with the executed feedback trajectory"></a>'
         "<p>Inspect the full-history policy on Lotka–Volterra and compare five set "
-        "representations on Lotka–Volterra, orbit, and fuel.</p></article>"
+        "representations on Lotka–Volterra, orbit, and fuel.</p>"
+        f'<p><a href="{ROUTE}/{archive_name}">Download the lesson and raw records</a> · '
+        f'<a href="{ROUTE}/{archive_name}.sha256">ZIP checksum</a></p></article>'
     )
     return {f"{ROUTE}/{key}": data for key, data in assets.items()}, [entry], card

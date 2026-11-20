@@ -6,8 +6,10 @@ import sys
 import tempfile
 import unittest
 from html.parser import HTMLParser
+from io import BytesIO
 from pathlib import Path
 from urllib.parse import urlsplit
+from zipfile import ZipFile
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
@@ -36,6 +38,12 @@ class NativeHistoryPublicationTests(unittest.TestCase):
         links = PageLinks()
         links.feed(files[entry["page"]].decode())
         self.assertTrue(all(f"{stage.ROUTE}/{path}" in files for path in links.paths))
+        archive_path = f"{stage.ROUTE}/{stage.ROUTE}.zip"
+        with ZipFile(BytesIO(files[archive_path])) as offline:
+            self.assertEqual(offline.read("index.html"), files[entry["page"]])
+            self.assertEqual(sorted(set(links.paths) - set(offline.namelist())), [])
+        for download in (archive_path, archive_path + ".sha256"):
+            self.assertIn(f'href="{download}"', card)
         summary = json.loads(files[entry["raw_record"]])
         self.assertEqual(summary["research_revision"], stage.SOURCE)
         self.assertEqual(summary["native_sdk_revision"], stage.SDK)
