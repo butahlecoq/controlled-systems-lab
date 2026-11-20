@@ -236,7 +236,7 @@ class PagesAugmentationAggregation(unittest.TestCase):
     def test_await_handoff_requires_parent_and_all_other_route_artifacts(self):
         sha = "a" * 40
         child = {"head_branch": "main", "event": "workflow_run",
-                 "conclusion": "success", "head_sha": sha}
+                 "conclusion": "success", "head_sha": "b" * 40}
         parent = {"id": 42, "head_sha": sha, "head_branch": "main",
                   "name": "Algorithm report records and site", "event": "push",
                   "status": "completed", "conclusion": "success",
@@ -254,7 +254,7 @@ class PagesAugmentationAggregation(unittest.TestCase):
                                 return_value={"conclusion": "success"}) as matching):
             result = await_pages_augmentation_runs.await_augmentations(
                 "https://api.example", "owner/repository", "token", 99, 30, 1)
-        self.assertEqual(result, 42)
+        self.assertEqual(result, (42, sha))
         self.assertEqual(get_json.call_args_list, [
             mock.call("https://api.example", "owner/repository", "token", "actions/runs/99"),
             mock.call("https://api.example", "owner/repository", "token", "actions/runs/42"),
@@ -264,6 +264,26 @@ class PagesAugmentationAggregation(unittest.TestCase):
             "b04-c-pages-augmentation.yml",
         ])
         self.assertTrue(all(call.args[4] is parent for call in matching.call_args_list))
+
+    def test_sibling_report_identity_comes_from_its_artifact(self):
+        sha = "a" * 40
+        parent = {"id": 42, "head_sha": sha, "created_at": "2026-11-11T09:00:00Z"}
+        sibling = {"id": 43, "head_sha": "b" * 40, "head_branch": "main",
+                   "event": "workflow_run", "status": "completed", "conclusion": "success",
+                   "created_at": "2026-11-11T09:01:00Z"}
+        matching = {"report_run_id": 42, "head_sha": sha}
+        with (mock.patch.object(await_pages_augmentation_runs, "workflow_runs",
+                                return_value=[sibling]) as runs,
+              mock.patch.object(await_pages_augmentation_runs, "pages_artifact",
+                                return_value={"id": 44}),
+              mock.patch.object(await_pages_augmentation_runs, "get_artifact_zip",
+                                return_value=b"artifact"),
+              mock.patch.object(await_pages_augmentation_runs, "source_marker",
+                                return_value=matching)):
+            result = await_pages_augmentation_runs.matching_augmentation(
+                "https://api.example", "owner/repository", "token", "sibling.yml", parent, 30, 1)
+        self.assertEqual(result, sibling)
+        self.assertIsNone(runs.call_args.args[-1])
 
     def test_await_skips_artifacts_for_a_superseded_report_run(self):
         sha = "a" * 40
@@ -297,6 +317,10 @@ class PagesAugmentationAggregation(unittest.TestCase):
         self.assertIn("augment_pages_bundle.py", workflow)
         self.assertIn("group: github-pages", workflow)
         self.assertIn("PAGES_SOURCE_RUN_ID", workflow)
+        await_job, deploy_job = workflow.split("\n  deploy:\n", 1)
+        self.assertIn("ref: ${{ github.workflow_sha }}", await_job)
+        self.assertIn("ref: ${{ needs.await.outputs.upstream_sha }}", deploy_job)
+        self.assertIn("needs.await.outputs.upstream_sha != ''", deploy_job)
         self.assertLess(workflow.index("pip install"), workflow.index("name: Stage and verify all Pages augmentations together"))
 
     def test_only_cumulative_workflow_can_publish_pages(self):

@@ -3,13 +3,12 @@
 import http.server
 import json
 import os
-from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import threading
 import unittest
-
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts" / "reports" / "check_deploy_head.py"
@@ -72,7 +71,7 @@ class DeploymentHeadTest(unittest.TestCase):
         BranchHandler.response_code = 200
         BranchHandler.latest_report_id = 42
 
-    def run_gate(self, expected_sha, source_run_id=None, *, check_only=False, create_site=True):
+    def run_gate(self, expected_sha, source_run_id=None, *, check_only=False, create_site=True, workflow_sha=None):
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary) / "github-output"
             site = Path(temporary) / "site"
@@ -84,11 +83,13 @@ class DeploymentHeadTest(unittest.TestCase):
                     "GITHUB_API_URL": f"http://127.0.0.1:{self.server.server_port}",
                     "GITHUB_REPOSITORY": "example/reports",
                     "GITHUB_TOKEN": "test-token",
-                    "GITHUB_SHA": expected_sha,
+                    "GITHUB_SHA": workflow_sha or expected_sha,
                     "GITHUB_OUTPUT": str(output),
                     "PAGES_SITE_DIR": str(site),
                 }
             )
+            if workflow_sha is not None:
+                env["PAGES_EXPECTED_SHA"] = expected_sha
             if source_run_id is not None:
                 event = Path(temporary) / "event.json"
                 event.write_text(json.dumps({"workflow_run": {
@@ -170,6 +171,22 @@ class DeploymentHeadTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(output, "current=false\n")
         self.assertIsNone(marker)
+
+    def test_scheduler_revision_is_distinct_from_the_report_source(self):
+        result, output, marker = self.run_gate(
+            OLDER, source_run_id=42, workflow_sha=NEWER
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(output, "current=false\n")
+        self.assertIsNone(marker)
+
+        result, output, marker = self.run_gate(
+            NEWER, source_run_id=42, workflow_sha=OLDER
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("current=true\n", output)
+        self.assertEqual(marker["head_sha"], NEWER)
+        self.assertEqual(marker["report_run_id"], 42)
 
     def test_current_workflow_run_writes_parent_identity_into_pages_site(self):
         result, output, marker = self.run_gate(NEWER, source_run_id=42)

@@ -3,12 +3,11 @@
 import argparse
 import json
 import os
-from pathlib import Path
 import re
 import sys
+from pathlib import Path
 from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
-
 
 SHA = re.compile(r"[0-9a-f]{40}\Z")
 SOURCE_MARKER = "pages-augmentation-source.json"
@@ -59,11 +58,13 @@ def main():
                         help="check freshness without writing the Pages source marker")
     args = parser.parse_args()
     repository = os.environ["GITHUB_REPOSITORY"]
-    expected = os.environ["GITHUB_SHA"]
+    expected = os.environ.get("PAGES_EXPECTED_SHA")
+    if expected is None:
+        expected = os.environ["GITHUB_SHA"]
     token = os.environ["GITHUB_TOKEN"]
     output = Path(os.environ["GITHUB_OUTPUT"])
     if not SHA.fullmatch(expected):
-        raise ValueError("GITHUB_SHA must be a full Git commit ID")
+        raise ValueError("Expected Pages source SHA must be a full Git commit ID")
     owner, name = repository.split("/")
     api = os.environ.get("GITHUB_API_URL", "https://api.github.com").rstrip("/")
     url = f"{api}/repos/{quote(owner, safe='')}/{quote(name, safe='')}/branches/main"
