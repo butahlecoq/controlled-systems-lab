@@ -135,7 +135,7 @@ jobs:
         id: head
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          GITHUB_SHA: ${{ github.event.workflow_run.head_sha }}
+          PAGES_EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
         run: python3 scripts/reports/check_deploy_head.py
 
       - name: Upload the complete augmented Pages site
