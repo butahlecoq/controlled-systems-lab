@@ -772,6 +772,13 @@
       "witness": "Frozen reachability sweep from CSL SDK v0.1.1; retained source reports/algorithm-results/catalogue-forward-reachability-v1/index.html"
     },
     {
+      "route": "examples/catalogue-ring-initial-support-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/catalogue-ring-initial-support-v1/index.html",
+      "sha256": "07a02457db0ac7dc8a8a5f3bfbc150a2e162ffd3dee10b23a520306a3cffaa38",
+      "witness": "Exact feasible witness and fixed-initial-state support for model 30"
+    },
+    {
       "route": "examples/mpc-crossover-6b7308c4/index.html",
       "disposition": "maintained",
       "owner": "scripts/reports/stage_mpc_crossover.py"

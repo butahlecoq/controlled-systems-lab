@@ -1,8 +1,10 @@
 """Stage the source-qualified three-step forward reachability sweep."""
 
+from io import BytesIO
 from pathlib import Path
+from zipfile import ZipFile, ZipInfo
 
-from frozen_native_bundle import FrozenNativeBundle, read_bundle
+from frozen_native_bundle import FrozenNativeBundle, checked_file, read_bundle
 
 IDENTITY = FrozenNativeBundle(
     route="catalogue-forward-reachability-v1",
@@ -47,6 +49,10 @@ FEASIBLE_HISTORY = FrozenNativeBundle(
 )
 
 
+RING_INITIAL_SUPPORT = "catalogue-ring-initial-support-v1"
+HISTORY_EVIDENCE = "catalogue-feasible-history-evidence.zip"
+
+
 def build_feasible_history(
     repository_root: Path,
 ) -> tuple[dict[str, bytes], list[dict[str, str]], str]:
@@ -55,6 +61,26 @@ def build_feasible_history(
         f"{route}/{name}": data
         for name, data in read_bundle(repository_root, FEASIBLE_HISTORY).items()
     }
+    companion = RING_INITIAL_SUPPORT
+    companion_root = repository_root / "reports" / "algorithm-results" / companion
+    companion_files = {
+        name: checked_file(companion_root, name).read_bytes()
+        for name in (
+            "index.html",
+            "verify_support.py",
+            "plot_support.py",
+            "certificate.json",
+            "initial-support.svg",
+        )
+    }
+    companion_files["examples.css"] = files[f"{route}/examples.css"]
+    companion_files[HISTORY_EVIDENCE] = files[f"{route}/{HISTORY_EVIDENCE}"]
+    buffer = BytesIO()
+    with ZipFile(buffer, "w") as offline:
+        for name, data in sorted(companion_files.items()):
+            offline.writestr(ZipInfo(name), data)
+    companion_files[f"{companion}.zip"] = buffer.getvalue()
+    files.update({f"{companion}/{name}": data for name, data in companion_files.items()})
     entry = {
         "family": "Reachability",
         "title": "How constraints change reachable sets",
@@ -70,7 +96,9 @@ def build_feasible_history(
         f'<a href="{entry["page"]}"><img src="{entry["figure"]}" alt="Full-constraint and interval-only projections for a two-battery model, overlaid by stage"></a>'
         "<p>Compare three-step feasible histories across 35 models. "
         "See how state constraints change the battery energy projections.</p>"
-        f'<p><a href="{route}/catalogue-feasible-history-evidence.zip">Download the C++ example and data</a></p></article>'
+        f'<p><a href="{route}/{HISTORY_EVIDENCE}">Download the C++ example and data</a></p>'
+        f'<p><a href="{companion}/index.html">Certify the Thirty-bank ring’s stage-zero support</a> · '
+        f'<a href="{companion}/{companion}.zip">Download the offline certificate</a></p></article>'
     )
     return files, [entry], card
 
