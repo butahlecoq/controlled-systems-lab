@@ -1402,6 +1402,12 @@ def build(catalog, site):
         )
     )
     saved_figures += catalogue_backward_card
+    catalogue_finite_files, catalogue_finite_inventory, catalogue_finite_card = (
+        stage_catalogue_forward_reachability.build_finite_action(
+            Path(__file__).resolve().parents[2]
+        )
+    )
+    saved_figures += catalogue_finite_card
     crossover_files, crossover_inventory, crossover_card = stage_mpc_crossover.build(
         Path(__file__).resolve().parents[2]
     )
@@ -1518,6 +1524,7 @@ def build(catalog, site):
     outputs.update(catalogue_history_files)
     outputs.update(catalogue_exact_files)
     outputs.update(catalogue_backward_files)
+    outputs.update(catalogue_finite_files)
     outputs.update(crossover_files)
     outputs.update(matched_files)
     outputs.update(buryatia_files)
@@ -1739,6 +1746,7 @@ def build(catalog, site):
     gallery_inventory.extend(catalogue_history_inventory)
     gallery_inventory.extend(catalogue_exact_inventory)
     gallery_inventory.extend(catalogue_backward_inventory)
+    gallery_inventory.extend(catalogue_finite_inventory)
     gallery_inventory.extend(crossover_inventory)
     gallery_inventory.extend(matched_inventory)
     gallery_inventory.extend(buryatia_inventory)

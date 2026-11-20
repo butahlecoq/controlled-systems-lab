@@ -1480,11 +1480,12 @@
     },
     {
       "source": "scripts/reports/stage_catalogue_forward_reachability.py",
-      "signal_count": 4,
+      "signal_count": 5,
       "asset_name_literals": [
         "battery-forward-backward.svg",
         "battery-history-projections.svg",
         "building-budget-projection.svg",
+        "hospital-finite-actions.svg",
         "platoon-forward.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
@@ -2845,6 +2846,19 @@
       "index_sha256": "822d7ac37ecd021ebae44a720026e3c377dd15a577b40e77d509802b5f5f06b3",
       "disposition": "reviewed: paired battery projections display full constraints and control intervals at each stage",
       "companion_route": "examples/catalogue-feasible-history-v1/index.html"
+    },
+    {
+      "route": "catalogue-finite-action-v1",
+      "source_bundle": "catalogue-finite-action-v1",
+      "assets": [
+        "hospital-finite-actions.svg",
+        "pair-shear-projection.svg",
+        "terminal-box-corner.svg",
+        "zonotope-certificate-coverage.svg"
+      ],
+      "index_sha256": "ff236f0f9265b41b61c3d01d9281cdf54cfd83029b904a1f7af2b8d94a34f19a",
+      "disposition": "reviewed: finite action alternatives, executed path, box and zonotope scoring, and paired shear projections across three stages",
+      "companion_route": "examples/catalogue-finite-action-v1/index.html"
     },
     {
       "route": "catalogue-forward-reachability-v1",
@@ -4420,6 +4434,11 @@
         "catalogue-exact-support-v1/building-budget-projection.svg",
         "catalogue-backward-reachability-v1/index.html",
         "catalogue-backward-reachability-v1/battery-forward-backward.svg",
+        "catalogue-finite-action-v1/index.html",
+        "catalogue-finite-action-v1/hospital-finite-actions.svg",
+        "catalogue-finite-action-v1/terminal-box-corner.svg",
+        "catalogue-finite-action-v1/zonotope-certificate-coverage.svg",
+        "catalogue-finite-action-v1/pair-shear-projection.svg",
         "mpc-crossover-6b7308c4/index.html",
         "native-source-constrained-mpc-v1/index.html",
         "native-source-constrained-mpc-v1/platoon.svg",

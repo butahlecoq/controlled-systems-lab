@@ -454,7 +454,12 @@ def build_native_manifest() -> dict:
 
 
 def _history_definitions() -> list[dict]:
-    from history_policy import LIFTED_POLYTOPE_CONTROLLER, LIFTED_POLYTOPE_IMPLEMENTATION
+    from history_policy import (
+        LIFTED_POLYTOPE_CONTROLLER,
+        LIFTED_POLYTOPE_IMPLEMENTATION,
+        NATIVE_STRATEGY_IDS,
+        provider_profiles,
+    )
 
     rows = []
     common_sources = [
@@ -626,6 +631,7 @@ def _history_definitions() -> list[dict]:
                 f"closed-loop/{task_name}/continuous-history-box-ipopt/1/cfg-{fingerprint[:16]}"
             )
             rows.append(geometry)
+            strategy_templates = {"box": geometry}
             for family in ("polytope", "zonotope", "parallelotope", "ellipsoid"):
                 family_graph = copy.deepcopy(geometry)
                 family_graph.pop("graph_id")
@@ -644,6 +650,7 @@ def _history_definitions() -> list[dict]:
                     f"closed-loop/{task_name}/continuous-history-{family}-ipopt/1/cfg-{fingerprint[:16]}"
                 )
                 rows.append(family_graph)
+                strategy_templates[family] = family_graph
             lifted = copy.deepcopy(geometry)
             lifted.pop("graph_id")
             lifted.pop("graph_fingerprint")
@@ -679,6 +686,67 @@ def _history_definitions() -> list[dict]:
                 f"closed-loop/{task_name}/continuous-history-lifted-polytope-ipopt/1/cfg-{fingerprint[:16]}"
             )
             rows.append(lifted)
+            strategy_templates["polytope"] = lifted
+            strategy_sources = {
+                "benchmarks/reporting/closed_loop/native_strategy_history.py",
+                "benchmarks/reporting/closed_loop/attempt_records.py",
+                "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
+                "include/csl/optimization/history_domain.hpp",
+                "include/csl/optimization/history_optimizer.hpp",
+                "include/csl/synthesis/strategy_a/strategy.hpp",
+                "include/csl/synthesis/strategy_b/direct_joint.hpp",
+                "src/adapters/nlp/casadi_history_optimizer.cpp",
+                "src/optimization/history_domain.cpp",
+                "src/optimization/history_optimizer.cpp",
+                "src/synthesis/strategy_a/strategy.cpp",
+                "src/synthesis/strategy_b/direct_joint.cpp",
+            }
+            for controller_id, (family, strategy) in NATIVE_STRATEGY_IDS.items():
+                native = copy.deepcopy(strategy_templates[family])
+                native.pop("graph_id")
+                native.pop("graph_fingerprint")
+                profiles = provider_profiles(task, task["control_domains"]["continuous"]["bounds"])
+                provider = profiles[0][0]
+                fallbacks = list(dict.fromkeys(name for name, _ in profiles[1:]))
+                native["controller"].update(
+                    id=controller_id,
+                    strategy=strategy,
+                    control_semantics=f"C++ Strategy {strategy} receding-horizon source cost with typed {family} memberships",
+                    source_files=sorted(
+                        set(native["controller"]["source_files"]) | strategy_sources
+                    ),
+                    solver={
+                        "provider": provider,
+                        "fallbacks": fallbacks,
+                        "profiles": [
+                            {"provider": name, "physical_scaling": scaling}
+                            for name, scaling in profiles
+                        ],
+                        "assurance": "local numerical",
+                    },
+                )
+                native["role_bindings"]["control_optimizer"] = {
+                    "id": provider,
+                    "fallbacks": fallbacks,
+                }
+                native["admission"]["basis"] = (
+                    "native full-history CasADi/HiGHS/Qhull bridge with supplied checked histories"
+                )
+                known_sources = {record["path"]: record for record in native["source_files"]}
+                for path in strategy_sources:
+                    known_sources[path] = {
+                        "path": path,
+                        "sha256": hashlib.sha256((ROOT / path).read_bytes()).hexdigest(),
+                    }
+                native["source_files"] = sorted(
+                    known_sources.values(), key=lambda item: item["path"]
+                )
+                fingerprint = canonical_sha256(native)
+                native["graph_fingerprint"] = fingerprint
+                native["graph_id"] = (
+                    f"closed-loop/{task_name}/{controller_id}/cfg-{fingerprint[:16]}"
+                )
+                rows.append(native)
     return rows + _fixed_tail_definitions()
 
 
