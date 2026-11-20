@@ -747,7 +747,7 @@
       "route": "examples/catalogue-finite-action-v1/index.html",
       "disposition": "frozen",
       "owner": "reports/algorithm-results/catalogue-finite-action-v1/index.html",
-      "sha256": "0b9b49728e76d51b62697cd8d39dc60705098f909f8fdc18dd52e8eec63ee960",
+      "sha256": "b3cbdecb3644dbb8fc6fb3b72753130d6d645402ad29f2562d20083502dd8141",
       "witness": "Frozen catalogue finite-action outcomes and terminal box scoring example"
     },
     {

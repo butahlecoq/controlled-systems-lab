@@ -2846,7 +2846,7 @@
         "hospital-finite-actions.svg",
         "terminal-box-corner.svg"
       ],
-      "index_sha256": "0b9b49728e76d51b62697cd8d39dc60705098f909f8fdc18dd52e8eec63ee960",
+      "index_sha256": "b3cbdecb3644dbb8fc6fb3b72753130d6d645402ad29f2562d20083502dd8141",
       "disposition": "reviewed: finite action alternatives, executed path and terminal box scoring geometry",
       "companion_route": "examples/catalogue-finite-action-v1/index.html"
     },

@@ -16,7 +16,7 @@
 </figure>
 <h2>Define the two-decision task</h2>
 <p>Start at the catalogue state <var>x</var><sub>0</sub>. Use the stored affine dynamics and its supplied nominal external input, or a declared zero input when the catalogue omits a forecast. The control catalogue is {0, −0.1<var>e</var><sub>1</sub>, +0.1<var>e</var><sub>1</sub>}. Minimize the squared terminal deviation ∑<sub><var>i</var></sub>((<var>x</var><sub>2,i</sub> − <var>x</var><sub>0,i</sub>)/max(1, |<var>x</var><sub>0,i</sub>|))². The state domain is universal. This is an authored hold task on the catalogue dynamics.</p>
-<p>The SDK scores each of the nine declared action histories. The fixed plan retains both selected actions. The feedback run applies the first action, uses the observed state as the next initial condition, and scores the three remaining alternatives. The executed action sequences agree within each completed model and representation in this deterministic experiment. In the warehouse case two different histories have the same exact minimum objective.</p>
+<p>The SDK attempts all nine declared action histories and records their scores or refusals. When the first solve selects a plan, the fixed plan retains both actions. The feedback run applies the first action, uses the observed state as the next initial condition, and attempts the three remaining alternatives. The executed action sequences agree within each completed model and representation in this deterministic experiment. In the warehouse case two different histories have the same exact minimum objective.</p>
 <h2>Compare representation coverage</h2>
 <table>
 <caption>Models completing both decisions with the original 16,384-corner limit</caption>
@@ -38,7 +38,7 @@
 </figure>
 <p>We relinked only the revised box module with SDK v0.1.1 and reran the frozen task. All ten refused box cases completed. The 25 earlier box routes retained the same applied controls and trajectories, and the 140 other representation outcomes matched. The numerical experiment measures coverage.</p>
 <h2>Reproduce both runs</h2>
-<p>Extract the evidence archive and follow <code>RUN.txt</code>. It builds the catalogue driver and the candidate box module against the released SDK. The independent checker replays the affine dynamics and enumerates the declared finite alternatives using exact rational arithmetic. The archive carries all original outcomes and refusals.</p>
+<p>Extract the evidence archive and follow its <code>RUN.txt</code> to build the catalogue driver and candidate box module against the released SDK. The instructions unpack the original baseline archive. Follow <code>baseline/RUN.txt</code> to rebuild and rerun the original SDK study. The independent checker replays the affine dynamics and enumerates the declared finite alternatives using exact rational arithmetic. The archive carries all original outcomes and refusals.</p>
 <ul>
 <li><a href="catalogue-separable-box-evidence.zip">Both studies, native sources, figures and replay instructions</a></li>
 <li><a href="catalogue_finite_action.cpp">Catalogue comparison driver</a></li>

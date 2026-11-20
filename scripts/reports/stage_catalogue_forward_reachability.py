@@ -151,8 +151,8 @@ FINITE_ACTION = FrozenNativeBundle(
     route="catalogue-finite-action-v1",
     source_commit="0bca2bf882ba7c63440c9f32470c25f5b27e612c",
     schema="csl.catalogue-finite-action-capture/1",
-    manifest_sha256="9ad5a58ceaf6e7b97812d7668c657b825e395980b9a8dcf4dd111df412ba6a71",
-    archive_sha256="7b33eed12c8fd88ba2a923ed4250cdfe688a2f9500ad22646ff67fe3365e383b",
+    manifest_sha256="d07da1c82993e87c58c22d2f98ca0abcbd509775d75e1121a6945aa33b10bf10",
+    archive_sha256="02ed827127b7fd3627d2ca33a19df8de535b6f42a64565997d3c9cdbcc3465bc",
 )
 
 
