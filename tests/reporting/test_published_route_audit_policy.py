@@ -115,6 +115,8 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
             "learn/closed-loop-semantics.html",
             "learn/controller-composition.html",
             "learn/set-operations.html",
+            "learn/native-substitution-matrix.html",
+            "learn/same-geometry-five-representations.html",
         )
         manifest = json.loads((preservation.SOURCE / "manifest.json").read_text())
         provenance = json.loads((fixture / "source.json").read_text())
@@ -168,6 +170,8 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
                     "learn/controller-composition.html",
                     "learn/set-operations.html",
                     "learn/closed-loop-semantics.html",
+                    "learn/native-substitution-matrix.html",
+                    "learn/same-geometry-five-representations.html",
                 }
                 self.assertEqual(
                     set(result["reviewed_learning_navigation_changes"]),
@@ -220,6 +224,18 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
                         self.assertFalse(result["passed"])
                         self.assertIn(route, result["unexpected_changed"])
                         path.write_bytes(original)
+
+                for route in (
+                    "learn/native-substitution-matrix.html",
+                    "learn/same-geometry-five-representations.html",
+                ):
+                    with self.subTest(unreviewed_pin=route):
+                        wrong_pin = json.loads(json.dumps(manifest))
+                        wrong_pin["mutable_routes_reviewed_sha256"][route] = "0" * 64
+                        (source / "manifest.json").write_text(json.dumps(wrong_pin))
+                        result = baseline_audit.audit(baseline, site)
+                        self.assertFalse(result["passed"])
+                        self.assertEqual(result["unexpected_changed"], [route])
 
                 wrong_identity = json.loads(json.dumps(manifest))
                 forward_insertion = next(
