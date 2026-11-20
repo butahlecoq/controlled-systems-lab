@@ -765,6 +765,13 @@
       "witness": "Frozen matched feasible-history sweep from CSL SDK v0.1.1"
     },
     {
+      "route": "examples/catalogue-disturbance-control-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/catalogue-disturbance-control-v1/index.html",
+      "sha256": "33a8d54282bc959d8a677393a0958817396f63e24ec10dc91b54ead73dcafe2f",
+      "witness": "Exact fixed-plan robust predecessors and native finite minimax replay"
+    },
+    {
       "route": "examples/catalogue-external-fixed-plan-v1/index.html",
       "disposition": "frozen",
       "owner": "reports/algorithm-results/catalogue-external-fixed-plan-v1/index.html",

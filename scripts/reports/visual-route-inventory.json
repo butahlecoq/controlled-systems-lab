@@ -1479,6 +1479,14 @@
       "role_and_disposition_reason": "Authenticates the frozen v2 manifest and native 35a708df producer identity, then copies all current and superseded two-state affine lesson assets byte exactly into the Pages gallery; no numerical execution or historical relabelling."
     },
     {
+      "source": "scripts/reports/stage_catalogue_disturbance_control.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "ev-causal-minimax.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_catalogue_external_fixed_plan.py",
       "signal_count": 1,
       "asset_name_literals": [
@@ -2834,6 +2842,17 @@
       "index_sha256": "3f4cee565641826d533afad1567acdca50b5bff8fe2e56812f99f0ea2ec90836",
       "disposition": "reviewed: all four battery stages show forward and backward rectangles, intersections and the trajectory",
       "companion_route": "examples/catalogue-backward-reachability-v1/index.html"
+    },
+    {
+      "route": "catalogue-disturbance-control-v1",
+      "source_bundle": "catalogue-disturbance-control-v1",
+      "assets": [
+        "ev-causal-minimax.svg",
+        "puffer-robust-predecessor.svg"
+      ],
+      "index_sha256": "33a8d54282bc959d8a677393a0958817396f63e24ec10dc91b54ead73dcafe2f",
+      "disposition": "reviewed: overlays stagewise robust predecessor geometry and compares finite worst-case policy paths",
+      "companion_route": "examples/catalogue-disturbance-control-v1/index.html"
     },
     {
       "route": "catalogue-exact-support-v1",
@@ -4445,6 +4464,9 @@
         "positive_part_budget_2d_native-solution.csv",
         "positive_part_budget_2d_run.txt",
         "positive_part_budget_2d_native-example.stdout",
+        "catalogue-disturbance-control-v1/index.html",
+        "catalogue-disturbance-control-v1/ev-causal-minimax.svg",
+        "catalogue-disturbance-control-v1/puffer-robust-predecessor.svg",
         "catalogue-external-fixed-plan-v1/index.html",
         "catalogue-external-fixed-plan-v1/queue-outer-projections.svg",
         "catalogue-forward-reachability-v1/index.html",
