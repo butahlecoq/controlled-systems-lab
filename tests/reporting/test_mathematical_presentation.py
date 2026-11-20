@@ -59,6 +59,17 @@ class PresentationTests(unittest.TestCase):
         ):
             self.assertTrue(audit.inspect_html(html))
 
+    def test_primary_math_is_audited_with_empty_and_duplicate_classes(self) -> None:
+        for attrs in ("class", 'class class="lesson-reproduction"'):
+            with self.subTest(attrs=attrs):
+                html = f"<p {attrs}>[[1, 0], [0, 1]]</p>"
+                self.assertEqual(
+                    [finding["kind"] for finding in audit.inspect_html(html)],
+                    ["numeric-nested-list"],
+                )
+        source = '<pre class="lesson-reproduction" class="visible">[[1, 0]]</pre>'
+        self.assertEqual(audit.inspect_html(source), [])
+
     def test_full_site_requires_its_producer_inventories(self):
         with tempfile.TemporaryDirectory() as directory:
             result = audit.audit_site(
