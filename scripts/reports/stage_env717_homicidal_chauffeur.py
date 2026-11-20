@@ -8,9 +8,9 @@ import hashlib
 import html
 import importlib.util
 import json
-from pathlib import Path
 import stat
 import zipfile
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/env717-homicidal-chauffeur-v1"
@@ -30,8 +30,16 @@ def load(name, path):
 capture = load("env717_homicidal_capture", CAPTURE_PATH)
 checker = load("env717_homicidal_checker", CHECKER_PATH)
 SOURCE_COMMIT = "af5f0a2ee498c0edcf88d60f1d6c49a39bd08bc8"
-FILES = ("README.md", "capture.json", "check.json", "figure-data.json", "index.html",
-         "projections.svg", "result.json", "scenario.json")
+FILES = (
+    "README.md",
+    "capture.json",
+    "check.json",
+    "figure-data.json",
+    "index.html",
+    "projections.svg",
+    "result.json",
+    "scenario.json",
+)
 
 
 def digest(content: bytes) -> str:
@@ -79,11 +87,13 @@ def validate_bundle(source: Path):
         raise ValueError("saved SVG differs from checked figure data")
     if capture.make_page(result, check, captured).encode() != files["index.html"]:
         raise ValueError("saved report page differs from result and metadata")
-    if (scenario != json.loads(SCENARIO.read_text(encoding="utf-8")) or
-            scenario.get("source", {}).get("commit") != SOURCE_COMMIT or
-            result.get("source", {}).get("repository_commit") != SOURCE_COMMIT or
-            result.get("scenario_sha256") != digest(SCENARIO.read_bytes()) or
-            captured.get("scenario_sha256") != result.get("scenario_sha256")):
+    if (
+        scenario != json.loads(SCENARIO.read_text(encoding="utf-8"))
+        or scenario.get("source", {}).get("commit") != SOURCE_COMMIT
+        or result.get("source", {}).get("repository_commit") != SOURCE_COMMIT
+        or result.get("scenario_sha256") != digest(SCENARIO.read_bytes())
+        or captured.get("scenario_sha256") != result.get("scenario_sha256")
+    ):
         raise ValueError("source or scenario provenance differs")
     if check.get("status") != "verified" or captured.get("solver_failures") != 0:
         raise ValueError("report lacks successful independent verification")
@@ -94,50 +104,79 @@ def stage(source: Path, site: Path) -> str:
     files, result, captured = validate_bundle(source)
     if not site.is_dir():
         raise ValueError("Pages staging directory does not exist")
-    identity = {"source_repository_commit": SOURCE_COMMIT,
-        "source_commit": captured["source_commit"], "capture_sha256": digest(files["capture.json"]),
+    identity = {
+        "source_repository_commit": SOURCE_COMMIT,
+        "source_commit": captured["source_commit"],
+        "capture_sha256": digest(files["capture.json"]),
         "result_sha256": digest(files["result.json"]),
         "stager_sha256": digest(Path(__file__).read_bytes()),
-        "source_files": {name: digest(content) for name, content in sorted(files.items())}}
-    report_id = "env717-homicidal-chauffeur-" + digest(
-        json.dumps(identity, sort_keys=True, separators=(",", ":")).encode())[:20]
+        "source_files": {name: digest(content) for name, content in sorted(files.items())},
+    }
+    report_id = (
+        "env717-homicidal-chauffeur-"
+        + digest(json.dumps(identity, sort_keys=True, separators=(",", ":")).encode())[:20]
+    )
     destination, archive_path = site / report_id, site / f"{report_id}.zip"
     index = site / "index.html"
     page = index.read_text(encoding="utf-8")
-    if destination.exists() or archive_path.exists() or report_id in page or page.count("</ul>") != 1:
+    if (
+        destination.exists()
+        or archive_path.exists()
+        or report_id in page
+        or page.count("</ul>") != 1
+    ):
         raise ValueError("immutable route already exists or landing insertion point differs")
     generated = dict(files)
-    footer = (f'<p>Immutable Pages report <code>{html.escape(report_id)}</code> · '
+    footer = (
+        f"<p>Immutable Pages report <code>{html.escape(report_id)}</code> · "
         '<a href="publication-manifest.json">Publication manifest</a> · '
-        f'<a href="../{html.escape(report_id)}.zip">Offline ZIP</a>.</p>')
-    generated["index.html"] = files["index.html"].decode().replace(
-        "</body>", footer + "</body>").encode()
+        f'<a href="../{html.escape(report_id)}.zip">Offline ZIP</a>.</p>'
+    )
+    generated["index.html"] = (
+        files["index.html"].decode().replace("</body>", footer + "</body>").encode()
+    )
     generated["SHA256SUMS"] = "".join(
-        f"{digest(content)}  {name}\n" for name, content in sorted(generated.items())
-        if name != "SHA256SUMS").encode("ascii")
-    manifest = {"schema": "csl.env717-publication/1", "report_id": report_id,
-        "source_report_id": source.name, "source_repository_commit": SOURCE_COMMIT,
-        "source_commit": captured["source_commit"], "stager_sha256": identity["stager_sha256"],
+        f"{digest(content)}  {name}\n"
+        for name, content in sorted(generated.items())
+        if name != "SHA256SUMS"
+    ).encode("ascii")
+    manifest = {
+        "schema": "csl.env717-publication/1",
+        "report_id": report_id,
+        "source_report_id": source.name,
+        "source_repository_commit": SOURCE_COMMIT,
+        "source_commit": captured["source_commit"],
+        "stager_sha256": identity["stager_sha256"],
         "measured_scope": "Four 0.1-second stages; complete finite reachable graph, terminal capture sweep, causal minimax value with independent replay, and five fresh-process runtime observations for the single adapter.",
-        "evidence_limits": ["Finite action catalogues and a quantized lattice only.",
+        "evidence_limits": [
+            "Finite action catalogues and a quantized lattice only.",
             "The zero-sum payoff signs and sequential response are analysis assumptions because the source environment does not assign per-agent payoff signs.",
             "Runtime is descriptive for one adapter and machine; it is not a comparison or speedup claim.",
-            "No continuous-action RL reproduction or continuous-game optimality claim."],
+            "No continuous-action RL reproduction or continuous-game optimality claim.",
+        ],
         "source_files": identity["source_files"],
-        "published_files": {name: digest(content) for name, content in sorted(generated.items())}}
-    generated["publication-manifest.json"] = (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode()
-    link = (f'<li><a href="{report_id}/index.html">HomicidalChauffeur reachability and minimax</a>'
+        "published_files": {name: digest(content) for name, content in sorted(generated.items())},
+    }
+    generated["publication-manifest.json"] = (
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n"
+    ).encode()
+    link = (
+        f'<li><a href="{report_id}/index.html">HomicidalChauffeur reachability and minimax</a>'
         f' · <a href="{report_id}/result.json">result JSON</a>'
         f' · <a href="{report_id}/projections.svg">player position projections</a>'
-        f' · <a href="{report_id}.zip">offline ZIP</a></li>')
+        f' · <a href="{report_id}.zip">offline ZIP</a></li>'
+    )
     destination.mkdir()
     for name, content in generated.items():
         (destination / name).write_bytes(content)
-    offline = (f'<!doctype html><html lang="en"><meta charset="utf-8"><title>Offline HomicidalChauffeur report</title>'
-        f'<a href="{report_id}/index.html">Open the report</a></html>').encode()
+    offline = (
+        f'<!doctype html><html lang="en"><meta charset="utf-8"><title>Offline HomicidalChauffeur report</title>'
+        f'<a href="{report_id}/index.html">Open the report</a></html>'
+    ).encode()
     with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-        entries = [("index.html", offline)] + [(f"{report_id}/{name}", content)
-                                               for name, content in sorted(generated.items())]
+        entries = [("index.html", offline)] + [
+            (f"{report_id}/{name}", content) for name, content in sorted(generated.items())
+        ]
         for name, content in entries:
             item = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
             item.compress_type = zipfile.ZIP_DEFLATED
