@@ -221,3 +221,61 @@ class CatalogueForwardPublicationTests(unittest.TestCase):
             self.assertEqual(archive_entry.commit, stage.BACKWARD_REACHABILITY.source_commit)
             for _, path in archive_entry.links:
                 self.assertTrue((site / path).is_file(), path)
+
+    def test_finite_action_keeps_both_runs_and_their_figures(self) -> None:
+        files, [entry], card = stage.build_finite_action(ROOT)
+        route = stage.FINITE_ACTION.route
+        evidence = f"{route}/catalogue-separable-box-evidence.zip"
+        for path in (entry["page"], entry["figure"], evidence):
+            self.assertIn(path, files)
+            self.assertIn(path, card)
+        with ZipFile(BytesIO(files[evidence])) as candidate:
+            comparison = json.loads(candidate.read("comparison.json"))
+            manifest = json.loads(files[entry["raw_record"]])
+            self.assertEqual(
+                manifest["candidate_sdk_commit"],
+                json.loads(candidate.read("provenance.json"))["candidate_sdk_commit"],
+            )
+            self.assertEqual(
+                files[f"{route}/terminal-box-corner.svg"], candidate.read("terminal-box-corner.svg")
+            )
+            self.assertEqual(
+                files[f"{route}/catalogue_finite_action.cpp"],
+                candidate.read("catalogue_finite_action.cpp"),
+            )
+            with ZipFile(
+                BytesIO(candidate.read("baseline-finite-action-evidence.zip"))
+            ) as baseline:
+                self.assertEqual(
+                    files[entry["figure"]], baseline.read("hospital-finite-actions.svg")
+                )
+                original = json.loads(baseline.read("audit.json"))
+                self.assertEqual(original["feedback_counts"]["box"]["selected"], 25)
+        self.assertEqual(comparison["recovered_box_models"], list(range(26, 36)))
+        self.assertEqual(comparison["retained_box_models"], list(range(1, 26)))
+        self.assertEqual(comparison["matching_nonbox_outcomes"], 140)
+
+        book = json.loads((ROOT / "docs/catalogue/learning-book-v1.json").read_bytes())
+        [chapter] = [
+            item for item in book["chapters"] if item["id"] == "native-model-tracking-first-pass"
+        ]
+        page = "examples/" + entry["page"]
+        self.assertIn("../" + page, {item["href"] for item in chapter["records"]})
+        with tempfile.TemporaryDirectory() as directory:
+            site = Path(directory)
+            for name, content in files.items():
+                target = site / "examples" / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(content)
+            ledger = json.loads(presentation.REGISTRY.read_bytes())
+            [record] = [item for item in ledger["routes"] if item["route"] == page]
+            report = presentation.audit_site(site, {"routes": [record]})
+            self.assertTrue(report["passed"], report["findings"])
+            index = site / "index.html"
+            index.write_text("<ul></ul>", encoding="utf-8")
+            (site / "archive.html").touch()
+            landing.build(site)
+            [archive_entry], _ = landing.parse_index(index.read_text(encoding="utf-8"))
+            self.assertEqual(archive_entry.commit, stage.FINITE_ACTION.source_commit)
+            for _, path in archive_entry.links:
+                self.assertTrue((site / path).is_file(), path)

@@ -1,0 +1,14 @@
+{
+  "schema": "csl.catalogue-finite-action-capture/1",
+  "source_commit": "0bca2bf882ba7c63440c9f32470c25f5b27e612c",
+  "baseline_sdk_commit": "dc6801dc5f02c4000b4f1272361752581a55873a",
+  "candidate_sdk_commit": "0ae7082aed158a6538e68cd2ad645cfb3ffa53c1",
+  "files_sha256": {
+    "catalogue-separable-box-evidence.zip": "2e13a7cfc0a7c19ce08452dab9eae5f1c40b6ba3d3d5e624602bc4be74a772b8",
+    "catalogue_finite_action.cpp": "318afc1bac8a277bff56dc4892d26b64d5dd90457ae2179cbb2d0ed525adbd70",
+    "examples.css": "11ded2b69cec694ff61ecad0493f175becbfc47bce3d641f2ee512543bb82cf4",
+    "hospital-finite-actions.svg": "088ee26727bde62929b9ae3c579cf27798002c905b6e3e470588ea734a08e599",
+    "index.html": "0b9b49728e76d51b62697cd8d39dc60705098f909f8fdc18dd52e8eec63ee960",
+    "terminal-box-corner.svg": "3228797a6a9a562af4bbcf1e2a10b36afb7854ff3c1df0cf3a66ce01d375298b"
+  }
+}

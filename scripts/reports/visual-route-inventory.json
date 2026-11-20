@@ -1480,11 +1480,12 @@
     },
     {
       "source": "scripts/reports/stage_catalogue_forward_reachability.py",
-      "signal_count": 4,
+      "signal_count": 5,
       "asset_name_literals": [
         "battery-forward-backward.svg",
         "battery-history-projections.svg",
         "building-budget-projection.svg",
+        "hospital-finite-actions.svg",
         "platoon-forward.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
@@ -2837,6 +2838,17 @@
       "index_sha256": "822d7ac37ecd021ebae44a720026e3c377dd15a577b40e77d509802b5f5f06b3",
       "disposition": "reviewed: paired battery projections display full constraints and control intervals at each stage",
       "companion_route": "examples/catalogue-feasible-history-v1/index.html"
+    },
+    {
+      "route": "catalogue-finite-action-v1",
+      "source_bundle": "catalogue-finite-action-v1",
+      "assets": [
+        "hospital-finite-actions.svg",
+        "terminal-box-corner.svg"
+      ],
+      "index_sha256": "0b9b49728e76d51b62697cd8d39dc60705098f909f8fdc18dd52e8eec63ee960",
+      "disposition": "reviewed: finite action alternatives, executed path and terminal box scoring geometry",
+      "companion_route": "examples/catalogue-finite-action-v1/index.html"
     },
     {
       "route": "catalogue-forward-reachability-v1",
@@ -4402,6 +4414,9 @@
         "catalogue-exact-support-v1/building-budget-projection.svg",
         "catalogue-backward-reachability-v1/index.html",
         "catalogue-backward-reachability-v1/battery-forward-backward.svg",
+        "catalogue-finite-action-v1/index.html",
+        "catalogue-finite-action-v1/hospital-finite-actions.svg",
+        "catalogue-finite-action-v1/terminal-box-corner.svg",
         "mpc-crossover-6b7308c4/index.html",
         "mpc-crossover-6b7308c4/feedback-geometry.svg",
         "mpc-crossover-6b7308c4/deployment-time.svg",
