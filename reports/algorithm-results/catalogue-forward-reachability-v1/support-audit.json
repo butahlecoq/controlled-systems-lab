@@ -1,0 +1,9 @@
+{
+  "models": 35,
+  "model_stages": 140,
+  "support_checks": 7592,
+  "nominal_external_models": 22,
+  "max_absolute_support_error": 4.694022948115162e-13,
+  "max_scaled_support_error": 1.3698684001809604e-15,
+  "scaled_tolerance": 1e-12
+}

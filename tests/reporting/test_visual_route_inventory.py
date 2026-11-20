@@ -245,7 +245,13 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertEqual(crossover["assets"],["deployment-time.svg","feedback-geometry.svg"])
         self.assertEqual(crossover["companion_route"],"examples/mpc-crossover-6b7308c4/index.html")
         self.assertNotIn("follow_up_issue",crossover)
-        reviewed_routes={paired["route"],query["route"],crossover["route"]}
+        forward=routes["catalogue-forward-reachability-v1"]
+        self.assertEqual(forward["assets"],["platoon-forward.svg"])
+        self.assertEqual(forward["companion_route"],
+                         "examples/catalogue-forward-reachability-v1/index.html")
+        self.assertIn("reviewed: physical and centred coordinates",forward["disposition"])
+        self.assertNotIn("follow_up_issue",forward)
+        reviewed_routes={paired["route"],query["route"],crossover["route"],forward["route"]}
         self.assertTrue(all(entry["disposition"].startswith("deferred: original frozen route-level readability")
                             for entry in routes.values() if entry["route"] not in reviewed_routes))
         self.assertTrue(all(entry["follow_up_issue"] ==
@@ -304,6 +310,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "positive-part-budget-2d.json", "positive_part_budget_2d_vertices.csv",
             "positive_part_budget_2d_native-solution.csv", "positive_part_budget_2d_run.txt",
             "positive_part_budget_2d_native-example.stdout",
+            "catalogue-forward-reachability-v1/index.html",
+            "catalogue-forward-reachability-v1/platoon-forward.svg",
             "mpc-crossover-6b7308c4/index.html", "mpc-crossover-6b7308c4/feedback-geometry.svg",
             "native-source-constrained-mpc-v1/index.html", "native-source-constrained-mpc-v1/platoon.svg",
             "mpc-crossover-6b7308c4/deployment-time.svg",

@@ -1220,6 +1220,10 @@
           "href": "../examples/native-extended-models-v1/manifest.json"
         },
         {
+          "label": "Three-step forward reachability on all 35 catalogue models",
+          "href": "../examples/catalogue-forward-reachability-v1/index.html"
+        },
+        {
           "label": "Reachability formulations and horizon variants",
           "href": "model-tracks.html#reachability-formulations"
         }

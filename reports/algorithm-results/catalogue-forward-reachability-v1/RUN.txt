@@ -1,0 +1,28 @@
+Catalogue forward reachability with a three-step authored box
+
+Use CSL SDK v0.1.1 at dc6801dc5f02c4000b4f1272361752581a55873a.
+The frozen models.csv is from the research revision in research-revision
+at reports/algorithm-results/native-discrete-models-v1/raw/models.csv.
+
+For each model start from its catalogue x0 and propagate using the native
+A, B, E and the native time step. Controls are independent in [-1,1] on each
+coordinate and at each of three steps. Keep the supplied nominal external
+vector constant where present and explicitly use zero where absent. The
+box is authored in each coordinate's tabulated unit. There are no additional
+state, headway or budget rows. The task studies forward reachability.
+
+  cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/path/to/csl
+  cmake --build build
+  ./build/catalogue_forward > support.csv
+  python check_support.py support.csv
+  python plot_platoon.py
+
+The exact-rational oracle reconstructs the stored binary64 coefficients
+from the frozen export and propagates directions backward with A transpose.
+It checks both signs of each coordinate direction and 32 directions in one
+projected plane at every stage. The native support is numerical. The audit
+compares sampled values; it does not certify containment in binary64 arithmetic.
+The platoon plot uses exact corner propagation of the three-coordinate final-car
+block. The plot checks that no other controls or state coordinates enter that
+block, then enumerates all eight possible corner histories at stage three.
+Plotting uses Matplotlib 3.11.2. This capture contains no timing measurements.
