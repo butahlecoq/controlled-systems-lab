@@ -13,7 +13,7 @@ SHA = re.compile(r"[0-9a-f]{40}\Z")
 SOURCE_MARKER = "pages-augmentation-source.json"
 
 
-def source_report(payload: dict) -> tuple[int, str] | None:
+def source_report(payload: dict[str, object]) -> tuple[int, str] | None:
     """Return the exact report run that caused a workflow_run augmentation."""
     upstream = payload.get("workflow_run")
     if not isinstance(upstream, dict):
@@ -27,7 +27,7 @@ def source_report(payload: dict) -> tuple[int, str] | None:
         raise ValueError("workflow_run event is not a successful main report run")
     run_id, source_sha = upstream.get("id"), upstream.get("head_sha")
     if (
-        not isinstance(run_id, int)
+        type(run_id) is not int
         or run_id <= 0
         or not isinstance(source_sha, str)
         or not SHA.fullmatch(source_sha)
@@ -64,10 +64,13 @@ def latest_report_run(api: str, repository: str, token: str, source_sha: str) ->
     ]
     if not matches:
         raise ValueError("no successful main report run exists for the Pages source")
-    return max(matches, key=lambda run: run["updated_at"])["id"]
+    run_id: object = max(matches, key=lambda run: run["updated_at"]).get("id")
+    if type(run_id) is not int or run_id <= 0:
+        raise ValueError("latest report identity is invalid")
+    return run_id
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--check-only",
