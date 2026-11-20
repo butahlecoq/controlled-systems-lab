@@ -226,7 +226,8 @@ class CatalogueForwardPublicationTests(unittest.TestCase):
         files, [entry], card = stage.build_finite_action(ROOT)
         route = stage.FINITE_ACTION.route
         evidence = f"{route}/catalogue-separable-box-evidence.zip"
-        for path in (entry["page"], entry["figure"], evidence):
+        package = f"{route}/{route}.zip"
+        for path in (entry["page"], entry["figure"], package):
             self.assertIn(path, files)
             self.assertIn(path, card)
         with ZipFile(BytesIO(files[evidence])) as candidate:

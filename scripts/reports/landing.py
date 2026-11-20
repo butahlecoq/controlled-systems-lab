@@ -1356,7 +1356,7 @@ def build(site: Path) -> None:
             Entry(
                 report_id=finite_action,
                 scope="175 native representation outcomes on the two-decision finite-action hold task.",
-                limits="Same authored task inputs and budgets for the baseline and the relinked box scorer.",
+                limits="Same authored inputs and budgets for the baseline, isolated scoring changes and joint replay.",
                 commit=manifest["source_commit"],
                 links=(
                     ("Source and hashes", finite_action + "/manifest.json"),
