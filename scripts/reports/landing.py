@@ -122,7 +122,7 @@ FAMILIES = {
         r"examples/catalogue-disturbance-control-v1",
         "geometry",
         "Disturbance guarantees and feedback",
-        "Compares robust terminal predecessors, fixed action plans and finite observed-state policies.",
+        "Compares robust terminal predecessors and finite minimax policies with and without the saved constraints.",
     ),
     "catalogue-external-fixed-plan-v1": Family(
         r"examples/catalogue-external-fixed-plan-v1",
@@ -1344,10 +1344,14 @@ def build(site: Path) -> None:
             Entry(
                 report_id=disturbance,
                 scope="Exact predecessor checks and numerical finite minimax replay on 35 models.",
-                limits="Two transitions with authored disturbances and universal intermediate states.",
+                limits="Two transitions with authored disturbances. The constrained replay retains its domain labels.",
                 commit=manifest["source_commit"],
                 links=(
                     ("Independent minimax audit", disturbance + "/minimax-audit.json"),
+                    (
+                        "Constrained replay",
+                        disturbance + "/catalogue-constrained-minimax-evidence.zip",
+                    ),
                     ("Offline evidence", disturbance + "/catalogue-disturbance-control-v1.zip"),
                 ),
             )

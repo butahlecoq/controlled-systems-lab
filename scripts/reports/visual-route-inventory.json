@@ -2848,10 +2848,11 @@
       "source_bundle": "catalogue-disturbance-control-v1",
       "assets": [
         "ev-causal-minimax.svg",
-        "puffer-robust-predecessor.svg"
+        "puffer-robust-predecessor.svg",
+        "queue-safety-obstruction.svg"
       ],
-      "index_sha256": "33a8d54282bc959d8a677393a0958817396f63e24ec10dc91b54ead73dcafe2f",
-      "disposition": "reviewed: overlays stagewise robust predecessor geometry and compares finite worst-case policy paths",
+      "index_sha256": "1a195f706cf3ec6d03dba67acd0c6246c620a5ae043bde2a6b3fe1c6e99c842b",
+      "disposition": "reviewed: overlays robust predecessor geometry, finite policy paths and the constrained queue safety obstruction",
       "companion_route": "examples/catalogue-disturbance-control-v1/index.html"
     },
     {
@@ -4467,6 +4468,7 @@
         "catalogue-disturbance-control-v1/index.html",
         "catalogue-disturbance-control-v1/ev-causal-minimax.svg",
         "catalogue-disturbance-control-v1/puffer-robust-predecessor.svg",
+        "catalogue-disturbance-control-v1/queue-safety-obstruction.svg",
         "catalogue-external-fixed-plan-v1/index.html",
         "catalogue-external-fixed-plan-v1/queue-outer-projections.svg",
         "catalogue-forward-reachability-v1/index.html",

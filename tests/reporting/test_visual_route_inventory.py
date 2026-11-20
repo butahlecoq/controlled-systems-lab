@@ -233,9 +233,9 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertEqual(hull_4d["assets"],["2d-visual-companion.svg", "input-projections.svg"])
         self.assertTrue(hull_4d["index_sha256"])
         disturbance = routes["catalogue-disturbance-control-v1"]
-        self.assertEqual(disturbance["assets"], ["ev-causal-minimax.svg", "puffer-robust-predecessor.svg"])
+        self.assertEqual(disturbance["assets"], ["ev-causal-minimax.svg", "puffer-robust-predecessor.svg", "queue-safety-obstruction.svg"])
         self.assertEqual(disturbance["companion_route"], "examples/catalogue-disturbance-control-v1/index.html")
-        self.assertIn("reviewed: overlays stagewise robust predecessor geometry", disturbance["disposition"])
+        self.assertIn("reviewed: overlays robust predecessor geometry", disturbance["disposition"])
         external = routes["catalogue-external-fixed-plan-v1"]
         self.assertEqual(external["assets"], ["queue-outer-projections.png", "queue-outer-projections.svg"])
         self.assertEqual(external["companion_route"], "examples/catalogue-external-fixed-plan-v1/index.html")
@@ -341,6 +341,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "catalogue-disturbance-control-v1/index.html",
             "catalogue-disturbance-control-v1/ev-causal-minimax.svg",
             "catalogue-disturbance-control-v1/puffer-robust-predecessor.svg",
+            "catalogue-disturbance-control-v1/queue-safety-obstruction.svg",
             "catalogue-external-fixed-plan-v1/index.html",
             "catalogue-external-fixed-plan-v1/queue-outer-projections.svg",
             "catalogue-forward-reachability-v1/index.html",

@@ -325,7 +325,7 @@ FROZEN_REVIEWED_ROUTES = {
     "mpc-crossover-6b7308c4":
         "reviewed: saved plots distinguish feasible and infeasible states, show the three-step trajectory and compare paired deployment timings",
     "catalogue-disturbance-control-v1":
-        "reviewed: overlays stagewise robust predecessor geometry and compares finite worst-case policy paths",
+        "reviewed: overlays robust predecessor geometry, finite policy paths and the constrained queue safety obstruction",
     "catalogue-external-fixed-plan-v1":
         "reviewed: three stage projections compare the enumerated queue hull and four outer enclosures",
     "review05-family-query-20261110-3b98f5b0":
@@ -550,6 +550,7 @@ def build(root: Path = ROOT) -> dict:
                     "catalogue-disturbance-control-v1/index.html",
                     "catalogue-disturbance-control-v1/ev-causal-minimax.svg",
                     "catalogue-disturbance-control-v1/puffer-robust-predecessor.svg",
+                    "catalogue-disturbance-control-v1/queue-safety-obstruction.svg",
                     "catalogue-external-fixed-plan-v1/index.html",
                     "catalogue-external-fixed-plan-v1/queue-outer-projections.svg",
                     "catalogue-forward-reachability-v1/index.html",

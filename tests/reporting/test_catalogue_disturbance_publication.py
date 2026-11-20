@@ -23,6 +23,14 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class CatalogueDisturbancePublicationTests(unittest.TestCase):
+    def check_archive_digests(self, archive: ZipFile) -> None:
+        hashes = [line.split("  ", 1) for line in archive.read("SHA256SUMS").decode().splitlines()]
+        self.assertEqual(
+            sorted(archive.namelist()), sorted([name for _, name in hashes] + ["SHA256SUMS"])
+        )
+        for digest, name in hashes:
+            self.assertEqual(hashlib.sha256(archive.read(name)).hexdigest(), digest, name)
+
     def test_lesson_tables_and_figures_match_the_verified_archive(self) -> None:
         files, [entry], card = stage.build(ROOT)
         route = stage.IDENTITY.route
@@ -34,14 +42,7 @@ class CatalogueDisturbancePublicationTests(unittest.TestCase):
                     self.assertIn(ref.path, offline.namelist())
         evidence = files[f"{route}/catalogue-disturbance-evidence.zip"]
         with ZipFile(BytesIO(evidence)) as archive:
-            hashes = [
-                line.split("  ", 1) for line in archive.read("SHA256SUMS").decode().splitlines()
-            ]
-            self.assertEqual(
-                sorted(archive.namelist()), sorted([name for _, name in hashes] + ["SHA256SUMS"])
-            )
-            for digest, name in hashes:
-                self.assertEqual(hashlib.sha256(archive.read(name)).hexdigest(), digest, name)
+            self.check_archive_digests(archive)
             for name in (
                 "puffer-robust-predecessor.svg",
                 "ev-causal-minimax.svg",
@@ -74,6 +75,42 @@ class CatalogueDisturbancePublicationTests(unittest.TestCase):
         for path in (entry["page"], entry["figure"], f"{route}/{route}.zip"):
             self.assertIn(path, files)
             self.assertIn(path, card)
+
+    def test_constrained_replay_separates_its_domain_and_matches_the_figure(self) -> None:
+        files, [entry], _ = stage.build(ROOT)
+        route = stage.IDENTITY.route
+        evidence = files[f"{route}/catalogue-constrained-minimax-evidence.zip"]
+        section = files[entry["page"]].decode().split('<section id="constraints">', 1)[1]
+        with ZipFile(BytesIO(evidence)) as archive:
+            self.check_archive_digests(archive)
+            figure = "queue-safety-obstruction.svg"
+            self.assertEqual(files[f"{route}/{figure}"], archive.read("replay/" + figure))
+            audit = json.loads(archive.read("replay/results.json"))
+            self.assertEqual(len(audit["models"]), 70)
+            expected = {"infeasible/infeasible": 2, "feasible/feasible": 33}
+            for profile in ("component-bounds", "all-retained-rows"):
+                self.assertEqual(audit["summary"][profile]["status_pairs"], expected)
+                self.assertEqual(
+                    audit["summary"][profile]["strict_causal_gain"], ["catalogue-2026/model-30/1"]
+                )
+            rows = {
+                item["model_id"]: item
+                for item in audit["models"]
+                if item["profile"] == "all-retained-rows"
+            }
+            self.assertEqual(
+                {model for model, row in rows.items() if row["fixed"]["status"] == "infeasible"},
+                {"catalogue-2026/model-1/1", "catalogue-2026/model-12/1"},
+            )
+            for number, label in ((6, "EV charging"), (30, "Thirty-bank ring")):
+                row = rows[f"catalogue-2026/model-{number}/1"]
+                self.assertIn(
+                    f'<th scope="row">{label}</th><td>{row["fixed"]["value"]:.11f}</td>'
+                    f"<td>{row['causal']['value']:.11f}</td>",
+                    section,
+                )
+            native = json.loads(archive.read("replay/native-audit.json"))
+            self.assertEqual(native["policy_outcomes"], 140)
 
     def test_offline_minimax_oracle_has_exact_zero_row_regression(self) -> None:
         files, _, _ = stage.build(ROOT)
@@ -137,6 +174,12 @@ assert actual == F(1, 9) + F(0.1) * F(2, 3)
             landing.build(site)
             [archive_entry], _ = landing.parse_index(index.read_text(encoding="utf-8"))
             self.assertEqual(archive_entry.commit, stage.IDENTITY.source_commit)
-            self.assertEqual(len(archive_entry.links), 2)
+            self.assertIn(
+                (
+                    "Constrained replay",
+                    f"examples/{stage.IDENTITY.route}/catalogue-constrained-minimax-evidence.zip",
+                ),
+                archive_entry.links,
+            )
             for _, path in archive_entry.links:
                 self.assertTrue((site / path).is_file(), path)

@@ -14,7 +14,8 @@
 <ul>
 <li><a href="#predecessor">Compute a robust terminal predecessor</a></li>
 <li><a href="#feedback">Compare fixed actions with finite causal feedback</a></li>
-<li><a href="#replay">Replay both experiments offline</a></li>
+<li><a href="#constraints">Apply the saved state and actuator constraints</a></li>
+<li><a href="#replay">Replay the experiments offline</a></li>
 </ul>
 
 <section id="predecessor">
@@ -60,8 +61,29 @@ A = ⎣ 0  0.7  ⎦   E = ⎣  0  1 ⎦</pre>
 <p>Both fixtures use universal intermediate state domains and authored actions or disturbances. The causal comparison is for the finite vertex game. The fixed plan also attains its maximum on these vertices for convex-hull uncertainty because the dynamics are affine and the terminal cost is convex. The results carry no physical calibration or performance claim.</p>
 </section>
 
+<section id="constraints">
+<h2>Apply the saved state and actuator constraints</h2>
+<p>Keep the same finite actions, disturbance vertices, and terminal quadratic. Use the first two stages of the saved feasible-history constraint profiles and apply their terminal rows at the new deadline. One variant keeps only the component state and actuator bounds. The other includes mixed rows, positive-part actuator budgets, and terminal rows. The 29 source-continuous, three continuous-relaxation, and three authored-domain labels stay with the records.</p>
+<p>Both fixed and causal policies are feasible on 33 models under either variant. The IP/SDN queues and warehouse/store models violate a lower state bound at the terminal stage. In the queue model every actuator-admitted plan has q₃ = −6 Mbit at that stage. The lower bound is q₃ ≥ 0.</p>
+<figure>
+<img src="queue-safety-obstruction.svg" alt="Discrete projections of queue states at stages zero, one and two. Every stage-two point has third-queue content of minus six below the zero bound.">
+<figcaption>Exact projection onto the first and third queue contents. All stage-two points fall below the admissible range for q₃. The first-queue coordinate can move with the action and disturbance. <a href="queue-safety-obstruction.svg">Open the full-size queue figure</a>.</figcaption>
+</figure>
+<table id="constrained-costs">
+<caption>Worst terminal cost with all retained rows</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Fixed plan</th><th scope="col">Causal feedback</th></tr></thead>
+<tbody>
+<tr><th scope="row">EV charging</th><td>0.00027777778</td><td>0.00027777778</td></tr>
+<tr><th scope="row">Thirty-bank ring</th><td>0.03988894635</td><td>0.03986116015</td></tr>
+</tbody>
+</table>
+<p>The EV actuator bound excludes the negative action that provided the earlier causal gain. The thirty-bank policy retains its advantage. The additional rows do not change the outcomes for this particular action menu.</p>
+<p>To pass the problem to the SDK, encode each complete fixed plan as one first-stage decision. For causal control retain two stages and share the second decision between exactly equal observations. Unsafe transitions lead to rejected nodes. The SDK and exact enumeration agree on all 140 feasibility statuses and all 132 costs for feasible policies. The largest absolute value difference is 6.98 × 10<sup>−16</sup>. Both results concern finite external vertices.</p>
+<p><a href="catalogue-constrained-minimax-evidence.zip">Download the constrained C++ replay, exact ledger, inputs, and figure</a>.</p>
+</section>
+
 <section id="replay">
-<h2>Replay both experiments offline</h2>
+<h2>Replay the experiments offline</h2>
 <p>Download the <a href="catalogue-disturbance-evidence.zip">C++ clients, replay instructions, inputs, raw results and independent checkers</a>. Use the bundled CMake project with <a href="https://github.com/butahlecoq/csl-sdk/tree/806738c9d1c8f1d9ebd8885b7bb605b5a698b1af">the pinned SDK source</a>, then run the two clients and the certificate verifiers as described in the included REPLAY.md.</p>
 <p><a href="minimax-audit.json">Per-model minimax audit</a> · <a href="manifest.json">Sources and checksums</a></p>
 </section>

@@ -768,7 +768,7 @@
       "route": "examples/catalogue-disturbance-control-v1/index.html",
       "disposition": "frozen",
       "owner": "reports/algorithm-results/catalogue-disturbance-control-v1/index.html",
-      "sha256": "33a8d54282bc959d8a677393a0958817396f63e24ec10dc91b54ead73dcafe2f",
+      "sha256": "1a195f706cf3ec6d03dba67acd0c6246c620a5ae043bde2a6b3fe1c6e99c842b",
       "witness": "Exact fixed-plan robust predecessors and native finite minimax replay"
     },
     {
