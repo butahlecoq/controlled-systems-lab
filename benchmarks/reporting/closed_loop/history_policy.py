@@ -9,6 +9,11 @@ LIFTED_POLYTOPE_CONTROLLER = "native-continuous-history-lifted-polytope-ipopt/1"
 LIFTED_POLYTOPE_IMPLEMENTATION = "csl.synthesis.lifted-history-projection"
 GEOMETRY_IDS = {f"native-continuous-history-{family}-ipopt/1": family for family in FAMILIES}
 GEOMETRY_IDS[LIFTED_POLYTOPE_CONTROLLER] = "polytope"
+NATIVE_STRATEGY_IDS = {
+    f"native-strategy-{strategy.lower()}-history-{family}/1": (family, strategy)
+    for family in FAMILIES for strategy in ("A", "B")
+}
+
 
 
 def should_refine_epigraph(checks, solver, compiled):
@@ -162,13 +167,18 @@ class HistoryPolicy:
         validate_source_binding(task)
         if manifest_sha256(task) != task_sha256:
             raise ValueError("history policy task hash differs from the source-bound task")
-        if controller_id not in {"native-continuous-affine-history-mpc/1", "native-continuous-affine-history-ipopt/1", *GEOMETRY_IDS}:
+        if controller_id not in {"native-continuous-affine-history-mpc/1", "native-continuous-affine-history-ipopt/1",
+                                 *GEOMETRY_IDS, *NATIVE_STRATEGY_IDS}:
             raise ValueError("unknown continuous history policy profile")
         if (controller_id == "native-continuous-affine-history-ipopt/1"
                 and task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01"):
             raise ValueError("orbit already selects the IPOPT history solver in the original profile")
-        self.geometry_family = GEOMETRY_IDS.get(controller_id)
-        self.lifted_polytope = controller_id == LIFTED_POLYTOPE_CONTROLLER
+        self.geometry_family, self.native_strategy = NATIVE_STRATEGY_IDS.get(
+            controller_id, (GEOMETRY_IDS.get(controller_id), None),
+        )
+        self.lifted_polytope = controller_id == LIFTED_POLYTOPE_CONTROLLER or (
+            self.native_strategy is not None and self.geometry_family == "polytope"
+        )
         self.history_solver = ("casadi-ipopt" if self.geometry_family is not None or controller_id == "native-continuous-affine-history-ipopt/1"
             or task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01" else "csl.convex.highs")
         if action_profile_id != task["control_domains"]["continuous"]["problem_id"]:
@@ -193,6 +203,8 @@ class HistoryPolicy:
             "geometry": self.geometry_family or "not_used", "history_solver": self.history_solver,
             "controller_semantics": ("observed-state affine-history MPC with F/B/I family memberships"
                 if self.geometry_family else "observed-state direct affine-history MPC")}
+        if self.native_strategy:
+            self.preparation_receipt["native_strategy"] = self.native_strategy
         if self.lifted_polytope:
             self.preparation_receipt["polytope_history"] = "lifted_whole_history"
 
@@ -314,6 +326,8 @@ class HistoryPolicy:
                 if self.task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01" else [],
             lifted_request=request if self.lifted_polytope else None)
             if self.geometry_family is not None else None)
+        if self.native_strategy:
+            return self._native_strategy_query(request, response, memberships, initial, warm_start, result)
         start_recovery = None
         if response["status"] == "solved":
             primal = np.asarray(response["primal"], dtype=float)
@@ -415,6 +429,59 @@ class HistoryPolicy:
             result["selected_representation"] = self.geometry_family
         if self.lifted_polytope:
             result["coverage"] = "exact lifted stage projections of the stored closed affine history"
+        return result
+
+    def _native_strategy_query(self, request, exported, memberships, initial, initialization, result):
+        from native_strategy_history import prepare_start, solve_strategy
+
+        if self.previous_history is not None:
+            initial = reintegrate_history_start(request, initial)
+            initialization["policy"] = "rollout-shifted-controls-from-observation"
+        try:
+            start, factors, phase = prepare_start(self.task, request, exported["history_relation"], memberships, initial)
+        except ValueError as error:
+            result["reason"] = f"Supplied history preparation failed: {error}"
+            return result
+        initialization["initial_primal"] = start
+        if phase:
+            initialization["policy"] = phase
+            result["invocations"].append({"operation": "history.start-feasibility",
+                                          "module_id": "scipy.optimize.linprog", "provider": "highs", "profile_id": self.controller_id})
+
+        def exchange(raw):
+            self.process.stdin.write(raw)
+            self.process.stdin.flush()
+            raw_response = self.process.stdout.readline()
+            if not raw_response:
+                raise RuntimeError("Native strategy bridge exited before returning a solve receipt")
+            return raw_response
+
+        def checkpoint(attempts):
+            self.last_query_capture["native_strategy_attempts"] = attempts
+            self._capture()
+
+        response, checks, attempts = solve_strategy(
+            self.task, request, exported, memberships, self.native_strategy, start, factors, exchange, checkpoint,
+        )
+        result["solve_receipt"] = {
+            "bridge_response": exported, "initialization": initialization,
+            "native_strategy_attempts": [{key: value for key, value in item.items()
+                                           if key not in {"request_raw", "response_raw"}} for item in attempts],
+        }
+        if response is None:
+            result["reason"] = "No checked native strategy proposal could be applied"
+            return result
+        solver = response["solver_receipt"]
+        result["solve_receipt"].update(solver=solver, independent_validation=checks)
+        result["invocations"].append({"operation": "controller.solve", "module_id": solver["strategy_module"],
+                                      "profile_id": self.controller_id, "provider": solver["provider"],
+                                      "version": solver["version"]})
+        self.previous_history = {"stage": request["absolute_update_index"], "primal": response["primal"]}
+        result.update(status="accepted", control=checks["controls"][0],
+                      selected_plan={key: checks[key] for key in ("states", "controls", "source_cost")},
+                      selected_representation=self.geometry_family,
+                      policy_semantics=f"C++ Strategy {self.native_strategy} with observed-state affine history MPC",
+                      coverage="single selected family with independently checked full-history memberships")
         return result
 
     def close(self):

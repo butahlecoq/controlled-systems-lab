@@ -5,6 +5,11 @@ on:
     paths:
       - '.github/actions/pages-deploy/**'
       - 'benchmarks/reporting/closed_loop/capabilities.py'
+      - 'benchmarks/reporting/closed_loop/native_strategy_history.py'
+      - 'benchmarks/reporting/closed_loop/history_policy.py'
+      - 'benchmarks/reporting/closed_loop/attempt_records.py'
+      - 'tests/reporting/test_native_strategy_history.py'
+      - 'tests/reporting/test_closed_loop_attempt_records.py'
       - 'benchmarks/reporting/closed_loop/native_compositions.py'
       - 'benchmarks/reporting/closed_loop/run_closed_loop.py'
       - 'benchmarks/reporting/closed_loop/run_campaign.py'
@@ -115,6 +120,11 @@ on:
     paths:
       - '.github/actions/pages-deploy/**'
       - 'benchmarks/reporting/closed_loop/capabilities.py'
+      - 'benchmarks/reporting/closed_loop/native_strategy_history.py'
+      - 'benchmarks/reporting/closed_loop/history_policy.py'
+      - 'benchmarks/reporting/closed_loop/attempt_records.py'
+      - 'tests/reporting/test_native_strategy_history.py'
+      - 'tests/reporting/test_closed_loop_attempt_records.py'
       - 'benchmarks/reporting/closed_loop/native_compositions.py'
       - 'benchmarks/reporting/closed_loop/run_closed_loop.py'
       - 'benchmarks/reporting/closed_loop/run_campaign.py'
@@ -269,6 +279,11 @@ jobs:
 
       - name: Check the locked source-only native row-scaling publication
         run: python -m unittest discover -s tests/reporting -p 'test_stage_native_row_scaling_diagnostic.py'
+      - name: Check native strategy starts, actuation and retry checkpoints
+        env:
+          OPENBLAS_NUM_THREADS: '1'
+          OMP_NUM_THREADS: '1'
+        run: python -m unittest tests.reporting.test_native_strategy_history tests.reporting.test_closed_loop_attempt_records
       - name: Check the saved native whole-history optimizer route
         run: python -m unittest discover -s tests/reporting -p 'test_history_optimizer_native.py'
       - name: Check the saved typed-membership 2D example
