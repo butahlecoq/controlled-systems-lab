@@ -8,7 +8,10 @@ import json
 import zipfile
 from pathlib import Path
 
-from env717 import check_broken_triangle as checker
+if __package__:
+    from .env717 import check_broken_triangle as checker
+else:
+    from env717 import check_broken_triangle as checker
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/env717-broken-triangle-pilot-v1"

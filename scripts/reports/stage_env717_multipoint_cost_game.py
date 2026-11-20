@@ -8,7 +8,10 @@ import json
 import zipfile
 from pathlib import Path
 
-from env717 import check_multipoint_cost_game as checker
+if __package__:
+    from .env717 import check_multipoint_cost_game as checker
+else:
+    from env717 import check_multipoint_cost_game as checker
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/env717-multipoint-cost-game-pilot-v1"

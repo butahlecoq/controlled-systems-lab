@@ -28,17 +28,28 @@ REPORTS = (
 
 
 class EnvironmentStagerPublicationTests(unittest.TestCase):
-    def test_published_routes_and_offline_archives_match(self) -> None:
+    def test_script_entrypoints_preserve_routes_and_zip_bytes(self) -> None:
+        self.assert_archived_routes(use_module=False)
+
+    def test_module_entrypoints_preserve_routes_and_zip_bytes(self) -> None:
+        self.assert_archived_routes(use_module=True)
+
+    def assert_archived_routes(self, *, use_module: bool) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             site = Path(temporary)
             landing = site / "index.html"
             landing.write_text("<ul></ul>", encoding="utf-8")
             for stager, bundle, route, expected_hash in REPORTS:
                 with self.subTest(route=route):
+                    invocation = (
+                        ["-m", f"scripts.reports.{Path(stager).stem}"]
+                        if use_module
+                        else [str(ROOT / "scripts/reports" / stager)]
+                    )
                     completed = subprocess.run(
                         [
                             sys.executable,
-                            str(ROOT / "scripts/reports" / stager),
+                            *invocation,
                             "--source",
                             str(ROOT / "reports/algorithm-results" / bundle),
                             "--site",
