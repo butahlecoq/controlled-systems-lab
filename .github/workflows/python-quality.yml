@@ -96,6 +96,8 @@ on:
       - 'scripts/reports/stage_native_source_constrained_mpc.py'
       - 'tests/reporting/test_mpc_crossover_publication.py'
       - 'tests/reporting/test_native_source_constrained_mpc_publication.py'
+      - 'tests/reporting/native_backward_graph_cases.py'
+      - 'tests/reporting/test_native_vertex_lp_priority_policy.py'
       - 'reports/algorithm-results/mpc-crossover-6b7308c4/**'
       - 'reports/algorithm-results/native-source-constrained-mpc-v1/**'
       - 'tests/reporting/test_discrete_mpc_2d.py'
@@ -209,6 +211,8 @@ on:
       - 'scripts/reports/stage_native_source_constrained_mpc.py'
       - 'tests/reporting/test_mpc_crossover_publication.py'
       - 'tests/reporting/test_native_source_constrained_mpc_publication.py'
+      - 'tests/reporting/native_backward_graph_cases.py'
+      - 'tests/reporting/test_native_vertex_lp_priority_policy.py'
       - 'reports/algorithm-results/mpc-crossover-6b7308c4/**'
       - 'reports/algorithm-results/native-source-constrained-mpc-v1/**'
       - 'tests/reporting/test_discrete_mpc_2d.py'
@@ -293,7 +297,7 @@ jobs:
           python -m unittest discover -s reports/algorithm-results/tooling/opt11 -p 'test_collect.py'
 
       - name: Check closed-loop catalogues, campaign resume and common runner failure paths
-        run: python -m unittest tests.reporting.test_native_compositions tests.reporting.test_closed_loop_campaign tests.reporting.test_closed_loop_native_capabilities tests.reporting.test_closed_loop_runner_failures tests.reporting.test_closed_loop_tracing
+        run: python -m unittest tests.reporting.test_native_compositions tests.reporting.test_closed_loop_campaign tests.reporting.test_closed_loop_native_capabilities tests.reporting.test_closed_loop_runner_failures tests.reporting.test_closed_loop_tracing tests.reporting.test_native_vertex_lp_priority_policy
       - name: Check architecture boundaries and decoded perf sample parsing
         run: |
           python tests/architecture/check_numeric_dependencies.py

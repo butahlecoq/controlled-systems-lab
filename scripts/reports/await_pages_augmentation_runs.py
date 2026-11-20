@@ -123,8 +123,11 @@ def run_marker(api_url: str, repository: str, token: str, run_id: int) -> dict |
 
 
 def workflow_runs(api_url: str, repository: str, token: str, workflow: str,
-                  head_sha: str) -> list[dict]:
-    query = urlencode({"head_sha": head_sha, "branch": "main", "per_page": 100})
+                  head_sha: str | None) -> list[dict]:
+    filters = {"branch": "main", "per_page": "100"}
+    if head_sha is not None:
+        filters["head_sha"] = head_sha
+    query = urlencode(filters)
     payload = get_json(api_url, repository, token,
                        f"actions/workflows/{workflow}/runs?{query}")
     return payload.get("workflow_runs", [])
@@ -146,10 +149,9 @@ def matching_augmentation(api_url: str, repository: str, token: str, workflow: s
     deadline = time.monotonic() + timeout_seconds
     observed: dict[int, tuple[int, dict | None]] = {}
     while time.monotonic() < deadline:
-        runs = workflow_runs(api_url, repository, token, workflow, head_sha)
+        runs = workflow_runs(api_url, repository, token, workflow, None)
         candidates = [run for run in runs
-                      if run.get("head_sha") == head_sha
-                      and run.get("head_branch") == "main"
+                      if run.get("head_branch") == "main"
                       and run.get("event") == "workflow_run"
                       and timestamp(run["created_at"]) >= timestamp(parent["created_at"])]
         candidates.sort(key=lambda run: timestamp(run["created_at"]), reverse=True)
@@ -179,7 +181,7 @@ def matching_augmentation(api_url: str, repository: str, token: str, workflow: s
 
 
 def await_augmentations(api_url: str, repository: str, token: str, child_run_id: int,
-                        timeout_seconds: int, poll_seconds: int) -> int | None:
+                        timeout_seconds: int, poll_seconds: int) -> tuple[int, str] | None:
     child = get_json(api_url, repository, token, f"actions/runs/{child_run_id}")
     if (child.get("head_branch") != "main" or child.get("event") != "workflow_run"
             or child.get("conclusion") != "success"):
@@ -188,9 +190,7 @@ def await_augmentations(api_url: str, repository: str, token: str, child_run_id:
     if marker is None:
         print("The triggering workflow has no Pages artifact; cumulative deployment is skipped.")
         return None
-    head_sha = child["head_sha"]
-    if marker["head_sha"] != head_sha:
-        raise RuntimeError("triggering Pages artifact source marker disagrees with its run SHA")
+    head_sha = marker["head_sha"]
 
     parent = get_json(api_url, repository, token, f"actions/runs/{marker['report_run_id']}")
     if (parent.get("head_sha") != head_sha
@@ -216,7 +216,7 @@ def await_augmentations(api_url: str, repository: str, token: str, child_run_id:
         remaining = max(1, int(deadline - time.monotonic()))
         matching_augmentation(api_url, repository, token, workflow, parent,
                               remaining, poll_seconds)
-    return int(parent["id"])
+    return int(parent["id"]), head_sha
 
 
 def main() -> None:
@@ -231,12 +231,12 @@ def main() -> None:
     api_url = os.environ.get("API_URL", "https://api.github.com").rstrip("/")
     repository = os.environ["REPOSITORY"]
     child_run_id = int(os.environ["CHILD_RUN_ID"])
-    upstream_id = await_augmentations(api_url, repository, token, child_run_id,
-                                      args.timeout_seconds, args.poll_seconds)
-    with args.output.open("a", encoding="utf-8") as output:
-        if upstream_id is not None:
-            output.write(f"upstream_run_id={upstream_id}\n")
-    if upstream_id is not None:
+    source = await_augmentations(api_url, repository, token, child_run_id,
+                                 args.timeout_seconds, args.poll_seconds)
+    if source is not None:
+        upstream_id, upstream_sha = source
+        with args.output.open("a", encoding="utf-8") as output:
+            output.write(f"upstream_run_id={upstream_id}\nupstream_sha={upstream_sha}\n")
         print(f"All Pages augmentations succeeded for report run {upstream_id}; its base artifact is ready.")
 
 
