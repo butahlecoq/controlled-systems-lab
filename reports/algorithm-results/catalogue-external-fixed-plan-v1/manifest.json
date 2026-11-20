@@ -1,0 +1,22 @@
+{
+  "files_sha256": {
+    "CMakeLists.txt": "d2476a8b37a571b83c09d27178a89b558c4f887a6621de316075e977019f227d",
+    "RUN.txt": "621fa609d4968446a00f8dec7d62439ea82a1f4f55c317d1d71279153c3f8154",
+    "audit.json": "a050717bdc38401be6e1d6613cb29b639e62afa479bda5a5e151c0f5873d83b8",
+    "catalogue_external.cpp": "0e0f10d97e0849297cc442523655cddf024ee0cc14e6fc4f48f59c24aac9192c",
+    "examples.css": "11ded2b69cec694ff61ecad0493f175becbfc47bce3d641f2ee512543bb82cf4",
+    "index.html": "a44cdeebcd26cc80548820b7af50f034815e5c27b7e39ac6a90e3facc9aad5c2",
+    "plot.py": "2b5ae35418ae773396392fe871a52f0b968669bc7961a5074eb9a7a1bb3692fc",
+    "prior-inputs.json": "664040ae0b0baab6cc5bb55bbd583566192b1bd561dafbfd54feaf65462d7c2a",
+    "queue-outer-projections.png": "338db388c77f3155fc33fec9e033f4290ea483569df0a58042dff8114da28018",
+    "queue-outer-projections.svg": "e97895adbda6d1d675ac4ce880438bb575834558a65efcb9c93a9b973cc70d3e",
+    "records.jsonl": "6e4b9922036cb01789ad49634ad0ce1633c29839b7eed88f3123767cdc89f725",
+    "verify.py": "97e4b633a28e59845d96ec4409fb1b11bc09400aba5aa0c3fa9b4092bbbc6be1"
+  },
+  "profile": "authored-external-fixed-plan/1",
+  "schema": "csl.catalogue-external-fixed-plan-capture/1",
+  "scope": "35 supplied discrete models, 5 representations, fixed zero plan, two authored external-set transitions",
+  "source_commit": "85ffb925a902cf5f47d36d2cfb0e10089ad70fc7",
+  "source_repository": "https://github.com/butahlecoq/csl-sdk",
+  "source_tree": "32d75f3632329a94b2f19a7611c835601f2fe740"
+}

@@ -1,0 +1,24 @@
+Verify the saved numerical records with Python 3.11 or later, using only its standard library.
+
+  python verify.py records.jsonl prior-inputs.json > rebuilt-audit.json
+  cmp audit.json rebuilt-audit.json
+
+Regenerate the numerical records with CSL SDK source at commit
+85ffb925a902cf5f47d36d2cfb0e10089ad70fc7 (tree 32d75f3632329a94b2f19a7611c835601f2fe740).
+The first released 0.1.1 tag precedes the scalable parallelotope implementation.
+Use nlohmann/json 3.11.3 headers and a C++20 compiler.
+
+  cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DCSL_SOURCE_DIR=/path/to/csl-sdk -DJSON_INCLUDE=/path/to/json/include -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_ENABLE_CASADI=OFF
+  cmake --build build --parallel 2 --target catalogue_external
+  ./build/catalogue_external > rebuilt-records.jsonl
+  cmp records.jsonl rebuilt-records.jsonl
+
+Omit CSL_SOURCE_DIR and pass CMAKE_PREFIX_PATH for an installation built from the same SDK commit.
+The recorded SDK build used GCC 16.2.1 and CMake 3.31.6 in Release mode. Its HiGHS
+and Qhull options were enabled. The driver calls only the fixed-plan geometry
+targets and uses neither optional backend. A clean geometry-only build uses the
+disabled options above.
+
+The deterministic figures use NumPy and Matplotlib with the Agg backend.
+
+  MPLBACKEND=Agg python plot.py
