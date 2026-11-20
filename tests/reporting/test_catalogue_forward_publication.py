@@ -171,3 +171,53 @@ class CatalogueForwardPublicationTests(unittest.TestCase):
             self.assertEqual(archive_entry.commit, stage.EXACT_SUPPORT.source_commit)
             for _, path in archive_entry.links:
                 self.assertTrue((site / path).is_file(), path)
+
+    def test_backward_reachability_keeps_the_exact_certificates_and_battery_trajectory(
+        self,
+    ) -> None:
+        files, [entry], card = stage.build_backward_reachability(ROOT)
+        route = stage.BACKWARD_REACHABILITY.route
+        original = f"{route}/catalogue-backward-support-evidence.zip"
+        for path in (entry["page"], entry["figure"], original):
+            self.assertIn(path, files)
+            self.assertIn(path, card)
+
+        with ZipFile(BytesIO(files[original])) as archive:
+            self.assertEqual(files[entry["figure"]], archive.read("battery-forward-backward.svg"))
+            self.assertEqual(files[f"{route}/predecessor.cpp"], archive.read("predecessor.cpp"))
+            audit = json.loads(archive.read("backward-audit.json"))
+            battery = json.loads(archive.read("battery-geometry.json"))
+
+        self.assertEqual(audit["models"], 35)
+        self.assertEqual(audit["checked_supports"], 1120)
+        self.assertIs(audit["tampered_support_rejected"], True)
+        self.assertEqual(len(audit["records"]), 35)
+        for record in audit["records"].values():
+            self.assertEqual(record["count"], 32)
+            self.assertEqual(record["status"], "all-sampled-supports-exact")
+        self.assertEqual([row["k"] for row in battery["stages"]], [0, 1, 2, 3])
+        self.assertEqual(battery["terminal_state"], ["33", "684736294544664953/9007199254740992"])
+
+        page = "examples/" + entry["page"]
+        book = json.loads((ROOT / "docs/catalogue/learning-book-v1.json").read_bytes())
+        [chapter] = [item for item in book["chapters"] if item["id"] == "native-forward-models"]
+        self.assertIn("../" + page, {item["href"] for item in chapter["records"]})
+        with tempfile.TemporaryDirectory() as directory:
+            site = Path(directory)
+            for name, content in files.items():
+                target = site / "examples" / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(content)
+            ledger = json.loads(presentation.REGISTRY.read_bytes())
+            [record] = [item for item in ledger["routes"] if item["route"] == page]
+            report = presentation.audit_site(site, {"routes": [record]})
+            self.assertTrue(report["passed"], report["findings"])
+            index = site / "index.html"
+            index.write_text("<ul></ul>", encoding="utf-8")
+            (site / "archive.html").touch()
+            landing.build(site)
+            [archive_entry], _ = landing.parse_index(index.read_text(encoding="utf-8"))
+            self.assertEqual(archive_entry.report_id + "/index.html", page)
+            self.assertEqual(archive_entry.commit, stage.BACKWARD_REACHABILITY.source_commit)
+            for _, path in archive_entry.links:
+                self.assertTrue((site / path).is_file(), path)
