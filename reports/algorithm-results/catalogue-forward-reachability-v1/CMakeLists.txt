@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.28)
+project(csl_catalogue_forward_generator LANGUAGES CXX)
+find_package(CSL 0.1.1 EXACT CONFIG REQUIRED)
+add_executable(catalogue_forward catalogue_forward.cpp)
+target_compile_features(catalogue_forward PRIVATE cxx_std_20)
+target_link_libraries(catalogue_forward PRIVATE CSL::model_catalogue CSL::geometry_generators)
+target_compile_options(catalogue_forward PRIVATE -Wall -Wextra -Wpedantic -Werror)

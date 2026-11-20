@@ -3816,6 +3816,16 @@
       "follow_up_issue": 669
     },
     {
+      "route": "catalogue-forward-reachability-v1",
+      "source_bundle": "catalogue-forward-reachability-v1",
+      "assets": [
+        "platoon-forward.svg"
+      ],
+      "index_sha256": "a2dccc7b3c2f84a61c2f05c6a60be39d37faf3b55e2006f9fbdbb43447415906",
+      "disposition": "reviewed: physical and centred coordinates show the same stagewise platoon projection",
+      "companion_route": "examples/catalogue-forward-reachability-v1/index.html"
+    },
+    {
       "route": "mpc-crossover-6b7308c4",
       "source_bundle": "mpc-crossover-6b7308c4",
       "assets": [
@@ -4343,6 +4353,8 @@
         "positive_part_budget_2d_native-solution.csv",
         "positive_part_budget_2d_run.txt",
         "positive_part_budget_2d_native-example.stdout",
+        "catalogue-forward-reachability-v1/index.html",
+        "catalogue-forward-reachability-v1/platoon-forward.svg",
         "mpc-crossover-6b7308c4/index.html",
         "mpc-crossover-6b7308c4/feedback-geometry.svg",
         "mpc-crossover-6b7308c4/deployment-time.svg",

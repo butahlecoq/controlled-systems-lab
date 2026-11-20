@@ -92,6 +92,9 @@ on:
       - 'scripts/reports/stage_closed_loop_initial_baselines.py'
       - 'tests/reporting/test_closed_loop_initial_baselines_publication.py'
       - 'scripts/reports/stage_discrete_mpc_2d.py'
+      - 'scripts/reports/stage_catalogue_forward_reachability.py'
+      - 'tests/reporting/test_catalogue_forward_publication.py'
+      - 'reports/algorithm-results/catalogue-forward-reachability-v1/**'
       - 'scripts/reports/stage_mpc_crossover.py'
       - 'tests/reporting/test_mpc_crossover_publication.py'
       - 'reports/algorithm-results/mpc-crossover-6b7308c4/**'
@@ -202,6 +205,9 @@ on:
       - 'scripts/reports/stage_closed_loop_initial_baselines.py'
       - 'tests/reporting/test_closed_loop_initial_baselines_publication.py'
       - 'scripts/reports/stage_discrete_mpc_2d.py'
+      - 'scripts/reports/stage_catalogue_forward_reachability.py'
+      - 'tests/reporting/test_catalogue_forward_publication.py'
+      - 'reports/algorithm-results/catalogue-forward-reachability-v1/**'
       - 'scripts/reports/stage_mpc_crossover.py'
       - 'tests/reporting/test_mpc_crossover_publication.py'
       - 'reports/algorithm-results/mpc-crossover-6b7308c4/**'
@@ -278,6 +284,7 @@ jobs:
       - name: Check the matched discrete MPC example and visual gallery
         run: |
           python -m unittest discover -s tests/reporting -p 'test_discrete_mpc_2d.py'
+          python -m unittest tests.reporting.test_catalogue_forward_publication
           python -m unittest tests.reporting.test_mpc_crossover_publication
           python -m unittest discover -s tests/reporting -p 'test_visual_examples.py'
       - name: Exercise OPT07 and OPT11 collectors, oracles and saved reports
