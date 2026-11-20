@@ -744,6 +744,13 @@
       "witness": "Frozen exact predecessor certificates and battery all-stage geometry"
     },
     {
+      "route": "examples/catalogue-finite-action-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/catalogue-finite-action-v1/index.html",
+      "sha256": "ff236f0f9265b41b61c3d01d9281cdf54cfd83029b904a1f7af2b8d94a34f19a",
+      "witness": "Frozen catalogue finite-action outcomes and stagewise projection of the pair shear"
+    },
+    {
       "route": "examples/catalogue-exact-support-v1/index.html",
       "disposition": "frozen",
       "owner": "reports/algorithm-results/catalogue-exact-support-v1/index.html",

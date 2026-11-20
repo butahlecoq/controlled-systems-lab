@@ -221,3 +221,104 @@ class CatalogueForwardPublicationTests(unittest.TestCase):
             self.assertEqual(archive_entry.commit, stage.BACKWARD_REACHABILITY.source_commit)
             for _, path in archive_entry.links:
                 self.assertTrue((site / path).is_file(), path)
+
+    def test_finite_action_keeps_both_runs_and_their_figures(self) -> None:
+        files, [entry], card = stage.build_finite_action(ROOT)
+        route = stage.FINITE_ACTION.route
+        evidence = f"{route}/catalogue-separable-box-evidence.zip"
+        package = f"{route}/{route}.zip"
+        self.assertIn("all 175 routes", card)
+        self.assertIn("45 baseline refusals", card)
+        for path in (entry["page"], entry["figure"], package):
+            self.assertIn(path, files)
+            self.assertIn(path, card)
+        with ZipFile(BytesIO(files[evidence])) as candidate:
+            comparison = json.loads(candidate.read("comparison.json"))
+            manifest = json.loads(files[entry["raw_record"]])
+            self.assertEqual(
+                manifest["candidate_sdk_commit"],
+                json.loads(candidate.read("provenance.json"))["candidate_sdk_commit"],
+            )
+            self.assertEqual(
+                files[f"{route}/terminal-box-corner.svg"], candidate.read("terminal-box-corner.svg")
+            )
+            self.assertEqual(
+                files[f"{route}/catalogue_finite_action.cpp"],
+                candidate.read("catalogue_finite_action.cpp"),
+            )
+            with ZipFile(
+                BytesIO(candidate.read("baseline-finite-action-evidence.zip"))
+            ) as baseline:
+                self.assertEqual(
+                    files[entry["figure"]], baseline.read("hospital-finite-actions.svg")
+                )
+                original = json.loads(baseline.read("audit.json"))
+                self.assertEqual(original["feedback_counts"]["box"]["selected"], 25)
+        self.assertEqual(comparison["recovered_box_models"], list(range(26, 36)))
+        self.assertEqual(comparison["retained_box_models"], list(range(1, 26)))
+        self.assertEqual(comparison["matching_nonbox_outcomes"], 140)
+
+        zonotope_replay = f"{route}/catalogue-zonotope-replay-evidence.zip"
+        with ZipFile(BytesIO(files[zonotope_replay])) as candidate:
+            comparison = json.loads(candidate.read("comparison.json"))
+            self.assertEqual(
+                manifest["candidate_zonotope_sdk_commit"],
+                json.loads(candidate.read("provenance.json"))["candidate_zonotope_sdk"],
+            )
+            combined = json.loads(candidate.read("combined/audit.json"))
+            counts = combined["feedback_counts"]
+            for profile in ("box", "zonotope", "ellipsoid", "polytope"):
+                self.assertEqual(counts[profile]["selected"], 35)
+            self.assertEqual(counts["parallelotope"]["selected"], 15)
+            with ZipFile(BytesIO(candidate.read("zonotope-proof-evidence.zip"))) as proof:
+                self.assertEqual(
+                    files[f"{route}/zonotope-certificate-coverage.svg"],
+                    proof.read("zonotope-certificate-coverage.svg"),
+                )
+        self.assertEqual(comparison["recovered_zonotope_models"], list(range(21, 36)))
+        self.assertEqual(comparison["unchanged_zonotope_models"], list(range(1, 21)))
+        self.assertEqual(comparison["matching_other_outcomes"], 140)
+
+        parallelotope_replay = f"{route}/catalogue-parallelotope-replay-evidence.zip"
+        with ZipFile(BytesIO(files[parallelotope_replay])) as candidate:
+            comparison = json.loads(candidate.read("comparison.json"))
+            provenance = json.loads(candidate.read("provenance.json"))
+            self.assertEqual(
+                manifest["candidate_parallelotope_sdk_commit"],
+                provenance["candidate_parallelotope_sdk"],
+            )
+            counts = json.loads(candidate.read("audit.json"))["feedback_counts"]
+            self.assertEqual(len(counts), 5)
+            self.assertTrue(all(result == {"selected": 35} for result in counts.values()))
+            self.assertEqual(comparison["unchanged_rows"], 155)
+            self.assertEqual(len(comparison["recovered"]), 20)
+            self.assertEqual(
+                files[f"{route}/pair-shear-projection.svg"],
+                candidate.read("pair-shear-projection.svg"),
+            )
+
+        book = json.loads((ROOT / "docs/catalogue/learning-book-v1.json").read_bytes())
+        [chapter] = [
+            item for item in book["chapters"] if item["id"] == "native-model-tracking-first-pass"
+        ]
+        page = "examples/" + entry["page"]
+        self.assertIn("../" + page, {item["href"] for item in chapter["records"]})
+        with tempfile.TemporaryDirectory() as directory:
+            site = Path(directory)
+            for name, content in files.items():
+                target = site / "examples" / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(content)
+            ledger = json.loads(presentation.REGISTRY.read_bytes())
+            [record] = [item for item in ledger["routes"] if item["route"] == page]
+            report = presentation.audit_site(site, {"routes": [record]})
+            self.assertTrue(report["passed"], report["findings"])
+            index = site / "index.html"
+            index.write_text("<ul></ul>", encoding="utf-8")
+            (site / "archive.html").touch()
+            landing.build(site)
+            [archive_entry], _ = landing.parse_index(index.read_text(encoding="utf-8"))
+            self.assertEqual(archive_entry.commit, stage.FINITE_ACTION.source_commit)
+            self.assertIn(("Joint replay", "examples/" + parallelotope_replay), archive_entry.links)
+            for _, path in archive_entry.links:
+                self.assertTrue((site / path).is_file(), path)

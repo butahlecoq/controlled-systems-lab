@@ -4379,7 +4379,7 @@
     },
     {
       "chapter_id": "native-model-tracking-first-pass",
-      "chapter_sha256": "c0055fb4781c19dc5451c69a3852449ad934fa30b3ef3a1b72f05ea099c81265",
+      "chapter_sha256": "81d883c044106e204949570b6f39a3daae8b9ccbfbadaa7a2098af4a39f751c2",
       "previous_chapter_id": "optimization-backends",
       "next_chapter_id": "lotka-capstone",
       "qualification": "Reviewed source-qualified all-35 native tracking saved-evidence lesson insertion. Staging consumes immutable attempts and does not rerun optimization; only the exact chapter and adjacent navigation fragments are approved."

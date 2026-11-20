@@ -5,12 +5,12 @@ import argparse
 import ast
 import hashlib
 import json
-from pathlib import Path
 import re
+from pathlib import Path
+from typing import TypedDict
 
 import control_witness_companions
 import stage_buryatia_volterra
-
 
 ROOT = Path(__file__).resolve().parents[2]
 VISUAL_SIGNAL = re.compile(r"<svg|savefig\s*\(|write_image\s*\(|\.svg\b|\.png\b|render_svg", re.I)
@@ -45,7 +45,22 @@ ASSET_NAME_LITERAL_OVERRIDES = {
     "scripts/reports/mpc01/b04_native_smoke_projection.py": [
         "b04-repeated-projections.svg", "native-smoke-projections.svg"],
 }
-PINNED_HISTORICAL_SOURCE_SNAPSHOTS = {
+
+
+class HistoricalSourceSnapshot(TypedDict):
+    source_commit: str
+    source_path: str
+    sha256: str
+
+
+class HistoricalSourcePin(TypedDict):
+    disposition: str
+    role_and_disposition_reason: str
+    source_snapshot: HistoricalSourceSnapshot
+    companion_ids: list[str]
+
+
+PINNED_HISTORICAL_SOURCE_SNAPSHOTS: dict[str, HistoricalSourcePin] = {
     "scripts/reports/lotka_volterra_sampled_frozen_321ac099.py": {
         "disposition": "pinned-historical-source-snapshot",
         "role_and_disposition_reason": (
@@ -268,6 +283,7 @@ FROZEN_COMPANIONS = {
     "catalogue-feasible-history-v1": "examples/catalogue-feasible-history-v1/index.html",
     "catalogue-exact-support-v1": "examples/catalogue-exact-support-v1/index.html",
     "catalogue-backward-reachability-v1": "examples/catalogue-backward-reachability-v1/index.html",
+    "catalogue-finite-action-v1": "examples/catalogue-finite-action-v1/index.html",
     "mpc-crossover-6b7308c4": "examples/mpc-crossover-6b7308c4/index.html",
     "mpc06-online-anchor-v1": "mpc06-complete-6b7059d62473d32d4210/index.html",
     "mpc06-online-anchor-checked-v2": "mpc06-complete-6b7059d62473d32d4210/index.html",
@@ -302,6 +318,8 @@ FROZEN_REVIEWED_ROUTES = {
         "reviewed: paired battery projections display full constraints and control intervals at each stage",
     "native-catalogue-convex-backends-v1":
         "reviewed: recovered episode figures show all four labelled states and both replay policies",
+    "catalogue-finite-action-v1":
+        "reviewed: finite action alternatives, executed path, box and zonotope scoring, and paired shear projections across three stages",
     "catalogue-forward-reachability-v1":
         "reviewed: physical and centred coordinates show the same stagewise platoon projection",
     "mpc-crossover-6b7308c4":
@@ -533,6 +551,11 @@ def build(root: Path = ROOT) -> dict:
                     "catalogue-exact-support-v1/building-budget-projection.svg",
                     "catalogue-backward-reachability-v1/index.html",
                     "catalogue-backward-reachability-v1/battery-forward-backward.svg",
+                    "catalogue-finite-action-v1/index.html",
+                    "catalogue-finite-action-v1/hospital-finite-actions.svg",
+                    "catalogue-finite-action-v1/terminal-box-corner.svg",
+                    "catalogue-finite-action-v1/zonotope-certificate-coverage.svg",
+                    "catalogue-finite-action-v1/pair-shear-projection.svg",
                     "mpc-crossover-6b7308c4/index.html",
                     "native-source-constrained-mpc-v1/index.html",
                     "native-source-constrained-mpc-v1/platoon.svg",
