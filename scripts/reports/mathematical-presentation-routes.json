@@ -737,6 +737,13 @@
       "owner": "scripts/reports/approx_extension_companions.py"
     },
     {
+      "route": "examples/catalogue-feasible-history-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/catalogue-feasible-history-v1/index.html",
+      "sha256": "822d7ac37ecd021ebae44a720026e3c377dd15a577b40e77d509802b5f5f06b3",
+      "witness": "Frozen matched feasible-history sweep from CSL SDK v0.1.1"
+    },
+    {
       "route": "examples/catalogue-forward-reachability-v1/index.html",
       "disposition": "frozen",
       "owner": "reports/algorithm-results/catalogue-forward-reachability-v1/index.html",

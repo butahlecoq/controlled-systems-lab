@@ -1480,8 +1480,9 @@
     },
     {
       "source": "scripts/reports/stage_catalogue_forward_reachability.py",
-      "signal_count": 1,
+      "signal_count": 2,
       "asset_name_literals": [
+        "battery-history-projections.svg",
         "platoon-forward.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
@@ -2804,6 +2805,16 @@
       "index_sha256": "f02785bb85f72e1d8260a34b80a08a87006d036ce6377a8ef88ddcba1beee75f",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
+    },
+    {
+      "route": "catalogue-feasible-history-v1",
+      "source_bundle": "catalogue-feasible-history-v1",
+      "assets": [
+        "battery-history-projections.svg"
+      ],
+      "index_sha256": "822d7ac37ecd021ebae44a720026e3c377dd15a577b40e77d509802b5f5f06b3",
+      "disposition": "reviewed: paired battery projections display full constraints and control intervals at each stage",
+      "companion_route": "examples/catalogue-feasible-history-v1/index.html"
     },
     {
       "route": "catalogue-forward-reachability-v1",
@@ -4363,6 +4374,8 @@
         "positive_part_budget_2d_native-example.stdout",
         "catalogue-forward-reachability-v1/index.html",
         "catalogue-forward-reachability-v1/platoon-forward.svg",
+        "catalogue-feasible-history-v1/index.html",
+        "catalogue-feasible-history-v1/battery-history-projections.svg",
         "mpc-crossover-6b7308c4/index.html",
         "mpc-crossover-6b7308c4/feedback-geometry.svg",
         "mpc-crossover-6b7308c4/deployment-time.svg",

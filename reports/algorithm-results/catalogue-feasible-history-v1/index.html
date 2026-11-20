@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How constraints change reachable sets</title>
+<link rel="stylesheet" href="examples.css">
+</head>
+<body>
+<main class="page-content">
+<h1>How constraints change reachable sets</h1>
+<p>Project the feasible histories of 35 discrete models over three steps. For each model, compare the complete task constraints with the same dynamics, initial state, external forecast, and per-control intervals.</p>
+<figure>
+<img src="battery-history-projections.svg" alt="Two battery energy coordinates in MWh. The initial point and three stages share one plane. Dashed polygons show control intervals alone. Solid polygons show the full constraints and exclude the lower-energy parts of the dashed polygons.">
+<figcaption>Battery pair, model 5. Solid outlines use the complete task constraints. Dashed outlines use the control intervals alone. Colour identifies the stage. Each outline joins witnesses from eight sampled support directions.</figcaption>
+</figure>
+<h2>Project the complete history</h2>
+<p>Let <var>F</var> contain the histories (<var>x</var><sub>0</sub>, …, <var>x</var><sub>3</sub>, <var>u</var><sub>0</sub>, …, <var>u</var><sub>2</sub>) that satisfy the three-step model and its constraints. Let <var>P</var><sub>k</sub> select the two plotted coordinates at stage <var>k</var>. To find the support in direction <var>d</var>, maximise <var>d</var><sup>T</sup><var>P</var><sub>k</sub><var>x</var><sub>k</sub> over <var>F</var>.</p>
+<p>The full profile keeps the intermediate state bounds, coupled rows, positive-part budgets, and terminal requirements of each matched continuous fixture. There are 29 source-continuous domains, three continuous relaxations (models 4, 9, and 10), and three authored continuous domains (models 24, 25, and 27). For the interval-only profile, drop those four constraint groups and keep each fixture’s control intervals. A point in the full projection extends to a feasible history through stage three. If the complete history is infeasible, every stage projection is empty, including stage zero.</p>
+<h2>Read the projections</h2>
+<p>At stage three, the minimum total stored energy rises by 60.986 MWh when the full constraints apply. The support in direction (−1, −1) gives the negative of that minimum. The plot gives a geometric view of that restriction.</p>
+<ul>
+<li>Bike stations, model 9. Station one starts at 12 bikes and loses at least five per step under the fixed forecast. After three steps its count is at most −3, which contradicts the required zero floor.</li>
+<li>Ten-car platoon, model 26. The paired supports agree to roundoff. Exact rational evaluation over the control box gives more than 3.67 m of slack on every headway row in this fixture.</li>
+</ul>
+<h2>Check the result</h2>
+<table>
+<thead><tr><th scope="col">Native outcome</th><th scope="col">Full history</th><th scope="col">Control intervals only</th></tr></thead>
+<tbody>
+<tr><th scope="row">Optimal</th><td>991</td><td>976</td></tr>
+<tr><th scope="row">Infeasible</th><td>32</td><td>0</td></tr>
+<tr><th scope="row">Unbounded</th><td>0</td><td>48</td></tr>
+<tr><th scope="row">Unsupported</th><td>96</td><td>96</td></tr>
+<tr><th scope="row">Undetermined</th><td>1</td><td>0</td></tr>
+</tbody>
+</table>
+<p>The independent checker eliminates the state variables and solves the resulting LP with SciPy’s HiGHS interior-point interface. Across 1,967 optimal supports the largest scaled discrepancy is below 2.85 × 10<sup>−14</sup>. The largest scaled witness residual is below 2.41 × 10<sup>−11</sup>. These results check sampled directions for the stated three-step fixtures.</p>
+<p>Models 23, 27, and 28 hit the native small-coefficient guard in both profiles. Model 30 has one undetermined query at stage zero. The archive keeps these outcomes alongside the independent checks.</p>
+<h2>Reproduce the sweep</h2>
+<p>Extract the original evidence ZIP. Use the CMake commands in <code>RUN.txt</code> to build the C++ driver against CSL SDK v0.1.1. Run these commands from the extracted directory to regenerate the 35 records and check them independently.</p>
+<pre><code>mkdir -p replay/raw
+for model in $(seq 1 35); do
+    record="replay/raw/$model"
+    status=0
+    ./build/catalogue_projection "$model" &gt; "$record.json" 2&gt; "$record.stderr" || status=$?
+    printf '%s\n' "$status" &gt; "$record.exit"
+done
+python verify_projection.py replay &gt; replay/independent-audit.json
+</code></pre>
+<p>The audit should report 35 checked models. The ZIP includes the original model inputs, query results, audit, and plot source.</p>
+<ul>
+<li><a href="catalogue-feasible-history-evidence.zip">Original evidence and reproduction code</a></li>
+<li><a href="manifest.json">Source revisions and SHA-256 checksums</a></li>
+</ul>
+</main>
+</body>
+</html>

@@ -36,3 +36,40 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
         f'<p><a href="{route}/{route}.zip">Download the offline example</a></p></article>'
     )
     return files, [entry], card
+
+
+FEASIBLE_HISTORY = FrozenNativeBundle(
+    route="catalogue-feasible-history-v1",
+    source_commit="dc6801dc5f02c4000b4f1272361752581a55873a",
+    schema="csl.catalogue-feasible-history-capture/1",
+    manifest_sha256="e49e8a8fc1603a1c9af5def0301c331edd780b8f6c118cedcf3ee1f40327da63",
+    archive_sha256="efce8c403b504a534e5d8b8b5c134ab00f5d9664c758c86489b5b5bd5d943d91",
+)
+
+
+def build_feasible_history(
+    repository_root: Path,
+) -> tuple[dict[str, bytes], list[dict[str, str]], str]:
+    route = FEASIBLE_HISTORY.route
+    files = {
+        f"{route}/{name}": data
+        for name, data in read_bundle(repository_root, FEASIBLE_HISTORY).items()
+    }
+    entry = {
+        "family": "Reachability",
+        "title": "How constraints change reachable sets",
+        "status": "saved-data-companion",
+        "anchor": route,
+        "page": f"{route}/index.html",
+        "figure": f"{route}/battery-history-projections.svg",
+        "source_page": f"https://github.com/butahlecoq/csl-sdk/blob/{FEASIBLE_HISTORY.source_commit}/include/csl/controllers/discrete_mpc.hpp",
+        "raw_record": f"{route}/manifest.json",
+    }
+    card = (
+        f'<article class="saved-figure" id="{route}"><h3><a href="{entry["page"]}">{entry["title"]}</a></h3>'
+        f'<a href="{entry["page"]}"><img src="{entry["figure"]}" alt="Full-constraint and interval-only projections for a two-battery model, overlaid by stage"></a>'
+        "<p>Compare three-step feasible histories across 35 models. "
+        "See how state constraints change the battery energy projections.</p>"
+        f'<p><a href="{route}/catalogue-feasible-history-evidence.zip">Download the C++ example and data</a></p></article>'
+    )
+    return files, [entry], card

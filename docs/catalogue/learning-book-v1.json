@@ -1224,6 +1224,10 @@
           "href": "../examples/catalogue-forward-reachability-v1/index.html"
         },
         {
+          "label": "How constraints change reachable sets",
+          "href": "../examples/catalogue-feasible-history-v1/index.html"
+        },
+        {
           "label": "Reachability formulations and horizon variants",
           "href": "model-tracks.html#reachability-formulations"
         }

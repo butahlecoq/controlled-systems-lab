@@ -5,7 +5,9 @@ import json
 import sys
 import tempfile
 import unittest
+from io import BytesIO
 from pathlib import Path
+from zipfile import ZipFile
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
@@ -53,4 +55,64 @@ class CatalogueForwardPublicationTests(unittest.TestCase):
             self.assertEqual(card.commit, stage.IDENTITY.source_commit)
             self.assertIn("authored", card.scope)
             for _, path in card.links:
+                self.assertTrue((site / path).is_file(), path)
+
+    def test_feasible_history_stages_original_data_and_battery_projection(self) -> None:
+        files, [entry], card = stage.build_feasible_history(ROOT)
+        route = stage.FEASIBLE_HISTORY.route
+        original = route + "/catalogue-feasible-history-evidence.zip"
+        for path in (entry["page"], entry["figure"], original):
+            self.assertIn(path, files)
+            self.assertIn(path, card)
+        with ZipFile(BytesIO(files[original])) as archive:
+            summary = json.loads(archive.read("comparison-summary.json"))
+            audit = json.loads(archive.read("independent-audit.json"))
+            self.assertEqual(
+                files[entry["figure"]], archive.read("battery-history-projections.svg")
+            )
+        self.assertEqual(len(audit), 35)
+        self.assertEqual(
+            summary["native"],
+            {
+                "full_history": {
+                    "optimal": 991,
+                    "infeasible": 32,
+                    "unsupported": 96,
+                    "undetermined": 1,
+                },
+                "intervals_only": {"optimal": 976, "unbounded": 48, "unsupported": 96},
+            },
+        )
+        battery = audit["5"]
+        supports = {}
+        for profile in ("full_history", "intervals_only"):
+            [sample] = [
+                row
+                for row in battery[profile]["samples"]
+                if row["stage"] == 3 and row["direction"] == [-1, -1]
+            ]
+            supports[profile] = sample["native_support"]
+        self.assertAlmostEqual(supports["intervals_only"] - supports["full_history"], 60.986)
+        book = json.loads((ROOT / "docs/catalogue/learning-book-v1.json").read_bytes())
+        [chapter] = [item for item in book["chapters"] if item["id"] == "native-forward-models"]
+        self.assertIn("../examples/" + entry["page"], {item["href"] for item in chapter["records"]})
+        with tempfile.TemporaryDirectory() as directory:
+            site = Path(directory)
+            for name, content in files.items():
+                path = site / "examples" / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(content)
+            ledger = json.loads(presentation.REGISTRY.read_bytes())
+            page = "examples/" + entry["page"]
+            [record] = [item for item in ledger["routes"] if item["route"] == page]
+            presentation_audit = presentation.audit_site(site, {"routes": [record]})
+            self.assertTrue(presentation_audit["passed"], presentation_audit["findings"])
+            index = site / "index.html"
+            index.write_text("<ul></ul>", encoding="utf-8")
+            (site / "archive.html").touch()
+            landing.build(site)
+            [archive_entry], _ = landing.parse_index(index.read_text(encoding="utf-8"))
+            self.assertEqual(archive_entry.report_id + "/index.html", page)
+            self.assertEqual(archive_entry.commit, stage.FEASIBLE_HISTORY.source_commit)
+            for _, path in archive_entry.links:
                 self.assertTrue((site / path).is_file(), path)
