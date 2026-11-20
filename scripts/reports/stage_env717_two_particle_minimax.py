@@ -55,14 +55,15 @@ def digest(content: bytes) -> str:
     return hashlib.sha256(content).hexdigest()
 
 
-def _read_bundle(source: Path):
+def _read_bundle(source: Path) -> tuple[dict[str, bytes], bytes]:
     if not source.is_dir() or source.is_symlink():
         raise ValueError("report bundle must be a regular directory")
     sums_path = source / "SHA256SUMS"
     if not sums_path.is_file() or sums_path.is_symlink():
         raise ValueError("report checksum file is missing or unsafe")
+    checksum_bytes = sums_path.read_bytes()
     checksums = {}
-    for line in sums_path.read_text(encoding="ascii").splitlines():
+    for line in checksum_bytes.decode("ascii").splitlines():
         sha, name = line.split("  ", 1)
         if name in checksums:
             raise ValueError("duplicate checksum path")
@@ -78,11 +79,10 @@ def _read_bundle(source: Path):
         if digest(content) != checksums[name]:
             raise ValueError(f"checksum mismatch: {name}")
         files[name] = content
-    return files
+    return files, checksum_bytes
 
 
-def validate_bundle(source: Path):
-    files = _read_bundle(source)
+def _validate_files(files: dict[str, bytes]) -> tuple[dict, dict, dict]:
     result = json.loads(files["result.json"])
     check = json.loads(files["check.json"])
     figure = json.loads(files["figure-data.json"])
@@ -103,15 +103,21 @@ def validate_bundle(source: Path):
         raise ValueError("report source provenance does not match the pinned game")
     if check.get("status") != "verified" or capture_record.get("solver_failures") != 0:
         raise ValueError("report does not contain a successful independently verified solve")
-    return files, result, check, capture_record
+    return result, check, capture_record
+
+
+def validate_bundle(source: Path) -> tuple[dict[str, bytes], dict, dict, dict]:
+    files, _ = _read_bundle(source)
+    return files, *_validate_files(files)
 
 
 def stage(source: Path, site: Path) -> str:
-    files, result, _, capture_record = validate_bundle(source)
+    files, checksum_bytes = _read_bundle(source)
+    result, _, capture_record = _validate_files(files)
     if not site.is_dir():
         raise ValueError("staged Pages site directory does not exist")
     publisher, archived_zip_sha256 = publication.archive_identity(
-        source.name, files["SHA256SUMS"], Path(__file__)
+        source.name, checksum_bytes, Path(__file__)
     )
     identity = {
         "source_repository_commit": SOURCE_COMMIT,
