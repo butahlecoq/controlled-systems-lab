@@ -210,46 +210,48 @@ def audit(baseline: Path, site: Path) -> dict:
             != manifest["baseline"]["artifact_tar_sha256"]
         ):
             raise ValueError("baseline artifact differs from pinned public artifact")
-    missing, changed, changed_zips = [], [], []
-    reviewed_receipt_order_changes = {}
-    reviewed_learning_navigation_changes = {}
-    learning_replacements = _learning_navigation_replacements(manifest)
-    invalid_learning_navigation_routes = _invalid_learning_navigation_routes(manifest)
-    order_only_receipts = manifest.get("order_insensitive_receipts_reviewed_separately", {})
-    total = zip_count = 0
-    with tarfile.open(baseline) as bundle:
-        for member in bundle:
-            if not member.isfile():
-                continue
-            route = safe(member.name.removeprefix("./")).as_posix()
-            total += 1
-            zip_count += route.endswith(".zip")
-            path = site / route
-            extracted = bundle.extractfile(member)
-            if extracted is None:
-                raise ValueError(f"could not read baseline route: {route}")
-            expected_bytes = extracted.read()
-            expected = digest(expected_bytes)
-            if not path.is_file() or path.is_symlink():
-                missing.append(route)
-            else:
-                actual_bytes = path.read_bytes()
-                if digest(actual_bytes) != expected:
-                    changed.append(route)
-                    if route in learning_replacements and _learning_navigation_only(
-                        route, expected_bytes, actual_bytes, learning_replacements[route]
-                    ):
-                        reviewed_learning_navigation_changes[route] = "; ".join(
-                            qualification for _, _, qualification in learning_replacements[route]
-                        )
-                    if (
-                        route == ORDER_INSENSITIVE_RECEIPT_ROUTE
-                        and route in order_only_receipts
-                        and _receipt_inventory_reordered_only(expected_bytes, actual_bytes)
-                    ):
-                        reviewed_receipt_order_changes[route] = order_only_receipts[route]
-            if route.endswith(".zip") and (route in missing or route in changed):
-                changed_zips.append(route)
+        stream.seek(0)
+        missing, changed, changed_zips = [], [], []
+        reviewed_receipt_order_changes = {}
+        reviewed_learning_navigation_changes = {}
+        learning_replacements = _learning_navigation_replacements(manifest)
+        invalid_learning_navigation_routes = _invalid_learning_navigation_routes(manifest)
+        order_only_receipts = manifest.get("order_insensitive_receipts_reviewed_separately", {})
+        total = zip_count = 0
+        with tarfile.open(fileobj=stream) as bundle:
+            for member in bundle:
+                if not member.isfile():
+                    continue
+                route = safe(member.name.removeprefix("./")).as_posix()
+                total += 1
+                zip_count += route.endswith(".zip")
+                path = site / route
+                extracted = bundle.extractfile(member)
+                if extracted is None:
+                    raise ValueError(f"could not read baseline route: {route}")
+                expected_bytes = extracted.read()
+                expected = digest(expected_bytes)
+                if not path.is_file() or path.is_symlink():
+                    missing.append(route)
+                else:
+                    actual_bytes = path.read_bytes()
+                    if digest(actual_bytes) != expected:
+                        changed.append(route)
+                        if route in learning_replacements and _learning_navigation_only(
+                            route, expected_bytes, actual_bytes, learning_replacements[route]
+                        ):
+                            reviewed_learning_navigation_changes[route] = "; ".join(
+                                qualification
+                                for _, _, qualification in learning_replacements[route]
+                            )
+                        if (
+                            route == ORDER_INSENSITIVE_RECEIPT_ROUTE
+                            and route in order_only_receipts
+                            and _receipt_inventory_reordered_only(expected_bytes, actual_bytes)
+                        ):
+                            reviewed_receipt_order_changes[route] = order_only_receipts[route]
+                if route.endswith(".zip") and (route in missing or route in changed):
+                    changed_zips.append(route)
     mutable = manifest["mutable_routes_reviewed_separately"]
     reviewed_copies = manifest["mutable_copy_reviewed_sha256"]
     reviewed_mutable_routes = manifest.get("mutable_routes_reviewed_sha256", {})

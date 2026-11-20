@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import io
 import json
 import stat
 import zipfile
@@ -46,12 +47,20 @@ def regular(path: Path) -> bytes:
     return path.read_bytes()
 
 
-def payloads(source: Path = SOURCE) -> dict[str, bytes]:
+def _manifest(source: Path) -> dict:
     if source.is_symlink() or not source.is_dir():
         raise ValueError("unsafe preservation source")
     manifest = json.loads(regular(source / "manifest.json"))
     if manifest["schema"] != "csl.published-route-preservation/1":
         raise ValueError("unsupported preservation manifest")
+    return manifest
+
+
+def payloads(source: Path = SOURCE) -> dict[str, bytes]:
+    return _payloads(source, _manifest(source))
+
+
+def _payloads(source: Path, manifest: dict) -> dict[str, bytes]:
     result = {}
     for archive in manifest["archives"]:
         name = safe(archive["path"]).as_posix()
@@ -59,7 +68,7 @@ def payloads(source: Path = SOURCE) -> dict[str, bytes]:
             raise ValueError("invalid preserved archive")
         data = checked(regular(source / name), archive)
         result[name] = data
-        with zipfile.ZipFile(source / name) as bundle:
+        with zipfile.ZipFile(io.BytesIO(data)) as bundle:
             entries = bundle.infolist()
             if (
                 len(entries) != len(archive["members"])
@@ -113,15 +122,16 @@ def stage(site: Path, source: Path = SOURCE) -> dict:
     site = Path(site)
     if any(p.is_symlink() for p in (site, *site.parents)) or not site.is_dir():
         raise ValueError("preservation needs an existing regular site directory")
-    assets = payloads(source)
-    manifest = json.loads(regular(source / "manifest.json"))
+    manifest = _manifest(source)
+    assets = _payloads(source, manifest)
     aliases = manifest["aliases"]
     replacements = {a["route"]: a.get("replaces_sha256") for a in aliases}
     # Validate the entire input and destination before changing any output.
     for route, data in assets.items():
         path = destination(site, route)
-        if path.exists() and path.read_bytes() != data:
-            if digest(path.read_bytes()) != replacements.get(route):
+        if path.exists():
+            current = path.read_bytes()
+            if current != data and digest(current) != replacements.get(route):
                 raise ValueError("conflicting preserved route: " + route)
     for route, data in assets.items():
         path = destination(site, route)

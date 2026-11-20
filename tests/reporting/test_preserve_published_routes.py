@@ -126,6 +126,86 @@ class PublishedRoutePreservationTests(unittest.TestCase):
                             else:
                                 self.assertEqual((site / name).read_bytes(), bundle.read(name))
 
+    def test_stage_uses_checked_archive_and_manifest_after_source_rename(self):
+        member = "original/index.html"
+        page = b"<p>Saved evidence</p>"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            site, source = root / "site", root / "source"
+            site.mkdir()
+            source.mkdir()
+            archive = source / "original.zip"
+            with zipfile.ZipFile(archive, "w") as bundle:
+                bundle.writestr(member, page)
+            original = archive.read_bytes()
+            manifest_path = source / "manifest.json"
+            manifest_path.write_text(
+                json.dumps(
+                    {
+                        "schema": "csl.published-route-preservation/1",
+                        "aliases": [],
+                        "archives": [
+                            {
+                                "path": archive.name,
+                                "size": len(original),
+                                "sha256": preservation.digest(original),
+                                "members": {
+                                    member: {
+                                        "size": len(page),
+                                        "sha256": preservation.digest(page),
+                                        "publish": True,
+                                    }
+                                },
+                            }
+                        ],
+                    }
+                )
+            )
+            read_regular = preservation.regular
+
+            def read_and_move(path: Path) -> bytes:
+                data = read_regular(path)
+                path.rename(path.with_name(path.name + ".read"))
+                return data
+
+            with patch.object(preservation, "regular", side_effect=read_and_move):
+                receipt = preservation.stage(site, source)
+            self.assertEqual(receipt, {"preserved_routes": 2, "preserved_top_level_zips": 1})
+            self.assertEqual((site / member).read_bytes(), page)
+            self.assertEqual((site / archive.name).read_bytes(), original)
+
+    def test_baseline_is_audited_from_the_digest_checked_handle(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            site, source = root / "site", root / "source"
+            site.mkdir()
+            source.mkdir()
+            route = "saved.html"
+            page = b"<p>Saved evidence</p>"
+            (site / route).write_bytes(page)
+            baseline = root / "baseline.tar"
+            with tarfile.open(baseline, "w") as bundle:
+                member = tarfile.TarInfo(route)
+                member.size = len(page)
+                bundle.addfile(member, io.BytesIO(page))
+            manifest = json.loads((preservation.SOURCE / "manifest.json").read_text())
+            manifest["baseline"]["artifact_tar_sha256"] = preservation.digest(baseline.read_bytes())
+            (source / "manifest.json").write_text(json.dumps(manifest))
+            digest_file = baseline_audit.hashlib.file_digest
+
+            def digest_and_move(stream, digest_name):
+                result = digest_file(stream, digest_name)
+                baseline.rename(baseline.with_name("checked.tar"))
+                return result
+
+            with (
+                patch.object(baseline_audit, "SOURCE", source),
+                patch.object(baseline_audit.hashlib, "file_digest", side_effect=digest_and_move),
+            ):
+                result = baseline_audit.audit(baseline, site)
+            self.assertTrue(result["passed"], result)
+            self.assertEqual(result["baseline_files"], 1)
+
     def test_tampered_archive_rejected_before_writes(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
