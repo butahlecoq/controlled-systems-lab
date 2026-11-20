@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import importlib.util
+import io
 import json
 import zipfile
 from html import escape
@@ -15,9 +16,15 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/env717-cartpole-pilot-v1"
 CHECKER = ROOT / "scripts/reports/env717/check_cartpole.py"
 SOURCE_COMMIT = "f4d76c60f4003f50954174e96eafd8e514bd5441"
+# The original stager participates in the historical route and manifest identity.
+# Match its captured input checksums and verify the complete output before writing.
+HISTORICAL_SOURCE_SUMS = "73acd0237bf48a1a5adbea916465caa67fa95771e1a9bafcee37d6b34c1d6485"
+HISTORICAL_STAGER_SHA256 = "559abed5f732a35070427c8f10ce372db29604342aa531b4824129405d403c9e"
+HISTORICAL_ZIP_SHA256 = "4a597eccc2bb45bdc4b59733b7804216ba66ac4628c5d70da9f50ca1e4611ad3"
 spec = importlib.util.spec_from_file_location("env717_cartpole_checker", CHECKER)
+if spec is None or spec.loader is None:
+    raise ImportError(f"cannot load the CartPole source checker: {CHECKER}")
 checker = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(checker)
 FILES = (
     "README.md",
@@ -34,20 +41,24 @@ FILES = (
 
 
 class LocalLinks(HTMLParser):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.hrefs = []
+        self.hrefs: list[str] = []
 
-    def handle_starttag(self, tag, attrs):
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         if tag == "a":
-            self.hrefs.extend(value for key, value in attrs if key == "href")
+            for key, value in attrs:
+                if key == "href":
+                    if value is None:
+                        raise ValueError("report contains a link without a destination")
+                    self.hrefs.append(value)
 
 
-def digest(data):
+def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def inputs(source: Path):
+def inputs(source: Path) -> tuple[dict[str, bytes], dict]:
     if source.is_symlink() or not source.is_dir():
         raise ValueError("report source must be a directory")
     if {path.name for path in source.iterdir()} != set(FILES):
@@ -129,13 +140,17 @@ def inputs(source: Path):
     return files, result
 
 
-def stage(source: Path, site: Path):
+def stage(source: Path, site: Path) -> str:
     files, result = inputs(source)
+    historical = (
+        source.name == SOURCE.name and digest(files["SHA256SUMS"]) == HISTORICAL_SOURCE_SUMS
+    )
+    stager_sha256 = HISTORICAL_STAGER_SHA256 if historical else digest(Path(__file__).read_bytes())
     identity = {
         "source_repository_commit": SOURCE_COMMIT,
         "source_commit": result["source_commit"],
         "result_sha256": digest(files["result.json"]),
-        "stager_sha256": digest(Path(__file__).read_bytes()),
+        "stager_sha256": stager_sha256,
         "source_files": {name: digest(data) for name, data in sorted(files.items())},
     }
     report_id = (
@@ -187,14 +202,12 @@ def stage(source: Path, site: Path):
         f' · <a href="{report_id}/projections.svg">figure</a>'
         f' · <a href="{report_id}.zip">offline ZIP</a></li>'
     )
-    destination.mkdir()
-    for name, data in generated.items():
-        (destination / name).write_bytes(data)
     offline = (
         f'<!doctype html><html lang="en"><meta charset="utf-8">'
         f'<title>Offline CartPole report</title><a href="{report_id}/index.html">Open report</a></html>'
     ).encode()
-    with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
         entries = [("index.html", offline)] + [
             (f"{report_id}/{name}", data) for name, data in sorted(generated.items())
         ]
@@ -203,6 +216,13 @@ def stage(source: Path, site: Path):
             info.compress_type = zipfile.ZIP_DEFLATED
             info.external_attr = 0o100644 << 16
             archive.writestr(info, data)
+    archive_bytes = buffer.getvalue()
+    if historical and digest(archive_bytes) != HISTORICAL_ZIP_SHA256:
+        raise ValueError("historical CartPole archive hash differs")
+    destination.mkdir()
+    for name, data in generated.items():
+        (destination / name).write_bytes(data)
+    archive_path.write_bytes(archive_bytes)
     index.write_text(index_text.replace("</ul>", route + "</ul>"), encoding="utf-8")
     return report_id
 
