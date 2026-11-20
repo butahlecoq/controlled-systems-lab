@@ -189,6 +189,8 @@ inline bool normalize(Rational& value, Budget& budget) {
         shift_right(value.denominator, denominator_twos);
         value.binary_exponent = static_cast<int>(next);
     }
+    if (value.denominator.words.size() == 1 && value.denominator.words.front() == 1)
+        return valid(value, budget);
     Integer common;
     if (!gcd(value.numerator, value.denominator, common, budget))
         return false;

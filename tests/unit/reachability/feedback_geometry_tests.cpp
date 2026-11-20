@@ -283,6 +283,46 @@ int main() {
             for(const Vector& point : std::vector<Vector>{{0.2,0.4},{1.2,0.4},{-0.8,0.4},{0.2,1.4},{0.2,-0.6}})
                 if(!axis_membership_contains(g.stages[1].intersection->membership,point)) return 22;
         }
+        const reachability::FeedbackGeometryDependencies certified_deps{
+            {forward, intersection}, selected(lp,"csl.program-result.v1"), 1000};
+        const auto certified_mode = reachability::FeedbackPolytopeHistory::certified_whole_history;
+        const auto certified = reachability::feedback_geometry(resolved,{"exact-history"},
+            box("narrow-terminal", {0.25,0.375}, {0.375,0.5}),
+            reachability::FeedbackFamily::polytope, {}, certified_deps, certified_mode, {});
+        const auto* complete = std::get_if<reachability::FeedbackGeometry>(&certified);
+        if(!complete || complete->stages.size()!=2) return 29;
+        for(const auto& stage : complete->stages) {
+            if(!stage.forward || !stage.backward || !stage.intersection) return 30;
+            for(const auto* geometry : {&*stage.forward, &*stage.backward, &*stage.intersection})
+                if(geometry->assurance!=Assurance::validated ||
+                   geometry->relation!=SetRelation::outer || geometry->lineage.empty()) return 31;
+            if(stage.forward->id==stage.backward->id || stage.backward->id==stage.intersection->id)
+                return 32;
+        }
+        const auto& terminal_stage = complete->stages[1];
+        if(!axis_membership_contains(terminal_stage.forward->membership,{0.45,0.45}) ||
+           axis_membership_contains(terminal_stage.intersection->membership,{0.45,0.45}) ||
+           !axis_membership_contains(terminal_stage.intersection->membership,{0.3,0.45}))
+            return 33;
+        const auto impossible = reachability::feedback_geometry(resolved,{"exact-impossible-terminal"},
+            box("impossible-terminal", {2,2}, {3,3}),
+            reachability::FeedbackFamily::polytope, {}, certified_deps, certified_mode, {});
+        const auto* infeasible = std::get_if<reachability::FeedbackGeometry>(&impossible);
+        if(!infeasible || !infeasible->stages[0].intersection ||
+           axis_membership_contains(infeasible->stages[0].intersection->membership,{0.2,0.4}))
+            return 34;
+
+        const auto too_many_rows = take(sets::make_h({{"oversized-terminal"},2,state_labels},
+            {take(numeric::snapshot(Matrix{4097,2,Vector(8194,0)})),
+             take(numeric::snapshot_vector(Vector(4097,1))),
+             take(numeric::snapshot(Matrix{0,2,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
+        const auto oversized = reachability::feedback_geometry(resolved,{"exact-oversized-terminal"},
+            too_many_rows, reachability::FeedbackFamily::polytope, {}, certified_deps, certified_mode, {});
+        const auto* oversized_failure = std::get_if<reachability::FeedbackGeometryFailure>(&oversized);
+        if(!oversized_failure || !oversized_failure->prefix.stages.empty()) return 35;
+        const auto* oversized_stop = std::get_if<OperationStopped>(&oversized_failure->cause);
+        if(!oversized_stop || oversized_stop->reason!=StopReason::resource_limit) return 36;
+
         const auto unbounded_control=take(sets::make_h({{"unbounded-control"},4,{}},
             {take(numeric::snapshot(Matrix{0,4,{}})),take(numeric::snapshot_vector(Vector{})),
              take(numeric::snapshot(Matrix{2,4,{1,-1,0,0, 0,0,1,-1}})),

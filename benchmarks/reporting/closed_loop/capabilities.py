@@ -454,6 +454,8 @@ def build_native_manifest() -> dict:
 
 
 def _history_definitions() -> list[dict]:
+    from history_policy import LIFTED_POLYTOPE_CONTROLLER, LIFTED_POLYTOPE_IMPLEMENTATION
+
     rows = []
     common_sources = [
         "benchmarks/reporting/closed_loop/history_policy.py",
@@ -642,6 +644,41 @@ def _history_definitions() -> list[dict]:
                     f"closed-loop/{task_name}/continuous-history-{family}-ipopt/1/cfg-{fingerprint[:16]}"
                 )
                 rows.append(family_graph)
+            lifted = copy.deepcopy(geometry)
+            lifted.pop("graph_id")
+            lifted.pop("graph_fingerprint")
+            lifted["controller"]["id"] = LIFTED_POLYTOPE_CONTROLLER
+            recovery_header = "include/csl/synthesis/control_recovery.hpp"
+            lifted["controller"]["source_files"].append(recovery_header)
+            lifted["source_files"].append(
+                {
+                    "path": recovery_header,
+                    "sha256": hashlib.sha256((ROOT / recovery_header).read_bytes()).hexdigest(),
+                }
+            )
+            lifted["source_files"].sort(key=lambda entry: entry["path"])
+            lifted["controller"]["control_semantics"] = (
+                "full-history MPC using exact lifted stage projections of the stored affine H history"
+            )
+            lifted["role_bindings"].update(
+                {
+                    "reachable_set_method": {"id": LIFTED_POLYTOPE_IMPLEMENTATION},
+                    "representation": {"id": "polytope"},
+                    "support_lp": "not_used",
+                }
+            )
+            lifted["admission"]["basis"] = (
+                "source-bound full-history IPOPT with lifted H stage views"
+            )
+            lifted["geometry_work"]["claim"] = (
+                "exact lifted projections of the stored closed affine history, with source predicates checked separately"
+            )
+            fingerprint = canonical_sha256(lifted)
+            lifted["graph_fingerprint"] = fingerprint
+            lifted["graph_id"] = (
+                f"closed-loop/{task_name}/continuous-history-lifted-polytope-ipopt/1/cfg-{fingerprint[:16]}"
+            )
+            rows.append(lifted)
     return rows + _fixed_tail_definitions()
 
 

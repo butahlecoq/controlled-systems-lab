@@ -269,3 +269,43 @@ TEST_CASE("stage-labelled recovery preserves the coordinate map and complete mul
     CHECK_FALSE(contains(joint.relation, {1, -1, 1.5, -1, 1.5, -1.25, -0.25, 0.5}));
     CHECK_FALSE(contains(joint.relation, {1, -1, 1.5, -1, 1.5, -1.0, 0.5, -0.25}));
 }
+
+TEST_CASE("lifted projections exclude future rows and retain the full terminal contradiction") {
+    const auto terminal = take(sets::make_empty({{"empty-terminal-lift"}, 1, {"x"}}));
+    const auto model = integrator(0.5);
+    const auto lifted = take<synthesis::LiftedHistoryProjections>(
+        synthesis::recover_lifted_history_projections(model, terminal));
+    REQUIRE(lifted.prefixes.size() == 3);
+    const auto h = std::get<sets::HRepresentation>(lifted.history.relation.representation());
+    CHECK_FALSE(contains(lifted.history.relation, history(0.25, 0.25)));
+
+    const auto prefix_contains = [&](std::size_t stage, const Vector& values) {
+        const auto& prefix = lifted.prefixes.at(stage);
+        const auto check_rows = [&](const numeric::MatrixView& rows, const numeric::VectorView& b,
+                                    const auto& ranges, bool equality) {
+            for (const auto& range : ranges)
+                for (std::size_t row = range.begin; row < range.end; ++row) {
+                    double lhs = 0;
+                    for (std::size_t column = 0; column < values.size(); ++column)
+                        lhs += rows(row, column) * values[column];
+                    if (equality ? lhs != b[row] : lhs > b[row])
+                        return false;
+                }
+            return true;
+        };
+        return check_rows(h.inequalities, h.upper_bounds, prefix.inequality_rows, false) &&
+               check_rows(h.equalities, h.equality_values, prefix.equality_rows, true);
+    };
+    using synthesis::HistoryIndexRange;
+    CHECK(lifted.prefixes[0].state_columns == HistoryIndexRange{0, 1});
+    CHECK(lifted.prefixes[1].state_columns == HistoryIndexRange{1, 2});
+    CHECK(lifted.prefixes[2].state_columns == HistoryIndexRange{2, 3});
+    CHECK(prefix_contains(0, {0, 7, 9, 7, -5}));
+    CHECK_FALSE(prefix_contains(0, {1, 7, 9, 7, -5}));
+    CHECK(prefix_contains(1, {0, 0.25, 9, 0.25, -5}));
+    CHECK_FALSE(prefix_contains(1, {0, 0.75, 9, 0.75, -5}));
+    CHECK_FALSE(prefix_contains(1, {0, 0.25, 9, 0.5, -5}));
+    CHECK(prefix_contains(2, history(0.25, 0.25)));
+    CHECK_FALSE(prefix_contains(2, history(0.25, 2)));
+    CHECK_FALSE(prefix_contains(2, {0, 0.25, 0.75, 0.25, 0.25}));
+}
