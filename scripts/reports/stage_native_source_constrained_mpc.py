@@ -42,8 +42,8 @@ CONVEX_BACKENDS = FrozenNativeBundle(
     route="native-catalogue-convex-backends-v1",
     source_commit="4bec054f8012b04a2a7108bb14dcdd83cab329ee",
     schema="csl.native-catalogue-convex-backends/1",
-    manifest_sha256="436581fc1898f51165499647ea1c211928d41c84d81b47ec8eefad4bb8b6058b",
-    archive_sha256="91163486e1432f22fc2cee08efbb7bf7300bc8b81b4ba6ab45fbfedb41659b89",
+    manifest_sha256="bad14baa9aad250e15f620f44a4448d2da73694622ac05cb16e0f11ea98a84f4",
+    archive_sha256="52b7b7e07cf594e033fbd01ce1123bed1c95c340ac6cae08c1214ad83f5352da",
 )
 
 
