@@ -1447,6 +1447,12 @@ def build(catalog, site):
         Path(__file__).resolve().parents[2]
     )
     saved_figures += matched_card
+    backend_files, backend_inventory, backend_card = (
+        stage_native_source_constrained_mpc.build_convex_backends(
+            Path(__file__).resolve().parents[2]
+        )
+    )
+    saved_figures += backend_card
     strategy_files, strategy_inventory, strategy_card = stage_native_history_strategies.build(
         Path(__file__).resolve().parents[2]
     )
@@ -1544,6 +1550,7 @@ def build(catalog, site):
     outputs.update(catalogue_finite_files)
     outputs.update(crossover_files)
     outputs.update(matched_files)
+    outputs.update(backend_files)
     outputs.update(strategy_files)
     outputs.update(buryatia_files)
     outputs.update(volterra_files)
@@ -1769,6 +1776,7 @@ def build(catalog, site):
     gallery_inventory.extend(catalogue_finite_inventory)
     gallery_inventory.extend(crossover_inventory)
     gallery_inventory.extend(matched_inventory)
+    gallery_inventory.extend(backend_inventory)
     gallery_inventory.extend(strategy_inventory)
     gallery_inventory.extend(buryatia_inventory)
     gallery_inventory.extend(volterra_inventory)

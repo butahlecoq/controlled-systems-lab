@@ -1,0 +1,786 @@
+{
+  "models": 35,
+  "literal_matrix_entries_checked": 25380,
+  "profiles": {
+    "attempted": 35
+  },
+  "policy_outcomes": {
+    "open_loop": {
+      "complete": 34,
+      "solver-not-optimal": 1
+    },
+    "closed_loop": {
+      "complete": 34,
+      "solver-not-optimal": 1
+    }
+  },
+  "paired_completions": 34,
+  "rows": [
+    {
+      "number": 1,
+      "exit_code": 0,
+      "output_sha256": "2725046ea388dcd7ab192bffe093bb0d9e5cbc11776458cf739a58a461c3624e",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 3.801252614057497
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 3.801252614057504
+      },
+      "absolute_cost_difference": 6.661338147750939e-15,
+      "maximum_control_difference": 1.8740564655672642e-13
+    },
+    {
+      "number": 2,
+      "exit_code": 0,
+      "output_sha256": "8d52dc79c94964b19a9b92c31f8db83161c5d50d25aaabbd3bbfbb551d283f2c",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 0.3169810278891866
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 0.31698102788918664
+      },
+      "absolute_cost_difference": 5.551115123125783e-17,
+      "maximum_control_difference": 5.0182080713057076e-14
+    },
+    {
+      "number": 3,
+      "exit_code": 0,
+      "output_sha256": "1b73a0e9bbda506a14cf763fa33e90057e8a4a3a087d43d3de8865c3252d01e8",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 1.8432314604288453e-16,
+        "constraint_excess": 0.0,
+        "cost": 2.8549027993078573
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 1.1111658977564282e-16,
+        "constraint_excess": 0.0,
+        "cost": 2.8549027993078577
+      },
+      "absolute_cost_difference": 4.440892098500626e-16,
+      "maximum_control_difference": 9.725553695716371e-14
+    },
+    {
+      "number": 4,
+      "exit_code": 0,
+      "output_sha256": "120b8a003de92562e73a5ee18134a050ac58b5eb7d1734bd7ff32fc6227e7000",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 2.4398478057655817
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 2.4398478057655817
+      },
+      "absolute_cost_difference": 0.0,
+      "maximum_control_difference": 1.4808535994670358e-10
+    },
+    {
+      "number": 5,
+      "exit_code": 0,
+      "output_sha256": "9b252695acea188ef843ed60070db9e89df901aa5106752a83dc8f2a581f2cfc",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 2.0301223758137555e-16,
+        "constraint_excess": 0.0,
+        "cost": 0.022486136815448404
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 2.0301230046806475e-16,
+        "constraint_excess": 0.0,
+        "cost": 0.022486136815932947
+      },
+      "absolute_cost_difference": 4.845429613098418e-13,
+      "maximum_control_difference": 1.939051349095172e-06
+    },
+    {
+      "number": 6,
+      "exit_code": 0,
+      "output_sha256": "2e0a16f31f0444d05bf26d30bb3201cb7a91e2921e9084cab1cebbeb20f56336",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 0.025000000232506245
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 0.02500000021709723
+      },
+      "absolute_cost_difference": 1.5409014342271377e-11,
+      "maximum_control_difference": 1.1490587556339655e-05
+    },
+    {
+      "number": 7,
+      "exit_code": 0,
+      "output_sha256": "f7a70daeb53454697814b5e6bf5d2ae323841eb71658626a3d00aee0bd575c65",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 2.0713295457659657e-16,
+        "constraint_excess": 0.0,
+        "cost": 0.7034170111257052
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 2.0713295457659657e-16,
+        "constraint_excess": 0.0,
+        "cost": 0.7034170111257054
+      },
+      "absolute_cost_difference": 2.220446049250313e-16,
+      "maximum_control_difference": 1.3312406732524096e-12
+    },
+    {
+      "number": 8,
+      "exit_code": 0,
+      "output_sha256": "aa08e64eb92f582168744b84c5a0e95392387be49e81681353aa31e3da6b3947",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 2.511060642276472e-16,
+        "constraint_excess": 0.0,
+        "cost": 0.7953315934451356
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 2.511060642276472e-16,
+        "constraint_excess": 0.0,
+        "cost": 0.7953315934451372
+      },
+      "absolute_cost_difference": 1.5543122344752192e-15,
+      "maximum_control_difference": 5.062616992290714e-13
+    },
+    {
+      "number": 9,
+      "exit_code": 0,
+      "output_sha256": "e4ff170a69b1f703b994f8a610502d7b5a6e4df4ce1477b1b847e1cbe37a6167",
+      "status": "attempted",
+      "open_loop": {
+        "status": "solver-not-optimal",
+        "holds": 0,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0
+      },
+      "closed_loop": {
+        "status": "solver-not-optimal",
+        "holds": 0,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0
+      }
+    },
+    {
+      "number": 10,
+      "exit_code": 0,
+      "output_sha256": "bbc336345f11ba2f9bab0d9154213fc8b04d67147aa733156a6da1b15f894229",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 1.22507368244666e-16,
+        "constraint_excess": 0.0,
+        "cost": 0.9576388889436763
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 1.2250736824466443e-16,
+        "constraint_excess": 0.0,
+        "cost": 0.957638888943672
+      },
+      "absolute_cost_difference": 4.3298697960381105e-15,
+      "maximum_control_difference": 1.6467448573102752e-12
+    },
+    {
+      "number": 11,
+      "exit_code": 0,
+      "output_sha256": "3a5fc9b78c3d0f08d0c067af8db601b51e864886597fcec2995fd77c8a8a6bb7",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 1.5104615905497953e-16,
+        "constraint_excess": 0.0,
+        "cost": 2.5393319345621084
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 1.5104615905497953e-16,
+        "constraint_excess": 0.0,
+        "cost": 2.5393319345621093
+      },
+      "absolute_cost_difference": 8.881784197001252e-16,
+      "maximum_control_difference": 9.758860386455126e-14
+    },
+    {
+      "number": 12,
+      "exit_code": 0,
+      "output_sha256": "ba25f62247bf2443e17415d15e14af52c6430050a0f97faaca4ca25b86eeb6bc",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 102.20143160835998
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 102.20143160836002
+      },
+      "absolute_cost_difference": 4.263256414560601e-14,
+      "maximum_control_difference": 7.122353512523105e-08
+    },
+    {
+      "number": 13,
+      "exit_code": 0,
+      "output_sha256": "a4e31207a32cd41e31be39d29249255d46de2bfaa3b779083e393f676519c35f",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 5.551115123125783e-17,
+        "constraint_excess": 0.0,
+        "cost": 0.018590699092848557
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 2.7755575615628914e-17,
+        "constraint_excess": 0.0,
+        "cost": 0.018590699092848557
+      },
+      "absolute_cost_difference": 0.0,
+      "maximum_control_difference": 8.624175644456056e-10
+    },
+    {
+      "number": 14,
+      "exit_code": 0,
+      "output_sha256": "5a423d489be6b6d38c430835d80cd47915ece6b665e7f49b18c4b9ff27a52d2e",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 0.3047210776784423
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 0.30472107767844275
+      },
+      "absolute_cost_difference": 4.440892098500626e-16,
+      "maximum_control_difference": 1.3778605094882067e-08
+    },
+    {
+      "number": 15,
+      "exit_code": 0,
+      "output_sha256": "9fb49f39c860b67d4516b49a9b5f719bfa063d97b44000cda97d4e9df1514a5f",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 2.342132879247086e-16,
+        "constraint_excess": 0.0,
+        "cost": 0.1322624592465345
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 0.13226245924653424
+      },
+      "absolute_cost_difference": 2.498001805406602e-16,
+      "maximum_control_difference": 3.785381823889555e-14
+    },
+    {
+      "number": 16,
+      "exit_code": 0,
+      "output_sha256": "4e36d27283183c55be621eb5d80b894882bb9350111c697bc0b4aeec633d0659",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 0.07193916839705103
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 1.3784770852789523e-16,
+        "constraint_excess": 0.0,
+        "cost": 0.07193916839332122
+      },
+      "absolute_cost_difference": 3.729808129016021e-12,
+      "maximum_control_difference": 1.0655575237516568e-08
+    },
+    {
+      "number": 17,
+      "exit_code": 0,
+      "output_sha256": "868684f895a7b5261f1e796403071f4528c954abe825aae0d93f1baa3dd86a8e",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 1.1102230246251565e-16,
+        "constraint_excess": 0.0,
+        "cost": 0.24122745477142366
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 1.1102230246251565e-16,
+        "constraint_excess": 0.0,
+        "cost": 0.2412274547713659
+      },
+      "absolute_cost_difference": 5.775935285612377e-14,
+      "maximum_control_difference": 5.388217446973266e-12
+    },
+    {
+      "number": 18,
+      "exit_code": 0,
+      "output_sha256": "d20a558162b36598afed38c502a20bf7a92d1ab0093f6495129908cd0c353a91",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 1.5186951825996209
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 1.5186951825996204
+      },
+      "absolute_cost_difference": 4.440892098500626e-16,
+      "maximum_control_difference": 2.532418719169982e-13
+    },
+    {
+      "number": 19,
+      "exit_code": 0,
+      "output_sha256": "593f0ded2992cc36d7ae4b35d4900be7a34b425550b2c3d047095450a71aac94",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 1.2845992732343553e-16,
+        "constraint_excess": 0.0,
+        "cost": 0.01902550284986153
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 1.2845992730334916e-16,
+        "constraint_excess": 0.0,
+        "cost": 0.019025502921337697
+      },
+      "absolute_cost_difference": 7.147616526426148e-11,
+      "maximum_control_difference": 1.9049599959887333e-06
+    },
+    {
+      "number": 20,
+      "exit_code": 0,
+      "output_sha256": "839c721ea5cbcbf111692f5badc3b2bcb8f5bebb85186cc5810deeb2c6f389ab",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 0.008049685045765894
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 0.008049685046542392
+      },
+      "absolute_cost_difference": 7.764986570402144e-13,
+      "maximum_control_difference": 2.9023704763513454e-09
+    },
+    {
+      "number": 21,
+      "exit_code": 0,
+      "output_sha256": "fb2612549b0f51851350e7bcf2ac14612e1a4f80b37da7b9c1b1c9757902aad9",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 1.734723475976807e-18,
+        "constraint_excess": 0.0,
+        "cost": 0.02418356672902832
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 1.734723475976807e-18,
+        "constraint_excess": 0.0,
+        "cost": 0.02418356672902832
+      },
+      "absolute_cost_difference": 0.0,
+      "maximum_control_difference": 6.938893903907228e-18
+    },
+    {
+      "number": 22,
+      "exit_code": 0,
+      "output_sha256": "d9ed5c48240b02803ffdd1575d9af1a14de27a04acb21734d9975f7541ce3d56",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 3.3881317890172014e-21,
+        "constraint_excess": 0.0,
+        "cost": 0.024996626395187106
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 5.421010862427522e-20,
+        "constraint_excess": 0.0,
+        "cost": 0.02499662639518711
+      },
+      "absolute_cost_difference": 3.469446951953614e-18,
+      "maximum_control_difference": 1.678639865998477e-13
+    },
+    {
+      "number": 23,
+      "exit_code": 0,
+      "output_sha256": "968c1783d5c8290b73769fca9ab4933d9702e28397e46c1e68c44d69f0171d68",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 6.776263578034403e-21,
+        "constraint_excess": 0.0,
+        "cost": 0.024999557043120707
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 6.776263578034403e-21,
+        "constraint_excess": 0.0,
+        "cost": 0.024999557043120707
+      },
+      "absolute_cost_difference": 0.0,
+      "maximum_control_difference": 4.662069341687669e-18
+    },
+    {
+      "number": 24,
+      "exit_code": 0,
+      "output_sha256": "fedef78339024fb4760bf8803891804d5646c64de3749c6029639797b2e376c5",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 8.470329472543003e-22,
+        "constraint_excess": 0.0,
+        "cost": 0.024999828209065256
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 8.470329472543003e-22,
+        "constraint_excess": 0.0,
+        "cost": 0.024999828209065256
+      },
+      "absolute_cost_difference": 0.0,
+      "maximum_control_difference": 1.0842021724855044e-19
+    },
+    {
+      "number": 25,
+      "exit_code": 0,
+      "output_sha256": "37f649a0eb82cd177cdc8824570157fe255b5f31400671d5f6ef573427d536f9",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 0.024999686207530732
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 0.024999686207530732
+      },
+      "absolute_cost_difference": 0.0,
+      "maximum_control_difference": 2.168404344971009e-19
+    },
+    {
+      "number": 26,
+      "exit_code": 0,
+      "output_sha256": "12db159440d529097b506a1369bff03d79c2d5c819679984e7eb17a8bfb6d16f",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 1.2465664738356605e-16,
+        "constraint_excess": 0.0,
+        "cost": 25.944463676617143
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 1.2465664738356605e-16,
+        "constraint_excess": 0.0,
+        "cost": 25.944463676617143
+      },
+      "absolute_cost_difference": 0.0,
+      "maximum_control_difference": 2.7755575615628914e-17
+    },
+    {
+      "number": 27,
+      "exit_code": 0,
+      "output_sha256": "0e589a371cb6b9a5cebeb47585a7e2cbf2b19f1646449916b8eb0bd3257323b9",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 1.0408340855860843e-17,
+        "constraint_excess": 0.0,
+        "cost": 0.02509841626048738
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 1.0408340855860843e-17,
+        "constraint_excess": 0.0,
+        "cost": 0.02509841626048738
+      },
+      "absolute_cost_difference": 0.0,
+      "maximum_control_difference": 1.734723475976807e-18
+    },
+    {
+      "number": 28,
+      "exit_code": 0,
+      "output_sha256": "61b001b5468677ecf407e321524a06f0ceb7b701ccd15b098f8bcefc07597d37",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 6.311860597004786e-16,
+        "constraint_excess": 0.0,
+        "cost": 0.3072549169429079
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 4.353827153384048e-16,
+        "constraint_excess": 0.0,
+        "cost": 0.30725491694290796
+      },
+      "absolute_cost_difference": 5.551115123125783e-17,
+      "maximum_control_difference": 4.3788583869996955e-13
+    },
+    {
+      "number": 29,
+      "exit_code": 0,
+      "output_sha256": "2e7f3dcf7b7b1cb2beab1277b00feedda9c409d03e2dc36ff440bca65d455eab",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 0.3047151136400521
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 0.304715113631294
+      },
+      "absolute_cost_difference": 8.75810535205801e-12,
+      "maximum_control_difference": 2.1853154193456244e-08
+    },
+    {
+      "number": 30,
+      "exit_code": 0,
+      "output_sha256": "013823f7e2805783044880307ab72e81f3a18c8c4631b3399590628068b5dccf",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 1.3877787807814457e-17,
+        "constraint_excess": 0.0,
+        "cost": 0.012735519507834043
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 1.3877787807814457e-17,
+        "constraint_excess": 0.0,
+        "cost": 0.012735519553974383
+      },
+      "absolute_cost_difference": 4.614033981276133e-11,
+      "maximum_control_difference": 7.070602503489454e-08
+    },
+    {
+      "number": 31,
+      "exit_code": 0,
+      "output_sha256": "71a50214f8ee55156a875517e84834216ba7b19739db1c19d6cc2665cdc4c303",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 1.1563118390227005
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 1.156311839022698
+      },
+      "absolute_cost_difference": 2.4424906541753444e-15,
+      "maximum_control_difference": 3.8061337880489416e-13
+    },
+    {
+      "number": 32,
+      "exit_code": 0,
+      "output_sha256": "b91df02917045d3bba5fac3ed8aab39ee2d0ae485fa753afedccb6c8716b223f",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 0.11716895243994836
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 0.11716895237517147
+      },
+      "absolute_cost_difference": 6.477689218353788e-11,
+      "maximum_control_difference": 1.2085187788485056e-06
+    },
+    {
+      "number": 33,
+      "exit_code": 0,
+      "output_sha256": "1763d455f5e28d1b71d3a55c57ad263be9a122a7c32fd4c9f9d88c3ac859112b",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 9.204585546222365
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 0.0,
+        "constraint_excess": 0.0,
+        "cost": 9.204585546222363
+      },
+      "absolute_cost_difference": 1.7763568394002505e-15,
+      "maximum_control_difference": 4.440892098500626e-16
+    },
+    {
+      "number": 34,
+      "exit_code": 0,
+      "output_sha256": "839e953bf00f6bc004b068663740ae632035c4368d9e9e75363eeeb22698b7d2",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 1.1918734737099827e-16,
+        "constraint_excess": 0.0,
+        "cost": 0.4735577945542685
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 1.3695088602473803e-16,
+        "constraint_excess": 0.0,
+        "cost": 0.47355779455426456
+      },
+      "absolute_cost_difference": 3.941291737419306e-15,
+      "maximum_control_difference": 3.2147617901046033e-12
+    },
+    {
+      "number": 35,
+      "exit_code": 0,
+      "output_sha256": "5adb4ba4260e5c1412858129ad364670ddaf938fbcfe333265ba045eb04fa017",
+      "status": "attempted",
+      "open_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 5.551115123125783e-17,
+        "constraint_excess": 0.0,
+        "cost": 1.763804142661223
+      },
+      "closed_loop": {
+        "status": "complete",
+        "holds": 3,
+        "dynamics_residual": 5.551115123125783e-17,
+        "constraint_excess": 0.0,
+        "cost": 1.7638041425857833
+      },
+      "absolute_cost_difference": 7.543965452327939e-11,
+      "maximum_control_difference": 5.0000593720713526e-09
+    }
+  ]
+}

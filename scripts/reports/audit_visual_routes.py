@@ -331,6 +331,8 @@ FROZEN_REVIEWED_ROUTES = {
         "reviewed: paired battery projections display full constraints and control intervals at each stage",
     "catalogue-finite-action-v1":
         "reviewed: finite action alternatives, executed path, box and zonotope scoring, and paired shear projections across three stages",
+    "native-catalogue-convex-backends-v1":
+        "reviewed: recovered episode figures show all four labelled states and both replay policies",
     "catalogue-forward-reachability-v1":
         "reviewed: physical and centred coordinates show the same stagewise platoon projection",
     "mpc-crossover-6b7308c4":
@@ -586,6 +588,9 @@ def build(root: Path = ROOT) -> dict:
                     "native-source-constrained-mpc-v1/platoon.svg",
                     "native-history-strategies-d57739b3/index.html",
                     "native-history-strategies-d57739b3/figures/lotka-polytope.svg",
+                    "native-catalogue-convex-backends-v1/index.html",
+                    "native-catalogue-convex-backends-v1/bicycle-row-scaling.svg",
+                    "native-catalogue-convex-backends-v1/twenty-zone-ipopt.svg",
                     "mpc-crossover-6b7308c4/feedback-geometry.svg",
                     "mpc-crossover-6b7308c4/deployment-time.svg",
                     "discrete-mpc-2d.html", "discrete-mpc-2d.svg", "discrete-mpc-2d.json",
