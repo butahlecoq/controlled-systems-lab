@@ -39,10 +39,18 @@ struct HistoryBallFactorMembership {
 struct HistoryVSimplexMembership {
     sets::SetData selected;
 };
+// Project the selected rows of the mandatory original H history onto the
+// membership's canonical state block. The full history is its witness.
+struct HistoryLiftedHMembership {
+    SetId carrier;
+    std::vector<synthesis::HistoryIndexRange> inequality_rows;
+    std::vector<synthesis::HistoryIndexRange> equality_rows;
+    bool operator==(const HistoryLiftedHMembership &) const = default;
+};
 using HistoryMembershipShape =
     std::variant<HistoryHMembership, HistoryAxisBoxMembership, HistoryZonotopeMembership,
                  HistoryParallelotopeMembership, HistoryBallFactorMembership,
-                 HistoryVSimplexMembership>;
+                 HistoryVSimplexMembership, HistoryLiftedHMembership>;
 
 struct HistorySourceGeometry {
     SetId id;
