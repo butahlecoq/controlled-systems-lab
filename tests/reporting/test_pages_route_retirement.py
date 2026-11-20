@@ -399,10 +399,11 @@ class PagesRouteRetirementTests(unittest.TestCase):
             root = (site / "index.html").read_text()
             self.assertIn('<a href="learn/index.html">Learning book</a>', root)
 
-    def test_env717_routes_resolve_nonuniform_stager_names(self) -> None:
+    def test_env717_routes_name_their_stager_and_workflow(self) -> None:
         routes = {
             "env717-simple-control-65a4341b28e95682f6de": "stage_env717.py",
             "env717-multipoint-96e7f4fa2a0f7bc543a5": "stage_env717_multipoint_cost_game.py",
+            "env717-cartpole-80ef217d60ba94910d3d": "stage_env717_cartpole.py",
         }
         with tempfile.TemporaryDirectory() as temporary:
             site, _ = self.make_site(Path(temporary))
@@ -418,7 +419,23 @@ class PagesRouteRetirementTests(unittest.TestCase):
                 with self.subTest(route=root):
                     producer = inventory["html_routes"][f"{root}/index.html"]["producer"]
                     self.assertEqual(producer["owner_status"], "exact")
-                    self.assertIn(f"scripts/reports/{stager}", producer["files"])
+                    self.assertEqual(
+                        producer["files"],
+                        [f"scripts/reports/{stager}", ".github/workflows/algorithm-reports.yml"],
+                    )
+
+    def test_env717_schema_cannot_assign_an_owner_to_an_unpublished_alias(self) -> None:
+        for root in ("multipoint-preview", "env717-multipoint-preview"):
+            with self.subTest(route=root), tempfile.TemporaryDirectory() as temporary:
+                site, _ = self.make_site(Path(temporary))
+                directory = site / root
+                directory.mkdir()
+                (directory / "index.html").write_text("<html><body>Archived report</body></html>")
+                (directory / "publication-manifest.json").write_text(
+                    json.dumps({"schema": "csl.env717-publication/1", "report_id": root})
+                )
+                with self.assertRaisesRegex(ValueError, f"no reviewed producer owner: {root}"):
+                    retirement.inventory(site)
 
     def test_module_catalogue_route_has_a_real_source_owner(self) -> None:
         repo = Path(__file__).resolve().parents[2]
