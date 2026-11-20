@@ -1,4 +1,5 @@
 """Load source-bound closed-loop task contracts and preserve their identities."""
+
 from __future__ import annotations
 
 import hashlib
@@ -7,6 +8,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 CONTRACTS = ROOT / "docs/contracts/closed-loop"
+
+
 def canonical_bytes(value: object) -> bytes:
     return json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
 
@@ -38,8 +41,11 @@ def validate_task(task: dict) -> None:
     names = [field["name"] for field in states + controls]
     if len(names) != len(set(names)):
         raise ValueError("state and control coordinate names must be unique")
-    expected_shape = {"SYN-NL-LV-01": (2, 1), "SYN-NL-FUEL-01": (4, 2),
-                      "ENV717-EARTH-ORBIT-CONTINUOUS-01": (4, 2)}.get(model["case_id"])
+    expected_shape = {
+        "SYN-NL-LV-01": (2, 1),
+        "SYN-NL-FUEL-01": (4, 2),
+        "ENV717-EARTH-ORBIT-CONTINUOUS-01": (4, 2),
+    }.get(model["case_id"])
     if expected_shape is None or (len(states), len(controls)) != expected_shape:
         raise ValueError("state and control dimensions do not match the task identity")
     for field in states + controls:
@@ -79,17 +85,27 @@ def validate_task(task: dict) -> None:
     for action in domains["finite"]["actions"]:
         if len(action) != len(controls):
             raise ValueError("finite action has the wrong control dimension")
-        if any(field["bounds"] is not None and not field["bounds"][0] <= value <= field["bounds"][1]
-               for field, value in zip(controls, action)):
+        if any(
+            field["bounds"] is not None and not field["bounds"][0] <= value <= field["bounds"][1]
+            for field, value in zip(controls, action, strict=True)
+        ):
             raise ValueError("finite action lies outside physical actuator bounds")
     if task["roles"]["forward_reachability"] != "all-admissible-control-family":
         raise ValueError("forward reachability role must cover all admissible controls")
     terminal_kind = task["terminal_condition"]["kind"]
     backward_role = task["roles"]["backward_feasibility"]
     if model["case_id"] in {"SYN-NL-LV-01", "SYN-NL-FUEL-01"}:
-        if terminal_kind != "physical-state-bounds" or backward_role != "predecessors-of-terminal-physical-state-bounds":
-            raise ValueError("synthetic-task terminal feasibility must use its physical state bounds")
-    elif terminal_kind != "positive-radius-model-domain" or backward_role != "predecessors-of-terminal-model-domain-r-positive":
+        if (
+            terminal_kind != "physical-state-bounds"
+            or backward_role != "predecessors-of-terminal-physical-state-bounds"
+        ):
+            raise ValueError(
+                "synthetic-task terminal feasibility must use its physical state bounds"
+            )
+    elif (
+        terminal_kind != "positive-radius-model-domain"
+        or backward_role != "predecessors-of-terminal-model-domain-r-positive"
+    ):
         raise ValueError("orbit backward feasibility must name its actual model domain")
     if task["terminal_condition"]["objective_target_is_feasibility_constraint"]:
         raise ValueError("the soft objective target is not a hard terminal constraint")
