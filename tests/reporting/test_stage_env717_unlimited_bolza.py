@@ -1,15 +1,14 @@
 import hashlib
 import json
-from pathlib import Path
 import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
 import zipfile
+from pathlib import Path
 
 from scripts.reports import stage_env717_unlimited_bolza as publication
-
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/env717-unlimited-bolza-pilot-v1"
@@ -17,11 +16,16 @@ SOURCE = ROOT / "reports/algorithm-results/env717-unlimited-bolza-pilot-v1"
 
 class UnlimitedBolzaPublicationTests(unittest.TestCase):
     def refresh_checksums(self, source: Path) -> None:
-        names = sorted(path.name for path in source.iterdir()
-                       if path.is_file() and path.name != "SHA256SUMS")
+        names = sorted(
+            path.name for path in source.iterdir() if path.is_file() and path.name != "SHA256SUMS"
+        )
         (source / "SHA256SUMS").write_text(
-            "".join(f"{hashlib.sha256((source / name).read_bytes()).hexdigest()}  {name}\n"
-                    for name in names), encoding="ascii")
+            "".join(
+                f"{hashlib.sha256((source / name).read_bytes()).hexdigest()}  {name}\n"
+                for name in names
+            ),
+            encoding="ascii",
+        )
 
     def source_copy(self, root: Path) -> Path:
         source = root / "source"
@@ -45,7 +49,9 @@ class UnlimitedBolzaPublicationTests(unittest.TestCase):
             self.assertEqual(manifest["report_id"], report_id)
             self.assertEqual(manifest["source_commit"], result["provenance"]["source_commit"])
             self.assertIn("5^10", (site / "index.html").read_text(encoding="utf-8"))
-            self.assertIn(f"{report_id}/index.html", (site / "index.html").read_text(encoding="utf-8"))
+            self.assertIn(
+                f"{report_id}/index.html", (site / "index.html").read_text(encoding="utf-8")
+            )
             with zipfile.ZipFile(site / f"{report_id}.zip") as archive:
                 names = set(archive.namelist())
                 self.assertIn(f"{report_id}/publication-manifest.json", names)
@@ -56,10 +62,16 @@ class UnlimitedBolzaPublicationTests(unittest.TestCase):
 
     def test_checker_cli_verifies_bundle_without_a_driver_argument(self):
         result = subprocess.run(
-            [sys.executable,
-             str(ROOT / "scripts/reports/env717/check_unlimited_bolza.py"),
-             "--verify-bundle", str(SOURCE)],
-            check=True, capture_output=True, text=True)
+            [
+                sys.executable,
+                str(ROOT / "scripts/reports/env717/check_unlimited_bolza.py"),
+                "--verify-bundle",
+                str(SOURCE),
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
         self.assertEqual(result.stdout.strip(), f"verified {SOURCE}")
 
     def test_rejects_changed_bundle_bytes(self):

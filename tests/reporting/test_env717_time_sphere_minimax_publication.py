@@ -4,16 +4,16 @@ import hashlib
 import importlib.util
 import json
 import os
-from pathlib import Path
 import shutil
 import tempfile
 import unittest
 import zipfile
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location(
-    "stage_env717_time_sphere_minimax",
-    ROOT / "scripts/reports/stage_env717_time_sphere_minimax.py")
+    "stage_env717_time_sphere_minimax", ROOT / "scripts/reports/stage_env717_time_sphere_minimax.py"
+)
 stage_module = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
 SPEC.loader.exec_module(stage_module)
@@ -30,7 +30,8 @@ class TimeOptimalSphereMinimaxPublicationTests(unittest.TestCase):
         self.site = self.root / "site"
         self.site.mkdir()
         (self.site / "index.html").write_text(
-            "<!doctype html><html><body><ul></ul></body></html>", encoding="utf-8")
+            "<!doctype html><html><body><ul></ul></body></html>", encoding="utf-8"
+        )
 
     def tearDown(self):
         self.temp.cleanup()
