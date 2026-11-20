@@ -2,12 +2,14 @@ include(FetchContent)
 include(${CMAKE_CURRENT_LIST_DIR}/DependencyArchive.cmake)
 # Test-only dependency. Excluded from product installation.
 set(DOCTEST_WITH_TESTS OFF CACHE BOOL "Disable doctest's own tests" FORCE)
+set(DOCTEST_WITH_MAIN_IN_STATIC_LIB ON CACHE BOOL "Build the shared doctest test entry point" FORCE)
 set(csl_doctest_archive_sha256 632ed2c05a7f53fa961381497bf8069093f0d6628c5f26286161fbd32a560186)
 csl_dependency_archive_url(csl_doctest_archive_url doctest
   https://codeload.github.com/doctest/doctest/tar.gz/refs/tags/v2.4.11 ${csl_doctest_archive_sha256})
 FetchContent_Declare(doctest
   URL "${csl_doctest_archive_url}"
   URL_HASH SHA256=${csl_doctest_archive_sha256}
+  SYSTEM
   EXCLUDE_FROM_ALL)
 FetchContent_MakeAvailable(doctest)
 
