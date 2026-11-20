@@ -106,7 +106,8 @@
       "configurePreset": "dev",
       "configuration": "Release",
       "targets": [
-        "csl_reporting_checks"
+        "csl_reporting_checks",
+        "mpc01_model_tests"
       ],
       "jobs": 4
     }

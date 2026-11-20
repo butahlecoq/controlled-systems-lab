@@ -1488,10 +1488,12 @@
     },
     {
       "source": "scripts/reports/stage_catalogue_forward_reachability.py",
-      "signal_count": 3,
+      "signal_count": 5,
       "asset_name_literals": [
+        "battery-forward-backward.svg",
         "battery-history-projections.svg",
         "building-budget-projection.svg",
+        "hospital-finite-actions.svg",
         "platoon-forward.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
@@ -2061,6 +2063,14 @@
       ],
       "disposition": "publication-validation-or-frozen-route",
       "role_and_disposition_reason": "Authenticates a locked source-only row-scaling diagnostic with original/scaled CSR, a saved native 2D point, original-coordinate checks and complete numerical-failure logs; no optimization, native build or binary redistribution during staging."
+    },
+    {
+      "source": "scripts/reports/stage_native_source_constrained_mpc.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "platoon.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
     },
     {
       "source": "scripts/reports/stage_nominal_quadratic_history.py",
@@ -2816,6 +2826,16 @@
       "follow_up_issue": 669
     },
     {
+      "route": "catalogue-backward-reachability-v1",
+      "source_bundle": "catalogue-backward-reachability-v1",
+      "assets": [
+        "battery-forward-backward.svg"
+      ],
+      "index_sha256": "3f4cee565641826d533afad1567acdca50b5bff8fe2e56812f99f0ea2ec90836",
+      "disposition": "reviewed: all four battery stages show forward and backward rectangles, intersections and the trajectory",
+      "companion_route": "examples/catalogue-backward-reachability-v1/index.html"
+    },
+    {
       "route": "catalogue-exact-support-v1",
       "source_bundle": "catalogue-exact-support-v1",
       "assets": [
@@ -2845,6 +2865,19 @@
       "index_sha256": "822d7ac37ecd021ebae44a720026e3c377dd15a577b40e77d509802b5f5f06b3",
       "disposition": "reviewed: paired battery projections display full constraints and control intervals at each stage",
       "companion_route": "examples/catalogue-feasible-history-v1/index.html"
+    },
+    {
+      "route": "catalogue-finite-action-v1",
+      "source_bundle": "catalogue-finite-action-v1",
+      "assets": [
+        "hospital-finite-actions.svg",
+        "pair-shear-projection.svg",
+        "terminal-box-corner.svg",
+        "zonotope-certificate-coverage.svg"
+      ],
+      "index_sha256": "ff236f0f9265b41b61c3d01d9281cdf54cfd83029b904a1f7af2b8d94a34f19a",
+      "disposition": "reviewed: finite action alternatives, executed path, box and zonotope scoring, and paired shear projections across three stages",
+      "companion_route": "examples/catalogue-finite-action-v1/index.html"
     },
     {
       "route": "catalogue-forward-reachability-v1",
@@ -4125,6 +4158,16 @@
       "follow_up_issue": 669
     },
     {
+      "route": "native-source-constrained-mpc-v1",
+      "source_bundle": "native-source-constrained-mpc-v1",
+      "assets": [
+        "platoon.svg"
+      ],
+      "index_sha256": "f4ace781c2b39154e7dcde5c6cd570b67f2db0ee0ce042cb49072d8e1478d507",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
       "route": "native-terminal-cost-33f907a0",
       "source_bundle": "native-terminal-cost-33f907a0",
       "assets": [
@@ -4410,7 +4453,16 @@
         "catalogue-feasible-history-v1/battery-history-projections.svg",
         "catalogue-exact-support-v1/index.html",
         "catalogue-exact-support-v1/building-budget-projection.svg",
+        "catalogue-backward-reachability-v1/index.html",
+        "catalogue-backward-reachability-v1/battery-forward-backward.svg",
+        "catalogue-finite-action-v1/index.html",
+        "catalogue-finite-action-v1/hospital-finite-actions.svg",
+        "catalogue-finite-action-v1/terminal-box-corner.svg",
+        "catalogue-finite-action-v1/zonotope-certificate-coverage.svg",
+        "catalogue-finite-action-v1/pair-shear-projection.svg",
         "mpc-crossover-6b7308c4/index.html",
+        "native-source-constrained-mpc-v1/index.html",
+        "native-source-constrained-mpc-v1/platoon.svg",
         "mpc-crossover-6b7308c4/feedback-geometry.svg",
         "mpc-crossover-6b7308c4/deployment-time.svg",
         "discrete-mpc-2d.html",

@@ -4365,7 +4365,7 @@
   "learning_navigation_insertions_reviewed_separately": [
     {
       "chapter_id": "native-forward-models",
-      "chapter_sha256": "2fd823476686e15d6da45509c1a9e1c0e79706bf7ea02bb12034f8e081d83122",
+      "chapter_sha256": "2a1205b77c262b30754dc21333526efab25989351bd41b6c5501ad59cb0bd89e",
       "previous_chapter_id": "representation-consumers",
       "next_chapter_id": "closed-loop-semantics",
       "qualification": "Reviewed native forward-models lesson insertion for issue #991. Only its exact source-catalogue index entry and the adjacent lessons' previous/next link fragments may change; every other byte remains baseline-identical."
@@ -4379,7 +4379,7 @@
     },
     {
       "chapter_id": "native-model-tracking-first-pass",
-      "chapter_sha256": "c0055fb4781c19dc5451c69a3852449ad934fa30b3ef3a1b72f05ea099c81265",
+      "chapter_sha256": "81d883c044106e204949570b6f39a3daae8b9ccbfbadaa7a2098af4a39f751c2",
       "previous_chapter_id": "optimization-backends",
       "next_chapter_id": "lotka-capstone",
       "qualification": "Reviewed source-qualified all-35 native tracking saved-evidence lesson insertion. Staging consumes immutable attempts and does not rerun optimization; only the exact chapter and adjacent navigation fragments are approved."

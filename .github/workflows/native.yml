@@ -185,6 +185,9 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install cmake==3.31.6
+      - name: Install pinned research report test analyzers
+        if: matrix.preset == 'highs'
+        run: python -m pip install --disable-pip-version-check -r requirements-cpp-quality.txt
       - name: Restore selected package validation caches
         id: cache
         uses: ./.github/actions/native-cache-setup
@@ -192,7 +195,7 @@ jobs:
           lane: package-${{ matrix.preset }}
           configuration: Release
           generator: Ninja
-          options: cmake --preset ${{ matrix.preset }} ${{ matrix.preset == 'core' && '-DCSL_BUILD_SYN07_REPORT=ON' || '' }}
+          options: cmake --preset ${{ matrix.preset }} ${{ matrix.preset == 'core' && '-DCSL_BUILD_SYN07_REPORT=ON' || '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON' }}
           clean: ${{ inputs.clean || false }}
       - name: Configure selected package and backend-neutral report regression
         shell: bash
@@ -200,7 +203,7 @@ jobs:
           if [ '${{ matrix.preset }}' = core ]; then
             cmake --preset core -DCSL_BUILD_SYN07_REPORT=ON
           else
-            cmake --preset highs
+            cmake --preset highs -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
           fi
       - name: Disabled vendors were not acquired
         shell: bash
@@ -210,6 +213,13 @@ jobs:
             test ! -d build/core/_deps/csl_highs-src
           fi
       - run: cmake --build --preset ${{ matrix.preset }}
+      - name: Check retained C++ report tests with the HiGHS build context
+        if: matrix.preset == 'highs'
+        shell: bash
+        run: |
+          sources=(tests/reporting/lp_report_tests.cpp tests/reporting/convex_report_tests.cpp)
+          clang-format --style=file --dry-run --Werror "${sources[@]}"
+          clang-tidy -p=build/highs --config-file=.clang-tidy --quiet "${sources[@]}"
       - run: ctest --preset ${{ matrix.preset }}
       - name: Build research driver against the installed core SDK
         if: matrix.preset == 'core'

@@ -109,3 +109,75 @@ def build_exact_support(
         f'<p><a href="{route}/catalogue-exact-support-evidence.zip">Download the C++ producer and certificates</a></p></article>'
     )
     return files, [entry], card
+
+
+BACKWARD_REACHABILITY = FrozenNativeBundle(
+    route="catalogue-backward-reachability-v1",
+    source_commit="4e2e332b6dffd697febfd53c3d7fb3a6b20f90ef",
+    schema="csl.catalogue-backward-reachability-capture/1",
+    manifest_sha256="397c07a65fb01ef3b0f1e657bcb105e3e1f7329647d64c8d5a246b1d8772425e",
+    archive_sha256="8895be0afce61cfa0ba6653ab437d2187d65613cb4de79fa01afc61867ebd4a6",
+)
+
+
+def build_backward_reachability(
+    repository_root: Path,
+) -> tuple[dict[str, bytes], list[dict[str, str]], str]:
+    route = BACKWARD_REACHABILITY.route
+    files = {
+        f"{route}/{name}": data
+        for name, data in read_bundle(repository_root, BACKWARD_REACHABILITY).items()
+    }
+    entry = {
+        "family": "Reachability",
+        "title": "Backward reachability across 35 catalogue models",
+        "status": "saved-data-companion",
+        "anchor": route,
+        "page": f"{route}/index.html",
+        "figure": f"{route}/battery-forward-backward.svg",
+        "source_page": f"https://github.com/butahlecoq/controlled-systems-lab/blob/{BACKWARD_REACHABILITY.source_commit}/reports/algorithm-results/{route}/predecessor.cpp",
+        "raw_record": f"{route}/manifest.json",
+    }
+    card = (
+        f'<article class="saved-figure" id="{route}"><h3><a href="{entry["page"]}">{entry["title"]}</a></h3>'
+        f'<a href="{entry["page"]}"><img src="{entry["figure"]}" alt="Four battery stages with forward sets, backward sets, intersections and the terminal-optimal trajectory"></a>'
+        "<p>Certify predecessor supports and see the states that can reach the battery target at each stage.</p>"
+        f'<p><a href="{route}/catalogue-backward-support-evidence.zip">Download the producer, checker and figures</a></p></article>'
+    )
+    return files, [entry], card
+
+
+FINITE_ACTION = FrozenNativeBundle(
+    route="catalogue-finite-action-v1",
+    source_commit="0bca2bf882ba7c63440c9f32470c25f5b27e612c",
+    schema="csl.catalogue-finite-action-capture/1",
+    manifest_sha256="be3023789fcd2f03386059fffe270dd3ef1d588d7b79134c1f0b85906ad8a86f",
+    archive_sha256="076f30290899165a257399feba70e2ca1ca64223dfd9c7a501d8b53127c27dde",
+)
+
+
+def build_finite_action(
+    repository_root: Path,
+) -> tuple[dict[str, bytes], list[dict[str, str]], str]:
+    route = FINITE_ACTION.route
+    files = {
+        f"{route}/{name}": data
+        for name, data in read_bundle(repository_root, FINITE_ACTION).items()
+    }
+    entry = {
+        "family": "Control",
+        "title": "Finite-action control across 35 catalogue models",
+        "status": "saved-data-companion",
+        "anchor": route,
+        "page": f"{route}/index.html",
+        "figure": f"{route}/hospital-finite-actions.svg",
+        "source_page": f"https://github.com/butahlecoq/controlled-systems-lab/blob/{FINITE_ACTION.source_commit}/reports/algorithm-results/{route}/catalogue_finite_action.cpp",
+        "raw_record": f"{route}/manifest.json",
+    }
+    card = (
+        f'<article class="saved-figure" id="{route}"><h3><a href="{entry["page"]}">{entry["title"]}</a></h3>'
+        f'<a href="{entry["page"]}"><img src="{entry["figure"]}" alt="Two-decision hospital trajectories with all finite terminal alternatives and the highlighted optimal path"></a>'
+        "<p>Follow both decisions across all 175 routes and see how the changes recover 45 baseline refusals.</p>"
+        f'<p><a href="{route}/{route}.zip">Download the lesson and all replay evidence</a></p></article>'
+    )
+    return files, [entry], card
