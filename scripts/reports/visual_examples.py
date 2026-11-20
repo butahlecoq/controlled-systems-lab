@@ -28,6 +28,7 @@ import site_additions
 import site_design
 import stage_buryatia_dim4
 import stage_buryatia_volterra
+import stage_catalogue_forward_reachability
 import stage_discrete_mpc_2d
 import stage_ext07
 import stage_four_state_projection_approximations
@@ -41,6 +42,7 @@ import stage_native_history_strategies
 import stage_native_model_catalogue
 import stage_native_model_tracking_first_pass
 import stage_native_row_scaling_diagnostic
+import stage_native_source_constrained_mpc
 import stage_nominal_quadratic_history
 import stage_positive_part_budget_2d
 import visual_example_fuel_layers
@@ -1379,6 +1381,34 @@ def build(catalog, site):
         stage_four_state_projection_approximations.build(Path(__file__).resolve().parents[2])
     )
     saved_figures += approximation_cards
+    forward_files, forward_inventory, forward_card = stage_catalogue_forward_reachability.build(
+        Path(__file__).resolve().parents[2]
+    )
+    saved_figures += forward_card
+    catalogue_history_files, catalogue_history_inventory, catalogue_history_card = (
+        stage_catalogue_forward_reachability.build_feasible_history(
+            Path(__file__).resolve().parents[2]
+        )
+    )
+    saved_figures += catalogue_history_card
+    catalogue_exact_files, catalogue_exact_inventory, catalogue_exact_card = (
+        stage_catalogue_forward_reachability.build_exact_support(
+            Path(__file__).resolve().parents[2]
+        )
+    )
+    saved_figures += catalogue_exact_card
+    catalogue_backward_files, catalogue_backward_inventory, catalogue_backward_card = (
+        stage_catalogue_forward_reachability.build_backward_reachability(
+            Path(__file__).resolve().parents[2]
+        )
+    )
+    saved_figures += catalogue_backward_card
+    catalogue_finite_files, catalogue_finite_inventory, catalogue_finite_card = (
+        stage_catalogue_forward_reachability.build_finite_action(
+            Path(__file__).resolve().parents[2]
+        )
+    )
+    saved_figures += catalogue_finite_card
     crossover_files, crossover_inventory, crossover_card = stage_mpc_crossover.build(
         Path(__file__).resolve().parents[2]
     )
@@ -1403,6 +1433,10 @@ def build(catalog, site):
         stage_native_model_tracking_first_pass.build(Path(__file__).resolve().parents[2])
     )
     saved_figures += tracking_card
+    matched_files, matched_inventory, matched_card = stage_native_source_constrained_mpc.build(
+        Path(__file__).resolve().parents[2]
+    )
+    saved_figures += matched_card
     strategy_files, strategy_inventory, strategy_card = stage_native_history_strategies.build(
         Path(__file__).resolve().parents[2]
     )
@@ -1491,7 +1525,13 @@ def build(catalog, site):
     outputs.update(analytic_files)
     outputs.update(native_files)
     outputs.update(approximation_files)
+    outputs.update(forward_files)
+    outputs.update(catalogue_history_files)
+    outputs.update(catalogue_exact_files)
+    outputs.update(catalogue_backward_files)
+    outputs.update(catalogue_finite_files)
     outputs.update(crossover_files)
+    outputs.update(matched_files)
     outputs.update(strategy_files)
     outputs.update(buryatia_files)
     outputs.update(volterra_files)
@@ -1708,7 +1748,13 @@ def build(catalog, site):
     gallery_inventory.extend(fuel_layer_inventory)
     gallery_inventory.extend(native_inventory)
     gallery_inventory.extend(approximation_inventory)
+    gallery_inventory.extend(forward_inventory)
+    gallery_inventory.extend(catalogue_history_inventory)
+    gallery_inventory.extend(catalogue_exact_inventory)
+    gallery_inventory.extend(catalogue_backward_inventory)
+    gallery_inventory.extend(catalogue_finite_inventory)
     gallery_inventory.extend(crossover_inventory)
+    gallery_inventory.extend(matched_inventory)
     gallery_inventory.extend(strategy_inventory)
     gallery_inventory.extend(buryatia_inventory)
     gallery_inventory.extend(volterra_inventory)

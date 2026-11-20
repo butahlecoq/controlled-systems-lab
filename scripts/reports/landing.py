@@ -118,12 +118,53 @@ FAMILIES = {
         "aggregate branch limits, and stop-status propagation. Its saved measurements describe this "
         "single case and do not establish a general performance comparison.",
     ),
+    "catalogue-forward-reachability-v1": Family(
+        r"examples/catalogue-forward-reachability-v1",
+        "geometry",
+        "Forward reachability across 35 discrete models",
+        "Propagates three steps of authored independent box controls for all 35 catalogue models. "
+        "An exact-rational checker validates sampled supports, and the figure shows the 30-state platoon projection.",
+    ),
+    "catalogue-feasible-history-v1": Family(
+        r"examples/catalogue-feasible-history-v1",
+        "geometry",
+        "How constraints change reachable sets",
+        "Compares complete three-step feasible histories with control-interval-only histories "
+        "on 35 matched catalogue models. The battery figure overlays both profiles at each stage.",
+    ),
+    "catalogue-exact-support-v1": Family(
+        r"examples/catalogue-exact-support-v1",
+        "geometry",
+        "Exact support certificates for three catalogue models",
+        "Checks a rational primal witness and upper bound for each of 192 saved direction-stage samples. "
+        "The building figure shows the exact support lost to the control budget.",
+    ),
+    "catalogue-backward-reachability-v1": Family(
+        r"examples/catalogue-backward-reachability-v1",
+        "geometry",
+        "Backward reachability across 35 catalogue models",
+        "Checks 1,120 predecessor support values for authored control boxes and terminal sets. "
+        "The battery example shows both sets, their intersections and its terminal-optimal trajectory.",
+    ),
+    "catalogue-finite-action-v1": Family(
+        r"examples/catalogue-finite-action-v1",
+        "synthesis",
+        "Finite-action control across 35 catalogue models",
+        "Completes both finite-action decisions in 175 routes, recovering 45 baseline refusals.",
+    ),
     "mpc-crossover": Family(
         r"examples/mpc-crossover-6b7308c4",
         "synthesis",
         "When does explicit MPC repay its setup cost?",
         "Compares the time to construct and use an explicit feedback policy with the time "
         "to update and solve an online quadratic program for the same constrained double integrator.",
+    ),
+    "native-source-constrained-mpc": Family(
+        r"examples/native-source-constrained-mpc-v1",
+        "synthesis",
+        "Open loop and MPC under the same constraints",
+        "Compares the two policies on matched deterministic three-step tasks and illustrates "
+        "the results with the last vehicle and headway margins of a ten-car platoon.",
     ),
     "mpc08-explicit-pilot": Family(
         r"mpc08-explicit-pilot-v1",
@@ -1249,6 +1290,95 @@ def build(site: Path) -> None:
                 links=entry.links,
             )
         )
+    forward = "examples/catalogue-forward-reachability-v1"
+    if (site / forward / "index.html").is_file():
+        manifest = json.loads((site / forward / "manifest.json").read_text(encoding="utf-8"))
+        detailed = [entry for entry in detailed if entry.report_id != forward]
+        detailed.append(
+            Entry(
+                report_id=forward,
+                scope="Three transitions on each of 35 models with one authored input box.",
+                limits="Sampled support checks in binary64. No state or headway constraints.",
+                commit=manifest["source_commit"],
+                links=(
+                    ("Sampled supports", forward + "/support.csv"),
+                    ("Independent audit", forward + "/support-audit.json"),
+                    ("Offline example", forward + "/catalogue-forward-reachability-v1.zip"),
+                ),
+            )
+        )
+    history = "examples/catalogue-feasible-history-v1"
+    if (site / history / "index.html").is_file():
+        manifest = json.loads((site / history / "manifest.json").read_text(encoding="utf-8"))
+        detailed = [entry for entry in detailed if entry.report_id != history]
+        detailed.append(
+            Entry(
+                report_id=history,
+                scope="2,240 sampled support queries on 35 matched three-step models.",
+                limits="Sampled linear projection evidence, with native refusals retained.",
+                commit=manifest["source_commit"],
+                links=(
+                    ("Source and hashes", history + "/manifest.json"),
+                    ("Offline evidence", history + "/catalogue-feasible-history-evidence.zip"),
+                ),
+            )
+        )
+    exact_support = "examples/catalogue-exact-support-v1"
+    if (site / exact_support / "index.html").is_file():
+        manifest = json.loads((site / exact_support / "manifest.json").read_text(encoding="utf-8"))
+        detailed = [entry for entry in detailed if entry.report_id != exact_support]
+        detailed.append(
+            Entry(
+                report_id=exact_support,
+                scope="192 exact support certificates across three archived model fixtures and two profiles.",
+                limits="Eight sampled directions at four stages per profile and model.",
+                commit=manifest["source_commit"],
+                links=(
+                    ("Source and hashes", exact_support + "/manifest.json"),
+                    ("Offline evidence", exact_support + "/catalogue-exact-support-evidence.zip"),
+                ),
+            )
+        )
+    backward = "examples/catalogue-backward-reachability-v1"
+    if (site / backward / "index.html").is_file():
+        manifest = json.loads((site / backward / "manifest.json").read_text(encoding="utf-8"))
+        detailed = [entry for entry in detailed if entry.report_id != backward]
+        detailed.append(
+            Entry(
+                report_id=backward,
+                scope="1,120 exact sampled predecessor supports across 35 linear discrete models.",
+                limits="Three-step authored signed controls, fixed forecasts and terminal targets.",
+                commit=manifest["source_commit"],
+                links=(
+                    ("Source and hashes", backward + "/manifest.json"),
+                    ("Offline evidence", backward + "/catalogue-backward-support-evidence.zip"),
+                ),
+            )
+        )
+    finite_action = "examples/catalogue-finite-action-v1"
+    if (site / finite_action / "index.html").is_file():
+        manifest = json.loads((site / finite_action / "manifest.json").read_text(encoding="utf-8"))
+        detailed = [entry for entry in detailed if entry.report_id != finite_action]
+        detailed.append(
+            Entry(
+                report_id=finite_action,
+                scope="175 native representation outcomes on the two-decision finite-action hold task.",
+                limits="Same authored inputs and budgets for the baseline, isolated scoring changes and joint replay.",
+                commit=manifest["source_commit"],
+                links=(
+                    ("Source and hashes", finite_action + "/manifest.json"),
+                    ("Box replay", finite_action + "/catalogue-separable-box-evidence.zip"),
+                    (
+                        "Zonotope replay",
+                        finite_action + "/catalogue-zonotope-replay-evidence.zip",
+                    ),
+                    (
+                        "Joint replay",
+                        finite_action + "/catalogue-parallelotope-replay-evidence.zip",
+                    ),
+                ),
+            )
+        )
     crossover = "examples/mpc-crossover-6b7308c4"
     if (site / crossover / "index.html").is_file():
         manifest = json.loads((site / crossover / "manifest.json").read_text(encoding="utf-8"))
@@ -1263,6 +1393,22 @@ def build(site: Path) -> None:
                     ("Raw attempts", crossover + "/raw.jsonl"),
                     ("Measured timings", crossover + "/summary.json"),
                     ("Offline study", crossover + "/mpc-crossover-6b7308c4.zip"),
+                ),
+            )
+        )
+    matched = "examples/native-source-constrained-mpc-v1"
+    if (site / matched / "index.html").is_file():
+        manifest = json.loads((site / matched / "manifest.json").read_text(encoding="utf-8"))
+        detailed = [entry for entry in detailed if entry.report_id != matched]
+        detailed.append(
+            Entry(
+                report_id=matched,
+                scope="Thirty-five catalogue models with one matched open-loop and MPC task per model.",
+                limits="The audit covers three-step deterministic tasks with an authored objective.",
+                commit=manifest["source_commit"],
+                links=(
+                    ("Independent audit", matched + "/independent-audit.json"),
+                    ("Offline study", matched + "/native-source-constrained-mpc-v1.zip"),
                 ),
             )
         )

@@ -1,0 +1,19 @@
+{
+  "schema": "csl.catalogue-forward-reachability-capture/1",
+  "source_commit": "dc6801dc5f02c4000b4f1272361752581a55873a",
+  "input_commit": "d6561f1ee36fca39beb9593e8cf6982f962856b8",
+  "files_sha256": {
+    "CMakeLists.txt": "e3ea85d8474aa328ca69995f8ea50e6b2d5e3ee94ec1e3f089cfaf58b161d445",
+    "RUN.txt": "7d926f586287b8abc4ad4b6f477ab2d487fc12ceeb865fdae193a37cac24664c",
+    "catalogue_forward.cpp": "515349d1794b425abf17d73e99ef24cfed0b96c345fa5a1aec02de20825df38e",
+    "check_support.py": "7c396354542b7f5d98220ad31863fce674bded8adf6b16c0ff764e22c3268b82",
+    "examples.css": "11ded2b69cec694ff61ecad0493f175becbfc47bce3d641f2ee512543bb82cf4",
+    "index.html": "a2dccc7b3c2f84a61c2f05c6a60be39d37faf3b55e2006f9fbdbb43447415906",
+    "models.csv": "498d3ff2ab5fcf817b7d0d1a22e6fa0a9344bdf40880f41aa8bab2329e5cf514",
+    "platoon-forward.svg": "57de4b1baa7dd6fea97d08ccc5d04689e5fa774e83a8a31b1ab0a74d0ccb2243",
+    "plot_platoon.py": "a94d08549de3c62dfb4dcdc7d51e1e04bf933dfbb5aaf65d9d73810feed4a333",
+    "research-revision": "b5e67f4cd073865371a7ed67503ad684f249d4773f41a0de84f3666bf95a0684",
+    "support-audit.json": "1cf3d0edd6f1328afd02f6b7e1dd10d1e0a8509050a886721aae0049c68ce316",
+    "support.csv": "da2bf3233c96a79ce11d768f125a4bc4a90907cf32fed2309708ed05a728c3ac"
+  }
+}

@@ -22,6 +22,9 @@ inline constexpr artifacts::SpanId family_construction{5};
 // Shared existential stage projections for numerical source-cost candidates.
 inline constexpr auto lifted_nominal_profile = "nominal_open_loop_lifted";
 
+// Selects direct H projection of joint transition factors for numerical candidates.
+inline constexpr auto projected_nominal_profile = "nominal_open_loop_projected";
+
 enum class PreimageTarget { forward_terminal_slice, terminal_candidate };
 // Scoped derivation evidence: terminal-program bounds concern the supplied
 // forward slice, not an independently verified original-problem optimum.

@@ -1,28 +1,33 @@
 """Contract and local-model checks for the three single-player task adapters."""
 
-import sys
 import importlib.util
-from pathlib import Path
+import sys
 import unittest
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "benchmarks/reporting/closed_loop"))
 
+
 class ClosedLoopTaskContracts(unittest.TestCase):
-    @unittest.skipUnless(all(importlib.util.find_spec(name) for name in
-                             ('numpy', 'scipy', 'casadi', 'do_mpc')),
-                         'qualified MPC11 numerical dependencies are unavailable')
+    @unittest.skipUnless(
+        all(importlib.util.find_spec(name) for name in ("numpy", "scipy", "casadi", "do_mpc")),
+        "qualified MPC11 numerical dependencies are unavailable",
+    )
     def test_source_bound_model_objective_and_prediction_contracts(self):
         from check_contracts import main
+
         self.assertEqual(main(), 0)
 
-    @unittest.skipUnless(all(importlib.util.find_spec(name) for name in
-                             ("numpy", "scipy", "casadi", "do_mpc")),
-                         "qualified numerical dependencies are unavailable")
+    @unittest.skipUnless(
+        all(importlib.util.find_spec(name) for name in ("numpy", "scipy", "casadi", "do_mpc")),
+        "qualified numerical dependencies are unavailable",
+    )
     def test_source_objective_for_remaining_horizon_keeps_absolute_stages(self):
         import numpy as np
-        from contracts import load_task
         from task_models import objective
+
+        from contracts import load_task
 
         for name in ("syn-nl-lv-01", "syn-nl-fuel-01", "earth-orbit"):
             with self.subTest(task=name):
@@ -37,13 +42,31 @@ class ClosedLoopTaskContracts(unittest.TestCase):
                 prefix_zero = controls.copy()
                 prefix_zero[stage:] = 0
                 prefix_cost = objective(task, states, prefix_zero)
-                tail = objective(task, states[stage:], controls[stage:], absolute_stage_offset=stage)
-                zero_tail = objective(task, states[stage:], np.zeros_like(controls[stage:]), absolute_stage_offset=stage)
-                self.assertAlmostEqual(tail["running"] - zero_tail["running"], full["running"] - prefix_cost["running"], places=10)
+                tail = objective(
+                    task, states[stage:], controls[stage:], absolute_stage_offset=stage
+                )
+                zero_tail = objective(
+                    task,
+                    states[stage:],
+                    np.zeros_like(controls[stage:]),
+                    absolute_stage_offset=stage,
+                )
+                self.assertAlmostEqual(
+                    tail["running"] - zero_tail["running"],
+                    full["running"] - prefix_cost["running"],
+                    places=10,
+                )
                 self.assertAlmostEqual(tail["terminal"], full["terminal"], places=10)
         orbit = load_task("earth-orbit")
         last = objective(orbit, np.ones((2, 4)), np.array([[0.2, 0.3]]), absolute_stage_offset=19)
         self.assertEqual(last["running"], 0.0)
+
+    def test_independent_replay_refuses_partial_hold_endpoint(self):
+        from check_replay import check_hold_endpoint
+
+        check_hold_endpoint("syn-nl-lv-01", 1, [0.4, 0.7], [0.4, 0.7])
+        with self.assertRaisesRegex(ValueError, "hold endpoint 1 has the wrong state dimension"):
+            check_hold_endpoint("syn-nl-lv-01", 1, [0.4, 0.7], [0.4])
 
     def test_bounded_candidates_keep_the_full_remaining_horizon_and_source_indices(self):
         from native_graph_policy import _candidate_action_histories
@@ -53,7 +76,7 @@ class ClosedLoopTaskContracts(unittest.TestCase):
         self.assertEqual(result["policy_id"], "constant-and-single-switch-full-horizon/1")
         self.assertEqual(len(candidates), 177)
         self.assertEqual(result["search_coverage"], "incomplete")
-        self.assertEqual(result["full_action_history_count"], str(3 ** 30))
+        self.assertEqual(result["full_action_history_count"], str(3**30))
         self.assertTrue(all(len(row) == 30 for row in candidates))
         self.assertTrue(all(0 <= action < 3 for row in candidates for action in row))
         self.assertEqual(len({tuple(row) for row in candidates}), len(candidates))

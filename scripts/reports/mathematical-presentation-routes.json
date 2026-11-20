@@ -737,9 +737,51 @@
       "owner": "scripts/reports/approx_extension_companions.py"
     },
     {
+      "route": "examples/catalogue-backward-reachability-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/catalogue-backward-reachability-v1/index.html",
+      "sha256": "3f4cee565641826d533afad1567acdca50b5bff8fe2e56812f99f0ea2ec90836",
+      "witness": "Frozen exact predecessor certificates and battery all-stage geometry"
+    },
+    {
+      "route": "examples/catalogue-finite-action-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/catalogue-finite-action-v1/index.html",
+      "sha256": "ff236f0f9265b41b61c3d01d9281cdf54cfd83029b904a1f7af2b8d94a34f19a",
+      "witness": "Frozen catalogue finite-action outcomes and stagewise projection of the pair shear"
+    },
+    {
+      "route": "examples/catalogue-exact-support-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/catalogue-exact-support-v1/index.html",
+      "sha256": "3ac34047bbaeeabea8ca9e428de5f80cf1ae3d995f197ff7c50a234bbef9d461",
+      "witness": "Frozen exact support certificates over three archived catalogue model fixtures"
+    },
+    {
+      "route": "examples/catalogue-feasible-history-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/catalogue-feasible-history-v1/index.html",
+      "sha256": "822d7ac37ecd021ebae44a720026e3c377dd15a577b40e77d509802b5f5f06b3",
+      "witness": "Frozen matched feasible-history sweep from CSL SDK v0.1.1"
+    },
+    {
+      "route": "examples/catalogue-forward-reachability-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/catalogue-forward-reachability-v1/index.html",
+      "sha256": "a2dccc7b3c2f84a61c2f05c6a60be39d37faf3b55e2006f9fbdbb43447415906",
+      "witness": "Frozen reachability sweep from CSL SDK v0.1.1; retained source reports/algorithm-results/catalogue-forward-reachability-v1/index.html"
+    },
+    {
       "route": "examples/mpc-crossover-6b7308c4/index.html",
       "disposition": "maintained",
       "owner": "scripts/reports/stage_mpc_crossover.py"
+    },
+    {
+      "route": "examples/native-source-constrained-mpc-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/native-source-constrained-mpc-v1/index.html",
+      "sha256": "f4ace781c2b39154e7dcde5c6cd570b67f2db0ee0ce042cb49072d8e1478d507",
+      "witness": "The source-only archive and SHA-256 inventory in reports/algorithm-results/native-source-constrained-mpc-v1"
     },
     {
       "route": "examples/native-history-strategies-d57739b3/index.html",

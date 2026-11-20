@@ -1220,6 +1220,22 @@
           "href": "../examples/native-extended-models-v1/manifest.json"
         },
         {
+          "label": "Three-step forward reachability on all 35 catalogue models",
+          "href": "../examples/catalogue-forward-reachability-v1/index.html"
+        },
+        {
+          "label": "How constraints change reachable sets",
+          "href": "../examples/catalogue-feasible-history-v1/index.html"
+        },
+        {
+          "label": "Exact support certificates for three catalogue models",
+          "href": "../examples/catalogue-exact-support-v1/index.html"
+        },
+        {
+          "label": "Backward reachability across 35 catalogue models",
+          "href": "../examples/catalogue-backward-reachability-v1/index.html"
+        },
+        {
           "label": "Reachability formulations and horizon variants",
           "href": "model-tracks.html#reachability-formulations"
         }
@@ -2097,6 +2113,10 @@
         {
           "label": "Source commit and exact producer binding",
           "href": "../examples/native-model-tracking-first-pass-v1/source-binding.json"
+        },
+        {
+          "label": "Finite-action control across 35 catalogue models",
+          "href": "../examples/catalogue-finite-action-v1/index.html"
         },
         {
           "label": "Model equations, task profiles and outcomes",

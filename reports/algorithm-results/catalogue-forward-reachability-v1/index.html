@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forward reachability across 35 discrete models</title>
+<link rel="stylesheet" href="examples.css">
+</head>
+<body>
+<main class="page-content">
+<h1>Forward reachability across 35 discrete models</h1>
+<p>Propagate a box of independent controls through the catalogue’s linear dynamics.
+See how the range of admissible controls changes the set of possible states over three steps.</p>
+<figure>
+<img src="platoon-forward.svg" alt="Initial point and three reachable sets projected onto position and velocity for car 10. The centred view shows a line segment at stage one and increasingly wide polygons at stages two and three.">
+<figcaption>The ten-car platoon has 30 states. The projection shows car 10 in physical coordinates and relative to each stage’s centre. Its final three-state block is independent of the other cars in this fixture, so enumerating up to eight corner histories gives the plotted polygons.</figcaption>
+</figure>
+<h2>Define the input set</h2>
+<p>The catalogue supplies the dynamics <var>x</var><sub>k+1</sub> = <var>A</var><var>x</var><sub>k</sub> + <var>B</var><var>u</var><sub>k</sub> + <var>G</var><var>w</var> and the initial point <var>x</var><sub>0</sub>. Each control coordinate ranges independently over [−1, 1] in its tabulated units. The 22 supplied nominal external vectors are held constant. The other 13 models use an explicit zero external vector. This authored experiment has no state, headway or budget constraints.</p>
+<h2>Propagate and check</h2>
+<p>Start with the singleton {<var>x</var><sub>0</sub>}. At each step, apply the affine image from the stored dynamics and take the Minkowski sum with the control box’s image under <var>B</var>. Independent controls give each step its own generator factors.</p>
+<p>The independent checker works in the opposite direction. It propagates each support direction through <var>A</var><sup>T</sup> using exact rational arithmetic on the stored binary64 inputs. All 7,592 checks pass across 140 model stages. The largest scaled discrepancy is 1.37 × 10<sup>−15</sup> against a tolerance of 10<sup>−12</sup>. The samples compare support values. They do not certify enclosure under floating-point arithmetic.</p>
+<h2>Reproduce the result</h2>
+<ul>
+<li><a href="RUN.txt">Build and run the C++ example against CSL SDK v0.1.1</a></li>
+<li><a href="support-audit.json">Support audit</a> and <a href="support.csv">sampled support data</a></li>
+<li><a href="manifest.json">Source identities and file hashes</a></li>
+</ul>
+</main>
+</body>
+</html>
