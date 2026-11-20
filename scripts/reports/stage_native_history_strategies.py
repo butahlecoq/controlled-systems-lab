@@ -11,7 +11,7 @@ from frozen_native_bundle import checked_file
 ROUTE = "native-history-strategies-d57739b3"
 SOURCE = "d57739b300e26810f02240c4029bde68028fdb3d"
 SDK = "b1aee9c1caa9ccfb245cc966eb8c1ef79978cdd0"
-ARCHIVE_SHA256 = "dad22913afbc7d42ce42ab38b67e6ec74a48e786c08a9240c998e710c35d1688"
+ARCHIVE_SHA256 = "99c1bad9e468372b08bc5f81e0f77282319905bdb394318487fd1f93ae784c75"
 FIGURES = (
     "syn-nl-lv-01-x1-x2",
     "earth-orbit-x1-x2",
