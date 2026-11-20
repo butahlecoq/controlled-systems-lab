@@ -74,7 +74,7 @@ summary { cursor: pointer; }
 <ul>
 <li><strong>Bicycle stations (model 9).</strong> The first station starts with 12 bikes. It loses at least five per transition, so its terminal inventory is at most −3. The task requires nonnegative inventory.</li>
 <li><strong>Models 23, 27, and 28.</strong> HiGHS refused coefficients at or below its 10<sup>−12</sup> removal threshold. The refusals describe backend admission.</li>
-<li><strong>Power budget (model 30).</strong> The open-loop suffix from the first feedback observation gives a checked feasible continuation. The feedback route stopped after HiGHS withheld a numerical optimality claim. The separate sensitivity run completed with tolerance 10<sup>−7</sup>. The baseline retains the stop at 10<sup>−8</sup>.</li>
+<li><strong>Reserve replenishment in the thirty-bank ring (model 30).</strong> The open-loop suffix from the first feedback observation gives a checked feasible continuation. The feedback route stopped after HiGHS withheld a numerical optimality claim. The separate sensitivity run completed with tolerance 10<sup>−7</sup>. The baseline retains the stop at 10<sup>−8</sup>.</li>
 </ul>
 <h2>Download and reproduce</h2>
 <p>Build the source-only driver against <a href="https://github.com/butahlecoq/csl-sdk/releases/tag/v0.1.1">CSL SDK v0.1.1</a> with HiGHS enabled. The driver uses the installed <code>CSL::controllers</code>, <code>CSL::model_catalogue</code>, and <code>CSL::highs_convex</code> targets. Set <code>SDK_PREFIX</code> to the installation prefix and <code>JSON_HEADERS</code> to the directory containing the nlohmann/json 3.11.3 headers.</p>
@@ -83,6 +83,11 @@ cmake --build source/build
 bash source/execute.sh replay
 python source/audit.py source/replay source/frozen-catalogue-export.csv</code></pre>
 <p>The checker requires NumPy. The optional platoon renderer also uses Matplotlib.</p>
+<p>To reproduce the separate tolerance diagnostic, build the driver from the diagnostic directory. Run model 30 with both of the recorded tolerances and compare its feedback status.</p>
+<pre><code>cmake -S tolerance-diagnostic -B tolerance-diagnostic/build -DCMAKE_BUILD_TYPE=Release   -DCMAKE_PREFIX_PATH="$SDK_PREFIX" -DCAMPAIGN_JSON_HEADERS="$JSON_HEADERS"
+cmake --build tolerance-diagnostic/build
+tolerance-diagnostic/build/catalogue_episode 30 1e-8 &gt; strict.json
+tolerance-diagnostic/build/catalogue_episode 30 1e-7 &gt; sensitivity.json</code></pre>
 <p><a href="native-source-constrained-mpc-v1.zip">Download figures, source, and raw outcomes</a> · <a href="native-source-constrained-mpc-v1.zip.sha256">ZIP checksum</a> · <a href="manifest.json">Publication manifest</a> · <a href="independent-audit.json">Independent audit</a> · <a href="stops-audit.json">Stop diagnosis</a> · <a href="tolerance-diagnostic/independent-audit.json">Tolerance sensitivity audit</a></p>
 </main>
 </body>

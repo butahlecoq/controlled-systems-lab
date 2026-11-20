@@ -6,7 +6,7 @@
   "files_sha256": {
     "environment.txt": "9a8d464ddef1416a6ec309c2f0fa4b6fd6dbfde656b99ec1f2d010f9e0d66690",
     "independent-audit.json": "41b45b4d844b9d1f8b80e78194356a1604e75edc4e43bb5bab382acbe60033a4",
-    "index.html": "4b226e3ad5a8e0474a250150fc8f7185904cb775dc290932312636b5c537b780",
+    "index.html": "f4ace781c2b39154e7dcde5c6cd570b67f2db0ee0ce042cb49072d8e1478d507",
     "offline-examples.css": "11ded2b69cec694ff61ecad0493f175becbfc47bce3d641f2ee512543bb82cf4",
     "platoon.svg": "218878ddbaaa11267d4357f3f85d14eab21b7bca854912d266249a5c07d005e1",
     "raw/1.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
@@ -126,6 +126,7 @@
     "tolerance-diagnostic/1e-7.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "tolerance-diagnostic/1e-8.json": "3ee0d39e24f8e1aa180546ce95f75d72aceb0ecf7bd348ef6517ef6f6c414197",
     "tolerance-diagnostic/1e-8.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tolerance-diagnostic/CMakeLists.txt": "06fbd404b5004013a1f15a0553a1040ca84d524818d32995d72871b70a82508a",
     "tolerance-diagnostic/catalogue_episode.cpp": "6c76475d07a54da76447b1d137d64cf03296673f8353ea9cb13e52797857cc0c",
     "tolerance-diagnostic/independent-audit.json": "bb01365834eaf756478bd2705753fc6784bb80948922d797fc31c42978600d70",
     "tolerance-diagnostic/source-binary.sha256": "9356c21566b0a113f49b91e3f1aab1f9446a07c689f8a537d231ce8d54b9c537"

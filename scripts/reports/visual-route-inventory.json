@@ -4079,7 +4079,7 @@
       "assets": [
         "platoon.svg"
       ],
-      "index_sha256": "4b226e3ad5a8e0474a250150fc8f7185904cb775dc290932312636b5c537b780",
+      "index_sha256": "f4ace781c2b39154e7dcde5c6cd570b67f2db0ee0ce042cb49072d8e1478d507",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },
