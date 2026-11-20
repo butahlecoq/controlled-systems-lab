@@ -3,6 +3,7 @@
 import hashlib
 import json
 import re
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -73,6 +74,30 @@ class CatalogueDisturbancePublicationTests(unittest.TestCase):
         for path in (entry["page"], entry["figure"], f"{route}/{route}.zip"):
             self.assertIn(path, files)
             self.assertIn(path, card)
+
+    def test_offline_minimax_oracle_has_exact_zero_row_regression(self) -> None:
+        files, _, _ = stage.build(ROOT)
+        evidence = files[f"{stage.IDENTITY.route}/catalogue-disturbance-evidence.zip"]
+        with tempfile.TemporaryDirectory() as directory, ZipFile(BytesIO(evidence)) as archive:
+            oracle = Path(directory) / "exact_causal_oracle.py"
+            oracle.write_bytes(archive.read("causal-oracle/exact_causal_oracle.py"))
+            subprocess.run(
+                [
+                    sys.executable,
+                    "-B",
+                    "-c",
+                    """from fractions import Fraction as F
+from exact_causal_oracle import quadratic_cost
+objective = {"Q": {"rows": 2, "columns": 2, "row_major": [2, 0, 0, 0]},
+             "linear": [0, 0.1], "constant": 0}
+actual = quadratic_cost(objective, (F(1, 3), F(2, 3)))
+assert isinstance(actual, F)
+assert actual == F(1, 9) + F(0.1) * F(2, 3)
+""",
+                ],
+                cwd=directory,
+                check=True,
+            )
 
     def test_book_and_archive_discover_the_lesson(self) -> None:
         files, [entry], _ = stage.build(ROOT)

@@ -8,8 +8,8 @@ IDENTITY = FrozenNativeBundle(
     route="catalogue-disturbance-control-v1",
     source_commit="806738c9d1c8f1d9ebd8885b7bb605b5a698b1af",
     schema="csl.catalogue-disturbance-control-capture/1",
-    manifest_sha256="b7ff59a1e71d476cf13277b32f78590909f31487c7221b9b3caa306e4dc884a2",
-    archive_sha256="9a3d69527975bd36f16a62f0166d5abc9286a94879945f7038827588ac6e9745",
+    manifest_sha256="3d7628ad8332e272f44554c0400c9edf4e0299d841b2ebb7e2bf44c22ae02e38",
+    archive_sha256="381e04702454a229619bc8d236c1ceec4c124c1ad3fc779cf42363d7469911b7",
 )
 
 

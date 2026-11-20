@@ -173,7 +173,7 @@
       "model_id": "catalogue-2026/model-21/1",
       "fixed": 0.04949889000000001,
       "causal": 0.04949889000000001,
-      "exact_advantage": "0.0",
+      "exact_advantage": "0",
       "observed_states": 15,
       "terminal_states": 225
     },
@@ -181,7 +181,7 @@
       "model_id": "catalogue-2026/model-22/1",
       "fixed": 0.04000000000000001,
       "causal": 0.04000000000000001,
-      "exact_advantage": "0.0",
+      "exact_advantage": "0",
       "observed_states": 15,
       "terminal_states": 117
     },
@@ -189,7 +189,7 @@
       "model_id": "catalogue-2026/model-23/1",
       "fixed": 0.04000000000000001,
       "causal": 0.04000000000000001,
-      "exact_advantage": "0.0",
+      "exact_advantage": "0",
       "observed_states": 15,
       "terminal_states": 117
     },
@@ -197,7 +197,7 @@
       "model_id": "catalogue-2026/model-24/1",
       "fixed": 0.04000000000000001,
       "causal": 0.04000000000000001,
-      "exact_advantage": "0.0",
+      "exact_advantage": "0",
       "observed_states": 15,
       "terminal_states": 117
     },
@@ -205,7 +205,7 @@
       "model_id": "catalogue-2026/model-25/1",
       "fixed": 0.04000000000000001,
       "causal": 0.04000000000000001,
-      "exact_advantage": "0.0",
+      "exact_advantage": "0",
       "observed_states": 15,
       "terminal_states": 117
     },
@@ -213,7 +213,7 @@
       "model_id": "catalogue-2026/model-26/1",
       "fixed": 9.02423793672883,
       "causal": 9.024237936728829,
-      "exact_advantage": "0.0",
+      "exact_advantage": "0",
       "observed_states": 15,
       "terminal_states": 189
     },
@@ -277,7 +277,7 @@
       "model_id": "catalogue-2026/model-34/1",
       "fixed": 0.1459073188999982,
       "causal": 0.1459073189000013,
-      "exact_advantage": "0.0",
+      "exact_advantage": "0",
       "observed_states": 15,
       "terminal_states": 185
     },
