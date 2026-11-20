@@ -9,6 +9,7 @@ import os
 import sys
 import zipfile
 from pathlib import Path
+from typing import TypedDict
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
@@ -16,7 +17,7 @@ if str(ROOT) not in sys.path:
 if str(ROOT / "scripts/reports") not in sys.path:
     sys.path.insert(0, str(ROOT / "scripts/reports"))
 
-from scripts.reports import (
+from scripts.reports import (  # noqa: E402
     pages_route_retirement,
     replay_mpc11_published_variants,
     stage_b04_c_strategy_a,
@@ -31,14 +32,30 @@ from scripts.reports import (
     stage_mpc11_mesh_timing,
     stage_review05_family_query,
 )
-from scripts.reports.mpc01 import augment_pages, stage_per_attempt
+from scripts.reports.mpc01 import augment_pages, stage_per_attempt  # noqa: E402
 
 B04_SOURCE = ROOT / "reports/algorithm-results/b04-c-strategy-a-verification-v1"
 MPC06_SOURCE = ROOT / "reports/algorithm-results/mpc06-tube-objective-v1"
 STRATEGY_AB_ROUTE = "docs/research/evidence/mpc01-strategy-ab-ts03-20261103-r1"
 
 
-def stage_all(site: Path) -> dict[str, str]:
+class AugmentationRoutes(TypedDict):
+    mpc01: str
+    b04_c: str
+    mpc06: str
+    mpc06_complete: str
+    mpc06_offline: str
+    review05: str
+    mpc11: str
+    mpc08: str
+    mpc07: str
+    mpc10: str
+    mpc11_studies: str
+    b04_source: str
+    retained_mpc11_variants: dict[str, str]
+
+
+def stage_all(site: Path) -> AugmentationRoutes:
     """Add every standalone Pages augmentation and verify their combined site."""
     if site.is_symlink() or not site.is_dir():
         raise ValueError("extracted Pages site must be a regular directory")
@@ -296,7 +313,7 @@ def stage_all(site: Path) -> dict[str, str]:
     }
 
 
-def augment(download: Path, destination: Path) -> dict[str, str]:
+def augment(download: Path, destination: Path) -> AugmentationRoutes:
     site = augment_pages.extract_pages_site(download, destination)
     return stage_all(site)
 

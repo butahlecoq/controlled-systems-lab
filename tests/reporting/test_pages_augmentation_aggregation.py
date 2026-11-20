@@ -402,6 +402,7 @@ class PagesAugmentationAggregation(unittest.TestCase):
             run(13, "2026-11-03T03:04:00Z", "2026-11-03T03:10:00Z", head="b" * 40, event="push"),
         ]
         latest = await_pages_augmentation_runs.latest_report_run(runs, head_sha=sha)
+        assert latest is not None
         self.assertEqual(latest["id"], 10)
 
     def test_await_handoff_requires_parent_and_all_other_route_artifacts(self):
