@@ -44,11 +44,13 @@ def parse(entries, dimension):
     return result
 
 
-def fixed_axis_ellipsoid_witnesses(entries, fixed):
-    """Prove which axis ellipsoids already contain a fixed original H block."""
+def fixed_axis_witnesses(entries, fixed, *, include_zonotopes=False):
+    """Prove which supported axis factor sets contain a fixed original H block."""
     witnesses = {}
     for position, (kind, indices, *data) in enumerate(entries):
-        if kind != "ellipsoid" or any(index not in fixed for index in indices):
+        if kind != "ellipsoid" and not (include_zonotopes and kind == "zonotope"):
+            continue
+        if any(index not in fixed for index in indices):
             continue
         center, factor = data
         if factor.shape != (len(indices), len(indices)) or np.any(factor != np.diag(np.diag(factor))):
@@ -61,12 +63,16 @@ def fixed_axis_ellipsoid_witnesses(entries, fixed):
             if scale == 0 and residual != 0:
                 break
             values.append(residual / scale if scale else Fraction(0))
-        if len(values) == len(indices) and sum(value * value for value in values) <= 1:
+        if len(values) != len(indices):
+            continue
+        admissible = (all(abs(value) <= 1 for value in values) if kind == "zonotope"
+                      else sum(value * value for value in values) <= 1)
+        if admissible:
             witnesses[position] = list(map(float, values))
     return witnesses
 
 
-def constrain(opti, z, entries, initial):
+def constrain(opti, z, entries, initial, *, physical_scales=None):
     """Add each membership without modifying the original cost."""
     factors = []
     for entry in entries:
@@ -84,7 +90,11 @@ def constrain(opti, z, entries, initial):
             columns = matrix.shape[1]
             if columns:
                 factor = opti.variable(columns)
-                opti.subject_to(x == ca.DM(center) + ca.DM(matrix) @ factor)
+                if physical_scales is None:
+                    opti.subject_to(x == ca.DM(center) + ca.DM(matrix) @ factor)
+                else:
+                    residual = x - ca.DM(center) - ca.DM(matrix) @ factor
+                    opti.subject_to(residual / ca.DM(physical_scales[indices]) == 0)
                 if kind == "zonotope":
                     opti.subject_to(opti.bounded(-1, factor, 1))
                 else:

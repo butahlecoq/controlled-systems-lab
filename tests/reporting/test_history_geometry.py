@@ -75,6 +75,29 @@ class GeometryMembershipTests(unittest.TestCase):
                            geometry_memberships=[outside])
         self.assertNotIn("fixed_geometry_witnesses", impossible["warm_start"])
 
+    def test_physical_scaling_preserves_original_history_and_witnesses(self):
+        relation = {"inequalities": [], "upper_bounds": [], "equalities": [[1, 0]],
+                    "equality_values": [7000]}
+        objective = {"quadratic": {"Q": [[0, 0], [0, 2]], "linear": [0, -2], "offset": 1},
+                     "residual_norms": []}
+        memberships = [
+            {"kind": "zonotope", "indices": [0], "center": [7000],
+             "factor_count": 1, "factor": [[0]]},
+            {"kind": "zonotope", "indices": [1], "center": [0],
+             "factor_count": 1, "factor": [[0.5]]},
+        ]
+        result = solve(relation, objective, initial=[7000, 0.25], positive_indices=[0, 1],
+                       geometry_memberships=memberships, physical_scales=[1000, 0.01])
+        self.assertTrue(result["success"], result)
+        self.assertEqual(result["warm_start"]["provider_initial_primal"], [7000, 0.25])
+        self.assertEqual(result["warm_start"]["fixed_geometry_witnesses"], [0])
+        self.assertEqual(result["numerical_profile"], "physical-scaling")
+        self.assertAlmostEqual(result["primal"][0], 7000)
+        self.assertAlmostEqual(result["primal"][1], 0.5, places=5)
+        self.assertAlmostEqual(result["objective"], 0.25, places=5)
+        self.assertTrue(verify(parse(memberships, 2), result["primal"],
+                               result["geometry_factors"])["accepted"])
+
     def test_source_acceptance_independently_checks_geometry_witness(self):
         from history_validation import validate
         task = {"episode": {"intervals": 1},
