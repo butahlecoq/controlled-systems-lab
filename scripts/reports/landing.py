@@ -150,7 +150,7 @@ FAMILIES = {
         r"examples/catalogue-finite-action-v1",
         "synthesis",
         "Finite-action control across 35 catalogue models",
-        "Follows two decisions across five representations and recovers ten box and fifteen zonotope routes.",
+        "Completes both finite-action decisions in 175 routes, recovering 45 baseline refusals.",
     ),
     "mpc-crossover": Family(
         r"examples/mpc-crossover-6b7308c4",

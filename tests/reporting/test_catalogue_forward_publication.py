@@ -227,6 +227,8 @@ class CatalogueForwardPublicationTests(unittest.TestCase):
         route = stage.FINITE_ACTION.route
         evidence = f"{route}/catalogue-separable-box-evidence.zip"
         package = f"{route}/{route}.zip"
+        self.assertIn("all 175 routes", card)
+        self.assertIn("45 baseline refusals", card)
         for path in (entry["page"], entry["figure"], package):
             self.assertIn(path, files)
             self.assertIn(path, card)

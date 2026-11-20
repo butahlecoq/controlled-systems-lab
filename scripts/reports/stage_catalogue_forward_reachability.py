@@ -177,7 +177,7 @@ def build_finite_action(
     card = (
         f'<article class="saved-figure" id="{route}"><h3><a href="{entry["page"]}">{entry["title"]}</a></h3>'
         f'<a href="{entry["page"]}"><img src="{entry["figure"]}" alt="Two-decision hospital trajectories with all finite terminal alternatives and the highlighted optimal path"></a>'
-        "<p>Follow two decisions across five set representations and see how new scorers recover 25 routes.</p>"
+        "<p>Follow both decisions across all 175 routes and see how the changes recover 45 baseline refusals.</p>"
         f'<p><a href="{route}/{route}.zip">Download the lesson and all replay evidence</a></p></article>'
     )
     return files, [entry], card
