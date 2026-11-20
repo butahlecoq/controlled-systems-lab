@@ -3,18 +3,18 @@
 from __future__ import annotations
 
 import argparse
-from datetime import datetime
-from io import BytesIO
 import json
 import os
-from pathlib import Path
-from pathlib import PurePosixPath
 import tarfile
 import time
+import zipfile
+from datetime import datetime
+from io import BytesIO
+from pathlib import Path, PurePosixPath
+from typing import TypedDict, cast
 from urllib.error import HTTPError
 from urllib.parse import urlencode
 from urllib.request import HTTPRedirectHandler, Request, build_opener, urlopen
-import zipfile
 
 WORKFLOWS = (
     "mpc01-per-attempt-pages-augmentation.yml",
@@ -25,6 +25,12 @@ REPORTS_WORKFLOW = "algorithm-reports.yml"
 SOURCE_MARKER = "pages-augmentation-source.json"
 MARKER_SCHEMA = "csl.pages-augmentation-source/1"
 MAX_MARKER_BYTES = 4096
+
+
+class SourceMarker(TypedDict):
+    schema: str
+    report_run_id: int
+    head_sha: str
 
 
 def timestamp(value: str) -> datetime:
@@ -61,7 +67,9 @@ def get_artifact_zip(api_url: str, repository: str, token: str, artifact_id: int
     )
 
     class NoRedirect(HTTPRedirectHandler):
-        def redirect_request(self, req, fp, code, msg, headers, new_url):
+        def redirect_request(
+            self, req: Request, fp: object, code: int, msg: str, headers: object, newurl: str
+        ) -> None:
             return None
 
     try:
@@ -77,7 +85,7 @@ def get_artifact_zip(api_url: str, repository: str, token: str, artifact_id: int
             return response.read()
 
 
-def source_marker(artifact_zip: bytes) -> dict | None:
+def source_marker(artifact_zip: bytes) -> SourceMarker | None:
     """Read only the small source marker from the Pages tar inside its zip."""
     try:
         with zipfile.ZipFile(BytesIO(artifact_zip)) as zipped:
@@ -98,20 +106,22 @@ def source_marker(artifact_zip: bytes) -> dict | None:
             stream = archive.extractfile(members[0])
             if stream is None:
                 raise ValueError("Pages source marker cannot be read")
-            marker = json.loads(stream.read(MAX_MARKER_BYTES + 1))
+            marker: object = json.loads(stream.read(MAX_MARKER_BYTES + 1))
     except (tarfile.TarError, zipfile.BadZipFile, json.JSONDecodeError) as error:
         raise ValueError("Pages artifact does not contain a valid safe archive") from error
+    if not isinstance(marker, dict) or marker.get("schema") != MARKER_SCHEMA:
+        raise ValueError("Pages source marker identity is invalid")
+    report_run_id: object = marker.get("report_run_id")
+    head_sha: object = marker.get("head_sha")
     if (
-        not isinstance(marker, dict)
-        or marker.get("schema") != MARKER_SCHEMA
-        or not isinstance(marker.get("report_run_id"), int)
-        or marker["report_run_id"] <= 0
-        or not isinstance(marker.get("head_sha"), str)
-        or len(marker["head_sha"]) != 40
-        or any(char not in "0123456789abcdef" for char in marker["head_sha"])
+        type(report_run_id) is not int
+        or report_run_id <= 0
+        or not isinstance(head_sha, str)
+        or len(head_sha) != 40
+        or any(char not in "0123456789abcdef" for char in head_sha)
     ):
         raise ValueError("Pages source marker identity is invalid")
-    return marker
+    return cast(SourceMarker, marker)
 
 
 def pages_artifact(api_url: str, repository: str, token: str, run_id: int) -> dict | None:
@@ -128,7 +138,7 @@ def pages_artifact(api_url: str, repository: str, token: str, run_id: int) -> di
     return matches[0] if matches else None
 
 
-def run_marker(api_url: str, repository: str, token: str, run_id: int) -> dict | None:
+def run_marker(api_url: str, repository: str, token: str, run_id: int) -> SourceMarker | None:
     artifact = pages_artifact(api_url, repository, token, run_id)
     if artifact is None:
         return None
@@ -173,7 +183,7 @@ def matching_augmentation(
 ) -> dict | None:
     head_sha, parent_id = parent["head_sha"], int(parent["id"])
     deadline = time.monotonic() + timeout_seconds
-    observed: dict[int, tuple[int, dict | None]] = {}
+    observed: dict[int, tuple[int, SourceMarker | None]] = {}
     while time.monotonic() < deadline:
         runs = workflow_runs(api_url, repository, token, workflow, None)
         candidates = [
@@ -266,10 +276,16 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--timeout-seconds", type=int, default=3600)
     parser.add_argument("--poll-seconds", type=int, default=10)
-    parser.add_argument("--output", type=Path, default=Path(os.environ["GITHUB_OUTPUT"]))
+    parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     if args.timeout_seconds <= 0 or args.poll_seconds <= 0:
         parser.error("timeout and poll intervals must be positive")
+    output_path: Path | None = args.output
+    if output_path is None:
+        configured_output = os.environ.get("GITHUB_OUTPUT")
+        if not configured_output:
+            parser.error("--output or GITHUB_OUTPUT is required")
+        output_path = Path(configured_output)
     token = os.environ["GH_TOKEN"]
     api_url = os.environ.get("API_URL", "https://api.github.com").rstrip("/")
     repository = os.environ["REPOSITORY"]
@@ -279,7 +295,7 @@ def main() -> None:
     )
     if source is not None:
         upstream_id, upstream_sha = source
-        with args.output.open("a", encoding="utf-8") as output:
+        with output_path.open("a", encoding="utf-8") as output:
             output.write(f"upstream_run_id={upstream_id}\nupstream_sha={upstream_sha}\n")
         print(
             f"All Pages augmentations succeeded for report run {upstream_id}; its base artifact is ready."
