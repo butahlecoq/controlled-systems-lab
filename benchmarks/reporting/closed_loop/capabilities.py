@@ -458,6 +458,7 @@ def _history_definitions() -> list[dict]:
         LIFTED_POLYTOPE_CONTROLLER,
         LIFTED_POLYTOPE_IMPLEMENTATION,
         NATIVE_STRATEGY_IDS,
+        provider_profiles,
     )
 
     rows = []
@@ -704,14 +705,9 @@ def _history_definitions() -> list[dict]:
                 native = copy.deepcopy(strategy_templates[family])
                 native.pop("graph_id")
                 native.pop("graph_fingerprint")
-                provider = (
-                    "csl.nlp.casadi-ipopt.scaled-history-cost"
-                    if orbit
-                    else "csl.nlp.casadi-ipopt.history-cost"
-                )
-                fallbacks = ["csl.nlp.casadi-ipopt.mumps-history-cost"]
-                if orbit:
-                    fallbacks.append("csl.nlp.casadi-ipopt.history-cost")
+                profiles = provider_profiles(task, task["control_domains"]["continuous"]["bounds"])
+                provider = profiles[0][0]
+                fallbacks = list(dict.fromkeys(name for name, _ in profiles[1:]))
                 native["controller"].update(
                     id=controller_id,
                     strategy=strategy,
@@ -722,6 +718,10 @@ def _history_definitions() -> list[dict]:
                     solver={
                         "provider": provider,
                         "fallbacks": fallbacks,
+                        "profiles": [
+                            {"provider": name, "physical_scaling": scaling}
+                            for name, scaling in profiles
+                        ],
                         "assurance": "local numerical",
                     },
                 )

@@ -4,11 +4,8 @@ import json
 
 import numpy as np
 from history_geometry import parse, verify
+from history_policy import provider_profiles
 from history_validation import validate
-
-PLAIN = "csl.nlp.casadi-ipopt.history-cost"
-SCALED = "csl.nlp.casadi-ipopt.scaled-history-cost"
-MUMPS = "csl.nlp.casadi-ipopt.mumps-history-cost"
 
 
 def _feasibility_lp(
@@ -30,7 +27,9 @@ def _feasibility_lp(
     return outcome.x
 
 
-def feasible_membership_factors(memberships, history, relation, state_coordinates):
+def feasible_membership_factors(
+    memberships, history, relation, state_coordinates, *, lp_calls=None
+):
     """Recover latent coefficients for a fixed history without optimizing source cost."""
     z = np.asarray(history, dtype=float)
     entries = parse(memberships, state_coordinates, relation=relation, history_dimension=len(z))
@@ -46,6 +45,8 @@ def feasible_membership_factors(memberships, history, relation, state_coordinate
         normalized, rhs = matrix / scale[:, None], residual / scale
         coefficients = np.linalg.lstsq(normalized, rhs, rcond=None)[0]
         if kind == "zonotope" and np.max(np.abs(coefficients), initial=0) > 1:
+            if lp_calls is not None:
+                lp_calls.append("history.start-membership-feasibility")
             coefficients = _feasibility_lp(matrix.shape[1], normalized, rhs, (-1, 1))
         witnesses.append(coefficients.tolist())
     if not verify(entries, z, witnesses, tolerance=1e-8)["accepted"]:
@@ -55,7 +56,7 @@ def feasible_membership_factors(memberships, history, relation, state_coordinate
     return witnesses
 
 
-def prepare_start(task, request, relation, memberships, history):
+def prepare_start(task, request, relation, memberships, history, *, lp_calls):
     orbit = task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01"
     n = len(request["observed_physical_state"])
     dimension = n * (len(request["predictor_stages"]) + 1)
@@ -76,6 +77,7 @@ def prepare_start(task, request, relation, memberships, history):
         bounds = [(None, None)] * len(history)
         for index in radii:
             bounds[index] = (1e-9, None)
+        lp_calls.append("history.start-feasibility")
         history = _feasibility_lp(
             len(history), eq or None, eq_values or None, bounds, neq or None, upper_bounds or None
         )
@@ -84,7 +86,7 @@ def prepare_start(task, request, relation, memberships, history):
         phase = "scipy-highs-zero-objective-phase-one"
     return (
         history.tolist(),
-        feasible_membership_factors(memberships, history, relation, dimension),
+        feasible_membership_factors(memberships, history, relation, dimension, lp_calls=lp_calls),
         phase,
     )
 
@@ -95,14 +97,75 @@ def actuation_error(control, bounds):
     )
 
 
-def provider_profiles(task, control_bounds):
-    if task["model"]["case_id"] != "ENV717-EARTH-ORBIT-CONTINUOUS-01":
-        return [(PLAIN, None), (MUMPS, None)]
-    scaling = {
-        "state": [field["scale"] for field in task["model"]["states"]],
-        "control": [max(abs(lo), abs(hi)) or 1.0 for lo, hi in control_bounds],
-    }
-    return [(SCALED, scaling), (MUMPS, scaling), (MUMPS, None), (PLAIN, None)]
+def _axis_witness_residual(member, chosen, coefficients, family):
+    dimension = len(chosen)
+    lower, upper = np.full(dimension, -np.inf), np.full(dimension, np.inf)
+    for rows, rhs, equal in (
+        ("inequalities", "upper_bounds", False),
+        ("equalities", "equality_values", True),
+    ):
+        for row, value in zip(member[rows], member[rhs], strict=True):
+            (index,) = np.flatnonzero(row)
+            multiplier = row[index]
+            bound = value / multiplier
+            if equal or multiplier < 0:
+                lower[index] = max(lower[index], bound)
+            if equal or multiplier > 0:
+                upper[index] = min(upper[index], bound)
+    if not np.isfinite(lower).all() or not np.isfinite(upper).all() or np.any(lower > upper):
+        raise ValueError("Native axis membership has invalid physical bounds.")
+    factor = np.asarray(coefficients, dtype=float)
+    if factor.shape != chosen.shape or not np.isfinite(factor).all():
+        raise ValueError("Native axis membership witness has invalid shape or values.")
+    if family == "box":
+        center = lower * 0.5 + upper * 0.5
+        radius = np.maximum(center - lower, upper - center)
+        lifted = center + radius * factor
+        bounds_error = np.max(np.abs(factor) - 1, initial=0.0)
+    else:
+        frame = np.asarray(member["parallelotope_frame"], dtype=float)
+        if not np.array_equal(frame, np.eye(dimension)):
+            raise ValueError("Native parallelotope membership uses an unsupported frame.")
+        lifted = frame @ factor
+        bounds_error = max(np.max(lower - factor, initial=0.0), np.max(factor - upper, initial=0.0))
+    return float(max(np.max(np.abs(chosen - lifted), initial=0.0), bounds_error))
+
+
+def verify_native_geometry_receipt(geometry, primal, receipt):
+    """Check the native source bindings and axis-family witnesses from the actual receipt."""
+    family = geometry["family"]
+    expected_bindings = []
+    members = []
+    for stage in geometry["stages"]:
+        for member in stage["memberships"]:
+            role, selected = member["role"], member["set_id"]
+            reference = selected
+            if member["kind"] != "lifted-h":
+                reference = stage[role + "_h"]["set_id"]
+            expected_bindings.append(
+                dict(
+                    stage=stage["stage"],
+                    role=role,
+                    selected=selected,
+                    reference=reference,
+                    relation=member["relation"],
+                )
+            )
+            members.append(member)
+    if receipt.get("geometry_bindings") != expected_bindings:
+        raise ValueError("Native membership source binding differs from the exported geometry.")
+    z = np.asarray(primal, dtype=float)
+    if z.ndim != 1 or not np.isfinite(z).all():
+        raise ValueError("Native history witness is not a finite vector.")
+    residual = 0.0
+    for member, factor in zip(members, receipt["geometry_factors"], strict=True):
+        if family in {"box", "parallelotope"}:
+            residual = max(
+                residual, _axis_witness_residual(member, z[member["indices"]], factor, family)
+            )
+        elif member["kind"] in {"h", "lifted-h"} and factor != []:
+            raise ValueError("Native H memberships expect an empty latent witness.")
+    return {"passed": residual <= 1e-7, "max_residual": residual, "bindings_checked": len(members)}
 
 
 def solve_strategy(
@@ -110,6 +173,7 @@ def solve_strategy(
 ):
     """Retry explicit providers for one observation and accept the first applicable checked plan."""
     attempts = []
+    strategy_module = {"A": "csl.synthesis.reach-back", "B": "csl.synthesis.strategy-b"}[strategy]
     for provider, scaling in provider_profiles(task, request["control_bounds"]):
         native_request = dict(
             request,
@@ -136,11 +200,15 @@ def solve_strategy(
         ):
             if receipt.get("provider"):
                 attempt["actual_provider"] = receipt["provider"]
+                attempt["actual_version"] = receipt.get("version")
+                attempt["actual_strategy_module"] = receipt.get("strategy_module")
             if response.get("status") == "solved":
                 if (
                     response.get("policy_id") != request["controller_id"]
                     or receipt.get("provider") != provider
                     or receipt.get("strategy") != strategy
+                    or receipt.get("strategy_module") != strategy_module
+                    or receipt.get("program_id") != request["request_id"]
                     or not receipt.get("supplied_readback")
                     or any(
                         response.get(key) != exported[key]
@@ -161,6 +229,11 @@ def solve_strategy(
                     geometry_memberships=memberships,
                     geometry_factors=receipt["geometry_factors"],
                 )
+                native_geometry = verify_native_geometry_receipt(
+                    exported["geometry"], response["primal"], receipt
+                )
+                checks["checks"]["native_geometry_receipt"] = native_geometry
+                checks["accepted"] = checks["accepted"] and native_geometry["passed"]
                 attempt["independent_accepted"] = checks["accepted"]
                 if checks["accepted"]:
                     difference = actuation_error(checks["controls"][0], request["control_bounds"])

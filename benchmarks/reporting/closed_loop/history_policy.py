@@ -16,6 +16,21 @@ NATIVE_STRATEGY_IDS = {
 
 
 
+PLAIN = "csl.nlp.casadi-ipopt.history-cost"
+SCALED = "csl.nlp.casadi-ipopt.scaled-history-cost"
+MUMPS = "csl.nlp.casadi-ipopt.mumps-history-cost"
+
+
+def provider_profiles(task, control_bounds):
+    if task["model"]["case_id"] != "ENV717-EARTH-ORBIT-CONTINUOUS-01":
+        return [(PLAIN, None), (MUMPS, None)]
+    scaling = {
+        "state": [field["scale"] for field in task["model"]["states"]],
+        "control": [max(abs(lo), abs(hi)) or 1.0 for lo, hi in control_bounds],
+    }
+    return [(SCALED, scaling), (MUMPS, scaling), (MUMPS, None), (PLAIN, None)]
+
+
 def should_refine_epigraph(checks, solver, compiled):
     """Retry the same NLP only when epigraph cost is the sole failed check."""
     rows = checks.get("checks", {})
@@ -437,16 +452,22 @@ class HistoryPolicy:
         if self.previous_history is not None:
             initial = reintegrate_history_start(request, initial)
             initialization["policy"] = "rollout-shifted-controls-from-observation"
+        lp_calls = []
         try:
-            start, factors, phase = prepare_start(self.task, request, exported["history_relation"], memberships, initial)
+            start, factors, phase = prepare_start(
+                self.task, request, exported["history_relation"], memberships, initial, lp_calls=lp_calls
+            )
         except ValueError as error:
             result["reason"] = f"Supplied history preparation failed: {error}"
             return result
+        finally:
+            result["invocations"].extend({
+                "operation": name, "module_id": "scipy.optimize.linprog",
+                "provider": "highs", "profile_id": self.controller_id,
+            } for name in lp_calls)
         initialization["initial_primal"] = start
         if phase:
             initialization["policy"] = phase
-            result["invocations"].append({"operation": "history.start-feasibility",
-                                          "module_id": "scipy.optimize.linprog", "provider": "highs", "profile_id": self.controller_id})
 
         def exchange(raw):
             self.process.stdin.write(raw)
@@ -468,14 +489,18 @@ class HistoryPolicy:
             "native_strategy_attempts": [{key: value for key, value in item.items()
                                            if key not in {"request_raw", "response_raw"}} for item in attempts],
         }
+        for attempt in attempts:
+            if attempt.get("actual_provider") and attempt.get("actual_strategy_module"):
+                result["invocations"].append({
+                    "operation": "controller.solve", "module_id": attempt["actual_strategy_module"],
+                    "profile_id": self.controller_id, "provider": attempt["actual_provider"],
+                    "version": attempt["actual_version"], "outcome": attempt["outcome"],
+                })
         if response is None:
             result["reason"] = "No checked native strategy proposal could be applied"
             return result
         solver = response["solver_receipt"]
         result["solve_receipt"].update(solver=solver, independent_validation=checks)
-        result["invocations"].append({"operation": "controller.solve", "module_id": solver["strategy_module"],
-                                      "profile_id": self.controller_id, "provider": solver["provider"],
-                                      "version": solver["version"]})
         self.previous_history = {"stage": request["absolute_update_index"], "primal": response["primal"]}
         result.update(status="accepted", control=checks["controls"][0],
                       selected_plan={key: checks[key] for key in ("states", "controls", "source_cost")},

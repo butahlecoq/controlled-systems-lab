@@ -30,3 +30,109 @@ class NativeStrategyHistoryTest(unittest.TestCase):
         self.assertTrue(all(-1 <= value <= 1 for value in factors))
         with self.assertRaisesRegex(ValueError, "membership"):
             feasible_membership_factors([membership], [1.8, 0.2], {}, 2)
+
+    def test_native_axis_witness_and_h_source_binding_are_checked(self):
+        from native_strategy_history import verify_native_geometry_receipt
+
+        member = {
+            "kind": "h",
+            "role": "forward",
+            "set_id": "selected",
+            "relation": "outer",
+            "indices": [0, 1],
+            "inequalities": [[1, 0], [-1, 0]],
+            "upper_bounds": [1, 1],
+            "equalities": [[0, 1]],
+            "equality_values": [2],
+        }
+        geometry = {
+            "family": "box",
+            "stages": [
+                {
+                    "stage": 0,
+                    "memberships": [member],
+                    "forward_h": {"set_id": "source"},
+                }
+            ],
+        }
+        binding = {
+            "stage": 0,
+            "role": "forward",
+            "selected": "selected",
+            "reference": "source",
+            "relation": "outer",
+        }
+        receipt = {"geometry_bindings": [binding], "geometry_factors": [[0.5, 0.0]]}
+        self.assertTrue(verify_native_geometry_receipt(geometry, [0.5, 2], receipt)["passed"])
+        wrong_factor = dict(receipt, geometry_factors=[[0.9, 0.0]])
+        self.assertFalse(verify_native_geometry_receipt(geometry, [0.5, 2], wrong_factor)["passed"])
+        wrong_source = dict(receipt, geometry_bindings=[dict(binding, reference="another")])
+        with self.assertRaisesRegex(ValueError, "source"):
+            verify_native_geometry_receipt(geometry, [0.5, 2], wrong_source)
+
+        member["parallelotope_frame"] = [[1, 0], [0, 1]]
+        geometry["family"] = "parallelotope"
+        receipt["geometry_factors"] = [[0.5, 2.0]]
+        self.assertTrue(verify_native_geometry_receipt(geometry, [0.5, 2], receipt)["passed"])
+        receipt["geometry_factors"] = [[0.5, 3.0]]
+        self.assertFalse(verify_native_geometry_receipt(geometry, [0.5, 2], receipt)["passed"])
+
+    def test_factor_feasibility_lp_is_recorded_even_if_it_stops(self):
+        from native_strategy_history import feasible_membership_factors
+
+        member = {
+            "kind": "zonotope",
+            "indices": [0],
+            "factor_count": 3,
+            "center": [0],
+            "factor": [[1, 1, 2]],
+        }
+        calls = []
+        [factor] = feasible_membership_factors([member], [3.6], {}, 1, lp_calls=calls)
+        self.assertAlmostEqual(factor[0] + factor[1] + 2 * factor[2], 3.6)
+        self.assertEqual(calls, ["history.start-membership-feasibility"])
+        calls.clear()
+        with self.assertRaisesRegex(ValueError, "feasibility"):
+            feasible_membership_factors([member], [5], {}, 1, lp_calls=calls)
+        self.assertEqual(calls, ["history.start-membership-feasibility"])
+
+    def test_native_proposal_must_belong_to_the_requested_program(self):
+        import json
+
+        from native_strategy_history import solve_strategy
+
+        request = {
+            "task_id": "test",
+            "task_sha256": "test-hash",
+            "action_profile_id": "continuous",
+            "controller_id": "controller",
+            "request_id": "original",
+            "control_bounds": [[-1, 1]],
+        }
+        task = {"model": {"case_id": "test"}}
+        exported = {"history_relation": {}, "history_objective": {}, "geometry": {}}
+        response = dict(
+            request,
+            **exported,
+            status="solved",
+            policy_id="controller",
+            solver_receipt={
+                "provider": "csl.nlp.casadi-ipopt.history-cost",
+                "strategy": "A",
+                "strategy_module": "csl.synthesis.reach-back",
+                "program_id": "unrelated",
+                "supplied_readback": True,
+            },
+        )
+        with self.assertRaisesRegex(ValueError, "requested route"):
+            solve_strategy(
+                task,
+                request,
+                exported,
+                [],
+                "A",
+                [0],
+                [],
+                lambda _raw: json.dumps(response),
+                lambda _attempts: None,
+            )
