@@ -7,11 +7,19 @@ import json
 from html import escape
 from html.parser import HTMLParser
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-if __name__ == "__main__" and not __package__:
-    from environment_report_publication import archive_identity, offline_zip
+if TYPE_CHECKING:
+    from scripts.reports import environment_report_publication as publication
 else:
-    from scripts.reports.environment_report_publication import archive_identity, offline_zip
+    publication_path = Path(__file__).with_name("environment_report_publication.py")
+    publication_spec = importlib.util.spec_from_file_location(
+        "environment_report_publication", publication_path
+    )
+    if publication_spec is None or publication_spec.loader is None:
+        raise ImportError(f"cannot load the environment publication helper: {publication_path}")
+    publication = importlib.util.module_from_spec(publication_spec)
+    publication_spec.loader.exec_module(publication)
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/env717-pendulum-terminal-pilot-v1"
@@ -106,7 +114,7 @@ def _inputs(source: Path) -> tuple[dict[str, bytes], dict]:
 
 def stage(source: Path, site_root: Path) -> str:
     files, result = _inputs(source)
-    publisher, archived_zip_sha256 = archive_identity(
+    publisher, archived_zip_sha256 = publication.archive_identity(
         source.name, files["SHA256SUMS"], Path(__file__)
     )
     identity = {
@@ -172,7 +180,7 @@ def stage(source: Path, site_root: Path) -> str:
         f"<title>Offline PendulumTerminal report</title>"
         f'<a href="{report_id}/index.html">Open the report</a></html>'
     ).encode()
-    archive_bytes = offline_zip(
+    archive_bytes = publication.offline_zip(
         report_id, offline_landing, generated, expected_sha256=archived_zip_sha256
     )
     destination.mkdir()
