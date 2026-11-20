@@ -1,6 +1,6 @@
+import csv
 import hashlib
 import json
-import csv
 import sys
 import tempfile
 import unittest
@@ -8,12 +8,14 @@ import warnings
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts" / "reports"))
-import control_figure_data as data
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "reports"))
+
 import adapt_fuel_record as fuel
+import control_figure_data as data
 import control_figures
 import figure_style
+
+ROOT = Path(__file__).resolve().parents[2]
 
 
 class ControlFiguresTests(unittest.TestCase):
@@ -334,23 +336,21 @@ class ControlFiguresTests(unittest.TestCase):
             self.assertEqual(
                 projection_tree.attrib["aria-labelledby"], "figure-title figure-description"
             )
+            svg_namespace = {"svg": "http://www.w3.org/2000/svg"}
             self.assertIn(
                 "projected terminal relation",
-                projection_tree.find("{http://www.w3.org/2000/svg}title").text,
+                projection_tree.findtext("svg:title", "", svg_namespace),
             )
-            description = projection_tree.find("{http://www.w3.org/2000/svg}desc").text
+            description = projection_tree.findtext("svg:desc", "", svg_namespace)
             self.assertIn("major gridlines", description)
             self.assertIn("Independent x/y scales", description)
+            trajectories = ET.parse(output / "trajectories.svg").getroot()
             self.assertIn(
-                "independent scales",
-                ET.parse(output / "trajectories.svg")
-                .getroot()
-                .find("{http://www.w3.org/2000/svg}desc")
-                .text,
+                "independent scales", trajectories.findtext("svg:desc", "", svg_namespace)
             )
             import matplotlib.pyplot as plt
 
-            equal_axis = plt.subplots()[1]
+            equal_figure, equal_axis = plt.subplots()
             self.assertIn(
                 "Equal x/y data scaling",
                 control_figures.set_coordinate_aspect(
@@ -358,7 +358,7 @@ class ControlFiguresTests(unittest.TestCase):
                 ),
             )
             self.assertEqual(equal_axis.get_aspect(), 1.0)
-            plt.close(equal_axis.figure)
+            plt.close(equal_figure)
             pair_svg = (output / "trajectory-pair-01.svg").read_text()
             self.assertIn("fixture-run · analytic fixture v 1 · witness-0", pair_svg)
             self.assertIn("selected witness trajectories", pair_svg)

@@ -1,14 +1,15 @@
 """Render validated saved control-system figure documents offline."""
 
 from __future__ import annotations
+
 import argparse
 import hashlib
 import importlib.metadata
 import json
 import os
-from pathlib import Path
 import time
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
 import control_figure_data as data
 import figure_style
@@ -55,13 +56,14 @@ def render(document, source_hash, style_path, out, additional_inputs=None):
     projections = [s for s in document["series"] if s["kind"] == "projection"]
     samples = [s for s in document["series"] if s["kind"] == "support_samples"]
     timings = [s for s in document["series"] if s["kind"] == "timing"]
-    rc = {
-        "font.family": style["font_family"],
-        "font.size": style["font_size"],
-        "svg.hashsalt": style["style_id"],
-        "svg.fonttype": "none",
-    }
-    with matplotlib.rc_context(rc):
+    with matplotlib.rc_context(
+        {
+            "font.family": style["font_family"],
+            "font.size": style["font_size"],
+            "svg.hashsalt": style["style_id"],
+            "svg.fonttype": "none",
+        }
+    ):
         if trajectories:
             first = trajectories[0]
             state_ids = first["state_coordinate_ids"]
@@ -137,7 +139,6 @@ def render(document, source_hash, style_path, out, additional_inputs=None):
             a, b = (state_defs[k] for k in item["coordinate_ids"])
             fig, ax = plt.subplots(figsize=tuple(style["projection_size"]))
             try:
-                x = document["axes"]["states"]["points"]
                 for path in item["paths"]:
                     ax.plot(
                         [point[0] for point in path["points"]],

@@ -54,6 +54,19 @@ on:
       - 'scripts/reports/render_full_profile_campaign.py'
       - 'docs/examples/closed-loop/campaign-2026-11-18/**'
       - 'scripts/reports/figure_style.py'
+      - 'scripts/reports/mathematical_notation.py'
+      - 'scripts/reports/control_figure_data.py'
+      - 'scripts/reports/control_figures.py'
+      - 'scripts/reports/recorded_closed_loop_figures.py'
+      - 'tests/reporting/test_recorded_closed_loop_figures.py'
+      - 'tests/reporting/test_viz03_control_figures.py'
+      - 'scripts/reports/adapt_fuel_record.py'
+      - 'scripts/reports/styles/control-v1.json'
+      - 'benchmarks/reporting/closed_loop/attempt_records.py'
+      - 'reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/scenario.json'
+      - 'reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/geometry.json'
+      - 'reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/raw-runs.jsonl'
+      - 'tests/fixtures/reports/b06-measured-source/b06_finite_minimax.cpp'
       - 'scripts/reports/plot.py'
       - 'scripts/reports/b04_c_exact_registered_reports.py'
       - 'tests/reporting/test_b04_publication_source_snapshot.py'
@@ -184,6 +197,19 @@ on:
       - 'scripts/reports/render_full_profile_campaign.py'
       - 'docs/examples/closed-loop/campaign-2026-11-18/**'
       - 'scripts/reports/figure_style.py'
+      - 'scripts/reports/mathematical_notation.py'
+      - 'scripts/reports/control_figure_data.py'
+      - 'scripts/reports/control_figures.py'
+      - 'scripts/reports/recorded_closed_loop_figures.py'
+      - 'tests/reporting/test_recorded_closed_loop_figures.py'
+      - 'tests/reporting/test_viz03_control_figures.py'
+      - 'scripts/reports/adapt_fuel_record.py'
+      - 'scripts/reports/styles/control-v1.json'
+      - 'benchmarks/reporting/closed_loop/attempt_records.py'
+      - 'reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/scenario.json'
+      - 'reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/geometry.json'
+      - 'reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/raw-runs.jsonl'
+      - 'tests/fixtures/reports/b06-measured-source/b06_finite_minimax.cpp'
       - 'scripts/reports/plot.py'
       - 'scripts/reports/b04_c_exact_registered_reports.py'
       - 'tests/reporting/test_b04_publication_source_snapshot.py'
@@ -304,6 +330,8 @@ jobs:
           python -m unittest tests.reporting.test_report_data tests.reporting.test_render tests.reporting.test_publication_policy tests.reporting.test_report_source_identity tests.reporting.test_registered_kinds tests.reporting.test_landing tests.reporting.test_learning_book tests.reporting.test_plot tests.reporting.test_b04_publication_source_snapshot tests.reporting.test_publication_spine_boundaries
       - name: Check mathematical presentation and frozen HTML
         run: python -m unittest tests.reporting.test_mathematical_presentation
+      - name: Validate recorded control figures
+        run: python -m unittest tests.reporting.test_recorded_closed_loop_figures tests.reporting.test_viz03_control_figures
       - name: Exercise saved publication and collector consumer families
         env:
           MPLBACKEND: Agg

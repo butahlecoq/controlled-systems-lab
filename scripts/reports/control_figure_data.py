@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-import hashlib
 import csv
+import hashlib
 import json
 import math
-from pathlib import Path
 import re
 from fractions import Fraction
+from pathlib import Path
 
 SCHEMA = "csl.plot-document/1"
 SHA256 = re.compile(r"[0-9a-f]{64}\Z")
@@ -182,7 +182,6 @@ def validate(document):
     if not isinstance(series, list) or not series:
         raise ValueError("at least one figure series is required")
     state_ids = {c["id"] for c in coords["states"]}
-    control_ids = {c["id"] for c in coords["controls"]}
     for i, item in enumerate(series):
         path = f"series[{i}]"
         if not isinstance(item, dict) or item.get("kind") not in (
