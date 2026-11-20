@@ -663,7 +663,10 @@ def _stage_owner(route: str, schema: str | None) -> str | None:
         )
     if schema.startswith("csl.env717-publication/"):
         suffix = root.removeprefix("env717-").rsplit("-", 1)[0]
-        stem = "env717_" + suffix.replace("-", "_")
+        stem = {
+            "simple-control": "env717",
+            "multipoint": "env717_multipoint_cost_game",
+        }.get(suffix, "env717_" + suffix.replace("-", "_"))
     else:
         stem = schema.removeprefix("csl.").split("/", 1)[0].removesuffix("-publication")
         stem = stem.replace(".", "_").replace("-", "_")
