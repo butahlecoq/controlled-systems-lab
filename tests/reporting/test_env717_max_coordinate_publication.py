@@ -12,8 +12,9 @@ ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location(
     "stage_env717_max_coordinate", ROOT / "scripts/reports/stage_env717_max_coordinate.py"
 )
+if SPEC is None or SPEC.loader is None:
+    raise ImportError("cannot load the environment publication test dependency")
 stage_module = importlib.util.module_from_spec(SPEC)
-assert SPEC.loader is not None
 SPEC.loader.exec_module(stage_module)
 
 
@@ -29,6 +30,11 @@ class MaxCoordinateGamePublicationTests(unittest.TestCase):
                 "<!doctype html><html><body><ul></ul></body></html>", encoding="utf-8"
             )
             report_id = stage_module.stage(stage_module.SOURCE, site)
+            self.assertEqual(report_id, "env717-max-coordinate-b38d01d47e4de3cffae3")
+            self.assertEqual(
+                hashlib.sha256((site / f"{report_id}.zip").read_bytes()).hexdigest(),
+                "2ed34aee529a48056b28301bbefbb23dfa8629c1c3a47ca95670768fc4cadd86",
+            )
             self.assertRegex(report_id, r"^env717-max-coordinate-[0-9a-f]{20}$")
             destination = site / report_id
             manifest = json.loads((destination / "publication-manifest.json").read_text())

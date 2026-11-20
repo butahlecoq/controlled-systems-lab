@@ -13,8 +13,9 @@ ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location(
     "stage_env717_unequal_game", ROOT / "scripts/reports/stage_env717_unequal_game.py"
 )
+if SPEC is None or SPEC.loader is None:
+    raise ImportError("cannot load the environment publication test dependency")
 stage_module = importlib.util.module_from_spec(SPEC)
-assert SPEC.loader is not None
 SPEC.loader.exec_module(stage_module)
 
 
@@ -37,6 +38,11 @@ class UnequalGamePublicationTests(unittest.TestCase):
 
     def test_stages_verified_content_addressed_report_and_offline_archive(self):
         report_id = stage_module.stage(self.source, self.site)
+        self.assertEqual(report_id, "env717-unequal-game-0184b7d45c1bdb804fc4")
+        self.assertEqual(
+            hashlib.sha256((self.site / f"{report_id}.zip").read_bytes()).hexdigest(),
+            "51dd33b121b823ba0e91fb4bdd90736a1437ebfd38621b21fe8d0b05b9dcb608",
+        )
         self.assertRegex(report_id, r"^env717-unequal-game-[0-9a-f]{20}$")
         destination = self.site / report_id
         manifest = json.loads((destination / "publication-manifest.json").read_text())

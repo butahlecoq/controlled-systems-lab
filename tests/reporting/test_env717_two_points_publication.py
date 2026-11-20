@@ -13,8 +13,9 @@ ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location(
     "stage_env717_two_points", ROOT / "scripts/reports/stage_env717_two_points.py"
 )
+if SPEC is None or SPEC.loader is None:
+    raise ImportError("cannot load the environment publication test dependency")
 stage_module = importlib.util.module_from_spec(SPEC)
-assert SPEC.loader is not None
 SPEC.loader.exec_module(stage_module)
 
 
@@ -42,6 +43,16 @@ class TwoPointsPublicationTests(unittest.TestCase):
         )
         legacy_id = stage_module.stage(legacy_source, self.site)
         report_id = stage_module.stage(self.source, self.site)
+        self.assertEqual(report_id, "env717-two-points-4fbedf73c6f198fd57e2")
+        self.assertEqual(
+            hashlib.sha256((self.site / f"{report_id}.zip").read_bytes()).hexdigest(),
+            "97961a731e37453d194eb03c621dc34320871849d50aefb009191dfb1d01b6ee",
+        )
+        self.assertEqual(legacy_id, "env717-two-points-a6ccaf470aaa2b1c92d1")
+        self.assertEqual(
+            hashlib.sha256((self.site / f"{legacy_id}.zip").read_bytes()).hexdigest(),
+            "8d8a2e92bded955b3d78c388ac2f0d78ab959842940ac0041bf91a6fedde9c22",
+        )
         self.assertNotEqual(legacy_id, report_id)
         self.assertRegex(report_id, r"^env717-two-points-[0-9a-f]{20}$")
         destination = self.site / report_id

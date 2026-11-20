@@ -37,7 +37,7 @@ class DubinsCarPublicationTests(unittest.TestCase):
     def tearDown(self):
         self.temp.cleanup()
 
-    def test_all_four_stagers_load_outside_the_repository(self):
+    def test_stagers_load_outside_the_repository(self):
         check_imports = """\
 import importlib
 import importlib.util
@@ -45,7 +45,7 @@ import sys
 from pathlib import Path
 
 root = Path(sys.argv[1])
-names = [f"stage_env717_{model}" for model in sys.argv[2:]]
+names = ["stage_env717" + suffix for suffix in sys.argv[2:]]
 for name in names:
     spec = importlib.util.spec_from_file_location(f"file_{name}", root / f"{name}.py")
     module = importlib.util.module_from_spec(spec)
@@ -62,10 +62,15 @@ for name in names:
                 "-c",
                 check_imports,
                 str(ROOT / "scripts/reports"),
-                "dubins_car",
-                "earth_orbit",
-                "pendulum_terminal",
-                "vanderpol",
+                "",
+                "_dubins_car",
+                "_earth_orbit",
+                "_max_coordinate",
+                "_pendulum_terminal",
+                "_point_on_plane",
+                "_two_points",
+                "_unequal_game",
+                "_vanderpol",
             ],
             cwd=self.site,
             capture_output=True,

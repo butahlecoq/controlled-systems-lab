@@ -14,8 +14,9 @@ ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location(
     "stage_env717_point_on_plane", ROOT / "scripts/reports/stage_env717_point_on_plane.py"
 )
+if SPEC is None or SPEC.loader is None:
+    raise ImportError("cannot load the environment publication test dependency")
 stage_module = importlib.util.module_from_spec(SPEC)
-assert SPEC.loader is not None
 SPEC.loader.exec_module(stage_module)
 
 
@@ -38,6 +39,11 @@ class PointOnThePlanePublicationTests(unittest.TestCase):
 
     def test_stages_verified_position_and_velocity_geometry(self):
         report_id = stage_module.stage(self.source, self.site)
+        self.assertEqual(report_id, "env717-point-on-plane-c19c55ac5163174af9d4")
+        self.assertEqual(
+            hashlib.sha256((self.site / f"{report_id}.zip").read_bytes()).hexdigest(),
+            "2376c95d8707ce29acaece14d5d9b92b502f3f52368e3d4062212d781c781b6a",
+        )
         self.assertRegex(report_id, r"^env717-point-on-plane-[0-9a-f]{20}$")
         destination = self.site / report_id
         manifest = json.loads((destination / "publication-manifest.json").read_text())
