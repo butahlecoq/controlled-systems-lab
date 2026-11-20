@@ -279,6 +279,7 @@ SAVED_DATA_COMPANION_RENDERERS = {
     "benchmarks/reporting/review05/render_constraint_ladder.py",
 }
 FROZEN_COMPANIONS = {
+    "catalogue-ring-initial-support-v1": "examples/catalogue-ring-initial-support-v1/index.html",
     "catalogue-forward-reachability-v1": "examples/catalogue-forward-reachability-v1/index.html",
     "catalogue-feasible-history-v1": "examples/catalogue-feasible-history-v1/index.html",
     "catalogue-exact-support-v1": "examples/catalogue-exact-support-v1/index.html",
@@ -310,6 +311,8 @@ FROZEN_COMPANIONS = {
     "lotka-volterra-sampled-20261023": "examples/lotka-volterra-sampled-v1.html",
 }
 FROZEN_REVIEWED_ROUTES = {
+    "catalogue-ring-initial-support-v1":
+        "reviewed: projected feasible zero-control history and fixed stage-zero support line",
     "catalogue-backward-reachability-v1":
         "reviewed: all four battery stages show forward and backward rectangles, intersections and the trajectory",
     "catalogue-exact-support-v1":
@@ -545,6 +548,8 @@ def build(root: Path = ROOT) -> dict:
                     "catalogue-forward-reachability-v1/platoon-forward.svg",
                     "catalogue-feasible-history-v1/index.html",
                     "catalogue-feasible-history-v1/battery-history-projections.svg",
+                    "catalogue-ring-initial-support-v1/index.html",
+                    "catalogue-ring-initial-support-v1/initial-support.svg",
                     "catalogue-exact-support-v1/index.html",
                     "catalogue-exact-support-v1/building-budget-projection.svg",
                     "catalogue-backward-reachability-v1/index.html",

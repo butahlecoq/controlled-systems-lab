@@ -254,6 +254,9 @@ class VisualRouteInventoryTests(unittest.TestCase):
         history=routes["catalogue-feasible-history-v1"]
         self.assertEqual(history["assets"],["battery-history-projections.svg"])
         self.assertEqual(history["companion_route"],"examples/catalogue-feasible-history-v1/index.html")
+        ring=routes["catalogue-ring-initial-support-v1"]
+        self.assertEqual(ring["assets"],["initial-support.svg"])
+        self.assertEqual(ring["companion_route"],"examples/catalogue-ring-initial-support-v1/index.html")
         exact=routes["catalogue-exact-support-v1"]
         self.assertEqual(exact["assets"],["building-budget-projection.svg"])
         self.assertEqual(exact["companion_route"],"examples/catalogue-exact-support-v1/index.html")
@@ -270,7 +273,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         reviewed_routes = {
             paired["route"], query["route"], crossover["route"], forward["route"],
             history["route"], exact["route"], backward["route"],
-            finite_action["route"],
+            finite_action["route"], ring["route"],
         }
         self.assertTrue(all(entry["disposition"].startswith("deferred: original frozen route-level readability")
                             for entry in routes.values() if entry["route"] not in reviewed_routes))
@@ -334,6 +337,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "catalogue-forward-reachability-v1/platoon-forward.svg",
             "catalogue-feasible-history-v1/index.html",
             "catalogue-feasible-history-v1/battery-history-projections.svg",
+            "catalogue-ring-initial-support-v1/index.html",
+            "catalogue-ring-initial-support-v1/initial-support.svg",
             "catalogue-exact-support-v1/index.html",
             "catalogue-exact-support-v1/building-budget-projection.svg",
             "catalogue-backward-reachability-v1/index.html",

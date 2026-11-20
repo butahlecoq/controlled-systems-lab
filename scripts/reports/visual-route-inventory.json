@@ -1480,12 +1480,13 @@
     },
     {
       "source": "scripts/reports/stage_catalogue_forward_reachability.py",
-      "signal_count": 5,
+      "signal_count": 6,
       "asset_name_literals": [
         "battery-forward-backward.svg",
         "battery-history-projections.svg",
         "building-budget-projection.svg",
         "hospital-finite-actions.svg",
+        "initial-support.svg",
         "platoon-forward.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
@@ -2869,6 +2870,16 @@
       "index_sha256": "a2dccc7b3c2f84a61c2f05c6a60be39d37faf3b55e2006f9fbdbb43447415906",
       "disposition": "reviewed: physical and centred coordinates show the same stagewise platoon projection",
       "companion_route": "examples/catalogue-forward-reachability-v1/index.html"
+    },
+    {
+      "route": "catalogue-ring-initial-support-v1",
+      "source_bundle": "catalogue-ring-initial-support-v1",
+      "assets": [
+        "initial-support.svg"
+      ],
+      "index_sha256": "07a02457db0ac7dc8a8a5f3bfbc150a2e162ffd3dee10b23a520306a3cffaa38",
+      "disposition": "reviewed: projected feasible zero-control history and fixed stage-zero support line",
+      "companion_route": "examples/catalogue-ring-initial-support-v1/index.html"
     },
     {
       "route": "convex-20261012T041854Z-4d54a407c9b2",
@@ -4430,6 +4441,8 @@
         "catalogue-forward-reachability-v1/platoon-forward.svg",
         "catalogue-feasible-history-v1/index.html",
         "catalogue-feasible-history-v1/battery-history-projections.svg",
+        "catalogue-ring-initial-support-v1/index.html",
+        "catalogue-ring-initial-support-v1/initial-support.svg",
         "catalogue-exact-support-v1/index.html",
         "catalogue-exact-support-v1/building-budget-projection.svg",
         "catalogue-backward-reachability-v1/index.html",
