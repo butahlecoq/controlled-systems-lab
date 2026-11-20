@@ -42,8 +42,8 @@ FEASIBLE_HISTORY = FrozenNativeBundle(
     route="catalogue-feasible-history-v1",
     source_commit="dc6801dc5f02c4000b4f1272361752581a55873a",
     schema="csl.catalogue-feasible-history-capture/1",
-    manifest_sha256="483aa1f432dd0d2ce9b30852c4acb1094f8ff1cbfbe0080dfb3bd7823f3d5c64",
-    archive_sha256="0ed715cf6721d9b2651e46ce16257eceda6c67485e760a901a344c610728729c",
+    manifest_sha256="e49e8a8fc1603a1c9af5def0301c331edd780b8f6c118cedcf3ee1f40327da63",
+    archive_sha256="efce8c403b504a534e5d8b8b5c134ab00f5d9664c758c86489b5b5bd5d943d91",
 )
 
 

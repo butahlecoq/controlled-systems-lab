@@ -16,7 +16,7 @@
 </figure>
 <h2>Project the complete history</h2>
 <p>Let <var>F</var> contain the histories (<var>x</var><sub>0</sub>, …, <var>x</var><sub>3</sub>, <var>u</var><sub>0</sub>, …, <var>u</var><sub>2</sub>) that satisfy the three-step model and its constraints. Let <var>P</var><sub>k</sub> select the two plotted coordinates at stage <var>k</var>. To find the support in direction <var>d</var>, maximise <var>d</var><sup>T</sup><var>P</var><sub>k</sub><var>x</var><sub>k</sub> over <var>F</var>.</p>
-<p>Keep the intermediate state bounds, coupled rows, positive-part budgets, and terminal requirements in the full profile. For the interval-only profile, drop those four constraint groups. A point in the full projection extends to a feasible history through stage three. If the complete history is infeasible, every stage projection is empty, including stage zero.</p>
+<p>The full profile keeps the intermediate state bounds, coupled rows, positive-part budgets, and terminal requirements of each matched continuous fixture. There are 29 source-continuous domains, three continuous relaxations (models 4, 9, and 10), and three authored continuous domains (models 24, 25, and 27). For the interval-only profile, drop those four constraint groups and keep each fixture’s control intervals. A point in the full projection extends to a feasible history through stage three. If the complete history is infeasible, every stage projection is empty, including stage zero.</p>
 <h2>Read the projections</h2>
 <p>At stage three, the minimum total stored energy rises by 60.986 MWh when the full constraints apply. The support in direction (−1, −1) gives the negative of that minimum. The plot gives a geometric view of that restriction.</p>
 <ul>
@@ -37,7 +37,17 @@
 <p>The independent checker eliminates the state variables and solves the resulting LP with SciPy’s HiGHS interior-point interface. Across 1,967 optimal supports the largest scaled discrepancy is below 2.85 × 10<sup>−14</sup>. The largest scaled witness residual is below 2.41 × 10<sup>−11</sup>. These results check sampled directions for the stated three-step fixtures.</p>
 <p>Models 23, 27, and 28 hit the native small-coefficient guard in both profiles. Model 30 has one undetermined query at stage zero. The archive keeps these outcomes alongside the independent checks.</p>
 <h2>Reproduce the sweep</h2>
-<p>Extract the original evidence ZIP and follow <code>RUN.txt</code> using CSL SDK v0.1.1. The ZIP includes the C++ driver, all model inputs and query results, the independent check, and the plot source.</p>
+<p>Extract the original evidence ZIP. Use the CMake commands in <code>RUN.txt</code> to build the C++ driver against CSL SDK v0.1.1. Run these commands from the extracted directory to regenerate the 35 records and check them independently.</p>
+<pre><code>mkdir -p replay/raw
+for model in $(seq 1 35); do
+    record="replay/raw/$model"
+    status=0
+    ./build/catalogue_projection "$model" &gt; "$record.json" 2&gt; "$record.stderr" || status=$?
+    printf '%s\n' "$status" &gt; "$record.exit"
+done
+python verify_projection.py replay &gt; replay/independent-audit.json
+</code></pre>
+<p>The audit should report 35 checked models. The ZIP includes the original model inputs, query results, audit, and plot source.</p>
 <ul>
 <li><a href="catalogue-feasible-history-evidence.zip">Original evidence and reproduction code</a></li>
 <li><a href="manifest.json">Source revisions and SHA-256 checksums</a></li>
