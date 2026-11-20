@@ -96,7 +96,7 @@ class NativeStrategyHistoryTest(unittest.TestCase):
             feasible_membership_factors([member], [5], {}, 1, lp_calls=calls)
         self.assertEqual(calls, ["history.start-membership-feasibility"])
 
-    def test_native_proposal_must_belong_to_the_requested_program(self):
+    def test_native_receipt_requires_requested_program_and_boolean_readback(self):
         import json
 
         from native_strategy_history import solve_strategy
@@ -111,28 +111,54 @@ class NativeStrategyHistoryTest(unittest.TestCase):
         }
         task = {"model": {"case_id": "test"}}
         exported = {"history_relation": {}, "history_objective": {}, "geometry": {}}
+        receipt = {
+            "provider": "csl.nlp.casadi-ipopt.history-cost",
+            "strategy": "A",
+            "strategy_module": "csl.synthesis.reach-back",
+            "program_id": "original",
+            "supplied_readback": True,
+        }
         response = dict(
-            request,
-            **exported,
-            status="solved",
-            policy_id="controller",
-            solver_receipt={
-                "provider": "csl.nlp.casadi-ipopt.history-cost",
-                "strategy": "A",
-                "strategy_module": "csl.synthesis.reach-back",
-                "program_id": "unrelated",
-                "supplied_readback": True,
-            },
+            request, **exported, status="solved", policy_id="controller", solver_receipt=receipt
         )
-        with self.assertRaisesRegex(ValueError, "requested route"):
-            solve_strategy(
-                task,
-                request,
-                exported,
-                [],
-                "A",
-                [0],
-                [],
-                lambda _raw: json.dumps(response),
-                lambda _attempts: None,
-            )
+        for status in ("solved", "failed"):
+            for changes in ({"program_id": "unrelated"}, {"supplied_readback": "false"}):
+                with self.subTest(status=status, changes=changes):
+                    rejected = dict(
+                        response,
+                        status=status,
+                        solver_receipt=dict(receipt, **changes),
+                    )
+                    serialized = json.dumps(rejected)
+                    with self.assertRaisesRegex(ValueError, "requested route"):
+                        solve_strategy(
+                            task,
+                            request,
+                            exported,
+                            [],
+                            "A",
+                            [0],
+                            [],
+                            lambda _raw, serialized=serialized: serialized,
+                            lambda _attempts: None,
+                        )
+
+        failed = dict(response, status="failed")
+        del failed["solver_receipt"]
+        candidate, checks, attempts = solve_strategy(
+            task,
+            request,
+            exported,
+            [],
+            "A",
+            [0],
+            [],
+            lambda _raw: json.dumps(failed),
+            lambda _attempts: None,
+        )
+        self.assertIsNone(candidate)
+        self.assertIsNone(checks)
+        self.assertTrue(attempts)
+        for attempt in attempts:
+            self.assertEqual(attempt["outcome"], "failed")
+            self.assertNotIn("actual_provider", attempt)

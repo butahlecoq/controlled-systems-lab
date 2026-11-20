@@ -192,32 +192,35 @@ def solve_strategy(
         attempt.update(state="returned", response_raw=response_raw)
         checkpoint(attempts)
         response = json.loads(response_raw)
-        attempt["outcome"] = response.get("status")
+        status = response.get("status")
+        attempt["outcome"] = status
         receipt = response.get("solver_receipt", {})
         if all(
             response.get(key) == request[key]
             for key in ("task_id", "task_sha256", "action_profile_id")
         ):
-            if receipt.get("provider"):
-                attempt["actual_provider"] = receipt["provider"]
-                attempt["actual_version"] = receipt.get("version")
-                attempt["actual_strategy_module"] = receipt.get("strategy_module")
-            if response.get("status") == "solved":
-                if (
+            if not isinstance(receipt, dict) or (
+                (receipt or status == "solved")
+                and (
                     response.get("policy_id") != request["controller_id"]
                     or receipt.get("provider") != provider
                     or receipt.get("strategy") != strategy
                     or receipt.get("strategy_module") != strategy_module
                     or receipt.get("program_id") != request["request_id"]
-                    or not receipt.get("supplied_readback")
-                    or any(
-                        response.get(key) != exported[key]
-                        for key in ("history_relation", "history_objective", "geometry")
-                    )
+                    or receipt.get("supplied_readback") is not True
+                )
+            ):
+                raise ValueError("Native strategy receipt does not match its requested route.")
+            if receipt:
+                attempt["actual_provider"] = receipt["provider"]
+                attempt["actual_version"] = receipt.get("version")
+                attempt["actual_strategy_module"] = receipt["strategy_module"]
+            if status == "solved":
+                if any(
+                    response.get(key) != exported[key]
+                    for key in ("history_relation", "history_objective", "geometry")
                 ):
-                    raise ValueError(
-                        "Native strategy result does not match its exported history and requested route."
-                    )
+                    raise ValueError("Native strategy result does not match its exported history.")
                 checks = validate(
                     task,
                     request["absolute_update_index"],
