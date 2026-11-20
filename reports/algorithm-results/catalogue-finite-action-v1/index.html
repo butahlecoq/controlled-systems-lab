@@ -20,11 +20,11 @@
 <h2>Compare representation coverage</h2>
 <table>
 <caption>Models completing both decisions with the original 16,384-corner limit</caption>
-<thead><tr><th scope="col">Representation</th><th scope="col">SDK v0.1.1</th><th scope="col">With separable box scoring</th></tr></thead>
+<thead><tr><th scope="col">Representation</th><th scope="col">SDK v0.1.1</th><th scope="col">With both scoring changes</th></tr></thead>
 <tbody>
 <tr><th scope="row">Polytope</th><td>35</td><td>35</td></tr>
 <tr><th scope="row">Box</th><td>25</td><td>35</td></tr>
-<tr><th scope="row">Zonotope</th><td>20</td><td>20</td></tr>
+<tr><th scope="row">Zonotope</th><td>20</td><td>35</td></tr>
 <tr><th scope="row">Parallelotope</th><td>15</td><td>15</td></tr>
 <tr><th scope="row">Ellipsoid</th><td>35</td><td>35</td></tr>
 </tbody>
@@ -37,10 +37,19 @@
 <figcaption>Planar section of the regression with <var>x</var><sub>3</sub> fixed at 3. For <var>x</var><sub>1</sub>² + 3<var>x</var><sub>1</sub> + 2<var>x</var><sub>2</sub>² − 1 on [−2, 1] × [−1, 1], both right corners have value 5. The second coordinate takes the lower endpoint on the tie.</figcaption>
 </figure>
 <p>We relinked only the revised box module with SDK v0.1.1 and reran the frozen task. All ten refused box cases completed. The 25 earlier box routes retained the same applied controls and trajectories, and the 140 other representation outcomes matched. The numerical experiment measures coverage.</p>
-<h2>Reproduce both runs</h2>
-<p>Extract the evidence archive and follow its <code>RUN.txt</code> to build the catalogue driver and candidate box module against the released SDK. The instructions unpack the original baseline archive. Follow <code>baseline/RUN.txt</code> to rebuild and rerun the original SDK study. The independent checker replays the affine dynamics and enumerates the declared finite alternatives using exact rational arithmetic. The archive carries all original outcomes and refusals.</p>
+<h2>Certify the terminal zonotope through its factors</h2>
+<p>Write the terminal state as <var>c</var> + <var>G</var><var>s</var>, with each <var>s</var><sub>i</sub> in [−1, 1]. A convex quadratic attains its maximum at a signed corner. The SDK keeps ordinary corner enumeration when it fits the budget and tries an exact sign certificate for a convex diagonal state objective when it does not.</p>
+<p>In the factor objective, write <var>a</var><sub>i</sub> for the current linear coefficient and <var>b</var><sub>ij</sub> for the pair coefficients. If |<var>a</var><sub>i</sub>| ≥ ∑<sub><var>j</var>≠<var>i</var></sub>|<var>b</var><sub>ij</sub>| over the remaining factors, choosing the sign of <var>a</var><sub>i</sub> cannot decrease the objective. If both sides are zero, either sign works. Substitute that sign and repeat. In each residual component a consistent assignment that maximizes every term also reaches the component’s upper bound. An incompatible component retains the budget refusal.</p>
+<figure>
+<img src="zonotope-certificate-coverage.svg" alt="The original corner cap admits models 1 through 20 and refuses 21 through 35. Sign fixing alone certifies 264 two-step plans and all 315 one-step suffixes. Compatible pairs certify the other 51 two-step plans.">
+<figcaption>The independent proof study checks all 630 terminal models. The separate native witness run attains the same exact maxima. The controller uses the numerical objective evaluator on its selected corner.</figcaption>
+</figure>
+<p>The isolated zonotope replay recovers all 15 prior refusals and matches all 20 established zonotope outcomes. With both scoring changes, 155 of 175 routes complete under the original budgets. The 20 remaining refusals require a supported parallelotope state dimension.</p>
+<h2>Reproduce the runs</h2>
+<p>For the box study, extract its evidence archive and follow its <code>RUN.txt</code> to build the catalogue driver and candidate box module against the released SDK. The instructions unpack the original baseline archive. Follow <code>baseline/RUN.txt</code> to rebuild and rerun the original SDK study. The independent checker replays the affine dynamics and enumerates the declared finite alternatives using exact rational arithmetic. The archive carries all original outcomes and refusals. Follow <code>RUN.txt</code> in the zonotope archive to rebuild its isolated and combined runs.</p>
 <ul>
-<li><a href="catalogue-separable-box-evidence.zip">Both studies, native sources, figures and replay instructions</a></li>
+<li><a href="catalogue-separable-box-evidence.zip">Original and box-scoring runs, native sources, figures and replay instructions</a></li>
+<li><a href="catalogue-zonotope-replay-evidence.zip">Zonotope and combined runs, exact proof study and reproducibility instructions</a></li>
 <li><a href="catalogue_finite_action.cpp">Catalogue comparison driver</a></li>
 <li><a href="manifest.json">Source revisions and SHA-256 checksums</a></li>
 </ul>

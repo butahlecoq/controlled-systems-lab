@@ -255,6 +255,27 @@ class CatalogueForwardPublicationTests(unittest.TestCase):
         self.assertEqual(comparison["retained_box_models"], list(range(1, 26)))
         self.assertEqual(comparison["matching_nonbox_outcomes"], 140)
 
+        zonotope_replay = f"{route}/catalogue-zonotope-replay-evidence.zip"
+        with ZipFile(BytesIO(files[zonotope_replay])) as candidate:
+            comparison = json.loads(candidate.read("comparison.json"))
+            self.assertEqual(
+                manifest["candidate_zonotope_sdk_commit"],
+                json.loads(candidate.read("provenance.json"))["candidate_zonotope_sdk"],
+            )
+            combined = json.loads(candidate.read("combined/audit.json"))
+            counts = combined["feedback_counts"]
+            for profile in ("box", "zonotope", "ellipsoid", "polytope"):
+                self.assertEqual(counts[profile]["selected"], 35)
+            self.assertEqual(counts["parallelotope"]["selected"], 15)
+            with ZipFile(BytesIO(candidate.read("zonotope-proof-evidence.zip"))) as proof:
+                self.assertEqual(
+                    files[f"{route}/zonotope-certificate-coverage.svg"],
+                    proof.read("zonotope-certificate-coverage.svg"),
+                )
+        self.assertEqual(comparison["recovered_zonotope_models"], list(range(21, 36)))
+        self.assertEqual(comparison["unchanged_zonotope_models"], list(range(1, 21)))
+        self.assertEqual(comparison["matching_other_outcomes"], 140)
+
         book = json.loads((ROOT / "docs/catalogue/learning-book-v1.json").read_bytes())
         [chapter] = [
             item for item in book["chapters"] if item["id"] == "native-model-tracking-first-pass"

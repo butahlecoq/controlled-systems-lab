@@ -151,8 +151,8 @@ FINITE_ACTION = FrozenNativeBundle(
     route="catalogue-finite-action-v1",
     source_commit="0bca2bf882ba7c63440c9f32470c25f5b27e612c",
     schema="csl.catalogue-finite-action-capture/1",
-    manifest_sha256="d07da1c82993e87c58c22d2f98ca0abcbd509775d75e1121a6945aa33b10bf10",
-    archive_sha256="02ed827127b7fd3627d2ca33a19df8de535b6f42a64565997d3c9cdbcc3465bc",
+    manifest_sha256="569f06001843b9ce37e904627394c791451fdee0465936137d6fb6ed3f5de7c3",
+    archive_sha256="29b54e5517df8d4e9743750dae0a0d9b84b9ccf89c3d37ef6439039bb2ee075b",
 )
 
 
@@ -177,7 +177,7 @@ def build_finite_action(
     card = (
         f'<article class="saved-figure" id="{route}"><h3><a href="{entry["page"]}">{entry["title"]}</a></h3>'
         f'<a href="{entry["page"]}"><img src="{entry["figure"]}" alt="Two-decision hospital trajectories with all finite terminal alternatives and the highlighted optimal path"></a>'
-        "<p>Follow two decisions across five set representations and see how separable scoring recovers ten box routes.</p>"
+        "<p>Follow two decisions across five set representations and see how new scorers recover 25 routes.</p>"
         f'<p><a href="{route}/catalogue-separable-box-evidence.zip">Download both captures and their replay</a></p></article>'
     )
     return files, [entry], card

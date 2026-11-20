@@ -150,7 +150,7 @@ FAMILIES = {
         r"examples/catalogue-finite-action-v1",
         "synthesis",
         "Finite-action control across 35 catalogue models",
-        "Follows two decisions across five representations and recovers ten high-dimensional box routes.",
+        "Follows two decisions across five representations and recovers ten box and fifteen zonotope routes.",
     ),
     "mpc-crossover": Family(
         r"examples/mpc-crossover-6b7308c4",
@@ -1360,7 +1360,11 @@ def build(site: Path) -> None:
                 commit=manifest["source_commit"],
                 links=(
                     ("Source and hashes", finite_action + "/manifest.json"),
-                    ("Offline evidence", finite_action + "/catalogue-separable-box-evidence.zip"),
+                    ("Box replay", finite_action + "/catalogue-separable-box-evidence.zip"),
+                    (
+                        "Zonotope and combined replay",
+                        finite_action + "/catalogue-zonotope-replay-evidence.zip",
+                    ),
                 ),
             )
         )

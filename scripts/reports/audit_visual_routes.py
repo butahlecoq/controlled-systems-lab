@@ -301,7 +301,7 @@ FROZEN_REVIEWED_ROUTES = {
     "catalogue-feasible-history-v1":
         "reviewed: paired battery projections display full constraints and control intervals at each stage",
     "catalogue-finite-action-v1":
-        "reviewed: finite action alternatives, executed path and terminal box scoring geometry",
+        "reviewed: finite action alternatives, executed path, terminal box geometry and zonotope certificates",
     "catalogue-forward-reachability-v1":
         "reviewed: physical and centred coordinates show the same stagewise platoon projection",
     "mpc-crossover-6b7308c4":
@@ -536,6 +536,7 @@ def build(root: Path = ROOT) -> dict:
                     "catalogue-finite-action-v1/index.html",
                     "catalogue-finite-action-v1/hospital-finite-actions.svg",
                     "catalogue-finite-action-v1/terminal-box-corner.svg",
+                    "catalogue-finite-action-v1/zonotope-certificate-coverage.svg",
                     "mpc-crossover-6b7308c4/index.html",
                     "mpc-crossover-6b7308c4/feedback-geometry.svg",
                     "mpc-crossover-6b7308c4/deployment-time.svg",
