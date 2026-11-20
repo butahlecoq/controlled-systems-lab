@@ -747,8 +747,8 @@
       "route": "examples/catalogue-finite-action-v1/index.html",
       "disposition": "frozen",
       "owner": "reports/algorithm-results/catalogue-finite-action-v1/index.html",
-      "sha256": "e8590bbcb37c215d8370c8030149b3a36b6f30b6632c15a5c06786f612405d92",
-      "witness": "Frozen catalogue finite-action outcomes and terminal box scoring example"
+      "sha256": "ff236f0f9265b41b61c3d01d9281cdf54cfd83029b904a1f7af2b8d94a34f19a",
+      "witness": "Frozen catalogue finite-action outcomes and stagewise projection of the pair shear"
     },
     {
       "route": "examples/catalogue-exact-support-v1/index.html",

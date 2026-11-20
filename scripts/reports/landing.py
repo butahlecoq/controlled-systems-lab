@@ -1362,8 +1362,12 @@ def build(site: Path) -> None:
                     ("Source and hashes", finite_action + "/manifest.json"),
                     ("Box replay", finite_action + "/catalogue-separable-box-evidence.zip"),
                     (
-                        "Zonotope and combined replay",
+                        "Zonotope replay",
                         finite_action + "/catalogue-zonotope-replay-evidence.zip",
+                    ),
+                    (
+                        "Joint replay",
+                        finite_action + "/catalogue-parallelotope-replay-evidence.zip",
                     ),
                 ),
             )

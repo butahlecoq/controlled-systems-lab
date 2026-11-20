@@ -264,7 +264,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
         )
         finite_action = routes["catalogue-finite-action-v1"]
         self.assertEqual(finite_action["assets"],
-                         ["hospital-finite-actions.svg", "terminal-box-corner.svg", "zonotope-certificate-coverage.svg"])
+                         ["hospital-finite-actions.svg", "pair-shear-projection.svg",
+                          "terminal-box-corner.svg", "zonotope-certificate-coverage.svg"])
         self.assertEqual(finite_action["companion_route"], "examples/catalogue-finite-action-v1/index.html")
         reviewed_routes = {
             paired["route"], query["route"], crossover["route"], forward["route"],
@@ -341,6 +342,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "catalogue-finite-action-v1/hospital-finite-actions.svg",
             "catalogue-finite-action-v1/terminal-box-corner.svg",
             "catalogue-finite-action-v1/zonotope-certificate-coverage.svg",
+                "catalogue-finite-action-v1/pair-shear-projection.svg",
             "mpc-crossover-6b7308c4/index.html", "mpc-crossover-6b7308c4/feedback-geometry.svg",
             "mpc-crossover-6b7308c4/deployment-time.svg",
             "discrete-mpc-2d.html", "discrete-mpc-2d.svg", "discrete-mpc-2d.json",

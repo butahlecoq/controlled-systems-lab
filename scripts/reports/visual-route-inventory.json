@@ -2844,11 +2844,12 @@
       "source_bundle": "catalogue-finite-action-v1",
       "assets": [
         "hospital-finite-actions.svg",
+        "pair-shear-projection.svg",
         "terminal-box-corner.svg",
         "zonotope-certificate-coverage.svg"
       ],
-      "index_sha256": "e8590bbcb37c215d8370c8030149b3a36b6f30b6632c15a5c06786f612405d92",
-      "disposition": "reviewed: finite action alternatives, executed path, terminal box geometry and zonotope certificates",
+      "index_sha256": "ff236f0f9265b41b61c3d01d9281cdf54cfd83029b904a1f7af2b8d94a34f19a",
+      "disposition": "reviewed: finite action alternatives, executed path, box and zonotope scoring, and paired shear projections across three stages",
       "companion_route": "examples/catalogue-finite-action-v1/index.html"
     },
     {
@@ -4419,6 +4420,7 @@
         "catalogue-finite-action-v1/hospital-finite-actions.svg",
         "catalogue-finite-action-v1/terminal-box-corner.svg",
         "catalogue-finite-action-v1/zonotope-certificate-coverage.svg",
+        "catalogue-finite-action-v1/pair-shear-projection.svg",
         "mpc-crossover-6b7308c4/index.html",
         "mpc-crossover-6b7308c4/feedback-geometry.svg",
         "mpc-crossover-6b7308c4/deployment-time.svg",

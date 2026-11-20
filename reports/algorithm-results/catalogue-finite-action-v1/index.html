@@ -20,13 +20,13 @@
 <h2>Compare representation coverage</h2>
 <table>
 <caption>Models completing both decisions with the original 16,384-corner limit</caption>
-<thead><tr><th scope="col">Representation</th><th scope="col">SDK v0.1.1</th><th scope="col">With both scoring changes</th></tr></thead>
+<thead><tr><th scope="col">Representation</th><th scope="col">SDK v0.1.1</th><th scope="col">Box and zonotope changes</th><th scope="col">All three changes</th></tr></thead>
 <tbody>
-<tr><th scope="row">Polytope</th><td>35</td><td>35</td></tr>
-<tr><th scope="row">Box</th><td>25</td><td>35</td></tr>
-<tr><th scope="row">Zonotope</th><td>20</td><td>35</td></tr>
-<tr><th scope="row">Parallelotope</th><td>15</td><td>15</td></tr>
-<tr><th scope="row">Ellipsoid</th><td>35</td><td>35</td></tr>
+<tr><th scope="row">Polytope</th><td>35</td><td>35</td><td>35</td></tr>
+<tr><th scope="row">Box</th><td>25</td><td>35</td><td>35</td></tr>
+<tr><th scope="row">Zonotope</th><td>20</td><td>35</td><td>35</td></tr>
+<tr><th scope="row">Parallelotope</th><td>15</td><td>15</td><td>35</td></tr>
+<tr><th scope="row">Ellipsoid</th><td>35</td><td>35</td><td>35</td></tr>
 </tbody>
 </table>
 <p>The original box and zonotope scores enumerate terminal corners or factor corners. Ten box models and fifteen zonotope models exceed those budgets. Twenty parallelotope models fall outside its supported dimensions. Every completed selection attains the finite objective minimum when checked independently against the stored binary64 coefficients.</p>
@@ -44,12 +44,20 @@
 <img src="zonotope-certificate-coverage.svg" alt="The original corner cap admits models 1 through 20 and refuses 21 through 35. Sign fixing alone certifies 264 two-step plans and all 315 one-step suffixes. Compatible pairs certify the other 51 two-step plans.">
 <figcaption>The independent proof study checks all 630 terminal models. The separate native witness run attains the same exact maxima. The controller uses the numerical objective evaluator on its selected corner.</figcaption>
 </figure>
-<p>The isolated zonotope replay recovers all 15 prior refusals and matches all 20 established zonotope outcomes. With both scoring changes, 155 of 175 routes complete under the original budgets. The 20 remaining refusals require a supported parallelotope state dimension.</p>
+<p>The isolated zonotope replay recovers all 15 prior refusals and matches all 20 established zonotope outcomes. With the box and zonotope changes, 155 of 175 routes complete under the original budgets.</p>
+<h2>Score adjacent shear blocks</h2>
+<p>For newly admitted dimensions, write the physical coordinates of each pair as (<var>y</var><sub>2j−1</sub> + <var>y</var><sub>2j</sub>, <var>y</var><sub>2j</sub>). An odd final coordinate is left unchanged. The frame is block diagonal, and the physical terminal objective has no terms between blocks. For dimensions above eight, the SDK compares the four endpoint assignments of each pair exactly, combines the winning assignments, and evaluates one full corner numerically.</p>
+<figure>
+<img src="pair-shear-projection.svg" alt="Overlaid projections at stages zero, one and two. Each outer stage set is slanted in x1–x2 and rectangular in x2–x3. Dashed reachable hulls lie inside the solid enclosures.">
+<figcaption>A separate three-state affine example starts with a bounded initial polytope and uses two fixed actions with bounded disturbances. The panels show how the same outer parallelotopes look in two physical coordinate projections.</figcaption>
+</figure>
+<p>The joint native replay completes both decisions in all 175 routes across the 35 catalogue models and five representations. Twenty parallelotope routes with 3–48 states complete for the first time. All 155 outcomes from the box and zonotope replay match. These counts describe coverage of the two-transition catalogue fixture.</p>
 <h2>Reproduce the runs</h2>
 <p>For the box study, extract its evidence archive and follow its <code>RUN.txt</code> to build the catalogue driver and candidate box module against the released SDK. The instructions unpack the original baseline archive. Follow <code>baseline/RUN.txt</code> to rebuild and rerun the original SDK study. The independent checker replays the affine dynamics and enumerates the declared finite alternatives using exact rational arithmetic. The archive carries all original outcomes and refusals. Follow <code>RUN.txt</code> in the zonotope archive to rebuild its isolated and combined runs.</p>
 <ul>
 <li><a href="catalogue-separable-box-evidence.zip">Original and box-scoring runs, native sources, figures and replay instructions</a></li>
 <li><a href="catalogue-zonotope-replay-evidence.zip">Zonotope and combined runs, exact proof study and reproducibility instructions</a></li>
+<li><a href="catalogue-parallelotope-replay-evidence.zip">Joint 175-row replay, parallelotope figure and reproducibility instructions</a></li>
 <li><a href="catalogue_finite_action.cpp">Catalogue comparison driver</a></li>
 <li><a href="manifest.json">Source revisions and SHA-256 checksums</a></li>
 </ul>

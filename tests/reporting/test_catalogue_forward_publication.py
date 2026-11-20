@@ -277,6 +277,24 @@ class CatalogueForwardPublicationTests(unittest.TestCase):
         self.assertEqual(comparison["unchanged_zonotope_models"], list(range(1, 21)))
         self.assertEqual(comparison["matching_other_outcomes"], 140)
 
+        parallelotope_replay = f"{route}/catalogue-parallelotope-replay-evidence.zip"
+        with ZipFile(BytesIO(files[parallelotope_replay])) as candidate:
+            comparison = json.loads(candidate.read("comparison.json"))
+            provenance = json.loads(candidate.read("provenance.json"))
+            self.assertEqual(
+                manifest["candidate_parallelotope_sdk_commit"],
+                provenance["candidate_parallelotope_sdk"],
+            )
+            counts = json.loads(candidate.read("audit.json"))["feedback_counts"]
+            self.assertEqual(len(counts), 5)
+            self.assertTrue(all(result == {"selected": 35} for result in counts.values()))
+            self.assertEqual(comparison["unchanged_rows"], 155)
+            self.assertEqual(len(comparison["recovered"]), 20)
+            self.assertEqual(
+                files[f"{route}/pair-shear-projection.svg"],
+                candidate.read("pair-shear-projection.svg"),
+            )
+
         book = json.loads((ROOT / "docs/catalogue/learning-book-v1.json").read_bytes())
         [chapter] = [
             item for item in book["chapters"] if item["id"] == "native-model-tracking-first-pass"
@@ -299,5 +317,6 @@ class CatalogueForwardPublicationTests(unittest.TestCase):
             landing.build(site)
             [archive_entry], _ = landing.parse_index(index.read_text(encoding="utf-8"))
             self.assertEqual(archive_entry.commit, stage.FINITE_ACTION.source_commit)
+            self.assertIn(("Joint replay", "examples/" + parallelotope_replay), archive_entry.links)
             for _, path in archive_entry.links:
                 self.assertTrue((site / path).is_file(), path)
