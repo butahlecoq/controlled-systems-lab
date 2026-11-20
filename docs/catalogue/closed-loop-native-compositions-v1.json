@@ -137163,7 +137163,7 @@
     },
     {
       "path": "benchmarks/reporting/closed_loop/capabilities.py",
-      "sha256": "4c2ed3b04c58eeb38b34bd76a2e1bf247b4c4eab69bb91aebea1fd43be51968f"
+      "sha256": "60962a78cb4766a2fb5977c4b0259e6d5e09e925bb9d58c87511da1f6cbeee90"
     },
     {
       "path": "benchmarks/reporting/closed_loop/run_closed_loop.py",

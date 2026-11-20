@@ -650,19 +650,26 @@ def _history_definitions() -> list[dict]:
             lifted["controller"]["id"] = LIFTED_POLYTOPE_CONTROLLER
             recovery_header = "include/csl/synthesis/control_recovery.hpp"
             lifted["controller"]["source_files"].append(recovery_header)
-            lifted["source_files"].append({
-                "path": recovery_header, "sha256": hashlib.sha256((ROOT / recovery_header).read_bytes()).hexdigest(),
-            })
+            lifted["source_files"].append(
+                {
+                    "path": recovery_header,
+                    "sha256": hashlib.sha256((ROOT / recovery_header).read_bytes()).hexdigest(),
+                }
+            )
             lifted["source_files"].sort(key=lambda entry: entry["path"])
             lifted["controller"]["control_semantics"] = (
                 "full-history MPC using exact lifted stage projections of the stored affine H history"
             )
-            lifted["role_bindings"].update({
-                "reachable_set_method": {"id": LIFTED_POLYTOPE_IMPLEMENTATION},
-                "representation": {"id": "polytope"},
-                "support_lp": "not_used",
-            })
-            lifted["admission"]["basis"] = "source-bound full-history IPOPT with lifted H stage views"
+            lifted["role_bindings"].update(
+                {
+                    "reachable_set_method": {"id": LIFTED_POLYTOPE_IMPLEMENTATION},
+                    "representation": {"id": "polytope"},
+                    "support_lp": "not_used",
+                }
+            )
+            lifted["admission"]["basis"] = (
+                "source-bound full-history IPOPT with lifted H stage views"
+            )
             lifted["geometry_work"]["claim"] = (
                 "exact lifted projections of the stored closed affine history, with source predicates checked separately"
             )
