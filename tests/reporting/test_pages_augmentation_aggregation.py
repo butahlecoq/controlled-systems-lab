@@ -317,6 +317,10 @@ class PagesAugmentationAggregation(unittest.TestCase):
         self.assertIn("augment_pages_bundle.py", workflow)
         self.assertIn("group: github-pages", workflow)
         self.assertIn("PAGES_SOURCE_RUN_ID", workflow)
+        await_job, deploy_job = workflow.split("\n  deploy:\n", 1)
+        self.assertIn("ref: ${{ github.workflow_sha }}", await_job)
+        self.assertIn("ref: ${{ needs.await.outputs.upstream_sha }}", deploy_job)
+        self.assertIn("needs.await.outputs.upstream_sha != ''", deploy_job)
         self.assertLess(workflow.index("pip install"), workflow.index("name: Stage and verify all Pages augmentations together"))
 
     def test_only_cumulative_workflow_can_publish_pages(self):
