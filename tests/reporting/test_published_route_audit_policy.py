@@ -259,11 +259,14 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
             row for row in manifest["learning_navigation_insertions_reviewed_separately"]
             if row["chapter_id"] == "native-forward-models"
         )
+        chapters = json.loads(baseline_audit.BOOK_MANIFEST.read_text())["chapters"]
+        adjacent = next(chapter for chapter in chapters if chapter["id"] == "closed-loop-semantics")
+        adjacent_identity = json.dumps(adjacent, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
         manifest["learning_navigation_insertions_reviewed_separately"] = [
             forward,
             {
                 "chapter_id": "closed-loop-semantics",
-                "chapter_sha256": "fb951101429be7caf73b13b72a21ccebe84ee44a03718db45abd7927b88bde8d",
+                "chapter_sha256": preservation.digest(adjacent_identity.encode()),
                 "previous_chapter_id": "native-forward-models",
                 "next_chapter_id": "finite-controller-consumers",
                 "qualification": "ambiguous adjacent insertion",
