@@ -1,5 +1,6 @@
 """Render the projected feasible witness and its stage-zero supporting line."""
 
+import argparse
 import json
 from fractions import Fraction
 from pathlib import Path
@@ -7,6 +8,10 @@ from pathlib import Path
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("output", type=Path)
+args = parser.parse_args()
 
 root = Path(__file__).resolve().parent
 data = json.loads((root / "certificate.json").read_bytes())
@@ -32,4 +37,4 @@ ax.xaxis.set_major_locator(MaxNLocator(5))
 ax.yaxis.set_major_locator(MaxNLocator(5))
 ax.grid(alpha=0.2)
 ax.legend(loc="upper left", frameon=False)
-fig.savefig(root / "initial-support.svg", metadata={"Date": None})
+fig.savefig(args.output, metadata={"Date": None})

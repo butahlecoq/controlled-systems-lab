@@ -1,5 +1,7 @@
 """Stage the source-qualified three-step forward reachability sweep."""
 
+import json
+from hashlib import sha256
 from io import BytesIO
 from pathlib import Path
 from zipfile import ZipFile, ZipInfo
@@ -50,6 +52,7 @@ FEASIBLE_HISTORY = FrozenNativeBundle(
 
 
 RING_INITIAL_SUPPORT = "catalogue-ring-initial-support-v1"
+RING_MANIFEST_SHA256 = "0cb601a57805bccada0b3fe8e96a9b714af4efd148c52693610f6d04b97809bb"
 HISTORY_EVIDENCE = "catalogue-feasible-history-evidence.zip"
 
 
@@ -63,16 +66,15 @@ def build_feasible_history(
     }
     companion = RING_INITIAL_SUPPORT
     companion_root = repository_root / "reports" / "algorithm-results" / companion
-    companion_files = {
-        name: checked_file(companion_root, name).read_bytes()
-        for name in (
-            "index.html",
-            "verify_support.py",
-            "plot_support.py",
-            "certificate.json",
-            "initial-support.svg",
-        )
-    }
+    manifest = checked_file(companion_root, "manifest.json").read_bytes()
+    if sha256(manifest).hexdigest() != RING_MANIFEST_SHA256:
+        raise ValueError("ring certificate manifest differs from the frozen publication")
+    companion_files = {"manifest.json": manifest}
+    for name, digest in json.loads(manifest)["files_sha256"].items():
+        data = checked_file(companion_root, name).read_bytes()
+        if sha256(data).hexdigest() != digest:
+            raise ValueError(f"ring certificate asset digest differs: {name}")
+        companion_files[name] = data
     companion_files["examples.css"] = files[f"{route}/examples.css"]
     companion_files[HISTORY_EVIDENCE] = files[f"{route}/{HISTORY_EVIDENCE}"]
     buffer = BytesIO()

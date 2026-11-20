@@ -2,6 +2,7 @@
 
 import importlib
 import json
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -155,6 +156,8 @@ class CatalogueForwardPublicationTests(unittest.TestCase):
                 "certificate.json",
                 original,
                 "initial-support.svg",
+                "plot_support.py",
+                "manifest.json",
             ):
                 self.assertIn(f'="{asset}"', page)
                 self.assertTrue((saved / asset).is_file())
@@ -164,6 +167,18 @@ class CatalogueForwardPublicationTests(unittest.TestCase):
             )
             self.assertNotEqual(rejected.returncode, 0)
             self.assertIn(b"Unexpected input archive SHA-256", rejected.stderr)
+
+    def test_ring_stager_rejects_a_modified_figure(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = Path(directory)
+            relative = Path("reports/algorithm-results")
+            for route in (stage.FEASIBLE_HISTORY.route, stage.RING_INITIAL_SUPPORT):
+                shutil.copytree(ROOT / relative / route, fixture / relative / route)
+            (fixture / relative / stage.RING_INITIAL_SUPPORT / "initial-support.svg").write_bytes(
+                b"<svg/>"
+            )
+            with self.assertRaisesRegex(ValueError, "asset digest differs: initial-support.svg"):
+                stage.build_feasible_history(fixture)
 
     def test_exact_support_keeps_the_refusals_and_primal_dual_certificates(self) -> None:
         files, [entry], card = stage.build_exact_support(ROOT)

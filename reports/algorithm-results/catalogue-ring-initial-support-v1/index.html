@@ -21,6 +21,8 @@
 <p>Save the <a href="verify_support.py">verifier</a>, the <a href="catalogue-feasible-history-evidence.zip">original evidence</a> and the <a href="certificate.json">saved exact certificate</a> in one directory. The verifier uses the Python standard library and checks the original archive’s SHA-256.</p>
 <pre><code>python3 verify_support.py &gt; replay.json
 diff -u certificate.json replay.json</code></pre>
+<p>Use Matplotlib 3.11.2 and the <a href="plot_support.py">plot script</a> to regenerate the figure to a separate file. The <a href="manifest.json">manifest</a> records the saved asset checksums.</p>
+<pre><code>python3 plot_support.py replay.svg</code></pre>
 </main>
 </body>
 </html>

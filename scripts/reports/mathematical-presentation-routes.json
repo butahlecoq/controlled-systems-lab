@@ -775,7 +775,7 @@
       "route": "examples/catalogue-ring-initial-support-v1/index.html",
       "disposition": "frozen",
       "owner": "reports/algorithm-results/catalogue-ring-initial-support-v1/index.html",
-      "sha256": "07a02457db0ac7dc8a8a5f3bfbc150a2e162ffd3dee10b23a520306a3cffaa38",
+      "sha256": "f9328690b8647d408fa8f8af2e91953a5979256b41caefe6824cf1fed5e25faf",
       "witness": "Exact feasible witness and fixed-initial-state support for model 30"
     },
     {
