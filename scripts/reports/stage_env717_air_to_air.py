@@ -6,17 +6,30 @@ import argparse
 import hashlib
 import importlib.util
 import json
-import zipfile
 from html import escape
 from html.parser import HTMLParser
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from scripts.reports import environment_report_publication as publication
+else:
+    publication_path = Path(__file__).with_name("environment_report_publication.py")
+    publication_spec = importlib.util.spec_from_file_location(
+        "environment_report_publication", publication_path
+    )
+    if publication_spec is None or publication_spec.loader is None:
+        raise ImportError(f"cannot load the environment publication helper: {publication_path}")
+    publication = importlib.util.module_from_spec(publication_spec)
+    publication_spec.loader.exec_module(publication)
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/env717-air-to-air-pilot-v1"
 CHECKER = ROOT / "scripts/reports/env717/check_air_to_air.py"
 spec = importlib.util.spec_from_file_location("env717_air_to_air_checker", CHECKER)
+if spec is None or spec.loader is None:
+    raise ImportError("cannot load the environment report dependency")
 checker = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(checker)
 FILES = (
     "README.md",
@@ -40,9 +53,13 @@ class LocalLinks(HTMLParser):
         super().__init__()
         self.hrefs: list[str] = []
 
-    def handle_starttag(self, tag, attrs) -> None:
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         if tag in ("a", "img"):
-            self.hrefs.extend(value for key, value in attrs if key in ("href", "src"))
+            for key, value in attrs:
+                if key in ("href", "src"):
+                    if value is None:
+                        raise ValueError("report contains a link without a destination")
+                    self.hrefs.append(value)
 
 
 def digest(data: bytes) -> str:
@@ -144,11 +161,14 @@ def inputs(source: Path) -> dict[str, bytes]:
 def stage(source: Path, site: Path) -> str:
     files = inputs(source)
     result = json.loads(files["result.json"])
+    publisher, archived_zip_sha256 = publication.archive_identity(
+        source.name, files["SHA256SUMS"], Path(__file__)
+    )
     identity = {
         "source_report_id": source.name,
         "result_sha256": digest(files["result.json"]),
         "renderer_sha256": digest(CHECKER.read_bytes()),
-        "stager_sha256": digest(Path(__file__).read_bytes()),
+        **publisher,
         "source_file_hashes": {key: digest(value) for key, value in sorted(files.items())},
     }
     route = (
@@ -182,22 +202,18 @@ def stage(source: Path, site: Path) -> str:
         "source_repository_commit": SOURCE_COMMIT,
         "source_commit": result["source_commit"],
         "result_sha256": digest(files["result.json"]),
+        **(publisher if archived_zip_sha256 is None else {}),
         "published_files": {key: digest(value) for key, value in sorted(generated.items())},
     }
     generated["publication-manifest.json"] = (json.dumps(manifest, indent=2) + "\n").encode()
+    landing = f'<!doctype html><meta charset="utf-8"><a href="{route}/index.html">Open AirToAir report</a>'.encode()
+    archive_bytes = publication.offline_zip(
+        route, landing, generated, expected_sha256=archived_zip_sha256
+    )
     destination.mkdir()
     for name, data in generated.items():
         (destination / name).write_bytes(data)
-    landing = f'<!doctype html><meta charset="utf-8"><a href="{route}/index.html">Open AirToAir report</a>'.encode()
-    with zipfile.ZipFile(archive_path, "w", zipfile.ZIP_DEFLATED) as archive:
-        entries = [("index.html", landing)] + [
-            (f"{route}/{name}", value) for name, value in sorted(generated.items())
-        ]
-        for name, value in entries:
-            item = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
-            item.compress_type = zipfile.ZIP_DEFLATED
-            item.external_attr = 0o100644 << 16
-            archive.writestr(item, value)
+    archive_path.write_bytes(archive_bytes)
     route_link = (
         f'<li><a href="{route}/index.html">AirToAirInterception finite minimax</a>'
         f" — 125 plans × 125 disturbances; stage geometry in two relative phase planes"

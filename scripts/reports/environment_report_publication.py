@@ -17,6 +17,16 @@ class _ArchivedReport(NamedTuple):
 
 # These receipts were verified against the preserved Pages artifact.
 _ARCHIVED_REPORTS = {
+    "env717-air-to-air-pilot-v1": _ArchivedReport(
+        "e21098cb19857abc8ced4bf0988964750b841834dd14e71272d31a48b72d4311",
+        "848ce6ec215006b6656d25928cad71817bf7fcc1b70d7c371ccff789136ef389",
+        "05426bb96a74d6d1c681afe58a9f7cc09e2bb5fa26b075dc1906e1794db77b16",
+    ),
+    "env717-homicidal-chauffeur-v1": _ArchivedReport(
+        "f860ebd0f1e8667ff0cfcf90941cd8b50f40aac0e2d11638f690fd9fb9edff27",
+        "dcc3cf0936874140ae4e36e6328811d64ef42995486638742dc3ec3477b07af1",
+        "56d4a91447efe1a6a46588a184f98bfd2aace2ead17cadf5fe4f38786ec8946c",
+    ),
     "env717-pendulum-pilot-v1": _ArchivedReport(
         "8b0412b3436704f9ce0da0d5ddcf54a7bdbcb89d1384006705cc50b1c8b8d881",
         "5e540406a9af5e882d1479f6e08d4af4c54075ae5322e72cb883cc67f4ca8afd",

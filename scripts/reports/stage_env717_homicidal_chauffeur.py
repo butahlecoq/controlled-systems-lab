@@ -9,8 +9,21 @@ import html
 import importlib.util
 import json
 import stat
-import zipfile
 from pathlib import Path
+from types import ModuleType
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from scripts.reports import environment_report_publication as publication
+else:
+    publication_path = Path(__file__).with_name("environment_report_publication.py")
+    publication_spec = importlib.util.spec_from_file_location(
+        "environment_report_publication", publication_path
+    )
+    if publication_spec is None or publication_spec.loader is None:
+        raise ImportError(f"cannot load the environment publication helper: {publication_path}")
+    publication = importlib.util.module_from_spec(publication_spec)
+    publication_spec.loader.exec_module(publication)
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/env717-homicidal-chauffeur-v1"
@@ -19,10 +32,11 @@ CAPTURE_PATH = ROOT / "scripts/reports/env717/capture_homicidal_chauffeur.py"
 CHECKER_PATH = ROOT / "scripts/reports/env717/check_homicidal_chauffeur.py"
 
 
-def load(name, path):
+def load(name: str, path: Path) -> ModuleType:
     spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"cannot load the environment report dependency: {path}")
     module = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None
     spec.loader.exec_module(module)
     return module
 
@@ -46,14 +60,15 @@ def digest(content: bytes) -> str:
     return hashlib.sha256(content).hexdigest()
 
 
-def read_bundle(source: Path):
+def _read_bundle(source: Path) -> tuple[dict[str, bytes], bytes]:
     if source.is_symlink() or not source.is_dir():
         raise ValueError("report bundle must be a regular directory")
     sums = source / "SHA256SUMS"
     if sums.is_symlink() or not sums.is_file():
         raise ValueError("report checksums are missing")
+    checksum_bytes = sums.read_bytes()
     recorded = {}
-    for line in sums.read_text(encoding="ascii").splitlines():
+    for line in checksum_bytes.decode("ascii").splitlines():
         sha, name = line.split("  ", 1)
         if name in recorded:
             raise ValueError("duplicate report checksum path")
@@ -69,11 +84,15 @@ def read_bundle(source: Path):
         if digest(content) != recorded[name]:
             raise ValueError(f"report checksum mismatch: {name}")
         result[name] = content
-    return result
+    return result, checksum_bytes
 
 
-def validate_bundle(source: Path):
-    files = read_bundle(source)
+def read_bundle(source: Path) -> dict[str, bytes]:
+    files, _ = _read_bundle(source)
+    return files
+
+
+def _validate_files(files: dict[str, bytes]) -> tuple[dict, dict]:
     result = json.loads(files["result.json"])
     check = json.loads(files["check.json"])
     figure = json.loads(files["figure-data.json"])
@@ -97,19 +116,28 @@ def validate_bundle(source: Path):
         raise ValueError("source or scenario provenance differs")
     if check.get("status") != "verified" or captured.get("solver_failures") != 0:
         raise ValueError("report lacks successful independent verification")
-    return files, result, captured
+    return result, captured
+
+
+def validate_bundle(source: Path) -> tuple[dict[str, bytes], dict, dict]:
+    files = read_bundle(source)
+    return files, *_validate_files(files)
 
 
 def stage(source: Path, site: Path) -> str:
-    files, result, captured = validate_bundle(source)
+    files, checksum_bytes = _read_bundle(source)
+    result, captured = _validate_files(files)
     if not site.is_dir():
         raise ValueError("Pages staging directory does not exist")
+    publisher, archived_zip_sha256 = publication.archive_identity(
+        source.name, checksum_bytes, Path(__file__)
+    )
     identity = {
         "source_repository_commit": SOURCE_COMMIT,
         "source_commit": captured["source_commit"],
         "capture_sha256": digest(files["capture.json"]),
         "result_sha256": digest(files["result.json"]),
-        "stager_sha256": digest(Path(__file__).read_bytes()),
+        **publisher,
         "source_files": {name: digest(content) for name, content in sorted(files.items())},
     }
     report_id = (
@@ -146,7 +174,7 @@ def stage(source: Path, site: Path) -> str:
         "source_report_id": source.name,
         "source_repository_commit": SOURCE_COMMIT,
         "source_commit": captured["source_commit"],
-        "stager_sha256": identity["stager_sha256"],
+        **publisher,
         "measured_scope": "Four 0.1-second stages; complete finite reachable graph, terminal capture sweep, causal minimax value with independent replay, and five fresh-process runtime observations for the single adapter.",
         "evidence_limits": [
             "Finite action catalogues and a quantized lattice only.",
@@ -166,22 +194,17 @@ def stage(source: Path, site: Path) -> str:
         f' · <a href="{report_id}/projections.svg">player position projections</a>'
         f' · <a href="{report_id}.zip">offline ZIP</a></li>'
     )
-    destination.mkdir()
-    for name, content in generated.items():
-        (destination / name).write_bytes(content)
     offline = (
         f'<!doctype html><html lang="en"><meta charset="utf-8"><title>Offline HomicidalChauffeur report</title>'
         f'<a href="{report_id}/index.html">Open the report</a></html>'
     ).encode()
-    with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-        entries = [("index.html", offline)] + [
-            (f"{report_id}/{name}", content) for name, content in sorted(generated.items())
-        ]
-        for name, content in entries:
-            item = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
-            item.compress_type = zipfile.ZIP_DEFLATED
-            item.external_attr = 0o100644 << 16
-            archive.writestr(item, content)
+    archive_bytes = publication.offline_zip(
+        report_id, offline, generated, expected_sha256=archived_zip_sha256
+    )
+    destination.mkdir()
+    for name, content in generated.items():
+        (destination / name).write_bytes(content)
+    archive_path.write_bytes(archive_bytes)
     index.write_text(page.replace("</ul>", link + "</ul>"), encoding="utf-8")
     return report_id
 

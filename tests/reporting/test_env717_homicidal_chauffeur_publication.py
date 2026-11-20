@@ -13,8 +13,9 @@ ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location(
     "stage_env717_homicidal_chauffeur", ROOT / "scripts/reports/stage_env717_homicidal_chauffeur.py"
 )
+if SPEC is None or SPEC.loader is None:
+    raise ImportError("cannot load the archived environment stager")
 stage_module = importlib.util.module_from_spec(SPEC)
-assert SPEC.loader is not None
 SPEC.loader.exec_module(stage_module)
 
 
@@ -37,7 +38,11 @@ class HomicidalChauffeurPublicationTests(unittest.TestCase):
 
     def test_stages_verified_game_and_both_player_position_views(self):
         report_id = stage_module.stage(self.source, self.site)
-        self.assertRegex(report_id, r"^env717-homicidal-chauffeur-[0-9a-f]{20}$")
+        self.assertEqual(report_id, "env717-homicidal-chauffeur-1ead2fc0b1513493d2ea")
+        self.assertEqual(
+            hashlib.sha256((self.site / f"{report_id}.zip").read_bytes()).hexdigest(),
+            "56d4a91447efe1a6a46588a184f98bfd2aace2ead17cadf5fe4f38786ec8946c",
+        )
         destination = self.site / report_id
         manifest = json.loads((destination / "publication-manifest.json").read_text())
         self.assertEqual(manifest["report_id"], report_id)
