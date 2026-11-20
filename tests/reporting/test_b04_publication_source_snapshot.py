@@ -87,11 +87,13 @@ class B04PublicationSourceSnapshotTests(unittest.TestCase):
             copy_sources(root)
             name = Path(publication.REGISTRATION_SOURCE).name
             source = root / publication.REGISTRATION_SNAPSHOT_ROOT / name
+            exact_bytes = root / "recorded-registration.py"
+            exact_bytes.write_bytes(source.read_bytes())
             source.unlink()
             with patch.object(publication, "ROOT", root):
                 with self.assertRaisesRegex(ValueError, "source hash mismatch"):
                     publication.adapt(BUNDLE)
-                source.symlink_to(root / publication.REGISTRATION_SOURCE)
+                source.symlink_to(exact_bytes)
                 with self.assertRaisesRegex(ValueError, "source hash mismatch"):
                     publication.adapt(BUNDLE)
 
