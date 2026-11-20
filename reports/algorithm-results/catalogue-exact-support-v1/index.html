@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exact support certificates for three catalogue models</title>
+<link rel="stylesheet" href="examples.css">
+</head>
+<body>
+<main class="page-content">
+<h1>Exact support certificates for three catalogue models</h1>
+<p>HiGHS refused 192 support queries for three models with small nonzero coefficients. A separate rational calculation certifies all 192 sampled supports for the same inputs. The evidence keeps the original refusals.</p>
+<figure>
+<img src="building-budget-projection.svg" alt="The building’s initial state and three sampled projections appear on the left. The two constraint profiles overlap at that scale. The right plot shows the positive support deficits on a logarithmic axis.">
+<figcaption>The twenty-zone building has 40 states. The left plot joins certified witnesses in the first two coordinates and uses colour for the stage. The right plot shows the support lost to the control budget in each direction with a positive gap.</figcaption>
+</figure>
+<h2>Certify a support value</h2>
+<p>For a direction <var>d</var> in the plotted plane at stage <var>k</var>, the state objective is <var>d</var><sup>T</sup><var>P</var><sub>k</sub><var>x</var><sub>k</sub>. The dynamics turn this into a constant plus one linear objective <var>c</var><sub>j</sub><sup>T</sup><var>u</var><sub>j</sub> per control stage. The C++ producer evaluates the stored binary64 coefficients as exact rationals.</p>
+<p>Optimise over the control intervals [<var>l</var><sub>j</sub>, <var>r</var><sub>j</sub>]. The building also has one independent upper budget <var>a</var><sub>j</sub><sup>T</sup><var>u</var><sub>j</sub> ≤ <var>b</var><sub>j</sub> per stage with nonnegative weights. Sort the profitable controls by objective gain per unit of budget. Take as much of each control as its interval and the remaining budget allow.</p>
+<p>The stage objective is bounded above by this expression for any <var>λ</var><sub>j</sub> ≥ 0.</p>
+<p><var>λ</var><sub>j</sub><var>b</var><sub>j</sub> + max<sub><var>l</var><sub>j</sub> ≤ <var>u</var> ≤ <var>r</var><sub>j</sub></sub> (<var>c</var><sub>j</sub> − <var>λ</var><sub>j</sub><var>a</var><sub>j</sub>)<sup>T</sup><var>u</var>.</p>
+<p>The independent checker propagates actuator columns forward to obtain the objective coefficients. It reconstructs the witness trajectory, checks the original constraints, and compares its objective with the sum of the stage upper bounds plus the constant. Equality proves the sampled support. This also proves support for the full profile when the witness satisfies all original state constraints.</p>
+<h2>Read the certified differences</h2>
+<table>
+<thead><tr><th scope="col">Model</th><th scope="col">Certificates</th><th scope="col">Strict reductions</th><th scope="col">Largest reduction</th></tr></thead>
+<tbody>
+<tr><th scope="row">Bicycle with actuators (23)</th><td>64</td><td>0</td><td>0</td></tr>
+<tr><th scope="row">Ten-generator ring (27)</th><td>64</td><td>0</td><td>0</td></tr>
+<tr><th scope="row">Twenty-zone building (28)</th><td>64</td><td>12</td><td>1.27 × 10<sup>−13</sup></td></tr>
+</tbody>
+</table>
+<p>Each row contains 32 direction-stage samples for the full profile and the same 32 for control intervals alone. The bicycle and building use source-continuous domains. The generator ring uses the archived authored continuous domain.</p>
+<p>The earlier condensed floating-point reference reported maximum paired gaps of 8.50 × 10<sup>−8</sup> for the generator ring and 4.78 × 10<sup>−7</sup> for the building. The exact certificates resolve these differences at the sampled directions. The apparent overlap in the building plot is consistent with the small exact gap.</p>
+<h2>Reproduce the certificates</h2>
+<p>Extract the evidence archive. Follow <code>RUN.txt</code> to compile the C++ producer with GMP 6.3.0 and nlohmann/json 3.11.3, regenerate the three certificate files, and run the Python checker on the fresh results.</p>
+<ul>
+<li><a href="catalogue-exact-support-evidence.zip">Evidence archive with inputs, code, certificates, and plots</a></li>
+<li><a href="exact_support.cpp">Exact support producer</a></li>
+<li><a href="manifest.json">Source revisions and SHA-256 checksums</a></li>
+</ul>
+</main>
+</body>
+</html>

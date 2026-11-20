@@ -737,6 +737,13 @@
       "owner": "scripts/reports/approx_extension_companions.py"
     },
     {
+      "route": "examples/catalogue-exact-support-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/catalogue-exact-support-v1/index.html",
+      "sha256": "62ac67f464d6d39d8e457e6c660385a5ab709f4985be560dfac7cc57db8bf255",
+      "witness": "Frozen exact support certificates over three archived catalogue model fixtures"
+    },
+    {
       "route": "examples/catalogue-feasible-history-v1/index.html",
       "disposition": "frozen",
       "owner": "reports/algorithm-results/catalogue-feasible-history-v1/index.html",

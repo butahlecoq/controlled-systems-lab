@@ -73,3 +73,39 @@ def build_feasible_history(
         f'<p><a href="{route}/catalogue-feasible-history-evidence.zip">Download the C++ example and data</a></p></article>'
     )
     return files, [entry], card
+
+
+EXACT_SUPPORT = FrozenNativeBundle(
+    route="catalogue-exact-support-v1",
+    source_commit="e7ebf482480271e0d79ec5e2d5167a27849528f9",
+    schema="csl.catalogue-exact-support-capture/1",
+    manifest_sha256="e264fb01ef8872da1472805dcc89add25d1d32fdca951e52ecbf5db70c72bcfb",
+    archive_sha256="01d9e1a30db838a17c0b1ac8c5d8916aa505130360996767480607cde9d5aa98",
+)
+
+
+def build_exact_support(
+    repository_root: Path,
+) -> tuple[dict[str, bytes], list[dict[str, str]], str]:
+    route = EXACT_SUPPORT.route
+    files = {
+        f"{route}/{name}": data
+        for name, data in read_bundle(repository_root, EXACT_SUPPORT).items()
+    }
+    entry = {
+        "family": "Reachability",
+        "title": "Exact support certificates for three catalogue models",
+        "status": "saved-data-companion",
+        "anchor": route,
+        "page": f"{route}/index.html",
+        "figure": f"{route}/building-budget-projection.svg",
+        "source_page": f"https://github.com/butahlecoq/controlled-systems-lab/blob/{EXACT_SUPPORT.source_commit}/reports/algorithm-results/{route}/exact_support.cpp",
+        "raw_record": f"{route}/manifest.json",
+    }
+    card = (
+        f'<article class="saved-figure" id="{route}"><h3><a href="{entry["page"]}">{entry["title"]}</a></h3>'
+        f'<a href="{entry["page"]}"><img src="{entry["figure"]}" alt="The building’s initial state and three projections beside the positive support deficits"></a>'
+        "<p>Check exact witnesses and upper bounds for 192 sampled supports, including the building’s small control-budget effect.</p>"
+        f'<p><a href="{route}/catalogue-exact-support-evidence.zip">Download the C++ producer and certificates</a></p></article>'
+    )
+    return files, [entry], card
