@@ -1,21 +1,20 @@
 from __future__ import annotations
 
 import hashlib
-import importlib.util
 import json
 import shutil
+import sys
 import tempfile
 import unittest
 import zipfile
 from pathlib import Path
 
+if __name__ == "__main__" and not __package__:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from scripts.reports import stage_env717_vanderpol as stage_module  # noqa: E402 - direct test entry point
+
 ROOT = Path(__file__).resolve().parents[2]
-SPEC = importlib.util.spec_from_file_location(
-    "stage_env717_vanderpol", ROOT / "scripts/reports/stage_env717_vanderpol.py"
-)
-stage_module = importlib.util.module_from_spec(SPEC)
-assert SPEC.loader is not None
-SPEC.loader.exec_module(stage_module)
 
 
 class VanDerPolPublicationTests(unittest.TestCase):
@@ -37,6 +36,11 @@ class VanDerPolPublicationTests(unittest.TestCase):
 
     def test_stages_source_qualified_finite_control_report(self):
         report_id = stage_module.stage(self.source, self.site)
+        self.assertEqual(report_id, "env717-vanderpol-12eb9b40481b84febbe8")
+        self.assertEqual(
+            hashlib.sha256((self.site / f"{report_id}.zip").read_bytes()).hexdigest(),
+            "6c0841f15482a4a93c557553558bc25657866617bf5713ffcf73e4336657bda3",
+        )
         self.assertRegex(report_id, r"^env717-vanderpol-[0-9a-f]{20}$")
         destination = self.site / report_id
         manifest = json.loads((destination / "publication-manifest.json").read_text())

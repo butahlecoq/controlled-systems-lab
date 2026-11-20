@@ -7,12 +7,17 @@ import hashlib
 import html
 import json
 import math
-import zipfile
 from pathlib import Path
+
+if __name__ == "__main__" and not __package__:
+    from env717 import check_earth_orbit as checker
+    from environment_report_publication import archive_identity, offline_zip
+else:
+    from scripts.reports.env717 import check_earth_orbit as checker
+    from scripts.reports.environment_report_publication import archive_identity, offline_zip
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/env717-earth-orbit-pilot-v1"
-CHECKER = ROOT / "scripts/reports/env717/check_earth_orbit.py"
 FILES = (
     "README.md",
     "capture.json",
@@ -50,11 +55,6 @@ def verified_bundle(source: Path) -> dict[str, bytes]:
         checksums[name] = value
     if checksums != {name: digest(data) for name, data in files.items() if name != "SHA256SUMS"}:
         raise ValueError("EarthOrbitalMotion report checksum mismatch")
-
-    import sys
-
-    sys.path.insert(0, str(CHECKER.parent))
-    import check_earth_orbit as checker
 
     result = json.loads(files["result.json"])
     raw = result.get("raw_driver_record", {})
@@ -113,10 +113,13 @@ def stage(source: Path, site: Path) -> str:
     if not site.is_dir() or source.name != "env717-earth-orbit-pilot-v1":
         raise ValueError("unknown EarthOrbitalMotion report source or Pages directory")
     files = verified_bundle(source)
+    publisher, archived_zip_sha256 = archive_identity(
+        source.name, files["SHA256SUMS"], Path(__file__)
+    )
     identity = {
         "source_repository_commit": UPSTREAM_SOURCE_COMMIT,
         "result_sha256": digest(files["result.json"]),
-        "stager_sha256": digest(Path(__file__).read_bytes()),
+        **publisher,
         "source_files": {name: digest(data) for name, data in sorted(files.items())},
     }
     route_id = (
@@ -159,21 +162,15 @@ def stage(source: Path, site: Path) -> str:
         f' · <a href="{route_id}/result.json">result JSON</a>'
         f' · <a href="{route_id}.zip">offline ZIP</a></li>'
     )
+    offline = (
+        f'<!doctype html><html lang="en"><meta charset="utf-8">'
+        f'<title>Offline EarthOrbitalMotion report</title><a href="{route_id}/index.html">Open report</a></html>'
+    ).encode()
+    archive_bytes = offline_zip(route_id, offline, output, expected_sha256=archived_zip_sha256)
     destination.mkdir()
     for name, data in output.items():
         (destination / name).write_bytes(data)
-    with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-        offline = (
-            f'<!doctype html><html lang="en"><meta charset="utf-8">'
-            f'<title>Offline EarthOrbitalMotion report</title><a href="{route_id}/index.html">Open report</a></html>'
-        ).encode()
-        for name, data in [("index.html", offline)] + [
-            (f"{route_id}/{name}", data) for name, data in sorted(output.items())
-        ]:
-            item = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
-            item.compress_type = zipfile.ZIP_DEFLATED
-            item.external_attr = 0o100644 << 16
-            archive.writestr(item, data)
+    archive_path.write_bytes(archive_bytes)
     index.write_text(page.replace("</ul>", route + "</ul>"), encoding="utf-8")
     return route_id
 

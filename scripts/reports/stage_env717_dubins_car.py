@@ -6,18 +6,23 @@ import argparse
 import hashlib
 import importlib.util
 import json
-import zipfile
 from html import escape
 from html.parser import HTMLParser
 from pathlib import Path
+
+if __name__ == "__main__" and not __package__:
+    from environment_report_publication import archive_identity, offline_zip
+else:
+    from scripts.reports.environment_report_publication import archive_identity, offline_zip
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/env717-dubins-car-pilot-v1"
 CHECKER = ROOT / "scripts/reports/env717/check_dubins_car.py"
 SOURCE_COMMIT = "f4d76c60f4003f50954174e96eafd8e514bd5441"
 spec = importlib.util.spec_from_file_location("env717_dubins_car_checker", CHECKER)
+if spec is None or spec.loader is None:
+    raise ImportError(f"cannot load the environment source checker: {CHECKER}")
 checker = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(checker)
 FILES = (
     "README.md",
@@ -32,20 +37,24 @@ FILES = (
 
 
 class LocalLinks(HTMLParser):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.hrefs = []
+        self.hrefs: list[str] = []
 
-    def handle_starttag(self, tag, attrs):
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         if tag == "a":
-            self.hrefs.extend(value for key, value in attrs if key == "href")
+            for key, value in attrs:
+                if key == "href":
+                    if value is None:
+                        raise ValueError("report contains a link without a destination")
+                    self.hrefs.append(value)
 
 
-def digest(data):
+def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def _inputs(source: Path):
+def _inputs(source: Path) -> tuple[dict[str, bytes], dict]:
     if source.is_symlink() or not source.is_dir():
         raise ValueError("report source must be a directory")
     if {path.name for path in source.iterdir()} != set(FILES):
@@ -112,13 +121,16 @@ def _inputs(source: Path):
     return files, result
 
 
-def stage(source: Path, site: Path):
+def stage(source: Path, site: Path) -> str:
     files, result = _inputs(source)
+    publisher, archived_zip_sha256 = archive_identity(
+        source.name, files["SHA256SUMS"], Path(__file__)
+    )
     identity = {
         "source_repository_commit": SOURCE_COMMIT,
         "source_commit": result["source_commit"],
         "result_sha256": digest(files["result.json"]),
-        "stager_sha256": digest(Path(__file__).read_bytes()),
+        **publisher,
         "source_files": {name: digest(data) for name, data in sorted(files.items())},
     }
     report_id = (
@@ -156,7 +168,7 @@ def stage(source: Path, site: Path):
         "source_repository_commit": SOURCE_COMMIT,
         "source_commit": result["source_commit"],
         "result_sha256": digest(files["result.json"]),
-        "stager_sha256": identity["stager_sha256"],
+        **publisher,
         "source_files": identity["source_files"],
         "published_files": {name: digest(data) for name, data in sorted(generated.items())},
     }
@@ -168,22 +180,15 @@ def stage(source: Path, site: Path):
         f' · <a href="{report_id}/projections.svg">figure</a>'
         f' · <a href="{report_id}.zip">offline ZIP</a></li>'
     )
-    destination.mkdir()
-    for name, data in generated.items():
-        (destination / name).write_bytes(data)
     offline = (
         f'<!doctype html><html lang="en"><meta charset="utf-8">'
         f'<title>Offline DubinsCar report</title><a href="{report_id}/index.html">Open report</a></html>'
     ).encode()
-    with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-        entries = [("index.html", offline)] + [
-            (f"{report_id}/{name}", data) for name, data in sorted(generated.items())
-        ]
-        for name, data in entries:
-            info = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
-            info.compress_type = zipfile.ZIP_DEFLATED
-            info.external_attr = 0o100644 << 16
-            archive.writestr(info, data)
+    archive_bytes = offline_zip(report_id, offline, generated, expected_sha256=archived_zip_sha256)
+    destination.mkdir()
+    for name, data in generated.items():
+        (destination / name).write_bytes(data)
+    archive_path.write_bytes(archive_bytes)
     index.write_text(index_text.replace("</ul>", route + "</ul>"), encoding="utf-8")
     return report_id
 
