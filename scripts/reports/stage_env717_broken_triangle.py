@@ -4,18 +4,24 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import zipfile
 from pathlib import Path
-
-if __package__:
-    from .env717 import check_broken_triangle as checker
-else:
-    from env717 import check_broken_triangle as checker
+from typing import TYPE_CHECKING
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/env717-broken-triangle-pilot-v1"
 CHECKER = ROOT / "scripts/reports/env717/check_broken_triangle.py"
+
+if TYPE_CHECKING:
+    from scripts.reports.env717 import check_broken_triangle as checker
+else:
+    spec = importlib.util.spec_from_file_location("env717_broken_triangle_checker", CHECKER)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"cannot load the environment source checker: {CHECKER}")
+    checker = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(checker)
 
 
 def digest(data: bytes) -> str:

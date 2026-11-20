@@ -28,6 +28,35 @@ REPORTS = (
 
 
 class EnvironmentStagerPublicationTests(unittest.TestCase):
+    def test_absolute_file_imports_work_without_the_checkout_on_sys_path(self) -> None:
+        check_imports = """\
+import importlib.util
+import sys
+from pathlib import Path
+
+for filename in sys.argv[1:]:
+    path = Path(filename)
+    spec = importlib.util.spec_from_file_location(path.stem, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    assert callable(module.stage)
+"""
+        with tempfile.TemporaryDirectory() as directory:
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    "-I",
+                    "-c",
+                    check_imports,
+                    *(str(ROOT / "scripts/reports" / stager) for stager, *_ in REPORTS),
+                ],
+                cwd=directory,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+
     def test_script_entrypoints_preserve_routes_and_zip_bytes(self) -> None:
         self.assert_archived_routes(use_module=False)
 
