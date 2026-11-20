@@ -1,21 +1,22 @@
 """Real pinned producer -> strict consumer -> offline bundle oracle."""
 
-import hashlib
 import csv
+import hashlib
+import importlib
 import importlib.util
 import io
 import json
 import os
-from pathlib import Path
 import sys
 import tempfile
 import unittest
 import zipfile
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 os.environ.setdefault("MPLCONFIGDIR", str(ROOT / "build/html01/mpl-config"))
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import report_data as data
+data = importlib.import_module("report_data")
 
 PROLOG = '<?xml version="1.0" encoding="utf-8" standalone="no"?>\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"\n  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n'
 
@@ -37,6 +38,7 @@ class PlotTests(unittest.TestCase):
         spec = importlib.util.spec_from_file_location(
             "report_site", ROOT / "scripts/reports/site.py"
         )
+        assert spec is not None and spec.loader is not None and spec.origin is not None
         self.assertTrue(Path(spec.origin).is_file(), "site adapter missing")
         site = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(site)
@@ -90,7 +92,9 @@ class PlotTests(unittest.TestCase):
                 rows = list(reader)
                 rows[0][field] = value
                 output = io.StringIO(newline="")
-                writer = csv.DictWriter(output, fieldnames=reader.fieldnames)
+                fieldnames = reader.fieldnames
+                assert fieldnames is not None
+                writer = csv.DictWriter(output, fieldnames=fieldnames)
                 writer.writeheader()
                 writer.writerows(rows)
                 corrupt("trials.csv", output.getvalue().encode())

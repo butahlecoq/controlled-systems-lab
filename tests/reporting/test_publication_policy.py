@@ -1,20 +1,21 @@
 """Publication policy owns a kind's staging identity and admission rules."""
 
-import sys
 import json
-from pathlib import Path
 import shutil
+import sys
 import tempfile
 import unittest
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "reports"))
-import publication_policy
-
 # Load the report site under a unique name; its imports register the concrete policies.
 import importlib.util
 
+import publication_policy
+
 SITE_PATH = Path(__file__).resolve().parents[2] / "scripts" / "reports" / "site.py"
 SITE_SPEC = importlib.util.spec_from_file_location("csl_publication_policy_site", SITE_PATH)
+assert SITE_SPEC is not None and SITE_SPEC.loader is not None
 report_site = importlib.util.module_from_spec(SITE_SPEC)
 SITE_SPEC.loader.exec_module(report_site)
 FIXTURES = Path(__file__).resolve().parents[2] / "reports" / "algorithm-results"

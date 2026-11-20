@@ -1,41 +1,42 @@
 """Typed native report adapters preserve producer identity and evidence scope."""
 
-import json
+import copy
 import csv
 import hashlib
-import io
-import copy
 import importlib.util
-from pathlib import Path
+import io
+import json
 import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
-from unittest.mock import patch
 import zipfile
+from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "reports"))
-import registered_reports as registered
-import geo04_registered_reports as geo04_publication
-import geo02_registered_reports as geo02_publication
-import geo05_registered_reports as geo05_publication
-import geo06_registered_reports as geo06_publication
-import b08_exact_registered_reports as b08_publication
 import b04_c_exact_registered_reports as b04_research_publication
 import b06_manifest_correction_registered_reports as b06_correction_publication
+import b08_exact_registered_reports as b08_publication
+import btulshor_registered_reports as btulshor_publication
+import geo02_registered_reports as geo02_publication
+import geo04_registered_reports as geo04_publication
+import geo05_registered_reports as geo05_publication
+import geo06_registered_reports as geo06_publication
 import issue3_registered_reports as issue3_publication
 import issue3_validated_registered_reports as issue3_validated_publication
+import opt11_registered_reports as opt11_publication
+import opt12_registered_reports as opt12_publication
+import registered_reports as registered
+import stage_btulshor
 import syn01_registered_reports as syn01_publication
 import syn02_registered_reports as syn02_publication
 import syn_ts01_paired_registered_reports as syn_ts01_paired_publication
-import opt12_registered_reports as opt12_publication
-import opt11_registered_reports as opt11_publication
-import btulshor_registered_reports as btulshor_publication
-import stage_btulshor
 
 SITE_PATH = Path(__file__).resolve().parents[2] / "scripts" / "reports" / "site.py"
 SITE_SPEC = importlib.util.spec_from_file_location("csl_report_site", SITE_PATH)
+assert SITE_SPEC is not None and SITE_SPEC.loader is not None
 site = importlib.util.module_from_spec(SITE_SPEC)
 SITE_SPEC.loader.exec_module(site)
 
@@ -75,10 +76,11 @@ class RegisteredKindTests(unittest.TestCase):
             public_id[:-1],
             "btulshor-source-faithful-" + "A" * 64,
             "other-family",
-            None,
         ):
             with self.subTest(report_id=invalid_id), self.assertRaises(ValueError):
                 btulshor_publication.artifact_links(invalid_id)
+        with self.assertRaises(ValueError):
+            btulshor_publication.artifact_links(None)  # ty: ignore[invalid-argument-type]
         with self.assertRaises(ValueError):
             btulshor_publication.artifact_links(public_id, "../../main")
         entry = {
@@ -118,14 +120,15 @@ class RegisteredKindTests(unittest.TestCase):
                     {"fixture_id": "near-tolerance", "points": [[0, 0], [1, 0], [1, 1], [0, 1]]}
                 ).encode(),
             }
-            providers = []
+            elapsed_samples = [10, 11, 12, 13, 14]
+            providers: list[dict[str, object]] = []
             for method in methods:
                 providers.append(
                     {
                         "method_id": method,
                         "status": "completed",
                         "retained_indices": [0, 1, 2, 3],
-                        "elapsed_ns_samples": [10, 11, 12, 13, 14],
+                        "elapsed_ns_samples": elapsed_samples,
                         "sample_statuses": ["completed"] * 5,
                         "exact_check": {
                             "status": "verified",
@@ -159,9 +162,9 @@ class RegisteredKindTests(unittest.TestCase):
             runs = []
             for sample in range(1, 6):
                 path = f"raw/runs/near-tolerance-r{sample}.json"
-                run_document = copy.deepcopy(document)
-                for provider in run_document["providers"]:
-                    provider["elapsed_ns"] = provider["elapsed_ns_samples"][sample - 1]
+                run_providers = copy.deepcopy(providers)
+                for provider in run_providers:
+                    provider["elapsed_ns"] = elapsed_samples[sample - 1]
                     for field in (
                         "elapsed_ns_samples",
                         "sample_statuses",
@@ -170,6 +173,7 @@ class RegisteredKindTests(unittest.TestCase):
                         "display_boundary_indices",
                     ):
                         provider.pop(field, None)
+                run_document = {**document, "providers": run_providers}
                 files[path] = json.dumps(run_document, separators=(",", ":")).encode()
                 runs.append(
                     {
@@ -252,6 +256,7 @@ class RegisteredKindTests(unittest.TestCase):
             for mutation in ("timing", "input", "order", "unindexed", "oracle", "oracle-driver"):
                 altered = dict(files)
                 run_path = runs[0]["path"]
+                assert isinstance(run_path, str)
                 run_doc = json.loads(altered[run_path])
                 if mutation == "timing":
                     run_doc["providers"][0]["elapsed_ns"] += 1
@@ -518,6 +523,7 @@ class RegisteredKindTests(unittest.TestCase):
         with path.open(newline="", encoding="utf-8") as stream:
             reader = csv.DictReader(stream)
             fields = reader.fieldnames
+            assert fields is not None
             rows = list(reader)
         rows[0][field] = "999999999" if rows[0][field] != "999999999" else "999999998"
         with path.open("w", newline="", encoding="utf-8") as stream:
@@ -691,7 +697,7 @@ class RegisteredKindTests(unittest.TestCase):
             )
             for name in ("records.json", "evidence/accepted-002/records.json"):
                 (bundle / name).write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
-            for name, field in (
+            for name, _ in (
                 ("trials.csv", "elapsed_ns"),
                 ("evidence/accepted-002/trials.csv", "elapsed_ns"),
                 ("summary.csv", "max_ns"),

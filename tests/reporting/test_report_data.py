@@ -1,13 +1,11 @@
 """Literal saved-record oracles; every duration in this file is TEST data."""
 
 import copy
-import importlib.util
-import json
 import hashlib
-import tempfile
-from pathlib import Path
 import sys
+import tempfile
 import unittest
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
@@ -16,11 +14,7 @@ sys.path.insert(0, str(ROOT / "scripts/reports"))
 class RecordTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        spec = importlib.util.find_spec("report_data")
-        cls.data = __import__("report_data") if spec else None
-
-    def setUp(self):
-        self.assertIsNotNone(self.data, "saved-record validation is not implemented")
+        cls.data = __import__("report_data")
 
     def fixture(self):
         return self.data.load_view(ROOT / "tests/reporting/fixtures/view-v1.json")
@@ -212,12 +206,14 @@ class RecordTests(unittest.TestCase):
     def test_profile_adapter_uses_separate_cpu_deltas_and_nonadditive_phase_totals(self):
         import collector_common
 
-        metric = lambda x: {
-            "available": True,
-            "value": x,
-            "unit": "ns",
-            "scope": "process lifetime CPU at snapshot",
-        }
+        def metric(x: int):
+            return {
+                "available": True,
+                "value": x,
+                "unit": "ns",
+                "scope": "process lifetime CPU at snapshot",
+            }
+
         unavailable = {"available": False, "reason": "not exposed"}
         event = {
             "purpose": "profile",

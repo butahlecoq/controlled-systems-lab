@@ -1,19 +1,18 @@
 """Saved-input rendering and offline safety behavior."""
 
-import copy
 import csv
 import hashlib
+import importlib
 import importlib.util
-import json
-from pathlib import Path
+import subprocess
 import sys
 import tempfile
 import unittest
-import subprocess
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import report_data as data
+data = importlib.import_module("report_data")
 
 
 class RenderTests(unittest.TestCase):
@@ -151,6 +150,7 @@ assert "jsonschema" not in sys.modules
         spec = importlib.util.spec_from_file_location(
             "report_site", ROOT / "scripts/reports/site.py"
         )
+        assert spec is not None and spec.loader is not None
         site = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(site)
         with self.assertRaises(ValueError):
@@ -165,7 +165,10 @@ assert "jsonschema" not in sys.modules
             }
             for name, value in content.items():
                 (root / name).write_bytes(value)
-            sha = lambda name: hashlib.sha256(content[name]).hexdigest()
+
+            def sha(name: str) -> str:
+                return hashlib.sha256(content[name]).hexdigest()
+
             p = {
                 "process": {
                     "events_sha256": sha("raw-events.jsonl"),
@@ -183,6 +186,7 @@ assert "jsonschema" not in sys.modules
         spec = importlib.util.spec_from_file_location(
             "report_site", ROOT / "scripts/reports/site.py"
         )
+        assert spec is not None and spec.loader is not None
         site = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(site)
         for page in (
@@ -201,6 +205,7 @@ assert "jsonschema" not in sys.modules
         spec = importlib.util.spec_from_file_location(
             "report_site", ROOT / "scripts/reports/site.py"
         )
+        assert spec is not None and spec.loader is not None
         site = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(site)
         view = data.load_view(ROOT / "tests/reporting/fixtures/view-v1.json")

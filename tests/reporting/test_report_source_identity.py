@@ -1,13 +1,14 @@
 import hashlib
-from pathlib import Path
+import importlib
 import subprocess
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import report_source_identity
+report_source_identity = importlib.import_module("report_source_identity")
 
 
 def git_bytes(*arguments: str) -> bytes:
