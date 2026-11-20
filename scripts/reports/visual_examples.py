@@ -28,6 +28,7 @@ import site_additions
 import site_design
 import stage_buryatia_dim4
 import stage_buryatia_volterra
+import stage_catalogue_forward_reachability
 import stage_discrete_mpc_2d
 import stage_ext07
 import stage_four_state_projection_approximations
@@ -1378,6 +1379,10 @@ def build(catalog, site):
         stage_four_state_projection_approximations.build(Path(__file__).resolve().parents[2])
     )
     saved_figures += approximation_cards
+    forward_files, forward_inventory, forward_card = stage_catalogue_forward_reachability.build(
+        Path(__file__).resolve().parents[2]
+    )
+    saved_figures += forward_card
     crossover_files, crossover_inventory, crossover_card = stage_mpc_crossover.build(
         Path(__file__).resolve().parents[2]
     )
@@ -1486,6 +1491,7 @@ def build(catalog, site):
     outputs.update(analytic_files)
     outputs.update(native_files)
     outputs.update(approximation_files)
+    outputs.update(forward_files)
     outputs.update(crossover_files)
     outputs.update(buryatia_files)
     outputs.update(volterra_files)
@@ -1702,6 +1708,7 @@ def build(catalog, site):
     gallery_inventory.extend(fuel_layer_inventory)
     gallery_inventory.extend(native_inventory)
     gallery_inventory.extend(approximation_inventory)
+    gallery_inventory.extend(forward_inventory)
     gallery_inventory.extend(crossover_inventory)
     gallery_inventory.extend(buryatia_inventory)
     gallery_inventory.extend(volterra_inventory)

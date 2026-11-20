@@ -263,6 +263,7 @@ SAVED_DATA_COMPANION_RENDERERS = {
     "benchmarks/reporting/review05/render_constraint_ladder.py",
 }
 FROZEN_COMPANIONS = {
+    "catalogue-forward-reachability-v1": "examples/catalogue-forward-reachability-v1/index.html",
     "mpc-crossover-6b7308c4": "examples/mpc-crossover-6b7308c4/index.html",
     "mpc06-online-anchor-v1": "mpc06-complete-6b7059d62473d32d4210/index.html",
     "mpc06-online-anchor-checked-v2": "mpc06-complete-6b7059d62473d32d4210/index.html",
@@ -289,6 +290,8 @@ FROZEN_COMPANIONS = {
     "lotka-volterra-sampled-20261023": "examples/lotka-volterra-sampled-v1.html",
 }
 FROZEN_REVIEWED_ROUTES = {
+    "catalogue-forward-reachability-v1":
+        "reviewed: physical and centred coordinates show the same stagewise platoon projection",
     "mpc-crossover-6b7308c4":
         "reviewed: saved plots distinguish feasible and infeasible states, show the three-step trajectory and compare paired deployment timings",
     "review05-family-query-20261110-3b98f5b0":
@@ -510,6 +513,8 @@ def build(root: Path = ROOT) -> dict:
                     "positive-part-budget-2d.json", "positive_part_budget_2d_vertices.csv",
                     "positive_part_budget_2d_native-solution.csv", "positive_part_budget_2d_run.txt",
                     "positive_part_budget_2d_native-example.stdout",
+                    "catalogue-forward-reachability-v1/index.html",
+                    "catalogue-forward-reachability-v1/platoon-forward.svg",
                     "mpc-crossover-6b7308c4/index.html",
                     "mpc-crossover-6b7308c4/feedback-geometry.svg",
                     "mpc-crossover-6b7308c4/deployment-time.svg",

@@ -118,6 +118,13 @@ FAMILIES = {
         "aggregate branch limits, and stop-status propagation. Its saved measurements describe this "
         "single case and do not establish a general performance comparison.",
     ),
+    "catalogue-forward-reachability-v1": Family(
+        r"examples/catalogue-forward-reachability-v1",
+        "geometry",
+        "Forward reachability across 35 discrete models",
+        "Propagates three steps of authored independent box controls for all 35 catalogue models. "
+        "An exact-rational checker validates sampled supports, and the figure shows the 30-state platoon projection.",
+    ),
     "mpc-crossover": Family(
         r"examples/mpc-crossover-6b7308c4",
         "synthesis",
@@ -1247,6 +1254,23 @@ def build(site: Path) -> None:
                 limits=details.get("limits", entry.limits),
                 commit=details.get("commit", entry.commit),
                 links=entry.links,
+            )
+        )
+    forward = "examples/catalogue-forward-reachability-v1"
+    if (site / forward / "index.html").is_file():
+        manifest = json.loads((site / forward / "manifest.json").read_text(encoding="utf-8"))
+        detailed = [entry for entry in detailed if entry.report_id != forward]
+        detailed.append(
+            Entry(
+                report_id=forward,
+                scope="Three transitions on each of 35 models with one authored input box.",
+                limits="Sampled support checks in binary64. No state or headway constraints.",
+                commit=manifest["source_commit"],
+                links=(
+                    ("Sampled supports", forward + "/support.csv"),
+                    ("Independent audit", forward + "/support-audit.json"),
+                    ("Offline example", forward + "/catalogue-forward-reachability-v1.zip"),
+                ),
             )
         )
     crossover = "examples/mpc-crossover-6b7308c4"
