@@ -395,6 +395,8 @@ def persist_native_capture(attempt_dir: Path, update_index: int, capture: dict,
         "bridge_response_sha256": capture.get("bridge_response_sha256"),
         "response_parse_status": capture.get("response_parse_status"),
         "response": saved.get("response")}
+    if "start_recovery" in capture:
+        metadata["start_recovery"] = capture["start_recovery"]
     metadata_serialization_started = time.perf_counter()
     metadata_bytes = (json.dumps(metadata, indent=2, allow_nan=False) + "\n").encode("utf-8")
     metadata_serialization_seconds = time.perf_counter() - metadata_serialization_started

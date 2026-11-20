@@ -158,6 +158,16 @@ class ClosedLoopAttemptRecordTests(unittest.TestCase):
         self.assertEqual(stage_metadata["response_parse_status"], "not_received")
         self.assertEqual(stage_payloads["request"].read_text(), request)
 
+    def test_interrupted_solver_retry_preserves_the_failed_start(self):
+        original = {"status": "solver-error", "error": "infeasible iterate"}
+        retry = {"policy": "rollout-shifted-controls-from-observation", "state": "started",
+                 "original_solver": original, "initial_primal": [3, 5.5, -1]}
+        capture = {"capture_kind": "bridge-exchange", "start_recovery": retry}
+        reference = persist_native_capture(self.attempt, 1, capture, {})
+        metadata, _ = read_native_capture_metadata(self.attempt, reference)
+        self.assertEqual(metadata["start_recovery"], retry)
+        self.assertNotIn("retry_solver_status", metadata["start_recovery"])
+
     def test_v2_attempt_summary_must_match_checked_stage_records(self):
         first = {"update_index": 0, "status": "applied-and-observed", "observed_physical": [0.0, 1.0],
             "applied_control": [0.25], "observed_next_physical": [0.5, 1.0]}

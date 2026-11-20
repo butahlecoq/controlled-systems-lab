@@ -76,6 +76,22 @@ def make_request(task, task_sha256, receipt, observed, stage, *, history_solver=
     return result
 
 
+def _rollout_from_observation(request, controls):
+    import numpy as np
+    states = [np.asarray(request["observed_physical_state"], dtype=float)]
+    for row, control in zip(request["predictor_stages"], controls, strict=True):
+        states.append(np.asarray(row["A"]) @ states[-1] + np.asarray(row["B"]) @ control + np.asarray(row["c"]))
+    return np.concatenate([*states, *controls])
+
+
+def reintegrate_history_start(request, shifted):
+    """Rebuild the state blocks from the observation and the existing shifted controls."""
+    n, m = len(request["observed_physical_state"]), len(request["control_bounds"])
+    horizon = len(request["predictor_stages"])
+    controls = shifted[(horizon + 1) * n:].reshape(horizon, m)
+    return _rollout_from_observation(request, controls)
+
+
 def initial_history(request, previous=None):
     """Drop the applied state/control stage without extending the fixed terminal time."""
     import numpy as np
@@ -97,10 +113,7 @@ def initial_history(request, previous=None):
     else:
         bounds = np.asarray(request["control_bounds"])
         controls = [np.clip(np.zeros(m), bounds[:, 0], bounds[:, 1]) for _ in range(horizon)]
-        states = [observed]
-        for row, control in zip(request["predictor_stages"], controls):
-            states.append(np.asarray(row["A"]) @ states[-1] + np.asarray(row["B"]) @ control + np.asarray(row["c"]))
-        initial = np.concatenate([*states, *controls])
+        initial = _rollout_from_observation(request, controls)
         policy = "initial-zero-control-rollout"
     if not np.isfinite(initial).all():
         raise ValueError("initial history must be finite")
@@ -261,6 +274,7 @@ class HistoryPolicy:
             [{"coordinate": 0, "lower_bound": 0, "strict": True}]
                 if self.task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01" else [])
             if self.geometry_family is not None else None)
+        start_recovery = None
         if response["status"] == "solved":
             primal = np.asarray(response["primal"], dtype=float)
             solver_receipt = response["solver_receipt"]
@@ -269,7 +283,6 @@ class HistoryPolicy:
         else:
             from history_norm_solver import solve
             n = len(observed_physical_state)
-            m = len(request["control_bounds"])
             positive = [n * k for k in range(1, len(request["predictor_stages"]) + 1)] if self.task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01" else []
             solver_receipt = solve(relation, compiled, initial=initial, positive_indices=positive,
                                    geometry_memberships=memberships or ())
@@ -278,8 +291,27 @@ class HistoryPolicy:
                 "version": solver_receipt.get("version", "unknown")})
             self.last_query_capture["solver_receipt"] = solver_receipt
             self._capture()
+            if solver_receipt["status"] == "solver-error" and self.previous_history is not None:
+                reintegrated = reintegrate_history_start(request, initial)
+                if (np.isfinite(reintegrated).all() and np.all(reintegrated[positive] > 0)
+                        and not np.array_equal(reintegrated, initial)):
+                    start_recovery = {"policy": "rollout-shifted-controls-from-observation",
+                                      "state": "started", "initial_primal": reintegrated.tolist(),
+                                      "original_solver": solver_receipt}
+                    self.last_query_capture["start_recovery"] = start_recovery
+                    self._capture()
+                    solver_receipt = solve(relation, compiled, initial=reintegrated, positive_indices=positive,
+                                           geometry_memberships=memberships or ())
+                    start_recovery.update(state="returned", retry_solver_status=solver_receipt["status"])
+                    result["invocations"].append({"operation": "controller.solve", "module_id": "continuous-history-mpc",
+                        "profile_id": self.controller_id, "provider": "casadi-ipopt",
+                        "version": solver_receipt.get("version", "unknown"), "reason": start_recovery["policy"]})
+                    self.last_query_capture["solver_receipt"] = solver_receipt
+                    self._capture()
             if not solver_receipt["success"]:
                 result["solve_receipt"] = {"bridge_response": response, "solver": solver_receipt}
+                if start_recovery is not None:
+                    result["solve_receipt"]["start_recovery"] = start_recovery
                 result["reason"] = "history norm solver failed: " + str(solver_receipt)
                 return result
             primal, solver_cost = solver_receipt["primal"], solver_receipt["objective"]
@@ -289,6 +321,8 @@ class HistoryPolicy:
                 "profile_id": self.controller_id, "provider": provider,
                 "version": solver_receipt.get("version", "unknown")})
         result["solve_receipt"] = {"bridge_response": response, "solver": solver_receipt}
+        if start_recovery is not None:
+            result["solve_receipt"]["start_recovery"] = start_recovery
         try:
             checks = validate(self.task, absolute_update_index, observed_physical_state,
                               request["predictor_stages"], relation, primal, solver_cost,

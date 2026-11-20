@@ -50,6 +50,18 @@ class HistoryNormSolverTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "next observed stage"):
             initial_history(request, previous)
 
+    def test_reintegration_keeps_shifted_controls_and_uses_the_observed_state(self):
+        from history_policy import initial_history, reintegrate_history_start
+
+        stage = {"A": [[2]], "B": [[1]], "c": [0.5]}
+        request = {"absolute_update_index": 4, "observed_physical_state": [3],
+                   "control_bounds": [[-2, 2]], "predictor_stages": [stage, stage]}
+        prior = {"stage": 3, "primal": [0, 1, 9, 10, 1.5, -1, 2]}
+        shifted, _ = initial_history(request, prior)
+        self.assertEqual(shifted.tolist(), [3, 9, 10, -1, 2])
+        recovered = reintegrate_history_start(request, shifted)
+        self.assertEqual(recovered.tolist(), [3, 5.5, 13.5, -1, 2])
+
     def test_nlp_receipt_retains_shifted_input_and_explicit_zero_duals(self):
         import numpy as np
         from history_norm_solver import solve
