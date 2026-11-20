@@ -1,15 +1,16 @@
-from pathlib import Path
 import hashlib
+import importlib
 import json
 import shutil
 import sys
 import tempfile
 import unittest
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import native_fixed_tail_episode_report as report
+report = importlib.import_module("native_fixed_tail_episode_report")
 
 
 class NativeEpisodeReportTests(unittest.TestCase):

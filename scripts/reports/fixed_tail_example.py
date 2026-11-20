@@ -37,18 +37,20 @@ def boundary(region):
         lo, hi = region["carrier_lower"], region["carrier_upper"]
         polygon = [(lo[0], lo[1]), (hi[0], lo[1]), (hi[0], hi[1]), (lo[0], hi[1])]
         for row, bound in zip(
-            region["reference"]["inequalities"], region["reference"]["upper_bounds"]
+            region["reference"]["inequalities"], region["reference"]["upper_bounds"], strict=True
         ):
             clipped = []
-            for a, b in zip(polygon, polygon[1:] + polygon[:1]):
+            for a, b in zip(polygon, polygon[1:] + polygon[:1], strict=True):
                 da, db = (
-                    sum(x * y for x, y in zip(row, a)) - bound,
-                    sum(x * y for x, y in zip(row, b)) - bound,
+                    sum(x * y for x, y in zip(row, a, strict=True)) - bound,
+                    sum(x * y for x, y in zip(row, b, strict=True)) - bound,
                 )
                 if da <= 1e-12:
                     clipped.append(a)
                 if da < 0 < db or db < 0 < da:
-                    clipped.append(tuple(x + (y - x) * (-da) / (db - da) for x, y in zip(a, b)))
+                    clipped.append(
+                        tuple(x + (y - x) * (-da) / (db - da) for x, y in zip(a, b, strict=True))
+                    )
             polygon = clipped
         return polygon
     member = region["membership"]
@@ -58,7 +60,9 @@ def boundary(region):
     else:
         factors = itertools.product((-1, 1), repeat=len(factor[0]))
     points = [
-        tuple(center[i] + sum(a * b for a, b in zip(factor[i], value)) for i in range(2))
+        tuple(
+            center[i] + sum(a * b for a, b in zip(factor[i], value, strict=True)) for i in range(2)
+        )
         for value in factors
     ]
     return convex_boundary(points) if member["factor_domain_norm"] != "l2" else points
@@ -81,13 +85,20 @@ def audit(responses):
                 "fixture must retain both physical stages and an accepted native query"
             )
         control = response["control"]
-        cost = sum((x - y) ** 2 for x, y in zip(control, target)) + 0.02 * sum(
+        if len(control) != 2 or len(response["history"]) != 6:
+            raise ValueError(
+                "native fixture differs from the expected control or history coordinate count"
+            )
+        cost = sum((x - y) ** 2 for x, y in zip(control, target, strict=True)) + 0.02 * sum(
             x * x for x in control
         )
         if (
-            max(abs(a - b) for a, b in zip(control, expected[family])) > 1e-7
+            max(abs(a - b) for a, b in zip(control, expected[family], strict=True)) > 1e-7
             or abs(cost - response["source_cost"]["total"]) > 1e-9
-            or max(abs(a - b) for a, b in zip(response["history"], [0, 0, *control, *control]))
+            or max(
+                abs(a - b)
+                for a, b in zip(response["history"], [0, 0, *control, *control], strict=True)
+            )
             > 1e-9
         ):
             raise ValueError("native fixture differs from its independent mathematical answer")
@@ -121,7 +132,7 @@ def figure(responses):
         parts.append(
             f'<path d="M100 {y}H880" stroke="#504945"/><text x="83" y="{y + 6}" text-anchor="end">{value}</text>'
         )
-    for family, color in zip(FAMILIES, COLORS):
+    for family, color in zip(FAMILIES, COLORS, strict=True):
         points = boundary(responses[family]["regions"][1])
         values = " ".join(f"{xy(point)[0]:.3f},{xy(point)[1]:.3f}" for point in points)
         dash = ' stroke-dasharray="8 5"' if family == "polytope" else ""
@@ -133,7 +144,7 @@ def figure(responses):
         parts.append(
             f'<path d="M{origin[0]} {origin[1]}L{end[0]} {end[1]}" stroke="{color}" stroke-width="1.5" opacity=".6"/><circle cx="{end[0]}" cy="{end[1]}" r="5" fill="{color}"/>'
         )
-    for i, (family, color) in enumerate(zip(FAMILIES, COLORS)):
+    for i, (family, color) in enumerate(zip(FAMILIES, COLORS, strict=True)):
         parts.append(
             f'<path d="M{100 + i * 175} 35h22" stroke="{color}" stroke-width="3"/><text x="{129 + i * 175}" y="41" font-size="15">{family}</text>'
         )
@@ -196,7 +207,8 @@ def build(root: Path = ROOT):
         raise ValueError("native fixed-tail fixture directory is missing or symlinked")
     assets = {}
     names = set()
-    for line in (source / "files.sha256").read_text().splitlines():
+    manifest = (source / "files.sha256").read_bytes()
+    for line in manifest.decode("utf-8").splitlines():
         digest, name = line.split("  ", 1)
         path = source / name
         if (
@@ -209,18 +221,20 @@ def build(root: Path = ROOT):
                 source.joinpath(*Path(name).parts[:i]).is_symlink()
                 for i in range(1, len(Path(name).parts) + 1)
             )
-            or hashlib.sha256(path.read_bytes()).hexdigest() != digest
         ):
             raise ValueError("native fixed-tail fixture hash/path mismatch")
+        raw = path.read_bytes()
+        if hashlib.sha256(raw).hexdigest() != digest:
+            raise ValueError("native fixed-tail fixture hash/path mismatch")
         names.add(name)
-        assets[f"{DATA}/{name}"] = path.read_bytes()
+        assets[f"{DATA}/{name}"] = raw
     if names != {
         p.relative_to(source).as_posix()
         for p in source.rglob("*")
         if p.is_file() and p.name != "files.sha256"
     }:
         raise ValueError("native fixed-tail fixture inventory differs")
-    assets[f"{DATA}/files.sha256"] = (source / "files.sha256").read_bytes()
+    assets[f"{DATA}/files.sha256"] = manifest
     responses = {
         family: json.loads(assets[f"{DATA}/{family}/response.jsonl"]) for family in FAMILIES
     }

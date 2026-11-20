@@ -1,13 +1,14 @@
-from pathlib import Path
+import importlib
 import json
 import shutil
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import fixed_tail_example as example
+example = importlib.import_module("fixed_tail_example")
 
 
 class FixedTailExampleTests(unittest.TestCase):
@@ -33,6 +34,19 @@ class FixedTailExampleTests(unittest.TestCase):
             response.write_bytes(response.read_bytes() + b" ")
             with self.assertRaisesRegex(ValueError, "hash/path mismatch"):
                 example.build(root)
+
+    def test_closed_form_audit_rejects_incorrect_control_and_history_shapes(self):
+        for field in ("control", "history"):
+            with self.subTest(field=field):
+                responses = {
+                    family: json.loads(
+                        (ROOT / "examples" / example.DATA / family / "response.jsonl").read_text()
+                    )
+                    for family in example.FAMILIES
+                }
+                responses["box"][field].append(0)
+                with self.assertRaisesRegex(ValueError, "coordinate count"):
+                    example.audit(responses)
 
     def test_closed_form_audit_rejects_an_incorrect_native_action(self):
         responses = {

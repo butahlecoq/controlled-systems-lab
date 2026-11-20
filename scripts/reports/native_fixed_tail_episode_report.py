@@ -6,8 +6,8 @@ import hashlib
 import json
 import math
 import re
-from pathlib import Path
 import zipfile
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = "reports/closed-loop-native-fixed-tail/a6-v1"
@@ -213,6 +213,7 @@ def build(root=ROOT):
 
 def main():
     import argparse
+
     import fixed_tail_example
 
     parser = argparse.ArgumentParser(description=__doc__)
