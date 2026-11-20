@@ -251,7 +251,10 @@ class VisualRouteInventoryTests(unittest.TestCase):
                          "examples/catalogue-forward-reachability-v1/index.html")
         self.assertIn("reviewed: physical and centred coordinates",forward["disposition"])
         self.assertNotIn("follow_up_issue",forward)
-        reviewed_routes={paired["route"],query["route"],crossover["route"],forward["route"]}
+        history=routes["catalogue-feasible-history-v1"]
+        self.assertEqual(history["assets"],["battery-history-projections.svg"])
+        self.assertEqual(history["companion_route"],"examples/catalogue-feasible-history-v1/index.html")
+        reviewed_routes={paired["route"],query["route"],crossover["route"],forward["route"],history["route"]}
         self.assertTrue(all(entry["disposition"].startswith("deferred: original frozen route-level readability")
                             for entry in routes.values() if entry["route"] not in reviewed_routes))
         self.assertTrue(all(entry["follow_up_issue"] ==
@@ -312,6 +315,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "positive_part_budget_2d_native-example.stdout",
             "catalogue-forward-reachability-v1/index.html",
             "catalogue-forward-reachability-v1/platoon-forward.svg",
+            "catalogue-feasible-history-v1/index.html",
+            "catalogue-feasible-history-v1/battery-history-projections.svg",
             "mpc-crossover-6b7308c4/index.html", "mpc-crossover-6b7308c4/feedback-geometry.svg",
             "mpc-crossover-6b7308c4/deployment-time.svg",
             "discrete-mpc-2d.html", "discrete-mpc-2d.svg", "discrete-mpc-2d.json",

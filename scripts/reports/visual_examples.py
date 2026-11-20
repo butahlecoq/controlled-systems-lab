@@ -1383,6 +1383,10 @@ def build(catalog, site):
         Path(__file__).resolve().parents[2]
     )
     saved_figures += forward_card
+    history_files, history_inventory, history_card = (
+        stage_catalogue_forward_reachability.build_feasible_history(Path(__file__).resolve().parents[2])
+    )
+    saved_figures += history_card
     crossover_files, crossover_inventory, crossover_card = stage_mpc_crossover.build(
         Path(__file__).resolve().parents[2]
     )
@@ -1492,6 +1496,7 @@ def build(catalog, site):
     outputs.update(native_files)
     outputs.update(approximation_files)
     outputs.update(forward_files)
+    outputs.update(history_files)
     outputs.update(crossover_files)
     outputs.update(buryatia_files)
     outputs.update(volterra_files)
@@ -1709,6 +1714,7 @@ def build(catalog, site):
     gallery_inventory.extend(native_inventory)
     gallery_inventory.extend(approximation_inventory)
     gallery_inventory.extend(forward_inventory)
+    gallery_inventory.extend(history_inventory)
     gallery_inventory.extend(crossover_inventory)
     gallery_inventory.extend(buryatia_inventory)
     gallery_inventory.extend(volterra_inventory)

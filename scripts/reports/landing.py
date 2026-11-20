@@ -125,6 +125,13 @@ FAMILIES = {
         "Propagates three steps of authored independent box controls for all 35 catalogue models. "
         "An exact-rational checker validates sampled supports, and the figure shows the 30-state platoon projection.",
     ),
+    "catalogue-feasible-history-v1": Family(
+        r"examples/catalogue-feasible-history-v1",
+        "geometry",
+        "How constraints change reachable sets",
+        "Compares complete three-step feasible histories with control-interval-only histories "
+        "on 35 matched catalogue models. The battery figure overlays both profiles at each stage.",
+    ),
     "mpc-crossover": Family(
         r"examples/mpc-crossover-6b7308c4",
         "synthesis",
@@ -1270,6 +1277,22 @@ def build(site: Path) -> None:
                     ("Sampled supports", forward + "/support.csv"),
                     ("Independent audit", forward + "/support-audit.json"),
                     ("Offline example", forward + "/catalogue-forward-reachability-v1.zip"),
+                ),
+            )
+        )
+    history = "examples/catalogue-feasible-history-v1"
+    if (site / history / "index.html").is_file():
+        manifest = json.loads((site / history / "manifest.json").read_text(encoding="utf-8"))
+        detailed = [entry for entry in detailed if entry.report_id != history]
+        detailed.append(
+            Entry(
+                report_id=history,
+                scope="2,240 sampled support queries on 35 matched three-step models.",
+                limits="Sampled linear projection evidence, with native refusals retained.",
+                commit=manifest["source_commit"],
+                links=(
+                    ("Source and hashes", history + "/manifest.json"),
+                    ("Offline evidence", history + "/catalogue-feasible-history-evidence.zip"),
                 ),
             )
         )

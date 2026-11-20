@@ -1,0 +1,11 @@
+{
+  "schema": "csl.catalogue-feasible-history-capture/1",
+  "source_commit": "dc6801dc5f02c4000b4f1272361752581a55873a",
+  "input_commit": "f4e58932c995d5b11242cb9beaeef398a2f0ce06",
+  "files_sha256": {
+    "battery-history-projections.svg": "3d78f4ac791806cb4e7b71d840839b5716450eabbb9b53906b1d93be5a778e64",
+    "catalogue-feasible-history-evidence.zip": "b393255e8c91049363a8e718e2063e04fc2f31c0f56e69e4e587a99a5926c92a",
+    "examples.css": "11ded2b69cec694ff61ecad0493f175becbfc47bce3d641f2ee512543bb82cf4",
+    "index.html": "2b969b688d2f1197151e719f9906535442cfa863a0731f1e9833e5e88cf34a70"
+  }
+}

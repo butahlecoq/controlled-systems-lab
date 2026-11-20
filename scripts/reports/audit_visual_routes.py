@@ -264,6 +264,7 @@ SAVED_DATA_COMPANION_RENDERERS = {
 }
 FROZEN_COMPANIONS = {
     "catalogue-forward-reachability-v1": "examples/catalogue-forward-reachability-v1/index.html",
+    "catalogue-feasible-history-v1": "examples/catalogue-feasible-history-v1/index.html",
     "mpc-crossover-6b7308c4": "examples/mpc-crossover-6b7308c4/index.html",
     "mpc06-online-anchor-v1": "mpc06-complete-6b7059d62473d32d4210/index.html",
     "mpc06-online-anchor-checked-v2": "mpc06-complete-6b7059d62473d32d4210/index.html",
@@ -290,6 +291,8 @@ FROZEN_COMPANIONS = {
     "lotka-volterra-sampled-20261023": "examples/lotka-volterra-sampled-v1.html",
 }
 FROZEN_REVIEWED_ROUTES = {
+    "catalogue-feasible-history-v1":
+        "reviewed: paired battery projections display full constraints and control intervals at each stage",
     "catalogue-forward-reachability-v1":
         "reviewed: physical and centred coordinates show the same stagewise platoon projection",
     "mpc-crossover-6b7308c4":
@@ -515,6 +518,8 @@ def build(root: Path = ROOT) -> dict:
                     "positive_part_budget_2d_native-example.stdout",
                     "catalogue-forward-reachability-v1/index.html",
                     "catalogue-forward-reachability-v1/platoon-forward.svg",
+                    "catalogue-feasible-history-v1/index.html",
+                    "catalogue-feasible-history-v1/battery-history-projections.svg",
                     "mpc-crossover-6b7308c4/index.html",
                     "mpc-crossover-6b7308c4/feedback-geometry.svg",
                     "mpc-crossover-6b7308c4/deployment-time.svg",
