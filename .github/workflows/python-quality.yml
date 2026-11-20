@@ -19,6 +19,12 @@ on:
       - 'tests/obs04/perf_control_mock.py'
       - 'tests/obs04/perf_probe_tests.py'
       - 'scripts/obs04_perf_probe.py'
+      - 'benchmarks/reporting/closed_loop/check_contracts.py'
+      - 'benchmarks/reporting/closed_loop/validate_contracts.py'
+      - 'benchmarks/reporting/closed_loop/check_episode.py'
+      - 'benchmarks/reporting/closed_loop/check_replay.py'
+      - 'benchmarks/reporting/closed_loop/contracts.py'
+      - 'tests/reporting/test_closed_loop_tasks.py'
       - 'scripts/ci/**'
       - 'tests/ci/**'
       - 'scripts/catalogue/**'
@@ -86,6 +92,8 @@ on:
       - 'scripts/reports/visual_examples.py'
       - 'scripts/reports/pages_route_retirement.py'
       - 'scripts/reports/audit_visual_routes.py'
+      - 'scripts/reports/audit_mathematical_presentation.py'
+      - 'tests/reporting/test_mathematical_presentation.py'
       - 'scripts/reports/mathematical-presentation-routes.json'
       - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
@@ -95,6 +103,9 @@ on:
       - 'scripts/reports/stage_catalogue_forward_reachability.py'
       - 'tests/reporting/test_catalogue_forward_publication.py'
       - 'reports/algorithm-results/catalogue-forward-reachability-v1/**'
+      - 'reports/algorithm-results/catalogue-feasible-history-v1/**'
+      - 'reports/algorithm-results/catalogue-exact-support-v1/**'
+      - 'reports/algorithm-results/catalogue-backward-reachability-v1/**'
       - 'scripts/reports/stage_mpc_crossover.py'
       - 'scripts/reports/stage_native_source_constrained_mpc.py'
       - 'tests/reporting/test_mpc_crossover_publication.py'
@@ -138,6 +149,12 @@ on:
       - 'tests/obs04/perf_control_mock.py'
       - 'tests/obs04/perf_probe_tests.py'
       - 'scripts/obs04_perf_probe.py'
+      - 'benchmarks/reporting/closed_loop/check_contracts.py'
+      - 'benchmarks/reporting/closed_loop/validate_contracts.py'
+      - 'benchmarks/reporting/closed_loop/check_episode.py'
+      - 'benchmarks/reporting/closed_loop/check_replay.py'
+      - 'benchmarks/reporting/closed_loop/contracts.py'
+      - 'tests/reporting/test_closed_loop_tasks.py'
       - 'scripts/ci/**'
       - 'tests/ci/**'
       - 'scripts/catalogue/**'
@@ -205,6 +222,8 @@ on:
       - 'scripts/reports/visual_examples.py'
       - 'scripts/reports/pages_route_retirement.py'
       - 'scripts/reports/audit_visual_routes.py'
+      - 'scripts/reports/audit_mathematical_presentation.py'
+      - 'tests/reporting/test_mathematical_presentation.py'
       - 'scripts/reports/mathematical-presentation-routes.json'
       - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
@@ -214,6 +233,9 @@ on:
       - 'scripts/reports/stage_catalogue_forward_reachability.py'
       - 'tests/reporting/test_catalogue_forward_publication.py'
       - 'reports/algorithm-results/catalogue-forward-reachability-v1/**'
+      - 'reports/algorithm-results/catalogue-feasible-history-v1/**'
+      - 'reports/algorithm-results/catalogue-exact-support-v1/**'
+      - 'reports/algorithm-results/catalogue-backward-reachability-v1/**'
       - 'scripts/reports/stage_mpc_crossover.py'
       - 'scripts/reports/stage_native_source_constrained_mpc.py'
       - 'tests/reporting/test_mpc_crossover_publication.py'
@@ -262,6 +284,8 @@ jobs:
         run: ruff format --check
       - name: Check types
         run: ty check
+      - name: Check closed-loop task and replay input shapes
+        run: python -m unittest tests.reporting.test_closed_loop_tasks
       - name: Exercise real Git and process behavior
         run: python -m unittest discover -s tests/ci -p 'test_*.py'
       - name: Exercise site additions and the APP02 staging caller
@@ -278,6 +302,8 @@ jobs:
           MPLBACKEND: Agg
         run: |
           python -m unittest tests.reporting.test_report_data tests.reporting.test_render tests.reporting.test_publication_policy tests.reporting.test_report_source_identity tests.reporting.test_registered_kinds tests.reporting.test_landing tests.reporting.test_learning_book tests.reporting.test_plot tests.reporting.test_b04_publication_source_snapshot tests.reporting.test_publication_spine_boundaries
+      - name: Check mathematical presentation and frozen HTML
+        run: python -m unittest tests.reporting.test_mathematical_presentation
       - name: Exercise saved publication and collector consumer families
         env:
           MPLBACKEND: Agg

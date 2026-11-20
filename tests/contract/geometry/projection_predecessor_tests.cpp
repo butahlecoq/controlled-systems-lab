@@ -401,6 +401,25 @@ TEST_CASE("projection onto R0 distinguishes nonempty and empty existential fiber
     CHECK(no.output.metadata.dimension==0);
 }
 
+TEST_CASE("duplicate H rows keep the tightest bound before projection pairing") {
+    // x+y <= 5, y >= 2, x >= -1. Eliminating y gives [-1, 3].
+    Matrix rows{17, 2, {}};
+    Vector bounds;
+    for (double slack : {3., 1., 0., 2., 4., 7., 5., 6.}) {
+        rows.values.insert(rows.values.end(), {1., 1., 0., -1.});
+        bounds.insert(bounds.end(), {5. + slack, -2. + slack});
+    }
+    rows.values.insert(rows.values.end(), {-1., 0.});
+    bounds.push_back(1.);
+    const auto source = h("repeated-rows", 2, rows, bounds, {0, 2, {}}, {});
+    const auto result = take(project(projection(source.as_handle(), {0}),
+        geometry::polyhedral::ProjectionOutput::h, rows.rows));
+    CHECK(contains(result.output, {-1.}));
+    CHECK(contains(result.output, {3.}));
+    CHECK_FALSE(contains(result.output, {-1.125}));
+    CHECK_FALSE(contains(result.output, {3.125}));
+}
+
 TEST_CASE("one-sided eliminated variable does not introduce a bound on remaining coordinates") {
     // exists y: x+y<=1 for every real x, since y has no lower bound.
     auto joint=h("joint",2,{1,2,{1,1}},{1},{0,2,{}},{});

@@ -66,7 +66,7 @@ def solve(relation: dict, objective: dict, *, initial, positive_indices=(), geom
                     if abs(coefficient) == 1:
                         fixed[coordinate] = float(bound[i] * coefficient)
     from history_geometry import constrain, fixed_axis_witnesses, parse, verify
-    geometry = parse(geometry_memberships, dimension)
+    geometry = parse(geometry_memberships, dimension, relation=relation)
     fixed_witnesses = fixed_axis_witnesses(geometry, fixed, include_zonotopes=scales is not None)
     active = [index for index in range(len(geometry)) if index not in fixed_witnesses]
     factor_variables = constrain(opti, z, [geometry[index] for index in active], initial,

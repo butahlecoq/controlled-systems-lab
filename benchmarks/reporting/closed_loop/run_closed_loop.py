@@ -976,8 +976,11 @@ def run_task(
     try:
         task = load_task(task_name)
         validate_source_binding(task)
+        from history_policy import LIFTED_POLYTOPE_CONTROLLER
+
         requested_action_profile_id = action_profile_id
         history_controller = controller_id in {
+            LIFTED_POLYTOPE_CONTROLLER,
             *(
                 f"native-fixed-tail-{family}-ipopt/1"
                 for family in ("polytope", "box", "zonotope", "parallelotope", "ellipsoid")

@@ -265,6 +265,9 @@ SAVED_DATA_COMPANION_RENDERERS = {
 }
 FROZEN_COMPANIONS = {
     "catalogue-forward-reachability-v1": "examples/catalogue-forward-reachability-v1/index.html",
+    "catalogue-feasible-history-v1": "examples/catalogue-feasible-history-v1/index.html",
+    "catalogue-exact-support-v1": "examples/catalogue-exact-support-v1/index.html",
+    "catalogue-backward-reachability-v1": "examples/catalogue-backward-reachability-v1/index.html",
     "mpc-crossover-6b7308c4": "examples/mpc-crossover-6b7308c4/index.html",
     "mpc06-online-anchor-v1": "mpc06-complete-6b7059d62473d32d4210/index.html",
     "mpc06-online-anchor-checked-v2": "mpc06-complete-6b7059d62473d32d4210/index.html",
@@ -291,6 +294,12 @@ FROZEN_COMPANIONS = {
     "lotka-volterra-sampled-20261023": "examples/lotka-volterra-sampled-v1.html",
 }
 FROZEN_REVIEWED_ROUTES = {
+    "catalogue-backward-reachability-v1":
+        "reviewed: all four battery stages show forward and backward rectangles, intersections and the trajectory",
+    "catalogue-exact-support-v1":
+        "reviewed: sampled building projections and positive support deficits from exact certificates",
+    "catalogue-feasible-history-v1":
+        "reviewed: paired battery projections display full constraints and control intervals at each stage",
     "native-catalogue-convex-backends-v1":
         "reviewed: recovered episode figures show all four labelled states and both replay policies",
     "catalogue-forward-reachability-v1":
@@ -518,6 +527,12 @@ def build(root: Path = ROOT) -> dict:
                     "positive_part_budget_2d_native-example.stdout",
                     "catalogue-forward-reachability-v1/index.html",
                     "catalogue-forward-reachability-v1/platoon-forward.svg",
+                    "catalogue-feasible-history-v1/index.html",
+                    "catalogue-feasible-history-v1/battery-history-projections.svg",
+                    "catalogue-exact-support-v1/index.html",
+                    "catalogue-exact-support-v1/building-budget-projection.svg",
+                    "catalogue-backward-reachability-v1/index.html",
+                    "catalogue-backward-reachability-v1/battery-forward-backward.svg",
                     "mpc-crossover-6b7308c4/index.html",
                     "native-source-constrained-mpc-v1/index.html",
                     "native-source-constrained-mpc-v1/platoon.svg",

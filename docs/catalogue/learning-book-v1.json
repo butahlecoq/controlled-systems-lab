@@ -1224,6 +1224,18 @@
           "href": "../examples/catalogue-forward-reachability-v1/index.html"
         },
         {
+          "label": "How constraints change reachable sets",
+          "href": "../examples/catalogue-feasible-history-v1/index.html"
+        },
+        {
+          "label": "Exact support certificates for three catalogue models",
+          "href": "../examples/catalogue-exact-support-v1/index.html"
+        },
+        {
+          "label": "Backward reachability across 35 catalogue models",
+          "href": "../examples/catalogue-backward-reachability-v1/index.html"
+        },
+        {
           "label": "Reachability formulations and horizon variants",
           "href": "model-tracks.html#reachability-formulations"
         }

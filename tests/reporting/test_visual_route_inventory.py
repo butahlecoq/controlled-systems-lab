@@ -251,12 +251,22 @@ class VisualRouteInventoryTests(unittest.TestCase):
                          "examples/catalogue-forward-reachability-v1/index.html")
         self.assertIn("reviewed: physical and centred coordinates",forward["disposition"])
         self.assertNotIn("follow_up_issue",forward)
+        history=routes["catalogue-feasible-history-v1"]
+        self.assertEqual(history["assets"],["battery-history-projections.svg"])
+        self.assertEqual(history["companion_route"],"examples/catalogue-feasible-history-v1/index.html")
+        exact=routes["catalogue-exact-support-v1"]
+        self.assertEqual(exact["assets"],["building-budget-projection.svg"])
+        self.assertEqual(exact["companion_route"],"examples/catalogue-exact-support-v1/index.html")
+        backward = routes["catalogue-backward-reachability-v1"]
+        self.assertEqual(backward["assets"], ["battery-forward-backward.svg"])
+        self.assertEqual(
+            backward["companion_route"], "examples/catalogue-backward-reachability-v1/index.html"
+        )
         backends = routes["native-catalogue-convex-backends-v1"]
         self.assertEqual(backends["assets"], ["bicycle-row-scaling.svg", "twenty-zone-ipopt.svg"])
         self.assertTrue(backends["disposition"].startswith("reviewed:"))
         self.assertNotIn("follow_up_issue", backends)
-        reviewed_routes = {paired["route"], query["route"], crossover["route"],
-                           forward["route"], backends["route"]}
+        reviewed_routes = {backends["route"], backward["route"], crossover["route"], exact["route"], forward["route"], history["route"], paired["route"], query["route"]}
         self.assertTrue(all(entry["disposition"].startswith("deferred: original frozen route-level readability")
                             for entry in routes.values() if entry["route"] not in reviewed_routes))
         self.assertTrue(all(entry["follow_up_issue"] ==
@@ -317,6 +327,12 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "positive_part_budget_2d_native-example.stdout",
             "catalogue-forward-reachability-v1/index.html",
             "catalogue-forward-reachability-v1/platoon-forward.svg",
+            "catalogue-feasible-history-v1/index.html",
+            "catalogue-feasible-history-v1/battery-history-projections.svg",
+            "catalogue-exact-support-v1/index.html",
+            "catalogue-exact-support-v1/building-budget-projection.svg",
+            "catalogue-backward-reachability-v1/index.html",
+            "catalogue-backward-reachability-v1/battery-forward-backward.svg",
             "mpc-crossover-6b7308c4/index.html", "mpc-crossover-6b7308c4/feedback-geometry.svg",
             "native-source-constrained-mpc-v1/index.html", "native-source-constrained-mpc-v1/platoon.svg",
             "native-catalogue-convex-backends-v1/index.html",

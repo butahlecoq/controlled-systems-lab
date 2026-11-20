@@ -1384,6 +1384,24 @@ def build(catalog, site):
         Path(__file__).resolve().parents[2]
     )
     saved_figures += forward_card
+    catalogue_history_files, catalogue_history_inventory, catalogue_history_card = (
+        stage_catalogue_forward_reachability.build_feasible_history(
+            Path(__file__).resolve().parents[2]
+        )
+    )
+    saved_figures += catalogue_history_card
+    catalogue_exact_files, catalogue_exact_inventory, catalogue_exact_card = (
+        stage_catalogue_forward_reachability.build_exact_support(
+            Path(__file__).resolve().parents[2]
+        )
+    )
+    saved_figures += catalogue_exact_card
+    catalogue_backward_files, catalogue_backward_inventory, catalogue_backward_card = (
+        stage_catalogue_forward_reachability.build_backward_reachability(
+            Path(__file__).resolve().parents[2]
+        )
+    )
+    saved_figures += catalogue_backward_card
     crossover_files, crossover_inventory, crossover_card = stage_mpc_crossover.build(
         Path(__file__).resolve().parents[2]
     )
@@ -1503,6 +1521,9 @@ def build(catalog, site):
     outputs.update(native_files)
     outputs.update(approximation_files)
     outputs.update(forward_files)
+    outputs.update(catalogue_history_files)
+    outputs.update(catalogue_exact_files)
+    outputs.update(catalogue_backward_files)
     outputs.update(crossover_files)
     outputs.update(matched_files)
     outputs.update(backend_files)
@@ -1722,6 +1743,9 @@ def build(catalog, site):
     gallery_inventory.extend(native_inventory)
     gallery_inventory.extend(approximation_inventory)
     gallery_inventory.extend(forward_inventory)
+    gallery_inventory.extend(catalogue_history_inventory)
+    gallery_inventory.extend(catalogue_exact_inventory)
+    gallery_inventory.extend(catalogue_backward_inventory)
     gallery_inventory.extend(crossover_inventory)
     gallery_inventory.extend(matched_inventory)
     gallery_inventory.extend(backend_inventory)

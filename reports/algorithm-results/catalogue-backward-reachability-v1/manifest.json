@@ -1,0 +1,13 @@
+{
+  "schema": "csl.catalogue-backward-reachability-capture/1",
+  "source_commit": "4e2e332b6dffd697febfd53c3d7fb3a6b20f90ef",
+  "input_commit": "f4e58932c995d5b11242cb9beaeef398a2f0ce06",
+  "prior_input_archive_sha256": "b393255e8c91049363a8e718e2063e04fc2f31c0f56e69e4e587a99a5926c92a",
+  "files_sha256": {
+    "battery-forward-backward.svg": "47d2dd5c46bc89b4d1f72360d73aaac212afc977ffaec7454c2fe4bf28989be5",
+    "catalogue-backward-support-evidence.zip": "4805124a15e87f5738a295072c5ecd12dec8719971acc8e9be352a7c797a3ec8",
+    "examples.css": "11ded2b69cec694ff61ecad0493f175becbfc47bce3d641f2ee512543bb82cf4",
+    "index.html": "3f4cee565641826d533afad1567acdca50b5bff8fe2e56812f99f0ea2ec90836",
+    "predecessor.cpp": "905b4dd78c9c05f7223a8748816916034215fd60ae49d70b9c9ccfa0f91355e1"
+  }
+}

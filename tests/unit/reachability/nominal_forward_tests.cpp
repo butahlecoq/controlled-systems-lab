@@ -314,8 +314,8 @@ TEST_CASE("clipped T-S01 chain retains literal marginals and stage shape counts"
     };
     using Shape=std::array<std::size_t,5>;
     const Shape stage1_joint{3,6,2,18,6},stage1_propagation{1,4,0,4,0},
-        stage1_marginal{1,4,0,4,0},stage2_joint{3,8,1,24,3},
-        stage2_propagation{1,4,0,4,0},stage2_marginal{1,4,0,4,0};
+        stage1_marginal{1,2,0,2,0},stage2_joint{3,6,1,18,3},
+        stage2_propagation{1,4,0,4,0},stage2_marginal{1,2,0,2,0};
     CHECK(shape(tube.stages[1].joint_factor)==stage1_joint);
     CHECK(shape(tube.stages[1].propagation_factor)==stage1_propagation);
     CHECK(shape(tube.stages[1].marginal.output)==stage1_marginal);

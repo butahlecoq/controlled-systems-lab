@@ -125,6 +125,27 @@ FAMILIES = {
         "Propagates three steps of authored independent box controls for all 35 catalogue models. "
         "An exact-rational checker validates sampled supports, and the figure shows the 30-state platoon projection.",
     ),
+    "catalogue-feasible-history-v1": Family(
+        r"examples/catalogue-feasible-history-v1",
+        "geometry",
+        "How constraints change reachable sets",
+        "Compares complete three-step feasible histories with control-interval-only histories "
+        "on 35 matched catalogue models. The battery figure overlays both profiles at each stage.",
+    ),
+    "catalogue-exact-support-v1": Family(
+        r"examples/catalogue-exact-support-v1",
+        "geometry",
+        "Exact support certificates for three catalogue models",
+        "Checks a rational primal witness and upper bound for each of 192 saved direction-stage samples. "
+        "The building figure shows the exact support lost to the control budget.",
+    ),
+    "catalogue-backward-reachability-v1": Family(
+        r"examples/catalogue-backward-reachability-v1",
+        "geometry",
+        "Backward reachability across 35 catalogue models",
+        "Checks 1,120 predecessor support values for authored control boxes and terminal sets. "
+        "The battery example shows both sets, their intersections and its terminal-optimal trajectory.",
+    ),
     "mpc-crossover": Family(
         r"examples/mpc-crossover-6b7308c4",
         "synthesis",
@@ -1284,6 +1305,54 @@ def build(site: Path) -> None:
                     ("Sampled supports", forward + "/support.csv"),
                     ("Independent audit", forward + "/support-audit.json"),
                     ("Offline example", forward + "/catalogue-forward-reachability-v1.zip"),
+                ),
+            )
+        )
+    history = "examples/catalogue-feasible-history-v1"
+    if (site / history / "index.html").is_file():
+        manifest = json.loads((site / history / "manifest.json").read_text(encoding="utf-8"))
+        detailed = [entry for entry in detailed if entry.report_id != history]
+        detailed.append(
+            Entry(
+                report_id=history,
+                scope="2,240 sampled support queries on 35 matched three-step models.",
+                limits="Sampled linear projection evidence, with native refusals retained.",
+                commit=manifest["source_commit"],
+                links=(
+                    ("Source and hashes", history + "/manifest.json"),
+                    ("Offline evidence", history + "/catalogue-feasible-history-evidence.zip"),
+                ),
+            )
+        )
+    exact_support = "examples/catalogue-exact-support-v1"
+    if (site / exact_support / "index.html").is_file():
+        manifest = json.loads((site / exact_support / "manifest.json").read_text(encoding="utf-8"))
+        detailed = [entry for entry in detailed if entry.report_id != exact_support]
+        detailed.append(
+            Entry(
+                report_id=exact_support,
+                scope="192 exact support certificates across three archived model fixtures and two profiles.",
+                limits="Eight sampled directions at four stages per profile and model.",
+                commit=manifest["source_commit"],
+                links=(
+                    ("Source and hashes", exact_support + "/manifest.json"),
+                    ("Offline evidence", exact_support + "/catalogue-exact-support-evidence.zip"),
+                ),
+            )
+        )
+    backward = "examples/catalogue-backward-reachability-v1"
+    if (site / backward / "index.html").is_file():
+        manifest = json.loads((site / backward / "manifest.json").read_text(encoding="utf-8"))
+        detailed = [entry for entry in detailed if entry.report_id != backward]
+        detailed.append(
+            Entry(
+                report_id=backward,
+                scope="1,120 exact sampled predecessor supports across 35 linear discrete models.",
+                limits="Three-step authored signed controls, fixed forecasts and terminal targets.",
+                commit=manifest["source_commit"],
+                links=(
+                    ("Source and hashes", backward + "/manifest.json"),
+                    ("Offline evidence", backward + "/catalogue-backward-support-evidence.zip"),
                 ),
             )
         )
