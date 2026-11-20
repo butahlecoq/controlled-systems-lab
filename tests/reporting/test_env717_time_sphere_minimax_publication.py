@@ -14,8 +14,9 @@ ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location(
     "stage_env717_time_sphere_minimax", ROOT / "scripts/reports/stage_env717_time_sphere_minimax.py"
 )
+if SPEC is None or SPEC.loader is None:
+    raise ImportError("cannot load the environment publication test dependency")
 stage_module = importlib.util.module_from_spec(SPEC)
-assert SPEC.loader is not None
 SPEC.loader.exec_module(stage_module)
 
 
@@ -38,6 +39,11 @@ class TimeOptimalSphereMinimaxPublicationTests(unittest.TestCase):
 
     def test_stages_verified_adversarial_reachability_and_minimax_result(self):
         report_id = stage_module.stage(self.source, self.site)
+        self.assertEqual(report_id, "env717-time-sphere-minimax-c50898f716ff6fdc8ea9")
+        self.assertEqual(
+            hashlib.sha256((self.site / f"{report_id}.zip").read_bytes()).hexdigest(),
+            "ec0062ce2fcba7046669f34c87f6edf5141239af01ef0fd71c8628980dc06816",
+        )
         self.assertRegex(report_id, r"^env717-time-sphere-minimax-[0-9a-f]{20}$")
         destination = self.site / report_id
         manifest = json.loads((destination / "publication-manifest.json").read_text())

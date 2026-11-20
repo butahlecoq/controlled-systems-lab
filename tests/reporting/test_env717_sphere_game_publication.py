@@ -13,8 +13,9 @@ ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location(
     "stage_env717_sphere_game", ROOT / "scripts/reports/stage_env717_sphere_game.py"
 )
+if SPEC is None or SPEC.loader is None:
+    raise ImportError("cannot load the environment publication test dependency")
 stage_module = importlib.util.module_from_spec(SPEC)
-assert SPEC.loader is not None
 SPEC.loader.exec_module(stage_module)
 
 
@@ -37,6 +38,11 @@ class SphereGamePublicationTests(unittest.TestCase):
 
     def test_stages_verified_sphere_phase_plane_report(self):
         report_id = stage_module.stage(self.source, self.site)
+        self.assertEqual(report_id, "env717-sphere-game-daf5f2eab900c226334f")
+        self.assertEqual(
+            hashlib.sha256((self.site / f"{report_id}.zip").read_bytes()).hexdigest(),
+            "caed5914e1973931732bdb13c1d2d7edc78467b32c38caeb4329eb2fa1b8786f",
+        )
         self.assertRegex(report_id, r"^env717-sphere-game-[0-9a-f]{20}$")
         destination = self.site / report_id
         manifest = json.loads((destination / "publication-manifest.json").read_text())

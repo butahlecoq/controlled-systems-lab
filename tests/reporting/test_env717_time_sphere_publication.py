@@ -14,8 +14,9 @@ ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location(
     "stage_env717_time_sphere", ROOT / "scripts/reports/stage_env717_time_sphere.py"
 )
+if SPEC is None or SPEC.loader is None:
+    raise ImportError("cannot load the environment publication test dependency")
 stage_module = importlib.util.module_from_spec(SPEC)
-assert SPEC.loader is not None
 SPEC.loader.exec_module(stage_module)
 
 
@@ -38,6 +39,11 @@ class TimeOptimalSpherePublicationTests(unittest.TestCase):
 
     def test_stages_verified_nominal_reachability_geometry(self):
         report_id = stage_module.stage(self.source, self.site)
+        self.assertEqual(report_id, "env717-time-sphere-75e9ca324bc41601eff4")
+        self.assertEqual(
+            hashlib.sha256((self.site / f"{report_id}.zip").read_bytes()).hexdigest(),
+            "2faeb9b8b0d01b696c7de9329242bd2072374201f1238329f0206689c82b427e",
+        )
         self.assertRegex(report_id, r"^env717-time-sphere-[0-9a-f]{20}$")
         destination = self.site / report_id
         manifest = json.loads((destination / "publication-manifest.json").read_text())

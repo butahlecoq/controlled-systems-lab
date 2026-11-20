@@ -13,8 +13,9 @@ ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location(
     "stage_env717_pendulum", ROOT / "scripts/reports/stage_env717_pendulum.py"
 )
+if SPEC is None or SPEC.loader is None:
+    raise ImportError("cannot load the environment publication test dependency")
 publication = importlib.util.module_from_spec(SPEC)
-assert SPEC.loader is not None
 SPEC.loader.exec_module(publication)
 
 
@@ -31,6 +32,11 @@ class PendulumPublicationTests(unittest.TestCase):
             )
 
             route_id = publication.stage(source, site)
+            self.assertEqual(route_id, "env717-pendulum-1e596033992c263d451e")
+            self.assertEqual(
+                hashlib.sha256((site / f"{route_id}.zip").read_bytes()).hexdigest(),
+                "9d04cd4f19e65238ac93a24b04a1f02003e8d607dd80826825487ec1bf31fc96",
+            )
 
             self.assertRegex(route_id, r"^env717-pendulum-[0-9a-f]{20}$")
             report = site / route_id

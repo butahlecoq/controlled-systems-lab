@@ -3,16 +3,32 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
-import sys
-import zipfile
 from html import escape
 from html.parser import HTMLParser
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from scripts.reports import environment_report_publication as publication
+else:
+    publication_path = Path(__file__).with_name("environment_report_publication.py")
+    publication_spec = importlib.util.spec_from_file_location(
+        "environment_report_publication", publication_path
+    )
+    if publication_spec is None or publication_spec.loader is None:
+        raise ImportError(f"cannot load the environment publication helper: {publication_path}")
+    publication = importlib.util.module_from_spec(publication_spec)
+    publication_spec.loader.exec_module(publication)
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT))
-from scripts.reports.env717 import check_unlimited_bolza as checker
+CHECKER = ROOT / "scripts/reports/env717/check_unlimited_bolza.py"
+spec = importlib.util.spec_from_file_location("env717_unlimited_bolza_checker", CHECKER)
+if spec is None or spec.loader is None:
+    raise ImportError("cannot load the environment report dependency")
+checker = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(checker)
 
 SOURCE = ROOT / "reports/algorithm-results/env717-unlimited-bolza-pilot-v1"
 FILES = (
@@ -33,7 +49,11 @@ class LocalLinks(HTMLParser):
 
     def handle_starttag(self, tag: str, attrs) -> None:
         if tag == "a":
-            self.hrefs.extend(value for key, value in attrs if key == "href")
+            for key, value in attrs:
+                if key == "href":
+                    if value is None:
+                        raise ValueError("report contains a link without a destination")
+                    self.hrefs.append(value)
 
 
 def _digest(data: bytes) -> str:
@@ -110,13 +130,15 @@ def _inputs(source: Path) -> tuple[dict[str, bytes], dict]:
 
 def stage(source: Path, site_root: Path) -> str:
     files, result = _inputs(source)
-    stager_sha = _digest(Path(__file__).read_bytes())
+    publisher, archived_zip_sha256 = publication.archive_identity(
+        source.name, files["SHA256SUMS"], Path(__file__)
+    )
     identity = {
         "schema": "csl.env717-publication-identity/1",
         "source_report_id": source.name,
         "result_sha256": _digest(files["result.json"]),
-        "renderer_sha256": _digest(Path(checker.__file__).read_bytes()),
-        "stager_sha256": stager_sha,
+        "renderer_sha256": _digest(CHECKER.read_bytes()),
+        **publisher,
         "source_file_hashes": {name: _digest(data) for name, data in sorted(files.items())},
     }
     report_id = (
@@ -163,7 +185,7 @@ def stage(source: Path, site_root: Path) -> str:
         "source_repository_commit": result["source_repository_commit"],
         "source_commit": result["provenance"]["source_commit"],
         "result_sha256": _digest(files["result.json"]),
-        "stager_sha256": stager_sha,
+        **publisher,
         "source_files": {name: _digest(data) for name, data in sorted(files.items())},
         "published_files": {name: _digest(data) for name, data in sorted(generated.items())},
     }
@@ -176,23 +198,18 @@ def stage(source: Path, site_root: Path) -> str:
         f' · <a href="{report_id}.zip">offline ZIP</a></li>'
     )
 
-    destination.mkdir()
-    for name, content in generated.items():
-        (destination / name).write_bytes(content)
     offline_landing = (
         f'<!doctype html><html lang="en"><meta charset="utf-8">'
         f"<title>Offline UnlimitedBolza report</title>"
         f'<a href="{report_id}/index.html">Open the report</a></html>'
     ).encode()
-    with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-        contents = [("index.html", offline_landing)] + [
-            (f"{report_id}/{name}", content) for name, content in sorted(generated.items())
-        ]
-        for name, content in contents:
-            info = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
-            info.compress_type = zipfile.ZIP_DEFLATED
-            info.external_attr = 0o100644 << 16
-            archive.writestr(info, content)
+    archive_bytes = publication.offline_zip(
+        report_id, offline_landing, generated, expected_sha256=archived_zip_sha256
+    )
+    destination.mkdir()
+    for name, content in generated.items():
+        (destination / name).write_bytes(content)
+    archive_path.write_bytes(archive_bytes)
     index.write_text(index_text.replace("</ul>", route_link + "</ul>"), encoding="utf-8")
     return report_id
 

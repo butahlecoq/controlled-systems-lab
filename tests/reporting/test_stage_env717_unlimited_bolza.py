@@ -28,7 +28,7 @@ class UnlimitedBolzaPublicationTests(unittest.TestCase):
         )
 
     def source_copy(self, root: Path) -> Path:
-        source = root / "source"
+        source = root / SOURCE.name
         shutil.copytree(SOURCE, source)
         return source
 
@@ -41,6 +41,11 @@ class UnlimitedBolzaPublicationTests(unittest.TestCase):
             (site / "index.html").write_text("<!doctype html><ul></ul>", encoding="utf-8")
 
             report_id = publication.stage(source, site)
+            self.assertEqual(report_id, "env717-unlimited-bolza-6f645469efd8fab2a0c7")
+            self.assertEqual(
+                hashlib.sha256((site / f"{report_id}.zip").read_bytes()).hexdigest(),
+                "c8283777534a75e29274b27afccbef620c669ad750d6f0dab1a2d561a128ad72",
+            )
 
             self.assertRegex(report_id, r"^env717-unlimited-bolza-[0-9a-f]{20}$")
             route = site / report_id

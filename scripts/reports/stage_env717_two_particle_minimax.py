@@ -9,20 +9,34 @@ import html
 import importlib.util
 import json
 import stat
-import zipfile
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from scripts.reports import environment_report_publication as publication
+else:
+    publication_path = Path(__file__).with_name("environment_report_publication.py")
+    publication_spec = importlib.util.spec_from_file_location(
+        "environment_report_publication", publication_path
+    )
+    if publication_spec is None or publication_spec.loader is None:
+        raise ImportError(f"cannot load the environment publication helper: {publication_path}")
+    publication = importlib.util.module_from_spec(publication_spec)
+    publication_spec.loader.exec_module(publication)
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/env717-two-particle-minimax-v1"
 CHECKER_PATH = ROOT / "scripts/reports/env717/check_two_particle_minimax.py"
 CAPTURE_PATH = ROOT / "scripts/reports/env717/capture_two_particle_minimax.py"
 SPEC = importlib.util.spec_from_file_location("env717_two_particle_capture", CAPTURE_PATH)
+if SPEC is None or SPEC.loader is None:
+    raise ImportError("cannot load the environment report dependency")
 capture = importlib.util.module_from_spec(SPEC)
-assert SPEC.loader is not None
 SPEC.loader.exec_module(capture)
 CHECKER_SPEC = importlib.util.spec_from_file_location("env717_two_particle_checker", CHECKER_PATH)
+if CHECKER_SPEC is None or CHECKER_SPEC.loader is None:
+    raise ImportError("cannot load the environment report dependency")
 checker = importlib.util.module_from_spec(CHECKER_SPEC)
-assert CHECKER_SPEC.loader is not None
 CHECKER_SPEC.loader.exec_module(checker)
 SOURCE_COMMIT = "af5f0a2ee498c0edcf88d60f1d6c49a39bd08bc8"
 FILES = (
@@ -96,12 +110,15 @@ def stage(source: Path, site: Path) -> str:
     files, result, _, capture_record = validate_bundle(source)
     if not site.is_dir():
         raise ValueError("staged Pages site directory does not exist")
+    publisher, archived_zip_sha256 = publication.archive_identity(
+        source.name, files["SHA256SUMS"], Path(__file__)
+    )
     identity = {
         "source_repository_commit": SOURCE_COMMIT,
         "source_commit": result["source_commit"],
         "result_sha256": digest(files["result.json"]),
         "capture_sha256": digest(files["capture.json"]),
-        "stager_sha256": digest(Path(__file__).read_bytes()),
+        **publisher,
         "published_source_files": {
             name: digest(content) for name, content in sorted(files.items())
         },
@@ -137,7 +154,7 @@ def stage(source: Path, site: Path) -> str:
         "source_repository_commit": SOURCE_COMMIT,
         "source_commit": result["source_commit"],
         "capture_sha256": digest(files["capture.json"]),
-        "stager_sha256": identity["stager_sha256"],
+        **publisher,
         "source_files": identity["published_source_files"],
         "published_files": {name: digest(content) for name, content in sorted(generated.items())},
     }
@@ -150,23 +167,18 @@ def stage(source: Path, site: Path) -> str:
         f' · <a href="{report_id}/projections.svg">position/velocity projections</a>'
         f' · <a href="{report_id}.zip">offline ZIP</a></li>'
     )
-    destination.mkdir()
-    for name, content in generated.items():
-        (destination / name).write_bytes(content)
     offline_index = (
         f'<!doctype html><html lang="en"><meta charset="utf-8">'
         f"<title>Offline TwoParticleGame report</title>"
         f'<a href="{report_id}/index.html">Open the report</a></html>'
     ).encode()
-    with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-        entries = [("index.html", offline_index)] + [
-            (f"{report_id}/{name}", content) for name, content in sorted(generated.items())
-        ]
-        for name, content in entries:
-            info = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
-            info.compress_type = zipfile.ZIP_DEFLATED
-            info.external_attr = 0o100644 << 16
-            archive.writestr(info, content)
+    archive_bytes = publication.offline_zip(
+        report_id, offline_index, generated, expected_sha256=archived_zip_sha256
+    )
+    destination.mkdir()
+    for name, content in generated.items():
+        (destination / name).write_bytes(content)
+    archive_path.write_bytes(archive_bytes)
     index.write_text(index_text.replace("</ul>", route_link + "</ul>"), encoding="utf-8")
     return report_id
 

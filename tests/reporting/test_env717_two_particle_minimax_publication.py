@@ -14,8 +14,9 @@ SPEC = importlib.util.spec_from_file_location(
     "stage_env717_two_particle_minimax",
     ROOT / "scripts/reports/stage_env717_two_particle_minimax.py",
 )
+if SPEC is None or SPEC.loader is None:
+    raise ImportError("cannot load the environment publication test dependency")
 stage_module = importlib.util.module_from_spec(SPEC)
-assert SPEC.loader is not None
 SPEC.loader.exec_module(stage_module)
 
 
@@ -38,6 +39,11 @@ class TwoParticleMinimaxPublicationTests(unittest.TestCase):
 
     def test_stages_checked_game_and_both_physical_projections(self):
         report_id = stage_module.stage(self.source, self.site)
+        self.assertEqual(report_id, "env717-two-particle-minimax-31bb367020af7a94b1a7")
+        self.assertEqual(
+            hashlib.sha256((self.site / f"{report_id}.zip").read_bytes()).hexdigest(),
+            "9668469231232930816589dedf615cd0af601036f7de78a4c63753d7a8d2f93f",
+        )
         self.assertRegex(report_id, r"^env717-two-particle-minimax-[0-9a-f]{20}$")
         destination = self.site / report_id
         manifest = json.loads((destination / "publication-manifest.json").read_text())
