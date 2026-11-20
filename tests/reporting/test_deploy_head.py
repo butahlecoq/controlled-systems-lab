@@ -22,16 +22,22 @@ class BranchHandler(http.server.BaseHTTPRequestHandler):
     latest_report_id = 42
 
     def do_GET(self):
-        if self.path.startswith("/repos/example/reports/actions/workflows/algorithm-reports.yml/runs?"):
-            payload = {"workflow_runs": [{
-                "id": self.latest_report_id,
-                "head_sha": NEWER,
-                "head_branch": "main",
-                "event": "push",
-                "status": "completed",
-                "conclusion": "success",
-                "updated_at": "2026-11-03T03:00:00Z",
-            }]}
+        if self.path.startswith(
+            "/repos/example/reports/actions/workflows/algorithm-reports.yml/runs?"
+        ):
+            payload = {
+                "workflow_runs": [
+                    {
+                        "id": self.latest_report_id,
+                        "head_sha": NEWER,
+                        "head_branch": "main",
+                        "event": "push",
+                        "status": "completed",
+                        "conclusion": "success",
+                        "updated_at": "2026-11-03T03:00:00Z",
+                    }
+                ]
+            }
             encoded = json.dumps(payload).encode()
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
@@ -71,7 +77,15 @@ class DeploymentHeadTest(unittest.TestCase):
         BranchHandler.response_code = 200
         BranchHandler.latest_report_id = 42
 
-    def run_gate(self, expected_sha, source_run_id=None, *, check_only=False, create_site=True, workflow_sha=None):
+    def run_gate(
+        self,
+        expected_sha,
+        source_run_id=None,
+        *,
+        check_only=False,
+        create_site=True,
+        workflow_sha=None,
+    ):
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary) / "github-output"
             site = Path(temporary) / "site"
@@ -92,14 +106,20 @@ class DeploymentHeadTest(unittest.TestCase):
                 env["PAGES_EXPECTED_SHA"] = expected_sha
             if source_run_id is not None:
                 event = Path(temporary) / "event.json"
-                event.write_text(json.dumps({"workflow_run": {
-                    "id": source_run_id,
-                    "name": "Algorithm report records and site",
-                    "head_sha": expected_sha,
-                    "head_branch": "main",
-                    "status": "completed",
-                    "conclusion": "success",
-                }}))
+                event.write_text(
+                    json.dumps(
+                        {
+                            "workflow_run": {
+                                "id": source_run_id,
+                                "name": "Algorithm report records and site",
+                                "head_sha": expected_sha,
+                                "head_branch": "main",
+                                "status": "completed",
+                                "conclusion": "success",
+                            }
+                        }
+                    )
+                )
                 env["GITHUB_EVENT_PATH"] = str(event)
             command = [sys.executable, str(SCRIPT)]
             if check_only:
@@ -129,13 +149,13 @@ class DeploymentHeadTest(unittest.TestCase):
         # Model GitHub's documented pending-slot semantics from the sole publisher.
         # A running old deployment holds the group while the newer, then older,
         # validated jobs arrive. Preserve the queued, newest-source publication.
-        workflow = (ROOT / ".github" / "workflows" / "pages-augmentation-aggregation.yml").read_text()
+        workflow = (
+            ROOT / ".github" / "workflows" / "pages-augmentation-aggregation.yml"
+        ).read_text()
         deploy = workflow.split("\n  deploy:\n", 1)[1]
         concurrency = deploy.split("\n    concurrency:\n", 1)[1].split("\n    environment:\n", 1)[0]
         settings = dict(
-            line.strip().split(": ", 1)
-            for line in concurrency.splitlines()
-            if ": " in line
+            line.strip().split(": ", 1) for line in concurrency.splitlines() if ": " in line
         )
         pending = [NEWER]
         if settings.get("queue", "single") == "single":
@@ -173,16 +193,12 @@ class DeploymentHeadTest(unittest.TestCase):
         self.assertIsNone(marker)
 
     def test_scheduler_revision_is_distinct_from_the_report_source(self):
-        result, output, marker = self.run_gate(
-            OLDER, source_run_id=42, workflow_sha=NEWER
-        )
+        result, output, marker = self.run_gate(OLDER, source_run_id=42, workflow_sha=NEWER)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(output, "current=false\n")
         self.assertIsNone(marker)
 
-        result, output, marker = self.run_gate(
-            NEWER, source_run_id=42, workflow_sha=OLDER
-        )
+        result, output, marker = self.run_gate(NEWER, source_run_id=42, workflow_sha=OLDER)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("current=true\n", output)
         self.assertEqual(marker["head_sha"], NEWER)
@@ -192,17 +208,22 @@ class DeploymentHeadTest(unittest.TestCase):
         result, output, marker = self.run_gate(NEWER, source_run_id=42)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("source_run_id=42\n", output)
-        self.assertEqual(marker, {
-            "schema": "csl.pages-augmentation-source/1",
-            "report_run_id": 42,
-            "head_sha": NEWER,
-        })
+        self.assertEqual(
+            marker,
+            {
+                "schema": "csl.pages-augmentation-source/1",
+                "report_run_id": 42,
+                "head_sha": NEWER,
+            },
+        )
 
     def test_check_only_mode_allows_freshness_check_before_site_exists(self):
         stale, stale_output, stale_marker = self.run_gate(
-            OLDER, source_run_id=42, check_only=True, create_site=False)
+            OLDER, source_run_id=42, check_only=True, create_site=False
+        )
         current, current_output, current_marker = self.run_gate(
-            NEWER, source_run_id=42, check_only=True, create_site=False)
+            NEWER, source_run_id=42, check_only=True, create_site=False
+        )
         self.assertEqual(stale.returncode, 0, stale.stderr)
         self.assertEqual(stale_output, "current=false\n")
         self.assertIsNone(stale_marker)
