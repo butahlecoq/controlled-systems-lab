@@ -66,6 +66,7 @@ FROZEN_DIAGRAM_EXCEPTIONS = {
 }
 PUBLICATION_EXPORT_ROUTES = {
     "scripts/reports/stage_mpc_crossover.py",
+    "scripts/reports/stage_native_source_constrained_mpc.py",
     "scripts/reports/stage_native_model_tracking_first_pass.py",
     "scripts/reports/stage_native_row_scaling_diagnostic.py",
     "scripts/reports/stage_native_extended_models.py",
@@ -511,6 +512,8 @@ def build(root: Path = ROOT) -> dict:
                     "positive_part_budget_2d_native-solution.csv", "positive_part_budget_2d_run.txt",
                     "positive_part_budget_2d_native-example.stdout",
                     "mpc-crossover-6b7308c4/index.html",
+                    "native-source-constrained-mpc-v1/index.html",
+                    "native-source-constrained-mpc-v1/platoon.svg",
                     "mpc-crossover-6b7308c4/feedback-geometry.svg",
                     "mpc-crossover-6b7308c4/deployment-time.svg",
                     "discrete-mpc-2d.html", "discrete-mpc-2d.svg", "discrete-mpc-2d.json",

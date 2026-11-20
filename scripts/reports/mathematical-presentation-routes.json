@@ -742,6 +742,13 @@
       "owner": "scripts/reports/stage_mpc_crossover.py"
     },
     {
+      "route": "examples/native-source-constrained-mpc-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/native-source-constrained-mpc-v1/index.html",
+      "sha256": "4b226e3ad5a8e0474a250150fc8f7185904cb775dc290932312636b5c537b780",
+      "witness": "The source-only archive and SHA-256 inventory in reports/algorithm-results/native-source-constrained-mpc-v1"
+    },
+    {
       "route": "examples/native-discrete-models.html",
       "disposition": "maintained",
       "owner": "docs/examples/native-discrete-models.html"

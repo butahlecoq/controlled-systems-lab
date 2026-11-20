@@ -305,6 +305,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "positive_part_budget_2d_native-solution.csv", "positive_part_budget_2d_run.txt",
             "positive_part_budget_2d_native-example.stdout",
             "mpc-crossover-6b7308c4/index.html", "mpc-crossover-6b7308c4/feedback-geometry.svg",
+            "native-source-constrained-mpc-v1/index.html", "native-source-constrained-mpc-v1/platoon.svg",
             "mpc-crossover-6b7308c4/deployment-time.svg",
             "discrete-mpc-2d.html", "discrete-mpc-2d.svg", "discrete-mpc-2d.json",
             "discrete_mpc_2d-output.csv", "discrete_mpc_2d-output.txt",

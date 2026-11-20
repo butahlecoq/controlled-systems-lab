@@ -125,6 +125,13 @@ FAMILIES = {
         "Compares the time to construct and use an explicit feedback policy with the time "
         "to update and solve an online quadratic program for the same constrained double integrator.",
     ),
+    "native-source-constrained-mpc": Family(
+        r"examples/native-source-constrained-mpc-v1",
+        "synthesis",
+        "Open loop and MPC under the same constraints",
+        "Compares the two policies on matched deterministic three-step tasks and illustrates "
+        "the results with the last vehicle and headway margins of a ten-car platoon.",
+    ),
     "mpc08-explicit-pilot": Family(
         r"mpc08-explicit-pilot-v1",
         "synthesis",
@@ -1263,6 +1270,22 @@ def build(site: Path) -> None:
                     ("Raw attempts", crossover + "/raw.jsonl"),
                     ("Measured timings", crossover + "/summary.json"),
                     ("Offline study", crossover + "/mpc-crossover-6b7308c4.zip"),
+                ),
+            )
+        )
+    matched = "examples/native-source-constrained-mpc-v1"
+    if (site / matched / "index.html").is_file():
+        manifest = json.loads((site / matched / "manifest.json").read_text(encoding="utf-8"))
+        detailed = [entry for entry in detailed if entry.report_id != matched]
+        detailed.append(
+            Entry(
+                report_id=matched,
+                scope="Thirty-five catalogue models with one matched open-loop and MPC task per model.",
+                limits="The audit covers three-step deterministic tasks with an authored objective.",
+                commit=manifest["source_commit"],
+                links=(
+                    ("Independent audit", matched + "/independent-audit.json"),
+                    ("Offline study", matched + "/native-source-constrained-mpc-v1.zip"),
                 ),
             )
         )
