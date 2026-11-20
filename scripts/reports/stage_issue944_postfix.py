@@ -7,6 +7,9 @@ import importlib.util
 import shutil
 from pathlib import Path
 
+import qhull_highs_strategy_a_example
+import site_design
+
 ROOT = Path(__file__).resolve().parents[2]
 REPORT_ID = "issue944-strategy-a-each-choice-postfix-v1"
 FILES = {
@@ -36,12 +39,13 @@ EXAMPLE_FILES = {
 }
 
 
-def load_module(path: Path, name: str):
-    spec = importlib.util.spec_from_file_location(name, path)
-    module = importlib.util.module_from_spec(spec)
-    assert spec and spec.loader
-    spec.loader.exec_module(module)
-    return module
+_site_spec = importlib.util.spec_from_file_location(
+    "issue944_postfix_offline_site", Path(__file__).with_name("site.py")
+)
+if _site_spec is None or _site_spec.loader is None:
+    raise ImportError("cannot load the #944 post-fix report's offline HTML validator")
+site = importlib.util.module_from_spec(_site_spec)
+_site_spec.loader.exec_module(site)
 
 
 def verified_files(source: Path) -> None:
@@ -85,28 +89,22 @@ def stage(source: Path, site_root: Path) -> str:
     verified_files(source)
     if site_root.is_symlink() or not site_root.is_dir():
         raise ValueError("an existing site directory is required")
-    example = load_module(
-        ROOT / "scripts/reports/qhull_highs_strategy_a_example.py", "issue944_postfix_example"
-    )
-    generated = example.build()
+    generated = qhull_highs_strategy_a_example.build()
     if set(generated) != EXAMPLE_FILES:
         raise ValueError("public Qhull example producer inventory differs")
     examples = site_root / "examples"
     if examples.is_symlink():
         raise ValueError("examples route must not be a symlink")
     examples.mkdir(exist_ok=True)
-    design = load_module(ROOT / "scripts/reports/site_design.py", "issue944_postfix_site_design")
-    stylesheet = design.stylesheet()
     style_path = examples / "examples.css"
     if style_path.exists() and style_path.is_symlink():
         raise ValueError("public example stylesheet must not be a symlink")
-    style_path.write_bytes(stylesheet)
+    style_path.write_bytes(site_design.stylesheet())
     for name, content in generated.items():
         destination = examples / name
         if destination.exists() and destination.is_symlink():
             raise ValueError("public example output must not be a symlink: " + name)
-        data = content.encode("utf-8") if isinstance(content, str) else content
-        destination.write_bytes(data)
+        destination.write_bytes(content.encode("utf-8"))
     if (
         examples.joinpath("qhull-highs-strategy-a-2d-record.json").read_bytes()
         != (ROOT / "docs/examples/qhull-highs-strategy-a-2d-record.json").read_bytes()
@@ -125,7 +123,6 @@ def stage(source: Path, site_root: Path) -> str:
             "https://github.com/butahlecoq/controlled-systems-lab/issues/974",
         }
     )
-    site = load_module(ROOT / "scripts/reports/site.py", "issue944_postfix_offline_site")
     parser = site.OfflineHTML(local_files)
     parser.feed((destination / "index.html").read_text(encoding="utf-8"))
     for href in (

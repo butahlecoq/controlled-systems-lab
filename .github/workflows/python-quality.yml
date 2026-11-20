@@ -59,6 +59,14 @@ on:
       - 'tests/reporting/test_b04_publication_source_snapshot.py'
       - 'tests/reporting/test_publication_spine_boundaries.py'
       - 'scripts/reports/stage_ext04.py'
+      - 'scripts/reports/stage_issue944_each_choice.py'
+      - 'scripts/reports/stage_issue944_postfix.py'
+      - 'tests/reporting/test_issue944_each_choice_publication.py'
+      - 'tests/reporting/test_issue944_postfix_publication.py'
+      - 'reports/algorithm-results/issue944-strategy-a-each-choice-v1/**'
+      - 'reports/algorithm-results/issue944-strategy-a-each-choice-postfix-v1/**'
+      - 'scripts/reports/qhull_highs_strategy_a_example.py'
+      - 'docs/examples/qhull-highs-strategy-a-2d-record.json'
       - 'scripts/reports/stage_finite_feedback.py'
       - 'scripts/reports/stage_geo07.py'
       - 'scripts/reports/stage_geo07_port.py'
@@ -185,6 +193,14 @@ on:
       - 'tests/reporting/test_b04_publication_source_snapshot.py'
       - 'tests/reporting/test_publication_spine_boundaries.py'
       - 'scripts/reports/stage_ext04.py'
+      - 'scripts/reports/stage_issue944_each_choice.py'
+      - 'scripts/reports/stage_issue944_postfix.py'
+      - 'tests/reporting/test_issue944_each_choice_publication.py'
+      - 'tests/reporting/test_issue944_postfix_publication.py'
+      - 'reports/algorithm-results/issue944-strategy-a-each-choice-v1/**'
+      - 'reports/algorithm-results/issue944-strategy-a-each-choice-postfix-v1/**'
+      - 'scripts/reports/qhull_highs_strategy_a_example.py'
+      - 'docs/examples/qhull-highs-strategy-a-2d-record.json'
       - 'scripts/reports/stage_finite_feedback.py'
       - 'scripts/reports/stage_geo07.py'
       - 'scripts/reports/stage_geo07_port.py'
@@ -303,6 +319,10 @@ jobs:
           python -m unittest tests.reporting.test_convex_report tests.reporting.test_opt07_collector tests.reporting.test_opt12_collector tests.reporting.test_visual_examples tests.reporting.test_geo07_publication tests.reporting.test_geo07_port_publication tests.reporting.test_geo07_dependent_publication tests.reporting.test_finite_feedback_publication tests.reporting.test_ext04_publication tests.reporting.test_report_lifecycle
 
 
+      - name: Check both saved Strategy A choice-pipeline publications
+        env:
+          MPLBACKEND: Agg
+        run: python -m unittest tests.reporting.test_issue944_each_choice_publication tests.reporting.test_issue944_postfix_publication
       - name: Check the locked source-only native row-scaling publication
         run: python -m unittest discover -s tests/reporting -p 'test_stage_native_row_scaling_diagnostic.py'
       - name: Check the saved native whole-history optimizer route

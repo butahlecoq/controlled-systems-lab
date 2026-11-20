@@ -10,8 +10,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import stage_issue944_each_choice as historical
-import stage_issue944_postfix as publication
+import stage_issue944_each_choice as historical  # noqa: E402 - direct test entry point
+import stage_issue944_postfix as publication  # noqa: E402 - direct test entry point
 
 
 class Issue944PostfixPublicationTests(unittest.TestCase):

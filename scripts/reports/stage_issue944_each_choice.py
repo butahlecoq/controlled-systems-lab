@@ -10,8 +10,9 @@ from pathlib import Path
 _site_spec = importlib.util.spec_from_file_location(
     "issue944_report_site", Path(__file__).with_name("site.py")
 )
+if _site_spec is None or _site_spec.loader is None:
+    raise ImportError("cannot load the #944 historical report's offline HTML validator")
 site = importlib.util.module_from_spec(_site_spec)
-assert _site_spec.loader is not None
 _site_spec.loader.exec_module(site)
 
 REPORT_ID = "issue944-strategy-a-each-choice-v1"

@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import stage_issue944_each_choice as publication
+import stage_issue944_each_choice as publication  # noqa: E402 - direct test entry point
 
 
 class Issue944ChoicePipelinePublicationTests(unittest.TestCase):
