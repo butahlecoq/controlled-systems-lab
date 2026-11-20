@@ -75,6 +75,8 @@ bool same_membership_payload(const HistoryMembershipShape &left,
             if constexpr (std::is_same_v<T, HistoryHMembership> ||
                           std::is_same_v<T, HistoryVSimplexMembership>) {
                 return same_set_payload(left_shape.selected, right_shape->selected);
+            } else if constexpr (std::is_same_v<T, HistoryLiftedHMembership>) {
+                return left_shape == *right_shape;
             } else if constexpr (std::is_same_v<T, HistoryAxisBoxMembership>) {
                 return left_shape.center == right_shape->center &&
                        left_shape.radii == right_shape->radii;
@@ -160,27 +162,41 @@ bool reconstruct(std::span<const double> state, std::span<const double> center,
     return true;
 }
 
+bool valid_row_ranges(std::span<const synthesis::HistoryIndexRange> ranges, std::size_t rows) {
+    std::size_t previous_end = 0;
+    for (const auto &range : ranges) {
+        if (range.begin < previous_end || range.begin >= range.end || range.end > rows)
+            return false;
+        previous_end = range.end;
+    }
+    return true;
+}
+
+bool h_rows_contain(const numeric::MatrixView &matrix, const numeric::VectorView &rhs,
+                    bool equality, synthesis::HistoryIndexRange range,
+                    std::span<const double> values, NumericalPolicy policy) {
+    for (std::size_t row = range.begin; row < range.end; ++row) {
+        double value = 0.0;
+        double scale = std::max(1.0, std::abs(rhs[row]));
+        for (std::size_t col = 0; col < matrix.cols(); ++col) {
+            const double term = matrix(row, col) * values[col];
+            value += term;
+            scale += std::abs(term);
+        }
+        const double residual = value - rhs[row];
+        if (!std::isfinite(value) ||
+            !within(equality ? std::abs(residual) : std::max(0.0, residual), scale, policy))
+            return false;
+    }
+    return true;
+}
+
 bool h_contains(const sets::HRepresentation &h, std::span<const double> state,
                 NumericalPolicy policy) {
-    const auto rows_match = [&](const numeric::MatrixView &matrix, const numeric::VectorView &rhs,
-                                bool equality) {
-        for (std::size_t row = 0; row < matrix.rows(); ++row) {
-            double value = 0.0;
-            double scale = std::max(1.0, std::abs(rhs[row]));
-            for (std::size_t col = 0; col < matrix.cols(); ++col) {
-                const double term = matrix(row, col) * state[col];
-                value += term;
-                scale += std::abs(term);
-            }
-            const double residual = value - rhs[row];
-            if (!std::isfinite(value) ||
-                !within(equality ? std::abs(residual) : std::max(0.0, residual), scale, policy))
-                return false;
-        }
-        return true;
-    };
-    return rows_match(h.inequalities, h.upper_bounds, false) &&
-           rows_match(h.equalities, h.equality_values, true);
+    return h_rows_contain(h.inequalities, h.upper_bounds, false,
+                          {0, h.inequalities.rows()}, state, policy) &&
+           h_rows_contain(h.equalities, h.equality_values, true, {0, h.equalities.rows()},
+                          state, policy);
 }
 } // namespace
 
@@ -190,6 +206,7 @@ Diagnostics check_history_domain_memberships(const HistoryDomain &domain) {
         SetId id;
         HistorySetFamily family;
         const HistoryMembershipShape *geometry;
+        std::optional<std::size_t> projected_stage;
     };
     std::vector<SeenSetIdentity> seen_identities;
     const auto &coordinates = domain.original.coordinates;
@@ -208,6 +225,8 @@ Diagnostics check_history_domain_memberships(const HistoryDomain &domain) {
         return {invalid("history.memberships.coordinates",
                         "Original full-history dimension does not match its coordinates.")};
     const auto original_metadata = domain.original.relation.metadata();
+    const auto original = domain.original.relation.representation();
+    const auto *original_h = std::get_if<sets::HRepresentation>(&original);
     for (std::size_t i = 0; i < domain.memberships.size(); ++i) {
         const auto &member = domain.memberships[i];
         const auto field = "history.memberships[" + std::to_string(i) + "]";
@@ -252,6 +271,12 @@ Diagnostics check_history_domain_memberships(const HistoryDomain &domain) {
                     if constexpr (std::is_same_v<T, HistoryHMembership>) {
                         return family == HistorySetFamily::polytope &&
                                check_set(item.selected, expected, true);
+                    } else if constexpr (std::is_same_v<T, HistoryLiftedHMembership>) {
+                        return family == HistorySetFamily::polytope && original_h &&
+                               item.carrier == original_metadata->id && expected != item.carrier &&
+                               valid_row_ranges(item.inequality_rows,
+                                                original_h->inequalities.rows()) &&
+                               valid_row_ranges(item.equality_rows, original_h->equalities.rows());
                     } else if constexpr (std::is_same_v<T, HistoryVSimplexMembership>) {
                         return family == HistorySetFamily::polytope &&
                                check_set(item.selected, expected, false);
@@ -299,14 +324,20 @@ Diagnostics check_history_domain_memberships(const HistoryDomain &domain) {
         if (valid) {
             const auto consistent_identity = [&](const SetId &id, HistorySetFamily family,
                                                  const HistoryMembershipShape &geometry) {
+                // A lifted shape's row selection is in full-history coordinates.
+                // The stage also identifies which state block it projects onto.
+                const auto projected_stage =
+                    std::holds_alternative<HistoryLiftedHMembership>(geometry)
+                        ? std::optional{member.stage.value}
+                        : std::nullopt;
                 const auto found =
                     std::find_if(seen_identities.begin(), seen_identities.end(),
                                  [&](const SeenSetIdentity &seen) { return seen.id == id; });
                 if (found == seen_identities.end()) {
-                    seen_identities.push_back({id, family, &geometry});
+                    seen_identities.push_back({id, family, &geometry, projected_stage});
                     return true;
                 }
-                return found->family == family &&
+                return found->family == family && found->projected_stage == projected_stage &&
                        same_membership_payload(*found->geometry, geometry);
             };
             valid = consistent_identity(member.origin.selected, member.origin.selected_family,
@@ -350,6 +381,20 @@ Diagnostics check_history_membership_witnesses(const HistoryDomain &domain,
                     const auto representation = selected.selected.representation();
                     return witness && h_contains(std::get<sets::HRepresentation>(representation),
                                                  state, policy);
+                } else if constexpr (std::is_same_v<T, HistoryLiftedHMembership>) {
+                    if (!std::holds_alternative<HistoryHWitness>(witnesses[i]))
+                        return false;
+                    const auto h = std::get<sets::HRepresentation>(domain.original.relation.representation());
+                    return std::all_of(selected.inequality_rows.begin(), selected.inequality_rows.end(),
+                               [&](auto range) {
+                                   return h_rows_contain(h.inequalities, h.upper_bounds, false,
+                                                         range, history, policy);
+                               }) &&
+                           std::all_of(selected.equality_rows.begin(), selected.equality_rows.end(),
+                               [&](auto range) {
+                                   return h_rows_contain(h.equalities, h.equality_values, true,
+                                                         range, history, policy);
+                               });
                 } else if constexpr (std::is_same_v<T, HistoryAxisBoxMembership>) {
                     const auto *witness = std::get_if<HistoryAxisBoxWitness>(&witnesses[i]);
                     if (!witness || witness->coefficients.size() != n ||
