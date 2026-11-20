@@ -4209,7 +4209,7 @@
         "bicycle-row-scaling.svg",
         "twenty-zone-ipopt.svg"
       ],
-      "index_sha256": "4845d44691c4a805cbc34c453b81df0b6736bf16e8279fe9df88f3d7ba858a8b",
+      "index_sha256": "da0f6b352e141d32f3f0f9f836cab12911b4610ad8a11207935b157cadbf3f32",
       "disposition": "reviewed: recovered episode figures show all four labelled states and both replay policies"
     },
     {

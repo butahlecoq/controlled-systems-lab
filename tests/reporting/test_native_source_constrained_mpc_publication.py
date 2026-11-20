@@ -160,3 +160,24 @@ class ConvexBackendPublicationTests(unittest.TestCase):
             for report in reports:
                 for _, relative in report.links:
                     self.assertTrue((site / relative).is_file(), relative)
+
+    def test_download_contains_its_baseline_and_local_links(self) -> None:
+        original, _, _ = stage.build(ROOT)
+        files, [entry], _ = stage.build_convex_backends(ROOT)
+        route = entry["anchor"]
+        baseline_name = stage.IDENTITY.route + ".zip"
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            ZipFile(BytesIO(files[f"{route}/{route}.zip"])) as archive,
+        ):
+            package = Path(directory)
+            archive.extractall(package)
+            parsed = PageLinks()
+            parsed.feed((package / "index.html").read_text(encoding="utf-8"))
+            self.assertIn(baseline_name, parsed.local_paths)
+            for path in parsed.local_paths:
+                self.assertTrue((package / path).is_file(), path)
+            self.assertEqual(
+                (package / baseline_name).read_bytes(),
+                original[f"{stage.IDENTITY.route}/{baseline_name}"],
+            )
