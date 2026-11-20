@@ -18,6 +18,8 @@ from zipfile import ZipFile
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts/reports/learning_book.py"
 SPEC = importlib.util.spec_from_file_location("learning_book", SCRIPT)
+if SPEC is None or SPEC.loader is None:
+    raise ImportError(f"Cannot load the learning-book generator from {SCRIPT}")
 learning_book = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = learning_book
 SPEC.loader.exec_module(learning_book)
@@ -30,8 +32,8 @@ class PageElements(HTMLParser):
         self.ids = set()
         self.main_classes = set()
 
-    def handle_starttag(self, tag, attributes):
-        attributes = dict(attributes)
+    def handle_starttag(self, tag, attrs):
+        attributes = dict(attrs)
         if "id" in attributes:
             self.ids.add(attributes["id"])
         if tag == "a" and "href" in attributes:
@@ -46,7 +48,7 @@ class LearningBookTests(unittest.TestCase):
         self.inventory = json.loads(
             (ROOT / "docs/catalogue/module-composition-inventory-v1.json").read_text()
         )
-        campaign_figures = [
+        self.campaign_figures = [
             {
                 "id": figure_id,
                 "task_id": {
@@ -73,7 +75,7 @@ class LearningBookTests(unittest.TestCase):
         ]
         self.figures = {
             "schema": "csl.closed-loop.figure-index/1",
-            "figures": [*pending_figures, *campaign_figures],
+            "figures": [*pending_figures, *self.campaign_figures],
         }
 
     def test_module_claims_are_executable_and_navigation_is_derived(self):
@@ -604,21 +606,35 @@ class LearningBookTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "absent from the figure index"):
             learning_book.validate(broken, self.inventory, self.figures)
 
-    def test_five_representation_example_prints_the_recorded_values(self):
-        result = subprocess.run(
-            [sys.executable, str(ROOT / "scripts/reports/learning_geometry_toy.py")],
-            check=True,
-            capture_output=True,
-            text=True,
+    def test_analytic_book_commands_print_the_recorded_values(self):
+        cases = (
+            (
+                "same-geometry-five-representations",
+                "learning_geometry_toy.py",
+                "d=(1.0, 0.0); exact_square=1; outer_disk=1.41421\n"
+                "d=(1.0, 1.0); exact_square=2; outer_disk=2\n"
+                "polytope=exact zonotope=exact parallelotope=exact ellipsoid=outer box=exact\n"
+                "Q subset E; E subset [-sqrt(2),sqrt(2)]^2; Q is [-1,1]^2\n",
+            ),
+            (
+                "closed-loop-semantics",
+                "learning_closed_loop_toy.py",
+                "update=0 observation=0 action=1 prediction_end=1 plant_state=1\n"
+                "update=1 observation=1 action=0 prediction_end=1 plant_state=1\n",
+            ),
         )
-        self.assertEqual(
-            result.stdout,
-            """d=(1.0, 0.0); exact_square=1; outer_disk=1.41421
-d=(1.0, 1.0); exact_square=2; outer_disk=2
-polytope=exact zonotope=exact parallelotope=exact ellipsoid=outer box=exact
-Q subset E; E subset [-sqrt(2),sqrt(2)]^2; Q is [-1,1]^2
-""",
-        )
+        for lesson_id, script, expected in cases:
+            with self.subTest(lesson=lesson_id):
+                chapter = next(
+                    item for item in self.manifest["chapters"] if item["id"] == lesson_id
+                )
+                path = f"scripts/reports/{script}"
+                self.assertEqual(chapter["command"], f"python3 {path}")
+                result = subprocess.run(
+                    [sys.executable, path], cwd=ROOT, check=True, capture_output=True, text=True
+                )
+                self.assertEqual(result.stdout, expected)
+                self.assertEqual(chapter["expected_output"] + "\n", expected)
 
     def test_build_emits_navigable_pages_and_manifest(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -921,9 +937,7 @@ Q subset E; E subset [-sqrt(2),sqrt(2)]^2; Q is [-1,1]^2
             {"id": figure_id, "availability": "pending", "reason": "Not part of this smoke."}
             for figure_id in ("lotka-populations", "earth-orbit")
         )
-        entries.extend(
-            figure for figure in self.figures["figures"] if figure["id"].startswith("campaign-")
-        )
+        entries.extend(self.campaign_figures)
         index = {"schema": "csl.closed-loop.figure-index/1", "figures": entries}
         with tempfile.TemporaryDirectory() as tmp:
             site = Path(tmp)
