@@ -79,8 +79,8 @@ EXACT_SUPPORT = FrozenNativeBundle(
     route="catalogue-exact-support-v1",
     source_commit="e7ebf482480271e0d79ec5e2d5167a27849528f9",
     schema="csl.catalogue-exact-support-capture/1",
-    manifest_sha256="e264fb01ef8872da1472805dcc89add25d1d32fdca951e52ecbf5db70c72bcfb",
-    archive_sha256="01d9e1a30db838a17c0b1ac8c5d8916aa505130360996767480607cde9d5aa98",
+    manifest_sha256="82ecc7806d24eef34fdb89b6713530defa914a30937b1908ef956b2ba51b4d77",
+    archive_sha256="3ef5d49f03cbd8c0067714cc5145877fbd245709cc473e0f1f4b5ff5661d5e2b",
 )
 
 

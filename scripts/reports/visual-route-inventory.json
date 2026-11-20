@@ -2813,7 +2813,7 @@
       "assets": [
         "building-budget-projection.svg"
       ],
-      "index_sha256": "62ac67f464d6d39d8e457e6c660385a5ab709f4985be560dfac7cc57db8bf255",
+      "index_sha256": "3ac34047bbaeeabea8ca9e428de5f80cf1ae3d995f197ff7c50a234bbef9d461",
       "disposition": "reviewed: sampled building projections and positive support deficits from exact certificates",
       "companion_route": "examples/catalogue-exact-support-v1/index.html"
     },

@@ -9,7 +9,7 @@
 <body>
 <main class="page-content">
 <h1>Exact support certificates for three catalogue models</h1>
-<p>HiGHS refused 192 support queries for three models with small nonzero coefficients. A separate rational calculation certifies all 192 sampled supports for the same inputs. The evidence keeps the original refusals.</p>
+<p>The CSL HiGHS adapter declined 192 support queries before invoking the solver because three models had coefficients below the adapter’s nonzero threshold. A separate rational calculation certifies all 192 sampled supports for the same inputs. The evidence keeps the original refusals.</p>
 <figure>
 <img src="building-budget-projection.svg" alt="The building’s initial state and three sampled projections appear on the left. The two constraint profiles overlap at that scale. The right plot shows the positive support deficits on a logarithmic axis.">
 <figcaption>The twenty-zone building has 40 states. The left plot joins certified witnesses in the first two coordinates and uses colour for the stage. The right plot shows the support lost to the control budget in each direction with a positive gap.</figcaption>
@@ -30,7 +30,7 @@
 </tbody>
 </table>
 <p>Each row contains 32 direction-stage samples for the full profile and the same 32 for control intervals alone. The bicycle and building use source-continuous domains. The generator ring uses the archived authored continuous domain.</p>
-<p>The earlier condensed floating-point reference reported maximum paired gaps of 8.50 × 10<sup>−8</sup> for the generator ring and 4.78 × 10<sup>−7</sup> for the building. The exact certificates resolve these differences at the sampled directions. The apparent overlap in the building plot is consistent with the small exact gap.</p>
+<p>The largest absolute discrepancies between the two earlier floating-point profiles were 8.50 × 10<sup>−8</sup> for the generator ring and 4.78 × 10<sup>−7</sup> for the building. In both cases the earlier interval-only value was lower than the full-profile value. The larger feasible domain must have equal or greater support. The apparent overlap in the building plot is consistent with the small exact gap.</p>
 <h2>Reproduce the certificates</h2>
 <p>Extract the evidence archive. Follow <code>RUN.txt</code> to compile the C++ producer with GMP 6.3.0 and nlohmann/json 3.11.3, regenerate the three certificate files, and run the Python checker on the fresh results.</p>
 <ul>
