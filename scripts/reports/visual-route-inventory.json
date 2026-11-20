@@ -2056,6 +2056,14 @@
       "role_and_disposition_reason": "Authenticates a locked source-only row-scaling diagnostic with original/scaled CSR, a saved native 2D point, original-coordinate checks and complete numerical-failure logs; no optimization, native build or binary redistribution during staging."
     },
     {
+      "source": "scripts/reports/stage_native_source_constrained_mpc.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "platoon.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_nominal_quadratic_history.py",
       "signal_count": 2,
       "asset_name_literals": [
@@ -4117,6 +4125,16 @@
       "follow_up_issue": 669
     },
     {
+      "route": "native-source-constrained-mpc-v1",
+      "source_bundle": "native-source-constrained-mpc-v1",
+      "assets": [
+        "platoon.svg"
+      ],
+      "index_sha256": "f4ace781c2b39154e7dcde5c6cd570b67f2db0ee0ce042cb49072d8e1478d507",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
       "route": "native-terminal-cost-33f907a0",
       "source_bundle": "native-terminal-cost-33f907a0",
       "assets": [
@@ -4403,6 +4421,8 @@
         "catalogue-backward-reachability-v1/index.html",
         "catalogue-backward-reachability-v1/battery-forward-backward.svg",
         "mpc-crossover-6b7308c4/index.html",
+        "native-source-constrained-mpc-v1/index.html",
+        "native-source-constrained-mpc-v1/platoon.svg",
         "mpc-crossover-6b7308c4/feedback-geometry.svg",
         "mpc-crossover-6b7308c4/deployment-time.svg",
         "discrete-mpc-2d.html",

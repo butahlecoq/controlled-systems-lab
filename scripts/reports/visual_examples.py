@@ -41,6 +41,7 @@ import stage_native_flexible_pitch
 import stage_native_model_catalogue
 import stage_native_model_tracking_first_pass
 import stage_native_row_scaling_diagnostic
+import stage_native_source_constrained_mpc
 import stage_nominal_quadratic_history
 import stage_positive_part_budget_2d
 import visual_example_fuel_layers
@@ -1425,6 +1426,10 @@ def build(catalog, site):
         stage_native_model_tracking_first_pass.build(Path(__file__).resolve().parents[2])
     )
     saved_figures += tracking_card
+    matched_files, matched_inventory, matched_card = stage_native_source_constrained_mpc.build(
+        Path(__file__).resolve().parents[2]
+    )
+    saved_figures += matched_card
     row_scaling_files, row_scaling_inventory, row_scaling_card = (
         stage_native_row_scaling_diagnostic.build(Path(__file__).resolve().parents[2])
     )
@@ -1514,6 +1519,7 @@ def build(catalog, site):
     outputs.update(catalogue_exact_files)
     outputs.update(catalogue_backward_files)
     outputs.update(crossover_files)
+    outputs.update(matched_files)
     outputs.update(buryatia_files)
     outputs.update(volterra_files)
     outputs.update(pitch_files)
@@ -1734,6 +1740,7 @@ def build(catalog, site):
     gallery_inventory.extend(catalogue_exact_inventory)
     gallery_inventory.extend(catalogue_backward_inventory)
     gallery_inventory.extend(crossover_inventory)
+    gallery_inventory.extend(matched_inventory)
     gallery_inventory.extend(buryatia_inventory)
     gallery_inventory.extend(volterra_inventory)
     gallery_inventory.extend(pitch_inventory)
