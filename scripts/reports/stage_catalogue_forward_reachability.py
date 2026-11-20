@@ -150,6 +150,15 @@ BACKWARD_REACHABILITY = FrozenNativeBundle(
 )
 
 
+CONSTRAINED_PREDECESSORS = FrozenNativeBundle(
+    route="catalogue-constrained-predecessors-v1",
+    source_commit="dc6801dc5f02c4000b4f1272361752581a55873a",
+    schema="csl.catalogue-constrained-predecessors/1",
+    manifest_sha256="27d54825675d672d90048e6171f75e190756fbbb83208044289d9de212ea625d",
+    archive_sha256="7903b5b0ca40f9e2d0fe4895fe578119411293ce9dad5652f27401ad17c0cb87",
+)
+
+
 def build_backward_reachability(
     repository_root: Path,
 ) -> tuple[dict[str, bytes], list[dict[str, str]], str]:
@@ -158,6 +167,13 @@ def build_backward_reachability(
         f"{route}/{name}": data
         for name, data in read_bundle(repository_root, BACKWARD_REACHABILITY).items()
     }
+    companion = CONSTRAINED_PREDECESSORS.route
+    files.update(
+        {
+            f"{companion}/{name}": data
+            for name, data in read_bundle(repository_root, CONSTRAINED_PREDECESSORS).items()
+        }
+    )
     entry = {
         "family": "Reachability",
         "title": "Backward reachability across 35 catalogue models",
@@ -172,7 +188,9 @@ def build_backward_reachability(
         f'<article class="saved-figure" id="{route}"><h3><a href="{entry["page"]}">{entry["title"]}</a></h3>'
         f'<a href="{entry["page"]}"><img src="{entry["figure"]}" alt="Four battery stages with forward sets, backward sets, intersections and the terminal-optimal trajectory"></a>'
         "<p>Certify predecessor supports and see the states that can reach the battery target at each stage.</p>"
-        f'<p><a href="{route}/catalogue-backward-support-evidence.zip">Download the producer, checker and figures</a></p></article>'
+        f'<p><a href="{route}/catalogue-backward-support-evidence.zip">Download the producer, checker and figures</a></p>'
+        f'<p><a href="{companion}/index.html">Backward reachable sets with saved constraints</a> · '
+        f'<a href="{companion}/{companion}.zip">Download the constrained replay</a></p></article>'
     )
     return files, [entry], card
 
