@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import tarfile
+import tempfile
 from collections import Counter
 from html import escape
 from pathlib import Path
@@ -204,13 +205,15 @@ def _learning_navigation_only(
 
 def audit(baseline: Path, site: Path) -> dict:
     manifest = json.loads((SOURCE / "manifest.json").read_text())
-    with baseline.open("rb") as stream:
-        if (
-            hashlib.file_digest(stream, "sha256").hexdigest()
-            != manifest["baseline"]["artifact_tar_sha256"]
-        ):
+    with baseline.open("rb") as stream, tempfile.TemporaryFile() as snapshot:
+        # Verify the same bytes used by the tar reader, keeping large artifacts off the heap.
+        checksum = hashlib.sha256()
+        while chunk := stream.read(1024 * 1024):
+            checksum.update(chunk)
+            snapshot.write(chunk)
+        if checksum.hexdigest() != manifest["baseline"]["artifact_tar_sha256"]:
             raise ValueError("baseline artifact differs from pinned public artifact")
-        stream.seek(0)
+        snapshot.seek(0)
         missing, changed, changed_zips = [], [], []
         reviewed_receipt_order_changes = {}
         reviewed_learning_navigation_changes = {}
@@ -218,7 +221,7 @@ def audit(baseline: Path, site: Path) -> dict:
         invalid_learning_navigation_routes = _invalid_learning_navigation_routes(manifest)
         order_only_receipts = manifest.get("order_insensitive_receipts_reviewed_separately", {})
         total = zip_count = 0
-        with tarfile.open(fileobj=stream) as bundle:
+        with tarfile.open(fileobj=snapshot) as bundle:
             for member in bundle:
                 if not member.isfile():
                     continue

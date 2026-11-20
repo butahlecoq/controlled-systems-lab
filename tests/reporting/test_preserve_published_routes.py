@@ -174,37 +174,48 @@ class PublishedRoutePreservationTests(unittest.TestCase):
             self.assertEqual((site / member).read_bytes(), page)
             self.assertEqual((site / archive.name).read_bytes(), original)
 
-    def test_baseline_is_audited_from_the_digest_checked_handle(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            site, source = root / "site", root / "source"
-            site.mkdir()
-            source.mkdir()
-            route = "saved.html"
-            page = b"<p>Saved evidence</p>"
-            (site / route).write_bytes(page)
-            baseline = root / "baseline.tar"
-            with tarfile.open(baseline, "w") as bundle:
-                member = tarfile.TarInfo(route)
-                member.size = len(page)
-                bundle.addfile(member, io.BytesIO(page))
-            manifest = json.loads((preservation.SOURCE / "manifest.json").read_text())
-            manifest["baseline"]["artifact_tar_sha256"] = preservation.digest(baseline.read_bytes())
-            (source / "manifest.json").write_text(json.dumps(manifest))
-            digest_file = baseline_audit.hashlib.file_digest
+    def test_baseline_uses_the_checked_bytes_after_the_source_changes(self):
+        for operation in ("rename", "rewrite"):
+            with self.subTest(operation=operation):
+                with tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory)
+                    site, source = root / "site", root / "source"
+                    site.mkdir()
+                    source.mkdir()
+                    route = "saved.html"
+                    page = b"<p>Saved evidence</p>"
+                    (site / route).write_bytes(page)
+                    baseline = root / "baseline.tar"
+                    with tarfile.open(baseline, "w") as bundle:
+                        member = tarfile.TarInfo(route)
+                        member.size = len(page)
+                        bundle.addfile(member, io.BytesIO(page))
+                    manifest = json.loads((preservation.SOURCE / "manifest.json").read_text())
+                    manifest["baseline"]["artifact_tar_sha256"] = preservation.digest(
+                        baseline.read_bytes()
+                    )
+                    (source / "manifest.json").write_text(json.dumps(manifest))
+                    read_tar = tarfile.open
 
-            def digest_and_move(stream, digest_name):
-                result = digest_file(stream, digest_name)
-                baseline.rename(baseline.with_name("checked.tar"))
-                return result
+                    def change_source_then_read(
+                        *args, baseline=baseline, operation=operation, read_tar=read_tar, **kwargs
+                    ):
+                        if operation == "rename":
+                            baseline.rename(baseline.with_name("checked.tar"))
+                        else:
+                            baseline.write_bytes(b"rewritten")
+                        return read_tar(*args, **kwargs)
 
-            with (
-                patch.object(baseline_audit, "SOURCE", source),
-                patch.object(baseline_audit.hashlib, "file_digest", side_effect=digest_and_move),
-            ):
-                result = baseline_audit.audit(baseline, site)
-            self.assertTrue(result["passed"], result)
-            self.assertEqual(result["baseline_files"], 1)
+                    with (
+                        patch.object(baseline_audit, "SOURCE", source),
+                        patch.object(
+                            baseline_audit.tarfile, "open", side_effect=change_source_then_read
+                        ) as parse,
+                    ):
+                        result = baseline_audit.audit(baseline, site)
+                    parse.assert_called_once()
+                    self.assertTrue(result["passed"], result)
+                    self.assertEqual(result["baseline_files"], 1)
 
     def test_tampered_archive_rejected_before_writes(self):
         with tempfile.TemporaryDirectory() as directory:
