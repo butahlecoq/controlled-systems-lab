@@ -11,6 +11,7 @@ import zipfile
 from html import escape
 from html.parser import HTMLParser
 from pathlib import Path, PurePosixPath
+from typing import TypedDict
 from urllib.parse import unquote, urlsplit
 
 BARE_ROUTE_LESSONS = {
@@ -485,9 +486,14 @@ def _illustration_type(
     return "graphic-purpose-unclassified", linked
 
 
+class ProducerRecord(TypedDict):
+    files: list[str]
+    owner_status: str
+
+
 def _producer_record(
     site: Path, route: str, catalog: dict[str, dict], source_identity: dict
-) -> dict:
+) -> ProducerRecord:
     parts = PurePosixPath(route).parts
     top = parts[0] if parts else route
     repo = Path(__file__).resolve().parents[2]
@@ -716,6 +722,7 @@ def _archive_fragment(route: str) -> str:
 
 def inventory(site: Path, *, source_commit: str = "unknown") -> dict:
     site = site.resolve(strict=True)
+    repo = Path(__file__).resolve().parents[2]
     catalog_path = site / "catalog.json"
     catalog = {}
     if catalog_path.is_file():
@@ -821,9 +828,6 @@ def inventory(site: Path, *, source_commit: str = "unknown") -> dict:
             replacement_page = None
         else:
             lesson = "No lesson replacement asserted"
-            statuses = sorted(
-                {str(item.get("status")) for item in route_entries if item.get("status")}
-            )
             completeness = {
                 "status": "evidence-only",
                 "basis": "not listed as a lesson in the gallery inventory",
@@ -853,6 +857,22 @@ def inventory(site: Path, *, source_commit: str = "unknown") -> dict:
             raise ValueError("catalogue offline ZIP identity differs for " + rel)
         source_identity = _source_identity(site, rel, catalog)
         producer = _producer_record(site, rel, catalog, source_identity)
+        if producer["owner_status"] not in {
+            "exact",
+            "source-bundle-and-workflow",
+            "gallery-aggregator",
+            "gallery-aggregation-pipeline",
+            "chapter-manifest-producer",
+            "recorded-figure-and-book-stage",
+        }:
+            raise ValueError(
+                f"HTML route has no reviewed producer owner: {rel} ({producer['owner_status']})"
+            )
+        missing_owners = [path for path in producer["files"] if not (repo / path).exists()]
+        if missing_owners:
+            raise ValueError(
+                f"HTML route names a missing producer source: {rel} -> {missing_owners}"
+            )
         pages[rel] = {
             "producer": producer,
             "source_identity": source_identity,
@@ -874,25 +894,6 @@ def inventory(site: Path, *, source_commit: str = "unknown") -> dict:
         }
     for route, row in pages.items():
         row["inbound_html_references"] = sorted(set(inbound.get(route, [])))
-    repo = Path(__file__).resolve().parents[2]
-    for route, row in pages.items():
-        owner = row["producer"]
-        if owner["owner_status"] not in {
-            "exact",
-            "source-bundle-and-workflow",
-            "gallery-aggregator",
-            "gallery-aggregation-pipeline",
-            "chapter-manifest-producer",
-            "recorded-figure-and-book-stage",
-        }:
-            raise ValueError(
-                f"HTML route has no reviewed producer owner: {route} ({owner['owner_status']})"
-            )
-        missing_owners = [path for path in owner["files"] if not (repo / path).exists()]
-        if missing_owners:
-            raise ValueError(
-                f"HTML route names a missing producer source: {route} -> {missing_owners}"
-            )
     zip_rows = []
     for path in sorted(site.rglob("*.zip")):
         if not path.is_file():

@@ -403,7 +403,7 @@ class PagesRouteRetirementTests(unittest.TestCase):
         repo = Path(__file__).resolve().parents[2]
         with tempfile.TemporaryDirectory() as temporary:
             site, _ = self.make_site(Path(temporary))
-            record = retirement._producer_record(site, "learn/module-catalogue.html", {}, "fixture")
+            record = retirement._producer_record(site, "learn/module-catalogue.html", {}, {})
             self.assertIn("scripts/reports/learning_book.py", record["files"])
             self.assertIn("docs/catalogue/module-composition-inventory-v1.json", record["files"])
             self.assertTrue(all((repo / source).is_file() for source in record["files"]))
@@ -412,7 +412,7 @@ class PagesRouteRetirementTests(unittest.TestCase):
         repo = Path(__file__).resolve().parents[2]
         with tempfile.TemporaryDirectory() as temporary:
             site, _ = self.make_site(Path(temporary))
-            record = retirement._producer_record(site, "learn/model-tracks.html", {}, "fixture")
+            record = retirement._producer_record(site, "learn/model-tracks.html", {}, {})
             self.assertIn("scripts/reports/learning_book.py", record["files"])
             self.assertIn("docs/catalogue/learning-book-v1.json", record["files"])
             self.assertIn("docs/examples/closed-loop/figure-index.json", record["files"])
