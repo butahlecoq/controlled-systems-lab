@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import importlib.util
 import json
 import zipfile
 from pathlib import Path
+
+from env717 import check_multipoint_cost_game as checker
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/env717-multipoint-cost-game-pilot-v1"
@@ -21,10 +22,6 @@ FILES = (
     "result.json",
     "SHA256SUMS",
 )
-spec = importlib.util.spec_from_file_location("env717_multipoint_checker", CHECKER)
-checker = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
-spec.loader.exec_module(checker)
 
 
 def digest(data: bytes) -> str:
@@ -54,7 +51,7 @@ def inputs(source: Path) -> tuple[dict[str, bytes], dict]:
     controls = [checker.CATALOGUE[i] for i in open_plan["control_indices"]]
     disturbances = [checker.CATALOGUE[i] for i in open_plan["maximizing_disturbance_indices"]]
     path = [checker.INITIAL]
-    for stage, (u, d) in enumerate(zip(controls, disturbances)):
+    for stage, (u, d) in enumerate(zip(controls, disturbances, strict=True)):
         path.append(checker.advance(path[-1], stage, u, d))
     replay.update(open_path=path, open_controls=controls, open_disturbances=disturbances)
     figure = json.loads(files["figure-data.json"])

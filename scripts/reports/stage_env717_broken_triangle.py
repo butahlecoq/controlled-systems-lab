@@ -4,18 +4,15 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import importlib.util
 import json
 import zipfile
 from pathlib import Path
 
+from env717 import check_broken_triangle as checker
+
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/env717-broken-triangle-pilot-v1"
 CHECKER = ROOT / "scripts/reports/env717/check_broken_triangle.py"
-spec = importlib.util.spec_from_file_location("env717_broken_triangle_checker", CHECKER)
-checker = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
-spec.loader.exec_module(checker)
 
 
 def digest(data: bytes) -> str:

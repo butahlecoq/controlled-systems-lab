@@ -62,6 +62,13 @@ on:
       - 'scripts/reports/stage_finite_feedback.py'
       - 'scripts/reports/stage_geo07.py'
       - 'scripts/reports/stage_geo07_port.py'
+      - 'scripts/reports/stage_env717_broken_triangle.py'
+      - 'scripts/reports/stage_env717_multipoint_cost_game.py'
+      - 'tests/reporting/test_env717_stager_publication.py'
+      - 'scripts/reports/env717/check_broken_triangle.py'
+      - 'scripts/reports/env717/check_multipoint_cost_game.py'
+      - 'reports/algorithm-results/env717-broken-triangle-pilot-v1/**'
+      - 'reports/algorithm-results/env717-multipoint-cost-game-pilot-v1/**'
       - 'scripts/reports/stage_geo07_dependent.py'
       - 'tests/reporting/test_convex_report.py'
       - 'tests/reporting/test_opt07_collector.py'
@@ -191,6 +198,13 @@ on:
       - 'scripts/reports/stage_finite_feedback.py'
       - 'scripts/reports/stage_geo07.py'
       - 'scripts/reports/stage_geo07_port.py'
+      - 'scripts/reports/stage_env717_broken_triangle.py'
+      - 'scripts/reports/stage_env717_multipoint_cost_game.py'
+      - 'tests/reporting/test_env717_stager_publication.py'
+      - 'scripts/reports/env717/check_broken_triangle.py'
+      - 'scripts/reports/env717/check_multipoint_cost_game.py'
+      - 'reports/algorithm-results/env717-broken-triangle-pilot-v1/**'
+      - 'reports/algorithm-results/env717-multipoint-cost-game-pilot-v1/**'
       - 'scripts/reports/stage_geo07_dependent.py'
       - 'tests/reporting/test_convex_report.py'
       - 'tests/reporting/test_opt07_collector.py'
@@ -311,6 +325,8 @@ jobs:
 
       - name: Check the locked source-only native row-scaling publication
         run: python -m unittest discover -s tests/reporting -p 'test_stage_native_row_scaling_diagnostic.py'
+      - name: Check the frozen environment report routes and ZIPs
+        run: python -m unittest tests.reporting.test_env717_stager_publication
       - name: Check the saved native whole-history optimizer route
         run: python -m unittest discover -s tests/reporting -p 'test_history_optimizer_native.py'
       - name: Check the saved typed-membership 2D example
