@@ -109,3 +109,39 @@ def build_exact_support(
         f'<p><a href="{route}/catalogue-exact-support-evidence.zip">Download the C++ producer and certificates</a></p></article>'
     )
     return files, [entry], card
+
+
+BACKWARD_REACHABILITY = FrozenNativeBundle(
+    route="catalogue-backward-reachability-v1",
+    source_commit="4e2e332b6dffd697febfd53c3d7fb3a6b20f90ef",
+    schema="csl.catalogue-backward-reachability-capture/1",
+    manifest_sha256="5b175b103da6f9734f40840410d5276bdb23b841268ca81aec622ca6518c102f",
+    archive_sha256="6534fedbf242917c432a481e897953354b6365eb22cd5dd0488b9438af5ae8f7",
+)
+
+
+def build_backward_reachability(
+    repository_root: Path,
+) -> tuple[dict[str, bytes], list[dict[str, str]], str]:
+    route = BACKWARD_REACHABILITY.route
+    files = {
+        f"{route}/{name}": data
+        for name, data in read_bundle(repository_root, BACKWARD_REACHABILITY).items()
+    }
+    entry = {
+        "family": "Reachability",
+        "title": "Backward reachability across 35 catalogue models",
+        "status": "saved-data-companion",
+        "anchor": route,
+        "page": f"{route}/index.html",
+        "figure": f"{route}/battery-forward-backward.svg",
+        "source_page": f"https://github.com/butahlecoq/controlled-systems-lab/blob/{BACKWARD_REACHABILITY.source_commit}/reports/algorithm-results/{route}/predecessor.cpp",
+        "raw_record": f"{route}/manifest.json",
+    }
+    card = (
+        f'<article class="saved-figure" id="{route}"><h3><a href="{entry["page"]}">{entry["title"]}</a></h3>'
+        f'<a href="{entry["page"]}"><img src="{entry["figure"]}" alt="Four battery stages with forward sets, backward sets, intersections and the terminal-optimal trajectory"></a>'
+        "<p>Certify predecessor supports and see the states that can reach the battery target at each stage.</p>"
+        f'<p><a href="{route}/catalogue-backward-support-evidence.zip">Download the producer, checker and figures</a></p></article>'
+    )
+    return files, [entry], card

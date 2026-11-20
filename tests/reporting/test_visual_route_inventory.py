@@ -257,7 +257,15 @@ class VisualRouteInventoryTests(unittest.TestCase):
         exact=routes["catalogue-exact-support-v1"]
         self.assertEqual(exact["assets"],["building-budget-projection.svg"])
         self.assertEqual(exact["companion_route"],"examples/catalogue-exact-support-v1/index.html")
-        reviewed_routes={paired["route"],query["route"],crossover["route"],forward["route"],history["route"],exact["route"]}
+        backward = routes["catalogue-backward-reachability-v1"]
+        self.assertEqual(backward["assets"], ["battery-forward-backward.svg"])
+        self.assertEqual(
+            backward["companion_route"], "examples/catalogue-backward-reachability-v1/index.html"
+        )
+        reviewed_routes = {
+            paired["route"], query["route"], crossover["route"], forward["route"],
+            history["route"], exact["route"], backward["route"],
+        }
         self.assertTrue(all(entry["disposition"].startswith("deferred: original frozen route-level readability")
                             for entry in routes.values() if entry["route"] not in reviewed_routes))
         self.assertTrue(all(entry["follow_up_issue"] ==
@@ -322,6 +330,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "catalogue-feasible-history-v1/battery-history-projections.svg",
             "catalogue-exact-support-v1/index.html",
             "catalogue-exact-support-v1/building-budget-projection.svg",
+            "catalogue-backward-reachability-v1/index.html",
+            "catalogue-backward-reachability-v1/battery-forward-backward.svg",
             "mpc-crossover-6b7308c4/index.html", "mpc-crossover-6b7308c4/feedback-geometry.svg",
             "mpc-crossover-6b7308c4/deployment-time.svg",
             "discrete-mpc-2d.html", "discrete-mpc-2d.svg", "discrete-mpc-2d.json",

@@ -139,6 +139,13 @@ FAMILIES = {
         "Checks a rational primal witness and upper bound for each of 192 saved direction-stage samples. "
         "The building figure shows the exact support lost to the control budget.",
     ),
+    "catalogue-backward-reachability-v1": Family(
+        r"examples/catalogue-backward-reachability-v1",
+        "geometry",
+        "Backward reachability across 35 catalogue models",
+        "Checks 1,120 predecessor support values for authored control boxes and terminal sets. "
+        "The battery example shows both sets, their intersections and its terminal-optimal trajectory.",
+    ),
     "mpc-crossover": Family(
         r"examples/mpc-crossover-6b7308c4",
         "synthesis",
@@ -1316,6 +1323,22 @@ def build(site: Path) -> None:
                 links=(
                     ("Source and hashes", exact_support + "/manifest.json"),
                     ("Offline evidence", exact_support + "/catalogue-exact-support-evidence.zip"),
+                ),
+            )
+        )
+    backward = "examples/catalogue-backward-reachability-v1"
+    if (site / backward / "index.html").is_file():
+        manifest = json.loads((site / backward / "manifest.json").read_text(encoding="utf-8"))
+        detailed = [entry for entry in detailed if entry.report_id != backward]
+        detailed.append(
+            Entry(
+                report_id=backward,
+                scope="1,120 exact sampled predecessor supports across 35 linear discrete models.",
+                limits="Three-step authored signed controls, fixed forecasts and terminal targets.",
+                commit=manifest["source_commit"],
+                links=(
+                    ("Source and hashes", backward + "/manifest.json"),
+                    ("Offline evidence", backward + "/catalogue-backward-support-evidence.zip"),
                 ),
             )
         )

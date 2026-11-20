@@ -737,6 +737,13 @@
       "owner": "scripts/reports/approx_extension_companions.py"
     },
     {
+      "route": "examples/catalogue-backward-reachability-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/catalogue-backward-reachability-v1/index.html",
+      "sha256": "061a7b7c5e6071b21232e84cf643b3da49c41d9fab55203ea216c5f4561c2609",
+      "witness": "Frozen exact predecessor certificates and battery all-stage geometry"
+    },
+    {
       "route": "examples/catalogue-exact-support-v1/index.html",
       "disposition": "frozen",
       "owner": "reports/algorithm-results/catalogue-exact-support-v1/index.html",
