@@ -1,7 +1,7 @@
 import copy
-import hashlib
 import importlib.util
 import json
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -9,13 +9,12 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts/reports/buryatia/check_2d.py"
 RAW = ROOT / "docs/examples/buryatia-volterra-affine-2d-records.json"
 SPEC = importlib.util.spec_from_file_location("buryatia_check_2d", SCRIPT)
+assert SPEC is not None and SPEC.loader is not None
 CHECK = importlib.util.module_from_spec(SPEC)
-assert SPEC and SPEC.loader
 SPEC.loader.exec_module(CHECK)
 
 
@@ -24,14 +23,37 @@ class Buryatia2DProvenanceTests(unittest.TestCase):
     def setUpClass(cls):
         cls.saved = json.loads(RAW.read_text(encoding="utf-8"))
 
-    def test_saved_raw_cli_accepts_declared_producer_after_source_update(self):
-        name = "src/geometry/approximation/box_parallelotope.cpp"
-        self.assertNotEqual(self.saved["native_build"]["source_sha256"][name],
-                            hashlib.sha256((ROOT / name).read_bytes()).hexdigest())
-        result = subprocess.run([sys.executable, str(SCRIPT), "--raw", str(RAW)],
-                                capture_output=True, text=True)
+    def test_saved_raw_cli_accepts_declared_historical_producer(self):
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT), "--raw", str(RAW)], capture_output=True, text=True
+        )
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("validated 61 stages", result.stdout)
+
+    def test_saved_record_regenerates_the_reviewed_html_svg_and_manifest(self):
+        stem = RAW.name.removesuffix("-records.json")
+        manifest = RAW.with_name(f"{stem}-manifest.json")
+        superseded = json.loads(manifest.read_bytes())["superseded_artifacts"]
+        with tempfile.TemporaryDirectory() as temporary:
+            replay = Path(temporary)
+            examples = replay / "docs/examples"
+            examples.mkdir(parents=True)
+            shutil.copyfile(RAW, examples / RAW.name)
+            for entry in superseded:
+                historical = ROOT / entry["path"]
+                shutil.copyfile(historical, examples / historical.name)
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(SCRIPT.with_name("render_2d.py")),
+                    "--raw",
+                    f"docs/examples/{RAW.name}",
+                ],
+                cwd=replay,
+                check=True,
+            )
+            for name in (f"{stem}.html", f"{stem}-terminal.svg", manifest.name):
+                self.assertEqual((examples / name).read_bytes(), (RAW.parent / name).read_bytes())
 
     def test_saved_raw_cli_rejects_tampered_hash_or_false_producer(self):
         # Current main can legitimately contain the same source blobs as this
@@ -42,13 +64,18 @@ class Buryatia2DProvenanceTests(unittest.TestCase):
             with self.subTest(field=field), tempfile.TemporaryDirectory() as temporary:
                 record = copy.deepcopy(self.saved)
                 if field == "hash":
-                    record["native_build"]["source_sha256"][CHECK.IMPLEMENTATION_SOURCES[0]] = "0" * 64
+                    record["native_build"]["source_sha256"][CHECK.IMPLEMENTATION_SOURCES[0]] = (
+                        "0" * 64
+                    )
                 else:
                     record["native_build"]["git_revision"] = false_producer
                 path = Path(temporary) / "tampered.json"
                 path.write_text(json.dumps(record), encoding="utf-8")
-                result = subprocess.run([sys.executable, str(SCRIPT), "--raw", str(path)],
-                                        capture_output=True, text=True)
+                result = subprocess.run(
+                    [sys.executable, str(SCRIPT), "--raw", str(path)],
+                    capture_output=True,
+                    text=True,
+                )
                 self.assertNotEqual(result.returncode, 0)
 
     def test_historical_receipt_cannot_be_labeled_current(self):
@@ -63,9 +90,11 @@ class Buryatia2DProvenanceTests(unittest.TestCase):
                 return subprocess.CompletedProcess(command, 0, json.dumps(self.saved), "")
             return run(command, **kwargs)
 
-        with patch.object(sys, "argv", [str(SCRIPT), "--exe", "native-fixture"]), \
-             patch.object(CHECK.subprocess, "run", side_effect=native_or_git), \
-             patch.object(CHECK, "native_receipt", return_value=self.saved["native_build"]):
+        with (
+            patch.object(sys, "argv", [str(SCRIPT), "--exe", "native-fixture"]),
+            patch.object(CHECK.subprocess, "run", side_effect=native_or_git),
+            patch.object(CHECK, "native_receipt", return_value=self.saved["native_build"]),
+        ):
             with self.assertRaises(AssertionError):
                 CHECK.main()
 
@@ -81,9 +110,20 @@ class Buryatia2DProvenanceTests(unittest.TestCase):
             (root / old).write_bytes((ROOT / old).read_bytes())
             subprocess.run(["git", "init", "-q", str(root)], check=True)
             subprocess.run(["git", "add", "."], cwd=root, check=True)
-            subprocess.run(["git", "-c", "user.name=Provenance test", "-c",
-                            "user.email=provenance@example.invalid", "commit", "-qm", "fixture"],
-                           cwd=root, check=True)
+            subprocess.run(
+                [
+                    "git",
+                    "-c",
+                    "user.name=Provenance test",
+                    "-c",
+                    "user.email=provenance@example.invalid",
+                    "commit",
+                    "-qm",
+                    "fixture",
+                ],
+                cwd=root,
+                check=True,
+            )
             with patch.object(CHECK, "ROOT", root):
                 record = copy.deepcopy(self.saved)
                 record["native_build"] = CHECK.native_receipt(Path(sys.executable), None)
