@@ -4,17 +4,18 @@ from __future__ import annotations
 
 import argparse
 import csv
-from html import escape
 import importlib.util
 import io
-from pathlib import Path
 import zipfile
+from html import escape
+from pathlib import Path
 
 spec = importlib.util.spec_from_file_location(
     "app03_collect", Path(__file__).with_name("collect.py")
 )
+if spec is None or spec.loader is None:
+    raise ImportError("APP-03 saved collector is unavailable")
 collect = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(collect)
 
 RENDERED = ("index.html", "example-2d.html", "zonotope-2d.svg", "summary.csv")

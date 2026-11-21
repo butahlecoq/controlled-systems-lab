@@ -4,18 +4,19 @@ from __future__ import annotations
 
 import argparse
 import csv
-from html import escape
 import importlib.util
 import io
-import json
-from pathlib import Path
 import zipfile
+from collections.abc import Sequence
+from html import escape
+from pathlib import Path
 
 spec = importlib.util.spec_from_file_location(
     "app02_collect", Path(__file__).with_name("collect.py")
 )
+if spec is None or spec.loader is None:
+    raise ImportError("APP-02 saved collector is unavailable")
 collect = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(collect)
 
 RENDERED = ("index.html", "polygons.svg", "summary.csv")
@@ -109,13 +110,16 @@ def validate(bundle: Path) -> dict:
 
 def figure(record: dict) -> bytes:
     # These coordinates map the literal (x,y) fixtures; paths are explanatory.
-    def xy(point: list[int]) -> str:
+    def xy(point: Sequence[float]) -> str:
         return f"{270 + 90 * point[0]},{270 - 90 * point[1]}"
 
     diamond = record["fixtures"]["diamond-rotated-outer"]["input_vertices"]
     box = record["fixtures"]["diamond-axis-inner"]["expected_v_vertices"]
     outer = [[-2, -2], [2, -2], [2, 2], [-2, 2]]
-    path = lambda points: " ".join(xy(point) for point in points)
+
+    def path(points: Sequence[Sequence[float]]) -> str:
+        return " ".join(xy(point) for point in points)
+
     dots = "".join(
         f'<circle cx="{270 + 90 * x}" cy="{270 - 90 * y}" r="5" fill="#f8f8f2"/>'
         for x, y in diamond
