@@ -3,8 +3,32 @@
 import json
 from html import escape
 from pathlib import Path
+from typing import NotRequired, TypedDict
 
-CASES = (
+
+class AnalyticIllustration(TypedDict):
+    id: str
+    family: str
+    title: str
+    summary: str
+    figure: str
+    record: str
+    kind: str
+    inputs: dict[str, object]
+    answer: dict[str, object]
+    svg: str
+    report_kind: NotRequired[str]
+    source_path: NotRequired[str]
+    source_commit: NotRequired[str]
+    source_files: NotRequired[list[str]]
+    source_file_labels: NotRequired[list[str]]
+    source_label: NotRequired[str]
+    example_page: NotRequired[str]
+    reproduction_command: NotRequired[str]
+    evidence: NotRequired[str]
+
+
+CASES: tuple[AnalyticIllustration, ...] = (
     {
         "id": "geo02-minkowski-triangles",
         "family": "Affine maps and Minkowski sums · GEO-02",
