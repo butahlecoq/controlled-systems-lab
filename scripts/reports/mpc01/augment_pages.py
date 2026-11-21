@@ -1,4 +1,5 @@
 """Safely extract the upstream Pages artifact before adding a report route."""
+
 from __future__ import annotations
 
 import argparse
@@ -12,8 +13,12 @@ def extract_pages_site(downloaded: Path, destination: Path) -> Path:
     if destination.exists() or destination.is_symlink():
         raise ValueError("Pages extraction destination must be fresh")
     candidates = list(downloaded.iterdir())
-    if len(candidates) != 1 or candidates[0].name != "artifact.tar" or \
-            candidates[0].is_symlink() or not candidates[0].is_file():
+    if (
+        len(candidates) != 1
+        or candidates[0].name != "artifact.tar"
+        or candidates[0].is_symlink()
+        or not candidates[0].is_file()
+    ):
         raise ValueError("Pages download must contain exactly one regular artifact.tar")
 
     destination.mkdir(parents=True, exist_ok=False)
@@ -36,15 +41,24 @@ def extract_pages_site(downloaded: Path, destination: Path) -> Path:
                     raise ValueError(f"unsafe Pages artifact root entry: {member.name!r}")
                 parents = set(path.parents) - {PurePosixPath(".")}
                 if parents & files:
-                    raise ValueError(f"Pages artifact member is nested under a file: {member.name!r}")
+                    raise ValueError(
+                        f"Pages artifact member is nested under a file: {member.name!r}"
+                    )
                 if member.isfile():
-                    if path in files or path in directories or any(
-                            path in existing.parents for existing in files | directories):
-                        raise ValueError(f"duplicate or conflicting Pages artifact path: {member.name!r}")
+                    if (
+                        path in files
+                        or path in directories
+                        or any(path in existing.parents for existing in files | directories)
+                    ):
+                        raise ValueError(
+                            f"duplicate or conflicting Pages artifact path: {member.name!r}"
+                        )
                     files.add(path)
                 else:
                     if path in directories or path in files:
-                        raise ValueError(f"duplicate or conflicting Pages artifact path: {member.name!r}")
+                        raise ValueError(
+                            f"duplicate or conflicting Pages artifact path: {member.name!r}"
+                        )
                     directories.add(path)
             archive.extractall(destination, filter="data")
         if not (destination / "index.html").is_file() or (destination / "index.html").is_symlink():
@@ -52,6 +66,7 @@ def extract_pages_site(downloaded: Path, destination: Path) -> Path:
     except Exception:
         # Do not leave a partial site that a later run could mistake for a complete extraction.
         import shutil
+
         shutil.rmtree(destination, ignore_errors=True)
         raise
     return destination

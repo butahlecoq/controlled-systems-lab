@@ -1,4 +1,5 @@
 """Adversarial checks for extraction of an upstream Pages tar artifact."""
+
 from __future__ import annotations
 
 import importlib.util
@@ -41,12 +42,14 @@ class PagesArtifactExtractionTests(unittest.TestCase):
         return augment.extract_pages_site(download, destination), root
 
     def test_extracts_regular_site_files_and_directories(self):
-        site, _ = self._extract([
-            (self._directory("./"), None),
-            (regular("index.html", b"<html></html>")),
-            (self._directory("examples/"), None),
-            (regular("examples/index.html", b"<html>examples</html>")),
-        ])
+        site, _ = self._extract(
+            [
+                (self._directory("./"), None),
+                (regular("index.html", b"<html></html>")),
+                (self._directory("examples/"), None),
+                (regular("examples/index.html", b"<html>examples</html>")),
+            ]
+        )
         self.assertEqual((site / "index.html").read_bytes(), b"<html></html>")
         self.assertEqual((site / "examples/index.html").read_bytes(), b"<html>examples</html>")
 
