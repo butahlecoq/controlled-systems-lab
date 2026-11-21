@@ -1,13 +1,14 @@
 """Validated publication adapter for the T-S01 analytic result record."""
 
 from __future__ import annotations
+
+import csv
 import hashlib
 import importlib.util
 import io
 import json
-import csv
-from pathlib import Path
 from html import escape
+from pathlib import Path
 
 import registered_reports as common
 

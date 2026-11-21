@@ -1,9 +1,13 @@
 from __future__ import annotations
-import json
+
+import hashlib
 import importlib.util
-from pathlib import Path
+import json
+import subprocess
 import sys
+import tempfile
 import unittest
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 TOOLS = ROOT / "reports" / "algorithm-results" / "tooling" / "ts01"
@@ -12,6 +16,7 @@ sys.path.insert(0, str(ROOT / "scripts" / "reports"))
 
 def load_tool(name):
     spec = importlib.util.spec_from_file_location("csl_test_ts01_" + name, TOOLS / (name + ".py"))
+    assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
@@ -21,7 +26,7 @@ def load_tool(name):
 report = load_tool("report")
 publication_map = load_tool("publication_map")
 build_bundle = load_tool("build_bundle")
-import ts01_registered_reports
+ts01_registered_reports = importlib.import_module("ts01_registered_reports")
 
 
 class Ts01SavedReportTests(unittest.TestCase):
@@ -93,12 +98,51 @@ class Ts01SavedReportTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "--measurement-dir is required"):
             build_bundle.build()
 
+    def test_saved_collection_rebuilds_the_exact_archived_bundle(self):
+        with tempfile.TemporaryDirectory() as directory:
+            scratch = Path(directory)
+            measurement = scratch / "measurement"
+            measurement.mkdir()
+            (measurement / "collection.json").write_bytes(
+                (self.bundle / "measurement.json").read_bytes()
+            )
+            (measurement / "events.jsonl").write_bytes(
+                (self.bundle / "measurement-events.jsonl").read_bytes()
+            )
+            output = scratch / self.bundle.name
+            subprocess.run(
+                [
+                    sys.executable,
+                    TOOLS / "build_bundle.py",
+                    "--measurement-dir",
+                    measurement,
+                    "--out-dir",
+                    output,
+                ],
+                check=True,
+                capture_output=True,
+            )
+            self.assertCountEqual(
+                [path.name for path in output.iterdir()],
+                [path.name for path in self.bundle.iterdir()],
+            )
+            for path in self.bundle.iterdir():
+                self.assertEqual((output / path.name).read_bytes(), path.read_bytes(), path.name)
+
     def test_registered_adapter_checks_bundle_and_creates_offline_archive(self):
         publication = ts01_registered_reports.adapt(self.bundle)
         self.assertEqual(publication.source_commit, report.SOURCE_COMMIT)
         self.assertEqual(publication.source_report_id, self.record["report_id"])
         archive = ts01_registered_reports.offline_zip(self.bundle, publication)
-        self.assertGreater(len(archive), 1000)
+        catalog = json.loads((self.bundle.parent / "catalog.json").read_bytes())
+        rows = [
+            row for row in catalog["reports"] if row.get("source_report_id") == self.bundle.name
+        ]
+        self.assertEqual(len(rows), 1)
+        row = rows[0]
+        self.assertEqual(row["report_id"], publication.report_id)
+        self.assertEqual(row["payload_sha256"], publication.payload_sha256)
+        self.assertEqual(row["zip_sha256"], hashlib.sha256(archive).hexdigest())
 
 
 if __name__ == "__main__":

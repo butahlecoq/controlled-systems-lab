@@ -1,6 +1,7 @@
 """Canonical identity mapping for the standalone T-S01 report."""
 
 from __future__ import annotations
+
 import hashlib
 import json
 
