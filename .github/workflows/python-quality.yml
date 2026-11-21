@@ -36,6 +36,10 @@ on:
       - 'tests/ci/**'
       - 'scripts/catalogue/**'
       - 'reports/algorithm-results/tooling/**'
+      - 'scripts/reports/geo06_report.py'
+      - 'tests/reporting/test_geo06_report.py'
+      - 'reports/algorithm-results/geo06-b010fb3df212604b/**'
+      - 'reports/algorithm-results/geo06-b010fb3df212604b.source.zip'
       - 'scripts/reports/report_data.py'
       - 'tests/reporting/test_report_data.py'
       - 'tests/reporting/test_render.py'
@@ -312,6 +316,10 @@ on:
       - 'tests/ci/**'
       - 'scripts/catalogue/**'
       - 'reports/algorithm-results/tooling/**'
+      - 'scripts/reports/geo06_report.py'
+      - 'tests/reporting/test_geo06_report.py'
+      - 'reports/algorithm-results/geo06-b010fb3df212604b/**'
+      - 'reports/algorithm-results/geo06-b010fb3df212604b.source.zip'
       - 'scripts/reports/report_data.py'
       - 'tests/reporting/test_report_data.py'
       - 'tests/reporting/test_render.py'
@@ -621,6 +629,10 @@ jobs:
           tests.reporting.test_env717_unequal_game_publication
           tests.reporting.test_env717_max_coordinate_publication
           tests.reporting.test_env717_point_on_plane_publication
+      - name: Check the saved QuickHull report
+        run: |
+          python -m unittest tests.reporting.test_geo06_report
+          python scripts/reports/geo06_report.py check --bundle reports/algorithm-results/geo06-b010fb3df212604b
       - name: Check frozen Pages route preservation
         run: python -m unittest tests.reporting.test_preserve_published_routes tests.reporting.test_published_route_audit_policy
       - name: Exercise shared publication owners and malformed-input boundaries
