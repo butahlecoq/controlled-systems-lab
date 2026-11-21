@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import hashlib
 import importlib.util
+import io
 import json
 import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import nullcontext, redirect_stdout
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 ROOT = Path(__file__).resolve().parents[2]
 TOOLS = ROOT / "reports" / "algorithm-results" / "tooling" / "ts01"
@@ -132,13 +134,17 @@ class Ts01SavedReportTests(unittest.TestCase):
             for path in self.bundle.iterdir():
                 self.assertEqual((output / path.name).read_bytes(), path.read_bytes(), path.name)
 
-    def test_collector_retains_rejected_native_output(self):
+    def test_collector_records_native_attempts_and_exports_only_accepted_results(self):
         attempts = (
             (7, b"partial native output\r\n", "measurement executable failed with status 7"),
             (0, b"invalid JSONL\n", "measurement executable emitted invalid JSONL"),
+            (0, (self.bundle / "measurement-events.jsonl").read_bytes(), None),
         )
         for returncode, stdout, reason in attempts:
-            with self.subTest(returncode=returncode), tempfile.TemporaryDirectory() as directory:
+            with (
+                self.subTest(returncode=returncode, reason=reason),
+                tempfile.TemporaryDirectory() as directory,
+            ):
                 scratch = Path(directory)
                 cmake = scratch / "cmake"
                 cmake.touch()
@@ -167,6 +173,15 @@ class Ts01SavedReportTests(unittest.TestCase):
                         executable = build / "Release" / "csl_syn07_ts01_report.exe"
                         executable.parent.mkdir()
                         executable.write_bytes(b"simulated executable")
+                        config = build / "CMakeFiles" / "stub" / "CMakeCXXCompiler.cmake"
+                        config.parent.mkdir(parents=True)
+                        config.write_text(
+                            'set(CMAKE_CXX_COMPILER "stub")\n'
+                            'set(CMAKE_CXX_COMPILER_VERSION "1.0")\n',
+                            encoding="utf-8",
+                        )
+                    if "--version" in command:
+                        return subprocess.CompletedProcess(command, 0, b"cmake simulator\n", b"")
                     return subprocess.CompletedProcess(command, 0, b"", b"")
 
                 def git_response(root, *args, build_root=build_root):
@@ -186,13 +201,17 @@ class Ts01SavedReportTests(unittest.TestCase):
                     str(output),
                 ]
                 process = subprocess.CompletedProcess(["driver"], returncode, stdout, stderr)
+                expected = (
+                    nullcontext() if reason is None else self.assertRaisesRegex(SystemExit, reason)
+                )
                 with (
                     patch.object(sys, "argv", argv),
                     patch.object(collector, "git", side_effect=git_response),
                     patch.object(collector, "run", side_effect=build_step),
                     patch.object(collector, "psutil", None),
-                    patch.object(collector.subprocess, "run", return_value=process),
-                    self.assertRaisesRegex(SystemExit, reason),
+                    patch.object(collector, "subprocess", Mock(run=Mock(return_value=process))),
+                    redirect_stdout(io.StringIO()),
+                    expected,
                 ):
                     collector.main()
 
@@ -200,14 +219,27 @@ class Ts01SavedReportTests(unittest.TestCase):
                 self.assertEqual((attempt / "stdout.bin").read_bytes(), stdout)
                 self.assertEqual((attempt / "stderr.bin").read_bytes(), stderr)
                 receipt = json.loads((attempt / "attempt.json").read_bytes())
-                self.assertEqual(receipt["status"], "failed")
-                self.assertEqual(receipt["reason"], reason)
                 self.assertEqual(receipt["returncode"], returncode)
                 self.assertEqual(receipt["source_commit"], report.SOURCE_COMMIT)
                 self.assertEqual(receipt["harness_commit"], "a" * 40)
                 self.assertEqual(receipt["stdout_sha256"], hashlib.sha256(stdout).hexdigest())
                 self.assertEqual(receipt["stderr_sha256"], hashlib.sha256(stderr).hexdigest())
-                self.assertFalse(output.exists())
+                if reason is None:
+                    self.assertEqual(receipt["status"], "accepted")
+                    self.assertNotIn("reason", receipt)
+                    self.assertCountEqual(
+                        [path.name for path in output.iterdir()],
+                        ["events.jsonl", "stderr.txt", "collection.json", "command.txt"],
+                    )
+                    self.assertEqual((output / "events.jsonl").read_bytes(), stdout)
+                    self.assertEqual((output / "stderr.txt").read_bytes(), stderr)
+                    collection = json.loads((output / "collection.json").read_bytes())
+                    self.assertEqual(collection["counts"]["failed"], 0)
+                    self.assertEqual(collection["raw_stdout_sha256"], receipt["stdout_sha256"])
+                else:
+                    self.assertEqual(receipt["status"], "failed")
+                    self.assertEqual(receipt["reason"], reason)
+                    self.assertFalse(output.exists())
 
     def test_registered_adapter_checks_bundle_and_creates_offline_archive(self):
         publication = ts01_registered_reports.adapt(self.bundle)
