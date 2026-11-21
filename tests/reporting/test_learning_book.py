@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import csv
 import hashlib
-import io
 import importlib.util
+import io
 import json
 import subprocess
 import sys
@@ -18,6 +18,8 @@ from zipfile import ZipFile
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts/reports/learning_book.py"
 SPEC = importlib.util.spec_from_file_location("learning_book", SCRIPT)
+if SPEC is None or SPEC.loader is None:
+    raise ImportError(f"Cannot load the learning-book generator from {SCRIPT}")
 learning_book = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = learning_book
 SPEC.loader.exec_module(learning_book)
@@ -30,8 +32,8 @@ class PageElements(HTMLParser):
         self.ids = set()
         self.main_classes = set()
 
-    def handle_starttag(self, tag, attributes):
-        attributes = dict(attributes)
+    def handle_starttag(self, tag, attrs):
+        attributes = dict(attrs)
         if "id" in attributes:
             self.ids.add(attributes["id"])
         if tag == "a" and "href" in attributes:
@@ -43,8 +45,10 @@ class PageElements(HTMLParser):
 class LearningBookTests(unittest.TestCase):
     def setUp(self):
         self.manifest = json.loads((ROOT / "docs/catalogue/learning-book-v1.json").read_text())
-        self.inventory = json.loads((ROOT / "docs/catalogue/module-composition-inventory-v1.json").read_text())
-        campaign_figures = [
+        self.inventory = json.loads(
+            (ROOT / "docs/catalogue/module-composition-inventory-v1.json").read_text()
+        )
+        self.campaign_figures = [
             {
                 "id": figure_id,
                 "task_id": {
@@ -71,28 +75,40 @@ class LearningBookTests(unittest.TestCase):
         ]
         self.figures = {
             "schema": "csl.closed-loop.figure-index/1",
-            "figures": [*pending_figures, *campaign_figures],
+            "figures": [*pending_figures, *self.campaign_figures],
         }
 
     def test_module_claims_are_executable_and_navigation_is_derived(self):
         chapters = learning_book.validate(self.manifest, self.inventory, self.figures)
         covered = {module for chapter in chapters for module in chapter["module_ids"]}
-        expected = {module["identity"].get("id") or module["identity"].get("symbol")
-                    for module in self.inventory["modules"]}
+        expected = {
+            module["identity"].get("id") or module["identity"].get("symbol")
+            for module in self.inventory["modules"]
+        }
         self.assertTrue(covered)
         self.assertTrue(covered < expected)
         for chapter in chapters:
             if chapter["module_ids"]:
                 self.assertEqual(chapter["kind"], "installed consumer")
                 self.assertTrue(chapter["example_sources"])
-                self.assertTrue(all((ROOT / source).is_file() for source in chapter["example_sources"]))
+                self.assertTrue(
+                    all((ROOT / source).is_file() for source in chapter["example_sources"])
+                )
         self.assertEqual(chapters[0]["previous"], None)
         self.assertEqual(chapters[0]["next"], chapters[1]["id"])
         self.assertEqual(chapters[-1]["previous"], chapters[-2]["id"])
         self.assertEqual(chapters[-1]["next"], None)
-        self.assertEqual({"orientation", "vertex_lp_simplex", "reachable_set_representation",
-                          "controller", "supporting_operations", "capstones"},
-                         {chapter["group"] for chapter in chapters})
+        self.assertEqual(
+            {
+                "orientation",
+                "vertex_lp_simplex",
+                "reachable_set_representation",
+                "controller",
+                "supporting_operations",
+                "capstones",
+            },
+            {chapter["group"] for chapter in chapters},
+        )
 
     def test_task_capstones_distinguish_figures_pilots_and_full_profile_outcomes(self):
         ledger = "examples/closed-loop/campaign-2026-11-18/raw/coverage.json"
@@ -100,9 +116,7 @@ class LearningBookTests(unittest.TestCase):
         tasks = {
             "lotka-capstone": ("syn-nl-lv-01", {"lotka-populations": [0, 1]}),
             "orbit-capstone": ("earth-orbit", {"earth-orbit": [0, 3]}),
-            "fuel-capstone": (
-                "syn-nl-fuel-01", {"fuel-state": [2, 0], "fuel-fuel-flow": [3, 1]}
-            ),
+            "fuel-capstone": ("syn-nl-fuel-01", {"fuel-state": [2, 0], "fuel-fuel-flow": [3, 1]}),
         }
         chapters = {chapter["id"]: chapter for chapter in self.manifest["chapters"]}
         index = json.loads((ROOT / "docs/examples/closed-loop/figure-index.json").read_bytes())
@@ -142,8 +156,10 @@ class LearningBookTests(unittest.TestCase):
         manifest = json.loads(preservation.read_bytes())
         pins = manifest["mutable_routes_reviewed_sha256"]
         routes = (
-            "learn/index.html", "learn/lotka-capstone.html",
-            "learn/orbit-capstone.html", "learn/fuel-capstone.html",
+            "learn/index.html",
+            "learn/lotka-capstone.html",
+            "learn/orbit-capstone.html",
+            "learn/fuel-capstone.html",
         )
         with tempfile.TemporaryDirectory() as directory:
             site = Path(directory)
@@ -153,7 +169,9 @@ class LearningBookTests(unittest.TestCase):
             for route in routes:
                 with self.subTest(route=route):
                     self.assertIn(route, manifest["mutable_routes_reviewed_separately"])
-                    self.assertEqual(hashlib.sha256((site / route).read_bytes()).hexdigest(), pins[route])
+                    self.assertEqual(
+                        hashlib.sha256((site / route).read_bytes()).hexdigest(), pins[route]
+                    )
 
     def test_campaign_tables_match_frozen_full_profile_coverage(self):
         chapter = next(
@@ -176,22 +194,37 @@ class LearningBookTests(unittest.TestCase):
         graph_table = tables["Final graph outcomes by task"]
         self.assertEqual(graph_table["columns"], ["task", "admitted", *outcomes])
         expected_rows = [
-            [label, str(sum(counts[task].values())), *(str(counts[task][name]) for name in outcomes)]
+            [
+                label,
+                str(sum(counts[task].values())),
+                *(str(counts[task][name]) for name in outcomes),
+            ]
             for task, label in tasks.items()
         ]
-        expected_rows.append([
-            "Total",
-            str(summary["admitted_graphs"]),
-            *(str(summary["by_graph_outcome"][name]) for name in outcomes),
-        ])
+        expected_rows.append(
+            [
+                "Total",
+                str(summary["admitted_graphs"]),
+                *(str(summary["by_graph_outcome"][name]) for name in outcomes),
+            ]
+        )
         self.assertEqual(graph_table["rows"], expected_rows)
-        self.assertEqual(dict(tables["Campaign accounting"]["rows"]), {
-            "admitted and attempted full-profile graphs": str(summary["attempted_graphs"]),
-            "full-profile attempt records including retries": str(summary["attempt_rows"]),
-            "completed reruns in the separate compatible profile": str(supplemental["outcomes"]["complete"]),
-            "source-incompatible candidates with recorded reasons": str(summary["incompatible_candidates"]),
-            "duplicate catalogue graph references": str(summary["duplicate_catalogue_references"]),
-        })
+        self.assertEqual(
+            dict(tables["Campaign accounting"]["rows"]),
+            {
+                "admitted and attempted full-profile graphs": str(summary["attempted_graphs"]),
+                "full-profile attempt records including retries": str(summary["attempt_rows"]),
+                "completed reruns in the separate compatible profile": str(
+                    supplemental["outcomes"]["complete"]
+                ),
+                "source-incompatible candidates with recorded reasons": str(
+                    summary["incompatible_candidates"]
+                ),
+                "duplicate catalogue graph references": str(
+                    summary["duplicate_catalogue_references"]
+                ),
+            },
+        )
 
     def test_source_permalinks_bind_to_the_executed_example_bytes(self):
         prefix = "https://github.com/butahlecoq/controlled-systems-lab/blob/"
@@ -200,19 +233,26 @@ class LearningBookTests(unittest.TestCase):
                 if not record["href"].startswith(prefix):
                     continue
                 with self.subTest(chapter=chapter["id"], source=record["href"]):
-                    commit, separator, source = record["href"][len(prefix):].partition("/")
+                    commit, separator, source = record["href"][len(prefix) :].partition("/")
                     self.assertTrue(separator)
                     self.assertRegex(commit, r"^[0-9a-f]{40}$")
                     self.assertIn(source, chapter["example_sources"])
-                    result = subprocess.run(["git", "show", f"{commit}:{source}"],
-                                            cwd=ROOT, capture_output=True)
+                    result = subprocess.run(
+                        ["git", "show", f"{commit}:{source}"], cwd=ROOT, capture_output=True
+                    )
                     self.assertEqual(result.returncode, 0, result.stderr.decode())
                     if "source_sha256" in record:
-                        self.assertEqual(hashlib.sha256(result.stdout).hexdigest(), record["source_sha256"],
-                                         "Source permalink differs from its pinned source digest")
+                        self.assertEqual(
+                            hashlib.sha256(result.stdout).hexdigest(),
+                            record["source_sha256"],
+                            "Source permalink differs from its pinned source digest",
+                        )
                     else:
-                        self.assertEqual(result.stdout, (ROOT / source).read_bytes(),
-                                         "Source permalink differs from the executed example")
+                        self.assertEqual(
+                            result.stdout,
+                            (ROOT / source).read_bytes(),
+                            "Source permalink differs from the executed example",
+                        )
 
     def test_native_tracks_link_existing_formulations_and_actual_outcomes(self):
         chapters = learning_book.validate(self.manifest, self.inventory, self.figures)
@@ -220,14 +260,20 @@ class LearningBookTests(unittest.TestCase):
         links = PageElements()
         links.feed(page)
         root = ROOT / "reports/algorithm-results"
-        expected = json.loads((root / "native-discrete-models-v1/catalogue.json").read_text())["models"]
+        expected = json.loads((root / "native-discrete-models-v1/catalogue.json").read_text())[
+            "models"
+        ]
         route = "native-model-tracking-first-pass-v1"
         with ZipFile(root / route / (route + ".zip")) as bundle:
-            results = list(csv.DictReader(io.StringIO(bundle.read("checks/independent_results.csv").decode())))
+            results = list(
+                csv.DictReader(io.StringIO(bundle.read("checks/independent_results.csv").decode()))
+            )
             self.assertEqual({r["model"] for r in results}, {m["id"] for m in expected})
             for key in links.links:
                 if key.startswith(f"../examples/{route}/"):
-                    self.assertIn(urlsplit(key).path.removeprefix(f"../examples/{route}/"), bundle.namelist())
+                    self.assertIn(
+                        urlsplit(key).path.removeprefix(f"../examples/{route}/"), bundle.namelist()
+                    )
         catalogue = PageElements()
         catalogue.feed((ROOT / "docs/examples/native-discrete-models.html").read_text())
         for model in expected:
@@ -260,7 +306,10 @@ class LearningBookTests(unittest.TestCase):
             (root / "link.txt").symlink_to(untracked)
             for path in (str(untracked), "../../untracked.txt", "link.txt"):
                 chapter = {"id": "native-forward-models", "records": [{"formulation_record": path}]}
-                with self.subTest(path=path), self.assertRaisesRegex(ValueError, "unsafe native formulation"):
+                with (
+                    self.subTest(path=path),
+                    self.assertRaisesRegex(ValueError, "unsafe native formulation"),
+                ):
                     learning_book.learning_model_tracks.native_sections(repo, [chapter])
 
     def test_model_tracks_are_generated_from_contracts_and_saved_results(self):
@@ -332,47 +381,71 @@ class LearningBookTests(unittest.TestCase):
             )
 
     @staticmethod
-    def _is_retained_source_commit(repo: Path, commit: str, *, allow_in_flight_head: bool = False) -> bool:
+    def _is_retained_source_commit(
+        repo: Path, commit: str, *, allow_in_flight_head: bool = False
+    ) -> bool:
         main_ref = "refs/remotes/origin/main"
-        main_result = subprocess.run(["git", "merge-base", "--is-ancestor", commit, main_ref],
-                                     cwd=repo, capture_output=True, text=True)
+        main_result = subprocess.run(
+            ["git", "merge-base", "--is-ancestor", commit, main_ref],
+            cwd=repo,
+            capture_output=True,
+            text=True,
+        )
         if main_result.returncode == 0:
             return True
         if main_result.returncode != 1:
             raise AssertionError(f"Cannot check {main_ref}: {main_result.stderr.strip()}")
 
         if allow_in_flight_head:
-            head_result = subprocess.run(["git", "merge-base", "--is-ancestor", commit, "HEAD"],
-                                         cwd=repo, capture_output=True, text=True)
+            head_result = subprocess.run(
+                ["git", "merge-base", "--is-ancestor", commit, "HEAD"],
+                cwd=repo,
+                capture_output=True,
+                text=True,
+            )
             if head_result.returncode == 0:
                 return True
             if head_result.returncode != 1:
                 raise AssertionError(f"Cannot check HEAD: {head_result.stderr.strip()}")
 
-        tags_result = subprocess.run(["git", "tag", "--list", "evidence/*-source-*"],
-                                     cwd=repo, capture_output=True, text=True)
+        tags_result = subprocess.run(
+            ["git", "tag", "--list", "evidence/*-source-*"],
+            cwd=repo,
+            capture_output=True,
+            text=True,
+        )
         if tags_result.returncode != 0:
             raise AssertionError(f"Cannot list evidence source tags: {tags_result.stderr.strip()}")
         for tag in tags_result.stdout.splitlines():
             tag_ref = f"refs/tags/{tag}"
-            tagged_commit = subprocess.run(["git", "rev-parse", "--verify", f"{tag_ref}^{{commit}}"],
-                                           cwd=repo, capture_output=True, text=True)
+            tagged_commit = subprocess.run(
+                ["git", "rev-parse", "--verify", f"{tag_ref}^{{commit}}"],
+                cwd=repo,
+                capture_output=True,
+                text=True,
+            )
             if tagged_commit.returncode != 0:
-                raise AssertionError(f"Cannot resolve evidence source tag {tag}: " +
-                                     tagged_commit.stderr.strip())
+                raise AssertionError(
+                    f"Cannot resolve evidence source tag {tag}: " + tagged_commit.stderr.strip()
+                )
             tag_result = subprocess.run(
                 ["git", "merge-base", "--is-ancestor", commit, tagged_commit.stdout.strip()],
-                cwd=repo, capture_output=True, text=True)
+                cwd=repo,
+                capture_output=True,
+                text=True,
+            )
             if tag_result.returncode == 0:
                 return True
             if tag_result.returncode != 1:
-                raise AssertionError(f"Cannot check evidence source tag {tag}: {tag_result.stderr.strip()}")
+                raise AssertionError(
+                    f"Cannot check evidence source tag {tag}: {tag_result.stderr.strip()}"
+                )
         return False
 
     def test_source_permalinks_are_retained_by_main_evidence_tags_or_in_flight_head(self):
         prefix = "https://github.com/butahlecoq/controlled-systems-lab/blob/"
         sources = {
-            record["href"][len(prefix):].partition("/")[0]
+            record["href"][len(prefix) :].partition("/")[0]
             for chapter in self.manifest["chapters"]
             for record in chapter.get("records", [])
             if record["href"].startswith(prefix)
@@ -382,15 +455,17 @@ class LearningBookTests(unittest.TestCase):
             with self.subTest(commit=commit):
                 self.assertTrue(
                     self._is_retained_source_commit(ROOT, commit, allow_in_flight_head=True),
-                    f"Source permalink commit {commit} is not retained by origin/main, an evidence source tag, or HEAD")
+                    f"Source permalink commit {commit} is not retained by origin/main, an evidence source tag, or HEAD",
+                )
 
     def test_source_retention_rejects_feature_only_history_and_accepts_durable_refs(self):
         with tempfile.TemporaryDirectory() as temporary:
             repo = Path(temporary)
 
             def git(*args: str) -> str:
-                result = subprocess.run(["git", *args], cwd=repo, check=True,
-                                        capture_output=True, text=True)
+                result = subprocess.run(
+                    ["git", *args], cwd=repo, check=True, capture_output=True, text=True
+                )
                 return result.stdout.strip()
 
             git("init", "--initial-branch=main")
@@ -407,8 +482,12 @@ class LearningBookTests(unittest.TestCase):
             git("add", "feature-source.cpp")
             git("commit", "-m", "feature-only source")
             feature_source = git("rev-parse", "HEAD")
-            self.assertEqual(subprocess.run(["git", "merge-base", "--is-ancestor", feature_source, "HEAD"],
-                                            cwd=repo).returncode, 0)
+            self.assertEqual(
+                subprocess.run(
+                    ["git", "merge-base", "--is-ancestor", feature_source, "HEAD"], cwd=repo
+                ).returncode,
+                0,
+            )
             self.assertFalse(self._is_retained_source_commit(repo, feature_source))
 
             git("checkout", "--orphan", "tagged-source")
@@ -417,8 +496,19 @@ class LearningBookTests(unittest.TestCase):
             git("commit", "-m", "frozen source snapshot")
             tagged_source = git("rev-parse", "HEAD")
             git("tag", "-a", "evidence/fixture-source-v1", "-m", "Retain the frozen source commit")
-            self.assertEqual(subprocess.run(["git", "merge-base", "--is-ancestor", tagged_source,
-                                             "refs/remotes/origin/main"], cwd=repo).returncode, 1)
+            self.assertEqual(
+                subprocess.run(
+                    [
+                        "git",
+                        "merge-base",
+                        "--is-ancestor",
+                        tagged_source,
+                        "refs/remotes/origin/main",
+                    ],
+                    cwd=repo,
+                ).returncode,
+                1,
+            )
             self.assertTrue(self._is_retained_source_commit(repo, main_source))
             self.assertTrue(self._is_retained_source_commit(repo, tagged_source))
 
@@ -432,10 +522,19 @@ class LearningBookTests(unittest.TestCase):
         chapters = learning_book.validate(self.manifest, self.inventory, self.figures)
         ready = [chapter for chapter in chapters if chapter["status"] == "ready"]
         self.assertGreaterEqual(len(ready), 10)
-        self.assertTrue(all(chapter["command"] and chapter["expected_output"] and
-                            chapter["mathematical_input"] and chapter["intermediate_geometry"] and
-                            chapter["support_limits"] for chapter in ready))
-        campaign = next(chapter for chapter in chapters if chapter["id"] == "native-substitution-matrix")
+        self.assertTrue(
+            all(
+                chapter["command"]
+                and chapter["expected_output"]
+                and chapter["mathematical_input"]
+                and chapter["intermediate_geometry"]
+                and chapter["support_limits"]
+                for chapter in ready
+            )
+        )
+        campaign = next(
+            chapter for chapter in chapters if chapter["id"] == "native-substitution-matrix"
+        )
         self.assertEqual(campaign["status"], "ready")
         self.assertIn("513 admitted", campaign["summary"])
         self.assertTrue(campaign["command"])
@@ -446,22 +545,35 @@ class LearningBookTests(unittest.TestCase):
         by_id = {chapter["id"]: chapter for chapter in chapters}
         for chapter in (item for item in chapters if item["status"] == "ready"):
             chapter_id = chapter["id"]
-            self.assertTrue(by_id[chapter_id].get("mathematical_displays") or
-                            by_id[chapter_id].get("mathematical_tables"), chapter_id)
-            html = learning_book._chapter_page(by_id[chapter_id], chapters,
+            self.assertTrue(
+                by_id[chapter_id].get("mathematical_displays")
+                or by_id[chapter_id].get("mathematical_tables"),
+                chapter_id,
+            )
+            html = learning_book._chapter_page(
+                by_id[chapter_id],
+                chapters,
                 (learning_book.CHAPTER_ROOT / by_id[chapter_id]["source"]).read_text(),
-                self.figures, self.inventory)
-            self.assertIn('<h2>Mathematical input</h2>', html)
+                self.figures,
+                self.inventory,
+            )
+            self.assertIn("<h2>Mathematical input</h2>", html)
             if chapter.get("mathematical_displays"):
                 self.assertIn('class="math-matrix"', html)
             else:
-                self.assertIn('<table>', html)
+                self.assertIn("<table>", html)
             self.assertIn('<details class="lesson-input-details">', html)
-            self.assertNotIn('<h3>Input</h3><pre', html)
+            self.assertNotIn("<h3>Input</h3><pre", html)
             if chapter_id == "representation-consumers":
-                preservation = json.loads((ROOT / "reports/published-route-preservation/manifest.json").read_text())
-                self.assertEqual(hashlib.sha256(html.encode()).hexdigest(),
-                                 preservation["mutable_copy_reviewed_sha256"]["learn/representation-consumers.html"])
+                preservation = json.loads(
+                    (ROOT / "reports/published-route-preservation/manifest.json").read_text()
+                )
+                self.assertEqual(
+                    hashlib.sha256(html.encode()).hexdigest(),
+                    preservation["mutable_copy_reviewed_sha256"][
+                        "learn/representation-consumers.html"
+                    ],
+                )
 
         terminal = by_id["terminal-optimization"]
         self.assertIn("{(x,y)=(s,1−s) : 0≤s≤1}", terminal["mathematical_conclusion"])
@@ -478,12 +590,18 @@ class LearningBookTests(unittest.TestCase):
         self.assertIn("finite reachability game", finite["mathematical_conclusion"])
         self.assertIn("finite causal minimax cost game", finite["mathematical_conclusion"])
         broken = json.loads(json.dumps(self.manifest))
-        game = next(item for item in broken["chapters"] if item["id"] == "finite-controller-consumers")
+        game = next(
+            item for item in broken["chapters"] if item["id"] == "finite-controller-consumers"
+        )
         game["mathematical_tables"][0]["rows"][0][2] = "0"
-        with self.assertRaisesRegex(ValueError, "transition table differs from its executable fixture"):
+        with self.assertRaisesRegex(
+            ValueError, "transition table differs from its executable fixture"
+        ):
             learning_book.validate(broken, self.inventory, self.figures)
         broken = json.loads(json.dumps(self.manifest))
-        game = next(item for item in broken["chapters"] if item["id"] == "finite-controller-consumers")
+        game = next(
+            item for item in broken["chapters"] if item["id"] == "finite-controller-consumers"
+        )
         game["source_witnesses"][0]["contains"][0] = "Game{states, actions, inputs}"
         with self.assertRaisesRegex(ValueError, "source fixture changed"):
             learning_book.validate(broken, self.inventory, self.figures)
@@ -491,18 +609,31 @@ class LearningBookTests(unittest.TestCase):
     def test_ready_figure_page_shows_scope_gaps_and_data_links(self):
         chapters = learning_book.validate(self.manifest, self.inventory, self.figures)
         chapter = next(item for item in chapters if item["id"] == "lotka-capstone")
-        index = {"schema": "csl.closed-loop.figure-index/1", "figures": [
-            {"id": "lotka-populations", "availability": "ready",
-             "href": "examples/closed-loop/figures/lotka-populations.html",
-             "plotted_data_href": "examples/closed-loop/figures/lotka-populations.plotted-data.json",
-             "layer_scopes": ["observed plant replay", "retained graph nodes"],
-             "missing_layers": ["all-admissible-control forward sets", "full-state intersections"]},
-            {"id": "earth-orbit", "availability": "pending", "reason": "Not in this chapter."},
-            {"id": "fuel-state", "availability": "pending", "reason": "Not in this chapter."},
-        ]}
-        html = learning_book._chapter_page(chapter, chapters,
-            (ROOT / "docs/examples/learning/chapters/lotka-capstone.html").read_text(), index,
-            self.inventory)
+        index = {
+            "schema": "csl.closed-loop.figure-index/1",
+            "figures": [
+                {
+                    "id": "lotka-populations",
+                    "availability": "ready",
+                    "href": "examples/closed-loop/figures/lotka-populations.html",
+                    "plotted_data_href": "examples/closed-loop/figures/lotka-populations.plotted-data.json",
+                    "layer_scopes": ["observed plant replay", "retained graph nodes"],
+                    "missing_layers": [
+                        "all-admissible-control forward sets",
+                        "full-state intersections",
+                    ],
+                },
+                {"id": "earth-orbit", "availability": "pending", "reason": "Not in this chapter."},
+                {"id": "fuel-state", "availability": "pending", "reason": "Not in this chapter."},
+            ],
+        }
+        html = learning_book._chapter_page(
+            chapter,
+            chapters,
+            (ROOT / "docs/examples/learning/chapters/lotka-capstone.html").read_text(),
+            index,
+            self.inventory,
+        )
         self.assertIn("observed plant replay; retained graph nodes", html)
         self.assertIn("all-admissible-control forward sets; full-state intersections", html)
         self.assertIn("lotka-populations.plotted-data.json", html)
@@ -510,11 +641,20 @@ class LearningBookTests(unittest.TestCase):
     def test_fuel_coordinate_maps_render_as_accessible_mathml_matrices(self):
         chapters = learning_book.validate(self.manifest, self.inventory, self.figures)
         chapter = next(item for item in chapters if item["id"] == "fuel-capstone")
-        html = learning_book._chapter_page(chapter, chapters,
+        html = learning_book._chapter_page(
+            chapter,
+            chapters,
             (ROOT / "docs/examples/learning/chapters/fuel-capstone.html").read_text(),
-            self.figures, self.inventory)
-        self.assertIn('role="math" aria-label="Physical state x, rows [m_ox, m_f, q_ox, q_f]: 100; 30; 2; 0.6"', html)
-        self.assertIn('aria-label="Oxidizer projection P_ox x = [q_ox, m_ox]^T: 0, 0, 1, 0; 1, 0, 0, 0"', html)
+            self.figures,
+            self.inventory,
+        )
+        self.assertIn(
+            'role="math" aria-label="Physical state x, rows [m_ox, m_f, q_ox, q_f]: 100; 30; 2; 0.6"',
+            html,
+        )
+        self.assertIn(
+            'aria-label="Oxidizer projection P_ox x = [q_ox, m_ox]^T: 0, 0, 1, 0; 1, 0, 0, 0"', html
+        )
         self.assertIn('aria-label="Fuel flow-mass point P_f x, rows [q_f, m_f]: 0.6; 30"', html)
         self.assertEqual(html.count('<math display="inline" aria-hidden="true">'), 5)
         self.assertEqual(html.count('class="scroll" tabindex="0" role="region"'), 5)
@@ -529,14 +669,35 @@ class LearningBookTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "absent from the figure index"):
             learning_book.validate(broken, self.inventory, self.figures)
 
-    def test_five_representation_example_prints_the_recorded_values(self):
-        result = subprocess.run([sys.executable, str(ROOT / "scripts/reports/learning_geometry_toy.py")],
-                                check=True, capture_output=True, text=True)
-        self.assertEqual(result.stdout, """d=(1.0, 0.0); exact_square=1; outer_disk=1.41421
-d=(1.0, 1.0); exact_square=2; outer_disk=2
-polytope=exact zonotope=exact parallelotope=exact ellipsoid=outer box=exact
-Q subset E; E subset [-sqrt(2),sqrt(2)]^2; Q is [-1,1]^2
-""")
+    def test_analytic_book_commands_print_the_recorded_values(self):
+        cases = (
+            (
+                "same-geometry-five-representations",
+                "learning_geometry_toy.py",
+                "d=(1.0, 0.0); exact_square=1; outer_disk=1.41421\n"
+                "d=(1.0, 1.0); exact_square=2; outer_disk=2\n"
+                "polytope=exact zonotope=exact parallelotope=exact ellipsoid=outer box=exact\n"
+                "Q subset E; E subset [-sqrt(2),sqrt(2)]^2; Q is [-1,1]^2\n",
+            ),
+            (
+                "closed-loop-semantics",
+                "learning_closed_loop_toy.py",
+                "update=0 observation=0 action=1 prediction_end=1 plant_state=1\n"
+                "update=1 observation=1 action=0 prediction_end=1 plant_state=1\n",
+            ),
+        )
+        for lesson_id, script, expected in cases:
+            with self.subTest(lesson=lesson_id):
+                chapter = next(
+                    item for item in self.manifest["chapters"] if item["id"] == lesson_id
+                )
+                path = f"scripts/reports/{script}"
+                self.assertEqual(chapter["command"], f"python3 {path}")
+                result = subprocess.run(
+                    [sys.executable, path], cwd=ROOT, check=True, capture_output=True, text=True
+                )
+                self.assertEqual(result.stdout, expected)
+                self.assertEqual(chapter["expected_output"] + "\n", expected)
 
     def test_build_emits_navigable_pages_and_manifest(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -761,18 +922,30 @@ Q subset E; E subset [-sqrt(2),sqrt(2)]^2; Q is [-1,1]^2
                 "Reference r: 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0",
             ]
             expected["native-forward-models"] = [
-                "Slide 50", "Separately authored box; historical X0 unavailable",
-                "Spatial flight", "Authored deviation set about a synthetic nonlinear reference",
+                "Slide 50",
+                "Separately authored box; historical X0 unavailable",
+                "Spatial flight",
+                "Authored deviation set about a synthetic nonlinear reference",
             ]
             expected["native-model-tracking-first-pass"] = [
-                "records", "34 · horizon-free", "Authored three-stage zero-target quadratic tracking",
+                "records",
+                "34 · horizon-free",
+                "Authored three-stage zero-target quadratic tracking",
             ]
-            self.assertEqual(set(expected), {chapter["id"] for chapter in self.manifest["chapters"]
-                                             if chapter["status"] == "ready"})
+            self.assertEqual(
+                set(expected),
+                {
+                    chapter["id"]
+                    for chapter in self.manifest["chapters"]
+                    if chapter["status"] == "ready"
+                },
+            )
             for chapter_id, values in expected.items():
                 page = (site / f"learn/{chapter_id}.html").read_text()
-                primary = page.split('<section class="learning-math">', 1)[1].split('</section>', 1)[0]
-                self.assertNotIn('<details', primary)
+                primary = page.split('<section class="learning-math">', 1)[1].split(
+                    "</section>", 1
+                )[0]
+                self.assertNotIn("<details", primary)
                 for value in values:
                     with self.subTest(chapter=chapter_id, value=value):
                         self.assertIn(value, primary)
@@ -811,17 +984,23 @@ Q subset E; E subset [-sqrt(2),sqrt(2)]^2; Q is [-1,1]^2
         entries = []
         for figure_id in ("fuel-state", "fuel-fuel-flow"):
             route = f"examples/closed-loop/figures/{figure_id}"
-            entries.append({"id": figure_id, "availability": "ready",
-                "href": route + ".html", "plotted_data_href": route + ".plotted-data.json",
-                "svg_href": route + ".svg", "png_href": route + ".png",
-                "layer_scopes": ["observed plant replay"],
-                "missing_layers": ["all-admissible-control forward sets"]})
-        entries.extend({"id": figure_id, "availability": "pending", "reason": "Not part of this smoke."}
-                       for figure_id in ("lotka-populations", "earth-orbit"))
+            entries.append(
+                {
+                    "id": figure_id,
+                    "availability": "ready",
+                    "href": route + ".html",
+                    "plotted_data_href": route + ".plotted-data.json",
+                    "svg_href": route + ".svg",
+                    "png_href": route + ".png",
+                    "layer_scopes": ["observed plant replay"],
+                    "missing_layers": ["all-admissible-control forward sets"],
+                }
+            )
         entries.extend(
-            figure for figure in self.figures["figures"]
-            if figure["id"].startswith("campaign-")
+            {"id": figure_id, "availability": "pending", "reason": "Not part of this smoke."}
+            for figure_id in ("lotka-populations", "earth-orbit")
         )
+        entries.extend(self.campaign_figures)
         index = {"schema": "csl.closed-loop.figure-index/1", "figures": entries}
         with tempfile.TemporaryDirectory() as tmp:
             site = Path(tmp)
