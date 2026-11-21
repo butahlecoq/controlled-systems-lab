@@ -230,6 +230,7 @@ class PublicationTests(unittest.TestCase):
             self.assertIn(
                 route + "/index.html#offline-example", (site / "examples/index.html").read_text()
             )
+            self.assertIn("<mtable>", (site / route / "index.html").read_text())
             with zipfile.ZipFile(site / (route + ".zip")) as z:
                 z.extractall(root / "outside")
             offline = root / "outside" / route
