@@ -6,8 +6,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import audit_visual_routes
-import site_design
+import audit_visual_routes  # noqa: E402
+import site_design  # noqa: E402
 
 
 class VisualRouteInventoryTests(unittest.TestCase):
@@ -715,7 +715,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertIn("7df01ba3af5e4c46e867e2d737aca56a8f2461af", page)
         self.assertIn("B06 finite-action minimax", page)
         for series in (row for row in source["series"] if row["kind"] == "projection"):
-            coordinates = list(zip(*series["points"]))
+            coordinates = list(zip(*series["points"], strict=True))
             for index, values in enumerate(coordinates):
                 target = series["target"][index]
                 for value in (min(values), max(values), target):

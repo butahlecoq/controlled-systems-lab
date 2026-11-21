@@ -8,7 +8,7 @@ import hashlib
 import json
 import re
 from pathlib import Path
-from typing import TypedDict
+from typing import NotRequired, TypedDict
 
 import control_witness_companions
 import stage_buryatia_volterra
@@ -61,6 +61,50 @@ class HistoricalSourcePin(TypedDict):
     role_and_disposition_reason: str
     source_snapshot: HistoricalSourceSnapshot
     companion_ids: list[str]
+
+
+class ProducerRoute(TypedDict):
+    source: str
+    signal_count: int
+    asset_name_literals: list[str]
+    disposition: str
+    role: NotRequired[str]
+    role_and_disposition_reason: NotRequired[str]
+    companion_ids: NotRequired[list[str]]
+    source_snapshot: NotRequired[HistoricalSourceSnapshot]
+    follow_up_issue: NotRequired[int]
+
+
+class FrozenRoute(TypedDict):
+    route: str
+    source_bundle: str
+    assets: list[str]
+    index_sha256: str
+    disposition: str
+    follow_up_issue: NotRequired[int]
+    companion_route: NotRequired[str]
+
+
+class GalleryRoute(TypedDict):
+    route: str
+    assets: list[str]
+    disposition: str
+
+
+class FigurePolicy(TypedDict):
+    id: str
+    solution: str
+    no_solver_or_geometry_runs: bool
+
+
+class VisualRouteInventory(TypedDict):
+    schema: str
+    policy: FigurePolicy
+    source_discovery: dict[str, str]
+    producers_and_routes: list[ProducerRoute]
+    frozen_published_routes: list[FrozenRoute]
+    gallery_routes: list[GalleryRoute]
+    migration_owner: str
 
 
 PINNED_HISTORICAL_SOURCE_SNAPSHOTS: dict[str, HistoricalSourcePin] = {
@@ -369,21 +413,21 @@ def migration_issue(source: str) -> int:
     return MIGRATION_ISSUES["historical-and-benchmarks"]
 
 
-def source_inventory(root: Path) -> list[dict]:
-    entries = []
+def source_inventory(root: Path) -> list[ProducerRoute]:
+    entries: list[ProducerRoute] = []
     reviewed = control_witness_companions.source_inventory()
     found = set()
     bases = (root / "scripts/reports", root / "benchmarks/reporting")
     for base in bases:
         for path in sorted(base.rglob("*.py")):
-            relative = path.relative_to(root)
+            relative_path = path.relative_to(root)
             if path.name in {"audit_visual_routes.py", "pages_route_retirement.py"} or any(
-                part.startswith("test") for part in relative.parts
+                part.startswith("test") for part in relative_path.parts
             ):
                 continue
             source = path.read_text(encoding="utf-8")
             matches = VISUAL_SIGNAL.findall(source)
-            relative = relative.as_posix()
+            relative = relative_path.as_posix()
             if not matches and relative not in reviewed:
                 continue
             tree = ast.parse(source, filename=relative)
@@ -397,10 +441,10 @@ def source_inventory(root: Path) -> list[dict]:
             )
             assets = sorted(set(assets) | set(ASSET_NAME_LITERAL_OVERRIDES.get(relative, ())))
             if relative in PINNED_HISTORICAL_SOURCE_SNAPSHOTS:
-                spec = PINNED_HISTORICAL_SOURCE_SNAPSHOTS[relative]
+                snapshot = PINNED_HISTORICAL_SOURCE_SNAPSHOTS[relative]
                 if (
                     hashlib.sha256(path.read_bytes()).hexdigest()
-                    != spec["source_snapshot"]["sha256"]
+                    != snapshot["source_snapshot"]["sha256"]
                 ):
                     raise ValueError(
                         "pinned historical producer snapshot bytes differ: " + relative
@@ -410,7 +454,7 @@ def source_inventory(root: Path) -> list[dict]:
                         "source": relative,
                         "signal_count": len(matches),
                         "asset_name_literals": assets,
-                        **spec,
+                        **snapshot,
                     }
                 )
                 continue
@@ -505,34 +549,21 @@ def source_inventory(root: Path) -> list[dict]:
                 disposition = "publication-validation-or-frozen-route"
             else:
                 disposition = "deferred-family-specific-migration"
-            entries.append(
-                {
-                    "source": relative,
-                    "signal_count": len(matches),
-                    "asset_name_literals": assets,
-                    "disposition": disposition,
-                    **(
-                        {"role_and_disposition_reason": VIZ10_ROLE_REASONS[relative]}
-                        if relative in VIZ10_ROLE_REASONS
-                        else {
-                            "role_and_disposition_reason": SAVED_DATA_ILLUSTRATION_RENDERERS[
-                                relative
-                            ]
-                        }
-                        if relative in SAVED_DATA_ILLUSTRATION_RENDERERS
-                        else {}
-                    ),
-                    **(
-                        {
-                            "follow_up_issue": FOLLOW_UP_ISSUE_OVERRIDES.get(
-                                relative, migration_issue(relative)
-                            )
-                        }
-                        if disposition == "deferred-family-specific-migration"
-                        else {}
-                    ),
-                }
-            )
+            entry: ProducerRoute = {
+                "source": relative,
+                "signal_count": len(matches),
+                "asset_name_literals": assets,
+                "disposition": disposition,
+            }
+            if relative in VIZ10_ROLE_REASONS:
+                entry["role_and_disposition_reason"] = VIZ10_ROLE_REASONS[relative]
+            elif relative in SAVED_DATA_ILLUSTRATION_RENDERERS:
+                entry["role_and_disposition_reason"] = SAVED_DATA_ILLUSTRATION_RENDERERS[relative]
+            if disposition == "deferred-family-specific-migration":
+                entry["follow_up_issue"] = FOLLOW_UP_ISSUE_OVERRIDES.get(
+                    relative, migration_issue(relative)
+                )
+            entries.append(entry)
     missing = set(reviewed) - found
     if missing:
         raise ValueError(
@@ -541,9 +572,9 @@ def source_inventory(root: Path) -> list[dict]:
     return entries
 
 
-def frozen_routes(root: Path) -> list[dict]:
+def frozen_routes(root: Path) -> list[FrozenRoute]:
     base = root / "reports/algorithm-results"
-    routes = []
+    routes: list[FrozenRoute] = []
     for page in sorted(base.rglob("index.html")):
         bundle = page.parent
         figures = sorted(
@@ -554,7 +585,7 @@ def frozen_routes(root: Path) -> list[dict]:
         if not figures:
             continue
         route = bundle.relative_to(base).as_posix()
-        entry = {
+        entry: FrozenRoute = {
             "route": route,
             "source_bundle": route,
             "assets": [path.name for path in figures],
@@ -574,7 +605,7 @@ def frozen_routes(root: Path) -> list[dict]:
     return routes
 
 
-def build(root: Path = ROOT) -> dict:
+def build(root: Path = ROOT) -> VisualRouteInventory:
     root = Path(root).resolve()
     return {
         "schema": "csl.visual-route-inventory/1",
