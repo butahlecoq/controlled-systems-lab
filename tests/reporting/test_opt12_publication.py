@@ -3,28 +3,50 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
-from pathlib import Path
+import shutil
 import sys
 import tempfile
 import unittest
+from pathlib import Path
+from zipfile import ZipFile
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "reports"))
+import opt12_registered_reports as publisher
+import registered_reports
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORTS = ROOT / "reports" / "algorithm-results"
-sys.path.insert(0, str(ROOT / "scripts" / "reports"))
-
-import opt12_registered_reports as publisher
-import registered_reports
 
 site_spec = importlib.util.spec_from_file_location(
     "opt12_publication_site", ROOT / "scripts" / "reports" / "site.py"
 )
+assert site_spec is not None and site_spec.loader is not None
 report_site = importlib.util.module_from_spec(site_spec)
 sys.modules[site_spec.name] = report_site
 site_spec.loader.exec_module(report_site)
 
 
 class Opt12PublicationTests(unittest.TestCase):
+    def test_valid_repacked_source_zip_gets_a_new_publication_identity(self):
+        catalog = json.loads((REPORTS / "catalog.json").read_text(encoding="utf-8"))
+        report = next(row for row in catalog["reports"] if row.get("report_kind") == publisher.KIND)
+        source_id = report["source_report_id"]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            bundle = shutil.copytree(REPORTS / source_id, root / source_id)
+            source_zip = root / f"{source_id}.zip"
+            shutil.copyfile(REPORTS / source_zip.name, source_zip)
+            with ZipFile(source_zip, "a") as archive:
+                archive.comment = b"Same native files with different archive bytes"
+            digest = hashlib.sha256(source_zip.read_bytes()).hexdigest()
+            (root / f"{source_zip.name}.sha256").write_text(
+                f"{digest}  {source_zip.name}\n", encoding="ascii"
+            )
+
+            publication = publisher.adapt(bundle)
+            self.assertNotEqual(publication.report_id, report["report_id"])
+            self.assertEqual(publication.native_payload_sha256, report["native_payload_sha256"])
+
     def test_registered_bundle_stages_with_catalogued_immutable_identity(self):
         catalog = json.loads((REPORTS / "catalog.json").read_text(encoding="utf-8"))
         report = next(row for row in catalog["reports"] if row.get("report_kind") == publisher.KIND)

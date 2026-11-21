@@ -11,13 +11,12 @@ import os
 import platform
 import re
 import subprocess
-import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
 import collector_common as common
-from opt12_fixtures import SCENARIOS, fixture_descriptions, validate_driver_fixture_events
 import report_data as data
+from opt12_fixtures import SCENARIOS, fixture_descriptions, validate_driver_fixture_events
 
 
 def digest(value: bytes) -> str:
@@ -122,8 +121,11 @@ def validate_build_identity(
         for fragment in group.get("compileCommandFragments", [])
     )
     flags = " ".join(flags.split())
-    for key in ("configured_flags", "release_flags"):
-        normalized = " ".join(expected[key].split())
+    for key, cache_key in (
+        ("configured_flags", "CMAKE_CXX_FLAGS"),
+        ("release_flags", "CMAKE_CXX_FLAGS_RELEASE"),
+    ):
+        normalized = " ".join(cache[cache_key].split())
         if normalized and normalized not in flags:
             raise ValueError(f"embedded {key} are absent from the selected Release compile group")
 

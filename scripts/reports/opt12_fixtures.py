@@ -5,7 +5,6 @@ from __future__ import annotations
 import hashlib
 import json
 
-
 SCENARIOS = ("tiny-overhead", "small-reuse", "transfer-cost")
 
 

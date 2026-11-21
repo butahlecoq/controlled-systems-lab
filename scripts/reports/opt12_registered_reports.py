@@ -4,13 +4,12 @@ from __future__ import annotations
 
 import hashlib
 import json
-from pathlib import Path
 import re
 import zipfile
+from pathlib import Path
 
 import opt12_render as source
 import registered_reports as common
-
 
 KIND = "opt12-warm-start"
 FILES = set(source.EVIDENCE_FILES) | {"records.json", "index.html", "comparison.svg"}
@@ -94,6 +93,7 @@ def adapt_payload(record: dict) -> common.PublicationRecord:
     )
 
 
+@common.preserve_publication
 def adapt(bundle):
     bundle = Path(bundle)
     record, _, _ = _validate_bundle(bundle)

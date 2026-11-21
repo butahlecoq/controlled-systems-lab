@@ -12,6 +12,7 @@ import json
 import math
 import statistics
 import zipfile
+from collections.abc import Sequence
 from pathlib import Path
 
 from opt12_fixtures import SCENARIOS, fixture_descriptions, validate_driver_fixture_events
@@ -258,7 +259,7 @@ def parse_evidence(records_path: Path) -> tuple[dict, list[dict], dict[str, byte
     return metadata, trials, files
 
 
-def median_range(values: list[float]) -> str:
+def median_range(values: Sequence[float]) -> str:
     if not values:
         return "unavailable"
     return f"{statistics.median(values):.6g} [{min(values):.6g}, {max(values):.6g}]"
@@ -294,7 +295,6 @@ def summary(rows: list[dict]) -> list[dict]:
 
 
 def comparison_svg(rows: list[dict]) -> str:
-    summaries = summary(rows)
     panels = (
         ("Public solve wall time (ns)", "wall_ns"),
         ("Native component work (s)", "native_work_s"),

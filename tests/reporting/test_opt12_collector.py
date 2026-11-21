@@ -4,6 +4,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "reports"))
 import opt12_collect
@@ -77,7 +78,7 @@ class CMakeCompilerIdentityTests(unittest.TestCase):
         )
         for field in ("architecture", "configured_flags", "release_flags", "compiler_version"):
             inconsistent = dict(record)
-            inconsistent[field] += " mismatch"
+            inconsistent[field] = f"{record[field]} mismatch"
             with (
                 self.subTest(field=field),
                 self.assertRaisesRegex(ValueError, "differs from CMake cache"),
@@ -117,7 +118,7 @@ class CMakeCompilerIdentityTests(unittest.TestCase):
     def test_driver_fixture_events_are_bound_to_canonical_lp_inputs(self):
         from opt12_fixtures import fixture_descriptions
 
-        events = [
+        events: list[dict[str, Any]] = [
             {
                 "schema": "csl.opt12-fixture/1",
                 "scenario": name,

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import hashlib
 import csv
+import hashlib
 import json
 import sys
 import tempfile
