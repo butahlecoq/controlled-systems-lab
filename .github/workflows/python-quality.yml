@@ -100,6 +100,24 @@ on:
       - 'scripts/reports/mathematical_notation.py'
       - 'scripts/reports/stage_finite_feedback.py'
       - 'scripts/reports/stage_geo07.py'
+      - 'scripts/reports/environment_report_publication.py'
+      - 'scripts/reports/stage_env717_dubins_car.py'
+      - 'scripts/reports/stage_env717_vanderpol.py'
+      - 'scripts/reports/stage_env717_pendulum_terminal.py'
+      - 'scripts/reports/stage_env717_earth_orbit.py'
+      - 'tests/reporting/test_env717_dubins_car_publication.py'
+      - 'tests/reporting/test_env717_vanderpol_publication.py'
+      - 'tests/reporting/test_env717_earth_orbit_publication.py'
+      - 'tests/reporting/test_stage_env717_pendulum_terminal.py'
+      - 'scripts/reports/env717/check_dubins_car.py'
+      - 'scripts/reports/env717/check_vanderpol.py'
+      - 'scripts/reports/env717/check_pendulum_terminal.py'
+      - 'scripts/reports/env717/check_earth_orbit.py'
+      - 'reports/algorithm-results/env717-dubins-car-pilot-v1/**'
+      - 'reports/algorithm-results/env717-vanderpol-pilot-v1/**'
+      - 'reports/algorithm-results/env717-pendulum-terminal-pilot-v1/**'
+      - 'reports/algorithm-results/env717-earth-orbit-pilot-v1/**'
+      - 'benchmarks/reporting/env717/earth_orbit.cpp'
       - 'scripts/reports/stage_geo07_port.py'
       - 'scripts/reports/stage_env717_broken_triangle.py'
       - 'scripts/reports/stage_env717_multipoint_cost_game.py'
@@ -291,6 +309,24 @@ on:
       - 'scripts/reports/mathematical_notation.py'
       - 'scripts/reports/stage_finite_feedback.py'
       - 'scripts/reports/stage_geo07.py'
+      - 'scripts/reports/environment_report_publication.py'
+      - 'scripts/reports/stage_env717_dubins_car.py'
+      - 'scripts/reports/stage_env717_vanderpol.py'
+      - 'scripts/reports/stage_env717_pendulum_terminal.py'
+      - 'scripts/reports/stage_env717_earth_orbit.py'
+      - 'tests/reporting/test_env717_dubins_car_publication.py'
+      - 'tests/reporting/test_env717_vanderpol_publication.py'
+      - 'tests/reporting/test_env717_earth_orbit_publication.py'
+      - 'tests/reporting/test_stage_env717_pendulum_terminal.py'
+      - 'scripts/reports/env717/check_dubins_car.py'
+      - 'scripts/reports/env717/check_vanderpol.py'
+      - 'scripts/reports/env717/check_pendulum_terminal.py'
+      - 'scripts/reports/env717/check_earth_orbit.py'
+      - 'reports/algorithm-results/env717-dubins-car-pilot-v1/**'
+      - 'reports/algorithm-results/env717-vanderpol-pilot-v1/**'
+      - 'reports/algorithm-results/env717-pendulum-terminal-pilot-v1/**'
+      - 'reports/algorithm-results/env717-earth-orbit-pilot-v1/**'
+      - 'benchmarks/reporting/env717/earth_orbit.cpp'
       - 'scripts/reports/stage_geo07_port.py'
       - 'scripts/reports/stage_env717_broken_triangle.py'
       - 'scripts/reports/stage_env717_multipoint_cost_game.py'
@@ -476,6 +512,12 @@ jobs:
 
       - name: Check closed-loop catalogues, campaign resume and common runner failure paths
         run: python -m unittest tests.reporting.test_native_compositions tests.reporting.test_closed_loop_campaign tests.reporting.test_closed_loop_native_capabilities tests.reporting.test_closed_loop_runner_failures tests.reporting.test_closed_loop_tracing tests.reporting.test_native_vertex_lp_priority_policy
+      - name: Check four frozen environment report routes and offline ZIPs
+        run: >-
+          python -m unittest tests.reporting.test_env717_dubins_car_publication
+          tests.reporting.test_env717_vanderpol_publication
+          tests.reporting.test_env717_earth_orbit_publication
+          tests.reporting.test_stage_env717_pendulum_terminal
       - name: Check architecture boundaries and decoded perf sample parsing
         run: |
           python tests/architecture/check_numeric_dependencies.py
