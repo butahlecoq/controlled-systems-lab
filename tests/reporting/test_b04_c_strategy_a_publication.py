@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import hashlib
-from pathlib import Path
 import shutil
 import tempfile
 import unittest
 import zipfile
+from pathlib import Path
+from unittest.mock import patch
 
 from scripts.reports import stage_b04_c_strategy_a as publisher
 
@@ -39,6 +40,41 @@ class B04CStrategyAPublicationTests(unittest.TestCase):
                 self.assertEqual(
                     archive.read(f"{route}/record.json"), (report / "record.json").read_bytes()
                 )
+
+    def test_historical_zip_is_independent_of_platform_metadata_defaults(self):
+        original_init = zipfile.ZipInfo.__init__
+
+        def use_windows_default(info, *args, **kwargs):
+            original_init(info, *args, **kwargs)
+            info.create_system = 0
+
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary)
+            (site / "index.html").write_text("<html><body>Reports</body></html>", encoding="utf-8")
+            with patch.object(zipfile.ZipInfo, "__init__", use_windows_default):
+                route = publisher.stage(publisher.SOURCE, site)
+            with zipfile.ZipFile(site / f"{route}.zip") as archive:
+                self.assertEqual({item.create_system for item in archive.infolist()}, {3})
+
+    def test_rejects_changed_historical_zip_before_publishing(self):
+        original_writestr = zipfile.ZipFile.writestr
+
+        def write_with_changed_metadata(archive, *args, **kwargs):
+            original_writestr(archive, *args, **kwargs)
+            archive.comment = b"Different archive metadata"
+
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary)
+            landing = site / "index.html"
+            original_html = "<html><body>Reports</body></html>"
+            landing.write_text(original_html, encoding="utf-8")
+            with (
+                patch.object(zipfile.ZipFile, "writestr", write_with_changed_metadata),
+                self.assertRaisesRegex(ValueError, "historical.*ZIP checksum"),
+            ):
+                publisher.stage(publisher.SOURCE, site)
+            self.assertEqual(list(site.iterdir()), [landing])
+            self.assertEqual(landing.read_text(encoding="utf-8"), original_html)
 
     def test_rejects_tampered_functional_test_receipt(self):
         with tempfile.TemporaryDirectory(prefix="b04-c-strategy-a-tamper-") as temporary:

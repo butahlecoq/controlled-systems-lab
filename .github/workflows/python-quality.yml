@@ -50,6 +50,13 @@ on:
       - 'scripts/reports/registered_report_policies.py'
       - 'docs/research/evidence/b04-c-publication-registration-source-v1/**'
       - 'reports/algorithm-results/b04-c-exact-dyadic-v1/**'
+      - 'reports/algorithm-results/b04-c-strategy-a-verification-v1/**'
+      - 'docs/research/tools/check_b04_c_exact_fiber.py'
+      - 'docs/research/evidence/mpc01-*/**'
+      - 'scripts/reports/mpc01/**'
+      - 'scripts/reports/stage_b04_c_strategy_a.py'
+      - 'tests/reporting/test_b04_c_strategy_a_publication.py'
+      - 'tests/reporting/test_mpc01_per_attempt_publication.py'
       - 'scripts/reports/schema3_publication_policies.py'
       - 'scripts/reports/registered_reports.py'
       - 'scripts/reports/collector_common.py'
@@ -288,6 +295,13 @@ on:
       - 'scripts/reports/registered_report_policies.py'
       - 'docs/research/evidence/b04-c-publication-registration-source-v1/**'
       - 'reports/algorithm-results/b04-c-exact-dyadic-v1/**'
+      - 'reports/algorithm-results/b04-c-strategy-a-verification-v1/**'
+      - 'docs/research/tools/check_b04_c_exact_fiber.py'
+      - 'docs/research/evidence/mpc01-*/**'
+      - 'scripts/reports/mpc01/**'
+      - 'scripts/reports/stage_b04_c_strategy_a.py'
+      - 'tests/reporting/test_b04_c_strategy_a_publication.py'
+      - 'tests/reporting/test_mpc01_per_attempt_publication.py'
       - 'scripts/reports/schema3_publication_policies.py'
       - 'scripts/reports/registered_reports.py'
       - 'scripts/reports/collector_common.py'
@@ -526,6 +540,17 @@ jobs:
           python -m unittest discover -s tests/reporting -p 'test_syn03_ts02_report.py'
       - name: Check frozen Pages route preservation
         run: python -m unittest tests.reporting.test_preserve_published_routes tests.reporting.test_published_route_audit_policy
+      - name: Check saved MPC-01 and B04-C Strategy A Pages reports
+        run: |
+          python -m unittest tests.reporting.test_mpc01_per_attempt_publication tests.reporting.test_b04_c_strategy_a_publication
+          site="$RUNNER_TEMP/saved-mpc01-b04-c-site"
+          mkdir -p "$site/examples"
+          printf '<html><body>Reports</body></html>\n' > "$site/index.html"
+          printf '<html><body>Examples</body></html>\n' > "$site/examples/index.html"
+          python scripts/reports/mpc01/stage_per_attempt.py --site "$site"
+          python scripts/reports/mpc01/stage_per_attempt.py --site "$site" --check
+          python scripts/reports/stage_b04_c_strategy_a.py --site "$site"
+          (cd "$site" && printf '%s\n' 'f6ca4bf0169e7f1809d8b1159d2803e40f7d8e9b46cdad97365e08b1f0d6bc2a  b04-c-strategy-a-bb5eb77fce5c2cd70b5c.zip' | sha256sum --check)
       - name: Exercise shared publication owners and malformed-input boundaries
         env:
           MPLBACKEND: Agg

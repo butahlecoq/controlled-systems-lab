@@ -6,10 +6,9 @@ import argparse
 import hashlib
 import html
 import json
-from pathlib import Path
 import re
 import shutil
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 from urllib.parse import urldefrag, urlparse
 
 ROOT = Path(__file__).resolve().parents[3]

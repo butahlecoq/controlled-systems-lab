@@ -4,21 +4,23 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import io
 import json
-from pathlib import Path
 import re
 import subprocess
 import sys
-import tempfile
 import zipfile
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from docs.research.tools.check_b04_c_exact_fiber import check
+from docs.research.tools.check_b04_c_exact_fiber import check  # noqa: E402
 
 SOURCE = ROOT / "reports/algorithm-results/b04-c-strategy-a-verification-v1"
+HISTORICAL_ROUTE = "b04-c-strategy-a-bb5eb77fce5c2cd70b5c"
+HISTORICAL_ZIP_SHA256 = "f6ca4bf0169e7f1809d8b1159d2803e40f7d8e9b46cdad97365e08b1f0d6bc2a"
 EXACT_RECORD = ROOT / "reports/algorithm-results/b04-c-exact-dyadic-v1/record.json"
 EXACT_CHECK = ROOT / "reports/algorithm-results/b04-c-exact-dyadic-v1/verification.json"
 SCENARIO_ID = "B04-c-exact-dyadic-20261102"
@@ -118,7 +120,8 @@ def validate_ci_record(ci: dict) -> None:
         "CI scope must remain functional only",
     )
     test = ci.get("test")
-    require(isinstance(test, dict), "Strategy A functional-test details are missing")
+    if not isinstance(test, dict):
+        raise ValueError("Strategy A functional-test details are missing")
     require(
         test.get("target") == "strategy_a_tests" and test.get("name") == TEST_NAME,
         "Strategy A test identity differs",
@@ -172,7 +175,8 @@ def validate_bundle(source: Path = SOURCE) -> dict[str, bytes]:
     checksums = {}
     for line in files["SHA256SUMS"].decode("ascii").splitlines():
         match = re.fullmatch(r"([0-9a-f]{64})  ([A-Za-z0-9_.-]+)", line)
-        require(match is not None, "invalid B04-C Strategy A checksum line")
+        if match is None:
+            raise ValueError("invalid B04-C Strategy A checksum line")
         require(match.group(2) not in checksums, "duplicate B04-C Strategy A checksum")
         checksums[match.group(2)] = match.group(1)
     expected_checksums = {
@@ -369,9 +373,25 @@ def stage(source: Path, site: Path) -> str:
         "published_files": {name: digest(value) for name, value in sorted(generated.items())},
     }
     generated["publication-manifest.json"] = json_bytes(publication_manifest)
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as archive:
+        for name, value in sorted(generated.items()):
+            item = zipfile.ZipInfo(f"{route}/{name}", date_time=(2026, 1, 1, 0, 0, 0))
+            item.compress_type = zipfile.ZIP_DEFLATED
+            item.create_system = 3  # ZIP's Unix creator ID, matching the published archive.
+            item.external_attr = 0o100644 << 16
+            archive.writestr(item, value)
+    zip_bytes = zip_buffer.getvalue()
+    if route == HISTORICAL_ROUTE:
+        require(
+            digest(zip_bytes) == HISTORICAL_ZIP_SHA256,
+            "B04-C historical report ZIP checksum differs from publication",
+        )
+
     destination.mkdir()
     for name, value in generated.items():
         (destination / name).write_bytes(value)
+    archive_path.write_bytes(zip_bytes)
     section = (
         f"<section><h2>B04-C registered Strategy A verification</h2>"
         f"<p>The corrected-track exact record is paired with the registered Strategy A functional test. "
@@ -380,12 +400,6 @@ def stage(source: Path, site: Path) -> str:
         f'<a href="{route}.zip">Download the offline report bundle</a>.</p></section>'
     )
     index.write_text(page.replace("</body>", section + "</body>"), encoding="utf-8")
-    with zipfile.ZipFile(archive_path, "w", zipfile.ZIP_DEFLATED) as archive:
-        for name, value in sorted(generated.items()):
-            item = zipfile.ZipInfo(f"{route}/{name}", date_time=(2026, 1, 1, 0, 0, 0))
-            item.compress_type = zipfile.ZIP_DEFLATED
-            item.external_attr = 0o100644 << 16
-            archive.writestr(item, value)
     return route
 
 

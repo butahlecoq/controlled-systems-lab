@@ -2,22 +2,23 @@
 
 from __future__ import annotations
 
-import importlib.util
 import hashlib
+import importlib.util
 import json
-from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
-import shutil
+from pathlib import Path
 from urllib.parse import urldefrag, urlparse
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts/reports/mpc01/stage_per_attempt.py"
 SPEC = importlib.util.spec_from_file_location("mpc01_stage_per_attempt", SCRIPT)
-stage_module = importlib.util.module_from_spec(SPEC)
+assert SPEC is not None
 assert SPEC.loader is not None
+stage_module = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(stage_module)
 
 
