@@ -5,6 +5,11 @@ on:
     paths:
       - '.github/actions/pages-deploy/**'
       - 'benchmarks/reporting/closed_loop/capabilities.py'
+      - 'benchmarks/reporting/closed_loop/native_strategy_history.py'
+      - 'benchmarks/reporting/closed_loop/history_policy.py'
+      - 'benchmarks/reporting/closed_loop/attempt_records.py'
+      - 'tests/reporting/test_native_strategy_history.py'
+      - 'tests/reporting/test_closed_loop_attempt_records.py'
       - 'benchmarks/reporting/closed_loop/native_compositions.py'
       - 'benchmarks/reporting/closed_loop/run_closed_loop.py'
       - 'benchmarks/reporting/closed_loop/run_campaign.py'
@@ -46,6 +51,13 @@ on:
       - 'scripts/reports/learning_model_tracks.py'
       - 'docs/catalogue/learning-book-v1.json'
       - 'tests/reporting/test_learning_book.py'
+      - 'docs/examples/closed-loop/figure-index.json'
+      - 'docs/examples/learning/chapters/orbit-capstone.html'
+      - 'reports/published-route-preservation/manifest.json'
+      - 'docs/examples/closed-loop/figures/lotka-populations.plotted-data.json'
+      - 'docs/examples/closed-loop/figures/earth-orbit.plotted-data.json'
+      - 'docs/examples/closed-loop/figures/fuel-state.plotted-data.json'
+      - 'docs/examples/closed-loop/figures/fuel-fuel-flow.plotted-data.json'
       - 'reports/algorithm-results/native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip'
       - 'reports/algorithm-results/native-model-catalogue-v1/three-state.stdout'
       - 'reports/algorithm-results/native-model-catalogue-v1/four-state.stdout'
@@ -96,6 +108,9 @@ on:
       - 'scripts/reports/audit_visual_routes.py'
       - 'scripts/reports/audit_mathematical_presentation.py'
       - 'tests/reporting/test_mathematical_presentation.py'
+      - 'scripts/reports/check_deploy_head.py'
+      - 'tests/reporting/test_deploy_head.py'
+      - '.github/workflows/pages-augmentation-aggregation.yml'
       - 'scripts/reports/mathematical-presentation-routes.json'
       - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
@@ -106,6 +121,7 @@ on:
       - 'tests/reporting/test_catalogue_forward_publication.py'
       - 'reports/algorithm-results/catalogue-forward-reachability-v1/**'
       - 'reports/algorithm-results/catalogue-feasible-history-v1/**'
+      - 'reports/algorithm-results/catalogue-ring-initial-support-v1/**'
       - 'reports/algorithm-results/catalogue-exact-support-v1/**'
       - 'reports/algorithm-results/catalogue-backward-reachability-v1/**'
       - 'reports/algorithm-results/catalogue-finite-action-v1/**'
@@ -117,6 +133,9 @@ on:
       - 'tests/reporting/test_native_vertex_lp_priority_policy.py'
       - 'reports/algorithm-results/mpc-crossover-6b7308c4/**'
       - 'reports/algorithm-results/native-source-constrained-mpc-v1/**'
+      - 'scripts/reports/stage_native_history_strategies.py'
+      - 'tests/reporting/test_native_history_strategy_publication.py'
+      - 'reports/algorithm-results/native-history-strategies-d57739b3/**'
       - 'tests/reporting/test_discrete_mpc_2d.py'
       - 'scripts/reports/stage_positive_part_budget_2d.py'
       - 'scripts/reports/stage_four_state_projection_approximations.py'
@@ -137,6 +156,11 @@ on:
     paths:
       - '.github/actions/pages-deploy/**'
       - 'benchmarks/reporting/closed_loop/capabilities.py'
+      - 'benchmarks/reporting/closed_loop/native_strategy_history.py'
+      - 'benchmarks/reporting/closed_loop/history_policy.py'
+      - 'benchmarks/reporting/closed_loop/attempt_records.py'
+      - 'tests/reporting/test_native_strategy_history.py'
+      - 'tests/reporting/test_closed_loop_attempt_records.py'
       - 'benchmarks/reporting/closed_loop/native_compositions.py'
       - 'benchmarks/reporting/closed_loop/run_closed_loop.py'
       - 'benchmarks/reporting/closed_loop/run_campaign.py'
@@ -178,6 +202,13 @@ on:
       - 'scripts/reports/learning_model_tracks.py'
       - 'docs/catalogue/learning-book-v1.json'
       - 'tests/reporting/test_learning_book.py'
+      - 'docs/examples/closed-loop/figure-index.json'
+      - 'docs/examples/learning/chapters/orbit-capstone.html'
+      - 'reports/published-route-preservation/manifest.json'
+      - 'docs/examples/closed-loop/figures/lotka-populations.plotted-data.json'
+      - 'docs/examples/closed-loop/figures/earth-orbit.plotted-data.json'
+      - 'docs/examples/closed-loop/figures/fuel-state.plotted-data.json'
+      - 'docs/examples/closed-loop/figures/fuel-fuel-flow.plotted-data.json'
       - 'reports/algorithm-results/native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip'
       - 'reports/algorithm-results/native-model-catalogue-v1/three-state.stdout'
       - 'reports/algorithm-results/native-model-catalogue-v1/four-state.stdout'
@@ -228,6 +259,9 @@ on:
       - 'scripts/reports/audit_visual_routes.py'
       - 'scripts/reports/audit_mathematical_presentation.py'
       - 'tests/reporting/test_mathematical_presentation.py'
+      - 'scripts/reports/check_deploy_head.py'
+      - 'tests/reporting/test_deploy_head.py'
+      - '.github/workflows/pages-augmentation-aggregation.yml'
       - 'scripts/reports/mathematical-presentation-routes.json'
       - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
@@ -238,6 +272,7 @@ on:
       - 'tests/reporting/test_catalogue_forward_publication.py'
       - 'reports/algorithm-results/catalogue-forward-reachability-v1/**'
       - 'reports/algorithm-results/catalogue-feasible-history-v1/**'
+      - 'reports/algorithm-results/catalogue-ring-initial-support-v1/**'
       - 'reports/algorithm-results/catalogue-exact-support-v1/**'
       - 'reports/algorithm-results/catalogue-backward-reachability-v1/**'
       - 'reports/algorithm-results/catalogue-finite-action-v1/**'
@@ -249,6 +284,9 @@ on:
       - 'tests/reporting/test_native_vertex_lp_priority_policy.py'
       - 'reports/algorithm-results/mpc-crossover-6b7308c4/**'
       - 'reports/algorithm-results/native-source-constrained-mpc-v1/**'
+      - 'scripts/reports/stage_native_history_strategies.py'
+      - 'tests/reporting/test_native_history_strategy_publication.py'
+      - 'reports/algorithm-results/native-history-strategies-d57739b3/**'
       - 'tests/reporting/test_discrete_mpc_2d.py'
       - 'scripts/reports/stage_positive_part_budget_2d.py'
       - 'scripts/reports/stage_four_state_projection_approximations.py'
@@ -308,6 +346,8 @@ jobs:
           python -m unittest tests.reporting.test_report_data tests.reporting.test_render tests.reporting.test_publication_policy tests.reporting.test_report_source_identity tests.reporting.test_registered_kinds tests.reporting.test_landing tests.reporting.test_learning_book tests.reporting.test_plot tests.reporting.test_b04_publication_source_snapshot tests.reporting.test_publication_spine_boundaries
       - name: Check mathematical presentation and frozen HTML
         run: python -m unittest tests.reporting.test_mathematical_presentation
+      - name: Exercise Pages deployment freshness and source identity
+        run: python -m unittest tests.reporting.test_deploy_head
       - name: Exercise saved publication and collector consumer families
         env:
           MPLBACKEND: Agg
@@ -317,6 +357,11 @@ jobs:
 
       - name: Check the locked source-only native row-scaling publication
         run: python -m unittest discover -s tests/reporting -p 'test_stage_native_row_scaling_diagnostic.py'
+      - name: Check native strategy starts, actuation and retry checkpoints
+        env:
+          OPENBLAS_NUM_THREADS: '1'
+          OMP_NUM_THREADS: '1'
+        run: python -m unittest tests.reporting.test_native_strategy_history tests.reporting.test_closed_loop_attempt_records
       - name: Check the saved native whole-history optimizer route
         run: python -m unittest discover -s tests/reporting -p 'test_history_optimizer_native.py'
       - name: Check the saved typed-membership 2D example
@@ -327,7 +372,7 @@ jobs:
         run: |
           python -m unittest discover -s tests/reporting -p 'test_discrete_mpc_2d.py'
           python -m unittest tests.reporting.test_catalogue_forward_publication
-          python -m unittest tests.reporting.test_mpc_crossover_publication tests.reporting.test_native_source_constrained_mpc_publication
+          python -m unittest tests.reporting.test_mpc_crossover_publication tests.reporting.test_native_source_constrained_mpc_publication tests.reporting.test_native_history_strategy_publication
           python -m unittest discover -s tests/reporting -p 'test_visual_examples.py'
       - name: Exercise OPT07 and OPT11 collectors, oracles and saved reports
         run: |
