@@ -1,17 +1,32 @@
 from __future__ import annotations
-import importlib.util, json, unittest, sys, zipfile, re, tempfile, csv, shutil
-from unittest import mock
+
+import csv
+import importlib.util
+import json
+import re
+import shutil
+import sys
+import tempfile
+import unittest
+import zipfile
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORT_PATH = ROOT / "reports/algorithm-results/tooling/syn03_ts02/report.py"
 sys.path.insert(0, str(ROOT/"scripts/reports"))
 
+def load_report():
+    spec = importlib.util.spec_from_file_location("syn03_ts02_report", REPORT_PATH)
+    assert spec is not None and spec.loader is not None
+    report = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(report)
+    return report
+
+
 class StrategyATs02ReportTests(unittest.TestCase):
     def test_exact_profile_and_all_required_trial_checks(self):
-        spec = importlib.util.spec_from_file_location("syn03_ts02_report", REPORT_PATH)
-        report = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(report)
+        report = load_report()
         record = json.loads(
             (ROOT / "reports/algorithm-results" / report.REPORT_ID / "records.json").read_text(
                 encoding="utf-8"
@@ -31,9 +46,7 @@ class StrategyATs02ReportTests(unittest.TestCase):
             self.assertTrue(event["distinct_histories_same_terminal_checked"])
 
     def test_saved_events_do_not_claim_unperformed_trajectory_residual_check(self):
-        spec = importlib.util.spec_from_file_location("syn03_ts02_report", REPORT_PATH)
-        report = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(report)
+        report = load_report()
         bundle = ROOT / "reports/algorithm-results" / report.REPORT_ID
         record = json.loads((bundle / "records.json").read_text(encoding="utf-8"))
         forbidden = {
@@ -67,9 +80,7 @@ class StrategyATs02ReportTests(unittest.TestCase):
         self.assertTrue(all(not forbidden.intersection(event) for event in profile))
 
     def test_standalone_html_identifies_analytical_path_and_scope(self):
-        spec = importlib.util.spec_from_file_location("syn03_ts02_report", REPORT_PATH)
-        report = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(report)
+        report = load_report()
         record = json.loads(
             (ROOT / "reports/algorithm-results" / report.REPORT_ID / "records.json").read_text(
                 encoding="utf-8"
@@ -82,9 +93,7 @@ class StrategyATs02ReportTests(unittest.TestCase):
         self.assertIn("speedup claim", page.lower())
 
     def test_event_identity_and_schema_three_offline_publication(self):
-        spec = importlib.util.spec_from_file_location("syn03_ts02_report", REPORT_PATH)
-        report = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(report)
+        report = load_report()
         bundle = ROOT / "reports/algorithm-results" / report.REPORT_ID
         record = json.loads((bundle / "records.json").read_text(encoding="utf-8"))
         mutated = json.loads(json.dumps(record))
