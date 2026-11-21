@@ -129,8 +129,9 @@ def stage(site: Path, source: Path = SOURCE) -> dict:
     # Validate the entire input and destination before changing any output.
     for route, data in assets.items():
         path = destination(site, route)
-        if path.exists() and path.read_bytes() != data:
-            if digest(path.read_bytes()) != replacements.get(route):
+        if path.exists():
+            current = path.read_bytes()
+            if current != data and digest(current) != replacements.get(route):
                 raise ValueError("conflicting preserved route: " + route)
     for route, data in assets.items():
         path = destination(site, route)

@@ -126,6 +126,97 @@ class PublishedRoutePreservationTests(unittest.TestCase):
                             else:
                                 self.assertEqual((site / name).read_bytes(), bundle.read(name))
 
+    def test_stage_uses_checked_archive_and_manifest_after_source_rename(self):
+        member = "original/index.html"
+        page = b"<p>Saved evidence</p>"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            site, source = root / "site", root / "source"
+            site.mkdir()
+            source.mkdir()
+            archive = source / "original.zip"
+            with zipfile.ZipFile(archive, "w") as bundle:
+                bundle.writestr(member, page)
+            original = archive.read_bytes()
+            manifest_path = source / "manifest.json"
+            manifest_path.write_text(
+                json.dumps(
+                    {
+                        "schema": "csl.published-route-preservation/1",
+                        "aliases": [],
+                        "archives": [
+                            {
+                                "path": archive.name,
+                                "size": len(original),
+                                "sha256": preservation.digest(original),
+                                "members": {
+                                    member: {
+                                        "size": len(page),
+                                        "sha256": preservation.digest(page),
+                                        "publish": True,
+                                    }
+                                },
+                            }
+                        ],
+                    }
+                )
+            )
+            read_regular = preservation.regular
+
+            def read_and_move(path: Path) -> bytes:
+                data = read_regular(path)
+                path.rename(path.with_name(path.name + ".read"))
+                return data
+
+            with patch.object(preservation, "regular", side_effect=read_and_move):
+                receipt = preservation.stage(site, source)
+            self.assertEqual(receipt, {"preserved_routes": 2, "preserved_top_level_zips": 1})
+            self.assertEqual((site / member).read_bytes(), page)
+            self.assertEqual((site / archive.name).read_bytes(), original)
+
+    def test_baseline_uses_the_checked_bytes_after_the_source_changes(self):
+        for operation in ("rename", "rewrite"):
+            with self.subTest(operation=operation):
+                with tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory)
+                    site, source = root / "site", root / "source"
+                    site.mkdir()
+                    source.mkdir()
+                    route = "saved.html"
+                    page = b"<p>Saved evidence</p>"
+                    (site / route).write_bytes(page)
+                    baseline = root / "baseline.tar"
+                    with tarfile.open(baseline, "w") as bundle:
+                        member = tarfile.TarInfo(route)
+                        member.size = len(page)
+                        bundle.addfile(member, io.BytesIO(page))
+                    manifest = json.loads((preservation.SOURCE / "manifest.json").read_text())
+                    manifest["baseline"]["artifact_tar_sha256"] = preservation.digest(
+                        baseline.read_bytes()
+                    )
+                    (source / "manifest.json").write_text(json.dumps(manifest))
+                    read_tar = tarfile.open
+
+                    def change_source_then_read(
+                        *args, baseline=baseline, operation=operation, read_tar=read_tar, **kwargs
+                    ):
+                        if operation == "rename":
+                            baseline.rename(baseline.with_name("checked.tar"))
+                        else:
+                            baseline.write_bytes(b"rewritten")
+                        return read_tar(*args, **kwargs)
+
+                    with (
+                        patch.object(baseline_audit, "SOURCE", source),
+                        patch.object(
+                            baseline_audit.tarfile, "open", side_effect=change_source_then_read
+                        ) as parse,
+                    ):
+                        result = baseline_audit.audit(baseline, site)
+                    parse.assert_called_once()
+                    self.assertTrue(result["passed"], result)
+                    self.assertEqual(result["baseline_files"], 1)
+
     def test_stage_reads_manifest_and_each_archive_once(self):
         source = preservation.SOURCE
         manifest = source / "manifest.json"
