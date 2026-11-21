@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import hashlib
 import importlib.util
+import io
 import json
 import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import nullcontext, redirect_stderr, redirect_stdout
 from pathlib import Path
+from unittest.mock import Mock, patch
 
 ROOT = Path(__file__).resolve().parents[2]
 TOOLS = ROOT / "reports" / "algorithm-results" / "tooling" / "ts01"
@@ -24,6 +27,8 @@ def load_tool(name):
 
 
 report = load_tool("report")
+with patch.dict(sys.modules, {"report": report}):
+    collector = load_tool("collect")
 publication_map = load_tool("publication_map")
 build_bundle = load_tool("build_bundle")
 ts01_registered_reports = importlib.import_module("ts01_registered_reports")
@@ -128,6 +133,161 @@ class Ts01SavedReportTests(unittest.TestCase):
             )
             for path in self.bundle.iterdir():
                 self.assertEqual((output / path.name).read_bytes(), path.read_bytes(), path.name)
+
+    def test_interrupted_measurement_retains_flushed_output(self):
+        with tempfile.TemporaryDirectory() as directory:
+            build_root = Path(directory)
+
+            def interrupted_process(command, **outputs):
+                if "stdout" in outputs:
+                    outputs["stdout"].write(b"partial stdout")
+                    outputs["stderr"].write(b"partial stderr")
+                raise KeyboardInterrupt
+
+            with (
+                patch.object(collector, "subprocess", Mock(run=interrupted_process)),
+                redirect_stderr(io.StringIO()),
+                self.assertRaises(KeyboardInterrupt),
+                collector.measurement_attempt(
+                    build_root, build_root / "driver.exe", "b" * 64, "a" * 40
+                ),
+            ):
+                self.fail("interrupted process has no result")
+
+            (attempt,) = build_root.glob("measurement-attempt.*")
+            self.assertEqual((attempt / "stdout.bin").read_bytes(), b"partial stdout")
+            self.assertEqual((attempt / "stderr.bin").read_bytes(), b"partial stderr")
+            receipt = json.loads((attempt / "attempt.json").read_bytes())
+            self.assertEqual(receipt["status"], "cancelled")
+            self.assertIsNone(receipt["returncode"])
+            self.assertEqual(
+                receipt["stdout_sha256"], hashlib.sha256(b"partial stdout").hexdigest()
+            )
+            self.assertEqual(
+                receipt["stderr_sha256"], hashlib.sha256(b"partial stderr").hexdigest()
+            )
+
+    def test_collector_records_native_attempts_and_exports_only_accepted_results(self):
+        attempts = (
+            (7, b"partial native output\r\n", "measurement executable failed with status 7"),
+            (0, b"invalid JSONL\n", "measurement executable emitted invalid JSONL"),
+            (0, (self.bundle / "measurement-events.jsonl").read_bytes(), None),
+        )
+        for returncode, stdout, reason in attempts:
+            with (
+                self.subTest(returncode=returncode, reason=reason),
+                tempfile.TemporaryDirectory() as directory,
+            ):
+                scratch = Path(directory)
+                cmake = scratch / "cmake"
+                cmake.touch()
+                build_root = scratch / "build"
+                output = build_root / "measurement-attempt"
+                stderr = b"native diagnostic\r\n"
+
+                def build_step(command, build_root=build_root):
+                    if "--build" in command:
+                        build = build_root / "release-build"
+                        build.mkdir()
+                        (build / "CMakeCache.txt").write_text(
+                            "CMAKE_GENERATOR:INTERNAL=Visual Studio 17 2022\n"
+                            "CMAKE_GENERATOR_PLATFORM:INTERNAL=x64\n",
+                            encoding="utf-8",
+                        )
+                        (build / "csl_syn07_ts01_report.vcxproj").write_text(
+                            '<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">'
+                            '<ItemDefinitionGroup Condition="Release|x64"><ClCompile>'
+                            "<LanguageStandard>stdcpp20</LanguageStandard>"
+                            "<Optimization>MaxSpeed</Optimization>"
+                            "<PreprocessorDefinitions>NDEBUG</PreprocessorDefinitions>"
+                            "</ClCompile></ItemDefinitionGroup></Project>",
+                            encoding="utf-8",
+                        )
+                        executable = build / "Release" / "csl_syn07_ts01_report.exe"
+                        executable.parent.mkdir()
+                        executable.write_bytes(b"simulated executable")
+                        config = build / "CMakeFiles" / "stub" / "CMakeCXXCompiler.cmake"
+                        config.parent.mkdir(parents=True)
+                        config.write_text(
+                            'set(CMAKE_CXX_COMPILER "stub")\n'
+                            'set(CMAKE_CXX_COMPILER_VERSION "1.0")\n',
+                            encoding="utf-8",
+                        )
+                    if "--version" in command:
+                        return subprocess.CompletedProcess(command, 0, b"cmake simulator\n", b"")
+                    return subprocess.CompletedProcess(command, 0, b"", b"")
+
+                def git_response(root, *args, build_root=build_root):
+                    if args == ("status", "--porcelain"):
+                        return ""
+                    return (
+                        report.SOURCE_COMMIT if root == build_root / "solver-source" else "a" * 40
+                    )
+
+                argv = [
+                    "collect.py",
+                    "--cmake",
+                    str(cmake),
+                    "--build-root",
+                    str(build_root),
+                    "--out",
+                    str(output),
+                ]
+
+                def run_driver(
+                    command,
+                    *,
+                    stdout,
+                    stderr,
+                    check,
+                    raw_stdout=stdout,
+                    raw_stderr=stderr,
+                    status=returncode,
+                ):
+                    stdout.write(raw_stdout)
+                    stderr.write(raw_stderr)
+                    return subprocess.CompletedProcess(command, status)
+
+                expected = (
+                    nullcontext() if reason is None else self.assertRaisesRegex(SystemExit, reason)
+                )
+                with (
+                    patch.object(sys, "argv", argv),
+                    patch.object(collector, "git", side_effect=git_response),
+                    patch.object(collector, "run", side_effect=build_step),
+                    patch.object(collector, "psutil", None),
+                    patch.object(collector, "subprocess", Mock(run=run_driver)),
+                    redirect_stdout(io.StringIO()),
+                    redirect_stderr(io.StringIO()),
+                    expected,
+                ):
+                    collector.main()
+
+                (attempt,) = build_root.glob("measurement-attempt.*")
+                self.assertEqual((attempt / "stdout.bin").read_bytes(), stdout)
+                self.assertEqual((attempt / "stderr.bin").read_bytes(), stderr)
+                receipt = json.loads((attempt / "attempt.json").read_bytes())
+                self.assertEqual(receipt["returncode"], returncode)
+                self.assertEqual(receipt["source_commit"], report.SOURCE_COMMIT)
+                self.assertEqual(receipt["harness_commit"], "a" * 40)
+                self.assertEqual(receipt["stdout_sha256"], hashlib.sha256(stdout).hexdigest())
+                self.assertEqual(receipt["stderr_sha256"], hashlib.sha256(stderr).hexdigest())
+                if reason is None:
+                    self.assertEqual(receipt["status"], "accepted")
+                    self.assertNotIn("reason", receipt)
+                    self.assertCountEqual(
+                        [path.name for path in output.iterdir()],
+                        ["events.jsonl", "stderr.txt", "collection.json", "command.txt"],
+                    )
+                    self.assertEqual((output / "events.jsonl").read_bytes(), stdout)
+                    self.assertEqual((output / "stderr.txt").read_bytes(), stderr)
+                    collection = json.loads((output / "collection.json").read_bytes())
+                    self.assertEqual(collection["counts"]["failed"], 0)
+                    self.assertEqual(collection["raw_stdout_sha256"], receipt["stdout_sha256"])
+                else:
+                    self.assertEqual(receipt["status"], "failed")
+                    self.assertEqual(receipt["reason"], reason)
+                    self.assertFalse(output.exists())
 
     def test_registered_adapter_checks_bundle_and_creates_offline_archive(self):
         publication = ts01_registered_reports.adapt(self.bundle)

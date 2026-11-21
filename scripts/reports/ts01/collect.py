@@ -11,7 +11,9 @@ import platform
 import statistics
 import subprocess
 import sys
+import tempfile
 import xml.etree.ElementTree as ET
+from contextlib import contextmanager
 from pathlib import Path
 
 import report
@@ -40,6 +42,68 @@ def git(root, *args):
     ).stdout.strip()
 
 
+@contextmanager
+def measurement_attempt(build_root, executable, binary_sha256, harness_commit):
+    """Save the process streams and mark acceptance only after the collection is complete."""
+    attempt = Path(tempfile.mkdtemp(prefix="measurement-attempt.", dir=build_root))
+    receipt = {
+        "schema": "csl.syn07-ts01-measurement-attempt/1",
+        "source_commit": report.SOURCE_COMMIT,
+        "harness_commit": harness_commit,
+        "binary_sha256": binary_sha256,
+        "command": [str(executable)],
+        "status": "started",
+        "returncode": None,
+        "stdout_sha256": None,
+        "stderr_sha256": None,
+    }
+    receipt_path = attempt / "attempt.json"
+
+    def write_receipt():
+        pending = receipt_path.with_suffix(".tmp")
+        pending.write_text(
+            json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n"
+        )
+        pending.replace(receipt_path)
+
+    stdout_path = attempt / "stdout.bin"
+    stderr_path = attempt / "stderr.bin"
+    write_receipt()
+    try:
+        try:
+            with stdout_path.open("xb") as stdout, stderr_path.open("xb") as stderr:
+                result = subprocess.run(
+                    receipt["command"], stdout=stdout, stderr=stderr, check=False
+                )
+                receipt.update(status="returned", returncode=result.returncode)
+                cpu_after = psutil.cpu_percent(interval=1.0) if psutil is not None else None
+        finally:
+            stdout_bytes = stdout_path.read_bytes() if stdout_path.exists() else None
+            stderr_bytes = stderr_path.read_bytes() if stderr_path.exists() else None
+            receipt.update(
+                stdout_sha256=sha(stdout_bytes) if stdout_bytes is not None else None,
+                stderr_sha256=sha(stderr_bytes) if stderr_bytes is not None else None,
+            )
+            write_receipt()
+        if stdout_bytes is None or stderr_bytes is None:
+            raise OSError("measurement attempt streams are missing")
+        result.stdout = stdout_bytes
+        result.stderr = stderr_bytes
+        yield result, cpu_after
+    except KeyboardInterrupt:
+        receipt.update(status="cancelled", reason="measurement interrupted")
+        print(f"Raw measurement evidence: {attempt}", file=sys.stderr)
+        raise
+    except (Exception, SystemExit) as error:
+        receipt.update(status="failed", reason=str(error))
+        print(f"Raw measurement evidence: {attempt}", file=sys.stderr)
+        raise
+    else:
+        receipt["status"] = "accepted"
+    finally:
+        write_receipt()
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -57,7 +121,7 @@ def main():
         "--build-root",
         type=Path,
         required=True,
-        help="new directory for the clean source worktree and Release build",
+        help="new directory for the clean source worktree, Release build, and raw attempt evidence",
     )
     parser.add_argument(
         "--out",
@@ -174,194 +238,206 @@ def main():
     executable = build_dir / "Release" / "csl_syn07_ts01_report.exe"
     binary = executable.read_bytes()
     cpu_before = psutil.cpu_percent(interval=1.0) if psutil is not None else None
-    result = subprocess.run([str(executable)], capture_output=True, check=False)
-    cpu_after = psutil.cpu_percent(interval=1.0) if psutil is not None else None
-    if result.returncode:
-        raise SystemExit(f"measurement executable failed with status {result.returncode}")
-    if git(source_checkout, "rev-parse", "HEAD") != report.SOURCE_COMMIT or git(
-        source_checkout, "status", "--porcelain"
+    with measurement_attempt(build_root, executable, sha(binary), harness_commit) as (
+        result,
+        cpu_after,
     ):
-        raise SystemExit("pinned solver worktree changed during measurement")
-    if git(root, "status", "--porcelain") or git(root, "rev-parse", "HEAD") != harness_commit:
-        raise SystemExit("harness checkout changed during measurement")
+        if result.returncode:
+            raise SystemExit(f"measurement executable failed with status {result.returncode}")
+        if git(source_checkout, "rev-parse", "HEAD") != report.SOURCE_COMMIT or git(
+            source_checkout, "status", "--porcelain"
+        ):
+            raise SystemExit("pinned solver worktree changed during measurement")
+        if git(root, "status", "--porcelain") or git(root, "rev-parse", "HEAD") != harness_commit:
+            raise SystemExit("harness checkout changed during measurement")
 
-    try:
-        lines = result.stdout.decode("utf-8", errors="strict").splitlines()
-        events = [
-            json.loads(line, parse_constant=lambda value: (_ for _ in ()).throw(ValueError(value)))
-            for line in lines
-        ]
-    except (UnicodeError, json.JSONDecodeError, ValueError) as error:
-        raise SystemExit("measurement executable emitted invalid JSONL") from error
-    if len(events) != 8 or any(
-        event.get("schema") != "csl.syn07-ts01-measurement-event/2" for event in events
-    ):
-        raise SystemExit("measurement output does not match the expected eight-event schema")
-    expected_order = [(0, True), *[(i, False) for i in range(1, 8)]]
-    if [(event.get("repetition"), event.get("warmup")) for event in events] != expected_order:
-        raise SystemExit("T-S01 warmup/repetition sequence differs")
-    if any(
-        event.get("status") != "passed"
-        or type(event.get("elapsed_ns")) is not int
-        or event["elapsed_ns"] < 0
-        or not event.get("consumed_result_marker")
-        or event.get("termination") != "completed"
-        or event.get("outcome") != "optimal"
-        or event.get("objective_lower") != 0
-        or event.get("objective_upper") != 0
-        or event.get("residuals_available") is not False
-        for event in events
-    ):
-        raise SystemExit("one or more T-S01 attempts failed validation or returned invalid timing")
-    measured = [event for event in events if not event["warmup"]]
-    values = [event["elapsed_ns"] for event in measured]
-    compiler_configs = list((build_dir / "CMakeFiles").glob("*/CMakeCXXCompiler.cmake"))
-    if len(compiler_configs) != 1:
-        raise SystemExit("unable to identify generated C++ compiler configuration")
-    compiler_config = compiler_configs[0]
-    compiler_text = compiler_config.read_text(encoding="utf-8", errors="replace")
+        try:
+            lines = result.stdout.decode("utf-8", errors="strict").splitlines()
+            events = [
+                json.loads(
+                    line, parse_constant=lambda value: (_ for _ in ()).throw(ValueError(value))
+                )
+                for line in lines
+            ]
+        except (UnicodeError, json.JSONDecodeError, ValueError) as error:
+            raise SystemExit("measurement executable emitted invalid JSONL") from error
+        if len(events) != 8 or any(
+            event.get("schema") != "csl.syn07-ts01-measurement-event/2" for event in events
+        ):
+            raise SystemExit("measurement output does not match the expected eight-event schema")
+        expected_order = [(0, True), *[(i, False) for i in range(1, 8)]]
+        if [(event.get("repetition"), event.get("warmup")) for event in events] != expected_order:
+            raise SystemExit("T-S01 warmup/repetition sequence differs")
+        if any(
+            event.get("status") != "passed"
+            or type(event.get("elapsed_ns")) is not int
+            or event["elapsed_ns"] < 0
+            or not event.get("consumed_result_marker")
+            or event.get("termination") != "completed"
+            or event.get("outcome") != "optimal"
+            or event.get("objective_lower") != 0
+            or event.get("objective_upper") != 0
+            or event.get("residuals_available") is not False
+            for event in events
+        ):
+            raise SystemExit(
+                "one or more T-S01 attempts failed validation or returned invalid timing"
+            )
+        measured = [event for event in events if not event["warmup"]]
+        values = [event["elapsed_ns"] for event in measured]
+        compiler_configs = list((build_dir / "CMakeFiles").glob("*/CMakeCXXCompiler.cmake"))
+        if len(compiler_configs) != 1:
+            raise SystemExit("unable to identify generated C++ compiler configuration")
+        compiler_config = compiler_configs[0]
+        compiler_text = compiler_config.read_text(encoding="utf-8", errors="replace")
 
-    def cmake_set(name):
-        prefix = f'set({name} "'
-        line = next((line for line in compiler_text.splitlines() if line.startswith(prefix)), None)
-        return line[len(prefix) : -2] if line else "unavailable"
+        def cmake_set(name):
+            prefix = f'set({name} "'
+            line = next(
+                (line for line in compiler_text.splitlines() if line.startswith(prefix)), None
+            )
+            return line[len(prefix) : -2] if line else "unavailable"
 
-    cxx_compiler = cmake_set("CMAKE_CXX_COMPILER")
-    cxx_version = cmake_set("CMAKE_CXX_COMPILER_VERSION")
-    if cxx_compiler == "unavailable" or cxx_version == "unavailable":
-        raise SystemExit("generated CMake compiler identity is incomplete")
-    measurement = {
-        "schema": "csl.syn07-ts01-measurement-collection/1",
-        "algorithm_source_commit": report.SOURCE_COMMIT,
-        "algorithm_source_checkout": {
-            "head": git(source_checkout, "rev-parse", "HEAD"),
-            "tree_sha": git(source_checkout, "rev-parse", f"{report.SOURCE_COMMIT}^{{tree}}"),
-            "clean_before_build": True,
-            "clean_after_run": True,
-            "strategy_source_sha256": sha(
-                run(
-                    [
-                        "git",
-                        "-C",
-                        source_checkout,
-                        "show",
-                        f"{report.SOURCE_COMMIT}:src/synthesis/strategy_ts01/analytic_profile.cpp",
-                    ]
-                ).stdout
-            ),
-            "strategy_header_sha256": sha(
-                run(
-                    [
-                        "git",
-                        "-C",
-                        source_checkout,
-                        "show",
-                        f"{report.SOURCE_COMMIT}:include/csl/synthesis/strategy_ts01/analytic_profile.hpp",
-                    ]
-                ).stdout
-            ),
-        },
-        "harness_commit": harness_commit,
-        "harness_sources": {
-            "driver_sha256": sha(driver.read_bytes()),
-            "runner_cmake_sha256": sha(runner_cmake.read_bytes()),
-        },
-        "scope": "Fresh problem construction and resolution, strategy registration/selection/preparation, exclusive workspace creation, public bound-workspace run, and independent complete-H-relation plus exact-membership validation. Excludes process startup, JSON serialization, build, collection, and rendering.",
-        "order": "One excluded warmup, followed by seven measured repetitions in one process. Single strategy only; alternation is inapplicable and no comparator was measured.",
-        "counts": {
-            "warmup": 1,
-            "measured": len(measured),
-            "passed": len(measured),
-            "failed": 0,
-            "unique_consumed_result_markers": len(
-                {event["consumed_result_marker"] for event in events}
-            ),
-            "all_outputs_consumed_and_validated": True,
-        },
-        "timing_ns": {
-            "observations": values,
-            "median": statistics.median(values),
-            "min": min(values),
-            "max": max(values),
-            "range": max(values) - min(values),
-        },
-        "strategy_observation": {
-            "termination": measured[-1]["termination"],
-            "outcome": measured[-1]["outcome"],
-            "objective_lower": measured[-1]["objective_lower"],
-            "objective_upper": measured[-1]["objective_upper"],
-            "residuals": {
-                "available": False,
-                "reason": "StrategyPort result exposes no residual fields",
+        cxx_compiler = cmake_set("CMAKE_CXX_COMPILER")
+        cxx_version = cmake_set("CMAKE_CXX_COMPILER_VERSION")
+        if cxx_compiler == "unavailable" or cxx_version == "unavailable":
+            raise SystemExit("generated CMake compiler identity is incomplete")
+        measurement = {
+            "schema": "csl.syn07-ts01-measurement-collection/1",
+            "algorithm_source_commit": report.SOURCE_COMMIT,
+            "algorithm_source_checkout": {
+                "head": git(source_checkout, "rev-parse", "HEAD"),
+                "tree_sha": git(source_checkout, "rev-parse", f"{report.SOURCE_COMMIT}^{{tree}}"),
+                "clean_before_build": True,
+                "clean_after_run": True,
+                "strategy_source_sha256": sha(
+                    run(
+                        [
+                            "git",
+                            "-C",
+                            source_checkout,
+                            "show",
+                            f"{report.SOURCE_COMMIT}:src/synthesis/strategy_ts01/analytic_profile.cpp",
+                        ]
+                    ).stdout
+                ),
+                "strategy_header_sha256": sha(
+                    run(
+                        [
+                            "git",
+                            "-C",
+                            source_checkout,
+                            "show",
+                            f"{report.SOURCE_COMMIT}:include/csl/synthesis/strategy_ts01/analytic_profile.hpp",
+                        ]
+                    ).stdout
+                ),
             },
-        },
-        "performance_conclusion": "inconclusive",
-        "limiter": {
-            "available": False,
-            "reason": "No separate sampling/call-stack profile was collected; this record does not attribute the observed time or establish capacity.",
-        },
-        "binary": {
-            "path": str(executable.relative_to(build_root)),
-            "sha256": sha(binary),
-            "bytes": len(binary),
-            "configuration": "Release",
-            "ndebug": True,
-            "cxx_standard": "c++20",
-            "release_properties": props,
-        },
-        "build_provenance": {
-            "cmake_path": str(cmake),
-            "cmake_sha256": sha(cmake.read_bytes()),
-            "cmake_version": (
-                run([cmake, "--version"]).stdout.decode("utf-8", errors="replace").splitlines()[0]
-            ),
-            "cmake_cache_sha256": sha(cache.read_bytes()),
-            "compiler_config_sha256": sha(compiler_config.read_bytes()),
-            "target_project_sha256": sha(target_project.read_bytes()),
-            "configure_log_sha256": sha((build_root / "configure.log").read_bytes()),
-            "build_log_sha256": sha(build_log),
-            "generator": "Visual Studio 17 2022 x64",
-            "compiler": "MSVC",
-            "compiler_path": cxx_compiler,
-            "compiler_version": cxx_version,
-            "configuration": "Release",
-            "dependency_cache": str(args.dependency_cache.resolve())
-            if args.dependency_cache
-            else "CMake source-defined fetches",
-            "configure_command": [str(part) for part in configure_command],
-            "build_command": [str(part) for part in build_command],
-        },
-        "environment": {
-            "os": platform.platform(),
-            "processor": platform.processor() or "unavailable",
-            "logical_cpu_count": os.cpu_count(),
-            "python": sys.version.split()[0],
-            "clock": "std::chrono::steady_clock; elapsed duration in nanoseconds",
-            "total_cpu_percent_1s_before": cpu_before,
-            "total_cpu_percent_1s_after": cpu_after,
-            "load_policy": "Unrelated processes were left running; the two CPU samples are outside the measured process. This is a single-side observation, so no interleaving or noise cancellation is claimed.",
-        },
-        "raw_stdout_sha256": sha(result.stdout),
-        "raw_stderr_sha256": sha(result.stderr),
-    }
-    out.mkdir(parents=True, exist_ok=False)
-    (out / "events.jsonl").write_bytes(result.stdout)
-    (out / "stderr.txt").write_bytes(result.stderr)
-    (out / "collection.json").write_text(
-        json.dumps(measurement, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
-    (out / "command.txt").write_text(
-        json.dumps(
-            {"configure": configure_command, "build": build_command, "run": [executable]},
-            indent=2,
-            default=str,
+            "harness_commit": harness_commit,
+            "harness_sources": {
+                "driver_sha256": sha(driver.read_bytes()),
+                "runner_cmake_sha256": sha(runner_cmake.read_bytes()),
+            },
+            "scope": "Fresh problem construction and resolution, strategy registration/selection/preparation, exclusive workspace creation, public bound-workspace run, and independent complete-H-relation plus exact-membership validation. Excludes process startup, JSON serialization, build, collection, and rendering.",
+            "order": "One excluded warmup, followed by seven measured repetitions in one process. Single strategy only; alternation is inapplicable and no comparator was measured.",
+            "counts": {
+                "warmup": 1,
+                "measured": len(measured),
+                "passed": len(measured),
+                "failed": 0,
+                "unique_consumed_result_markers": len(
+                    {event["consumed_result_marker"] for event in events}
+                ),
+                "all_outputs_consumed_and_validated": True,
+            },
+            "timing_ns": {
+                "observations": values,
+                "median": statistics.median(values),
+                "min": min(values),
+                "max": max(values),
+                "range": max(values) - min(values),
+            },
+            "strategy_observation": {
+                "termination": measured[-1]["termination"],
+                "outcome": measured[-1]["outcome"],
+                "objective_lower": measured[-1]["objective_lower"],
+                "objective_upper": measured[-1]["objective_upper"],
+                "residuals": {
+                    "available": False,
+                    "reason": "StrategyPort result exposes no residual fields",
+                },
+            },
+            "performance_conclusion": "inconclusive",
+            "limiter": {
+                "available": False,
+                "reason": "No separate sampling/call-stack profile was collected; this record does not attribute the observed time or establish capacity.",
+            },
+            "binary": {
+                "path": str(executable.relative_to(build_root)),
+                "sha256": sha(binary),
+                "bytes": len(binary),
+                "configuration": "Release",
+                "ndebug": True,
+                "cxx_standard": "c++20",
+                "release_properties": props,
+            },
+            "build_provenance": {
+                "cmake_path": str(cmake),
+                "cmake_sha256": sha(cmake.read_bytes()),
+                "cmake_version": (
+                    run([cmake, "--version"])
+                    .stdout.decode("utf-8", errors="replace")
+                    .splitlines()[0]
+                ),
+                "cmake_cache_sha256": sha(cache.read_bytes()),
+                "compiler_config_sha256": sha(compiler_config.read_bytes()),
+                "target_project_sha256": sha(target_project.read_bytes()),
+                "configure_log_sha256": sha((build_root / "configure.log").read_bytes()),
+                "build_log_sha256": sha(build_log),
+                "generator": "Visual Studio 17 2022 x64",
+                "compiler": "MSVC",
+                "compiler_path": cxx_compiler,
+                "compiler_version": cxx_version,
+                "configuration": "Release",
+                "dependency_cache": str(args.dependency_cache.resolve())
+                if args.dependency_cache
+                else "CMake source-defined fetches",
+                "configure_command": [str(part) for part in configure_command],
+                "build_command": [str(part) for part in build_command],
+            },
+            "environment": {
+                "os": platform.platform(),
+                "processor": platform.processor() or "unavailable",
+                "logical_cpu_count": os.cpu_count(),
+                "python": sys.version.split()[0],
+                "clock": "std::chrono::steady_clock; elapsed duration in nanoseconds",
+                "total_cpu_percent_1s_before": cpu_before,
+                "total_cpu_percent_1s_after": cpu_after,
+                "load_policy": "Unrelated processes were left running; the two CPU samples are outside the measured process. This is a single-side observation, so no interleaving or noise cancellation is claimed.",
+            },
+            "raw_stdout_sha256": sha(result.stdout),
+            "raw_stderr_sha256": sha(result.stderr),
+        }
+        out.mkdir(parents=True, exist_ok=False)
+        (out / "events.jsonl").write_bytes(result.stdout)
+        (out / "stderr.txt").write_bytes(result.stderr)
+        (out / "command.txt").write_text(
+            json.dumps(
+                {"configure": configure_command, "build": build_command, "run": [executable]},
+                indent=2,
+                default=str,
+            )
+            + "\n",
+            encoding="utf-8",
+            newline="\n",
         )
-        + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
+        pending = out / "collection.json.tmp"
+        pending.write_text(
+            json.dumps(measurement, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        pending.replace(out / "collection.json")
     print(json.dumps(measurement, ensure_ascii=False, sort_keys=True))
 
 
