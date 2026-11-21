@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-import importlib.util
 import hashlib
+import importlib.util
 import json
-from pathlib import Path
 import shutil
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
@@ -15,8 +15,8 @@ sys.path.insert(0, str(ROOT / "scripts/reports"))
 
 def load_module(name: str, path: Path):
     spec = importlib.util.spec_from_file_location(name, path)
+    assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None
     spec.loader.exec_module(module)
     return module
 
@@ -34,9 +34,10 @@ class Ext07ResourceObservationTests(unittest.TestCase):
         candidates = sorted(
             (ROOT / "reports/algorithm-results").glob("ext07-resource-observation-*")
         )
-        cls.bundle = next((path for path in candidates if path.is_dir()), None)
-        if cls.bundle is None:
+        bundle = next((path for path in candidates if path.is_dir()), None)
+        if bundle is None:
             raise unittest.SkipTest("EXT-07 resource report is built from saved captures")
+        cls.bundle = bundle
 
     def test_saved_resource_bundle_regenerates_exactly(self) -> None:
         result = resource.render(self.bundle, check=True)

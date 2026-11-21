@@ -3,37 +3,53 @@
 from __future__ import annotations
 
 import argparse
-from html import escape
+import hashlib
 import importlib.util
 import json
+from html import escape
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-spec = importlib.util.spec_from_file_location(
-    "ext07_saved_renderer", ROOT / "scripts/reports/ext07/render_saved.py"
-)
-report = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
-spec.loader.exec_module(report)
-site_spec = importlib.util.spec_from_file_location(
-    "ext07_site_validator", Path(__file__).with_name("site.py")
-)
-site = importlib.util.module_from_spec(site_spec)
-assert site_spec.loader is not None
-site_spec.loader.exec_module(site)
-two_spec = importlib.util.spec_from_file_location(
+HISTORICAL_STAGER_SHA256 = "5a8803e9f51ae96b61342d7470c7ba4ce74a4232a49a9ec1a875037ed90ae434"
+# These exact saved manifests were admitted by the original stager.
+HISTORICAL_MANIFEST_SHA256 = {
+    "4699fb473b04daa04f35141489ba39914bc91cf0870f88cf1b774977dcd429df",
+    "eff251f06895cb801429b52ccfeda085f7016134bbd92719aee94ad8e3a5dcbf",
+    "0f07aee507bd028410fe1b37c51bf7c2dc32baf8b7bd0b7cd80c2b2b61076dea",
+    "341de72cf4c6c4d0c6d541cff7e67108386049537972527138ab95f675e47d6f",
+    "0c76939bf36b4548d53c68c1a90b5226d6602ca3e4842e5589134f312193496c",
+    "f8e0b6e7cef02a6056b19bc4ccefc90bdf80a3ae15159d77f1c67dc44928e830",
+    "276f73009adeba343e659a80928f4f61731331c413bd27b3e1be00df769d4d96",
+    "37e39e02799831c597118453ae00c6569a35fed569fc7cbd3f808094dc9af023",
+    "a57b3c52cc012702a536f184bd81a0ea363fb198286caeda35b9d4645c3b7e26",
+    "b7dd21b9ecd0405a3ddbb209121ae4f3fdc412e7ff595bef24a252f47087cbce",
+}
+
+
+def _load_module(name: str, path: Path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"EXT-07 publication module could not be loaded: {path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+report = _load_module("ext07_saved_renderer", ROOT / "scripts/reports/ext07/render_saved.py")
+site = _load_module("ext07_site_validator", Path(__file__).with_name("site.py"))
+two_parameter_report = _load_module(
     "ext07_two_parameter_saved_renderer",
     ROOT / "scripts/reports/ext07/two_parameter_render_saved.py",
 )
-two_parameter_report = importlib.util.module_from_spec(two_spec)
-assert two_spec.loader is not None
-two_spec.loader.exec_module(two_parameter_report)
-resource_spec = importlib.util.spec_from_file_location(
+resource_report = _load_module(
     "ext07_resource_observation", ROOT / "scripts/reports/ext07/resource_observation.py"
 )
-resource_report = importlib.util.module_from_spec(resource_spec)
-assert resource_spec.loader is not None
-resource_spec.loader.exec_module(resource_report)
+
+
+def _stager_sha256(manifest_sha256: str) -> str:
+    if manifest_sha256 in HISTORICAL_MANIFEST_SHA256:
+        return HISTORICAL_STAGER_SHA256
+    return hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 
 
 def catalog_entry(bundle: Path) -> dict:
@@ -52,7 +68,7 @@ def catalog_entry(bundle: Path) -> dict:
             "collector_sha256": resource_report.sha(
                 (ROOT / "scripts/reports/ext07/resource_observation.py").read_bytes()
             ),
-            "stager_sha256": resource_report.sha(Path(__file__).read_bytes()),
+            "stager_sha256": _stager_sha256(details["manifest_sha256"]),
         }
     if bundle.name.startswith("ext07-hybrid-two-parameter-"):
         details = two_parameter_report.render(bundle, check=True)
@@ -83,7 +99,7 @@ def catalog_entry(bundle: Path) -> dict:
             "renderer_sha256": two_parameter_report.collect.sha(
                 (ROOT / "scripts/reports/ext07/two_parameter_render_saved.py").read_bytes()
             ),
-            "stager_sha256": two_parameter_report.collect.sha(Path(__file__).read_bytes()),
+            "stager_sha256": _stager_sha256(details["manifest_sha256"]),
         }
     details = report.render(bundle, check=True)
     record = report.validate(bundle)
@@ -105,7 +121,7 @@ def catalog_entry(bundle: Path) -> dict:
         "renderer_sha256": report.collect.sha(
             (ROOT / "scripts/reports/ext07/render_saved.py").read_bytes()
         ),
-        "stager_sha256": report.collect.sha(Path(__file__).read_bytes()),
+        "stager_sha256": _stager_sha256(details["manifest_sha256"]),
     }
 
 
@@ -203,7 +219,6 @@ def stage(catalog: Path, site_dir: Path) -> str:
         staged_bundles.append(
             (
                 report_id,
-                bundle,
                 {
                     path.relative_to(bundle).as_posix(): path.read_bytes()
                     for path in bundle.rglob("*")
@@ -223,7 +238,7 @@ def stage(catalog: Path, site_dir: Path) -> str:
                 "</li>", " · " + " · ".join(related_links) + "</li>"
             )
     # Do not leave earlier routes behind when a later catalog entry is invalid.
-    for report_id, bundle, files in staged_bundles:
+    for report_id, files in staged_bundles:
         destination = site_dir / report_id
         report.collect.require(not destination.exists(), "EXT-07 Pages route must be fresh")
         destination.mkdir()

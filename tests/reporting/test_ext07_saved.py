@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import importlib.util
 import json
-from pathlib import Path
 import shutil
 import sys
 import tempfile
 import unittest
+from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
@@ -14,8 +15,8 @@ sys.path.insert(0, str(ROOT / "scripts/reports"))
 
 def load_module(name: str, path: Path):
     spec = importlib.util.spec_from_file_location(name, path)
+    assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None
     spec.loader.exec_module(module)
     return module
 
@@ -31,7 +32,7 @@ class Ext07SavedReportTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         bundles = sorted((ROOT / "reports/algorithm-results").glob("ext07-hybrid-*"))
-        cls.bundle = next((path for path in bundles if path.is_dir()), None)
+        bundle = next((path for path in bundles if path.is_dir()), None)
         cls.two_parameter_bundle = next(
             (
                 path
@@ -40,8 +41,22 @@ class Ext07SavedReportTests(unittest.TestCase):
             ),
             None,
         )
-        if cls.bundle is None:
+        if bundle is None:
             raise unittest.SkipTest("EXT-07 report bundle is created from a frozen measured source")
+        cls.bundle = bundle
+
+    def test_frozen_catalogue_keeps_the_stager_hash_after_stager_changes(self) -> None:
+        catalogue = ROOT / "reports/algorithm-results/ext07-publications.json"
+        entries = json.loads(catalogue.read_text(encoding="utf-8"))["reports"]
+        with tempfile.TemporaryDirectory() as temporary:
+            revised = Path(temporary) / "stage_ext07.py"
+            revised.write_text("# Revised stager source\n", encoding="utf-8")
+            with patch.object(stage_ext07, "__file__", str(revised)):
+                regenerated = [
+                    stage_ext07.catalog_entry(catalogue.parent / entry["report_id"])
+                    for entry in entries
+                ]
+        self.assertEqual(regenerated, entries)
 
     def test_saved_report_rebuilds_and_catalogue_binds_every_file(self) -> None:
         self.assertEqual(
