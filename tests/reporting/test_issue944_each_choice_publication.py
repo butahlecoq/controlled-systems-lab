@@ -3,15 +3,15 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
-from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import stage_issue944_each_choice as publication
+import stage_issue944_each_choice as publication  # noqa: E402 - direct test entry point
 
 
 class Issue944ChoicePipelinePublicationTests(unittest.TestCase):
@@ -23,27 +23,39 @@ class Issue944ChoicePipelinePublicationTests(unittest.TestCase):
         self.assertEqual(len(checks), 11)
         for line in checks:
             expected, name = line.split("  ", 1)
-            self.assertEqual(hashlib.sha256((self.bundle / name).read_bytes()).hexdigest(), expected)
+            self.assertEqual(
+                hashlib.sha256((self.bundle / name).read_bytes()).hexdigest(), expected
+            )
         run = json.loads((self.bundle / "records.json").read_text(encoding="utf-8"))
-        regression = json.loads((self.bundle / "terminal-membership-regression.json").read_text(encoding="utf-8"))
+        regression = json.loads(
+            (self.bundle / "terminal-membership-regression.json").read_text(encoding="utf-8")
+        )
         self.assertEqual(run["schema"], "csl.strategy-a-each-choice-pipeline/2")
         self.assertEqual(len(run["attempts"]), 128)
-        self.assertEqual(regression["schema"], "csl.strategy-a-terminal-membership-indexing-regression/1")
+        self.assertEqual(
+            regression["schema"], "csl.strategy-a-terminal-membership-indexing-regression/1"
+        )
         outcomes = {}
         for attempt in run["attempts"]:
             if attempt.get("first_unmet", "").startswith("phase_one.objective:"):
                 outcome = "structural-contract-exclusion"
-            elif attempt.get("first_unmet", "").startswith(("highs.matrix:", "highs.convex.matrix:")):
+            elif attempt.get("first_unmet", "").startswith(
+                ("highs.matrix:", "highs.convex.matrix:")
+            ):
                 outcome = "numeric-refusal"
             else:
                 outcome = "completed"
             outcomes[outcome] = outcomes.get(outcome, 0) + 1
-        self.assertEqual(outcomes, {"structural-contract-exclusion": 64, "completed": 62, "numeric-refusal": 2})
+        self.assertEqual(
+            outcomes, {"structural-contract-exclusion": 64, "completed": 62, "numeric-refusal": 2}
+        )
         with (self.bundle / "role-matrix.csv").open(encoding="utf-8", newline="") as stream:
             rows = list(csv.DictReader(stream))
         self.assertEqual(len(rows), 128)
         self.assertEqual(rows[0]["vertex_reducer"], run["attempts"][0]["vertex_reducer"])
-        self.assertEqual(sum(row["outcome_class"] == "structural-contract-exclusion" for row in rows), 64)
+        self.assertEqual(
+            sum(row["outcome_class"] == "structural-contract-exclusion" for row in rows), 64
+        )
         self.assertEqual(sum(row["outcome_class"] == "numeric-refusal" for row in rows), 2)
         html = (self.bundle / "index.html").read_text(encoding="utf-8")
         self.assertIn('name="viewport"', html)
@@ -55,7 +67,10 @@ class Issue944ChoicePipelinePublicationTests(unittest.TestCase):
         self.assertIn("@media(max-width:600px)", html)
         self.assertIn(".issue944-print{display:block!important}", html)
         self.assertIn(".issue944-stat{", html)
-        self.assertIn('<div class="issue944-narrow"><figure><img src="terminal-membership-regression-mobile.svg"', html)
+        self.assertIn(
+            '<div class="issue944-narrow"><figure><img src="terminal-membership-regression-mobile.svg"',
+            html,
+        )
         self.assertIn(".issue944-narrow{display:block}", html)
         self.assertIn("background:var(--surface)", html)
         self.assertNotIn("--bg:", html)
@@ -63,20 +78,31 @@ class Issue944ChoicePipelinePublicationTests(unittest.TestCase):
         self.assertIn("one-step nominal open-loop", html)
         self.assertIn("complete-family", html)
         self.assertIn("https://github.com/butahlecoq/controlled-systems-lab/pull/976", html)
-        self.assertIn("H = [[1,-1.1102230246251565e-16], [0,1], [1.1102230246251565e-16,-1], [-1,0]]", html)
+        self.assertIn(
+            "H = [[1,-1.1102230246251565e-16], [0,1], [1.1102230246251565e-16,-1], [-1,0]]", html
+        )
         self.assertIn("b = [0.99999999999999989,1,0,0]", html)
-        self.assertIn("csl.polyhedron.v", (self.bundle / "records.json").read_text(encoding="utf-8"))
+        self.assertIn(
+            "csl.polyhedron.v", (self.bundle / "records.json").read_text(encoding="utf-8")
+        )
         provenance = json.loads((self.bundle / "provenance.json").read_text(encoding="utf-8"))
-        self.assertEqual(provenance["solver_source_commit"], "5a4730c517a875400ec7b69e4c8e2c265e49016c")
+        self.assertEqual(
+            provenance["solver_source_commit"], "5a4730c517a875400ec7b69e4c8e2c265e49016c"
+        )
         historical_sources = {
             "runner_source_sha256": "tools/strategy_a_each_choice_pipeline.cpp",
             "checker_source_sha256": "scripts/catalogue/check_944_each_choice_pipeline.py",
         }
         for key, relative in historical_sources.items():
-            historical = subprocess.check_output([
-                "git", "-C", str(ROOT), "show",
-                f'{provenance["solver_source_commit"]}:{relative}',
-            ])
+            historical = subprocess.check_output(
+                [
+                    "git",
+                    "-C",
+                    str(ROOT),
+                    "show",
+                    f"{provenance['solver_source_commit']}:{relative}",
+                ]
+            )
             self.assertEqual(provenance[key], hashlib.sha256(historical).hexdigest())
         publication_source = "7c05c56f39b7270e329d029ecbddb9049d478b8d"
         publication_sources = {
@@ -85,16 +111,28 @@ class Issue944ChoicePipelinePublicationTests(unittest.TestCase):
             "shared_stylesheet_sha256": "docs/examples/examples.css",
         }
         for key, relative in publication_sources.items():
-            historical = subprocess.check_output([
-                "git", "-C", str(ROOT), "show", f"{publication_source}:{relative}",
-            ])
+            historical = subprocess.check_output(
+                [
+                    "git",
+                    "-C",
+                    str(ROOT),
+                    "show",
+                    f"{publication_source}:{relative}",
+                ]
+            )
             self.assertEqual(provenance[key], hashlib.sha256(historical).hexdigest())
         pipeline = (self.bundle / "pipeline-2d.svg").read_text(encoding="utf-8")
         mobile_pipeline = (self.bundle / "pipeline-2d-mobile.svg").read_text(encoding="utf-8")
         pipeline_print = (self.bundle / "pipeline-2d-print.svg").read_text(encoding="utf-8")
-        regression_svg = (self.bundle / "terminal-membership-regression.svg").read_text(encoding="utf-8")
-        regression_mobile = (self.bundle / "terminal-membership-regression-mobile.svg").read_text(encoding="utf-8")
-        regression_print = (self.bundle / "terminal-membership-regression-print.svg").read_text(encoding="utf-8")
+        regression_svg = (self.bundle / "terminal-membership-regression.svg").read_text(
+            encoding="utf-8"
+        )
+        regression_mobile = (self.bundle / "terminal-membership-regression-mobile.svg").read_text(
+            encoding="utf-8"
+        )
+        regression_print = (self.bundle / "terminal-membership-regression-print.svg").read_text(
+            encoding="utf-8"
+        )
         self.assertIn("#a6e22e", pipeline)
         self.assertIn("#a6e22e", mobile_pipeline)
         self.assertIn("#a6e22e", regression_svg)
@@ -114,19 +152,30 @@ class Issue944ChoicePipelinePublicationTests(unittest.TestCase):
 
     def test_independent_checker_accepts_immutable_source_5a_capture(self):
         checker = ROOT / "scripts/catalogue/check_944_each_choice_pipeline.py"
-        subprocess.run([
-            sys.executable, str(checker),
-            "--record-json", str(self.bundle / "records.json"),
-            "--regression-json", str(self.bundle / "terminal-membership-regression.json"),
-            "--expected-numeric-boundaries", "2",
-        ], check=True, capture_output=True, text=True)
+        subprocess.run(
+            [
+                sys.executable,
+                str(checker),
+                "--record-json",
+                str(self.bundle / "records.json"),
+                "--regression-json",
+                str(self.bundle / "terminal-membership-regression.json"),
+                "--expected-numeric-boundaries",
+                "2",
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
 
     def test_stage_checks_hashes_local_links_and_fresh_route(self):
         with tempfile.TemporaryDirectory() as temporary:
             site = Path(temporary)
             route = publication.stage(self.bundle, site)
             staged = site / route
-            self.assertEqual((staged / "records.json").read_bytes(), (self.bundle / "records.json").read_bytes())
+            self.assertEqual(
+                (staged / "records.json").read_bytes(), (self.bundle / "records.json").read_bytes()
+            )
             with self.assertRaisesRegex(ValueError, "fresh"):
                 publication.stage(self.bundle, site)
 
@@ -137,10 +186,18 @@ class Issue944ChoicePipelinePublicationTests(unittest.TestCase):
             site.mkdir()
             alias = root / "alias"
             alias.symlink_to(site, target_is_directory=True)
-            result = subprocess.run([
-                sys.executable, str(ROOT / "scripts/reports/stage_issue944_each_choice.py"),
-                "--source", str(self.bundle), "--site", str(alias),
-            ], capture_output=True, text=True)
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts/reports/stage_issue944_each_choice.py"),
+                    "--source",
+                    str(self.bundle),
+                    "--site",
+                    str(alias),
+                ],
+                capture_output=True,
+                text=True,
+            )
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("existing site directory", result.stderr)
             self.assertEqual(list(site.iterdir()), [])
