@@ -552,6 +552,8 @@ jobs:
           tests.reporting.test_history_norm_solver
           tests.reporting.test_native_fixed_tail_policy
           tests.reporting.test_nominal_tube_source
+      - name: Check standalone closed-loop diagnostic imports
+        run: python benchmarks/reporting/closed_loop/terminal_objective_probe.py --help
       - name: Check the saved native whole-history optimizer route
         run: python -m unittest discover -s tests/reporting -p 'test_history_optimizer_native.py'
       - name: Check the frozen CartPole route and offline ZIP

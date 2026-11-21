@@ -10,7 +10,6 @@ import os
 import subprocess
 from pathlib import Path
 
-import affine
 from native_graph_policy import NativeGraphPolicy
 from task_models import source_scenario
 
@@ -22,6 +21,9 @@ def main() -> int:
     parser.add_argument("--bridge", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+
+    import affine
+
     bridge = args.bridge.resolve(strict=True)
     if not bridge.is_file() or not os.access(bridge, os.X_OK):
         parser.error("--bridge must name an executable file")
