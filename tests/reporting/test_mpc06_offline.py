@@ -178,6 +178,38 @@ class SavedEvidenceTests(unittest.TestCase):
 
 
 class PublicationTests(unittest.TestCase):
+    def test_helper_revision_survives_a_merge_wrapper(self):
+        import subprocess
+        import tempfile
+        from unittest.mock import patch
+
+        from scripts.reports import stage_mpc06_offline_costs as publication
+
+        with tempfile.TemporaryDirectory() as directory:
+            repository = Path(directory)
+
+            def git(*args: str) -> str:
+                return subprocess.check_output(
+                    ["git", *args], cwd=repository, stderr=subprocess.PIPE, text=True
+                ).strip()
+
+            git("init", "--initial-branch=main")
+            git("config", "user.name", "Test")
+            git("config", "user.email", "test@example.invalid")
+            helper = repository / "helper.py"
+            helper.write_text("# baseline\n")
+            git("add", "helper.py")
+            git("commit", "-m", "baseline")
+            git("switch", "-c", "reviewed")
+            helper.write_text("# reviewed\n")
+            git("commit", "-am", "change helper")
+            owner = git("rev-parse", "HEAD")
+            with patch.multiple(publication, ROOT=repository, HELPERS=("helper.py",)):
+                self.assertEqual(publication.helper_revision(), owner)
+                git("switch", "main")
+                git("merge", "--no-ff", "reviewed", "-m", "integration wrapper")
+                self.assertEqual(publication.helper_revision(), owner)
+
     def test_checked_extension_and_outside_checkout_source_proof(self):
         import json
         import os

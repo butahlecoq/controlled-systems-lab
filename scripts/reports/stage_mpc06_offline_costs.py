@@ -158,8 +158,9 @@ def validate(source=SOURCE, *, repository=ROOT):
 
 
 def helper_revision():
+    # Follow the parent with these helper bytes, skipping merge wrappers.
     return subprocess.check_output(
-        ["git", "log", "--first-parent", "--full-history", "-1", "--format=%H", "--", *HELPERS],
+        ["git", "log", "-1", "--format=%H", "--", *HELPERS],
         cwd=ROOT,
         text=True,
     ).strip()
