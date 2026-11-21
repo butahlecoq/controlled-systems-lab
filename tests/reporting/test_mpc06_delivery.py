@@ -1,17 +1,19 @@
-import importlib.util
-from fractions import Fraction as Q
-from pathlib import Path
-import unittest
 import copy
+import importlib.util
+import json
 import shutil
 import tempfile
-import json
+import unittest
+from fractions import Fraction as Q
+from pathlib import Path
 from unittest import mock
+
 from scripts.reports.mpc06_delivery import records
 
 ROOT = Path(__file__).resolve().parents[2]
 PATH = ROOT / "scripts/reports/mpc06_delivery/reference.py"
 SPEC = importlib.util.spec_from_file_location("mpc06_delivery_reference", PATH)
+assert SPEC is not None and SPEC.loader is not None
 REF = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(REF)
 

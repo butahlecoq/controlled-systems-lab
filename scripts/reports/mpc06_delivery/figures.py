@@ -1,24 +1,26 @@
 """Pinned shared-style publication figures and reading layer over checked data."""
 
 from __future__ import annotations
+
 import argparse
-from fractions import Fraction as Q
 import hashlib
 import io
 import json
 import os
-from pathlib import Path
 import shutil
 import sys
+from fractions import Fraction as Q
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 if str(ROOT / "scripts/reports") not in sys.path:
     sys.path.insert(0, str(ROOT / "scripts/reports"))
-from scripts.reports.mpc06_delivery import records
-from figure_style import configure_numeric_axis, STYLE_ID
-from plot import normalize_owned_svg
+from figure_style import STYLE_ID, configure_numeric_axis  # noqa: E402
+from plot import normalize_owned_svg  # noqa: E402
+
+from scripts.reports.mpc06_delivery import records  # noqa: E402
 
 COLORS = {
     "finite-reference": "#89b4fa",
@@ -77,26 +79,28 @@ def plot(data, output):
     if matplotlib.__version__ != "3.11.2":
         raise ValueError("Matplotlib 3.11.2 is required")
     matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-    from matplotlib.patches import Polygon, Rectangle
     import math
 
-    style = {
-        "font.family": "DejaVu Sans",
-        "font.size": 10,
-        "svg.hashsalt": "csl-mpc06-delivery-v1",
-        "svg.fonttype": "path",
-        "figure.facecolor": "#1e1e2e",
-        "axes.facecolor": "#1e1e2e",
-        "text.color": "#cdd6f4",
-        "axes.labelcolor": "#cdd6f4",
-        "axes.edgecolor": "#cdd6f4",
-        "xtick.color": "#cdd6f4",
-        "ytick.color": "#cdd6f4",
-        "legend.facecolor": "#1e1e2e",
-        "legend.labelcolor": "#cdd6f4",
-    }
-    with matplotlib.rc_context(style):
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Polygon, Rectangle
+
+    with matplotlib.rc_context(
+        {
+            "font.family": "DejaVu Sans",
+            "font.size": 10,
+            "svg.hashsalt": "csl-mpc06-delivery-v1",
+            "svg.fonttype": "path",
+            "figure.facecolor": "#1e1e2e",
+            "axes.facecolor": "#1e1e2e",
+            "text.color": "#cdd6f4",
+            "axes.labelcolor": "#cdd6f4",
+            "axes.edgecolor": "#cdd6f4",
+            "xtick.color": "#cdd6f4",
+            "ytick.color": "#cdd6f4",
+            "legend.facecolor": "#1e1e2e",
+            "legend.labelcolor": "#cdd6f4",
+        }
+    ):
         fig, axes = plt.subplots(1, 2, figsize=(11, 5), layout="constrained")
         try:
             vertices = [[float(Q(x)) for x in row] for row in data["geometry"]["exact_Z_vertices"]]
@@ -192,7 +196,7 @@ def plot(data, output):
             plt.close(fig)
         fig, axes = plt.subplots(2, 2, figsize=(10, 9), layout="constrained")
         try:
-            for axis, method in zip(axes.flat, COLORS):
+            for axis, method in zip(axes.flat, COLORS, strict=True):
                 rows = [row for row in data["initial_grid"] if row["method"] == method]
                 for feasible, marker, color, label in (
                     (False, "x", "#6c7086", "infeasible"),
