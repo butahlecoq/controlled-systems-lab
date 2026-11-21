@@ -1,11 +1,22 @@
 from __future__ import annotations
-import copy, importlib.util, json, sys, unittest, tempfile, hashlib, shutil, re, zipfile
+
+import hashlib
+import importlib.util
+import json
+import re
+import shutil
+import sys
+import tempfile
+import unittest
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location(
     "syn04_ts02_contract", ROOT / "reports/algorithm-results/tooling/syn04_ts02/report.py"
 )
+if spec is None or spec.loader is None:
+    raise ImportError("Cannot load the saved Strategy B report dependency")
 report = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(report)
 
@@ -69,6 +80,8 @@ class Ts02ReportTests(unittest.TestCase):
         import syn04_ts02_registered_reports as publisher
 
         spec = importlib.util.spec_from_file_location("ts02_site", ROOT / "scripts/reports/site.py")
+        if spec is None or spec.loader is None:
+            raise ImportError("Cannot load the saved Strategy B report dependency")
         site = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(site)
         item = publisher.adapt(ROOT / "reports/algorithm-results" / report.REPORT_ID)

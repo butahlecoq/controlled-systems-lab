@@ -75,7 +75,7 @@ def sanitizer(build):
 
     def text(value):
         for pattern, label in patterns:
-            value = pattern.sub(lambda _: label, value)
+            value = pattern.sub(lambda _, label=label: label, value)
         return value
 
     def value(item):

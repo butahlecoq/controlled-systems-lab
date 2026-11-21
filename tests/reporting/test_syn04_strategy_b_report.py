@@ -1,27 +1,32 @@
 from __future__ import annotations
+
+import hashlib
 import importlib.util
 import json
-from pathlib import Path
-import sys
-import tempfile
-import hashlib
 import shutil
 import subprocess
+import sys
+import tempfile
 import unittest
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 TOOL = ROOT / "reports/algorithm-results/tooling/syn04/report.py"
 spec = importlib.util.spec_from_file_location("csl_test_syn04_strategy_b_report", TOOL)
+if spec is None or spec.loader is None:
+    raise ImportError("Cannot load the saved Strategy B report dependency")
 report = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = report
 spec.loader.exec_module(report)
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import report_data
-import syn04_strategy_b_registered_reports as publication
+import report_data  # noqa: E402
+import syn04_strategy_b_registered_reports as publication  # noqa: E402
 
 site_spec = importlib.util.spec_from_file_location(
     "csl_test_syn04_report_site", ROOT / "scripts/reports/site.py"
 )
+if site_spec is None or site_spec.loader is None:
+    raise ImportError("Cannot load the saved Strategy B report dependency")
 report_site = importlib.util.module_from_spec(site_spec)
 sys.modules[site_spec.name] = report_site
 site_spec.loader.exec_module(report_site)
@@ -31,6 +36,8 @@ sys.modules.pop("report", None)
 collect_spec = importlib.util.spec_from_file_location(
     "csl_test_syn04_strategy_b_collect", COLLECT_TOOL
 )
+if collect_spec is None or collect_spec.loader is None:
+    raise ImportError("Cannot load the saved Strategy B report dependency")
 collect = importlib.util.module_from_spec(collect_spec)
 sys.modules[collect_spec.name] = collect
 collect_spec.loader.exec_module(collect)
