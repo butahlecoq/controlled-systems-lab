@@ -32,7 +32,9 @@ class PairedTs01ReportTests(unittest.TestCase):
         stdout = (REPORT_DIR / "process-stdout.bin").read_bytes()
         events = [json.loads(line) for line in raw.decode("utf-8").splitlines()]
         self.assertEqual(events, self.record["measurement"]["events"])
-        self.assertEqual(hashlib.sha256(raw).hexdigest(), self.record["measurement"]["events_sha256"])
+        self.assertEqual(
+            hashlib.sha256(raw).hexdigest(), self.record["measurement"]["events_sha256"]
+        )
         self.assertEqual(stdout.replace(b"\r\n", b"\n"), raw)
         self.assertEqual((REPORT_DIR / "process-stderr.bin").read_bytes(), b"")
 
@@ -62,10 +64,16 @@ class PairedTs01ReportTests(unittest.TestCase):
     def test_manifest_covers_every_bundle_file(self) -> None:
         manifest = json.loads((REPORT_DIR / "manifest.json").read_text(encoding="utf-8"))
         listed = manifest["files"]
-        actual = {path.name for path in REPORT_DIR.iterdir() if path.is_file() and path.name != "manifest.json"}
+        actual = {
+            path.name
+            for path in REPORT_DIR.iterdir()
+            if path.is_file() and path.name != "manifest.json"
+        }
         self.assertEqual(set(listed), actual)
         for name, expected_hash in listed.items():
-            self.assertEqual(hashlib.sha256((REPORT_DIR / name).read_bytes()).hexdigest(), expected_hash, name)
+            self.assertEqual(
+                hashlib.sha256((REPORT_DIR / name).read_bytes()).hexdigest(), expected_hash, name
+            )
 
     def test_saved_bundle_regenerates_byte_identically_without_solver(self) -> None:
         commands = json.loads((REPORT_DIR / "commands.json").read_text(encoding="utf-8"))
@@ -77,7 +85,9 @@ class PairedTs01ReportTests(unittest.TestCase):
             output = Path(temp) / REPORT.REPORT_ID
             regenerate_bundle.regenerate(REPORT_DIR, output)
             for name in sorted(REPORT.BUNDLE_FILES):
-                self.assertEqual((REPORT_DIR / name).read_bytes(), (output / name).read_bytes(), name)
+                self.assertEqual(
+                    (REPORT_DIR / name).read_bytes(), (output / name).read_bytes(), name
+                )
 
     def test_trial_csv_is_bound_to_saved_raw_and_typed_events(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -88,21 +98,36 @@ class PairedTs01ReportTests(unittest.TestCase):
             manifest_path = bundle / "manifest.json"
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
             manifest["files"]["trials.csv"] = hashlib.sha256(csv_path.read_bytes()).hexdigest()
-            manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+            manifest_path.write_text(
+                json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
+                encoding="utf-8",
+            )
             with self.assertRaisesRegex(ValueError, "trial CSV differs"):
                 REPORT.validate_bundle(bundle)
 
     def test_strict_json_parser_rejects_duplicate_keys_and_nonfinite_values(self) -> None:
-        for payload in ('{"schema": "first", "schema": "second"}', '{"value": NaN}', '{"value": Infinity}'):
+        for payload in (
+            '{"schema": "first", "schema": "second"}',
+            '{"value": NaN}',
+            '{"value": Infinity}',
+        ):
             with self.subTest(payload=payload), self.assertRaises(ValueError):
                 REPORT.parse_json(payload)
 
     def test_bundle_rejects_duplicate_keys_in_records_manifest_sidecar_and_jsonl(self) -> None:
         mutations = {
-            "records.json": lambda text: text.replace('"schema":', '"schema": "shadow", "schema":', 1),
-            "manifest.json": lambda text: text.replace('"schema":', '"schema": "shadow", "schema":', 1),
-            "environment.json": lambda text: text.replace('"schema":', '"schema": "shadow", "schema":', 1),
-            "measurement-events.jsonl": lambda text: text.replace('"event":"header"', '"event":"header","event":"header"', 1),
+            "records.json": lambda text: text.replace(
+                '"schema":', '"schema": "shadow", "schema":', 1
+            ),
+            "manifest.json": lambda text: text.replace(
+                '"schema":', '"schema": "shadow", "schema":', 1
+            ),
+            "environment.json": lambda text: text.replace(
+                '"schema":', '"schema": "shadow", "schema":', 1
+            ),
+            "measurement-events.jsonl": lambda text: text.replace(
+                '"event":"header"', '"event":"header","event":"header"', 1
+            ),
         }
         for filename, mutate in mutations.items():
             with self.subTest(filename=filename), tempfile.TemporaryDirectory() as temp:
@@ -114,7 +139,10 @@ class PairedTs01ReportTests(unittest.TestCase):
                     manifest_path = bundle / "manifest.json"
                     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
                     manifest["files"][filename] = hashlib.sha256(path.read_bytes()).hexdigest()
-                    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+                    manifest_path.write_text(
+                        json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
+                        encoding="utf-8",
+                    )
                 with self.assertRaisesRegex(ValueError, "duplicate JSON key"):
                     REPORT.validate_bundle(bundle)
 

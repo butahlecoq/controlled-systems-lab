@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import hashlib
-import importlib.util
 import json
 import shutil
 import sys
@@ -45,9 +44,15 @@ class PairedTs01PublicationTests(unittest.TestCase):
             root = Path(temp)
             shutil.copytree(SOURCE, root / SOURCE_ID)
             (root / (item.report_id + ".zip")).write_bytes(archive)
-            catalogue = {"schema": "csl.algorithm-report-catalog/3", "artifact_ref": "main", "reports": [row]}
+            catalogue = {
+                "schema": "csl.algorithm-report-catalog/3",
+                "artifact_ref": "main",
+                "reports": [row],
+            }
             catalog_path = root / "catalog.json"
-            catalog_path.write_text(json.dumps(catalogue, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            catalog_path.write_text(
+                json.dumps(catalogue, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+            )
             index = SITE.catalogue_index(catalogue)
             (root / "index.html").write_text(index, encoding="utf-8")
 
@@ -66,8 +71,14 @@ class PairedTs01PublicationTests(unittest.TestCase):
             self.assertTrue(paired.validate_publication_manifest(published, row))
 
             with zipfile.ZipFile(staged / (item.report_id + ".zip")) as saved:
-                self.assertEqual(saved.read(item.report_id + "/measurement-events.jsonl"), (SOURCE / "measurement-events.jsonl").read_bytes())
-                self.assertEqual(saved.read(item.report_id + "/performance.svg"), (SOURCE / "performance.svg").read_bytes())
+                self.assertEqual(
+                    saved.read(item.report_id + "/measurement-events.jsonl"),
+                    (SOURCE / "measurement-events.jsonl").read_bytes(),
+                )
+                self.assertEqual(
+                    saved.read(item.report_id + "/performance.svg"),
+                    (SOURCE / "performance.svg").read_bytes(),
+                )
 
     def test_adapter_rejects_tampered_saved_trial_projection_even_when_manifest_is_resealed(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -78,7 +89,10 @@ class PairedTs01PublicationTests(unittest.TestCase):
             manifest_path = bundle / "manifest.json"
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
             manifest["files"]["trials.csv"] = hashlib.sha256(trials.read_bytes()).hexdigest()
-            manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+            manifest_path.write_text(
+                json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
+                encoding="utf-8",
+            )
             with self.assertRaisesRegex(ValueError, "trial CSV differs"):
                 paired.adapt(bundle)
 
@@ -92,7 +106,10 @@ class PairedTs01PublicationTests(unittest.TestCase):
             manifest_path = bundle / "manifest.json"
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
             manifest["files"]["README.md"] = hashlib.sha256(readme.read_bytes()).hexdigest()
-            manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+            manifest_path.write_text(
+                json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
+                encoding="utf-8",
+            )
             changed = paired.adapt(bundle)
         self.assertEqual(changed.source_report_id, original.source_report_id)
         self.assertEqual(changed.payload_sha256, original.payload_sha256)
@@ -101,7 +118,11 @@ class PairedTs01PublicationTests(unittest.TestCase):
     def test_catalogue_and_zip_are_bound_to_bundle_bytes(self):
         item, archive, row = self.catalogue_row()
         self.assertEqual(hashlib.sha256(archive).hexdigest(), row["zip_sha256"])
-        catalogue = {"schema": "csl.algorithm-report-catalog/3", "artifact_ref": "main", "reports": [row]}
+        catalogue = {
+            "schema": "csl.algorithm-report-catalog/3",
+            "artifact_ref": "main",
+            "reports": [row],
+        }
         links = SITE.catalogue_index(catalogue)
         self.assertIn(f'href="{item.report_id}/index.html"', links)
         self.assertIn(f'href="{item.report_id}/performance.svg"', links)
@@ -114,13 +135,25 @@ class PairedTs01PublicationTests(unittest.TestCase):
         rows = [row for row in catalogue["reports"] if row.get("source_report_id") == SOURCE_ID]
         self.assertEqual(len(rows), 1)
         row = rows[0]
-        for field in ("report_id", "report_kind", "source_report_id", "payload_schema", "payload_sha256",
-                      "native_payload_sha256", "source_commit", "measured_scope", "evidence_limits", "zip_sha256"):
+        for field in (
+            "report_id",
+            "report_kind",
+            "source_report_id",
+            "payload_schema",
+            "payload_sha256",
+            "native_payload_sha256",
+            "source_commit",
+            "measured_scope",
+            "evidence_limits",
+            "zip_sha256",
+        ):
             self.assertEqual(row[field], expected[field], field)
         committed_zip = REPORTS / (item.report_id + ".zip")
         self.assertEqual(committed_zip.read_bytes(), archive)
         self.assertEqual(hashlib.sha256(committed_zip.read_bytes()).hexdigest(), row["zip_sha256"])
-        self.assertEqual((REPORTS / "index.html").read_text(encoding="utf-8"), SITE.catalogue_index(catalogue))
+        self.assertEqual(
+            (REPORTS / "index.html").read_text(encoding="utf-8"), SITE.catalogue_index(catalogue)
+        )
 
 
 if __name__ == "__main__":
