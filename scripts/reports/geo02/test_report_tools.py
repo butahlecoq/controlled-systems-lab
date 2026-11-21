@@ -206,6 +206,17 @@ class ContractTests(unittest.TestCase):
             self.assertEqual(events, replay["trials"])
             self.assertEqual((output / "raw-driver-output.csv").read_text(), partial_output)
             render.validate(replay)
+    def test_duplicate_warmup_geometry_key_is_rejected_before_validation(self):
+        stdout = (SAVED / "raw-driver-output.csv").read_bytes()
+        stderr = (SAVED / "process-stderr.txt").read_bytes()
+        malformed = stderr.replace(
+            b'"support_values":[', b'"support_values":null,"support_values":[', 1
+        )
+        self.assertNotEqual(malformed, stderr)
+        _, receipt = self.run_saved_driver(stdout, malformed, 2)
+        self.assertEqual(receipt["state"], "failed")
+        self.assertIn("duplicate JSON key: support_values", receipt["warmup_parse_error"])
+
     def test_out_of_segment_point_fails_the_oracle_in_trials_and_warmups(self):
         with mock.patch.object(sys, "path", [str(HERE.parent), *sys.path]):
             adapter = importlib.import_module("geo02_registered_reports")
