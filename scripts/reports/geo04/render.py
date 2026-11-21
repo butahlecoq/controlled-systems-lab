@@ -96,7 +96,7 @@ def vertices_match_expected(points: list, expected_points: list, tolerance: floa
                 if index not in consumed
                 and all(
                     abs(float(actual) - float(wanted)) <= tolerance
-                    for actual, wanted in zip(point, candidate)
+                    for actual, wanted in zip(point, candidate, strict=True)
                 )
             ),
             None,
@@ -398,7 +398,7 @@ def render_svg(payload: dict) -> str:
     for si, (scenario, group) in enumerate(scenarios):
         y0 = 20 + si * group_height
         parts.append(f'<text class="scenario" x="8" y="{y0 + 15}">{html.escape(scenario)}</text>')
-        for phase_index, (label, key, color) in enumerate(zip(labels, keys, colors)):
+        for phase_index, (label, key, color) in enumerate(zip(labels, keys, colors, strict=True)):
             y = y0 + phase_top + phase_index * phase_step
             parts.append(f'<text x="8" y="{y + 13}">{label}</text>')
             value = group["phases"][key]["median"]

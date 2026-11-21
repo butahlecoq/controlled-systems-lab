@@ -1,8 +1,21 @@
 """Versioned, immutable GEO-04 scenario inputs and analytic output oracles."""
 
+from typing import NotRequired, TypedDict
+
+
+class ScenarioOracle(TypedDict):
+    inputs: dict[str, object]
+    inequalities: int
+    equalities: NotRequired[int]
+    vertices: NotRequired[list[list[int | float]]]
+    reduction_status: NotRequired[str]
+    lp_calls: NotRequired[int]
+    removed_inequalities: NotRequired[list[int]]
+
+
 CATALOG_VERSION = "geo04-analytic-v1"
 SCENARIOS = ("crossing_octagon", "empty_intersection", "affine_equality", "essential_rows_highs")
-EXPECTED = {
+EXPECTED: dict[str, ScenarioOracle] = {
     "crossing_octagon": {
         "inputs": {
             "left_A": [[1, 0], [-1, 0], [0, 1], [0, -1]],

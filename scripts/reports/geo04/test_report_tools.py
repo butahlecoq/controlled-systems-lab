@@ -11,20 +11,27 @@ import sys
 import tempfile
 import unittest
 import xml.etree.ElementTree as ET
+from itertools import pairwise
 from pathlib import Path
 
 import geo04_catalog
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-SPEC = importlib.util.spec_from_file_location("geo04_collect", HERE / "collect.py")
-collect = importlib.util.module_from_spec(SPEC)
-sys.modules[SPEC.name] = collect
-SPEC.loader.exec_module(collect)
-SPEC = importlib.util.spec_from_file_location("geo04_render", HERE / "render.py")
-render = importlib.util.module_from_spec(SPEC)
-sys.modules[SPEC.name] = render
-SPEC.loader.exec_module(render)
+
+
+def load(name: str, path: Path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"cannot load {name} from {path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+collect = load("geo04_collect", HERE / "collect.py")
+render = load("geo04_render", HERE / "render.py")
 
 
 def trial(scenario: str, status: str = "passed") -> dict:
@@ -69,7 +76,7 @@ def valid_trials() -> list[dict]:
     return rows
 
 
-def valid_payload(report_id: str) -> dict:
+def valid_payload(report_id: str | None) -> dict:
     rows = valid_trials()
     expected = collect.EXPECTED
     payload = {
@@ -407,7 +414,7 @@ class ReportToolTests(unittest.TestCase):
             float(node.attrib["y"]) for node in root.findall(".//svg:text[@x='8']", ns)
         )
         self.assertGreater(len(baselines), 4)
-        for previous, current in zip(baselines, baselines[1:]):
+        for previous, current in pairwise(baselines):
             self.assertGreaterEqual(
                 current - previous, 15, f"overlapping chart labels at y={previous} and y={current}"
             )

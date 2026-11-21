@@ -146,7 +146,7 @@ def vertices_match_expected(points: list, expected_points: list, tolerance: floa
                 if index not in consumed
                 and all(
                     abs(float(actual) - float(wanted)) <= tolerance
-                    for actual, wanted in zip(point, candidate)
+                    for actual, wanted in zip(point, candidate, strict=True)
                 )
             ),
             None,
@@ -397,9 +397,10 @@ def main() -> int:
                 "vertices",
                 "oracle_checks",
             ):
-                row[key] = int(row[key])
-                if row[key] < 0:
+                value = int(row[key])
+                if value < 0:
                     raise ValueError(f"negative value in {key}")
+                row[key] = value
             if row["oracle_passed"] not in ("true", "false"):
                 raise ValueError("noncanonical oracle_passed boolean")
             row["oracle_passed"] = row["oracle_passed"] == "true"
