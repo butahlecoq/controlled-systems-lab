@@ -1,18 +1,19 @@
-import importlib.util
-from fractions import Fraction as Q
-from pathlib import Path, PureWindowsPath
-import unittest
 import copy
+import hashlib
+import importlib.util
 import json
+import shutil
+import subprocess
 import sys
 import tempfile
-import subprocess
-import hashlib
-import shutil
+import unittest
+from fractions import Fraction as Q
+from pathlib import Path, PureWindowsPath
 from unittest import mock
 
 P = Path(__file__).resolve().parents[2] / "scripts/reports/mpc06_online/model.py"
 S = importlib.util.spec_from_file_location("mpc06_online_model", P)
+assert S is not None and S.loader is not None
 M = importlib.util.module_from_spec(S)
 S.loader.exec_module(M)
 
@@ -21,6 +22,7 @@ def online_module(name, dependencies=None):
     spec = importlib.util.spec_from_file_location(
         "test_mpc06_online_" + name, P.with_name(name + ".py")
     )
+    assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     with mock.patch.dict(sys.modules, dependencies or {}):
         spec.loader.exec_module(module)

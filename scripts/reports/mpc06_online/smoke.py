@@ -2,10 +2,11 @@
 """Cross-platform functional public-port smoke; no benchmark claim."""
 
 import argparse
-from fractions import Fraction as Q
 import json
-from pathlib import Path
 import subprocess
+from fractions import Fraction as Q
+from pathlib import Path
+
 from study import exact_approximation_check
 
 if __name__ == "__main__":
