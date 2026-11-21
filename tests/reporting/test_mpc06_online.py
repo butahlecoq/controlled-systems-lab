@@ -47,6 +47,29 @@ class OnlineTubeTests(unittest.TestCase):
         self.assertEqual(receipt["verification"]["status"], "verified")
         self.assertNotEqual(receipt["checked_sources"], ONLINE_EVIDENCE.tool_bindings())
 
+    def test_live_renderer_refuses_archived_receipt_before_creating_output(self):
+        report = P.parents[3] / "reports/algorithm-results/mpc06-online-anchor-portable-v3"
+        bundle = report / "checked-inputs/mpc06-online-anchor-v1"
+        receipt = report / "verification-v2.json"
+        with tempfile.TemporaryDirectory() as folder:
+            output = Path(folder) / "rendered"
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(P.with_name("render.py")),
+                    str(bundle),
+                    "--receipt",
+                    str(receipt),
+                    "--output",
+                    str(output),
+                ],
+                capture_output=True,
+                text=True,
+            )
+            self.assertNotEqual(result.returncode, 0, "mixed tools should fail before writing")
+            self.assertIn("use the receipt's matching review-tools/render.py", result.stderr)
+            self.assertFalse(output.exists())
+
     def test_saved_anchor_rejects_coordinated_checker_receipt_and_manifest_rewrite(self):
         root = P.parents[3] / "reports/algorithm-results/mpc06-online-anchor-portable-v3"
         with tempfile.TemporaryDirectory() as folder:

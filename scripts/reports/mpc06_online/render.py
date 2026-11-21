@@ -13,9 +13,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING or __package__:
-    from .evidence import checked_sources
+    from .evidence import TOOLS, checked_sources, digest
 else:
-    from evidence import checked_sources
+    from evidence import TOOLS, checked_sources, digest
 
 
 def render(bundle, receipt_path, output):
@@ -28,6 +28,12 @@ def render(bundle, receipt_path, output):
         raise ValueError("render output must be separate from immutable source bundle")
     if output.exists():
         raise ValueError("render output must be new")
+    tool_sources = {name: Path(__file__).with_name(name).read_bytes() for name in TOOLS}
+    if {name: digest(data) for name, data in tool_sources.items()} != receipt["checked_sources"]:
+        raise ValueError(
+            "renderer tools do not match the verification receipt; "
+            "use the receipt's matching review-tools/render.py or create a fresh receipt"
+        )
     source_prefix = "checked-inputs/" + bundle.name
     output.mkdir(parents=True)
     shutil.copytree(bundle, output / source_prefix)
@@ -35,8 +41,8 @@ def render(bundle, receipt_path, output):
     (output / "verification-v2.json").write_bytes(receipt_path.read_bytes())
     tools = output / "review-tools"
     tools.mkdir()
-    for name in ("check.py", "evidence.py", "model.py", "study.py", "render.py"):
-        (tools / name).write_bytes(Path(__file__).with_name(name).read_bytes())
+    for name, data in tool_sources.items():
+        (tools / name).write_bytes(data)
     bundle = output
     grid = record["grid"]["rows"]
     counts = Counter(row["method"] for row in grid if row["qp"]["feasible"])
