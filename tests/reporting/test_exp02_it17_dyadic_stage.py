@@ -1,21 +1,23 @@
 """The repeated ITIS17 dyadic bundle stages as a safe, navigable Pages report."""
+
 import csv
 import importlib.util
 import json
-from pathlib import Path
 import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 from zipfile import ZipFile
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
 spec = importlib.util.spec_from_file_location(
-    "exp02_it17_dyadic_stage", ROOT / "scripts/reports/stage_exp02_it17_dyadic.py")
+    "exp02_it17_dyadic_stage", ROOT / "scripts/reports/stage_exp02_it17_dyadic.py"
+)
+assert spec is not None and spec.loader is not None
 stage_report = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(stage_report)
 
 
@@ -23,8 +25,10 @@ class Exp02IT17DyadicStageTests(unittest.TestCase):
     def test_250_point_bundle_validates_and_stages_its_raw_checks_and_plot(self):
         report_id = "exp02-it17-dyadic-250-20261029-r1"
         source = ROOT / "reports/algorithm-results" / report_id
-        rows = [json.loads(line) for line in
-                (source / "raw/raw-rows.jsonl").read_text(encoding="utf-8").splitlines()]
+        rows = [
+            json.loads(line)
+            for line in (source / "raw/raw-rows.jsonl").read_text(encoding="utf-8").splitlines()
+        ]
         self.assertEqual(len(rows), 48)
         self.assertTrue(all(row["checker"]["status"] == "verified" for row in rows))
         self.assertTrue(all(row["checker"]["budget_max_points"] == 250 for row in rows))
@@ -32,13 +36,15 @@ class Exp02IT17DyadicStageTests(unittest.TestCase):
             site = Path(temp) / "site"
             site.mkdir()
             (site / "index.html").write_text(
-                '<!doctype html><html lang="en"><body><ul></ul></body></html>',
-                encoding="utf-8")
+                '<!doctype html><html lang="en"><body><ul></ul></body></html>', encoding="utf-8"
+            )
             self.assertEqual(stage_report.stage(source, site), report_id)
             import landing
+
             landing.build(site)
-            self.assertIn("with one 250-point continuation",
-                          (site / "index.html").read_text(encoding="utf-8"))
+            self.assertIn(
+                "with one 250-point continuation", (site / "index.html").read_text(encoding="utf-8")
+            )
             page = (site / report_id / "index.html").read_text(encoding="utf-8")
             self.assertIn("Performance conclusion: inconclusive", page)
             self.assertIn("0/7", page)
@@ -57,28 +63,42 @@ class Exp02IT17DyadicStageTests(unittest.TestCase):
             rows = [json.loads(line) for line in path.read_text().splitlines()]
             measured = [row for row in rows if not row["warmup"]]
             failed_group = measured[0]["method"]
-            short_group = next(row["method"] for row in measured
-                               if row["method"] != failed_group)
-            next(row for row in rows if row["method"] == failed_group and not row["warmup"])["passed"] = False
-            short_row = next(row for row in rows
-                             if row["method"] == short_group and not row["warmup"])
+            short_group = next(row["method"] for row in measured if row["method"] != failed_group)
+            next(row for row in rows if row["method"] == failed_group and not row["warmup"])[
+                "passed"
+            ] = False
+            short_row = next(
+                row for row in rows if row["method"] == short_group and not row["warmup"]
+            )
             rows.remove(short_row)
-            path.write_text("".join(json.dumps(row, separators=(",", ":")) + "\n"
-                                      for row in rows), encoding="utf-8")
+            path.write_text(
+                "".join(json.dumps(row, separators=(",", ":")) + "\n" for row in rows),
+                encoding="utf-8",
+            )
 
-            subprocess.run([sys.executable, str(copied / "summarize.py")],
-                           check=True, capture_output=True, text=True)
+            subprocess.run(
+                [sys.executable, str(copied / "summarize.py")],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
 
             with (copied / "summary.csv").open(newline="", encoding="utf-8") as stream:
                 summaries = list(csv.DictReader(stream))
-            failed = next(row for row in summaries
-                          if row["fixture"] == "dyadic-square-n64"
-                          and row["method"] == failed_group)
-            short = next(row for row in summaries
-                         if row["fixture"] == "dyadic-square-n64"
-                         and row["method"] == short_group)
+            failed = next(
+                row
+                for row in summaries
+                if row["fixture"] == "dyadic-square-n64" and row["method"] == failed_group
+            )
+            short = next(
+                row
+                for row in summaries
+                if row["fixture"] == "dyadic-square-n64" and row["method"] == short_group
+            )
             for row, measured_count, passed_count, failed_count in (
-                    (failed, "5", "4", "1"), (short, "4", "4", "0")):
+                (failed, "5", "4", "1"),
+                (short, "4", "4", "0"),
+            ):
                 self.assertEqual(row["measured"], measured_count)
                 self.assertEqual(row["passed"], passed_count)
                 self.assertEqual(row["failed"], failed_count)
@@ -95,11 +115,12 @@ class Exp02IT17DyadicStageTests(unittest.TestCase):
             site = Path(temp) / "site"
             site.mkdir()
             (site / "index.html").write_text(
-                '<!doctype html><html lang="en"><body><ul></ul></body></html>',
-                encoding="utf-8")
+                '<!doctype html><html lang="en"><body><ul></ul></body></html>', encoding="utf-8"
+            )
 
             self.assertEqual(stage_report.stage(source, site), report_id)
             import landing
+
             landing.build(site)
 
             page = (site / report_id / "index.html").read_text(encoding="utf-8")
@@ -128,11 +149,12 @@ class Exp02IT17DyadicStageTests(unittest.TestCase):
             site = Path(temp) / "site"
             site.mkdir()
             (site / "index.html").write_text(
-                '<!doctype html><html lang="en"><body><ul></ul></body></html>',
-                encoding="utf-8")
+                '<!doctype html><html lang="en"><body><ul></ul></body></html>', encoding="utf-8"
+            )
 
             self.assertEqual(stage_report.stage(source, site), report_id)
             import landing
+
             landing.build(site)
 
             report_page = site / report_id / "index.html"
@@ -155,11 +177,12 @@ class Exp02IT17DyadicStageTests(unittest.TestCase):
             site = Path(temp) / "site"
             site.mkdir()
             (site / "index.html").write_text(
-                '<!doctype html><html lang="en"><body><ul></ul></body></html>',
-                encoding="utf-8")
+                '<!doctype html><html lang="en"><body><ul></ul></body></html>', encoding="utf-8"
+            )
 
             self.assertEqual(stage_report.stage(source, site), stage_report.REPORT_ID)
             import landing
+
             landing.build(site)
 
             report_page = site / stage_report.REPORT_ID / "index.html"
@@ -179,7 +202,9 @@ class Exp02IT17DyadicStageTests(unittest.TestCase):
                 names = set(archive.namelist())
                 self.assertIn(stage_report.REPORT_ID + "/raw/n256.jsonl", names)
                 self.assertIn(stage_report.REPORT_ID + "/prior-halton-ladder/index.html", names)
-                self.assertIn(stage_report.REPORT_ID + "/prior-halton-ladder/halton-square-n1000.svg", names)
+                self.assertIn(
+                    stage_report.REPORT_ID + "/prior-halton-ladder/halton-square-n1000.svg", names
+                )
                 self.assertIn(stage_report.REPORT_ID + "/SHA256SUMS", names)
 
     def test_bundle_hash_mismatch_is_rejected(self):
@@ -187,6 +212,7 @@ class Exp02IT17DyadicStageTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             copied = Path(temp) / stage_report.REPORT_ID
             import shutil
+
             shutil.copytree(source, copied)
             with (copied / "summary.csv").open("a", encoding="utf-8") as output:
                 output.write("tampered\n")

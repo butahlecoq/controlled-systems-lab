@@ -5,24 +5,37 @@ from __future__ import annotations
 import argparse
 import hashlib
 import importlib.util
-from pathlib import Path
 import re
 import zipfile
+from pathlib import Path
 
 site_spec = importlib.util.spec_from_file_location(
-    "algorithm_report_site", Path(__file__).with_name("site.py"))
+    "algorithm_report_site", Path(__file__).with_name("site.py")
+)
+if site_spec is None or site_spec.loader is None:
+    raise ImportError("Cannot load the report site module")
 site_module = importlib.util.module_from_spec(site_spec)
-assert site_spec.loader is not None
 site_spec.loader.exec_module(site_module)
 
 
 REPORT_ID = "quickhull-it17-paper-adaptations-20261024-r1"
 FILES = {
-    "README.md", "build-config.txt", "build-flags.make", "build.log",
-    "executable.sha256", "fixture-geometry.svg", "host-after.txt",
-    "host-before.txt", "index.html", "paper-identities.txt",
-    "preliminary_driver.cpp", "raw-capture.jsonl", "raw-rows.jsonl",
-    "summarize.py", "summary.csv", "validation.txt",
+    "README.md",
+    "build-config.txt",
+    "build-flags.make",
+    "build.log",
+    "executable.sha256",
+    "fixture-geometry.svg",
+    "host-after.txt",
+    "host-before.txt",
+    "index.html",
+    "paper-identities.txt",
+    "preliminary_driver.cpp",
+    "raw-capture.jsonl",
+    "raw-rows.jsonl",
+    "summarize.py",
+    "summary.csv",
+    "validation.txt",
 }
 
 
@@ -66,7 +79,7 @@ def stage(source: Path, site_root: Path) -> str:
 
     offline_index = (
         '<!doctype html><html lang="en"><meta charset="utf-8">'
-        '<title>Offline hull adaptation report</title><h1>Offline report</h1>'
+        "<title>Offline hull adaptation report</title><h1>Offline report</h1>"
         f'<a href="{REPORT_ID}/index.html">{REPORT_ID}</a></html>'
     ).encode("utf-8")
     with zipfile.ZipFile(archive_path, "x", compression=zipfile.ZIP_DEFLATED) as archive:
@@ -86,12 +99,13 @@ def stage(source: Path, site_root: Path) -> str:
         raise ValueError("site index insertion point differs")
     link = (
         f'<li><a href="{REPORT_ID}/index.html">QuickHull and ITIS17 LP hull methods</a>'
-        ' — exploratory 2D comparison of six reducers on three exact square fixtures'
+        " — exploratory 2D comparison of six reducers on three exact square fixtures"
         f' · <a href="{REPORT_ID}/raw-rows.jsonl">raw rows</a>'
         f' · <a href="{REPORT_ID}.zip">offline bundle</a></li>'
     )
-    site_module.OfflineHTML({f"{REPORT_ID}/index.html", f"{REPORT_ID}/raw-rows.jsonl",
-                             f"{REPORT_ID}.zip"}).feed(link)
+    site_module.OfflineHTML(
+        {f"{REPORT_ID}/index.html", f"{REPORT_ID}/raw-rows.jsonl", f"{REPORT_ID}.zip"}
+    ).feed(link)
     index.write_text(text.replace("</ul>", link + "</ul>"), encoding="utf-8")
     return REPORT_ID
 
