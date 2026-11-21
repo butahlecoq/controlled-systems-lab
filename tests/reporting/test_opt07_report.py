@@ -1,123 +1,179 @@
 """Synthetic-only saved-data tests; these are never benchmark observations."""
+
 from __future__ import annotations
 
 import hashlib
 import importlib.util
 import json
-from pathlib import Path
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
 import opt07_registered_reports as publisher  # noqa: E402
+
 report = publisher.source
 SOURCE_PATHS = report.SOURCE_PATHS
 fixture_sha256 = report.fixture_sha256
 FIXTURES = report.FIXTURES
 site_spec = importlib.util.spec_from_file_location(
-    "opt07_report_site", Path(__file__).resolve().parents[2] /
-    "scripts/reports/site.py")
+    "opt07_report_site", Path(__file__).resolve().parents[2] / "scripts/reports/site.py"
+)
+if site_spec is None or site_spec.loader is None:
+    raise ImportError("cannot load the CSL report site")
 report_site = importlib.util.module_from_spec(site_spec)
 site_spec.loader.exec_module(report_site)
 
 
 CERTIFICATES = {
-    "signed-score": ([0, 1, 2, 3],
-                     [(5, [(2, 0.125), (3, 0.875)]),
-                      (4, [(0, 0.375), (2, 0.625)])]),
-    "zero-width-duplicate": ([1, 3],
-                             [(0, [(3, 1.0)]),
-                              (2, [(1, 0.5), (3, 0.5)])]),
-    "late-outside": ([0, 3],
-                     [(2, [(0, 0.75), (3, 0.25)]),
-                      (1, [(0, 0.5), (3, 0.5)])]),
+    "signed-score": ([0, 1, 2, 3], [(5, [(2, 0.125), (3, 0.875)]), (4, [(0, 0.375), (2, 0.625)])]),
+    "zero-width-duplicate": ([1, 3], [(0, [(3, 1.0)]), (2, [(1, 0.5), (3, 0.5)])]),
+    "late-outside": ([0, 3], [(2, [(0, 0.75), (3, 0.25)]), (1, [(0, 0.5), (3, 0.5)])]),
 }
 
 
 def synthetic_call(case_id: str, round_id: int, ordinal: int) -> dict:
     fixture = FIXTURES[case_id]
     retained, certificates = CERTIFICATES[case_id]
-    removed = [{"point": point, "program_problem": f"opt07-{case_id}",
-                "program": f"hull-membership-{point}",
-                "terms": [[index, weight] for index, weight in terms]}
-               for point, terms in certificates]
+    removed = [
+        {
+            "point": point,
+            "program_problem": f"opt07-{case_id}",
+            "program": f"hull-membership-{point}",
+            "terms": [[index, weight] for index, weight in terms],
+        }
+        for point, terms in certificates
+    ]
     removed_ids = {point for point, _ in certificates}
-    return {"kind": "call", "purpose": "test", "case_id": case_id,
-            "problem": f"opt07-{case_id}", "round": round_id,
-            "warmup": round_id == 0, "ordinal": ordinal,
-            "points": fixture["points"], "verified": True, "status": "complete",
-            "retained": retained, "removed": removed, "order": fixture["order"],
-            "ordered_candidates": len(fixture["points"]),
-            "zero_width_coordinates": fixture["zero_width"],
-            "identity_fallback": False, "lp_calls": len(fixture["points"]),
-            "attempts": [[point, "feasible" if point in removed_ids else "infeasible"]
-                         for point in fixture["order"]],
-            "support": fixture["support"]}
+    return {
+        "kind": "call",
+        "purpose": "test",
+        "case_id": case_id,
+        "problem": f"opt07-{case_id}",
+        "round": round_id,
+        "warmup": round_id == 0,
+        "ordinal": ordinal,
+        "points": fixture["points"],
+        "verified": True,
+        "status": "complete",
+        "retained": retained,
+        "removed": removed,
+        "order": fixture["order"],
+        "ordered_candidates": len(fixture["points"]),
+        "zero_width_coordinates": fixture["zero_width"],
+        "identity_fallback": False,
+        "lp_calls": len(fixture["points"]),
+        "attempts": [
+            [point, "feasible" if point in removed_ids else "infeasible"]
+            for point in fixture["order"]
+        ],
+        "support": fixture["support"],
+    }
 
 
 def synthetic_collection(directory: Path) -> None:
     rows = []
     for case_index, case_id in enumerate(FIXTURES):
         for round_id in range(8):
-            rows.extend(synthetic_call(case_id, round_id, ordinal)
-                        for ordinal in range(100))
-            rows.append({"kind": "batch", "purpose": "test",
-                         "case_id": case_id, "round": round_id,
-                         "warmup": round_id == 0, "calls": 100,
-                         "verified_calls": 100,
-                         "elapsed_ns": 1000 + case_index * 1000 + round_id * 10})
+            rows.extend(synthetic_call(case_id, round_id, ordinal) for ordinal in range(100))
+            rows.append(
+                {
+                    "kind": "batch",
+                    "purpose": "test",
+                    "case_id": case_id,
+                    "round": round_id,
+                    "warmup": round_id == 0,
+                    "calls": 100,
+                    "verified_calls": 100,
+                    "elapsed_ns": 1000 + case_index * 1000 + round_id * 10,
+                }
+            )
     (directory / "raw-stdout.jsonl").write_text(
         "".join(json.dumps(row, separators=(",", ":")) + "\n" for row in rows),
-        encoding="utf-8", newline="\n")
+        encoding="utf-8",
+        newline="\n",
+    )
     (directory / "raw-stderr.txt").write_bytes(b"")
     log = b"Clean Release /O2 /D NDEBUG /std:c++20 at $SOURCE_ROOT\n"
     (directory / "release-build-log-sanitized.txt").write_bytes(log)
     (directory / "functional-validation.json").write_text(
-        json.dumps({"purpose": "test", "fixtures": 3,
-                    "batches": 24, "calls": 2400}), encoding="utf-8")
+        json.dumps({"purpose": "test", "fixtures": 3, "batches": 24, "calls": 2400}),
+        encoding="utf-8",
+    )
     commit = "a" * 40
-    collection = {"purpose": "test", "source_commit": commit,
-                  "description": {"kind": "describe", "source_commit": commit,
-                                  "harness_sha256": "b" * 64,
-                                  "configuration": "Release",
-                                  "cxx_standard": 202002, "ndebug": True,
-                                  "batch_calls": 100, "repetitions": 7},
-                  "algorithm": {"method": "csl.hull.ordered-membership",
-                                "version": "1.0.0"},
-                  "backend": {"method": "csl.lp.highs",
-                              "adapter_version": "1.0.0+highs.1.11.0",
-                              "configured_threads": 1},
-                  "process_exit_code": 0,
-                  "raw_stdout_sha256": hashlib.sha256(
-                      (directory / "raw-stdout.jsonl").read_bytes()).hexdigest(),
-                  "raw_stderr_sha256": hashlib.sha256(
-                      (directory / "raw-stderr.txt").read_bytes()).hexdigest(),
-                  "protocol": {"warmup_batches_per_fixture": 1,
-                               "measured_batches_per_fixture": 7,
-                               "calls_per_batch": 100},
-                  "build_log_sha256": "b" * 64,
-                  "sanitized_build_log_sha256": hashlib.sha256(log).hexdigest(),
-                  "executable_sha256": "c" * 64,
-                  "fixture_sha256": fixture_sha256(),
-                  "cmake_cache_sha256": "e" * 64,
-                  "generated_release_project_sha256": "f" * 64,
-                  "source_sha256": {path: ("b" if path.endswith(
-                      "ordered_hull_driver.cpp") else "a") * 64
-                                    for path in SOURCE_PATHS},
-                  "release_project": {"LanguageStandard": "stdcpp20",
-                                      "Optimization": "MaxSpeed",
-                                      "PreprocessorDefinitions": "NDEBUG"},
-                  "environment": {"os": "synthetic test host",
-                                  "machine": "synthetic machine",
-                                  "logical_processors": 1,
-                                  "concurrent_work_note": "synthetic test only"}}
-    (directory / "collection.json").write_text(json.dumps(collection),
-                                                  encoding="utf-8")
+    collection = {
+        "purpose": "test",
+        "source_commit": commit,
+        "description": {
+            "kind": "describe",
+            "source_commit": commit,
+            "harness_sha256": "b" * 64,
+            "configuration": "Release",
+            "cxx_standard": 202002,
+            "ndebug": True,
+            "batch_calls": 100,
+            "repetitions": 7,
+        },
+        "algorithm": {"method": "csl.hull.ordered-membership", "version": "1.0.0"},
+        "backend": {
+            "method": "csl.lp.highs",
+            "adapter_version": "1.0.0+highs.1.11.0",
+            "configured_threads": 1,
+        },
+        "process_exit_code": 0,
+        "raw_stdout_sha256": hashlib.sha256(
+            (directory / "raw-stdout.jsonl").read_bytes()
+        ).hexdigest(),
+        "raw_stderr_sha256": hashlib.sha256(
+            (directory / "raw-stderr.txt").read_bytes()
+        ).hexdigest(),
+        "protocol": {
+            "warmup_batches_per_fixture": 1,
+            "measured_batches_per_fixture": 7,
+            "calls_per_batch": 100,
+        },
+        "build_log_sha256": "b" * 64,
+        "sanitized_build_log_sha256": hashlib.sha256(log).hexdigest(),
+        "executable_sha256": "c" * 64,
+        "fixture_sha256": fixture_sha256(),
+        "cmake_cache_sha256": "e" * 64,
+        "generated_release_project_sha256": "f" * 64,
+        "source_sha256": {
+            path: ("b" if path.endswith("ordered_hull_driver.cpp") else "a") * 64
+            for path in SOURCE_PATHS
+        },
+        "release_project": {
+            "LanguageStandard": "stdcpp20",
+            "Optimization": "MaxSpeed",
+            "PreprocessorDefinitions": "NDEBUG",
+        },
+        "environment": {
+            "os": "synthetic test host",
+            "machine": "synthetic machine",
+            "logical_processors": 1,
+            "concurrent_work_note": "synthetic test only",
+        },
+    }
+    (directory / "collection.json").write_text(json.dumps(collection), encoding="utf-8")
 
 
 class SavedReportTests(unittest.TestCase):
+    def test_committed_report_keeps_its_reviewed_publication(self):
+        bundle = (
+            Path(__file__).resolve().parents[2] / "reports/algorithm-results/opt07-bbb4aee749d643ff"
+        )
+        publication = publisher.adapt(bundle)
+        self.assertEqual(
+            publication.report_id,
+            "opt07-6e77b298e159fa0b80d5d69ccd8c14233eb8830513a5d060f98ee76d8e414c96",
+        )
+        self.assertEqual(
+            hashlib.sha256(publisher.offline_zip(bundle, publication)).hexdigest(),
+            "287ac701e0c1f2d19d36f31747bde732fefa548398e8632738065e1b85bc167d",
+        )
+
     def test_build_check_and_literal_batch_median_from_synthetic_raw(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -133,8 +189,10 @@ class SavedReportTests(unittest.TestCase):
             self.assertEqual(checked["summary"][0]["median_batch_ns"], 1040)
             self.assertEqual(checked["summary"][0]["nonwarmup_calls"], 700)
             self.assertEqual(checked["validation"]["calls"], 2400)
-            self.assertEqual((bundle / "raw-stdout.jsonl").read_bytes(),
-                             (collection / "raw-stdout.jsonl").read_bytes())
+            self.assertEqual(
+                (bundle / "raw-stdout.jsonl").read_bytes(),
+                (collection / "raw-stdout.jsonl").read_bytes(),
+            )
             self.assertIn("TEST / synthetic", (bundle / "index.html").read_text())
             self.assertNotIn("Measured batches", (bundle / "index.html").read_text())
             self.assertNotIn("Seven measured", (bundle / "latency.svg").read_text())
@@ -169,8 +227,9 @@ class SavedReportTests(unittest.TestCase):
             page = bundle / "index.html"
             original = page.read_bytes()
             self.assertIn(b"TEST / synthetic data", original)
-            altered = original.replace(b"TEST / synthetic data",
-                                       b"TEST / altered synthetic data", 1)
+            altered = original.replace(
+                b"TEST / synthetic data", b"TEST / altered synthetic data", 1
+            )
             self.assertNotEqual(altered, original)
             page.write_bytes(altered)
             manifest_path = bundle / "manifest.json"
@@ -189,17 +248,25 @@ class SavedReportTests(unittest.TestCase):
             bundle = report.build(collection, root, allow_test=True)
             with self.assertRaisesRegex(ValueError, "test-only"):
                 publisher.adapt(bundle)
-            row = {"report_id": "opt07-" + "b" * 64,
-                   "report_kind": publisher.KIND,
-                   "source_report_id": bundle.name}
+            row = {
+                "report_id": "opt07-" + "b" * 64,
+                "report_kind": publisher.KIND,
+                "source_report_id": bundle.name,
+            }
             catalog = root / "catalog.json"
-            catalog.write_text(json.dumps({"schema": "csl.algorithm-report-catalog/3",
-                                           "artifact_ref": "main", "reports": [row]}),
-                               encoding="utf-8")
+            catalog.write_text(
+                json.dumps(
+                    {
+                        "schema": "csl.algorithm-report-catalog/3",
+                        "artifact_ref": "main",
+                        "reports": [row],
+                    }
+                ),
+                encoding="utf-8",
+            )
             with patch.object(report_site, "legacy_pins", return_value={}):
                 with self.assertRaisesRegex(ValueError, "test-only"):
-                    report_site.stage(catalog, root / "staged", check=False,
-                                      allow_test=True)
+                    report_site.stage(catalog, root / "staged", check=False, allow_test=True)
 
     def test_changed_valid_batch_rejected_by_collection_time_hash(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -229,16 +296,17 @@ class SavedReportTests(unittest.TestCase):
             path = collection / "collection.json"
             original = json.loads(path.read_text(encoding="utf-8"))
             mutations = (
-                (lambda data: data["source_sha256"].update({"synthetic.cpp": "a" * 64}),
-                 "source file inventory"),
-                (lambda data: data.update({"fixture_sha256": "d" * 64}),
-                 "fixture digest"),
-                (lambda data: data["description"].update({"harness_sha256": "e" * 64}),
-                 "harness digest"),
-                (lambda data: data["description"].update({"ndebug": False}),
-                 "source-bound"),
-                (lambda data: data["description"].update({"batch_calls": 1}),
-                 "source-bound"),
+                (
+                    lambda data: data["source_sha256"].update({"synthetic.cpp": "a" * 64}),
+                    "source file inventory",
+                ),
+                (lambda data: data.update({"fixture_sha256": "d" * 64}), "fixture digest"),
+                (
+                    lambda data: data["description"].update({"harness_sha256": "e" * 64}),
+                    "harness digest",
+                ),
+                (lambda data: data["description"].update({"ndebug": False}), "source-bound"),
+                (lambda data: data["description"].update({"batch_calls": 1}), "source-bound"),
             )
             for mutate, message in mutations:
                 with self.subTest(message=message):
