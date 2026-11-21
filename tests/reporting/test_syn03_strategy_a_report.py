@@ -1,21 +1,23 @@
 from __future__ import annotations
+
+import csv
+import hashlib
 import importlib.util
+import io
 import json
-from pathlib import Path
+import subprocess
 import sys
 import tempfile
-import hashlib
-import csv
-import io
-import subprocess
 import unittest
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import report_data
+report_data = importlib.import_module("report_data")
 
 TOOL = ROOT / "reports/algorithm-results/tooling/syn03/strategy_a_report.py"
 spec = importlib.util.spec_from_file_location("csl_test_syn03_strategy_a_report", TOOL)
+assert spec is not None and spec.loader is not None
 report = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = report
 spec.loader.exec_module(report)
@@ -25,6 +27,7 @@ sys.modules.pop("report", None)
 collect_spec = importlib.util.spec_from_file_location(
     "csl_test_syn03_strategy_a_collect", COLLECT_TOOL
 )
+assert collect_spec is not None and collect_spec.loader is not None
 collect = importlib.util.module_from_spec(collect_spec)
 sys.modules[collect_spec.name] = collect
 collect_spec.loader.exec_module(collect)
@@ -34,6 +37,7 @@ ADAPTER_TOOL = ROOT / "scripts/reports/syn03_strategy_a_registered_reports.py"
 adapter_spec = importlib.util.spec_from_file_location(
     "csl_test_syn03_strategy_a_publisher", ADAPTER_TOOL
 )
+assert adapter_spec is not None and adapter_spec.loader is not None
 adapter = importlib.util.module_from_spec(adapter_spec)
 sys.modules[adapter_spec.name] = adapter
 adapter_spec.loader.exec_module(adapter)
