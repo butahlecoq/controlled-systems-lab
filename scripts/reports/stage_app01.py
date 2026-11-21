@@ -5,14 +5,14 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
-from html import escape
 import importlib.util
 import io
 import json
 import math
-from pathlib import Path
 import re
 import statistics
+from html import escape
+from pathlib import Path
 
 import registered_reports as registered
 import report_data
@@ -20,6 +20,8 @@ import report_data
 _spec = importlib.util.spec_from_file_location(
     "csl_report_site_v1", Path(__file__).with_name("site.py")
 )
+if _spec is None or _spec.loader is None:
+    raise ImportError("APP-01 Pages validator is unavailable")
 site = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(site)
 
@@ -236,10 +238,9 @@ def expected_residuals(name: str) -> list[dict]:
 
 def check_residuals(actual: object, name: str) -> None:
     expected = expected_residuals(name)
-    require(
-        isinstance(actual, list) and len(actual) == len(expected), "APP-01 residual count differs"
-    )
-    for row, literal in zip(actual, expected):
+    if not isinstance(actual, list) or len(actual) != len(expected):
+        raise ValueError("APP-01 residual count differs")
+    for row, literal in zip(actual, expected, strict=True):
         require(
             isinstance(row, dict)
             and set(row) == set(literal)
@@ -330,7 +331,7 @@ def svg(summary: list[dict]) -> str:
     per_call = [row["median_elapsed_ns"] / row["batch"] for row in summary]
     maximum = max(per_call)
     bars = []
-    for index, (name, value) in enumerate(zip(FIXTURES, per_call)):
+    for index, (name, value) in enumerate(zip(FIXTURES, per_call, strict=True)):
         y = 40 + index * 58
         bars.append(
             f'<text x="12" y="{y + 20}" font-size="15">{escape(name)}</text>'
@@ -491,9 +492,10 @@ def validate(bundle: Path) -> registered.PublicationRecord:
     require(native == local(bundle, "bundle.zip").read_bytes(), "APP-01 native ZIP differs")
     record = read_json(local(bundle, "records.json"))
     payload = record.get("payload")
+    if not isinstance(payload, dict):
+        raise ValueError("APP-01 record envelope differs")
     require(
-        isinstance(payload, dict)
-        and record.get("schema") == "csl.app01-plan-report/1"
+        record.get("schema") == "csl.app01-plan-report/1"
         and record.get("report_id") == bundle.name
         and payload.get("schema") == record["schema"]
         and record.get("payload_sha256") == digest(payload),
@@ -513,7 +515,7 @@ def validate(bundle: Path) -> registered.PublicationRecord:
     inputs = fixture_inputs()
     require(
         isinstance(source, str)
-        and re.fullmatch(r"[0-9a-f]{40}", source)
+        and re.fullmatch(r"[0-9a-f]{40}", source) is not None
         and bundle.name.endswith(source[:8])
         and payload.get("module")
         == {"id": "csl.geometry.approximation.check_inner_state_plan", "version": "1"}
@@ -680,10 +682,11 @@ def stage(catalogue: Path, site_dir: Path) -> str:
         "APP-01 extension catalogue differs",
     )
     source_id = catalog["reports"][0].get("source_report_id")
-    require(
-        isinstance(source_id, str) and re.fullmatch(r"app01-plan-\d{8}-[0-9a-f]{8}", source_id),
-        "unsafe APP-01 catalogue source",
-    )
+    if (
+        not isinstance(source_id, str)
+        or re.fullmatch(r"app01-plan-\d{8}-[0-9a-f]{8}", source_id) is None
+    ):
+        raise ValueError("unsafe APP-01 catalogue source")
     bundle = catalogue.parent / source_id
     expected = catalogue_entry(bundle)
     require(catalog["reports"][0] == expected, "APP-01 catalogue differs from source")
