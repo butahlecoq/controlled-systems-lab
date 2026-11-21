@@ -1,18 +1,20 @@
 import importlib.util
+import io
 import json
-from pathlib import Path
 import shutil
 import tempfile
 import unittest
 import zipfile
-
+from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location(
     "stage_ext04_affine_synthesis", ROOT / "scripts/reports/stage_ext04_affine_synthesis.py"
 )
+if SPEC is None or SPEC.loader is None:
+    raise ImportError("Cannot load the EXT-04 affine-synthesis publisher")
 stage = importlib.util.module_from_spec(SPEC)
-assert SPEC.loader is not None
 SPEC.loader.exec_module(stage)
 CATALOG = ROOT / "reports/algorithm-results/ext04-affine-synthesis-publications.json"
 
@@ -61,6 +63,31 @@ class AffineSynthesisPublicationTests(unittest.TestCase):
             with zipfile.ZipFile(site_dir / (report_id + ".zip")) as archive:
                 self.assertIsNone(archive.testzip())
                 self.assertIn(report_id + "/index.html", archive.namelist())
+
+    def test_historical_zip_metadata_cannot_be_republished(self):
+        build_archive = stage.archive
+
+        def repack(report_id, files):
+            buffer = io.BytesIO(build_archive(report_id, files))
+            with zipfile.ZipFile(buffer, "a") as archive:
+                archive.comment = b"Different metadata, same members"
+            return buffer.getvalue()
+
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary)
+            landing = site / "index.html"
+            landing.write_bytes(b"<html><body><ul></ul></body></html>")
+            with patch.object(stage, "archive", side_effect=repack):
+                with self.assertRaisesRegex(
+                    ValueError, "Historical EXT-04 input or archive checksum"
+                ):
+                    stage.entry_for(source_bundle())
+                with self.assertRaisesRegex(
+                    ValueError, "Historical EXT-04 input or archive checksum"
+                ):
+                    stage.stage(CATALOG, site)
+            self.assertEqual(list(site.iterdir()), [landing])
+            self.assertEqual(landing.read_bytes(), b"<html><body><ul></ul></body></html>")
 
     def test_catalog_rejects_a_mutated_trial(self):
         with tempfile.TemporaryDirectory() as temporary:

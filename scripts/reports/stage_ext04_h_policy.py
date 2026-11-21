@@ -4,23 +4,29 @@ from __future__ import annotations
 
 import argparse
 import csv
-from html import escape
 import hashlib
 import importlib.util
 import io
 import json
-from pathlib import Path
 import re
 import statistics
 import sys
 import tempfile
 import zipfile
+from html import escape
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+# Preserve the original publisher identity only with the exact saved inputs and ZIP.
+HISTORICAL_REPORT_ID = "ext04-h-policy-0c0a95116ce4642b"
+HISTORICAL_INPUTS_SHA256 = "de2c1002039a3a74e7ee9947158cd77f2e39356ff9b2f12ac5603c14ff768190"
+HISTORICAL_PUBLISHER_SHA256 = "75fbc6124e0ab0e723f3f4ac598c168e17c53e4e7e96c7d48ca854b90491f9b2"
+HISTORICAL_ZIP_SHA256 = "aaa221a335648655927f8c564bbdabb1081d7213d82041fd9963b8a81d93d2ba"
 sys.path.insert(0, str(ROOT / "scripts/reports"))
 spec = importlib.util.spec_from_file_location("ext04_h_site", ROOT / "scripts/reports/site.py")
+if spec is None or spec.loader is None:
+    raise ImportError("Cannot load the report site module")
 site = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(site)
 
 
@@ -135,7 +141,10 @@ def source_entry(bundle: Path) -> dict:
         maxima = [entry["support_upper_bound"] for entry in result["constraints"]]
         if (
             len(maxima) != len(expected_maxima)
-            or any(abs(value - target) > 1e-7 for value, target in zip(maxima, expected_maxima))
+            or any(
+                abs(value - target) > 1e-7
+                for value, target in zip(maxima, expected_maxima, strict=True)
+            )
             or abs(result["domain_witness"][1] - 0.1 * result["domain_witness"][0]) > 1e-8
         ):
             raise ValueError("raw H-policy result or correlated witness differs")
@@ -164,7 +173,7 @@ def source_entry(bundle: Path) -> dict:
             "ns_per_call": str(trial["elapsed_ns"] / 100),
             "status": "passed",
         }
-        for row, trial in zip(rows, trials[1:])
+        for row, trial in zip(rows, trials[1:], strict=True)
     ):
         raise ValueError("summary CSV differs from raw trials")
     with zipfile.ZipFile(bundle / (report_id + ".zip")) as archive:
@@ -271,14 +280,30 @@ def public_zip(report_id: str, files: dict[str, bytes]) -> bytes:
     return output.getvalue()
 
 
-def entry_for(bundle: Path) -> dict:
+def prepare_publication(bundle: Path) -> tuple[dict, dict[str, bytes], bytes]:
     entry = source_entry(bundle)
     files = public_files(bundle, entry)
-    return {
-        **entry,
-        "public_files_sha256": {name: sha(data) for name, data in sorted(files.items())},
-        "zip_sha256": sha(public_zip(entry["report_id"], files)),
-    }
+    archive_bytes = public_zip(entry["report_id"], files)
+    zip_sha256 = sha(archive_bytes)
+    if entry["report_id"] == HISTORICAL_REPORT_ID:
+        inputs = json.dumps(entry["files"], sort_keys=True, separators=(",", ":")).encode()
+        if sha(inputs) != HISTORICAL_INPUTS_SHA256 or zip_sha256 != HISTORICAL_ZIP_SHA256:
+            raise ValueError("Historical EXT-04 input or archive checksum differs")
+        entry["publisher_sha256"] = HISTORICAL_PUBLISHER_SHA256
+    return (
+        {
+            **entry,
+            "public_files_sha256": {name: sha(content) for name, content in sorted(files.items())},
+            "zip_sha256": zip_sha256,
+        },
+        files,
+        archive_bytes,
+    )
+
+
+def entry_for(bundle: Path) -> dict:
+    entry, _, _ = prepare_publication(bundle)
+    return entry
 
 
 def stage(catalog_path: Path, site_dir: Path) -> str:
@@ -290,10 +315,9 @@ def stage(catalog_path: Path, site_dir: Path) -> str:
         raise ValueError("EXT-04 H-policy publication catalog differs")
     entry = catalog["reports"][0]
     bundle = catalog_path.parent / entry["source_report_id"]
-    if entry != entry_for(bundle):
+    expected, files, archive_bytes = prepare_publication(bundle)
+    if entry != expected:
         raise ValueError("publication catalog differs from the report bundle")
-    files = public_files(bundle, entry)
-    archive = public_zip(entry["report_id"], files)
     site_dir = Path(site_dir)
     dest = site_dir / entry["report_id"]
     zip_dest = site_dir / (entry["report_id"] + ".zip")
@@ -303,7 +327,7 @@ def stage(catalog_path: Path, site_dir: Path) -> str:
     dest.mkdir()
     for name, content in files.items():
         (dest / name).write_bytes(content)
-    zip_dest.write_bytes(archive)
+    zip_dest.write_bytes(archive_bytes)
     index = site_dir / "index.html"
     page = index.read_text(encoding="utf-8")
     report_id = entry["report_id"]

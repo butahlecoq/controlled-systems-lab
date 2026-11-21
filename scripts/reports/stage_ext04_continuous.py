@@ -4,23 +4,28 @@ from __future__ import annotations
 
 import argparse
 import csv
-from html import escape
 import hashlib
-import json
-from pathlib import Path
-import zipfile
-
 import importlib.util
 import io
+import json
 import statistics
 import tempfile
+import zipfile
+from html import escape
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+# Preserve the original publisher identity only with the exact saved inputs and ZIP.
+HISTORICAL_REPORT_ID = "ext04-continuous-ebcf879d07ee9157"
+HISTORICAL_INPUTS_SHA256 = "8bc977f90423bb348cc7536b05d7059f2b5f76044aedd9d537aac9b019b8bc2e"
+HISTORICAL_PUBLISHER_SHA256 = "82e3067182abc3c6bd603b94ed8734638744ffbc399c3a2d9baa7c39fc4b63be"
+HISTORICAL_ZIP_SHA256 = "77bc06c96b12cf6628039325e3c0326e998fd40165cb1c5f549ae22ddff86c53"
 spec = importlib.util.spec_from_file_location(
     "ext04_continuous_site", ROOT / "scripts/reports/site.py"
 )
+if spec is None or spec.loader is None:
+    raise ImportError("Cannot load the report site module")
 site = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(site)
 
 
@@ -129,7 +134,7 @@ def source_entry(bundle: Path) -> dict:
             "ns_per_call": str(trial["elapsed_ns"] / 5000),
             "status": "passed",
         }
-        for row, trial in zip(csv_rows, trials[1:])
+        for row, trial in zip(csv_rows, trials[1:], strict=True)
     ):
         raise ValueError("saved CSV differs from raw trial rows")
     renderer_spec = importlib.util.spec_from_file_location(
@@ -225,15 +230,30 @@ def public_zip(report_id: str, files: dict[str, bytes]) -> bytes:
     return buf.getvalue()
 
 
-def entry_for(bundle: Path) -> dict:
+def prepare_publication(bundle: Path) -> tuple[dict, dict[str, bytes], bytes]:
     entry = source_entry(bundle)
     files = public_files(bundle, entry)
-    archive = public_zip(entry["report_id"], files)
-    return {
-        **entry,
-        "public_files_sha256": {name: sha(content) for name, content in sorted(files.items())},
-        "zip_sha256": sha(archive),
-    }
+    archive_bytes = public_zip(entry["report_id"], files)
+    zip_sha256 = sha(archive_bytes)
+    if entry["report_id"] == HISTORICAL_REPORT_ID:
+        inputs = json.dumps(entry["files"], sort_keys=True, separators=(",", ":")).encode()
+        if sha(inputs) != HISTORICAL_INPUTS_SHA256 or zip_sha256 != HISTORICAL_ZIP_SHA256:
+            raise ValueError("Historical EXT-04 input or archive checksum differs")
+        entry["publisher_sha256"] = HISTORICAL_PUBLISHER_SHA256
+    return (
+        {
+            **entry,
+            "public_files_sha256": {name: sha(content) for name, content in sorted(files.items())},
+            "zip_sha256": zip_sha256,
+        },
+        files,
+        archive_bytes,
+    )
+
+
+def entry_for(bundle: Path) -> dict:
+    entry, _, _ = prepare_publication(bundle)
+    return entry
 
 
 def stage(catalog_path: Path, site_dir: Path) -> str:
@@ -245,11 +265,9 @@ def stage(catalog_path: Path, site_dir: Path) -> str:
         raise ValueError("EXT-04 continuous publication catalog differs")
     entry = catalog["reports"][0]
     bundle = catalog_path.parent / entry["source_report_id"]
-    expected = entry_for(bundle)
+    expected, files, archive_bytes = prepare_publication(bundle)
     if entry != expected:
         raise ValueError("continuous publication catalog differs from bundle")
-    files = public_files(bundle, entry)
-    archive = public_zip(entry["report_id"], files)
     site_dir = Path(site_dir)
     dest = site_dir / entry["report_id"]
     zip_dest = site_dir / (entry["report_id"] + ".zip")
@@ -259,7 +277,7 @@ def stage(catalog_path: Path, site_dir: Path) -> str:
     dest.mkdir()
     for name, content in files.items():
         (dest / name).write_bytes(content)
-    zip_dest.write_bytes(archive)
+    zip_dest.write_bytes(archive_bytes)
     index = site_dir / "index.html"
     text = index.read_text(encoding="utf-8")
     if text.count("</ul>") != 1 or entry["report_id"] in text:

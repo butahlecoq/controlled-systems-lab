@@ -152,6 +152,16 @@ on:
       - 'tests/reporting/test_geo07_dependent_publication.py'
       - 'tests/reporting/test_finite_feedback_publication.py'
       - 'tests/reporting/test_ext04_publication.py'
+      - 'scripts/reports/stage_ext04_continuous.py'
+      - 'scripts/reports/stage_ext04_affine_synthesis.py'
+      - 'scripts/reports/stage_ext04_h_policy.py'
+      - 'tests/reporting/test_ext04_affine_synthesis_publication.py'
+      - 'reports/algorithm-results/ext04-continuous-publications.json'
+      - 'reports/algorithm-results/ext04-affine-synthesis-publications.json'
+      - 'reports/algorithm-results/ext04-h-policy-publications.json'
+      - 'reports/algorithm-results/ext04-continuous-ebcf879d07ee9157/**'
+      - 'reports/algorithm-results/ext04-affine-synthesis-7eadf7c7ecbb2bbd/**'
+      - 'reports/algorithm-results/ext04-h-policy-0c0a95116ce4642b/**'
       - 'tests/reporting/test_report_lifecycle.py'
       - 'scripts/reports/requirements.txt'
       - 'scripts/reports/frozen_native_bundle.py'
@@ -390,6 +400,16 @@ on:
       - 'tests/reporting/test_geo07_dependent_publication.py'
       - 'tests/reporting/test_finite_feedback_publication.py'
       - 'tests/reporting/test_ext04_publication.py'
+      - 'scripts/reports/stage_ext04_continuous.py'
+      - 'scripts/reports/stage_ext04_affine_synthesis.py'
+      - 'scripts/reports/stage_ext04_h_policy.py'
+      - 'tests/reporting/test_ext04_affine_synthesis_publication.py'
+      - 'reports/algorithm-results/ext04-continuous-publications.json'
+      - 'reports/algorithm-results/ext04-affine-synthesis-publications.json'
+      - 'reports/algorithm-results/ext04-h-policy-publications.json'
+      - 'reports/algorithm-results/ext04-continuous-ebcf879d07ee9157/**'
+      - 'reports/algorithm-results/ext04-affine-synthesis-7eadf7c7ecbb2bbd/**'
+      - 'reports/algorithm-results/ext04-h-policy-0c0a95116ce4642b/**'
       - 'tests/reporting/test_report_lifecycle.py'
       - 'scripts/reports/requirements.txt'
       - 'scripts/reports/frozen_native_bundle.py'
@@ -537,6 +557,24 @@ jobs:
         run: python -m unittest tests.reporting.test_mathematical_presentation
       - name: Validate recorded control figures
         run: python -m unittest tests.reporting.test_recorded_closed_loop_figures tests.reporting.test_viz03_control_figures
+      - name: Replay archived EXT-04 continuous, affine and H-domain policies
+        env:
+          MPLBACKEND: Agg
+        run: |
+          python -m unittest tests.reporting.test_ext04_affine_synthesis_publication
+          results=reports/algorithm-results
+          site=$(mktemp -d "$RUNNER_TEMP/ext04-policies.XXXXXXXX")
+          printf '<html><body><ul></ul></body></html>\n' > "$site/index.html"
+          for variant in continuous affine-synthesis h-policy; do
+            catalog="$results/ext04-$variant-publications.json"
+            report=$(jq -er '.reports[0].source_report_id' "$catalog")
+            checksum=$(jq -er '.reports[0].zip_sha256' "$catalog")
+            stager="scripts/reports/stage_ext04_${variant//-/_}.py"
+            python "$stager" --source "$results/$report" > "$site/$variant.catalogue.json"
+            cmp "$catalog" "$site/$variant.catalogue.json"
+            python "$stager" --catalog "$catalog" --site "$site"
+            printf '%s  %s\n' "$checksum" "$site/$report.zip" | sha256sum --check
+          done
       - name: Exercise Pages deployment freshness and source identity
         run: python -m unittest tests.reporting.test_deploy_head
       - name: Exercise saved publication and collector consumer families

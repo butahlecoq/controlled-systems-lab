@@ -2,25 +2,30 @@ from __future__ import annotations
 
 import argparse
 import csv
-from html import escape
 import hashlib
 import importlib.util
 import io
 import json
-from pathlib import Path
 import re
 import statistics
 import sys
-import tempfile
 import zipfile
+from html import escape
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+# Preserve the original publisher identity only with the exact saved inputs and ZIP.
+HISTORICAL_REPORT_ID = "ext04-affine-synthesis-7eadf7c7ecbb2bbd"
+HISTORICAL_INPUTS_SHA256 = "c3fa1a2b5805eaf23e313ccf5d095a64aabab897acd7646d844f9dd85db6c7ac"
+HISTORICAL_PUBLISHER_SHA256 = "24aec896f9fcc2e93edba65db8ca844fcbf95468d2f277a838180bb89ab3cb2b"
+HISTORICAL_ZIP_SHA256 = "70e4e44c691c11babb46aaf039f04b1571838645fe96e6cf905b16b3808c7aae"
 sys.path.insert(0, str(ROOT / "scripts/reports"))
 site_spec = importlib.util.spec_from_file_location(
     "ext04_affine_site", ROOT / "scripts/reports/site.py"
 )
+if site_spec is None or site_spec.loader is None:
+    raise ImportError("Cannot load the report site module")
 site = importlib.util.module_from_spec(site_spec)
-assert site_spec.loader is not None
 site_spec.loader.exec_module(site)
 
 
@@ -157,7 +162,7 @@ def source_entry(bundle: Path) -> dict:
             "ns_per_call": str(trial["elapsed_ns"] / 100),
             "status": "passed",
         }
-        for row, trial in zip(rows, trials[1:])
+        for row, trial in zip(rows, trials[1:], strict=True)
     ):
         raise ValueError("summary CSV differs from raw rows")
     archive_path = bundle / (report_id + ".zip")
@@ -238,14 +243,30 @@ def archive(report_id: str, files: dict[str, bytes]) -> bytes:
     return buffer.getvalue()
 
 
-def entry_for(bundle: Path) -> dict:
+def prepare_publication(bundle: Path) -> tuple[dict, dict[str, bytes], bytes]:
     entry = source_entry(bundle)
     files = public_files(bundle, entry)
-    return {
-        **entry,
-        "public_files_sha256": {name: sha(content) for name, content in sorted(files.items())},
-        "zip_sha256": sha(archive(entry["report_id"], files)),
-    }
+    archive_bytes = archive(entry["report_id"], files)
+    zip_sha256 = sha(archive_bytes)
+    if entry["report_id"] == HISTORICAL_REPORT_ID:
+        inputs = json.dumps(entry["files"], sort_keys=True, separators=(",", ":")).encode()
+        if sha(inputs) != HISTORICAL_INPUTS_SHA256 or zip_sha256 != HISTORICAL_ZIP_SHA256:
+            raise ValueError("Historical EXT-04 input or archive checksum differs")
+        entry["publisher_sha256"] = HISTORICAL_PUBLISHER_SHA256
+    return (
+        {
+            **entry,
+            "public_files_sha256": {name: sha(content) for name, content in sorted(files.items())},
+            "zip_sha256": zip_sha256,
+        },
+        files,
+        archive_bytes,
+    )
+
+
+def entry_for(bundle: Path) -> dict:
+    entry, _, _ = prepare_publication(bundle)
+    return entry
 
 
 def stage(catalog_path: Path, site_dir: Path) -> str:
@@ -257,10 +278,9 @@ def stage(catalog_path: Path, site_dir: Path) -> str:
         raise ValueError("EXT-04 affine-synthesis publication catalogue differs")
     entry = catalog["reports"][0]
     bundle = catalog_path.parent / entry["source_report_id"]
-    if entry != entry_for(bundle):
+    expected, files, archive_bytes = prepare_publication(bundle)
+    if entry != expected:
         raise ValueError("publication catalogue differs from the report bundle")
-    files = public_files(bundle, entry)
-    zip_bytes = archive(entry["report_id"], files)
     site_dir = Path(site_dir)
     dest = site_dir / entry["report_id"]
     zip_dest = site_dir / (entry["report_id"] + ".zip")
@@ -270,7 +290,7 @@ def stage(catalog_path: Path, site_dir: Path) -> str:
     dest.mkdir()
     for name, content in files.items():
         (dest / name).write_bytes(content)
-    zip_dest.write_bytes(zip_bytes)
+    zip_dest.write_bytes(archive_bytes)
     index = site_dir / "index.html"
     text = index.read_text(encoding="utf-8")
     if text.count("</ul>") != 1 or entry["report_id"] in text:
