@@ -2,8 +2,24 @@
 """Build, measure, validate, and bundle the SYN-02 terminal relation report."""
 
 from __future__ import annotations
-import argparse, csv, datetime as dt, hashlib, html, io, json, os, platform, statistics, subprocess, sys, zipfile
+
+import argparse
+import csv
+import datetime as dt
+import hashlib
+import html
+import importlib
+import io
+import json
+import os
+import platform
+import statistics
+import subprocess
+import sys
+import zipfile
 from pathlib import Path
+from typing import NotRequired, TypedDict
+
 from publication_map import project as publication_map
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -16,7 +32,20 @@ UNIT_BOX = {
     "equalities": [],
     "equality_values": [],
 }
-SCENARIOS = {
+
+
+class Scenario(TypedDict):
+    input: dict[str, object]
+    outcome: str
+    termination: str
+    provider: str
+    value: float | None
+    relation: str
+    samples: list[tuple[list[float], bool]]
+    backend_observation: NotRequired[str]
+
+
+SCENARIOS: dict[str, Scenario] = {
     "linear-face": {
         "input": {"type": "linear", "coefficients": [1, 0], "offset": 7},
         "outcome": "optimal",
@@ -272,7 +301,8 @@ def validate_trial(row):
         ):
             failures.append("optimal_result_presence")
         actual = row.get("primal_value")
-        if actual is None or abs(actual - oracle["value"]) > 1e-7:
+        expected_value = oracle["value"]
+        if actual is None or expected_value is None or abs(actual - expected_value) > 1e-7:
             failures.append("literal_objective")
         if (
             row.get("relation_support") != "unestablished"
@@ -307,11 +337,11 @@ def validate_trial(row):
             failures.append("relation_shape")
         for point, expected in oracle["samples"]:
             feasible = all(
-                sum(a * x for a, x in zip(line, point)) <= b + 1e-7
-                for line, b in zip(inequalities, upper)
+                sum(a * x for a, x in zip(line, point, strict=False)) <= b + 1e-7
+                for line, b in zip(inequalities, upper, strict=False)
             ) and all(
-                abs(sum(a * x for a, x in zip(line, point)) - b) <= 1e-7
-                for line, b in zip(equalities, rhs)
+                abs(sum(a * x for a, x in zip(line, point, strict=False)) - b) <= 1e-7
+                for line, b in zip(equalities, rhs, strict=False)
             )
             if feasible != expected:
                 failures.append("literal_relation_sample")
@@ -617,7 +647,6 @@ def write_bundle(
         json.dumps(row, sort_keys=True, separators=(",", ":"), allow_nan=False) + "\n"
         for row in raw
     ).encode()
-    rows = [r for r in raw if not r["warmup"]]
     (bundle / "trials.csv").write_bytes(trials_csv_bytes(raw))
     (bundle / "summary.csv").write_bytes(summary_csv_bytes(payload["summary"]))
     (bundle / "raw-events.jsonl").write_bytes(raw_bytes)
@@ -734,7 +763,7 @@ def collect(a, state):
     require(a.cmake.is_file(), "CMake executable not found")
     require(not a.build_dir.exists(), "build directory must be fresh")
     try:
-        import psutil
+        psutil = importlib.import_module("psutil")
     except ImportError as e:
         raise RuntimeError("psutil required for host/environment and profile observations") from e
     build = a.build_dir.resolve()
@@ -800,11 +829,13 @@ def collect(a, state):
         (build / ".cmake/api/v1/reply" / idx["reply"]["codemodel-v2"]["jsonFile"]).read_text()
     )
     config_model = next((c for c in cm["configurations"] if c["name"] == "Release"), None)
-    require(config_model is not None, "Release codemodel absent")
+    if config_model is None:
+        raise ValueError("Release codemodel absent")
     target = next(
         (t for t in config_model["targets"] if t["name"] == "csl_syn02_terminal_report"), None
     )
-    require(target is not None, "report executable absent from codemodel")
+    if target is None:
+        raise ValueError("report executable absent from codemodel")
     target_doc = json.loads((build / ".cmake/api/v1/reply" / target["jsonFile"]).read_text())
     groups = [g for g in target_doc.get("compileGroups", []) if g.get("language") == "CXX"]
     require(
@@ -979,7 +1010,6 @@ def collect(a, state):
 
     compiler_id = re.search(r'set\(CMAKE_CXX_COMPILER_ID "([^"]+)"\)', compiler_text)
     compiler_version = re.search(r'set\(CMAKE_CXX_COMPILER_VERSION "([^"]+)"\)', compiler_text)
-    target_by_id = {t["id"]: t for t in config_model["targets"]}
     target_docs = {}
     for item in config_model["targets"]:
         target_docs[item["id"]] = json.loads(
@@ -1227,7 +1257,7 @@ def main():
             failure_dir = persist_failure(a, state, error)
         except Exception as persist_error:
             print(f"Failed to persist collection evidence: {persist_error}", file=sys.stderr)
-            raise error
+            raise error from persist_error
         print(
             f"Collection failed at {state['stage']}; durable evidence: {failure_dir}",
             file=sys.stderr,
