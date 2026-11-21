@@ -1,17 +1,17 @@
-from pathlib import Path
 import json
 import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports/exp824"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
+import stage_issue824_zonotope as publisher
+from exp824 import make_report
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports"))
-import stage_issue824_zonotope as publisher
-
-sys.path.insert(0, str(ROOT / "scripts/reports/exp824"))
-import make_report
 
 
 def reseal_capture(source: Path, changed: Path, update_capture) -> None:

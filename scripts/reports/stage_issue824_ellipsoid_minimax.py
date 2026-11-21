@@ -5,8 +5,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import report_source_identity
@@ -67,7 +67,8 @@ def verified_bundle(source: Path) -> dict[str, bytes]:
         ROOT, capture.get("source_commit", ""), capture.get("source_files_sha256", {})
     ):
         raise ValueError("issue #824 ellipsoid source files differ from the captured commit")
-    planar = files["planar-example.html"].decode("utf-8")
+    # The companion page must also be valid UTF-8.
+    files["planar-example.html"].decode("utf-8")
     planar_ellipse = files["ellipsoid-planar-example.html"].decode("utf-8")
     if "all four exact vertices" not in planar_ellipse or "A=[[2,0],[0,1]]" not in planar_ellipse:
         raise ValueError("issue #824 planar ellipsoid example omits its input or inclusion claim")

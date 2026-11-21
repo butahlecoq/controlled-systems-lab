@@ -1,26 +1,18 @@
 from __future__ import annotations
 
-import importlib.util
 import json
-from pathlib import Path
 import shutil
 import sys
 import tempfile
 import unittest
+from pathlib import Path
+from unittest import mock
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
+import stage_issue824_matched_minimax as STAGER
+import visual_examples as VISUAL
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports"))
-STAGER_PATH = ROOT / "scripts/reports/stage_issue824_matched_minimax.py"
-SPEC = importlib.util.spec_from_file_location("issue824_matched_stage", STAGER_PATH)
-assert SPEC is not None and SPEC.loader is not None
-STAGER = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(STAGER)
-VISUAL_SPEC = importlib.util.spec_from_file_location(
-    "issue824_visual_examples", ROOT / "scripts/reports/visual_examples.py"
-)
-assert VISUAL_SPEC is not None and VISUAL_SPEC.loader is not None
-VISUAL = importlib.util.module_from_spec(VISUAL_SPEC)
-VISUAL_SPEC.loader.exec_module(VISUAL)
 BUNDLE = ROOT / "reports/algorithm-results/issue824-two-points-matched-minimax-v1"
 
 
@@ -95,11 +87,10 @@ class Issue824MatchedMinimaxPublicationTest(unittest.TestCase):
         failed["error"] = "synthetic captured selector failure"
         failed.pop("outcome")
         check = STAGER.check_matched_minimax.check(result)
-        original_figures = VISUAL.SAVED_FIGURES
-        VISUAL.SAVED_FIGURES = tuple(
-            example for example in original_figures if example.get("route") == BUNDLE.name
+        figures = tuple(
+            example for example in VISUAL.SAVED_FIGURES if example.get("route") == BUNDLE.name
         )
-        try:
+        with mock.patch.object(VISUAL, "SAVED_FIGURES", figures):
             with tempfile.TemporaryDirectory() as temporary:
                 site = Path(temporary)
                 STAGER.stage(BUNDLE, site)
@@ -111,8 +102,6 @@ class Issue824MatchedMinimaxPublicationTest(unittest.TestCase):
                 self.assertIn("Incomplete evidence", cards)
                 self.assertIn("24 completed outcomes checked across 25/25 attempts", cards)
                 self.assertNotIn("each score all 27 plans", cards)
-        finally:
-            VISUAL.SAVED_FIGURES = original_figures
 
     def test_does_not_overwrite_an_existing_route(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

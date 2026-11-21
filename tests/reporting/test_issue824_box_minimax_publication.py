@@ -1,13 +1,14 @@
-from pathlib import Path
 import shutil
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
 import stage_issue824_box_minimax as publisher
 import visual_examples
+
+ROOT = Path(__file__).resolve().parents[2]
 
 
 class Issue824BoxMinimaxPublicationTests(unittest.TestCase):

@@ -1,17 +1,15 @@
 from __future__ import annotations
 
-import importlib.util
 import json
-from pathlib import Path
+import sys
 import tempfile
 import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
+import stage_issue824_nominal as STAGER
 
 ROOT = Path(__file__).resolve().parents[2]
-MODULE_PATH = ROOT / "scripts/reports/stage_issue824_nominal.py"
-SPEC = importlib.util.spec_from_file_location("issue824_nominal_stage", MODULE_PATH)
-assert SPEC is not None and SPEC.loader is not None
-STAGER = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(STAGER)
 
 
 class Issue824NominalPublicationTest(unittest.TestCase):

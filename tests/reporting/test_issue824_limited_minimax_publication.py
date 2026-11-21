@@ -1,26 +1,18 @@
 from __future__ import annotations
 
-import importlib.util
 import json
-from pathlib import Path
 import shutil
 import sys
 import tempfile
 import unittest
+from pathlib import Path
+from unittest import mock
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
+import stage_issue824_limited_minimax as STAGER
+import visual_examples as VISUAL
 
 ROOT = Path(__file__).resolve().parents[2]
-STAGER_PATH = ROOT / "scripts/reports/stage_issue824_limited_minimax.py"
-SPEC = importlib.util.spec_from_file_location("issue824_limited_stage", STAGER_PATH)
-assert SPEC is not None and SPEC.loader is not None
-STAGER = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(STAGER)
-sys.path.insert(0, str(ROOT / "scripts/reports"))
-VISUAL_SPEC = importlib.util.spec_from_file_location(
-    "issue824_limited_visual_examples", ROOT / "scripts/reports/visual_examples.py"
-)
-assert VISUAL_SPEC is not None and VISUAL_SPEC.loader is not None
-VISUAL = importlib.util.module_from_spec(VISUAL_SPEC)
-VISUAL_SPEC.loader.exec_module(VISUAL)
 BUNDLE = ROOT / "reports/algorithm-results/issue824-two-points-matched-minimax-resource-v1"
 
 
@@ -62,11 +54,10 @@ class Issue824LimitedMinimaxPublicationTest(unittest.TestCase):
                 self.assertEqual((staged / name).read_bytes(), files[name])
 
     def test_gallery_includes_resource_limited_route(self) -> None:
-        original_figures = VISUAL.SAVED_FIGURES
-        VISUAL.SAVED_FIGURES = tuple(
-            example for example in original_figures if example.get("route") == BUNDLE.name
+        figures = tuple(
+            example for example in VISUAL.SAVED_FIGURES if example.get("route") == BUNDLE.name
         )
-        try:
+        with mock.patch.object(VISUAL, "SAVED_FIGURES", figures):
             with tempfile.TemporaryDirectory() as temporary:
                 site = Path(temporary)
                 STAGER.stage(BUNDLE, site)
@@ -75,8 +66,6 @@ class Issue824LimitedMinimaxPublicationTest(unittest.TestCase):
                 )
                 self.assertIn("Compare five minimax set tracks under shared resource limits", cards)
                 self.assertIn("8 GiB process-tree profile", cards)
-        finally:
-            VISUAL.SAVED_FIGURES = original_figures
 
     def test_rejects_corrupt_resource_profile(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

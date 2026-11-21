@@ -5,13 +5,12 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-sys.path.insert(0, str(Path(__file__).resolve().parent / "exp824"))
-import check_matched_minimax
 import report_source_identity
+from exp824 import check_matched_minimax
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/issue824-two-points-matched-minimax-v1"

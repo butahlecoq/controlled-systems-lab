@@ -6,14 +6,13 @@ import argparse
 import hashlib
 import io
 import json
-from pathlib import Path
 import sys
 import tarfile
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-sys.path.insert(0, str(Path(__file__).resolve().parent / "exp824"))
-import check_nominal
 import report_source_identity
+from exp824 import check_nominal
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/issue824-two-points-nominal-v1"

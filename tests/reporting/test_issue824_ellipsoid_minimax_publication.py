@@ -1,15 +1,16 @@
-from pathlib import Path
 import json
 import shutil
 import sys
 import tempfile
 import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
+import stage_issue824_ellipsoid_minimax as publisher
+import stage_issue824_zonotope as previous_publisher
+import visual_examples
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports"))
-import stage_issue824_zonotope as previous_publisher
-import stage_issue824_ellipsoid_minimax as publisher
-import visual_examples
 
 
 class Issue824EllipsoidMinimaxPublicationTests(unittest.TestCase):

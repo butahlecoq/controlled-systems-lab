@@ -45,6 +45,15 @@ on:
       - 'tests/reporting/test_landing.py'
       - 'tests/reporting/test_plot.py'
       - 'scripts/reports/report_source_identity.py'
+      - 'scripts/reports/stage_issue824_*.py'
+      - 'tests/reporting/test_issue824_*_publication.py'
+      - 'scripts/reports/exp824/check_matched_minimax.py'
+      - 'scripts/reports/exp824/check_nominal.py'
+      - 'scripts/reports/exp824/check_two_points_box.py'
+      - 'scripts/reports/exp824/make_report.py'
+      - 'scripts/reports/mpc05/reference.py'
+      - 'reports/algorithm-results/catalog.json'
+      - 'reports/algorithm-results/issue824-two-points-*/**'
       - 'scripts/reports/publication_policy.py'
       - 'scripts/reports/*_publication_policy.py'
       - 'scripts/reports/registered_report_policies.py'
@@ -282,6 +291,15 @@ on:
       - 'tests/reporting/test_landing.py'
       - 'tests/reporting/test_plot.py'
       - 'scripts/reports/report_source_identity.py'
+      - 'scripts/reports/stage_issue824_*.py'
+      - 'tests/reporting/test_issue824_*_publication.py'
+      - 'scripts/reports/exp824/check_matched_minimax.py'
+      - 'scripts/reports/exp824/check_nominal.py'
+      - 'scripts/reports/exp824/check_two_points_box.py'
+      - 'scripts/reports/exp824/make_report.py'
+      - 'scripts/reports/mpc05/reference.py'
+      - 'reports/algorithm-results/catalog.json'
+      - 'reports/algorithm-results/issue824-two-points-*/**'
       - 'scripts/reports/publication_policy.py'
       - 'scripts/reports/*_publication_policy.py'
       - 'scripts/reports/registered_report_policies.py'
@@ -550,6 +568,31 @@ jobs:
         run: python -m unittest tests.reporting.test_issue944_each_choice_publication tests.reporting.test_issue944_postfix_publication
       - name: Check the locked source-only native row-scaling publication
         run: python -m unittest discover -s tests/reporting -p 'test_stage_native_row_scaling_diagnostic.py'
+      - name: Replay the ten saved TwoPoints publications
+        run: |
+          # The full checkout includes evidence tags. Fetch the two retained
+          # PR refs for the additional matched-profile source commits.
+          git fetch --no-tags origin refs/pull/846/head refs/pull/849/head
+          python -m unittest discover -s tests/reporting -p 'test_issue824_*_publication.py'
+          site=$(mktemp -d "$RUNNER_TEMP/issue824-replay.XXXXXXXX")
+          printf '<ul></ul>\n' > "$site/index.html"
+          while read -r publisher suffix; do
+            source="reports/algorithm-results/issue824-two-points-$suffix"
+            route=$(python "scripts/reports/stage_issue824_$publisher.py" --source "$source" --site "$site")
+            test "$route" = "${source##*/}"
+            diff -r "$source" "$site/$route"
+          done <<'ROUTES'
+          zonotope zonotope-pilot-v2
+          box_minimax box-pilot-v4
+          zonotope_minimax zonotope-minimax-v1
+          zonotope_minimax zonotope-minimax-v2
+          ellipsoid_minimax ellipsoid-minimax-v1
+          ellipsoid_minimax ellipsoid-minimax-v2
+          nominal nominal-v1
+          nominal nominal-v2
+          matched_minimax matched-minimax-v1
+          limited_minimax matched-minimax-resource-v1
+          ROUTES
       - name: Check the frozen environment report routes and ZIPs
         run: python -m unittest tests.reporting.test_env717_stager_publication
       - name: Check native strategy starts, actuation and retry checkpoints
