@@ -265,6 +265,15 @@ def fixture_payload(stamp="manual"):
     return finalize(payload, stamp)
 
 
+def unique_json_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON key: {key}")
+        result[key] = value
+    return result
+
+
 def require_driver_geometry(points: object, support: object) -> None:
     limit = sys.float_info.max
 
@@ -377,7 +386,9 @@ def main():
     try:
         for line in stderr.decode("utf-8").splitlines():
             if line.startswith("geo02_warmup="):
-                warmups.append(json.loads(line[len("geo02_warmup=") :]))
+                warmups.append(
+                    json.loads(line[len("geo02_warmup=") :], object_pairs_hook=unique_json_object)
+                )
         warmup_keys = {(row["scenario"], row["repetition"]) for row in warmups}
         expected_warmups = {
             (scenario, repetition) for scenario in SCENARIOS for repetition in range(a.warmups)
