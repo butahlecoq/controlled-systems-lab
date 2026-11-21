@@ -58,7 +58,7 @@ def check_phases(record):
     if t not in (2, 4, 8):
         raise ValueError("unsupported literal phase fixture")
     expected = ((width, nnz), (1, width), (nnz, width))
-    for span, (input_size, output_size) in zip(parts, expected):
+    for span, (input_size, output_size) in zip(parts, expected, strict=True):
         if span["input_size"] != input_size or span["output_size"] != output_size:
             raise ValueError("phase sizes differ from actual literal sparse/program dimensions")
     residual = build["ticks"] - sum(span["ticks"] for span in parts)

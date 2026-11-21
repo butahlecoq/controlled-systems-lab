@@ -6,6 +6,8 @@ spec = importlib.util.spec_from_file_location(
     "scalar_query_oracle",
     Path(__file__).resolve().parents[2] / "benchmarks/reporting/review05/scalar_query_oracle.py",
 )
+if spec is None or spec.loader is None:
+    raise ImportError("Cannot load the maintained REVIEW-05 test subject")
 oracle = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(oracle)
 

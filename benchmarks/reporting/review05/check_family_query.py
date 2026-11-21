@@ -27,7 +27,7 @@ def _rows(h, horizon):
     ):
         if len(matrix) != len(bounds):
             raise ValueError("relation row count mismatch")
-        for row, bound in zip(matrix, bounds):
+        for row, bound in zip(matrix, bounds, strict=True):
             if len(row) != width:
                 raise ValueError("relation width mismatch")
             result.append(([number(x) for x in row], number(bound), equality))
@@ -50,16 +50,19 @@ def _feasible(rows, width):
         a = [x / divisor for x in a]
         b /= divisor
 
-        def substitute(c, d):
+        def substitute(c, d, coefficients, bound, column):
             nonlocal budget
-            factor = c[pivot]
+            factor = c[column]
             budget += width
             if budget > 5000000:
                 raise OracleBudget("exact oracle operation budget exhausted")
-            return ([x - factor * y for x, y in zip(c, a)], d - factor * b)
+            return (
+                [x - factor * y for x, y in zip(c, coefficients, strict=True)],
+                d - factor * bound,
+            )
 
-        eq = [substitute(c, d) for c, d in eq]
-        ine = [(*substitute(c, d), s) for c, d, s in ine]
+        eq = [substitute(c, d, a, b, pivot) for c, d in eq]
+        ine = [(*substitute(c, d, a, b, pivot), s) for c, d, s in ine]
     remaining = set(range(width))
     while True:
         unique = {}
@@ -101,7 +104,9 @@ def _feasible(rows, width):
                 if budget > 5000000:
                     raise OracleBudget("exact oracle operation budget exhausted")
                 p, q = a[pivot], -c[pivot]
-                out.append(([x / p + y / q for x, y in zip(a, c)], b / p + d / q, s or t))
+                out.append(
+                    ([x / p + y / q for x, y in zip(a, c, strict=True)], b / p + d / q, s or t)
+                )
         ine = out
 
 
@@ -119,7 +124,7 @@ def verify_family(h, horizon, terminal_coefficient):
             point.append(point[-1] + u)
         point.extend(map(Fraction, controls))
         for a, b, equality in rows:
-            value = sum(x * y for x, y in zip(a, point))
+            value = sum(x * y for x, y in zip(a, point, strict=True))
             if value != b if equality else value > b:
                 raise ValueError("relation omits an optimal literal history")
     expected = []
@@ -158,7 +163,7 @@ def verify_query(witness, direction, horizon, terminal_coefficient):
     if len(direction) != horizon:
         raise ValueError("direction width mismatch")
     direction = list(map(number, direction))
-    actual = sum(d * number(u[0]) for d, u in zip(direction, witness["controls"]))
+    actual = sum(d * number(u[0]) for d, u in zip(direction, witness["controls"], strict=True))
     optimum = (
         sum(min(Fraction(0), d) for d in direction) if terminal_coefficient == 0 else Fraction(0)
     )

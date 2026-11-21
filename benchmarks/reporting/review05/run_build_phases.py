@@ -14,6 +14,7 @@ import sys
 import time
 from collections import Counter, defaultdict
 from pathlib import Path
+from typing import TypedDict
 
 from check_build_phases import check_phases
 from render_family_query import bound_receipt
@@ -23,6 +24,12 @@ SIDE = "csl.synthesis.strategy-b"
 FILES = [f"{name}-t{t:02}.json" for name in ("horizon01", "family-query-flat") for t in (2, 4, 8)]
 
 
+class PhaseAttempt(TypedDict):
+    attempt: str
+    mathematical_check: str
+    phase_check: dict
+
+
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -30,7 +37,7 @@ def sha(path):
 def summarize(bundle):
     checks = json.loads((bundle / "checks.json").read_text())
     checked = {x["attempt"]: x for x in checks["attempts"]}
-    rows = []
+    rows: list[PhaseAttempt] = []
     groups = defaultdict(list)
     for path in sorted((bundle / "attempts").glob("*/receipt.json")):
         key = str(path.parent.relative_to(bundle))
@@ -52,6 +59,8 @@ def summarize(bundle):
             or receipt.get("refusal_probe")
         ):
             continue
+        if not isinstance(record, dict):
+            raise ValueError("verified REVIEW-05 phase attempt must have a JSON object result")
         groups[(record["fixture"], record["horizon"], receipt["mode"])].append(
             (record, receipt, phase)
         )

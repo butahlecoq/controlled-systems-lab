@@ -10,6 +10,7 @@ import json
 import statistics
 from collections import Counter, defaultdict
 from pathlib import Path
+from typing import Any
 
 
 def bound_receipt(bundle, path, check):
@@ -56,10 +57,12 @@ def summary(bundle):
         attempts.append((key, receipt, record, check))
         if receipt.get("warmup") or receipt.get("refusal_probe") or check["status"] != "verified":
             continue
+        if not isinstance(record, dict):
+            raise ValueError("verified REVIEW-05 attempt must have a JSON object result")
         groups[(record["fixture"], record["horizon"], record["strategy"], receipt["mode"])].append(
             (receipt, record, check)
         )
-    rows = []
+    rows: list[dict[str, Any]] = []
     for key, values in sorted(groups.items()):
         row = {
             "fixture": key[0],

@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import html
 import importlib.util
 import io
 import json
@@ -77,7 +76,8 @@ def _sums(content):
     result = {}
     for line in content.decode("ascii").splitlines():
         match = re.fullmatch(r"([0-9a-f]{64})  (.+)", line)
-        require(match is not None, "invalid REVIEW-05 checksum record")
+        if match is None:
+            raise ValueError("invalid REVIEW-05 checksum record")
         name = match[2]
         _name(name)
         require(name not in result, "duplicate REVIEW-05 checksum path")
@@ -285,6 +285,8 @@ def _module(name):
     spec = importlib.util.spec_from_file_location(
         "_review05_publish_" + name, BENCH / (name + ".py")
     )
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Cannot load REVIEW-05 module {name}")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module

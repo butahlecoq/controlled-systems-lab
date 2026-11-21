@@ -7,11 +7,13 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
-SPEC = importlib.util.spec_from_file_location(
-    "family_query_checker", ROOT / "benchmarks/reporting/review05/check_family_query.py"
-)
+CHECKER_PATH = ROOT / "benchmarks/reporting/review05/check_family_query.py"
+SPEC = importlib.util.spec_from_file_location("family_query_checker", CHECKER_PATH)
+if SPEC is None or SPEC.loader is None:
+    raise ImportError("Cannot load the maintained REVIEW-05 test subject")
 CHECKER = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(CHECKER)
 
@@ -112,7 +114,7 @@ class FamilyQueryTests(unittest.TestCase):
         )
 
     def test_profile_resource_stop_uses_the_same_inconclusive_boundary(self):
-        import profile_family_query
+        from benchmarks.reporting.review05 import profile_family_query
 
         result = profile_family_query.check_process(
             {"returncode": -9, "timed_out": True}, b"", None, None
@@ -139,14 +141,14 @@ class FamilyQueryTests(unittest.TestCase):
                 )
             )
             result = subprocess.run(
-                [sys.executable, str(SPEC.origin), str(root)], capture_output=True
+                [sys.executable, str(CHECKER_PATH), str(root)], capture_output=True
             )
             self.assertEqual(result.returncode, 0, result.stderr)
             checks = json.loads((root / "checks.json").read_text())
             self.assertEqual(checks["attempts"][0]["status"], "inconclusive")
 
     def test_renderer_rejects_raw_receipt_or_scenario_changed_after_check(self):
-        import render_family_query
+        from benchmarks.reporting.review05 import render_family_query
 
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -156,7 +158,10 @@ class FamilyQueryTests(unittest.TestCase):
             (root / "scenarios/case.json").write_text("{}")
             (attempt / "stdout.txt").write_text('{"registered_synthesis_ns":1}')
             (attempt / "stderr.txt").write_bytes(b"")
-            digest = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
+
+            def digest(path: Path) -> str:
+                return hashlib.sha256(path.read_bytes()).hexdigest()
+
             receipt = {
                 "returncode": 0,
                 "timed_out": False,
@@ -204,7 +209,7 @@ class FamilyQueryTests(unittest.TestCase):
             "strategy_version": "1",
             "lineage": [],
         }
-        record = dict(
+        record: dict[str, Any] = dict(
             binding,
             schema="csl.review05.family-query/1",
             scenario_sha256="hash",

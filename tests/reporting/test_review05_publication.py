@@ -21,6 +21,8 @@ ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location(
     "review05_publication", ROOT / "scripts/reports/stage_review05_family_query.py"
 )
+if SPEC is None or SPEC.loader is None:
+    raise ImportError("Cannot load the maintained REVIEW-05 test subject")
 STAGER = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(STAGER)
 QUERY = ROOT / "reports/algorithm-results/review05-family-query-20261110-3b98f5b0"
@@ -250,7 +252,7 @@ class PublicationTests(unittest.TestCase):
                 self.end_headers()
                 self.wfile.write(data)
 
-            def log_message(self, *args):
+            def log_message(self, format: str, *args: object) -> None:
                 pass
 
         server = http.server.HTTPServer(("127.0.0.1", 0), Handler)
