@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from fractions import Fraction
 from functools import lru_cache
-import hashlib
-import html
-import json
 from pathlib import Path
 
 SCALE = 2000
@@ -89,7 +88,7 @@ def reference() -> tuple[
         worst = Fraction(-1)
         for disturbance_history in product(DISTURBANCES, repeat=3):
             state = layers[0][0]
-            for action, disturbance in zip(plan, disturbance_history):
+            for action, disturbance in zip(plan, disturbance_history, strict=True):
                 state = step(state, action, disturbance)
             worst = max(worst, cost(state))
         fixed_values.append(worst)
@@ -135,9 +134,13 @@ def verify_result(result: dict) -> dict:
         raise ValueError(
             "TwoPoints saved state catalogues differ from source-derived exact transitions"
         )
-    for saved_layer, exact_layer in zip(item["bellman_cost_to_go"], values):
+    saved_layers = item["bellman_cost_to_go"]
+    if len(saved_layers) != len(values):
+        raise ValueError("TwoPoints Bellman cost-to-go table stage count differs")
+    for saved_layer, exact_layer in zip(saved_layers, values, strict=True):
         if len(saved_layer) != len(exact_layer) or any(
-            abs(saved - float(exact)) > 1e-9 for saved, exact in zip(saved_layer, exact_layer)
+            abs(saved - float(exact)) > 1e-9
+            for saved, exact in zip(saved_layer, exact_layer, strict=True)
         ):
             raise ValueError(
                 "TwoPoints Bellman cost-to-go table differs from exact finite reference"
@@ -157,7 +160,7 @@ def verify_result(result: dict) -> dict:
             worst = Fraction(-1)
             for history in product(DISTURBANCES, repeat=3 - stage):
                 state = start
-                for action, disturbance in zip(plan, history):
+                for action, disturbance in zip(plan, history, strict=True):
                     state = step(state, action, disturbance)
                 worst = max(worst, Fraction((state[0] - state[2]) ** 2, SCALE**2))
             candidate = (worst, plan)
@@ -294,8 +297,8 @@ def verify_result(result: dict) -> dict:
     plotted_path = source_figure["trajectory"]
     if len(plotted_path) != len(worst_path) or any(
         abs(plotted - exact / SCALE) > 1e-10
-        for plotted_state, exact_state in zip(plotted_path, worst_path)
-        for plotted, exact in zip(plotted_state, exact_state)
+        for plotted_state, exact_state in zip(plotted_path, worst_path, strict=True)
+        for plotted, exact in zip(plotted_state, exact_state, strict=True)
     ):
         raise ValueError(
             "Existing phase-plane path differs from causal policy's replayed worst-case path"
@@ -356,7 +359,7 @@ def verify_result(result: dict) -> dict:
             "backward_layer_counts": [len(layer) for layer in expected_backward],
             "forward_backward_intersection_counts": [
                 len(forward & backward)
-                for forward, backward in zip(expected_layers, expected_backward)
+                for forward, backward in zip(expected_layers, expected_backward, strict=True)
             ],
         },
         "reachability_geometry": source_figure,

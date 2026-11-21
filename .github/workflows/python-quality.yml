@@ -34,6 +34,15 @@ on:
       - 'scripts/catalogue/**'
       - 'reports/algorithm-results/tooling/**'
       - 'scripts/reports/report_data.py'
+      - 'scripts/reports/mpc03/b08_report.py'
+      - 'scripts/reports/mpc05/reference.py'
+      - 'scripts/reports/stage_mpc03_b08.py'
+      - 'scripts/reports/stage_mpc05_causal_tree.py'
+      - 'tests/reporting/test_mpc03_b08_report.py'
+      - 'tests/reporting/test_mpc05_causal_tree_publication.py'
+      - 'tests/reporting/test_mpc05_reference.py'
+      - 'reports/algorithm-results/mpc03-b08-l04-miQCP-v1/**'
+      - 'reports/algorithm-results/mpc05-causal-tree-pilot-v2/**'
       - 'tests/reporting/test_report_data.py'
       - 'tests/reporting/test_render.py'
       - 'tests/reporting/test_publication_policy.py'
@@ -324,6 +333,15 @@ on:
       - 'scripts/catalogue/**'
       - 'reports/algorithm-results/tooling/**'
       - 'scripts/reports/report_data.py'
+      - 'scripts/reports/mpc03/b08_report.py'
+      - 'scripts/reports/mpc05/reference.py'
+      - 'scripts/reports/stage_mpc03_b08.py'
+      - 'scripts/reports/stage_mpc05_causal_tree.py'
+      - 'tests/reporting/test_mpc03_b08_report.py'
+      - 'tests/reporting/test_mpc05_causal_tree_publication.py'
+      - 'tests/reporting/test_mpc05_reference.py'
+      - 'reports/algorithm-results/mpc03-b08-l04-miQCP-v1/**'
+      - 'reports/algorithm-results/mpc05-causal-tree-pilot-v2/**'
       - 'tests/reporting/test_report_data.py'
       - 'tests/reporting/test_render.py'
       - 'tests/reporting/test_publication_policy.py'
@@ -714,6 +732,8 @@ jobs:
         run: python -m unittest tests.reporting.test_lotka_volterra_sampled
       - name: Check the saved typed-membership 2D example
         run: python -m unittest discover -s tests/reporting -p 'test_history_membership_2d.py'
+      - name: Replay the MPC-03 B08 and MPC-05 causal-tree saved reports
+        run: python -m unittest tests.reporting.test_mpc03_b08_report tests.reporting.test_mpc05_causal_tree_publication tests.reporting.test_mpc05_reference
       - name: Check the four-state projection approximation report
         run: python -m unittest discover -s tests/reporting -p 'test_four_state_projection_approximations.py'
       - name: Check the matched discrete MPC example and visual gallery
