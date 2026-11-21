@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import collect
 
@@ -99,13 +101,20 @@ class CollectionTests(unittest.TestCase):
         self.assertEqual(collect.summarize(trials, warmups, True, missing), record["summary"])
 
     def test_driver_timeout_returns_partial_output_and_aborted_status(self) -> None:
-        result, aborted = collect.run_with_timeout(
-            [sys.executable, "-c", "import time; print('started', flush=True); time.sleep(2)"], 0.05
+        command = ["opt04-driver", "--smoke"]
+        timeout = subprocess.TimeoutExpired(
+            command, 60, output=b"partial output\n", stderr=b"partial diagnostic\n"
         )
+        with mock.patch.object(collect.subprocess, "run", side_effect=timeout) as run:
+            result, aborted = collect.run_with_timeout(command, 60)
 
+        run.assert_called_once_with(
+            command, text=True, capture_output=True, check=False, timeout=60
+        )
         self.assertTrue(aborted)
         self.assertEqual(result.returncode, 124)
-        self.assertIn("started", result.stdout)
+        self.assertEqual(result.stdout, "partial output\n")
+        self.assertEqual(result.stderr, "partial diagnostic\n")
 
 
 class FixtureProvenanceTests(unittest.TestCase):
