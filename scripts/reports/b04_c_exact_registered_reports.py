@@ -21,6 +21,8 @@ SOURCE_ID = "b04-c-exact-dyadic-v1"
 MANIFEST_SHA256 = "8ee378c901c36a148166fa5dd5a2bf2747352847ff1510869bd9babaaf32aee8"
 SNAPSHOT_ROOT = Path("docs/research/evidence/b04-c-publication-source-snapshot")
 SPINE_SNAPSHOT_ROOT = Path("docs/research/evidence/b04-c-publication-spine-source-v1")
+REGISTRATION_SNAPSHOT_ROOT = Path("docs/research/evidence/b04-c-publication-registration-source-v1")
+REGISTRATION_SOURCE = "scripts/reports/b04_c_exact_publication_policy.py"
 SPINE_SNAPSHOT_MANIFEST_SHA256 = "a3307b6537b5a40c4d8b485fe50313e6be062ed4e34fc20aba926bd43541abc4"
 SPINE_SOURCE_FILES = frozenset(
     {
@@ -50,7 +52,7 @@ SOURCE_FILES = (
     "tests/reporting/test_b04_c_exact_fiber.py",
     ".github/workflows/algorithm-reports.yml",
     "scripts/reports/b04_c_exact_registered_reports.py",
-    "scripts/reports/b04_c_exact_publication_policy.py",
+    REGISTRATION_SOURCE,
     "scripts/reports/registered_reports.py",
     "scripts/reports/publication_policy.py",
     "scripts/reports/report_data.py",
@@ -89,7 +91,7 @@ def _pretty(value) -> bytes:
 def _checked_spine_sources(root: Path, recorded: dict[str, str]) -> dict[str, bytes]:
     if root.is_symlink():
         raise ValueError("B04-C publication source root is unsafe")
-    for relative in (SPINE_SNAPSHOT_ROOT, SNAPSHOT_ROOT):
+    for relative in (SPINE_SNAPSHOT_ROOT, SNAPSHOT_ROOT, REGISTRATION_SNAPSHOT_ROOT):
         current = root
         for part in relative.parts:
             current = current / part
@@ -173,7 +175,12 @@ def _verify_bundle(bundle: Path):
         relative = Path(name)
         if relative.is_absolute() or ".." in relative.parts:
             raise ValueError("unsafe B04-C source path")
-        source = ROOT / SNAPSHOT_ROOT / relative if name in SNAPSHOT_FILES else ROOT / relative
+        if name == REGISTRATION_SOURCE:
+            source = ROOT / REGISTRATION_SNAPSHOT_ROOT / relative.name
+        elif name in SNAPSHOT_FILES:
+            source = ROOT / SNAPSHOT_ROOT / relative
+        else:
+            source = ROOT / relative
         if (
             source.is_symlink()
             or not source.is_file()
