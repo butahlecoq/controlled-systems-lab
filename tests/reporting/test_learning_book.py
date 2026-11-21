@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from collections import Counter
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
@@ -92,6 +93,44 @@ class LearningBookTests(unittest.TestCase):
         self.assertEqual({"orientation", "vertex_lp_simplex", "reachable_set_representation",
                           "controller", "supporting_operations", "capstones"},
                          {chapter["group"] for chapter in chapters})
+
+    def test_campaign_tables_match_frozen_full_profile_coverage(self):
+        chapter = next(
+            item for item in self.manifest["chapters"] if item["id"] == "native-substitution-matrix"
+        )
+        raw = ROOT / "docs/examples/closed-loop/campaign-2026-11-18/raw"
+        coverage = json.loads((raw / "coverage.json").read_text())
+        supplemental = json.loads((raw / "targeted-reruns-summary.json").read_text())
+        tasks = {
+            "syn-nl-lv-01": "Lotka–Volterra",
+            "earth-orbit": "Earth orbit",
+            "syn-nl-fuel-01": "Fuel transfer",
+        }
+        outcomes = ("complete", "failed", "inconclusive", "unsupported")
+        counts = {name: Counter() for name in tasks}
+        for cell in coverage["cells"]:
+            counts[cell["task_name"]][cell["attempts"][-1]["category"]] += 1
+        summary = coverage["outcomes"]
+        tables = {table["label"]: table for table in chapter["mathematical_tables"]}
+        graph_table = tables["Final graph outcomes by task"]
+        self.assertEqual(graph_table["columns"], ["task", "admitted", *outcomes])
+        expected_rows = [
+            [label, str(sum(counts[task].values())), *(str(counts[task][name]) for name in outcomes)]
+            for task, label in tasks.items()
+        ]
+        expected_rows.append([
+            "Total",
+            str(summary["admitted_graphs"]),
+            *(str(summary["by_graph_outcome"][name]) for name in outcomes),
+        ])
+        self.assertEqual(graph_table["rows"], expected_rows)
+        self.assertEqual(dict(tables["Campaign accounting"]["rows"]), {
+            "admitted and attempted full-profile graphs": str(summary["attempted_graphs"]),
+            "full-profile attempt records including retries": str(summary["attempt_rows"]),
+            "completed reruns in the separate compatible profile": str(supplemental["outcomes"]["complete"]),
+            "source-incompatible candidates with recorded reasons": str(summary["incompatible_candidates"]),
+            "duplicate catalogue graph references": str(summary["duplicate_catalogue_references"]),
+        })
 
     def test_source_permalinks_bind_to_the_executed_example_bytes(self):
         prefix = "https://github.com/butahlecoq/controlled-systems-lab/blob/"
@@ -638,7 +677,7 @@ Q subset E; E subset [-sqrt(2),sqrt(2)]^2; Q is [-1,1]^2
                 "native-substitution-matrix": [
                     "Retained graph layers and selected policy path",
                     "I_ret[k] = F_ret[k] ∩ B_ret[k]",
-                    "498",
+                    "<td>Total</td><td>513</td><td>483</td><td>7</td><td>15</td><td>8</td>",
                     "513",
                 ],
                 "controller-composition": [
