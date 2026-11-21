@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import html
-from fractions import Fraction
 import hashlib
+import html
 import json
 import statistics
+from fractions import Fraction
 
 SCHEMA = "csl.syn07-ts01-analytic-report/2"
 SOURCE_COMMIT = "e22d9c2aeb05dc7567038801e6a21b8780184c9e"
@@ -192,7 +192,10 @@ def render_html(record):
     errors = validate(record)
     if errors:
         raise ValueError("invalid saved T-S01 record: " + ", ".join(errors))
-    esc = lambda x: html.escape(str(x))
+
+    def esc(value: object) -> str:
+        return html.escape(str(value))
+
     rows = "".join(
         '<tr><th scope="row">'
         + esc(r["id"])

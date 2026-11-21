@@ -6,8 +6,8 @@ import csv
 import hashlib
 import importlib.util
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parents[3] / "reports" / "algorithm-results"
 
@@ -163,28 +163,20 @@ def build(out=None, measurement_dir=None):
             "This report records the profile theorem and exact membership examples; it is not an independent mathematical review of the source implementation.",
         ],
         "performance": {
-            "status": "exploratory_single_strategy" if measurement_dir else "unavailable",
-            "reason": "Seven validated observations from a standalone Release harness; no comparison or speedup claim. Performance conclusions remain inconclusive without a limiter profile."
-            if measurement_dir
-            else "No standalone public T-S01 execution/measurement executable or accepted harness exists at the source commit. The C++ API test is correctness coverage, not a timing harness; no proxy timing is reported.",
+            "status": "exploratory_single_strategy",
+            "reason": "Seven validated observations from a standalone Release harness; no comparison or speedup claim. Performance conclusions remain inconclusive without a limiter profile.",
             "comparison": "none",
             "speedup_claim": False,
         },
     }
     record["scenario"]["sha256"] = report.digest(record["scenario"]["value"])
     record["input"]["sha256"] = report.digest(record["input"]["value"])
-    if measurement_dir:
-        measurement_dir = Path(measurement_dir)
-        measurement = json.loads((measurement_dir / "collection.json").read_text(encoding="utf-8"))
-        record["measurement"] = {
-            **measurement,
-            "events": [
-                json.loads(line)
-                for line in (measurement_dir / "events.jsonl")
-                .read_text(encoding="utf-8")
-                .splitlines()
-            ],
-        }
+    measurement_dir = Path(measurement_dir)
+    collection = json.loads((measurement_dir / "collection.json").read_text(encoding="utf-8"))
+    event_bytes = (measurement_dir / "events.jsonl").read_bytes()
+    events = [json.loads(line) for line in event_bytes.decode("utf-8").splitlines()]
+    measurement = {**collection, "events": events}
+    record["measurement"] = measurement
     errors = report.validate(record)
     if errors:
         raise ValueError("invalid authored record: " + ", ".join(errors))
@@ -201,31 +193,24 @@ def build(out=None, measurement_dir=None):
     )
     (out / "index.html").write_text(report.render_html(record), encoding="utf-8", newline="\n")
     (out / "raw-events.jsonl").write_bytes(b"".join(canonical(row) + b"\n" for row in examples))
-    if measurement_dir:
-        (out / "measurement-events.jsonl").write_bytes(
-            (measurement_dir / "events.jsonl").read_bytes()
-        )
-        write_json(out / "measurement.json", record["measurement"])
-        with (out / "timings.csv").open("w", encoding="utf-8", newline="") as stream:
-            writer = csv.DictWriter(
-                stream,
-                fieldnames=(
-                    "repetition",
-                    "warmup",
-                    "status",
-                    "elapsed_ns",
-                    "consumed_result_marker",
-                    "termination",
-                    "outcome",
-                    "objective_lower",
-                    "objective_upper",
-                    "residuals_available",
-                ),
-                lineterminator="\n",
-            )
-            writer.writeheader()
-            for event in record["measurement"]["events"]:
-                writer.writerow({key: event[key] for key in writer.fieldnames})
+    (out / "measurement-events.jsonl").write_bytes(event_bytes)
+    write_json(out / "measurement.json", measurement)
+    fields = (
+        "repetition",
+        "warmup",
+        "status",
+        "elapsed_ns",
+        "consumed_result_marker",
+        "termination",
+        "outcome",
+        "objective_lower",
+        "objective_upper",
+        "residuals_available",
+    )
+    with (out / "timings.csv").open("w", encoding="utf-8", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
+        writer.writeheader()
+        writer.writerows({key: event[key] for key in fields} for event in events)
     with (out / "trials.csv").open("w", encoding="utf-8", newline="") as stream:
         writer = csv.DictWriter(
             stream,
@@ -244,19 +229,11 @@ def build(out=None, measurement_dir=None):
             "canonical_relation": record["canonical_relation"],
         },
     )
+    # The published Windows bundle uses CRLF for this sidecar.
     (out / "environment.json").write_text(
-        json.dumps(
-            record["measurement"]["environment"]
-            if measurement_dir
-            else {
-                "measurement": "not performed",
-                "timing": "unavailable",
-                "reason": record["performance"]["reason"],
-            },
-            indent=2,
-        )
-        + "\n",
+        json.dumps(measurement["environment"], indent=2) + "\n",
         encoding="utf-8",
+        newline="\r\n",
     )
     (out / "README.md").write_text(
         f"""# T-S01 result bundle\n\nSource commit: `{report.SOURCE_COMMIT}`. Timings are exploratory single-strategy observations, not a performance verdict or speedup comparison.\n\nRebuild a measurement from the pinned clean source worktree, rebuild the bundle in a fresh scratch directory, and validate the report and catalogue with:\n\n```powershell\npython reports/algorithm-results/tooling/ts01/collect.py --cmake 'C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe' --dependency-cache build/ts01-report/_deps --algorithm-source-commit {report.SOURCE_COMMIT} --build-root build/ts01-source-build --out build/ts01-measurement\npython reports/algorithm-results/tooling/ts01/build_bundle.py --measurement-dir build/ts01-measurement --out-dir build/ts01-rebuilt\npython reports/algorithm-results/tooling/ts01/report.py --check reports/algorithm-results/{REPORT_ID}/records.json\npython -m unittest tests.reporting.test_ts01_report -v\npython scripts/reports/site.py --catalog reports/algorithm-results/catalog.json --check --out build/ts01-report-site\n```\n\nSee `index.html` for the full assumptions, exact relation, membership examples, timing scope and assurance limits. `raw-events.jsonl` and `trials.csv` project exact membership results; `measurement-events.jsonl`, `measurement.json` and `timings.csv` retain raw trial timings and provenance.\n""",

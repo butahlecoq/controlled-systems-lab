@@ -4,20 +4,20 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib
 import json
 import os
-from pathlib import Path
 import platform
-import shutil
 import statistics
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
 import report
 
 try:
-    import psutil
+    psutil = importlib.import_module("psutil")
 except ImportError:
     psutil = None
 
@@ -151,7 +151,10 @@ def main():
     target_project = build_dir / "csl_syn07_ts01_report.vcxproj"
     target_root = ET.parse(target_project).getroot()
     namespace = target_root.tag.partition("}")[0].removeprefix("{")
-    qualified = lambda name: "{" + namespace + "}" + name
+
+    def qualified(name: str) -> str:
+        return "{" + namespace + "}" + name
+
     groups = target_root.findall(qualified("ItemDefinitionGroup"))
     release = next(
         (group for group in groups if "Release|x64" in group.attrib.get("Condition", "")), None
