@@ -610,22 +610,31 @@ jobs:
           reports=reports/algorithm-results
           python scripts/reports/stage_mpc05_causal_tree.py --source "$reports/mpc05-causal-tree-pilot-v2" --site "$site"
           python scripts/reports/stage_mpc06_tube.py --source "$reports/mpc06-nilpotent-tube-pilot-v1" --site "$site"
-          python scripts/reports/stage_mpc06_tube_objective.py --site "$site"
+          # A separately installed mpc06 package must not shadow the saved renderer.
+          pythonpath=$(mktemp -d "$RUNNER_TEMP/tube-pythonpath.XXXXXXXX")
+          mkdir "$pythonpath/mpc06"
+          touch "$pythonpath/mpc06/__init__.py"
+          PYTHONPATH="$pythonpath" python scripts/reports/stage_mpc06_tube_objective.py --site "$site"
 
           python - "$site" <<'PYZIP'
+          import hashlib
           import sys
           from pathlib import Path
           from zipfile import ZipFile
 
           site = Path(sys.argv[1])
-          routes = (
-              "mpc05-causal-tree-b3806c9080aea34bf291",
-              "mpc06-tube-405a8ac4eb2bea7ebec8",
-              "mpc06-tube-cost-7e3fe044f4cecc83a90c",
-          )
-          for route in routes:
+          # SHA-256 of the published archives, independently reproduced at the base commit.
+          archive_hashes = {
+              "mpc05-causal-tree-b3806c9080aea34bf291": "3e37a022cccf75b4472f88e9248da64262fe3f5ba57a7d6f1455e96ce754f4e8",
+              "mpc06-tube-405a8ac4eb2bea7ebec8": "5c1c55429d719a497770a732ae4a7110b583c74e7b0cbeaa2d62618515716b23",
+              "mpc06-tube-cost-7e3fe044f4cecc83a90c": "02d6d5dfa6cd51038361916ae8cacb813da62e85fc7c72f9e61a509812070f64",
+          }
+          for route, expected_hash in archive_hashes.items():
+              archive_path = site / f"{route}.zip"
+              if hashlib.sha256(archive_path.read_bytes()).hexdigest() != expected_hash:
+                  raise ValueError(f"Published archive checksum differs for {route}")
               members = {f"{route}/{path.name}": path for path in (site / route).iterdir()}
-              with ZipFile(site / f"{route}.zip") as archive:
+              with ZipFile(archive_path) as archive:
                   names = archive.namelist()
                   if len(names) != len(members) or set(names) != members.keys():
                       raise ValueError(f"Archive inventory differs for {route}")

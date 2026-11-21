@@ -4,16 +4,19 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import re
-import sys
 import zipfile
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from mpc06 import render_tube_objective
-
 ROOT = Path(__file__).resolve().parents[2]
+RENDERER_PATH = ROOT / "scripts/reports/mpc06/render_tube_objective.py"
+render_spec = importlib.util.spec_from_file_location("mpc06_tube_objective_renderer", RENDERER_PATH)
+if render_spec is None or render_spec.loader is None:
+    raise ImportError(f"Cannot load the MPC-06 objective renderer: {RENDERER_PATH}")
+render_tube_objective = importlib.util.module_from_spec(render_spec)
+render_spec.loader.exec_module(render_tube_objective)
 SOURCE = ROOT / "reports/algorithm-results/mpc06-tube-objective-v1"
 SOURCE_MODULES = {
     "benchmarks/scenarios/mpc06-tube-objective-v1.json",
