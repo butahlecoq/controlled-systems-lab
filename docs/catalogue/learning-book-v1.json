@@ -2127,6 +2127,10 @@
           "href": "../examples/catalogue-finite-action-v1/index.html"
         },
         {
+          "label": "Disturbance guarantees and finite causal feedback",
+          "href": "../examples/catalogue-disturbance-control-v1/index.html"
+        },
+        {
           "label": "Model equations, task profiles and outcomes",
           "href": "model-tracks.html#discrete-formulations"
         }
