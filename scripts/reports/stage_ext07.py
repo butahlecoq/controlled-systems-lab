@@ -10,7 +10,14 @@ from html import escape
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-HISTORICAL_STAGER_SHA256 = "5a8803e9f51ae96b61342d7470c7ba4ce74a4232a49a9ec1a875037ed90ae434"
+HISTORICAL_TOOL_SHA256 = {
+    "ext07_collect.py": "38074d97cafaf0c06cb1c6a434692811af94f95b6f33dac8966895ffcdde38cb",
+    "render_saved.py": "46a032403a119e14fdf2af0d61e0070f7876dc51bd84e4905c39ad8d4fbecf0e",
+    "resource_observation.py": "3b2008e43fd2a2e397ad38d4db48218f7359dbc3345d4bfcf535608d69b61b8e",
+    "stage_ext07.py": "5a8803e9f51ae96b61342d7470c7ba4ce74a4232a49a9ec1a875037ed90ae434",
+    "two_parameter_collect.py": "fc75960d1e5ad39034dc3f960a0576d9649256a7c777ace16a757bcb73ba5274",
+    "two_parameter_render_saved.py": "a5ae28a13f0d911b534e731865c9d3cb312deff881ebae2a728643da96400712",
+}
 # These exact saved manifests were admitted by the original stager.
 HISTORICAL_MANIFEST_SHA256 = {
     "4699fb473b04daa04f35141489ba39914bc91cf0870f88cf1b774977dcd429df",
@@ -46,10 +53,13 @@ resource_report = _load_module(
 )
 
 
-def _stager_sha256(manifest_sha256: str) -> str:
+def _tool_sha256(path: Path, manifest_sha256: str) -> str:
+    """Use the recorded tool identity only for an exact reviewed manifest."""
     if manifest_sha256 in HISTORICAL_MANIFEST_SHA256:
-        return HISTORICAL_STAGER_SHA256
-    return hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+        recorded = HISTORICAL_TOOL_SHA256.get(path.name)
+        if recorded is not None:
+            return recorded
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def catalog_entry(bundle: Path) -> dict:
@@ -65,10 +75,10 @@ def catalog_entry(bundle: Path) -> dict:
         return {
             **details,
             "schema": "csl.ext07-resource-observation/1",
-            "collector_sha256": resource_report.sha(
-                (ROOT / "scripts/reports/ext07/resource_observation.py").read_bytes()
+            "collector_sha256": _tool_sha256(
+                ROOT / "scripts/reports/ext07/resource_observation.py", details["manifest_sha256"]
             ),
-            "stager_sha256": _stager_sha256(details["manifest_sha256"]),
+            "stager_sha256": _tool_sha256(Path(__file__), details["manifest_sha256"]),
         }
     if bundle.name.startswith("ext07-hybrid-two-parameter-"):
         details = two_parameter_report.render(bundle, check=True)
@@ -93,13 +103,14 @@ def catalog_entry(bundle: Path) -> dict:
             **details,
             "schema": record["schema"],
             "verifier_id": record["measurement"]["trials"][0]["verifier"],
-            "collector_sha256": two_parameter_report.collect.sha(
-                (ROOT / "scripts/reports/ext07/two_parameter_collect.py").read_bytes()
+            "collector_sha256": _tool_sha256(
+                ROOT / "scripts/reports/ext07/two_parameter_collect.py", details["manifest_sha256"]
             ),
-            "renderer_sha256": two_parameter_report.collect.sha(
-                (ROOT / "scripts/reports/ext07/two_parameter_render_saved.py").read_bytes()
+            "renderer_sha256": _tool_sha256(
+                ROOT / "scripts/reports/ext07/two_parameter_render_saved.py",
+                details["manifest_sha256"],
             ),
-            "stager_sha256": _stager_sha256(details["manifest_sha256"]),
+            "stager_sha256": _tool_sha256(Path(__file__), details["manifest_sha256"]),
         }
     details = report.render(bundle, check=True)
     record = report.validate(bundle)
@@ -115,13 +126,13 @@ def catalog_entry(bundle: Path) -> dict:
     return {
         **details,
         "schema": record["schema"],
-        "collector_sha256": report.collect.sha(
-            (ROOT / "scripts/reports/ext07/ext07_collect.py").read_bytes()
+        "collector_sha256": _tool_sha256(
+            ROOT / "scripts/reports/ext07/ext07_collect.py", details["manifest_sha256"]
         ),
-        "renderer_sha256": report.collect.sha(
-            (ROOT / "scripts/reports/ext07/render_saved.py").read_bytes()
+        "renderer_sha256": _tool_sha256(
+            ROOT / "scripts/reports/ext07/render_saved.py", details["manifest_sha256"]
         ),
-        "stager_sha256": _stager_sha256(details["manifest_sha256"]),
+        "stager_sha256": _tool_sha256(Path(__file__), details["manifest_sha256"]),
     }
 
 
