@@ -69,6 +69,23 @@ and generated scientific data are excluded. The
 Other maintained C++ modules still require
 coverage under [issue 993](https://github.com/butahlecoq/controlled-systems-lab/issues/993).
 
+The Lab's C++ report gate checks the LP and convex report libraries, their clients
+and tests, the shared report runtime and counters, and the OPT-12 capture driver.
+The HiGHS build supplies the analyzer's real translation units. Ninja dependency
+records verify that the built report targets include the four private headers.
+Install the pinned reporting dependencies from `scripts/reports/requirements.txt`
+for the functional smoke tests.
+
+```sh
+cmake -DCSL_CPP_QUALITY_SCOPE=reports -DCSL_CPP_QUALITY_MODE=format -P scripts/ci/check_cpp_core.cmake
+cmake --preset highs -B build/cpp-report-quality -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+cmake --build build/cpp-report-quality --parallel 2 \
+  --target csl_reporting_checks csl_opt12_warm_start_measure
+cmake -DCSL_CPP_QUALITY_SCOPE=reports -DCSL_CPP_QUALITY_MODE=tidy -P scripts/ci/check_cpp_core.cmake
+ctest --test-dir build/cpp-report-quality --output-on-failure --no-tests=error \
+  -R '^(lp_report_tests|convex_report_tests|convex_report_data_tests|convex_report_smoke|report_data_tests|report_render_tests|opt12_report_tests|report_smoke)$'
+```
+
 The Python tools under `scripts/ci` and `scripts/catalogue`, tests under
 `tests/ci`, `scripts/reports/frozen_native_bundle.py`,
 `scripts/reports/stage_native_model_catalogue.py`, and

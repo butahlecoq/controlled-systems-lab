@@ -1,0 +1,108 @@
+name: C++ report tooling quality
+
+on:
+  pull_request:
+    paths:
+      - 'benchmarks/reporting/convex_report.cpp'
+      - 'benchmarks/reporting/convex_report.hpp'
+      - 'benchmarks/reporting/convex_report_main.cpp'
+      - 'benchmarks/reporting/lp_report.cpp'
+      - 'benchmarks/reporting/lp_report.hpp'
+      - 'benchmarks/reporting/lp_report_main.cpp'
+      - 'benchmarks/reporting/opt12_warm_start_measure.cpp'
+      - 'benchmarks/reporting/process_counters.cpp'
+      - 'benchmarks/reporting/process_counters.hpp'
+      - 'benchmarks/reporting/report_runtime.cpp'
+      - 'benchmarks/reporting/report_runtime.hpp'
+      - 'tests/reporting/convex_report_tests.cpp'
+      - 'tests/reporting/lp_report_tests.cpp'
+      - 'cmake/**'
+      - 'CMakeLists.txt'
+      - 'CMakePresets.json'
+      - '.clang-format'
+      - '.clang-tidy'
+      - 'requirements-cpp-quality.txt'
+      - 'scripts/ci/check_cpp_core.cmake'
+      - 'scripts/reports/requirements.txt'
+      - 'scripts/reports/report_data.py'
+      - 'scripts/reports/collector_common.py'
+      - 'scripts/reports/render.py'
+      - 'scripts/reports/plot.py'
+      - 'tests/reporting/test_smoke.py'
+      - 'tests/reporting/test_convex_report.py'
+      - 'tests/reporting/test_report_data.py'
+      - 'tests/reporting/test_render.py'
+      - 'tests/reporting/test_opt12_render.py'
+      - '.github/workflows/cpp-report-quality.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'benchmarks/reporting/convex_report.cpp'
+      - 'benchmarks/reporting/convex_report.hpp'
+      - 'benchmarks/reporting/convex_report_main.cpp'
+      - 'benchmarks/reporting/lp_report.cpp'
+      - 'benchmarks/reporting/lp_report.hpp'
+      - 'benchmarks/reporting/lp_report_main.cpp'
+      - 'benchmarks/reporting/opt12_warm_start_measure.cpp'
+      - 'benchmarks/reporting/process_counters.cpp'
+      - 'benchmarks/reporting/process_counters.hpp'
+      - 'benchmarks/reporting/report_runtime.cpp'
+      - 'benchmarks/reporting/report_runtime.hpp'
+      - 'tests/reporting/convex_report_tests.cpp'
+      - 'tests/reporting/lp_report_tests.cpp'
+      - 'cmake/**'
+      - 'CMakeLists.txt'
+      - 'CMakePresets.json'
+      - '.clang-format'
+      - '.clang-tidy'
+      - 'requirements-cpp-quality.txt'
+      - 'scripts/ci/check_cpp_core.cmake'
+      - 'scripts/reports/requirements.txt'
+      - 'scripts/reports/report_data.py'
+      - 'scripts/reports/collector_common.py'
+      - 'scripts/reports/render.py'
+      - 'scripts/reports/plot.py'
+      - 'tests/reporting/test_smoke.py'
+      - 'tests/reporting/test_convex_report.py'
+      - 'tests/reporting/test_report_data.py'
+      - 'tests/reporting/test_render.py'
+      - 'tests/reporting/test_opt12_render.py'
+      - '.github/workflows/cpp-report-quality.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  cpp-report-quality:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned quality and reporting tools
+        run: >-
+          python -m pip install --disable-pip-version-check
+          -r requirements-cpp-quality.txt -r scripts/reports/requirements.txt
+      - name: Check report formatting
+        run: cmake -DCSL_CPP_QUALITY_SCOPE=reports -DCSL_CPP_QUALITY_MODE=format -P scripts/ci/check_cpp_core.cmake
+      - name: Configure the HiGHS report build
+        run: >-
+          cmake --preset highs -B build/cpp-report-quality
+          -DCMAKE_C_COMPILER=clang-18 -DCMAKE_CXX_COMPILER=clang++-18
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      - name: Build the report libraries, drivers and tests
+        run: >-
+          cmake --build build/cpp-report-quality --parallel 2
+          --target csl_reporting_checks csl_opt12_warm_start_measure
+      - name: Analyze the report build contexts
+        run: cmake -DCSL_CPP_QUALITY_SCOPE=reports -DCSL_CPP_QUALITY_MODE=tidy -P scripts/ci/check_cpp_core.cmake
+      - name: Exercise the LP and convex report fixtures
+        run: >-
+          ctest --test-dir build/cpp-report-quality --output-on-failure --no-tests=error
+          -R '^(lp_report_tests|convex_report_tests|convex_report_data_tests|convex_report_smoke|report_data_tests|report_render_tests|opt12_report_tests|report_smoke)$'
