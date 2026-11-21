@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.28)
+project(csl_source_catalogue_campaign LANGUAGES CXX)
+find_package(CSL 0.1.1 EXACT CONFIG REQUIRED)
+add_executable(catalogue_episode catalogue_episode.cpp)
+target_compile_features(catalogue_episode PRIVATE cxx_std_20)
+target_link_libraries(catalogue_episode PRIVATE CSL::controllers CSL::model_catalogue CSL::highs_convex)
+target_include_directories(catalogue_episode SYSTEM PRIVATE "${CAMPAIGN_JSON_HEADERS}")
+target_compile_options(catalogue_episode PRIVATE -Wall -Wextra -Wpedantic -Werror)

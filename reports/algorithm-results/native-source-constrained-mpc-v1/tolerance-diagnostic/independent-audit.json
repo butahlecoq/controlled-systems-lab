@@ -1,0 +1,34 @@
+{
+  "1e-8": {
+    "open_loop": {
+      "status": "complete",
+      "holds": 3,
+      "dynamics_residual": 1.3877787807814457e-17,
+      "constraint_excess": 0.0,
+      "cost": 0.01273551948900413
+    },
+    "closed_loop": {
+      "status": "solver-not-optimal",
+      "holds": 1,
+      "dynamics_residual": 1.3877787807814457e-17,
+      "constraint_excess": 0.0
+    }
+  },
+  "1e-7": {
+    "open_loop": {
+      "status": "complete",
+      "holds": 3,
+      "dynamics_residual": 1.3877787807814457e-17,
+      "constraint_excess": 0.0,
+      "cost": 0.01273551948900413
+    },
+    "closed_loop": {
+      "status": "complete",
+      "holds": 3,
+      "dynamics_residual": 1.3877787807814457e-17,
+      "constraint_excess": 0.0,
+      "cost": 0.012735519489004164
+    },
+    "maximum_absolute_control_difference": 2.203883058427697e-08
+  }
+}

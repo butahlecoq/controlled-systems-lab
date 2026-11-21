@@ -1232,6 +1232,10 @@
           "href": "../examples/catalogue-exact-support-v1/index.html"
         },
         {
+          "label": "Backward reachability across 35 catalogue models",
+          "href": "../examples/catalogue-backward-reachability-v1/index.html"
+        },
+        {
           "label": "Reachability formulations and horizon variants",
           "href": "model-tracks.html#reachability-formulations"
         }
@@ -2111,6 +2115,10 @@
           "href": "../examples/native-model-tracking-first-pass-v1/source-binding.json"
         },
         {
+          "label": "Finite-action control across 35 catalogue models",
+          "href": "../examples/catalogue-finite-action-v1/index.html"
+        },
+        {
           "label": "Model equations, task profiles and outcomes",
           "href": "model-tracks.html#discrete-formulations"
         }
@@ -2152,12 +2160,12 @@
       ],
       "module_ids": [],
       "source": "lotka-capstone.html",
-      "summary": "Plot P against R from saved execution states. Keep plant replay and prediction stages distinct. This is one local-NLP policy path. Native module substitution rows remain pending until #943; every bypassed module must read not_used.",
+      "summary": "Compare five native controller runs in the prey–predator plane and find the Lotka–Volterra outcomes in the full-profile campaign.",
       "mathematical_input": "Fixed source task syn-nl-lv-01; state order (P,R), parameters, objective, initial state and horizon from the task contract.",
       "command": "python scripts/reports/visual_examples.py --catalog reports/algorithm-results/catalog.json --site build/report-site\npython scripts/reports/stage_closed_loop_pilot.py --source reports/closed-loop-pilot/closed-loop-pilot-v1 --site build/report-site\npython scripts/reports/learning_book.py --site build/report-site --figure-index docs/examples/closed-loop/figure-index.json",
-      "expected_output": "The source-bound replay records 30 of 30 control holds and total objective 0.0916847851630468. The book links the saved P,R view and the published three-task report.",
+      "expected_output": "The separate local-NLP pilot report records 30 of 30 control holds and total objective 0.0916847851630468. The book links the saved P,R view and the published three-task report.",
       "intermediate_geometry": "Plot P against R from saved execution states. Keep plant replay and prediction stages distinct.",
-      "support_limits": "This is one local-NLP policy path. Native module substitution rows remain pending until #943; every bypassed module must read not_used. The saved figure shows the captured path-conditioned and retained-node evidence only. The FigureIndex lists the missing complete all-stage forward sets, all-admissible-control forward sets, materialized backward/predecessor sets, and materialized full-state intersections. Figure availability means a source-bound view is published; it does not mean the geometry acceptance criteria are complete.",
+      "support_limits": "The linked figure shows 5 saved native controller runs in prey and predator coordinates. The figure index records path-conditioned and retained-node evidence. Its missing layers include the complete forward sets, all-admissible-control forward sets, materialized backward sets and full-state intersections. The separate full-profile composition campaign admitted 178 graphs for this task, with final outcomes of 166 complete, 1 failed, 5 inconclusive, 6 unsupported.",
       "figure_ids": [
         "lotka-populations"
       ],
@@ -2169,6 +2177,10 @@
         {
           "label": "Published three-task closed-loop pilot report",
           "href": "../closed-loop-pilot-v1/index.html"
+        },
+        {
+          "label": "Full-profile per-graph coverage ledger",
+          "href": "../examples/closed-loop/campaign-2026-11-18/raw/coverage.json"
         }
       ],
       "example_sources": [
@@ -2213,12 +2225,12 @@
       ],
       "module_ids": [],
       "source": "orbit-capstone.html",
-      "summary": "Plot r against v for the recorded execution states. The target radius and rate remain soft objective terms. The finite nine-action three-block source task differs from this continuous per-interval domain. Native substitutions await #943.",
+      "summary": "Compare four native controller runs in radius and angular rate, then inspect the Earth-orbit outcomes in the full-profile campaign.",
       "mathematical_input": "Earth-orbit task: r [km], v [km/s], θ [rad], ω [rad/s]; force controls (u_r,u_t) [N].",
       "command": "python scripts/reports/visual_examples.py --catalog reports/algorithm-results/catalog.json --site build/report-site\npython scripts/reports/stage_closed_loop_pilot.py --source reports/closed-loop-pilot/closed-loop-pilot-v1 --site build/report-site\npython scripts/reports/learning_book.py --site build/report-site --figure-index docs/examples/closed-loop/figure-index.json",
-      "expected_output": "The source-bound replay records 20 of 20 intervals, each 100 s, and total objective 65.22966436462173. The target radius and angular rate remain soft objective terms.",
-      "intermediate_geometry": "Plot r against v for the recorded execution states. The target radius and rate remain soft objective terms.",
-      "support_limits": "The finite nine-action three-block source task differs from this continuous per-interval domain. Native substitutions await #943. The saved figure shows the captured path-conditioned and retained-node evidence only. The FigureIndex lists the missing complete all-stage forward sets, all-admissible-control forward sets, materialized backward/predecessor sets, and materialized full-state intersections. Figure availability means a source-bound view is published; it does not mean the geometry acceptance criteria are complete.",
+      "expected_output": "The separate local-NLP pilot report records 20 of 20 intervals, each 100 s, and total objective 65.22966436462173. The target radius and angular rate remain soft objective terms.",
+      "intermediate_geometry": "Read radius r [km] on the horizontal axis and angular rate ω [rad/s] on the vertical axis. Both target terms remain soft.",
+      "support_limits": "The linked figure shows 4 saved native controller runs in radius and angular rate. The campaign's finite nine-action-per-step adaptation and the historical three-block source task use distinct action profiles. The figure index records path-conditioned and retained-node evidence. Its missing layers include the complete forward sets, all-admissible-control forward sets, materialized backward sets and full-state intersections. The separate full-profile composition campaign admitted 167 graphs for this task, with final outcomes of 156 complete, 5 failed, 5 inconclusive, 1 unsupported.",
       "figure_ids": [
         "earth-orbit"
       ],
@@ -2230,6 +2242,10 @@
         {
           "label": "Published three-task closed-loop pilot report",
           "href": "../closed-loop-pilot-v1/index.html"
+        },
+        {
+          "label": "Full-profile per-graph coverage ledger",
+          "href": "../examples/closed-loop/campaign-2026-11-18/raw/coverage.json"
         }
       ],
       "example_sources": [
@@ -2280,12 +2296,12 @@
       ],
       "module_ids": [],
       "source": "fuel-capstone.html",
-      "summary": "The flow coordinate precedes mass on both axes. Unscale only when the raw source coordinates are scaled. Do not conflate absolute propellant mass with the older stock-balance example. The pilot is one local-NLP path. Native substitutions await #943.",
+      "summary": "Compare two native controller runs in the physical flow–mass projections and find the fuel outcomes in the full-profile campaign.",
       "mathematical_input": "Physical vector [m_ox,m_f,q_ox,q_f]=[100,30,2,0.6]. Plot flow-mass planes with raw index pairs [2,0] and [3,1].",
       "command": "python scripts/reports/visual_examples.py --catalog reports/algorithm-results/catalog.json --site build/report-site\npython scripts/reports/stage_closed_loop_pilot.py --source reports/closed-loop-pilot/closed-loop-pilot-v1 --site build/report-site\npython scripts/reports/learning_book.py --site build/report-site --figure-index docs/examples/closed-loop/figure-index.json",
-      "expected_output": "The source-bound replay records 40 of 40 control holds and total objective 0.00382598508724389. The two initial plot points are oxidizer (2 kg/s,100 kg) and fuel (0.6 kg/s,30 kg).",
-      "intermediate_geometry": "The flow coordinate precedes mass on both axes. Unscale only when the raw source coordinates are scaled.",
-      "support_limits": "Do not conflate absolute propellant mass with the older stock-balance example. The pilot is one local-NLP path. Native substitutions await #943. The saved figure shows the captured path-conditioned and retained-node evidence only. The FigureIndex lists the missing complete all-stage forward sets, all-admissible-control forward sets, materialized backward/predecessor sets, and materialized full-state intersections. Figure availability means a source-bound view is published; it does not mean the geometry acceptance criteria are complete.",
+      "expected_output": "The separate local-NLP pilot report records 40 of 40 control holds and total objective 0.00382598508724389. The two initial plot points are oxidizer (2 kg/s,100 kg) and fuel (0.6 kg/s,30 kg).",
+      "intermediate_geometry": "Use flow on the horizontal axis and mass on the vertical axis. Unscale only when the source coordinates are scaled.",
+      "support_limits": "Each fuel projection shows 2 saved native controller runs. The coordinates use absolute propellant masses. The older stock-balance example uses a different model. The figure index records path-conditioned and retained-node evidence. Its missing layers include the complete forward sets, all-admissible-control forward sets, materialized backward sets and full-state intersections. The separate full-profile composition campaign admitted 168 graphs for this task, with final outcomes of 161 complete, 1 failed, 5 inconclusive, 1 unsupported.",
       "figure_ids": [
         "fuel-state",
         "fuel-fuel-flow"
@@ -2298,6 +2314,10 @@
         {
           "label": "Published three-task closed-loop pilot report",
           "href": "../closed-loop-pilot-v1/index.html"
+        },
+        {
+          "label": "Full-profile per-graph coverage ledger",
+          "href": "../examples/closed-loop/campaign-2026-11-18/raw/coverage.json"
         }
       ],
       "example_sources": [
@@ -2401,7 +2421,7 @@
       "command": "set -euo pipefail\nREPO_ROOT=\"$(git rev-parse --show-toplevel)\"\nMANIFEST=\"$REPO_ROOT/docs/examples/closed-loop/campaign-2026-11-18/raw/archive-manifest.json\"\nBASE=https://github.com/butahlecoq/controlled-systems-lab/releases/download/evidence/closed-loop-campaign-947-full-immutable-20261119\nROOT=\"$REPO_ROOT/build/campaign-2026-11-18\"\nPARTS=\"$ROOT/parts\"\nmkdir -p \"$PARTS\" \"$ROOT/extracted\"\njq -r '.parts[].name' \"$MANIFEST\" | while IFS= read -r part; do\n  curl -fL \"$BASE/$part\" -o \"$PARTS/$part\"\ndone\nARCHIVE=\"$PARTS/$(jq -r '.archive' \"$MANIFEST\")\"\njq -r '\"\\(.archive_sha256)  \\(.archive)\"' \"$MANIFEST\" > \"$PARTS/archive.sha256\"\n(\n  cd \"$PARTS\"\n  archive_name=\"$(basename \"$ARCHIVE\")\"\n  : > \"$archive_name\"\n  while IFS= read -r part; do cat \"$part\" >> \"$archive_name\"; done < <(jq -r '.parts[].name' \"$MANIFEST\")\n  sha256sum --check archive.sha256\n)\ntar -I 'zstd -T0 -d' -xf \"$ARCHIVE\" -C \"$ROOT/extracted\"\npython scripts/reports/render_full_profile_campaign.py \\\n  --freeze \"$ROOT/extracted/full-profile/freeze.json\" \\\n  --coverage \"$ROOT/extracted/full-profile/full-outcomes/campaign-coverage-20261118T142500Z-post-retry-reconciled.json\" \\\n  --outcomes \"$ROOT/extracted/full-profile/full-outcomes\" \\\n  --targeted-reruns \"$ROOT/extracted/fixed-tail-compatible-profile/targeted-reruns\" \\\n  --archive-manifest \"$MANIFEST\" \\\n  --output \"$ROOT/rendered\"",
       "expected_output": "The full-profile capture records 513/513 graph outcomes: 483 complete, 7 failed, 8 unsupported and 15 inconclusive; no graph is pending. Its 516 attempt records include retries. Fifteen compatible-profile reruns completed and remain supplemental. The source catalogue contains 480 candidates: 460 requestable and 20 incompatible, with zero candidates classified as backend-unavailable or implementation-missing.",
       "intermediate_geometry": "The current dashboard shows five representations for each task. Graph figures overlay retained finite-action states at every prediction stage, backward-viable states, the selected plan and observed replay. The box controller instead displays its numerical fixed-plan outer tube and does not claim a full reachable set. Fuel uses oxidizer (mass, flow) and fuel (mass, flow) projections.",
-      "support_limits": "No five alternating timing repetitions were run, so this is not a performance ranking. Beam width is 8 and finite-action search coverage is incomplete; projected points are not continuous reachable-set boundaries and graph plans are optimal only over retained nodes. Box tubes enclose one selected fixed plan. Numerical checks use binary64. Fifteen completed compatible-profile reruns remain separate from full-profile totals.",
+      "support_limits": "The full-profile campaign uses one-pass descriptive timings. The separate matched fixed-tail timing study reports five alternating measured repetitions per side and an inconclusive comparison. Beam width is 8 and finite-action search coverage is incomplete; projected points are not continuous reachable-set boundaries and graph plans are optimal only over retained nodes. Box tubes enclose one selected fixed plan. Numerical checks use binary64. Fifteen completed compatible-profile reruns remain separate from full-profile totals.",
       "figure_ids": [
         "campaign-syn-nl-lv-01-lotka",
         "campaign-earth-orbit-orbit",
@@ -2412,6 +2432,10 @@
         {
           "label": "Current full-profile dashboard and graph-by-graph coverage",
           "href": "../examples/closed-loop/campaign-2026-11-18/index.html"
+        },
+        {
+          "label": "Raw full-profile outcome ledger",
+          "href": "../examples/closed-loop/campaign-2026-11-18/raw/coverage.json"
         },
         {
           "label": "Current publication provenance and file hashes",
@@ -2438,8 +2462,8 @@
           "href": "https://github.com/butahlecoq/controlled-systems-lab/tree/9140e2a6fde55697b2035349a0996941be80297c/docs/contracts/closed-loop"
         },
         {
-          "label": "Issue #947 and remaining gates",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/issues/947"
+          "label": "Campaign completion and matched fixed-tail timing disposition",
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/issues/947#issuecomment-7001015847"
         },
         {
           "label": "Campaign index archive",
@@ -2501,47 +2525,42 @@
             "task",
             "admitted",
             "complete",
-            "incorrect",
             "failed",
-            "timed out",
+            "inconclusive",
             "unsupported"
           ],
           "rows": [
             [
               "Lotka–Volterra",
               "178",
-              "171",
-              "5",
-              "0",
+              "166",
               "1",
-              "1"
+              "5",
+              "6"
             ],
             [
               "Earth orbit",
               "167",
-              "161",
-              "0",
+              "156",
               "5",
-              "0",
+              "5",
               "1"
             ],
             [
               "Fuel transfer",
               "168",
-              "166",
-              "0",
+              "161",
               "1",
-              "0",
+              "5",
               "1"
             ],
             [
               "Total",
               "513",
-              "498",
-              "5",
-              "6",
-              "1",
-              "3"
+              "483",
+              "7",
+              "15",
+              "8"
             ]
           ]
         },
@@ -2553,15 +2572,15 @@
           ],
           "rows": [
             [
-              "admitted and attempted graph configurations",
+              "admitted and attempted full-profile graphs",
               "513"
             ],
             [
-              "recorded attempt rows",
-              "528"
+              "full-profile attempt records including retries",
+              "516"
             ],
             [
-              "historical inconclusive attempt rows",
+              "completed reruns in the separate compatible profile",
               "15"
             ],
             [

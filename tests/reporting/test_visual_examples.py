@@ -760,6 +760,21 @@ class GalleryTests(unittest.TestCase):
         for key in ("page", "figure", "raw_record"):
             self.assertTrue((self.site / "examples" / exact_entry[key]).is_file())
         self.assertIn('id="catalogue-exact-support-v1"', gallery_html)
+        [backward_entry] = [
+            entry
+            for entry in visual_inventory["entries"]
+            if entry["anchor"] == "catalogue-backward-reachability-v1"
+        ]
+        for key in ("page", "figure", "raw_record"):
+            self.assertTrue((self.site / "examples" / backward_entry[key]).is_file())
+        self.assertIn('id="catalogue-backward-reachability-v1"', gallery_html)
+        [finite_action_entry] = [
+            entry for entry in visual_inventory["entries"]
+            if entry["anchor"] == "catalogue-finite-action-v1"
+        ]
+        for key in ("page", "figure", "raw_record"):
+            self.assertTrue((self.site / "examples" / finite_action_entry[key]).is_file())
+        self.assertIn('id="catalogue-finite-action-v1"', gallery_html)
         budget_page = self.site / "examples/positive-part-budget-2d.html"
         self.assertTrue(budget_page.is_file())
         self.assertTrue((self.site / "examples/positive-part-budget-2d.svg").is_file())

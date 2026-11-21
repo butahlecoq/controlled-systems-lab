@@ -1,0 +1,10 @@
+{
+  "schema": "csl.catalogue-ring-initial-support/1",
+  "files_sha256": {
+    "certificate.json": "8f0efc885dd2d5375a58dc93523dcb4a7e29a348bff45fde21e1733c9324219a",
+    "index.html": "f9328690b8647d408fa8f8af2e91953a5979256b41caefe6824cf1fed5e25faf",
+    "initial-support.svg": "9d1225dde85526cebdde64e4b9ea56b14b80fb2dcade7ca3e695455ad08d87dd",
+    "plot_support.py": "d279ee40480f490708f92a220ec9efbc49544dcbd205ab3b5307ed1e2c5b505e",
+    "verify_support.py": "6993dcffcce15290fc3d682a901928ea6e496e89546450a6bafacba5a2348075"
+  }
+}

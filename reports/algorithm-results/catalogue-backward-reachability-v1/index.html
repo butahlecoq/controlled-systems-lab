@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Backward reachability across 35 catalogue models</title>
+<link rel="stylesheet" href="examples.css">
+</head>
+<body>
+<main class="page-content">
+<h1>Backward reachability across 35 catalogue models</h1>
+<p>Ask which states can reach a terminal target in the remaining steps. A rational C++ producer and an independent checker certify 1,120 sampled support values across 35 discrete models.</p>
+<figure>
+<img src="battery-forward-backward.svg" alt="Four panels for stages zero through three. The forward rectangles grow from the initial point while the backward rectangles shrink to the terminal target. Their intersections are shaded. The trajectory reaches the upper corner of the terminal intersection.">
+<figcaption>Two-state battery pair. The dot in each panel marks that stage’s state on the terminal-optimal trajectory. At stage zero the initial point is both the forward set and the intersection. The backward set coincides with the target at stage three.</figcaption>
+</figure>
+<h2>Define the predecessor problem</h2>
+<p>Use the archived affine update <var>x</var><sub>j+1</sub> = <var>A</var><var>x</var><sub>j</sub> + <var>B</var><var>u</var><sub>j</sub> + <var>g</var><sub>j</sub>, where <var>g</var><sub>j</sub> includes the fixed nominal forecast. The authored control box is [−1, 1]<sup><var>m</var></sup> at every step. The zero-control history <var>c</var><sub>j</sub> starts at the archived initial state. The terminal target is the box centred at <var>c</var><sub>3</sub> with half-width <var>r</var><sub>i</sub> = max(1, |<var>c</var><sub>3,i</sub>|)/10 in coordinate <var>i</var>.</p>
+<p>The backward set at stage <var>k</var> contains every state that can reach this target using the remaining control intervals. This authored profile keeps the affine dynamics, fixed forecast, signed control intervals and terminal target. The earlier matched experiments carry the source state, stage and budget constraints.</p>
+<h2>Match an upper bound to a witness</h2>
+<p>Embed a sampled direction <var>d</var> in the two plotted coordinates and set <var>q</var><sub>k</sub> = <var>d</var>. Solve <var>A</var><sup>T</sup><var>q</var><sub>j+1</sub> = <var>q</var><sub>j</sub> successively. All 35 transition matrices are nonsingular when interpreted as exact stored binary64 values.</p>
+<p>The bound for the support at stage <var>k</var> is <var>d</var><sup>T</sup><var>c</var><sub>k</sub> + ∑<sub><var>i</var></sub> <var>r</var><sub>i</sub>|<var>q</var><sub>3,i</sub>| + ∑<sub><var>j</var>=<var>k</var></sub><sup>2</sup> ‖<var>B</var><sup>T</sup><var>q</var><sub>j+1</sub>‖<sub>1</sub>. The target box yields the first sum. Each signed control box yields a term in the second sum.</p>
+<p>The C++ producer chooses a maximizing point on the target box and maximizing controls, then solves backward for the witness state. The checker verifies the transpose equations, replays each witness forward, and checks that it reaches the target. The feasible witness objective equals the upper bound exactly for all eight sampled directions at every stage of each model. A seeded change to a support value fails the check.</p>
+<h2>Read the battery trajectory</h2>
+<p>The battery starts at (30, 70) MWh and has target [27, 33] × [63, 77] MWh. Each control acts on only one battery, so the forward and backward sets have independent coordinate intervals. Intersect those intervals at each stage. The upper corner of the terminal intersection maximizes <var>x</var><sub>1</sub> + <var>x</var><sub>2</sub>. The plotted trajectory reaches (33, 76.021) MWh after three steps, with values rounded for display.</p>
+<h2>Reproduce the sweep</h2>
+<p>Extract the evidence archive and follow <code>RUN.txt</code> to compile the C++ producer with GMP 6.3.0 and nlohmann/json 3.11.3. Regenerate the 35 certificate files, run the independent checker, and rebuild the figure.</p>
+<ul>
+<li><a href="catalogue-backward-support-evidence.zip">Evidence archive with inputs, certificates, and replay code</a></li>
+<li><a href="predecessor.cpp">Exact predecessor producer</a></li>
+<li><a href="manifest.json">Source revisions and SHA-256 checksums</a></li>
+</ul>
+</main>
+</body>
+</html>

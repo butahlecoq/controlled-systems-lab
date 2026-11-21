@@ -24,6 +24,8 @@ on:
       - 'src/reachability/Module.cmake'
       - 'src/reachability/Tests.cmake'
       - 'src/geometry/Module.cmake'
+      - 'benchmarks/reporting/mpc01/**'
+      - 'tests/benchmarks/mpc01_model_tests.cpp'
       - 'cmake/**'
       - 'CMakeLists.txt'
       - 'CMakePresets.json'
@@ -56,6 +58,8 @@ on:
       - 'src/reachability/Module.cmake'
       - 'src/reachability/Tests.cmake'
       - 'src/geometry/Module.cmake'
+      - 'benchmarks/reporting/mpc01/**'
+      - 'tests/benchmarks/mpc01_model_tests.cpp'
       - 'cmake/**'
       - 'CMakeLists.txt'
       - 'CMakePresets.json'
@@ -81,7 +85,7 @@ jobs:
           python-version: '3.12'
       - name: Install pinned development tools
         run: python -m pip install --disable-pip-version-check -r requirements-cpp-quality.txt
-      - name: Check core, nominal reachability, numeric and set data formatting
+      - name: Check formatting for core modules and the MPC-01 contract
         run: cmake -DCSL_CPP_QUALITY_MODE=format -P scripts/ci/check_cpp_core.cmake
       - name: Configure real C++20 compilation contexts
         run: >-
@@ -97,9 +101,10 @@ jobs:
           csl_sets header_sets_contracts_hpp header_sets_data_hpp sets_tests sets_public_client
           public_headers_client public_headers_lp_first_client
           contract_tests public_client projection_predecessor_tests projection_predecessor_public_client
-      - name: Analyze selected public headers and implementations
+          mpc01_model_tests
+      - name: Analyze selected native code and the MPC-01 contract
         run: cmake -DCSL_CPP_QUALITY_MODE=tidy -P scripts/ci/check_cpp_core.cmake
-      - name: Exercise existing core, predecessor, numeric and set behavior
+      - name: Exercise selected core behavior and the MPC-01 contract
         run: >-
           ctest --test-dir build/cpp-quality --output-on-failure
-          -R '^(contract_tests|public_client|projection_predecessor_tests|projection_predecessor_public_client|numeric_tests|numeric_buffer_views_tests|public_headers_client|public_headers_lp_first_client|numeric_dependency_direction|sets_tests|sets_public_client)$'
+          -R '^(contract_tests|public_client|projection_predecessor_tests|projection_predecessor_public_client|numeric_tests|numeric_buffer_views_tests|public_headers_client|public_headers_lp_first_client|numeric_dependency_direction|sets_tests|sets_public_client|mpc01_model_contract)$'

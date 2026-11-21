@@ -1,0 +1,14 @@
+{
+  "model_9": {
+    "status": "infeasible-in-the-pinned-continuous-relaxation",
+    "coordinate": "x1",
+    "terminal_upper_bound": -3,
+    "terminal_minimum": 0
+  },
+  "model_30": {
+    "status": "feedback-suffix-has-an-independently-checked-feasible-witness",
+    "feedback_holds": 1,
+    "witness": "suffix of complete open-loop trajectory from the identical observation",
+    "witness_holds": 2
+  }
+}

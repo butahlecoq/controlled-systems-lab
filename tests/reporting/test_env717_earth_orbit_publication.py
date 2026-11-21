@@ -1,20 +1,18 @@
 from __future__ import annotations
 
 import hashlib
-import importlib.util
 import json
-from pathlib import Path
 import shutil
+import sys
 import tempfile
 import unittest
 import zipfile
+from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
-SPEC = importlib.util.spec_from_file_location(
-    "stage_env717_earth_orbit", ROOT / "scripts/reports/stage_env717_earth_orbit.py")
-publication = importlib.util.module_from_spec(SPEC)
-assert SPEC.loader is not None
-SPEC.loader.exec_module(publication)
+if __name__ == "__main__" and not __package__:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from scripts.reports import stage_env717_earth_orbit as publication  # noqa: E402 - direct test entry point
 
 
 class EarthOrbitalMotionPublicationTests(unittest.TestCase):
@@ -26,21 +24,31 @@ class EarthOrbitalMotionPublicationTests(unittest.TestCase):
             site = base / "site"
             site.mkdir()
             (site / "index.html").write_text(
-                "<!doctype html><html><ul></ul></html>", encoding="utf-8")
+                "<!doctype html><html><ul></ul></html>", encoding="utf-8"
+            )
 
             route_id = publication.stage(source, site)
+            self.assertEqual(route_id, "env717-earth-orbit-d89c89a7460a98d8297b")
+            self.assertEqual(
+                hashlib.sha256((site / f"{route_id}.zip").read_bytes()).hexdigest(),
+                "54222e7c40271d5e32c2531bc0113ee086db4124d4c95592420c312127a1336c",
+            )
 
             self.assertRegex(route_id, r"^env717-earth-orbit-[0-9a-f]{20}$")
             report = site / route_id
             manifest = json.loads((report / "publication-manifest.json").read_text())
             self.assertEqual(manifest["report_id"], route_id)
-            self.assertEqual(manifest["source_repository_commit"], publication.UPSTREAM_SOURCE_COMMIT)
+            self.assertEqual(
+                manifest["source_repository_commit"], publication.UPSTREAM_SOURCE_COMMIT
+            )
             for name, expected in manifest["published_files"].items():
                 self.assertEqual(hashlib.sha256((report / name).read_bytes()).hexdigest(), expected)
             result = json.loads((report / "result.json").read_text())
             self.assertEqual(result["search"]["evaluated_plan_count"], 729)
             self.assertTrue(result["search"]["all_plan_scores_independently_replayed"])
-            self.assertIn("not an optimum over continuous controls", (report / "index.html").read_text())
+            self.assertIn(
+                "not an optimum over continuous controls", (report / "index.html").read_text()
+            )
             self.assertIn("Target orbit", (report / "orbit-phase-plane.svg").read_text())
             with zipfile.ZipFile(site / f"{route_id}.zip") as archive:
                 self.assertIsNone(archive.testzip())

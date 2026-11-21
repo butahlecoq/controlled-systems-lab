@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open loop and MPC under the same constraints</title>
+<link rel="stylesheet" href="offline-examples.css">
+<style>
+img { width: 100%; display: block; background: #fff; border-radius: .4rem; }
+td:last-child { text-align: right; }
+summary { cursor: pointer; }
+.scroll { overflow: auto; }
+</style>
+</head>
+<body>
+<main class="page-content">
+<h1>Open loop and MPC under the same constraints</h1>
+<p>The same three-transition problem drives both controllers. The open-loop controller plans once. Observed-state MPC receives the state after each action and solves the remaining problem to the same final stage.</p>
+<p>The matched forecast and replay make this a deterministic comparison. Across 35 catalogue models, open loop completed 31 and MPC completed 30. The 30 complete pairs agreed within 1.14 × 10<sup>−13</sup> in total cost and 8.68 × 10<sup>−8</sup> in absolute applied-control difference.</p>
+<figure>
+<img src="platoon.svg" alt="Position and velocity of the last car and minimum following margin across the platoon. The two policy curves overlap over four recorded states.">
+<figcaption>The ten-car platoon has 30 states and nine coupled headway constraints. Both trajectories lie on top of each other in the displayed position–velocity plane. The right panel shows the smallest headway margin across all nine following cars, including the terminal state.</figcaption>
+</figure>
+<h2>Task and numerical checks</h2>
+<p>For each following car <var>i</var>, the headway constraint is <math><mrow><msub><mi>p</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>−</mo><msub><mi>p</mi><mi>i</mi></msub><mo>≥</mo><mn>2</mn><mo>+</mo><mn>1.2</mn><msub><mi>v</mi><mi>i</mi></msub></mrow></math>. Here <var>p</var> is position in metres and <var>v</var> is velocity in metres per second.</p>
+<p>Each profile uses the catalogue initial state and its declared nominal external input, or an explicitly authored zero input where the catalogue leaves it open. The reference shifts the first state by 10% of its scale, with each scale equal to the larger of one and the magnitude of its initial value. The same weighted state-tracking quadratic appears at each transition and twice its weight appears at the terminal stage. Each control has positive quadratic effort.</p>
+<p>Cards 4, 9, and 10 use explicitly named continuous relaxations. Cards 24, 25, and 27 use authored numerical bounds. The raw records contain the matrices, trajectories, predictions, and native diagnostics. The independent checker compared 25,380 saved matrix entries with the catalogue export and recomputed dynamics, bounds, headway rows, positive-part budgets, and cost in original coordinates.</p>
+<details>
+<summary>Outcomes and raw records for all 35 models</summary>
+<div class="scroll">
+<table>
+<thead><tr><th scope="col">Catalogue model</th><th scope="col">Open loop</th><th scope="col">Observed-state MPC</th><th scope="col">Absolute cost difference</th></tr></thead>
+<tbody>
+<tr><th scope="row"><a href="raw/1.json">1. IP/SDN queues</a></th><td>Complete</td><td>Complete</td><td>0</td></tr>
+<tr><th scope="row"><a href="raw/2.json">2. Puffer playback buffer</a></th><td>Complete</td><td>Complete</td><td>0</td></tr>
+<tr><th scope="row"><a href="raw/3.json">3. 5G core signalling</a></th><td>Complete</td><td>Complete</td><td>0</td></tr>
+<tr><th scope="row"><a href="raw/4.json">4. GPU cluster</a></th><td>Complete</td><td>Complete</td><td>0</td></tr>
+<tr><th scope="row"><a href="raw/5.json">5. Battery pair</a></th><td>Complete</td><td>Complete</td><td>3.47e-18</td></tr>
+<tr><th scope="row"><a href="raw/6.json">6. EV charging</a></th><td>Complete</td><td>Complete</td><td>0</td></tr>
+<tr><th scope="row"><a href="raw/7.json">7. District heating</a></th><td>Complete</td><td>Complete</td><td>2.22e-16</td></tr>
+<tr><th scope="row"><a href="raw/8.json">8. Commercial building</a></th><td>Complete</td><td>Complete</td><td>1.11e-16</td></tr>
+<tr><th scope="row"><a href="raw/9.json">9. Bike stations</a></th><td>Solver not optimal</td><td>Solver not optimal</td><td>—</td></tr>
+<tr><th scope="row"><a href="raw/10.json">10. Taxi zones</a></th><td>Complete</td><td>Complete</td><td>0</td></tr>
+<tr><th scope="row"><a href="raw/11.json">11. Traffic lights</a></th><td>Complete</td><td>Complete</td><td>0</td></tr>
+<tr><th scope="row"><a href="raw/12.json">12. Warehouse/store</a></th><td>Complete</td><td>Complete</td><td>1.14e-13</td></tr>
+<tr><th scope="row"><a href="raw/13.json">13. Gas mixtures</a></th><td>Complete</td><td>Complete</td><td>6.94e-18</td></tr>
+<tr><th scope="row"><a href="raw/14.json">14. Industrial load</a></th><td>Complete</td><td>Complete</td><td>0</td></tr>
+<tr><th scope="row"><a href="raw/15.json">15. Bank liquidity</a></th><td>Complete</td><td>Complete</td><td>0</td></tr>
+<tr><th scope="row"><a href="raw/16.json">16. Household debt</a></th><td>Complete</td><td>Complete</td><td>5.55e-17</td></tr>
+<tr><th scope="row"><a href="raw/17.json">17. Inflation/unemployment</a></th><td>Complete</td><td>Complete</td><td>0</td></tr>
+<tr><th scope="row"><a href="raw/18.json">18. 311 service requests</a></th><td>Complete</td><td>Complete</td><td>6.66e-16</td></tr>
+<tr><th scope="row"><a href="raw/19.json">19. Shelter capacity</a></th><td>Complete</td><td>Complete</td><td>0</td></tr>
+<tr><th scope="row"><a href="raw/20.json">20. Hospital loads</a></th><td>Complete</td><td>Complete</td><td>1.73e-18</td></tr>
+<tr><th scope="row"><a href="raw/21.json">21. OSQP quadcopter</a></th><td>Complete</td><td>Complete</td><td>0</td></tr>
+<tr><th scope="row"><a href="raw/22.json">22. Aerosonde test Jacobian</a></th><td>Complete</td><td>Complete</td><td>0</td></tr>
+<tr><th scope="row"><a href="raw/23.json">23. Bicycle car + actuators</a></th><td>Solver unsupported</td><td>Solver unsupported</td><td>—</td></tr>
+<tr><th scope="row"><a href="raw/24.json">24. OTTER test</a></th><td>Complete</td><td>Complete</td><td>0</td></tr>
+<tr><th scope="row"><a href="raw/25.json">25. REMUS test</a></th><td>Complete</td><td>Complete</td><td>0</td></tr>
+<tr><th scope="row"><a href="raw/26.json">26. Ten-car platoon</a></th><td>Complete</td><td>Complete</td><td>0</td></tr>
+<tr><th scope="row"><a href="raw/27.json">27. Ten-generator ring</a></th><td>Solver unsupported</td><td>Solver unsupported</td><td>—</td></tr>
+<tr><th scope="row"><a href="raw/28.json">28. Twenty-zone RC building</a></th><td>Solver unsupported</td><td>Solver unsupported</td><td>—</td></tr>
+<tr><th scope="row"><a href="raw/29.json">29. 32 O-RAN queues</a></th><td>Complete</td><td>Complete</td><td>2.22e-16</td></tr>
+<tr><th scope="row"><a href="raw/30.json">30. Thirty-bank ring</a></th><td>Complete</td><td>Solver not optimal</td><td>—</td></tr>
+<tr><th scope="row"><a href="raw/31.json">31. Twelve institution queues/occupancy</a></th><td>Complete</td><td>Complete</td><td>2.22e-16</td></tr>
+<tr><th scope="row"><a href="raw/32.json">32. 24-node CDN</a></th><td>Complete</td><td>Complete</td><td>1.39e-17</td></tr>
+<tr><th scope="row"><a href="raw/33.json">33. Eight-node DDoS</a></th><td>Complete</td><td>Complete</td><td>1.78e-15</td></tr>
+<tr><th scope="row"><a href="raw/34.json">34. Eight-zone AI datacentre</a></th><td>Complete</td><td>Complete</td><td>1.67e-16</td></tr>
+<tr><th scope="row"><a href="raw/35.json">35. Twelve base stations</a></th><td>Complete</td><td>Complete</td><td>0</td></tr>
+</tbody>
+</table>
+</div>
+</details>
+<h2>How to interpret the five incomplete pairs</h2>
+<ul>
+<li><strong>Bicycle stations (model 9).</strong> The first station starts with 12 bikes. It loses at least five per transition, so its terminal inventory is at most −3. The task requires nonnegative inventory.</li>
+<li><strong>Models 23, 27, and 28.</strong> HiGHS refused coefficients at or below its 10<sup>−12</sup> removal threshold. The refusals describe backend admission.</li>
+<li><strong>Reserve replenishment in the thirty-bank ring (model 30).</strong> The open-loop suffix from the first feedback observation gives a checked feasible continuation. The feedback route stopped after HiGHS withheld a numerical optimality claim. The separate sensitivity run completed with tolerance 10<sup>−7</sup>. The baseline retains the stop at 10<sup>−8</sup>.</li>
+</ul>
+<h2>Download and reproduce</h2>
+<p>Build the source-only driver against <a href="https://github.com/butahlecoq/csl-sdk/releases/tag/v0.1.1">CSL SDK v0.1.1</a> with HiGHS enabled. The driver uses the installed <code>CSL::controllers</code>, <code>CSL::model_catalogue</code>, and <code>CSL::highs_convex</code> targets. Set <code>SDK_PREFIX</code> to the installation prefix and <code>JSON_HEADERS</code> to the directory containing the nlohmann/json 3.11.3 headers.</p>
+<pre><code>cmake -S source -B source/build -DCMAKE_BUILD_TYPE=Release   -DCMAKE_PREFIX_PATH="$SDK_PREFIX" -DCAMPAIGN_JSON_HEADERS="$JSON_HEADERS"
+cmake --build source/build
+bash source/execute.sh replay
+python source/audit.py source/replay source/frozen-catalogue-export.csv</code></pre>
+<p>The checker requires NumPy. The optional platoon renderer also uses Matplotlib.</p>
+<p>To reproduce the separate tolerance diagnostic, build the driver from the diagnostic directory. Run model 30 with both of the recorded tolerances and compare its feedback status.</p>
+<pre><code>cmake -S tolerance-diagnostic -B tolerance-diagnostic/build -DCMAKE_BUILD_TYPE=Release   -DCMAKE_PREFIX_PATH="$SDK_PREFIX" -DCAMPAIGN_JSON_HEADERS="$JSON_HEADERS"
+cmake --build tolerance-diagnostic/build
+tolerance-diagnostic/build/catalogue_episode 30 1e-8 &gt; strict.json
+tolerance-diagnostic/build/catalogue_episode 30 1e-7 &gt; sensitivity.json</code></pre>
+<p><a href="native-source-constrained-mpc-v1.zip">Download figures, source, and raw outcomes</a> · <a href="native-source-constrained-mpc-v1.zip.sha256">ZIP checksum</a> · <a href="manifest.json">Publication manifest</a> · <a href="independent-audit.json">Independent audit</a> · <a href="stops-audit.json">Stop diagnosis</a> · <a href="tolerance-diagnostic/independent-audit.json">Tolerance sensitivity audit</a></p>
+</main>
+</body>
+</html>
