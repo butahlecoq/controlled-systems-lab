@@ -1021,6 +1021,14 @@ class _HistoricalPublicationPin(TypedDict):
 
 
 _HISTORICAL_PUBLICATIONS: dict[str, _HistoricalPublicationPin] = {
+    "opt12-7b732a53716c": {
+        "report_id": "opt12-warm-start-b45c68fc3a6b164919ba3dac5e863688fd39cbb867dcc06c75f1e124c94b1386",
+        "inventory_sha256": "2d3186d04ab0aec0d411fcd609f0dd9e52cab41076043a8ca8f3d6156565b23f",
+        "identity_files_sha256": {
+            "opt12-7b732a53716c.zip": "10c245099268e77fcc2ecfba31f5cca9cbf5cf247d782fc058f66f0a5ea75e7e"
+        },
+        "zip_sha256": "116a0a1dd5b1551f1ef37591da88af10682dfe822a782c9b1b6d0a63366a85ed",
+    },
     "geo02-20261012T235755Z-6b1f504ad3db": {
         "identity_files_sha256": {
             "geo02-20261012T235755Z-6b1f504ad3db.zip": "faa9ec723875f6ab9072b38aaa0f3d0d4be30eb7732b887f1c9aa99f46d00b40"

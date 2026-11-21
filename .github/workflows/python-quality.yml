@@ -145,7 +145,11 @@ on:
       - 'reports/algorithm-results/env717-cartpole-pilot-v1/**'
       - 'tests/reporting/test_convex_report.py'
       - 'tests/reporting/test_opt07_collector.py'
-      - 'tests/reporting/test_opt12_collector.py'
+      - 'scripts/reports/opt12_*.py'
+      - 'tests/reporting/test_opt12_*.py'
+      - 'reports/algorithm-results/opt12-*/**'
+      - 'reports/algorithm-results/opt12-*.zip*'
+      - 'reports/algorithm-results/catalog.json'
       - 'tests/reporting/test_visual_examples.py'
       - 'tests/reporting/test_geo07_publication.py'
       - 'tests/reporting/test_geo07_port_publication.py'
@@ -382,7 +386,11 @@ on:
       - 'reports/algorithm-results/env717-cartpole-pilot-v1/**'
       - 'tests/reporting/test_convex_report.py'
       - 'tests/reporting/test_opt07_collector.py'
-      - 'tests/reporting/test_opt12_collector.py'
+      - 'scripts/reports/opt12_*.py'
+      - 'tests/reporting/test_opt12_*.py'
+      - 'reports/algorithm-results/opt12-*/**'
+      - 'reports/algorithm-results/opt12-*.zip*'
+      - 'reports/algorithm-results/catalog.json'
       - 'tests/reporting/test_visual_examples.py'
       - 'tests/reporting/test_geo07_publication.py'
       - 'tests/reporting/test_geo07_port_publication.py'
@@ -541,7 +549,7 @@ jobs:
         env:
           MPLBACKEND: Agg
         run: |
-          python -m unittest tests.reporting.test_convex_report tests.reporting.test_opt07_collector tests.reporting.test_opt12_collector tests.reporting.test_visual_examples tests.reporting.test_geo07_publication tests.reporting.test_geo07_port_publication tests.reporting.test_geo07_dependent_publication tests.reporting.test_finite_feedback_publication tests.reporting.test_ext04_publication tests.reporting.test_report_lifecycle
+          python -m unittest tests.reporting.test_convex_report tests.reporting.test_opt07_collector tests.reporting.test_visual_examples tests.reporting.test_geo07_publication tests.reporting.test_geo07_port_publication tests.reporting.test_geo07_dependent_publication tests.reporting.test_finite_feedback_publication tests.reporting.test_ext04_publication tests.reporting.test_report_lifecycle
 
 
       - name: Check both saved Strategy A choice-pipeline publications
@@ -571,6 +579,11 @@ jobs:
           python -m unittest tests.reporting.test_catalogue_forward_publication
           python -m unittest tests.reporting.test_mpc_crossover_publication tests.reporting.test_native_source_constrained_mpc_publication tests.reporting.test_native_history_strategy_publication
           python -m unittest discover -s tests/reporting -p 'test_visual_examples.py'
+      - name: Check OPT-12 collection, rendering and immutable publication
+        run: |
+          python -m unittest tests.reporting.test_opt12_collector tests.reporting.test_opt12_render tests.reporting.test_opt12_publication
+          python scripts/reports/opt12_collect.py --help
+          python scripts/reports/opt12_render.py --help
       - name: Exercise OPT07 and OPT11 collectors, oracles and saved reports
         run: |
           python -m unittest discover -s tests/reporting -p 'test_opt07_*.py'
