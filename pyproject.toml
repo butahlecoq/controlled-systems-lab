@@ -31,6 +31,9 @@ include = [
     "tests/reporting/test_history_membership_2d.py",
     "scripts/reports/stage_native_row_scaling_diagnostic.py",
     "scripts/reports/stage_closed_loop_initial_baselines.py",
+    "scripts/reports/stage_issue4_volterra.py",
+    "scripts/research/issue4_volterra_enclosure.py",
+    "tests/reporting/test_issue4_volterra_enclosure.py",
     "scripts/reports/fixed_tail_example.py",
     "scripts/reports/native_fixed_tail_episode_report.py",
     "scripts/reports/native_fixed_tail_geometry.py",
@@ -144,7 +147,7 @@ select = ["E4", "E7", "E9", "F", "I", "B"]
 
 [tool.ty.environment]
 python-version = "3.11"
-extra-paths = ["scripts", "scripts/ci", "scripts/reports", "benchmarks/reporting/closed_loop", "benchmarks/reporting/mpc11", "reports/algorithm-results/tooling"]
+extra-paths = ["scripts", "scripts/ci", "scripts/reports", "scripts/research", "benchmarks/reporting/closed_loop", "benchmarks/reporting/mpc11", "reports/algorithm-results/tooling"]
 
 [tool.ty.src]
 include = [
@@ -251,6 +254,9 @@ include = [
     "scripts/reports/stage_native_row_scaling_diagnostic.py",
     "tests/reporting/test_stage_native_row_scaling_diagnostic.py",
     "scripts/reports/stage_closed_loop_initial_baselines.py",
+    "scripts/reports/stage_issue4_volterra.py",
+    "scripts/research/issue4_volterra_enclosure.py",
+    "tests/reporting/test_issue4_volterra_enclosure.py",
     "scripts/reports/fixed_tail_example.py",
     "scripts/reports/native_fixed_tail_episode_report.py",
     "scripts/reports/native_fixed_tail_geometry.py",

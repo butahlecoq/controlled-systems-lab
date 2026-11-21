@@ -15,7 +15,6 @@ from dataclasses import dataclass
 from fractions import Fraction
 from pathlib import Path
 
-
 SCALE = 10**15
 SOURCE_SHA256 = "c26fc2424fa8b3325a864d1afbc67920ba1c05665bfdf4562bed79548b60a4f1"
 
@@ -98,7 +97,15 @@ def step_box() -> Box:
 
 
 def run() -> dict:
-    q = lambda n, d=1: Box.rational(Fraction(n, d))
+    def q(n: int, d: int = 1) -> Box:
+        return Box.rational(Fraction(n, d))
+
+    def affine(state: list[Box], matrix: list[list[Box]], drive: Box) -> list[Box]:
+        return [
+            matrix[0][0] * state[0] + matrix[0][1] * state[1] + drive,
+            matrix[1][0] * state[0] + matrix[1][1] * state[1],
+        ]
+
     a, b, c, d, input_gain = q(9, 10), q(3, 1000), q(4, 5), q(1, 500), q(17, 20)
     step = step_box()
     control = Box(-3 * SCALE // 10, 3 * SCALE // 10)
@@ -120,16 +127,10 @@ def run() -> dict:
         ]
         drive = step * input_gain * control
 
-        def affine(state: list[Box]) -> list[Box]:
-            return [
-                matrix[0][0] * state[0] + matrix[0][1] * state[1] + drive,
-                matrix[1][0] * state[0] + matrix[1][1] * state[1],
-            ]
-
         product = nonlinear[0] * nonlinear[1]
-        nonlinear_next = affine(nonlinear)
+        nonlinear_next = affine(nonlinear, matrix, drive)
         nonlinear = [nonlinear_next[0] - step * b * product, nonlinear_next[1] + step * d * product]
-        linear = affine(linear)
+        linear = affine(linear, matrix, drive)
         # The identical control cancels algebraically in this recurrence.
         error = [
             matrix[0][0] * error[0] + matrix[0][1] * error[1] - step * b * product,

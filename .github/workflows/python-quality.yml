@@ -184,6 +184,11 @@ on:
       - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
       - 'scripts/reports/stage_closed_loop_initial_baselines.py'
+      - 'scripts/reports/stage_issue4_volterra.py'
+      - 'scripts/research/issue4_volterra_enclosure.py'
+      - 'tests/reporting/test_issue4_volterra_enclosure.py'
+      - 'scripts/reports/issue4_volterra/render.py'
+      - 'reports/algorithm-results/issue4-volterra-7dce05b47c50c27a/**'
       - 'scripts/reports/fixed_tail_example.py'
       - 'scripts/reports/native_fixed_tail_episode_report.py'
       - 'scripts/reports/native_fixed_tail_geometry.py'
@@ -419,6 +424,11 @@ on:
       - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
       - 'scripts/reports/stage_closed_loop_initial_baselines.py'
+      - 'scripts/reports/stage_issue4_volterra.py'
+      - 'scripts/research/issue4_volterra_enclosure.py'
+      - 'tests/reporting/test_issue4_volterra_enclosure.py'
+      - 'scripts/reports/issue4_volterra/render.py'
+      - 'reports/algorithm-results/issue4-volterra-7dce05b47c50c27a/**'
       - 'scripts/reports/fixed_tail_example.py'
       - 'scripts/reports/native_fixed_tail_episode_report.py'
       - 'scripts/reports/native_fixed_tail_geometry.py'
@@ -512,6 +522,15 @@ jobs:
           python scripts/reports/native_fixed_tail_geometry.py --output "$RUNNER_TEMP/fixed-tail-geometry-site"
           cmp docs/examples/examples.css "$RUNNER_TEMP/fixed-tail-episode-site/examples/examples.css"
           cmp docs/examples/examples.css "$RUNNER_TEMP/fixed-tail-geometry-site/examples.css"
+      - name: Replay the saved Volterra certificate and offline ZIP
+        run: |
+          python -m unittest tests.reporting.test_issue4_volterra_enclosure
+          site="$RUNNER_TEMP/issue4-volterra-site"
+          bundle=reports/algorithm-results/issue4-volterra-7dce05b47c50c27a
+          mkdir "$site"
+          printf '<ul></ul>\n' > "$site/index.html"
+          python scripts/reports/stage_issue4_volterra.py --source "$bundle" --site "$site"
+          diff -r "$bundle" "$site/${bundle##*/}"
       - name: Exercise the composed Pages route finalizer
         run: python -m unittest tests.reporting.test_pages_route_retirement
       - name: Exercise maintained compatibility entry points

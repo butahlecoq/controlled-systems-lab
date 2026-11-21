@@ -10,15 +10,17 @@ ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location(
     "issue4_volterra_renderer", ROOT / "scripts/reports/issue4_volterra/render.py"
 )
+if spec is None or spec.loader is None:
+    raise ImportError("Volterra report renderer is unavailable")
 report = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(report)
 
 site_spec = importlib.util.spec_from_file_location(
     "issue4_site", Path(__file__).with_name("site.py")
 )
+if site_spec is None or site_spec.loader is None:
+    raise ImportError("Pages report helpers are unavailable")
 site = importlib.util.module_from_spec(site_spec)
-assert site_spec.loader is not None
 site_spec.loader.exec_module(site)
 
 
