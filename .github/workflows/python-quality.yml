@@ -517,6 +517,11 @@ jobs:
       - name: Replay the saved EXT-07 catalogue and report archives
         run: |
           python -m unittest tests.reporting.test_ext07_saved tests.reporting.test_ext07_resource_observation
+          capability=reports/algorithm-results/ext07-capability-scale-3d8fdf8589b7194f
+          capability_output="$RUNNER_TEMP/ext07-capability-summary"
+          python scripts/reports/ext07/capability_collect.py --raw "$capability/measure.jsonl" --out "$capability_output"
+          cmp "$capability/summary.csv" "$capability_output/summary.csv"
+          cmp "$capability/summary.json" "$capability_output/summary.json"
           catalog=reports/algorithm-results/ext07-publications.json
           site="$RUNNER_TEMP/ext07-saved-site"
           mkdir "$site"
