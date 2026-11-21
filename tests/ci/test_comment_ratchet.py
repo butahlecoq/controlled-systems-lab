@@ -49,7 +49,9 @@ class CommentRatchetTests(unittest.TestCase):
     def test_accepts_required_directives_and_hashes_in_strings(self):
         self.file.write_text(
             "#!/usr/bin/env python3\n# coding: utf-8\n# SPDX-License-Identifier: MIT\n"
-            'x = "# prose in a string"  # noqa: F841\n'
+            'x = "# prose in a string"  # noqa: F841,\tF401\n'
+            "values = []  # type: list[int]\n"
+            "def f(values):\n    # type: (list[int]) -> None\n    pass\n"
             "ignored = x  # type: ignore[assignment]\n"
             "# ruff: isort: skip_file\n"
             "# isort: split\n"
@@ -65,6 +67,12 @@ class CommentRatchetTests(unittest.TestCase):
                 result = self.checker("check", "--base", "HEAD")
                 self.assertEqual(result.returncode, 1, result.stderr)
                 self.assertIn(f"scripts/ci/tool.py:1: # {prefix}: This is prose", result.stderr)
+
+    def test_free_form_ignore_payload_is_prose(self):
+        self.file.write_text("x = 1  # type: ignore[this is an excuse]\n")
+        result = self.checker("check", "--base", "HEAD")
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("scripts/ci/tool.py:1: # type: ignore[this is an excuse]", result.stderr)
 
     def test_rejects_a_cookie_like_comment_after_the_encoding_header(self):
         self.file.write_text("x = 1\n# coding: utf-8\n")

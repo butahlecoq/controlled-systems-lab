@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import io
 import json
 import os
@@ -18,12 +19,13 @@ from typing import Literal
 SCOPE = "scripts/ci"
 CommentKind = Literal["comment_only", "inline", "directive"]
 ENCODING_COOKIE = re.compile(r"^#.*?coding[:=][ \t]*[-\w.]+")
+TYPE_COMMENT = re.compile(r"#\s*type:\s*(\S.*)")
 DIRECTIVE = re.compile(
     r"#\s*(?:"
-    r"(?i:(?:ruff:\s*)?noqa)(?:\s*:\s*[A-Z][A-Z0-9]+(?:[ ,]+[A-Z][A-Z0-9]+)*)?"
+    r"(?i:(?:ruff:\s*)?noqa)(?:\s*:\s*[A-Z][A-Z0-9]+(?:[ \t,]+[A-Z][A-Z0-9]+)*)?"
     r"|fmt:\s*(?:on|off|skip)"
     r"|(?:ruff:\s*)?isort:\s*(?:on|off|skip|skip_file|split)"
-    r"|(?:type|ty|pyright):\s*ignore(?:\[[\w, -]+\])?"
+    r"|(?:type|ty|pyright):\s*ignore(?:\[\s*[\w-]+(?:\s*,\s*[\w-]+)*\s*\])?"
     r"|SPDX-(?:FileCopyrightText|License-Identifier):\s*\S.*"
     r")"
 )
@@ -51,8 +53,30 @@ def python_paths(paths: bytes) -> list[str]:
     return sorted({os.fsdecode(path) for path in paths.split(b"\0") if path.endswith(b".py")})
 
 
+def type_annotations(contents: bytes) -> Counter[str]:
+    annotations: Counter[str] = Counter()
+    try:
+        tree = ast.parse(contents, type_comments=True)
+    except SyntaxError:
+        return annotations
+    for node in ast.walk(tree):
+        text = getattr(node, "type_comment", None)
+        if text:
+            annotation = text.strip()
+            try:
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    ast.parse(annotation, mode="func_type")
+                else:
+                    ast.parse(annotation, mode="eval")
+            except SyntaxError:
+                continue
+            annotations[annotation] += 1
+    return annotations
+
+
 def comments(path: str, contents: bytes) -> list[Comment]:
     result = []
+    annotations = None
     try:
         source = io.BytesIO(contents)
         _, encoding_lines = tokenize.detect_encoding(source.readline)
@@ -73,6 +97,13 @@ def comments(path: str, contents: bytes) -> list[Comment]:
                 or DIRECTIVE.fullmatch(text)
             ):
                 kind = "directive"
+            elif match := TYPE_COMMENT.fullmatch(text):
+                if annotations is None:
+                    annotations = type_annotations(contents)
+                annotation = match[1]
+                if annotations[annotation]:
+                    annotations[annotation] -= 1
+                    kind = "directive"
             result.append(Comment(path, line, kind, text))
     except (SyntaxError, tokenize.TokenError, UnicodeError) as error:
         raise ValueError(f"{path}: cannot tokenize Python source: {error}") from error
