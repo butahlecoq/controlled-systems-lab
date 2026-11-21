@@ -1,11 +1,12 @@
 """Verify and stage the issue #824 four-state box-minimax report."""
+
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import report_source_identity
@@ -13,8 +14,16 @@ import report_source_identity
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/issue824-two-points-box-pilot-v4"
 ROUTE = "issue824-two-points-box-pilot-v4"
-FILES = ("README.md", "SHA256SUMS", "capture.json", "check.json", "figure-data.json",
-         "index.html", "projections.svg", "result.json")
+FILES = (
+    "README.md",
+    "SHA256SUMS",
+    "capture.json",
+    "check.json",
+    "figure-data.json",
+    "index.html",
+    "projections.svg",
+    "result.json",
+)
 
 
 def digest(data: bytes) -> str:
@@ -22,7 +31,11 @@ def digest(data: bytes) -> str:
 
 
 def verified_bundle(source: Path) -> dict[str, bytes]:
-    if source.is_symlink() or not source.is_dir() or {path.name for path in source.iterdir()} != set(FILES):
+    if (
+        source.is_symlink()
+        or not source.is_dir()
+        or {path.name for path in source.iterdir()} != set(FILES)
+    ):
         raise ValueError("issue #824 box-minimax report inventory differs")
     files = {name: (source / name).read_bytes() for name in FILES}
     checksums = {}
@@ -39,24 +52,34 @@ def verified_bundle(source: Path) -> dict[str, bytes]:
     result = json.loads(files["result.json"])
     box = result.get("box_method", {})
     exact = result.get("exact_reference", {})
-    if (capture.get("source_tree_clean_before_report_generation") is not True or
-            result.get("schema") != "csl.issue824-two-points-box-minimax/1" or
-            result.get("environment") != "TwoPointsOnParallelLines" or
-            check.get("status") != "verified" or
-            check.get("exact_finite_minimax_value") != exact.get("finite_minimax_value") or
-            check.get("selected_plan_replay_value") != box.get("full_catalogue_replay_value") or
-            len(box.get("stages", [])) != 4 or len(box.get("all_plan_scores", [])) != 27 or
-            "every exact finite-catalog state checked at every stage" not in
-            check.get("stage_box_inclusion", "") or
-            "not a validated bound" not in check.get("objective_bound_status", "")):
-        raise ValueError("issue #824 box-minimax report lacks verified stage, replay, or scope evidence")
+    if (
+        capture.get("source_tree_clean_before_report_generation") is not True
+        or result.get("schema") != "csl.issue824-two-points-box-minimax/1"
+        or result.get("environment") != "TwoPointsOnParallelLines"
+        or check.get("status") != "verified"
+        or check.get("exact_finite_minimax_value") != exact.get("finite_minimax_value")
+        or check.get("selected_plan_replay_value") != box.get("full_catalogue_replay_value")
+        or len(box.get("stages", [])) != 4
+        or len(box.get("all_plan_scores", [])) != 27
+        or "every exact finite-catalog state checked at every stage"
+        not in check.get("stage_box_inclusion", "")
+        or "not a validated bound" not in check.get("objective_bound_status", "")
+    ):
+        raise ValueError(
+            "issue #824 box-minimax report lacks verified stage, replay, or scope evidence"
+        )
     if not report_source_identity.source_hashes_match_commit(
-            ROOT, capture.get("source_commit", ""), capture.get("source_files_sha256", {})):
+        ROOT, capture.get("source_commit", ""), capture.get("source_files_sha256", {})
+    ):
         raise ValueError("issue #824 box-minimax source differs from the captured commit")
     figure = files["projections.svg"].decode("utf-8")
-    if ("x1 position" not in figure or "x2 velocity" not in figure or
-            "x3 position" not in figure or "x4 velocity" not in figure or
-            "Box-selected plan replay" not in figure):
+    if (
+        "x1 position" not in figure
+        or "x2 velocity" not in figure
+        or "x3 position" not in figure
+        or "x4 velocity" not in figure
+        or "Box-selected plan replay" not in figure
+    ):
         raise ValueError("issue #824 box-minimax figure omits player projections or replay")
     return files
 
