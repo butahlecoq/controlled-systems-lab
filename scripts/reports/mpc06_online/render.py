@@ -13,13 +13,16 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING or __package__:
-    from .evidence import TOOLS, checked_sources, digest
+    from .evidence import TOOLS, checked_sources, digest, json_value, load_sources
 else:
-    from evidence import TOOLS, checked_sources, digest
+    from evidence import TOOLS, checked_sources, digest, json_value, load_sources
 
 
 def render(bundle, receipt_path, output):
+    receipt_bytes = receipt_path.read_bytes()
     record, receipt = checked_sources(bundle, receipt_path)
+    if json_value(receipt_bytes) != receipt:
+        raise ValueError("verification receipt changed during validation")
     has_source_guide = (Path(bundle) / "source/README.md").is_file()
     verified = receipt["verification"]
     if output.resolve().is_relative_to(bundle.resolve()) or bundle.resolve().is_relative_to(
@@ -37,8 +40,10 @@ def render(bundle, receipt_path, output):
     source_prefix = "checked-inputs/" + bundle.name
     output.mkdir(parents=True)
     shutil.copytree(bundle, output / source_prefix)
-    checked_sources(output / source_prefix, receipt_path)
-    (output / "verification-v2.json").write_bytes(receipt_path.read_bytes())
+    _, copied_inputs = load_sources(output / source_prefix)
+    if copied_inputs != receipt["inputs"]:
+        raise ValueError("copied inputs do not match the verification receipt")
+    (output / "verification-v2.json").write_bytes(receipt_bytes)
     tools = output / "review-tools"
     tools.mkdir()
     for name, data in tool_sources.items():

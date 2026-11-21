@@ -118,15 +118,32 @@ class OnlineTubeTests(unittest.TestCase):
             original_read = Path.read_bytes
             expected = original_read(renderer_source)
             copied_tool = output / "review-tools/render.py"
+            expected_receipt = original_read(receipt)
+            load_sources = ONLINE_RENDER.load_sources
+            copied_inputs_checked = False
+
+            def load_during_render(source):
+                nonlocal copied_inputs_checked
+                result = load_sources(source)
+                if source != bundle:
+                    copied_inputs_checked = True
+                return result
 
             def read_during_render(path):
+                if path == receipt and copied_inputs_checked:
+                    return b'{"edited": true}\n'
                 if path == renderer_source and copied_tool.exists():
                     return expected + b"\n# edited during rendering\n"
                 return original_read(path)
 
-            with mock.patch.object(Path, "read_bytes", read_during_render):
+            with (
+                mock.patch.object(ONLINE_RENDER, "load_sources", load_during_render),
+                mock.patch.object(Path, "read_bytes", read_during_render),
+            ):
                 ONLINE_RENDER.render(bundle, receipt, output)
+            self.assertTrue(copied_inputs_checked)
             self.assertTrue((output / "index.html").is_file())
+            self.assertEqual((output / "verification-v2.json").read_bytes(), expected_receipt)
             self.assertEqual(copied_tool.read_bytes(), expected)
             self.assertEqual((output / "render-source/render.py").read_bytes(), expected)
             summary = json.loads((output / "summary.json").read_text())
