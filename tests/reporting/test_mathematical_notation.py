@@ -19,15 +19,17 @@ class MatrixMarkup(HTMLParser):
         self.math_labels: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        attrs = dict(attrs)
+        attributes = dict(attrs)
         if tag == "mtr":
             self.rows += 1
         elif tag == "mtd":
             self.cells += 1
         elif tag == "mtable":
             self.mathml_tables += 1
-        elif tag == "span" and attrs.get("role") == "math":
-            self.math_labels.append(attrs.get("aria-label", ""))
+        elif tag == "span" and attributes.get("role") == "math":
+            label = attributes.get("aria-label")
+            assert label is not None, "the math fragment must have a spoken label"
+            self.math_labels.append(label)
 
 
 class MathematicalNotationTests(unittest.TestCase):
