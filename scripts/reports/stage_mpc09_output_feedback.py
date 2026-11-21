@@ -7,18 +7,23 @@ import argparse
 import hashlib
 import html
 import importlib.util
+import io
 import json
-from pathlib import Path
 import re
 import stat
 import subprocess
 import tempfile
 import zipfile
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 GIT_ROOT = ROOT
 SOURCE_REPOSITORY_URL = "https://github.com/butahlecoq/controlled-systems-lab.git"
 SOURCE = ROOT / "reports/algorithm-results/mpc09-two-particle-output-feedback-v1"
+# Retain the deployed route only for the exact captured input inventory.
+HISTORICAL_BUNDLE_SHA256 = "19cebca113e41cd07f8ecc05ba567a2cf3cc1075c00f6a49ced89f3c978742bd"
+HISTORICAL_STAGER_SHA256 = "207be7bb49964e4af162f81287221a3c195ab4aea85d0e7d9bfa3d6e9c7486c0"
+HISTORICAL_ZIP_SHA256 = "457cd203b245f8d7cfc26a8c3c464155cf20d5ed84e3e77ac04fd5b99079ba20"
 CHECKER_PATH = ROOT / "scripts/reports/mpc09/check_output_feedback.py"
 REPORT_PATH = ROOT / "scripts/reports/mpc09/make_report.py"
 REQUIRED_SOURCE_FINGERPRINTS = (
@@ -191,12 +196,19 @@ def stage(source: Path, site: Path) -> str:
     page = index_path.read_text(encoding="utf-8")
     if page.count("</ul>") != 1:
         raise ValueError("algorithm archive insertion point differs")
+    source_hashes = {name: digest(content) for name, content in sorted(files.items())}
+    historical = (
+        source.name == SOURCE.name
+        and digest(json.dumps(source_hashes, separators=(",", ":")).encode())
+        == HISTORICAL_BUNDLE_SHA256
+    )
+    stager_sha256 = HISTORICAL_STAGER_SHA256 if historical else digest(Path(__file__).read_bytes())
     identity = {
         "source_commit": capture["source_commit"],
         "capture_sha256": digest(files["capture.json"]),
         "result_sha256": digest(files["result.json"]),
-        "stager_sha256": digest(Path(__file__).read_bytes()),
-        "published_source_files": {name: digest(value) for name, value in sorted(files.items())},
+        "stager_sha256": stager_sha256,
+        "published_source_files": source_hashes,
     }
     route = (
         "mpc09-output-feedback-"
@@ -228,7 +240,7 @@ def stage(source: Path, site: Path) -> str:
         ],
         "stager_sha256": identity["stager_sha256"],
         "verification": verification,
-        "source_bundle_sha256": {name: digest(value) for name, value in sorted(files.items())},
+        "source_bundle_sha256": source_hashes,
         "published_files": {name: digest(value) for name, value in sorted(generated.items())},
     }
     generated["publication-manifest.json"] = (
@@ -240,14 +252,12 @@ def stage(source: Path, site: Path) -> str:
         f' · <a href="{route}/projections.svg">particle phase planes</a>'
         f' · <a href="{route}.zip">offline ZIP</a></li>'
     )
-    destination.mkdir()
-    for name, content in generated.items():
-        (destination / name).write_bytes(content)
     offline = (
         f'<!doctype html><html lang="en"><meta charset="utf-8"><title>Offline MPC-09 report</title>'
         f'<a href="{route}/index.html">Open the output-feedback report</a></html>'
     ).encode()
-    with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+    archive_bytes = io.BytesIO()
+    with zipfile.ZipFile(archive_bytes, "w", compression=zipfile.ZIP_DEFLATED) as archive:
         for name, content in [("index.html", offline)] + [
             (f"{route}/{name}", content) for name, content in sorted(generated.items())
         ]:
@@ -255,6 +265,13 @@ def stage(source: Path, site: Path) -> str:
             item.compress_type = zipfile.ZIP_DEFLATED
             item.external_attr = 0o100644 << 16
             archive.writestr(item, content)
+    archive_data = archive_bytes.getvalue()
+    if historical and digest(archive_data) != HISTORICAL_ZIP_SHA256:
+        raise ValueError("MPC-09 historical archive checksum differs")
+    destination.mkdir()
+    for name, content in generated.items():
+        (destination / name).write_bytes(content)
+    archive_path.write_bytes(archive_data)
     index_path.write_text(page.replace("</ul>", link + "</ul>"), encoding="utf-8")
     return route
 

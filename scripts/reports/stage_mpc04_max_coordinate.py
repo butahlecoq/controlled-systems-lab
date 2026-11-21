@@ -10,7 +10,6 @@ import importlib.util
 import io
 import json
 import os
-from pathlib import Path, PurePosixPath
 import re
 import shutil
 import stat
@@ -18,10 +17,15 @@ import subprocess
 import sys
 import tempfile
 import zipfile
+from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE_REPOSITORY_URL = "https://github.com/butahlecoq/controlled-systems-lab.git"
 SOURCE = ROOT / "reports/algorithm-results/mpc04-max-coordinate-replanning-pilot-20261030"
+# Retain the deployed route only for the exact captured input inventory.
+HISTORICAL_BUNDLE_SHA256 = "a600448ea698e559505f549c4dcb639c8716abe1e929be3d4313507987e67375"
+HISTORICAL_STAGER_SHA256 = "7becddc7cdc71222bb0927e3ef5b07d3703a7720f57808899873376d4bee93f9"
+HISTORICAL_ZIP_SHA256 = "ab5a12359f365d3044743dd9ad74d3ee6279e00f2d68895830c84f8ab59aa965"
 REPORT_PATH = ROOT / "scripts/reports/mpc04/max_coordinate_replanning.py"
 CHECKER_PATH = ROOT / "scripts/reports/mpc04/check_max_coordinate.py"
 PAYLOAD_FILES = (
@@ -261,12 +265,19 @@ def stage(source: Path, site: Path) -> str:
         raise ValueError("MPC-04 archive insertion point differs")
 
     source_commit = capture["source"]["report_code_commit"]
+    source_hashes = {name: digest(content) for name, content in sorted(files.items())}
+    historical = (
+        source.name == SOURCE.name
+        and digest(json.dumps(source_hashes, separators=(",", ":")).encode())
+        == HISTORICAL_BUNDLE_SHA256
+    )
+    stager_sha256 = HISTORICAL_STAGER_SHA256 if historical else digest(Path(__file__).read_bytes())
     identity = {
         "source_commit": source_commit,
         "capture_sha256": digest(files["capture.json"]),
         "result_sha256": digest(files["result.json"]),
-        "stager_sha256": digest(Path(__file__).read_bytes()),
-        "source_bundle_sha256": {name: digest(content) for name, content in sorted(files.items())},
+        "stager_sha256": stager_sha256,
+        "source_bundle_sha256": source_hashes,
     }
     route = (
         "mpc04-max-coordinate-replanning-"
@@ -341,8 +352,11 @@ def stage(source: Path, site: Path) -> str:
                 item.compress_type = zipfile.ZIP_DEFLATED
                 item.external_attr = 0o100644 << 16
                 archive.writestr(item, content)
+        archive_data = archive_bytes.getvalue()
+        if historical and digest(archive_data) != HISTORICAL_ZIP_SHA256:
+            raise ValueError("MPC-04 historical archive checksum differs")
         staged_archive = temporary_path / f"{route}.zip"
-        staged_archive.write_bytes(archive_bytes.getvalue())
+        staged_archive.write_bytes(archive_data)
         staged_index = temporary_path / "index.html"
         staged_index.write_text(page.replace("</ul>", link + "</ul>"), encoding="utf-8")
         if destination.exists() or archive_path.exists():

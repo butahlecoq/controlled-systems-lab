@@ -1,15 +1,16 @@
 import json
-from pathlib import Path
 import shutil
 import sys
 import tempfile
 import unittest
 import zipfile
+from importlib import import_module
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import landing
-import stage_mpc04_max_coordinate as publication
+landing = import_module("landing")
+publication = import_module("stage_mpc04_max_coordinate")
 
 
 class Mpc04PublicationTests(unittest.TestCase):
