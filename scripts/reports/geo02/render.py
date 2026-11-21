@@ -61,7 +61,7 @@ def check_oracle(scenario, points, tol=1e-8):
         for p in points:
             q = [float(x) - a[i] for i, x in enumerate(p)]
             t = sum(q[i] * d[i] for i in range(2)) / norm
-            if t < -tol or t > 1 + tol or any(abs(q[i] - t * d[i]) > tol for i in range(2)):
+            if not -tol <= t <= 1 + tol or any(abs(q[i] - t * d[i]) > tol for i in range(2)):
                 return False
         return True
     return False

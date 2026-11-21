@@ -1,8 +1,10 @@
 """Focused contract tests for immutable GEO-02 numerical reports."""
 
 import copy
+import csv
 import hashlib
 import importlib
+import io
 import json
 import subprocess
 import sys
@@ -23,11 +25,12 @@ else:
     render = importlib.import_module("render")
 
 
+SAVED = HERE.parents[2] / "reports" / "algorithm-results" / "geo02-20261013T061151Z-338ff7d1d63c"
+
+
 class ContractTests(unittest.TestCase):
-    def test_collector_preserves_the_archived_driver_rows(self):
-        root = HERE.parents[2]
-        saved = root / "reports" / "algorithm-results" / "geo02-20261013T061151Z-338ff7d1d63c"
-        records = json.loads((saved / "records.json").read_bytes())
+    def run_saved_driver(self, stdout, stderr, expected_exit):
+        records = json.loads((SAVED / "records.json").read_bytes())
         with tempfile.TemporaryDirectory() as directory:
             scratch = Path(directory)
             exe = scratch / "driver.exe"
@@ -53,28 +56,149 @@ class ContractTests(unittest.TestCase):
                 str(output),
                 "--reviewed",
             ]
+            (scratch / "stdout").write_bytes(stdout)
+            (scratch / "stderr").write_bytes(stderr)
+
+            def run_driver(_command, **kwargs):
+                return subprocess.run(
+                    [
+                        sys.executable,
+                        "-c",
+                        "from pathlib import Path; import sys; "
+                        "sys.stdout.buffer.write(Path('stdout').read_bytes()); "
+                        "sys.stderr.buffer.write(Path('stderr').read_bytes())",
+                    ],
+                    **kwargs,
+                )
+
             process = mock.Mock(wraps=subprocess)
-            process.run.return_value = subprocess.CompletedProcess(
-                [str(exe)],
-                0,
-                (saved / "raw-driver-output.csv").read_text(encoding="utf-8"),
-                (saved / "process-stderr.txt").read_text(encoding="utf-8"),
-            )
+            process.run.side_effect = run_driver
             with (
                 mock.patch.object(sys, "argv", argv),
                 mock.patch.object(collect, "subprocess", process),
-                mock.patch.object(provenance, "git", return_value=str(root)),
+                mock.patch.object(provenance, "git", return_value=str(HERE.parents[2])),
                 mock.patch.object(provenance, "require_clean_tracked_tree"),
                 mock.patch.object(
                     provenance, "final_build_provenance", return_value=({}, "", "", "")
                 ),
             ):
-                self.assertEqual(collect.main(), 0)
-            replay = json.loads((output / "records.json").read_bytes())
-            self.assertEqual(replay["collection"]["state"], "complete")
-            self.assertEqual(json.dumps(replay["trials"]), json.dumps(records["trials"]))
-            self.assertEqual(replay["summary"], records["summary"])
-            render.validate(replay)
+                self.assertEqual(collect.main(), expected_exit)
+            self.assertEqual((output / "raw-driver-output.csv").read_bytes(), stdout)
+            self.assertEqual((output / "process-stderr.txt").read_bytes(), stderr)
+            return (
+                json.loads((output / "records.json").read_bytes()),
+                json.loads((output / "collection-status.json").read_bytes()),
+            )
+
+    def test_collector_preserves_the_archived_driver_rows(self):
+        records = json.loads((SAVED / "records.json").read_bytes())
+        replay, receipt = self.run_saved_driver(
+            (SAVED / "raw-driver-output.csv")
+            .read_text(encoding="utf-8")
+            .replace("\n", "\r\n")
+            .encode(),
+            (SAVED / "process-stderr.txt")
+            .read_text(encoding="utf-8")
+            .replace("\n", "\r\n")
+            .encode(),
+            0,
+        )
+        self.assertEqual(receipt["state"], "complete")
+        self.assertEqual(json.dumps(replay["trials"]), json.dumps(records["trials"]))
+        self.assertEqual(replay["summary"], records["summary"])
+        render.validate(replay)
+
+    def test_malformed_geometry_retains_raw_output_and_failed_status(self):
+        stdout = (SAVED / "raw-driver-output.csv").read_text(encoding="utf-8")
+        stderr = (SAVED / "process-stderr.txt").read_text(encoding="utf-8")
+        cases = (
+            ("trial", "support_values", "null"),
+            ("trial", "support_values", "[NaN,2]"),
+            ("trial", "output_points", "[[1e999],[2]]"),
+            ("warmup", "support_values", "[NaN,2]"),
+            ("warmup", "output_points", "[null]"),
+            ("warmup", "support_checks", "NaN"),
+        )
+        for stage, field, value in cases:
+            with self.subTest(stage=stage, field=field, value=value):
+                trial_stdout, trial_stderr = stdout, stderr
+                if stage == "trial":
+                    rows = list(csv.reader(io.StringIO(stdout)))
+                    rows[1][rows[0].index(field)] = value
+                    output = io.StringIO()
+                    csv.writer(output, lineterminator="\n").writerows(rows)
+                    trial_stdout = output.getvalue()
+                else:
+                    lines = stderr.splitlines(keepends=True)
+                    index = next(
+                        i for i, line in enumerate(lines) if line.startswith("geo02_warmup=")
+                    )
+                    row = json.loads(lines[index].removeprefix("geo02_warmup="))
+                    row[field] = json.loads(value)
+                    lines[index] = "geo02_warmup=" + json.dumps(row) + "\n"
+                    trial_stderr = "".join(lines)
+                replay, receipt = self.run_saved_driver(
+                    trial_stdout.encode(), trial_stderr.encode(), 2
+                )
+                self.assertEqual(receipt["state"], "failed")
+                error_key = "parse_error" if stage == "trial" else "warmup_parse_error"
+                self.assertIn(field, receipt[error_key])
+                self.assertEqual(receipt[error_key], replay["collection"][error_key])
+
+    def test_duplicate_warmup_geometry_key_is_rejected_before_validation(self):
+        stdout = (SAVED / "raw-driver-output.csv").read_bytes()
+        stderr = (SAVED / "process-stderr.txt").read_bytes()
+        malformed = stderr.replace(
+            b'"support_values":[', b'"support_values":null,"support_values":[', 1
+        )
+        self.assertNotEqual(malformed, stderr)
+        _, receipt = self.run_saved_driver(stdout, malformed, 2)
+        self.assertEqual(receipt["state"], "failed")
+        self.assertIn("duplicate JSON key: support_values", receipt["warmup_parse_error"])
+
+    def test_out_of_segment_point_fails_the_oracle_in_trials_and_warmups(self):
+        with mock.patch.object(sys, "path", [str(HERE.parent), *sys.path]):
+            adapter = importlib.import_module("geo02_registered_reports")
+
+        stdout = (SAVED / "raw-driver-output.csv").read_bytes()
+        stderr = (SAVED / "process-stderr.txt").read_bytes()
+        scenario = "singular_map_box_segment"
+        largest = sys.float_info.max
+        points = [[0, 0], [2, 4], [largest, -largest]]
+        reader = csv.DictReader(io.StringIO(stdout.decode()))
+        rows = list(reader)
+        trial = next(row for row in rows if row["scenario"] == scenario)
+        trial["output_points"] = json.dumps(points)
+        trial["materialized_output_point_count"] = "3"
+        output = io.StringIO()
+        writer = csv.DictWriter(output, fieldnames=collect.FIELDS)
+        writer.writeheader()
+        writer.writerows(rows)
+        lines = stderr.decode().splitlines(keepends=True)
+        prefix = "geo02_warmup="
+        index = next(
+            i for i, line in enumerate(lines) if line.startswith(prefix) and scenario in line
+        )
+        warmup = json.loads(lines[index].removeprefix(prefix))
+        for stage in ("trial", "warmup", "warmup_count"):
+            with self.subTest(stage=stage):
+                if stage == "trial":
+                    trial_stdout, trial_stderr = output.getvalue().encode(), stderr
+                else:
+                    row = warmup.copy()
+                    if stage == "warmup":
+                        row.update(output_points=points, materialized_output_point_count=3)
+                    else:
+                        row["support_checks"] = 0
+                    lines[index] = prefix + json.dumps(row) + "\n"
+                    trial_stdout, trial_stderr = stdout, "".join(lines).encode()
+                replay, receipt = self.run_saved_driver(trial_stdout, trial_stderr, 2)
+                self.assertEqual(receipt["state"], "failed")
+                results = replay["trials"] if stage == "trial" else receipt["warmup_results"]
+                failed = next(row for row in results if row["scenario"] == scenario)
+                self.assertEqual(failed["status"], "oracle_failed")
+                with self.assertRaises(ValueError):
+                    adapter.adapt_payload(replay)
 
     def test_signed_payload_hash_and_tamper_detection(self):
         p = collect.fixture_payload("20261013T000000Z")
