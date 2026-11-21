@@ -77,6 +77,7 @@ class LocalOnlyDocsTests(unittest.TestCase):
         for relative in (
             "docs/notes/working-plan.txt",
             "docs/notes/working-plan.json",
+            "docs/research/proof-audit-provenance.json",
             "notes/working-plan.txt",
             "notes/working-plan.json",
         ):
