@@ -4,13 +4,17 @@ from __future__ import annotations
 
 import hashlib
 import html
+import io
 import json
+import math
 import os
 import shutil
 import statistics
 import tempfile
 import xml.etree.ElementTree as ET
+from collections.abc import Mapping
 from pathlib import Path
+from typing import TypedDict
 
 import figure_style
 import geometry_figures
@@ -100,16 +104,42 @@ def sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def _phase_row(label: str, series: str, values: dict) -> dict:
-    median, low, high = (values.get(key) for key in ("median", "min", "max"))
-    if any(type(value) not in (int, float) for value in (median, low, high)):
-        raise ValueError("timing row needs finite median/min/max values")
+class TimingRow(TypedDict):
+    label: str
+    series: str
+    median: int | float
+    min: int | float
+    max: int | float
+
+
+class TimingReceipt(TypedDict):
+    schema: str
+    style_id: str
+    quantitative_axis_policy: str
+    matplotlib: str
+    scale: str
+    title: str
+    description: str
+    rows: list[TimingRow]
+    omitted_zero_rows: list[str]
+    style_sha256: str
+    files: dict[str, str]
+
+
+def _duration(value: object) -> int | float:
+    if type(value) is int or (type(value) is float and math.isfinite(value)):
+        return value
+    raise ValueError("timing row needs finite median/min/max values")
+
+
+def _phase_row(label: str, series: str, values: Mapping[str, object]) -> TimingRow:
+    median, low, high = (_duration(values.get(key)) for key in ("median", "min", "max"))
     if not low <= median <= high or low < 0:
         raise ValueError("timing row has inconsistent bounds")
     return {"label": label, "series": series, "median": median, "min": low, "max": high}
 
 
-def timing_rows(slug: str, record: dict) -> list[dict]:
+def timing_rows(slug: str, record: dict) -> list[TimingRow]:
     if slug == "geo02":
         return [
             _phase_row(name, "total trial", group["phases"]["total_ns"])
@@ -216,7 +246,7 @@ def _svg_with_accessibility(svg: bytes, title: str, description: str) -> bytes:
     return ET.tostring(root, encoding="utf-8", xml_declaration=True)
 
 
-def render_timing(rows: list[dict], title: str, description: str, out: Path) -> dict:
+def render_timing(rows: list[TimingRow], title: str, description: str, out: Path) -> TimingReceipt:
     if not rows:
         raise ValueError("timing companion needs at least one saved row")
     style_bytes = STYLE.read_bytes()
@@ -244,14 +274,15 @@ def render_timing(rows: list[dict], title: str, description: str, out: Path) -> 
         for index, name in enumerate(sorted({row["series"] for row in plotted}))
     }
     height = max(3.6, 0.38 * len(plotted) + 1.6)
-    rc = {
-        "font.family": style["font_family"],
-        "font.size": style["font_size"],
-        "svg.hashsalt": style["style_id"],
-        "svg.fonttype": "none",
-    }
     out.mkdir(parents=True, exist_ok=True)
-    with matplotlib.rc_context(rc):
+    with matplotlib.rc_context(
+        {
+            "font.family": style["font_family"],
+            "font.size": style["font_size"],
+            "svg.hashsalt": style["style_id"],
+            "svg.fonttype": "none",
+        }
+    ):
         fig, axis = plt.subplots(figsize=(11, height))
         try:
             for index, row in enumerate(plotted):
@@ -289,8 +320,8 @@ def render_timing(rows: list[dict], title: str, description: str, out: Path) -> 
                 min(row["min"] for row in plotted) * 0.65, max(row["max"] for row in plotted) * 1.7
             )
             fig.subplots_adjust(left=0.48, right=0.97, top=0.91, bottom=0.16)
-            svg_buffer = __import__("io").BytesIO()
-            png_buffer = __import__("io").BytesIO()
+            svg_buffer = io.BytesIO()
+            png_buffer = io.BytesIO()
             fig.savefig(
                 svg_buffer,
                 format="svg",
@@ -443,7 +474,7 @@ def _timing_page_section(
     title: str,
     description: str,
     report_id: str,
-    rows: list[dict],
+    rows: list[TimingRow],
     raw: bytes,
     output: Path,
 ) -> dict:
@@ -578,7 +609,7 @@ def build(output: Path) -> tuple[list[str], list[dict], list[str]]:
             f'<a href="{html.escape(raw_name, quote=True)}">raw saved record</a></p></section>'
         )
         sections.append(figure)
-        assets.extend((svg_name, png_name, f"geometry-opt/{slug}/export.json", raw_name))
+        assets.extend((svg_name, png_name, export_name, raw_name))
         inventory.append(
             {
                 "family": "Geometry and optimization",

@@ -198,6 +198,11 @@ on:
       - 'scripts/reports/pages_route_retirement.py'
       - 'tests/reporting/test_pages_route_retirement.py'
       - 'scripts/reports/audit_visual_routes.py'
+      - 'scripts/reports/geometry_opt_companions.py'
+      - 'tests/reporting/test_geometry_opt_companions.py'
+      - 'scripts/reports/geometry_figures.py'
+      - 'reports/algorithm-results/**'
+      - 'scripts/reports/visual-route-inventory.json'
       - 'scripts/reports/audit_mathematical_presentation.py'
       - 'scripts/reports/augment_pages_bundle.py'
       - 'tests/reporting/test_pages_augmentation_aggregation.py'
@@ -486,6 +491,11 @@ on:
       - 'scripts/reports/pages_route_retirement.py'
       - 'tests/reporting/test_pages_route_retirement.py'
       - 'scripts/reports/audit_visual_routes.py'
+      - 'scripts/reports/geometry_opt_companions.py'
+      - 'tests/reporting/test_geometry_opt_companions.py'
+      - 'scripts/reports/geometry_figures.py'
+      - 'reports/algorithm-results/**'
+      - 'scripts/reports/visual-route-inventory.json'
       - 'scripts/reports/audit_mathematical_presentation.py'
       - 'scripts/reports/augment_pages_bundle.py'
       - 'tests/reporting/test_pages_augmentation_aggregation.py'
@@ -697,6 +707,8 @@ jobs:
         run: python -m unittest tests.reporting.test_env717_cartpole_publication
       - name: Check the saved typed-membership 2D example
         run: python -m unittest discover -s tests/reporting -p 'test_history_membership_2d.py'
+      - name: Validate saved geometry and optimization timing rows
+        run: python -m unittest tests.reporting.test_geometry_opt_companions
       - name: Check the four-state projection approximation report
         run: python -m unittest discover -s tests/reporting -p 'test_four_state_projection_approximations.py'
       - name: Check the matched discrete MPC example and visual gallery
