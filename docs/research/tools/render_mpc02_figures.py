@@ -9,6 +9,7 @@ import json
 import shutil
 import sys
 import tempfile
+from contextlib import chdir
 from fractions import Fraction
 from pathlib import Path
 
@@ -34,6 +35,7 @@ def render(
     series: list[dict[str, object]],
     source_hash: str,
     output: Path,
+    generated: Path,
 ) -> None:
     document = {
         "schema": "csl.saved-geometric-plot/1",
@@ -43,25 +45,23 @@ def render(
         "aspect": "equal",
         "series": series,
     }
-    with tempfile.TemporaryDirectory(prefix="mpc02-figure-") as temp:
-        generated = Path(temp)
-        receipt = geometry_figures.render(document, STYLE, generated)
-        for suffix in ("svg", "png"):
-            shutil.copyfile(generated / f"geometry.{suffix}", output / f"{name}.{suffix}")
-        provenance = {
-            "schema": "csl.mpc02-analytic-figure-export/1",
-            "scenario_id": "mpc02-slew-2d-v1",
-            "source_json": "mpc02-slew-analytic-source.json",
-            "source_sha256": source_hash,
-            "plot": document,
-            "renderer_receipt": receipt,
-        }
-        (output / f"{name}-export.json").write_text(
-            json.dumps(provenance, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
-        )
+    receipt = geometry_figures.render(document, STYLE, generated)
+    for suffix in ("svg", "png"):
+        shutil.copyfile(generated / f"geometry.{suffix}", output / f"{name}.{suffix}")
+    provenance = {
+        "schema": "csl.mpc02-analytic-figure-export/1",
+        "scenario_id": "mpc02-slew-2d-v1",
+        "source_json": "mpc02-slew-analytic-source.json",
+        "source_sha256": source_hash,
+        "plot": document,
+        "renderer_receipt": receipt,
+    }
+    (output / f"{name}-export.json").write_text(
+        json.dumps(provenance, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
 
 
-def build(output: Path) -> None:
+def build(output: Path, generated: Path) -> None:
     source_bytes = SOURCE.read_bytes()
     source = json.loads(source_bytes)
     if source.get("schema") != "csl.mpc02-analytic-projection-source/1":
@@ -112,6 +112,7 @@ def build(output: Path) -> None:
         ],
         source_hash,
         output,
+        generated,
     )
 
     render(
@@ -150,6 +151,7 @@ def build(output: Path) -> None:
         ],
         source_hash,
         output,
+        generated,
     )
 
 
@@ -158,7 +160,13 @@ def main() -> None:
     parser.add_argument(
         "--out", type=Path, default=OUTPUT, help="directory for the six generated files"
     )
-    build(parser.parse_args().out)
+    output = parser.parse_args().out.resolve()
+    with tempfile.TemporaryDirectory(prefix="mpc02-figures-") as temp:
+        scratch = Path(temp)
+        # Matplotlib reads the working directory's configuration on first import.
+        (scratch / "matplotlibrc").touch()
+        with chdir(scratch):
+            build(output, scratch / "figure")
 
 
 if __name__ == "__main__":

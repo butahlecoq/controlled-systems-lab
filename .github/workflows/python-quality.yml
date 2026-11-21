@@ -726,8 +726,10 @@ jobs:
         run: |
           scratch=$(mktemp -d "$RUNNER_TEMP/mpc02-figures.XXXXXXXX")
           cd "$scratch"
-          export TMPDIR="$scratch" MPLCONFIGDIR="$scratch/mpl" PYTHONDONTWRITEBYTECODE=1
-          env -u PYTHONPATH python "$GITHUB_WORKSPACE/docs/research/tools/render_mpc02_figures.py" --out "$scratch/output"
+          export TMPDIR="$scratch" PYTHONDONTWRITEBYTECODE=1
+          printf '%s\n' 'axes.facecolor: red' >matplotlibrc
+          env -u PYTHONPATH -u MPLCONFIGDIR python "$GITHUB_WORKSPACE/docs/research/tools/render_mpc02_figures.py" --out output
+          test "$(find "$scratch" -mindepth 1 -maxdepth 1 | wc -l)" -eq 2
           test "$(find "$scratch/output" -type f | wc -l)" -eq 6
           for projection in memory terminal-state; do
             stem="mpc02-slew-${projection}-projection"
