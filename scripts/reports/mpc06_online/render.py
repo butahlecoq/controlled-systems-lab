@@ -102,7 +102,7 @@ def render(bundle, receipt_path, output):
         schema="csl.mpc06-online-summary/1",
         rows=rows,
         verification=verified,
-        renderer_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        renderer_sha256=digest(tool_sources["render.py"]),
         offline_grid_construction_and_check_ns=record["grid"]["elapsed_ns"],
         offline_native_approximation_ns=[
             p["approximation"]["construction_ns"]
