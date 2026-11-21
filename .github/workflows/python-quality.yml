@@ -34,6 +34,13 @@ on:
       - 'scripts/catalogue/**'
       - 'reports/algorithm-results/tooling/**'
       - 'scripts/reports/report_data.py'
+      - 'scripts/reports/feedback_geometry_example.py'
+      - 'scripts/reports/visual_example_fuel_layers.py'
+      - 'tests/reporting/test_feedback_geometry_example.py'
+      - 'tests/reporting/test_visual_example_fuel_layers.py'
+      - 'examples/feedback_geometry_2d.html'
+      - 'examples/feedback-geometry-tiny-fd28/**'
+      - 'docs/examples/fuel-reachability-layers/**'
       - 'tests/reporting/test_report_data.py'
       - 'tests/reporting/test_render.py'
       - 'tests/reporting/test_publication_policy.py'
@@ -324,6 +331,13 @@ on:
       - 'scripts/catalogue/**'
       - 'reports/algorithm-results/tooling/**'
       - 'scripts/reports/report_data.py'
+      - 'scripts/reports/feedback_geometry_example.py'
+      - 'scripts/reports/visual_example_fuel_layers.py'
+      - 'tests/reporting/test_feedback_geometry_example.py'
+      - 'tests/reporting/test_visual_example_fuel_layers.py'
+      - 'examples/feedback_geometry_2d.html'
+      - 'examples/feedback-geometry-tiny-fd28/**'
+      - 'docs/examples/fuel-reachability-layers/**'
       - 'tests/reporting/test_report_data.py'
       - 'tests/reporting/test_render.py'
       - 'tests/reporting/test_publication_policy.py'
@@ -714,6 +728,8 @@ jobs:
         run: python -m unittest tests.reporting.test_lotka_volterra_sampled
       - name: Check the saved typed-membership 2D example
         run: python -m unittest discover -s tests/reporting -p 'test_history_membership_2d.py'
+      - name: Replay saved feedback geometry and fuel gallery assets
+        run: python -m unittest tests.reporting.test_feedback_geometry_example tests.reporting.test_visual_example_fuel_layers
       - name: Check the four-state projection approximation report
         run: python -m unittest discover -s tests/reporting -p 'test_four_state_projection_approximations.py'
       - name: Check the matched discrete MPC example and visual gallery
