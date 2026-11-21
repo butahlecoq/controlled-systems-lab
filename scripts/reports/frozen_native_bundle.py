@@ -19,16 +19,21 @@ class FrozenNativeBundle:
     archive_sha256: str
 
 
-def checked_file(root: Path, relative: str) -> Path:
+def asset_path(relative: str) -> PurePosixPath:
     parts = PurePosixPath(relative)
     if (
-        not relative
+        relative in {"", ".", ".."}
         or parts.is_absolute()
         or any(part in {".", ".."} for part in parts.parts)
         or parts.as_posix() != relative
         or "\\" in relative
     ):
         raise ValueError("native example asset path is unsafe")
+    return parts
+
+
+def checked_file(root: Path, relative: str) -> Path:
+    parts = asset_path(relative)
     path = root
     if path.is_symlink():
         raise ValueError("native example root is symlinked")
@@ -70,16 +75,29 @@ def read_bundle(repository_root: Path, identity: FrozenNativeBundle) -> dict[str
     archive_bytes = checked_file(root, archive_name).read_bytes()
     if hashlib.sha256(archive_bytes).hexdigest() != identity.archive_sha256:
         raise ValueError("native example archive differs from frozen publication identity")
+    offline = manifest.get("offline_files_sha256", {})
+    if not isinstance(offline, dict) or set(offline) & set(files):
+        raise ValueError(
+            "native example offline digest list overlaps published files or is invalid"
+        )
     with zipfile.ZipFile(BytesIO(archive_bytes)) as archive:
         if (
-            len(archive.namelist()) != len(files)
-            or set(archive.namelist()) != set(files)
+            len(archive.namelist()) != len(files) + len(offline)
+            or set(archive.namelist()) != files.keys() | offline.keys()
             or archive.testzip() is not None
         ):
             raise ValueError("native example archive members differ")
         for name, content in files.items():
             if archive.read(name) != content:
                 raise ValueError("native example archive bytes differ: " + name)
+        for name, digest in offline.items():
+            if not isinstance(name, str) or not isinstance(digest, str):
+                raise ValueError(
+                    "native example offline digests must contain paths and SHA-256 strings"
+                )
+            asset_path(name)
+            if hashlib.sha256(archive.read(name)).hexdigest() != digest:
+                raise ValueError("native example offline asset digest differs: " + name)
     files[archive_name] = archive_bytes
     sidecar = checked_file(root, archive_name + ".sha256").read_bytes()
     canonical = (identity.archive_sha256 + "  " + archive_name + "\n").encode("ascii")

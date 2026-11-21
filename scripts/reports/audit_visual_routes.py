@@ -285,6 +285,7 @@ FROZEN_COMPANIONS = {
     "catalogue-feasible-history-v1": "examples/catalogue-feasible-history-v1/index.html",
     "catalogue-exact-support-v1": "examples/catalogue-exact-support-v1/index.html",
     "catalogue-backward-reachability-v1": "examples/catalogue-backward-reachability-v1/index.html",
+    "catalogue-constrained-predecessors-v1": "examples/catalogue-constrained-predecessors-v1/index.html",
     "catalogue-finite-action-v1": "examples/catalogue-finite-action-v1/index.html",
     "mpc-crossover-6b7308c4": "examples/mpc-crossover-6b7308c4/index.html",
     "mpc06-online-anchor-v1": "mpc06-complete-6b7059d62473d32d4210/index.html",
@@ -316,6 +317,8 @@ FROZEN_REVIEWED_ROUTES = {
         "reviewed: projected feasible zero-control history and fixed stage-zero support line",
     "catalogue-backward-reachability-v1":
         "reviewed: all four battery stages show forward and backward rectangles, intersections and the trajectory",
+    "catalogue-constrained-predecessors-v1":
+        "reviewed: four battery panels compare exact predecessor rectangles under the same controls",
     "catalogue-exact-support-v1":
         "reviewed: sampled building projections and positive support deficits from exact certificates",
     "catalogue-feasible-history-v1":
@@ -557,6 +560,8 @@ def build(root: Path = ROOT) -> dict:
                     "catalogue-exact-support-v1/building-budget-projection.svg",
                     "catalogue-backward-reachability-v1/index.html",
                     "catalogue-backward-reachability-v1/battery-forward-backward.svg",
+                    "catalogue-constrained-predecessors-v1/index.html",
+                    "catalogue-constrained-predecessors-v1/battery-predecessor.svg",
                     "catalogue-finite-action-v1/index.html",
                     "catalogue-finite-action-v1/hospital-finite-actions.svg",
                     "catalogue-finite-action-v1/terminal-box-corner.svg",

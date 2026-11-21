@@ -274,10 +274,13 @@ class VisualRouteInventoryTests(unittest.TestCase):
                          ["hospital-finite-actions.svg", "pair-shear-projection.svg",
                           "terminal-box-corner.svg", "zonotope-certificate-coverage.svg"])
         self.assertEqual(finite_action["companion_route"], "examples/catalogue-finite-action-v1/index.html")
+        constrained = routes["catalogue-constrained-predecessors-v1"]
+        self.assertEqual(constrained["assets"], ["battery-predecessor.svg"])
+        self.assertEqual(constrained["companion_route"], "examples/catalogue-constrained-predecessors-v1/index.html")
         reviewed_routes = {
             paired["route"], query["route"], crossover["route"], forward["route"],
             history["route"], exact["route"], backward["route"],
-            finite_action["route"], backends["route"], ring["route"],
+            finite_action["route"], backends["route"], ring["route"], constrained["route"],
         }
         self.assertTrue(all(entry["disposition"].startswith("deferred: original frozen route-level readability")
                             for entry in routes.values() if entry["route"] not in reviewed_routes))
@@ -347,6 +350,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "catalogue-exact-support-v1/building-budget-projection.svg",
             "catalogue-backward-reachability-v1/index.html",
             "catalogue-backward-reachability-v1/battery-forward-backward.svg",
+            "catalogue-constrained-predecessors-v1/index.html",
+            "catalogue-constrained-predecessors-v1/battery-predecessor.svg",
             "catalogue-finite-action-v1/index.html",
             "catalogue-finite-action-v1/hospital-finite-actions.svg",
             "catalogue-finite-action-v1/terminal-box-corner.svg",
