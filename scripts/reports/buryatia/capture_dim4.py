@@ -14,7 +14,6 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-
 IMPLEMENTATION_SOURCES = (
     "benchmarks/reporting/buryatia/dim4_driver.cpp",
     "benchmarks/scenarios/buryatia-dim4-matlab-literal-affine-v1.json",
@@ -172,7 +171,7 @@ def capture(
         metadata.flush()
         os.fsync(metadata.fileno())
     os.replace(temporary_metadata, metadata_path)
-    if spawn_error:
+    if return_code is None:
         raise RuntimeError(
             f"native report could not start; evidence retained in {destination}: {spawn_error}"
         )

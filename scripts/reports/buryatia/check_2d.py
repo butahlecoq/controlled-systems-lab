@@ -10,7 +10,6 @@ import re
 import subprocess
 from pathlib import Path
 
-
 FAMILIES = {
     "exact_affine_polytope",
     "unreduced_zonotope",

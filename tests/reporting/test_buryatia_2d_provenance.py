@@ -2,6 +2,7 @@ import copy
 import hashlib
 import importlib.util
 import json
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -9,13 +10,12 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts/reports/buryatia/check_2d.py"
 RAW = ROOT / "docs/examples/buryatia-volterra-affine-2d-records.json"
 SPEC = importlib.util.spec_from_file_location("buryatia_check_2d", SCRIPT)
+assert SPEC is not None and SPEC.loader is not None
 CHECK = importlib.util.module_from_spec(SPEC)
-assert SPEC and SPEC.loader
 SPEC.loader.exec_module(CHECK)
 
 
@@ -35,6 +35,31 @@ class Buryatia2DProvenanceTests(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("validated 61 stages", result.stdout)
+
+    def test_saved_record_regenerates_the_reviewed_html_svg_and_manifest(self):
+        stem = RAW.name.removesuffix("-records.json")
+        manifest = RAW.with_name(f"{stem}-manifest.json")
+        superseded = json.loads(manifest.read_bytes())["superseded_artifacts"]
+        with tempfile.TemporaryDirectory() as temporary:
+            replay = Path(temporary)
+            examples = replay / "docs/examples"
+            examples.mkdir(parents=True)
+            shutil.copyfile(RAW, examples / RAW.name)
+            for entry in superseded:
+                historical = ROOT / entry["path"]
+                shutil.copyfile(historical, examples / historical.name)
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(SCRIPT.with_name("render_2d.py")),
+                    "--raw",
+                    f"docs/examples/{RAW.name}",
+                ],
+                cwd=replay,
+                check=True,
+            )
+            for name in (f"{stem}.html", f"{stem}-terminal.svg", manifest.name):
+                self.assertEqual((examples / name).read_bytes(), (RAW.parent / name).read_bytes())
 
     def test_saved_raw_cli_rejects_tampered_hash_or_false_producer(self):
         # Current main can legitimately contain the same source blobs as this

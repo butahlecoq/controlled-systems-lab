@@ -6,16 +6,15 @@ import tempfile
 import unittest
 from pathlib import Path
 
-
 SCRIPT = Path(__file__).resolve().parents[2] / "scripts/reports/buryatia/capture_dim4.py"
 SPEC = importlib.util.spec_from_file_location("buryatia_capture_dim4", SCRIPT)
+assert SPEC is not None and SPEC.loader is not None
 CAPTURE = importlib.util.module_from_spec(SPEC)
-assert SPEC and SPEC.loader
 SPEC.loader.exec_module(CAPTURE)
 CHECK_SCRIPT = Path(__file__).resolve().parents[2] / "scripts/reports/buryatia/check_dim4.py"
 CHECK_SPEC = importlib.util.spec_from_file_location("buryatia_check_dim4", CHECK_SCRIPT)
+assert CHECK_SPEC is not None and CHECK_SPEC.loader is not None
 CHECK = importlib.util.module_from_spec(CHECK_SPEC)
-assert CHECK_SPEC and CHECK_SPEC.loader
 CHECK_SPEC.loader.exec_module(CHECK)
 
 

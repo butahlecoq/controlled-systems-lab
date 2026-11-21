@@ -7,7 +7,6 @@ import html
 import json
 from pathlib import Path
 
-
 FAMILIES = [
     ("exact_affine_polytope", "Exact affine polytope", "#f8f8f2"),
     ("unreduced_zonotope", "Unreduced zonotope", "#66d9ef"),

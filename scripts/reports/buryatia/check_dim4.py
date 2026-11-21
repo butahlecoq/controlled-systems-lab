@@ -10,7 +10,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 EXPECTED_FAMILIES = {
     "exact_affine_polytope",
     "unreduced_zonotope",
@@ -105,7 +104,8 @@ def validate(record: dict, *, require_full_box_orientation: bool = False) -> Non
                 elif family["family"] in {"box", "parallelotope"}:
                     operation = invocations["operation"]
                     assert operation["affine_sum"] == "csl.geometry.affine-sum"
-                    assert operation["approximation"].startswith(expected_provider + "/")
+                    provider = EXPECTED_MODULES[family["family"]]
+                    assert operation["approximation"].startswith(provider + "/")
                     assert operation["inclusion_basis"] == "v_h_containment"
                     if require_full_box_orientation and family["family"] == "box":
                         assert (

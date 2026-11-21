@@ -148,6 +148,12 @@ on:
       - 'tests/reporting/test_opt12_collector.py'
       - 'tests/reporting/test_visual_examples.py'
       - 'scripts/reports/stage_buryatia_dim4.py'
+      - 'scripts/reports/buryatia/capture_dim4.py'
+      - 'scripts/reports/buryatia/check_2d.py'
+      - 'scripts/reports/buryatia/check_dim4.py'
+      - 'scripts/reports/buryatia/render_2d.py'
+      - 'tests/reporting/test_buryatia_2d_provenance.py'
+      - 'tests/reporting/test_buryatia_dim4_capture.py'
       - 'scripts/reports/stage_buryatia_volterra.py'
       - 'tests/reporting/test_stage_buryatia_dim4.py'
       - 'tests/reporting/test_stage_buryatia_volterra.py'
@@ -438,6 +444,12 @@ on:
       - 'tests/reporting/test_opt12_collector.py'
       - 'tests/reporting/test_visual_examples.py'
       - 'scripts/reports/stage_buryatia_dim4.py'
+      - 'scripts/reports/buryatia/capture_dim4.py'
+      - 'scripts/reports/buryatia/check_2d.py'
+      - 'scripts/reports/buryatia/check_dim4.py'
+      - 'scripts/reports/buryatia/render_2d.py'
+      - 'tests/reporting/test_buryatia_2d_provenance.py'
+      - 'tests/reporting/test_buryatia_dim4_capture.py'
       - 'scripts/reports/stage_buryatia_volterra.py'
       - 'tests/reporting/test_stage_buryatia_dim4.py'
       - 'tests/reporting/test_stage_buryatia_volterra.py'
@@ -673,6 +685,8 @@ jobs:
         run: python -m unittest tests.reporting.test_recorded_closed_loop_figures tests.reporting.test_viz03_control_figures
       - name: Exercise Pages deployment freshness and source identity
         run: python -m unittest tests.reporting.test_deploy_head
+      - name: Check the Buryatia capture protocol and replay the saved geometry
+        run: python -m unittest tests.reporting.test_buryatia_2d_provenance tests.reporting.test_buryatia_dim4_capture
       - name: Check the frozen Buryatia reachability lessons
         run: python -m unittest tests.reporting.test_stage_buryatia_dim4 tests.reporting.test_stage_buryatia_volterra
       - name: Exercise saved publication and collector consumer families
