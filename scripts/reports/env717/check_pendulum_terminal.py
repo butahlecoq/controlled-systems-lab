@@ -175,7 +175,10 @@ def verify(record: dict, *, require_saved_oracle: bool = False) -> dict:
         for action in controls:
             state = linear_step(state, action)
             expected_states.append([state[0], state[1]])
-        for stage, (actual, expected) in enumerate(zip(plan["predicted_states"], expected_states)):
+        predicted = plan["predicted_states"]
+        if not isinstance(predicted, list) or len(predicted) != len(expected_states):
+            raise ValueError(f"plan {indices}: predicted state count differs")
+        for stage, (actual, expected) in enumerate(zip(predicted, expected_states, strict=True)):
             if len(actual) != 2:
                 raise ValueError("predicted states must contain theta and theta_dot")
             close(actual[0], expected[0], f"plan {indices} stage {stage} theta")
