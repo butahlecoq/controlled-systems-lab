@@ -128,9 +128,13 @@ class Exp02Hull4DPublicationTests(unittest.TestCase):
             self.assertIn(f"Projection {pair}", figure)
 
     def test_offline_package_is_deterministic_and_verifies(self) -> None:
-        first = publication.package(BUNDLE)
-        self.assertEqual(first, publication.package(BUNDLE))
-        self.assertEqual(first, publication.verify_bundle(BUNDLE))
+        publication.verify_bundle(BUNDLE)
+        with tempfile.TemporaryDirectory() as temporary:
+            bundle = Path(temporary) / BUNDLE.name
+            shutil.copytree(BUNDLE, bundle)
+            first = publication.package(bundle)
+            self.assertEqual(first, publication.package(bundle))
+            self.assertEqual(first, publication.verify_bundle(bundle))
 
     def test_stager_adds_route_and_rejects_tampering_and_symlinks(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

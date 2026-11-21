@@ -591,14 +591,19 @@ jobs:
           out=$(mktemp -d "$RUNNER_TEMP/it17-replay.XXXXXXXX")
           reports=reports/algorithm-results
           preliminary="$reports/quickhull-it17-paper-adaptations-20261024-r1"
+          mkdir "$out/site"
+          printf '<ul></ul>\n' > "$out/site/index.html"
+          python scripts/reports/stage_it17_hull_adaptations.py --source "$preliminary" --site "$out/site"
           python benchmarks/reporting/it17_hull/summarize.py "$preliminary/raw-capture.jsonl" "$out/preliminary"
-          cmp "$preliminary/summary.csv" "$out/preliminary/summary.csv"
+          for file in summary.csv index.html fixture-geometry.svg raw-rows.jsonl; do
+            cmp "$preliminary/$file" "$out/preliminary/$file"
+          done
           for dimension in 3d 4d; do
             source="$reports/exp02-it17-hull-$dimension-simplex-20261028-r1"
             python "benchmarks/reporting/it17_hull/summarize_$dimension.py" --raw "$source/raw/raw-rows.jsonl" --output-dir "$out/$dimension"
-            cmp "$source/summary.csv" "$out/$dimension/summary.csv"
-            cmp "$source/input-projections.svg" "$out/$dimension/input-projections.svg"
-            cmp "$source/validated-rows.jsonl" "$out/$dimension/validated-rows.jsonl"
+            for file in summary.csv index.html input-projections.svg validated-rows.jsonl; do
+              cmp "$source/$file" "$out/$dimension/$file"
+            done
           done
           ladder="$reports/exp02-it17-hull-ladder-20261024-r1"
           python scripts/reports/summarize_exp02_hull_ladder.py --raw-dir "$ladder/raw" --output-dir "$out/ladder"
@@ -606,7 +611,9 @@ jobs:
           cmp "$ladder/validated-rows.jsonl" "$out/ladder/validated-rows.jsonl"
           dyadic="$reports/exp02-it17-dyadic-250-20261029-r1"
           python scripts/reports/summarize_exp02_it17_250.py "$dyadic/raw/raw-rows.jsonl" "$out/dyadic"
-          cmp "$dyadic/summary.csv" "$out/dyadic/summary.csv"
+          for file in summary.csv index.html fixture-geometry.svg; do
+            cmp "$dyadic/$file" "$out/dyadic/$file"
+          done
       - name: Exercise OPT07 and OPT11 collectors, oracles and saved reports
         run: |
           python -m unittest discover -s tests/reporting -p 'test_opt07_*.py'
