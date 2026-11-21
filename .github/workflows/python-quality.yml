@@ -611,7 +611,7 @@ jobs:
           cmp "$ladder/validated-rows.jsonl" "$out/ladder/validated-rows.jsonl"
           dyadic="$reports/exp02-it17-dyadic-250-20261029-r1"
           python scripts/reports/summarize_exp02_it17_250.py "$dyadic/raw/raw-rows.jsonl" "$out/dyadic"
-          for file in summary.csv index.html fixture-geometry.svg; do
+          for file in summary.csv index.html fixture-geometry.svg raw/raw-rows.jsonl; do
             cmp "$dyadic/$file" "$out/dyadic/$file"
           done
       - name: Exercise OPT07 and OPT11 collectors, oracles and saved reports
