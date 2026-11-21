@@ -45,7 +45,7 @@ class Ext07SavedReportTests(unittest.TestCase):
             raise unittest.SkipTest("EXT-07 report bundle is created from a frozen measured source")
         cls.bundle = bundle
 
-    def test_frozen_catalogue_keeps_the_stager_hash_after_stager_changes(self) -> None:
+    def test_frozen_catalogue_keeps_recorded_tool_hashes(self) -> None:
         catalogue = ROOT / "reports/algorithm-results/ext07-publications.json"
         entries = json.loads(catalogue.read_text(encoding="utf-8"))["reports"]
         with tempfile.TemporaryDirectory() as temporary:
@@ -58,6 +58,18 @@ class Ext07SavedReportTests(unittest.TestCase):
                 ]
         self.assertEqual(regenerated, entries)
 
+    def test_other_manifests_record_the_current_tool_hashes(self) -> None:
+        for name in stage_ext07.HISTORICAL_TOOL_SHA256:
+            with self.subTest(tool=name):
+                path = (
+                    ROOT / "scripts/reports" / name
+                    if name == "stage_ext07.py"
+                    else ROOT / "scripts/reports/ext07" / name
+                )
+                self.assertEqual(
+                    stage_ext07._tool_sha256(path, "0" * 64), collect.sha(path.read_bytes())
+                )
+
     def test_saved_report_rebuilds_and_catalogue_binds_every_file(self) -> None:
         self.assertEqual(
             render_saved.render(self.bundle, check=True)["report_id"], self.bundle.name
@@ -66,10 +78,12 @@ class Ext07SavedReportTests(unittest.TestCase):
         self.assertEqual(
             entry["source_commit"], collect.read_json(self.bundle / "records.json")["source_commit"]
         )
-        self.assertEqual(
-            entry["collector_sha256"],
-            collect.sha((ROOT / "scripts/reports/ext07/ext07_collect.py").read_bytes()),
-        )
+        catalogue = ROOT / "reports/algorithm-results/ext07-publications.json"
+        reviewed = {
+            item["report_id"]: item
+            for item in json.loads(catalogue.read_text(encoding="utf-8"))["reports"]
+        }
+        self.assertEqual(entry["collector_sha256"], reviewed[self.bundle.name]["collector_sha256"])
         self.assertEqual(
             entry["zip_sha256"],
             collect.sha((self.bundle / (self.bundle.name + ".zip")).read_bytes()),
