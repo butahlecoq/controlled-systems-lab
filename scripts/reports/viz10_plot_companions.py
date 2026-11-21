@@ -13,10 +13,16 @@ import json
 import os
 import tempfile
 import xml.etree.ElementTree as ET
+from collections.abc import Sequence
 from pathlib import Path
+from typing import TYPE_CHECKING, Literal, TypedDict
 
 import figure_style
 import site_design
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+    from matplotlib.figure import Figure
 
 ROOT = Path(__file__).resolve().parents[2]
 STYLE = ROOT / "scripts/reports/styles/control-v1.json"
@@ -62,9 +68,26 @@ def add_svg_description(path: Path, title: str, description: str) -> None:
     tree.write(path, encoding="utf-8", xml_declaration=True)
 
 
+class FigureReceipt(TypedDict):
+    schema: str
+    title: str
+    description: str
+    quantitative_axis_policy: str
+    style_sha256: str
+    matplotlib: str
+    sources: dict[str, str]
+    files: dict[str, str]
+
+
 def save(
-    fig, name: str, title: str, description: str, sources: dict[str, str], out: Path, style: dict
-):
+    fig: Figure,
+    name: str,
+    title: str,
+    description: str,
+    sources: dict[str, str],
+    out: Path,
+    style: dict,
+) -> FigureReceipt:
     svg_path, png_path = out / f"{name}.svg", out / f"{name}.png"
     fig.savefig(svg_path, metadata={"Date": None, "Creator": "CSL VIZ-10 saved-record companion"})
     fig.savefig(png_path, dpi=style["png_dpi"], metadata={"Software": style["style_id"]})
@@ -73,7 +96,7 @@ def save(
         title,
         description + " Numeric ticks and major gridlines follow " + figure_style.STYLE_ID + ".",
     )
-    receipt = {
+    receipt: FigureReceipt = {
         "schema": "csl.viz10-figure-export/1",
         "title": title,
         "description": description,
@@ -91,21 +114,21 @@ def save(
 
 
 def style_axis(
-    axis,
+    axis: Axes,
     xlabel: str,
     ylabel: str,
     title: str,
     equal: bool = False,
-    direction: str = "both",
+    direction: Literal["both", "x", "y"] = "both",
     bins: int = 6,
-):
+) -> None:
     axis.set(xlabel=xlabel, ylabel=ylabel, title=title)
     if equal:
         axis.set_aspect("equal", adjustable="box")
     figure_style.configure_numeric_axis(axis, direction=direction, bins=bins)
 
 
-def render_b07(out: Path, style: dict, receipts: list[dict]) -> list[tuple[str, str, str]]:
+def render_b07(out: Path, style: dict, receipts: list[FigureReceipt]) -> list[tuple[str, str, str]]:
     path = REPORTS / "b07-owner-approved-eight-case-v1/results.jsonl"
     readme = path.parent / "README.md"
     source_hashes = {
@@ -122,7 +145,7 @@ def render_b07(out: Path, style: dict, receipts: list[dict]) -> list[tuple[str, 
         )
         try:
             for axis, (first, second, xlabel, ylabel), title in zip(
-                axes, B07_PAIRS, ("Flow projection", "Stock projection")
+                axes, B07_PAIRS, ("Flow projection", "Stock projection"), strict=True
             ):
                 projected = project_coordinates(vertices, first, second)
                 axis.scatter(
@@ -170,7 +193,7 @@ def render_b07(out: Path, style: dict, receipts: list[dict]) -> list[tuple[str, 
     return figures
 
 
-def render_b09(out: Path, style: dict, receipts: list[dict]) -> list[tuple[str, str, str]]:
+def render_b09(out: Path, style: dict, receipts: list[FigureReceipt]) -> list[tuple[str, str, str]]:
     path = REPORTS / "b09-a08-source-reference-4818ddde/results.jsonl"
     scenario_path = path.parent / "scenario.json"
     source_hashes = {
@@ -185,7 +208,7 @@ def render_b09(out: Path, style: dict, receipts: list[dict]) -> list[tuple[str, 
             1, 2, figsize=(11, 5.4)
         )
         for axis, (first, second, xlabel, ylabel), title in zip(
-            axes, FUEL_PAIRS, ("Flow projection", "Stock projection")
+            axes, FUEL_PAIRS, ("Flow projection", "Stock projection"), strict=True
         ):
             projected = project_coordinates(vertices, first, second)
             axis.scatter(
@@ -243,10 +266,10 @@ def render_timing(
     path: Path,
     name: str,
     title: str,
-    rows: list[tuple[str, list[int], int]],
+    rows: Sequence[tuple[str, list[int], int | float | None]],
     out: Path,
     style: dict,
-    receipts: list[dict],
+    receipts: list[FigureReceipt],
 ):
     plt = __import__("matplotlib.pyplot", fromlist=["subplots"])
     fig, axis = plt.subplots(figsize=tuple(style["timing_size"]))
@@ -284,7 +307,7 @@ def render_timing(
     return (name, title, desc)
 
 
-def render_exp04(out: Path, style: dict, receipts: list[dict]):
+def render_exp04(out: Path, style: dict, receipts: list[FigureReceipt]):
     path = REPORTS / "exp04-replay-93fe3b87795e1d3a/records.json"
     record = load_json(path)
     cases = [record["fixtures"][key] for key in ("plane-forward", "plane-reverse")]
@@ -292,7 +315,7 @@ def render_exp04(out: Path, style: dict, receipts: list[dict]):
         figsize=tuple(style["projection_size"])
     )
     for case, label, color in zip(
-        cases, ("Forward replay", "Reverse replay"), (COLORS["stored"], COLORS["open"])
+        cases, ("Forward replay", "Reverse replay"), (COLORS["stored"], COLORS["open"]), strict=True
     ):
         states = case["expected_states"]
         axis.plot(
@@ -325,7 +348,7 @@ def render_exp04(out: Path, style: dict, receipts: list[dict]):
     return ("exp04-two-state-paths", "EXP-04 · saved replay paths", desc)
 
 
-def render_analytic_fixture(out: Path, style: dict, receipts: list[dict]):
+def render_analytic_fixture(out: Path, style: dict, receipts: list[FigureReceipt]):
     path = REPORTS / "issue3-validated-minimax-20261023-r1/records.json"
     record = load_json(path)
     # The immutable source record's analytic_2d input is x0=(0,0), A=B=I,
@@ -366,7 +389,7 @@ def render_analytic_fixture(out: Path, style: dict, receipts: list[dict]):
     return ("issue3-analytic-fixture", "Issue #3 · analytic fixture", desc)
 
 
-def render_volterra(out: Path, style: dict, receipts: list[dict]):
+def render_volterra(out: Path, style: dict, receipts: list[FigureReceipt]):
     path = REPORTS / "issue4-volterra-7dce05b47c50c27a/records.json"
     record = load_json(path)
     fig, axis = __import__("matplotlib.pyplot", fromlist=["subplots"]).subplots(
@@ -422,15 +445,16 @@ def build(out: Path) -> None:
     if matplotlib.__version__ != style["matplotlib_version"]:
         raise ValueError(f"Matplotlib {style['matplotlib_version']} required")
     matplotlib.use("Agg")
-    rc = {
-        "font.family": style["font_family"],
-        "font.size": style["font_size"],
-        "svg.hashsalt": style["style_id"],
-        "svg.fonttype": "none",
-    }
-    receipts: list[dict] = []
+    receipts: list[FigureReceipt] = []
     figures: list[tuple[str, str, str]] = []
-    with matplotlib.rc_context(rc):
+    with matplotlib.rc_context(
+        {
+            "font.family": style["font_family"],
+            "font.size": style["font_size"],
+            "svg.hashsalt": style["style_id"],
+            "svg.fonttype": "none",
+        }
+    ):
         figures.extend(render_b07(out, style, receipts))
         figures.extend(render_b09(out, style, receipts))
 
@@ -539,9 +563,9 @@ def build(out: Path) -> None:
         "quantitative_axis_policy": figure_style.STYLE_ID,
         "inputs": {k: v for receipt in receipts for k, v in receipt["sources"].items()},
         "figures": {
-            path.name: sha(path.read_bytes())
-            for path in sorted(out.iterdir())
-            if path.is_file() and path.suffix in {".svg", ".png", ".json"}
+            name + suffix: sha((out / (name + suffix)).read_bytes())
+            for name, _, _ in figures
+            for suffix in (".svg", ".png", "-export.json")
         },
         "index_sha256": sha((out / "index.html").read_bytes()),
     }
