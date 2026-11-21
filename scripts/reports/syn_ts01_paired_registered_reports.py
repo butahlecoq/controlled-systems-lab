@@ -1,4 +1,5 @@
 """Static publication adapter for the immutable paired T-S01 report bundle."""
+
 from __future__ import annotations
 
 import hashlib
@@ -20,10 +21,22 @@ REPORT_SPEC.loader.exec_module(report)
 
 KIND = "syn-ts01-paired-comparison"
 FILES = {
-    "README.md", "build-provenance.json", "commands.json", "environment.json",
-    "index.html", "limiter-profile.json", "manifest.json", "measurement-events.jsonl",
-    "performance.svg", "process-run.json", "process-stderr.bin", "process-stdout.bin",
-    "records.json", "scenario.json", "trials.csv", "validation.json",
+    "README.md",
+    "build-provenance.json",
+    "commands.json",
+    "environment.json",
+    "index.html",
+    "limiter-profile.json",
+    "manifest.json",
+    "measurement-events.jsonl",
+    "performance.svg",
+    "process-run.json",
+    "process-stderr.bin",
+    "process-stdout.bin",
+    "records.json",
+    "scenario.json",
+    "trials.csv",
+    "validation.json",
 }
 
 
@@ -32,7 +45,9 @@ def _json(path):
 
 
 def _pretty(value):
-    return (json.dumps(value, ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False) + "\n").encode("utf-8")
+    return (
+        json.dumps(value, ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False) + "\n"
+    ).encode("utf-8")
 
 
 def _sha256(value):
@@ -84,25 +99,29 @@ def publication_artifacts(bundle, publication):
     bundle = Path(bundle)
     files = {name: (bundle / name).read_bytes() for name in publication.files}
     record = _json(bundle / "records.json")
-    files["report-envelope.json"] = _pretty({
-        "schema": "csl.algorithm-report-envelope/1",
-        "report_id": publication.report_id,
-        "report_kind": publication.kind,
-        "payload_schema": publication.payload_schema,
-        "payload_sha256": publication.payload_sha256,
-        "native_payload_sha256": publication.native_payload_sha256,
-        "source_commit": publication.source_commit,
-        "measured_scope": publication.measured_scope,
-        "evidence_limits": publication.evidence_limits,
-        "source_report_id": publication.source_report_id,
-        "payload": record,
-    })
-    files["publication-manifest.json"] = _pretty({
-        "schema": "csl.algorithm-report-publication-manifest/1",
-        "report_id": publication.report_id,
-        "report_kind": publication.kind,
-        "files": {name: _sha256(files[name]) for name in sorted(files)},
-    })
+    files["report-envelope.json"] = _pretty(
+        {
+            "schema": "csl.algorithm-report-envelope/1",
+            "report_id": publication.report_id,
+            "report_kind": publication.kind,
+            "payload_schema": publication.payload_schema,
+            "payload_sha256": publication.payload_sha256,
+            "native_payload_sha256": publication.native_payload_sha256,
+            "source_commit": publication.source_commit,
+            "measured_scope": publication.measured_scope,
+            "evidence_limits": publication.evidence_limits,
+            "source_report_id": publication.source_report_id,
+            "payload": record,
+        }
+    )
+    files["publication-manifest.json"] = _pretty(
+        {
+            "schema": "csl.algorithm-report-publication-manifest/1",
+            "report_id": publication.report_id,
+            "report_kind": publication.kind,
+            "files": {name: _sha256(files[name]) for name in sorted(files)},
+        }
+    )
     return files
 
 
