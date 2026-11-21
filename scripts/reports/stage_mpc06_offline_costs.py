@@ -379,9 +379,38 @@ def stage(site, source=SOURCE, *, parent_route=None):
             "invariant-tightenings.svg": image,
         }
     )
-    generated["offline_check.py"] = (
-        b"from pathlib import Path\nimport importlib.util,json\nr=Path(__file__).resolve().parent\ns=importlib.util.spec_from_file_location('offline_extension',r/'source-root/scripts/reports/stage_mpc06_offline_costs.py')\nm=importlib.util.module_from_spec(s);s.loader.exec_module(m)\nm.verify_export(r/'source-root',json.loads((r/'source-files.json').read_bytes()))\n_,_,checked,_=m.validate(r/'evidence'/m.SOURCE.name,repository=r/'source-root')\nassert checked==json.loads((r/'verification.json').read_bytes())\nprint(json.dumps(checked))\n"
-    )
+    generated["offline_check.py"] = b"""from pathlib import Path
+import importlib.util
+import json
+import os
+
+# The exported repository and its fixed local configuration own the Git proof.
+for name in tuple(os.environ):
+    if name.startswith("GIT_"):
+        del os.environ[name]
+os.environ.update(
+    GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_SYSTEM=os.devnull, GIT_CONFIG_NOSYSTEM="1"
+)
+
+root = Path(__file__).resolve().parent
+spec = importlib.util.spec_from_file_location(
+    "offline_extension", root / "source-root/scripts/reports/stage_mpc06_offline_costs.py"
+)
+if spec is None or spec.loader is None:
+    raise ImportError("Cannot load the exported MPC-06 verifier")
+verifier = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(verifier)
+verifier.verify_export(
+    root / "source-root", json.loads((root / "source-files.json").read_bytes())
+)
+_, _, checked, _ = verifier.validate(
+    root / "evidence" / verifier.SOURCE.name, repository=root / "source-root"
+)
+if checked != json.loads((root / "verification.json").read_bytes()):
+    raise ValueError("Offline verification differs from the reviewed result")
+print(json.dumps(checked))
+"""
+
     generated["README.md"] = f"""# MPC06 offline cost supplement
 
 Extract ../{route}.zip in a fresh directory, enter {route}, verify OFFLINE_SHA256SUMS, then run `python -B offline_check.py`. Python3.11+ and Git suffice; no checkout/network/native solver/Matplotlib/install is needed. The complete original capture and checking receipt are unchanged under evidence/. Selected authentic Git objects exist only in the offline ZIP, with fixed empty configuration, no host hooks/credentials/full history. They preserve full-commit byte checks for capture/checker/helpers; missing or corrupted objects refuse, with no cached-success fallback. Helper identity is the stable last helper-changing commit. Historical process paths are evidence, not portable execution commands.

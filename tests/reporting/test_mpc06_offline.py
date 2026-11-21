@@ -234,19 +234,13 @@ class PublicationTests(unittest.TestCase):
             with zipfile.ZipFile(site / (route + ".zip")) as z:
                 z.extractall(root / "outside")
             offline = root / "outside" / route
-            environment = {
-                k: v
-                for k, v in os.environ.items()
-                if k
-                not in (
-                    "GIT_DIR",
-                    "GIT_WORK_TREE",
-                    "GIT_OBJECT_DIRECTORY",
-                    "GIT_ALTERNATE_OBJECT_DIRECTORIES",
-                )
-            }
-            environment.update(
-                GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_SYSTEM=os.devnull, GIT_CONFIG_NOSYSTEM="1"
+            external = root / "unrelated"
+            subprocess.run(["git", "init", str(external)], check=True, capture_output=True)
+            environment = dict(
+                os.environ,
+                GIT_DIR=str(external / ".git"),
+                GIT_WORK_TREE=str(external),
+                GIT_OBJECT_DIRECTORY=str(external / ".git/objects"),
             )
             result = subprocess.run(
                 [sys.executable, "-B", "offline_check.py"],
@@ -263,6 +257,7 @@ class PublicationTests(unittest.TestCase):
             refused = subprocess.run(
                 [sys.executable, "-B", "offline_check.py"],
                 cwd=offline,
+                env=environment,
                 capture_output=True,
                 text=True,
                 timeout=30,
