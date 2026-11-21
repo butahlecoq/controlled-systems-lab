@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-import html
-import hashlib
-import json
-import math
-import statistics
 import copy
+import hashlib
+import html
+import json
+import statistics
 
 SCHEMA = "csl.syn01-nominal-forward-report/2"
 EVENT_SCHEMA = "csl.syn01-nominal-forward-trial/2"
@@ -452,7 +451,7 @@ def render_svg(record):
     values = [row["phases"]["execute_ns"]["median_ns"] for row in record["summary"]]
     maximum = max((value for value in values if value is not None), default=1)
     parts = []
-    for index, (scenario, value) in enumerate(zip(SCENARIOS, values)):
+    for index, (scenario, value) in enumerate(zip(SCENARIOS, values, strict=True)):
         y = 30 + index * 46
         width = 0 if value is None else max(1, round(520 * value / maximum))
         coverage = record["summary"][index]["phases"]["execute_ns"]["coverage"]

@@ -1,6 +1,7 @@
 """Canonical schema-3 mapping and immutable identity for SYN-01 reports."""
 
 from __future__ import annotations
+
 import hashlib
 import json
 

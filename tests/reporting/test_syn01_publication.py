@@ -3,32 +3,37 @@
 import hashlib
 import importlib.util
 import json
-from pathlib import Path
+import subprocess
 import sys
 import tempfile
 import unittest
+import zipfile
+from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
-TOOLING = ROOT / "reports" / "algorithm-results" / "tooling" / "syn01"
-sys.path.insert(0, str(ROOT / "scripts" / "reports"))
-sys.path.insert(0, str(TOOLING))
+REPORT_SCRIPTS = ROOT / "scripts" / "reports"
+SAVED_REPORTS = ROOT / "reports" / "algorithm-results"
+sys.path.insert(0, str(REPORT_SCRIPTS))
+TOOLING = SAVED_REPORTS / "tooling" / "syn01"
 
-import report
-import publication_map
-import syn01_registered_reports as adapter
-import registered_reports
 
-COLLECT_SPEC = importlib.util.spec_from_file_location(
-    "csl_syn01_test_collect", TOOLING / "collect.py"
-)
-collect = importlib.util.module_from_spec(COLLECT_SPEC)
-COLLECT_SPEC.loader.exec_module(collect)
+def _load_module(name, path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
-SITE_SPEC = importlib.util.spec_from_file_location(
-    "csl_syn01_test_site", ROOT / "scripts" / "reports" / "site.py"
-)
-report_site = importlib.util.module_from_spec(SITE_SPEC)
-SITE_SPEC.loader.exec_module(report_site)
+
+report = _load_module("csl_syn01_test_report", TOOLING / "report.py")
+publication_map = _load_module("csl_syn01_test_map", TOOLING / "publication_map.py")
+with mock.patch.dict(sys.modules, {"report": report, "publication_map": publication_map}):
+    collect = _load_module("csl_syn01_test_collect", TOOLING / "collect.py")
+adapter = importlib.import_module("syn01_registered_reports")
+registered_reports = importlib.import_module("registered_reports")
+report_site = _load_module("csl_syn01_test_site", REPORT_SCRIPTS / "site.py")
+
 
 SOURCE = "a" * 40
 HARNESS = "b" * 40
@@ -109,6 +114,25 @@ def make_event(scenario, repetition):
 
 
 class Syn01PublicationTests(unittest.TestCase):
+    def test_saved_renderer_reproduces_the_archived_page_and_plot(self):
+        source = SAVED_REPORTS / "syn01-nominal-20261013-f7ba310d-48a679cfc0d4"
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary) / "rendered"
+            subprocess.run(
+                [
+                    sys.executable,
+                    REPORT_SCRIPTS / "syn01/render_saved.py",
+                    source / "records.json",
+                    output,
+                ],
+                check=True,
+            )
+            with zipfile.ZipFile(source.with_suffix(".zip")) as archive:
+                for name in ("index.html", "latency.svg"):
+                    archived = archive.read(f"{source.name}/{name}")
+                    self.assertEqual((source / name).read_bytes(), archived)
+                    self.assertEqual((output / name).read_bytes(), archived)
+
     def test_future_capture_excludes_working_reproduction_note(self):
         self.assertNotIn("README.md", adapter.FILES)
         self.assertFalse((ROOT / "scripts/reports/syn01/README.md").exists())
