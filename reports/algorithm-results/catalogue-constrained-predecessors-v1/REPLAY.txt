@@ -1,0 +1,94 @@
+Backward reachable sets with saved constraints
+
+Extract the offline ZIP to a new directory. Run the commands below from
+its root unless a code block changes directory. The manifest lists SHA-256
+digests for the reading assets and every replay file. The two original
+captures in replay/native are unchanged public report artifacts from
+Controlled Systems Lab commit e9c95871b7ec8ff31b16104919e6c93d79e1419f.
+
+Check the saved results
+
+  cd replay
+  python3 native/verify_native.py native . --ipopt native/ipopt > audit-replay.json
+  diff -u native/audit-with-ipopt.json audit-replay.json
+  python3 native/verify_building.py > building-audit-replay.json
+  diff -u native/audit-building-exact.json building-audit-replay.json
+
+The first check uses NumPy 2.5.5 and accepts numerical errors up to 1e-7
+after scaling. It reports ten withheld Ipopt outcomes. The second verifies
+the separate exact certificates for all 32 building stage-direction pairs. This
+includes the ten unresolved numerical queries listed in the first audit.
+
+Regenerate the comparison and figure
+
+  cd replay
+  OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python3 prototype_predecessor.py native > outcome-replay.json
+  diff -u outcome.json outcome-replay.json
+  python3 summarize_predecessors.py native outcome-replay.json > summary-replay.json
+  diff -u summary.json summary-replay.json
+  python3 certify_intervals.py native outcome-replay.json > interval-replay.json
+  diff -u interval-certificates-final.json interval-replay.json
+  python3 retry_unmatched.py native outcome-replay.json > retries-replay.json
+  python3 retry_unbounded.py native outcome-replay.json > retries-unbounded-replay.json
+  MPLBACKEND=Agg python3 plot_battery.py
+
+The reference uses SciPy 1.17.1 and NumPy 2.5.5. Matplotlib 3.11.2 produced
+the four-panel battery figure. The regenerated SVG appears in replay and
+can be compared with ../battery-predecessor.svg.
+
+Rebuild the released native HiGHS driver
+
+Use CMake 3.28 or newer, a C++20 compiler, CSL SDK v0.1.1
+(dc6801dc5f02c4000b4f1272361752581a55873a), and nlohmann/json 3.11.3.
+Set SDK_PREFIX to the SDK installation with HiGHS and JSON_INCLUDE to
+the nlohmann/json single_include directory.
+
+  cd replay
+  python3 native/prepare_inputs.py native/history.zip native/backward.zip fresh-input
+  cmake -S native -B native-build -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_PREFIX_PATH="$SDK_PREFIX" -DCAMPAIGN_JSON_HEADERS="$JSON_INCLUDE"
+  cmake --build native-build
+  mkdir -p native-replay
+  ln -s "$PWD/fresh-input" native-replay/input
+  mkdir -p native-replay/raw
+  for model in $(seq 1 35); do
+    ./native-build/matched_predecessor "fresh-input/$model.json" > "native-replay/raw/$model.json"
+  done
+  python3 native/verify_native.py native-replay . > released-audit-replay.json
+
+The saved records include original unscaled attempts and the released
+driver's bounded row retries. Backend logs may contain incidental timings
+that vary by run. This is a correctness experiment.
+
+Rebuild the optional Ipopt replay
+
+Set IPOPT_SDK_PREFIX to the SDK installation built from
+f53e770462e323f9e0ff3c844e6fa3882fd82966 (csl-sdk PR #35), with Ipopt
+3.14.19. Set IPOPT_ROOT to the Ipopt dependency prefix.
+
+  cd replay
+  cmake -S native -B ipopt-build -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_PREFIX_PATH="$IPOPT_SDK_PREFIX" -DCAMPAIGN_JSON_HEADERS="$JSON_INCLUDE" \
+    -DIpopt_ROOT="$IPOPT_ROOT" -DMATCHED_PREDECESSOR_USE_IPOPT=ON
+  cmake --build ipopt-build
+  mkdir -p ipopt-replay
+  for model in 27 28; do
+    OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 ./ipopt-build/matched_predecessor \
+      "native/input/$model.json" > "ipopt-replay/$model.json"
+  done
+  python3 native/verify_native.py native . --ipopt ipopt-replay > ipopt-audit-replay.json
+
+The provider's contract requires a quadratic objective. A zero Hessian
+leaves the support objective linear and keeps the feasible set unchanged.
+The archive also retains the preliminary direct-linear refusals.
+
+Rebuild the exact building producer
+
+  cd replay
+  c++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Werror \
+    -isystem "$JSON_INCLUDE" native/exact_building.cpp -lgmpxx -lgmp -o exact-building
+  ./exact-building native/building-matched-input.json > building-exact-replay.json
+  diff -u native/building-exact.json building-exact-replay.json
+
+The producer uses GMP 6.3.0. The separate Python verifier uses only the
+standard library for the rational dynamics and support proof.

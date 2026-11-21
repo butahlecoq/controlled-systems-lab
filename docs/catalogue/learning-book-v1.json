@@ -1240,6 +1240,10 @@
           "href": "../examples/catalogue-backward-reachability-v1/index.html"
         },
         {
+          "label": "Backward reachable sets with saved constraints",
+          "href": "../examples/catalogue-constrained-predecessors-v1/index.html"
+        },
+        {
           "label": "Reachability formulations and horizon variants",
           "href": "model-tracks.html#reachability-formulations"
         }
