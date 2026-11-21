@@ -10,7 +10,9 @@ import statistics
 
 
 def read_jsonl(path: Path) -> list[dict]:
-    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    return [
+        json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()
+    ]
 
 
 def main() -> int:
@@ -29,52 +31,84 @@ def main() -> int:
     expected_count = summary["repetitions"] * len(summary["fixtures"]) * 4
     if len(attempts) != expected_count or len(records) != len(summary["fixtures"]):
         raise ValueError("capture does not contain the declared attempt or comparison-record count")
-    if summary["completed"] != expected_count or any(row["status"] != "completed" for row in attempts):
+    if summary["completed"] != expected_count or any(
+        row["status"] != "completed" for row in attempts
+    ):
         raise ValueError("capture contains a failed, timed-out or resource-limited attempt")
     if summary["timed_out"] or summary["resource_limited"] or summary["failed"]:
         raise ValueError("attempt summary counters disagree with completion status")
     for row in attempts:
-        if row["enforced"]["memory_max_bytes"] != 8 * 1024**3 or \
-                row["enforced"]["memory_swap_max_bytes"] != 0 or \
-                row["enforced"]["wall_watchdog_seconds"] != 300:
+        if (
+            row["enforced"]["memory_max_bytes"] != 8 * 1024**3
+            or row["enforced"]["memory_swap_max_bytes"] != 0
+            or row["enforced"]["wall_watchdog_seconds"] != 300
+        ):
             raise ValueError(f"resource contract differs for attempt {row['index']}")
         observed = row["observed"]
-        events = {key: int(value) for key, value in (line.split() for line in observed["memory_events"])}
+        events = {
+            key: int(value) for key, value in (line.split() for line in observed["memory_events"])
+        }
         if events.get("oom", 0) or events.get("oom_kill", 0):
             raise ValueError(f"memory OOM was recorded for attempt {row['index']}")
     expected_keys = set()
     for row in attempts:
         event = row["attempt"]
-        expected_keys.add((event["case_id"], event["method"], event["start_mode"],
-                           event["repetition"], event["input_sha256"]))
+        expected_keys.add(
+            (
+                event["case_id"],
+                event["method"],
+                event["start_mode"],
+                event["repetition"],
+                event["input_sha256"],
+            )
+        )
     record_keys = set()
     for record in records:
-        if record.get("schema") != "csl.comparison-record/1" or len(record.get("attempts", [])) != 20:
+        if (
+            record.get("schema") != "csl.comparison-record/1"
+            or len(record.get("attempts", [])) != 20
+        ):
             raise ValueError("comparison record failed the schema or attempt-count check")
         for item in record["attempts"]:
             payload = json.loads(item["measurement_payload"])
             event = payload["attempt"]
             if "resource_profile" not in event:
                 raise ValueError("canonical record omitted a per-attempt resource receipt")
-            record_keys.add((event["case_id"], event["method"], event["start_mode"],
-                             event["repetition"], event["input_sha256"]))
+            record_keys.add(
+                (
+                    event["case_id"],
+                    event["method"],
+                    event["start_mode"],
+                    event["repetition"],
+                    event["input_sha256"],
+                )
+            )
     if record_keys != expected_keys:
         raise ValueError("canonical records do not contain exactly the captured native attempts")
     if len(exact) != summary["repetitions"] * 18:
         raise ValueError(f"expected 90 exact rational checks, found {len(exact)}")
     for row in exact:
-        if row.get("schema") != "csl.mpc01-exact-candidate-check/1" or \
-                row.get("feasibility") != "verified_exact_rational":
+        if (
+            row.get("schema") != "csl.mpc01-exact-candidate-check/1"
+            or row.get("feasibility") != "verified_exact_rational"
+        ):
             raise ValueError("exact checker produced a non-verified candidate row")
 
     figure_manifest = json.loads((root / "b04-figure-manifest.json").read_text(encoding="utf-8"))
     representatives = read_jsonl(root / "representative-b04-cold-attempts.jsonl")
-    if (figure_manifest.get("attempt_count") != 2 or len(representatives) != 2 or
-            figure_manifest.get("attempts_sha256") != hashlib.sha256(
-                (root / "representative-b04-cold-attempts.jsonl").read_bytes()).hexdigest()):
+    if (
+        figure_manifest.get("attempt_count") != 2
+        or len(representatives) != 2
+        or figure_manifest.get("attempts_sha256")
+        != hashlib.sha256(
+            (root / "representative-b04-cold-attempts.jsonl").read_bytes()
+        ).hexdigest()
+    ):
         raise ValueError("B04 representative figure manifest does not bind its saved paths")
-    if not (root / "b04-repeated-projections.svg").is_file() or \
-            not (root / "b04-repeated-projections.html").is_file():
+    if (
+        not (root / "b04-repeated-projections.svg").is_file()
+        or not (root / "b04-repeated-projections.html").is_file()
+    ):
         raise ValueError("B04 2D projection files are missing")
 
     by_arm: dict[tuple[str, str, str], list[dict]] = defaultdict(list)
@@ -82,8 +116,9 @@ def main() -> int:
     for row in attempts:
         event = row["attempt"]
         by_arm[(row["fixture"], row["method"], row["start_mode"])].append(row)
-        outcome_counts[(row["fixture"], row["method"], row["start_mode"],
-                        event["mathematical_outcome"])] += 1
+        outcome_counts[
+            (row["fixture"], row["method"], row["start_mode"], event["mathematical_outcome"])
+        ] += 1
 
     lines = [
         "# MPC-01 per-attempt resource capture",

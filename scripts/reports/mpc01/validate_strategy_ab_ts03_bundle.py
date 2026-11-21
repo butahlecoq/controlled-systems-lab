@@ -35,13 +35,19 @@ def validate(bundle: Path) -> None:
         if relative.is_absolute() or ".." in relative.parts or not relative.parts or name in names:
             raise ValueError("unsafe or duplicate Strategy A/B manifest path: " + name)
         path = bundle / name
-        if (path.is_symlink() or not path.is_file() or
-                not path.resolve().is_relative_to(bundle) or
-                hashlib.sha256(path.read_bytes()).hexdigest() != digest):
+        if (
+            path.is_symlink()
+            or not path.is_file()
+            or not path.resolve().is_relative_to(bundle)
+            or hashlib.sha256(path.read_bytes()).hexdigest() != digest
+        ):
             raise ValueError("Strategy A/B checksum mismatch: " + name)
         names.add(name)
-    actual = {path.relative_to(bundle).as_posix() for path in bundle.rglob("*")
-              if path.is_file() and path.name != "SHA256SUMS"}
+    actual = {
+        path.relative_to(bundle).as_posix()
+        for path in bundle.rglob("*")
+        if path.is_file() and path.name != "SHA256SUMS"
+    }
     if actual != names or any(path.is_symlink() for path in bundle.rglob("*")):
         raise ValueError("Strategy A/B bundle inventory differs from its manifest")
     if not set(GENERATED).issubset(names):
