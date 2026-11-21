@@ -187,6 +187,28 @@ on:
       - '.github/workflows/pages-augmentation-aggregation.yml'
       - 'scripts/reports/mathematical-presentation-routes.json'
       - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
+      - 'scripts/reports/stage_env717.py'
+      - 'scripts/reports/stage_env717_two_points.py'
+      - 'scripts/reports/stage_env717_unequal_game.py'
+      - 'scripts/reports/stage_env717_max_coordinate.py'
+      - 'scripts/reports/stage_env717_point_on_plane.py'
+      - 'tests/reporting/test_env717_publication.py'
+      - 'tests/reporting/test_env717_two_points_publication.py'
+      - 'tests/reporting/test_env717_unequal_game_publication.py'
+      - 'tests/reporting/test_env717_max_coordinate_publication.py'
+      - 'tests/reporting/test_env717_point_on_plane_publication.py'
+      - 'scripts/reports/env717/check_smoke.py'
+      - 'scripts/reports/env717/check_two_points.py'
+      - 'scripts/reports/env717/check_two_points_legacy.py'
+      - 'scripts/reports/env717/check_unequal_game.py'
+      - 'scripts/reports/env717/check_max_coordinate.py'
+      - 'scripts/reports/env717/check_point_on_plane.py'
+      - 'reports/algorithm-results/env717-simple-control-pilot-v1/**'
+      - 'reports/algorithm-results/env717-two-points-pilot-v1/**'
+      - 'reports/algorithm-results/env717-two-points-feedback-v1/**'
+      - 'reports/algorithm-results/env717-unequal-game-pilot-v1/**'
+      - 'reports/algorithm-results/env717-max-coordinate-pilot-v1/**'
+      - 'reports/algorithm-results/env717-point-on-plane-pilot-v1/**'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
       - 'scripts/reports/stage_closed_loop_initial_baselines.py'
       - 'scripts/reports/fixed_tail_example.py'
@@ -428,6 +450,28 @@ on:
       - '.github/workflows/pages-augmentation-aggregation.yml'
       - 'scripts/reports/mathematical-presentation-routes.json'
       - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
+      - 'scripts/reports/stage_env717.py'
+      - 'scripts/reports/stage_env717_two_points.py'
+      - 'scripts/reports/stage_env717_unequal_game.py'
+      - 'scripts/reports/stage_env717_max_coordinate.py'
+      - 'scripts/reports/stage_env717_point_on_plane.py'
+      - 'tests/reporting/test_env717_publication.py'
+      - 'tests/reporting/test_env717_two_points_publication.py'
+      - 'tests/reporting/test_env717_unequal_game_publication.py'
+      - 'tests/reporting/test_env717_max_coordinate_publication.py'
+      - 'tests/reporting/test_env717_point_on_plane_publication.py'
+      - 'scripts/reports/env717/check_smoke.py'
+      - 'scripts/reports/env717/check_two_points.py'
+      - 'scripts/reports/env717/check_two_points_legacy.py'
+      - 'scripts/reports/env717/check_unequal_game.py'
+      - 'scripts/reports/env717/check_max_coordinate.py'
+      - 'scripts/reports/env717/check_point_on_plane.py'
+      - 'reports/algorithm-results/env717-simple-control-pilot-v1/**'
+      - 'reports/algorithm-results/env717-two-points-pilot-v1/**'
+      - 'reports/algorithm-results/env717-two-points-feedback-v1/**'
+      - 'reports/algorithm-results/env717-unequal-game-pilot-v1/**'
+      - 'reports/algorithm-results/env717-max-coordinate-pilot-v1/**'
+      - 'reports/algorithm-results/env717-point-on-plane-pilot-v1/**'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
       - 'scripts/reports/stage_closed_loop_initial_baselines.py'
       - 'scripts/reports/fixed_tail_example.py'
@@ -530,6 +574,14 @@ jobs:
         run: |
           python -m unittest discover -s tests/reporting -p 'test_syn03_strategy_a_report.py'
           python -m unittest discover -s tests/reporting -p 'test_syn03_ts02_report.py'
+      - name: Check six saved environment routes and offline ZIPs
+        run: >-
+          python -m unittest
+          tests.reporting.test_env717_publication
+          tests.reporting.test_env717_two_points_publication
+          tests.reporting.test_env717_unequal_game_publication
+          tests.reporting.test_env717_max_coordinate_publication
+          tests.reporting.test_env717_point_on_plane_publication
       - name: Check frozen Pages route preservation
         run: python -m unittest tests.reporting.test_preserve_published_routes tests.reporting.test_published_route_audit_policy
       - name: Exercise shared publication owners and malformed-input boundaries

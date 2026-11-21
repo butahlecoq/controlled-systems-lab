@@ -4,17 +4,19 @@ import hashlib
 import importlib.util
 import json
 import os
-from pathlib import Path
 import shutil
 import tempfile
 import unittest
 import zipfile
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location(
-    "stage_env717_point_on_plane", ROOT / "scripts/reports/stage_env717_point_on_plane.py")
+    "stage_env717_point_on_plane", ROOT / "scripts/reports/stage_env717_point_on_plane.py"
+)
+if SPEC is None or SPEC.loader is None:
+    raise ImportError("cannot load the environment publication test dependency")
 stage_module = importlib.util.module_from_spec(SPEC)
-assert SPEC.loader is not None
 SPEC.loader.exec_module(stage_module)
 
 
@@ -29,13 +31,19 @@ class PointOnThePlanePublicationTests(unittest.TestCase):
         self.site = self.root / "site"
         self.site.mkdir()
         (self.site / "index.html").write_text(
-            "<!doctype html><html><body><ul></ul></body></html>", encoding="utf-8")
+            "<!doctype html><html><body><ul></ul></body></html>", encoding="utf-8"
+        )
 
     def tearDown(self):
         self.temp.cleanup()
 
     def test_stages_verified_position_and_velocity_geometry(self):
         report_id = stage_module.stage(self.source, self.site)
+        self.assertEqual(report_id, "env717-point-on-plane-c19c55ac5163174af9d4")
+        self.assertEqual(
+            hashlib.sha256((self.site / f"{report_id}.zip").read_bytes()).hexdigest(),
+            "2376c95d8707ce29acaece14d5d9b92b502f3f52368e3d4062212d781c781b6a",
+        )
         self.assertRegex(report_id, r"^env717-point-on-plane-[0-9a-f]{20}$")
         destination = self.site / report_id
         manifest = json.loads((destination / "publication-manifest.json").read_text())
@@ -65,9 +73,13 @@ class PointOnThePlanePublicationTests(unittest.TestCase):
         figure["projection_pairs"] = [[0, 1], [1, 2]]
         figure_path.write_text(json.dumps(figure, indent=2) + "\n")
         names = [name for name in stage_module.FILES if name != "SHA256SUMS"]
-        (self.source / "SHA256SUMS").write_text("".join(
-            f"{hashlib.sha256((self.source / name).read_bytes()).hexdigest()}  {name}\n"
-            for name in names), encoding="ascii")
+        (self.source / "SHA256SUMS").write_text(
+            "".join(
+                f"{hashlib.sha256((self.source / name).read_bytes()).hexdigest()}  {name}\n"
+                for name in names
+            ),
+            encoding="ascii",
+        )
         with self.assertRaisesRegex(ValueError, "saved projection data differs"):
             stage_module._inputs(self.source)
 
@@ -81,9 +93,13 @@ class PointOnThePlanePublicationTests(unittest.TestCase):
         except OSError as error:
             self.skipTest(f"symlink creation unavailable: {error}")
         names = [name for name in stage_module.FILES if name != "SHA256SUMS"]
-        (self.source / "SHA256SUMS").write_text("".join(
-            f"{hashlib.sha256((self.source / name).read_bytes()).hexdigest()}  {name}\n"
-            for name in names), encoding="ascii")
+        (self.source / "SHA256SUMS").write_text(
+            "".join(
+                f"{hashlib.sha256((self.source / name).read_bytes()).hexdigest()}  {name}\n"
+                for name in names
+            ),
+            encoding="ascii",
+        )
         with self.assertRaisesRegex(ValueError, "regular non-symlink files"):
             stage_module._inputs(self.source)
 
