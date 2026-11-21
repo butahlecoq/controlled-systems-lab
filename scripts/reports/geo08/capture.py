@@ -1,4 +1,5 @@
 """Capture checked GEO-08 public calls from one clean frozen source commit."""
+
 from __future__ import annotations
 
 import argparse
@@ -24,11 +25,15 @@ def write(path: Path, value: dict) -> None:
 
 
 def receipt(source: Path, commit: str, phase: str) -> dict:
-    value = {"schema": "csl.geo08-source-receipt/1", "phase": phase,
-             "observed_utc": utc(), "commit": git(source, "rev-parse", "HEAD"),
-             "tree": git(source, "rev-parse", "HEAD^{tree}"),
-             "status": git(source, "status", "--porcelain=v1", "--untracked-files=all").splitlines(),
-             "tracked_count": len(git(source, "ls-files").splitlines())}
+    value = {
+        "schema": "csl.geo08-source-receipt/1",
+        "phase": phase,
+        "observed_utc": utc(),
+        "commit": git(source, "rev-parse", "HEAD"),
+        "tree": git(source, "rev-parse", "HEAD^{tree}"),
+        "status": git(source, "status", "--porcelain=v1", "--untracked-files=all").splitlines(),
+        "tracked_count": len(git(source, "ls-files").splitlines()),
+    }
     if value["commit"] != commit or value["status"]:
         raise ValueError("Source checkout is not the clean frozen commit")
     return value
@@ -50,22 +55,47 @@ def capture(source: Path, destination: Path, commit: str, cmake: str) -> None:
     destination.mkdir(parents=True)
     write(destination / "prebuild.json", before)
     build = destination / "measure-build"
-    env = dict(os.environ, VSLANG="1033", PreferredUILang="en-US",
-               DOTNET_CLI_UI_LANGUAGE="en-US")
-    command([cmake, "-S", str(source), "-B", str(build), "-DBUILD_TESTING=OFF",
-             "-DCSL_ENABLE_HIGHS=OFF", "-DCSL_ENABLE_QHULL=OFF",
-             "-DCSL_BUILD_GEO08_REPORT=ON"], source,
-            destination / "configure.log", env)
-    command([cmake, "--build", str(build), "--config", "Release", "--target",
-             "csl_geo08_lazy_report", "--parallel", "4", "--",
-             "/p:PreferredUILang=en-US", "/clp:ErrorsOnly"], source,
-            destination / "build.log", env)
+    env = dict(os.environ, VSLANG="1033", PreferredUILang="en-US", DOTNET_CLI_UI_LANGUAGE="en-US")
+    command(
+        [
+            cmake,
+            "-S",
+            str(source),
+            "-B",
+            str(build),
+            "-DBUILD_TESTING=OFF",
+            "-DCSL_ENABLE_HIGHS=OFF",
+            "-DCSL_ENABLE_QHULL=OFF",
+            "-DCSL_BUILD_GEO08_REPORT=ON",
+        ],
+        source,
+        destination / "configure.log",
+        env,
+    )
+    command(
+        [
+            cmake,
+            "--build",
+            str(build),
+            "--config",
+            "Release",
+            "--target",
+            "csl_geo08_lazy_report",
+            "--parallel",
+            "4",
+            "--",
+            "/p:PreferredUILang=en-US",
+            "/clp:ErrorsOnly",
+        ],
+        source,
+        destination / "build.log",
+        env,
+    )
     executable = build / "Release/csl_geo08_lazy_report.exe"
     if not executable.is_file():
         raise FileNotFoundError(executable)
     for phase in ("smoke", "measure"):
-        run = subprocess.run([str(executable), phase], cwd=source, env=env,
-                             capture_output=True)
+        run = subprocess.run([str(executable), phase], cwd=source, env=env, capture_output=True)
         (destination / f"{phase}.csv").write_bytes(run.stdout)
         (destination / f"{phase}.stderr.txt").write_bytes(run.stderr)
         if run.returncode:
@@ -73,12 +103,21 @@ def capture(source: Path, destination: Path, commit: str, cmake: str) -> None:
     after = receipt(source, commit, "postrun")
     after["executable_sha256"] = hashlib.sha256(executable.read_bytes()).hexdigest()
     write(destination / "postrun.json", after)
-    write(destination / "host.json", {"source_commit": commit,
-        "source_tree": before["tree"], "source_status": [],
-        "collected_utc": utc(), "host": platform.node(),
-        "os": platform.platform(), "processor": platform.processor(),
-        "architecture": platform.machine(), "python": platform.python_version(),
-        "logical_processors": os.cpu_count()})
+    write(
+        destination / "host.json",
+        {
+            "source_commit": commit,
+            "source_tree": before["tree"],
+            "source_status": [],
+            "collected_utc": utc(),
+            "host": platform.node(),
+            "os": platform.platform(),
+            "processor": platform.processor(),
+            "architecture": platform.machine(),
+            "python": platform.python_version(),
+            "logical_processors": os.cpu_count(),
+        },
+    )
 
 
 if __name__ == "__main__":

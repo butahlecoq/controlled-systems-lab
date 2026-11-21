@@ -1,4 +1,5 @@
 """Render the OPT-10 report, 2D example, manifest and ZIP from saved bytes."""
+
 from __future__ import annotations
 
 import argparse
@@ -10,7 +11,9 @@ import json
 from pathlib import Path
 import zipfile
 
-spec = importlib.util.spec_from_file_location("opt10_collect", Path(__file__).with_name("collect.py"))
+spec = importlib.util.spec_from_file_location(
+    "opt10_collect", Path(__file__).with_name("collect.py")
+)
 collect = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
 spec.loader.exec_module(collect)
@@ -22,57 +25,78 @@ def validate(bundle: Path) -> dict:
     collect.require(bundle.is_dir() and not bundle.is_symlink(), "OPT-10 bundle missing")
     record = collect.read_json(bundle / "records.json")
     unsigned = {key: value for key, value in record.items() if key != "report_id"}
-    collect.require(record.get("schema") == "csl.opt10-smooth-convex-report/1" and
-                    record.get("report_id") == bundle.name ==
-                    "opt10-smooth-" + collect.sha(collect.encoded(unsigned))[:16],
-                    "OPT-10 record identity differs")
+    collect.require(
+        record.get("schema") == "csl.opt10-smooth-convex-report/1"
+        and record.get("report_id")
+        == bundle.name
+        == "opt10-smooth-" + collect.sha(collect.encoded(unsigned))[:16],
+        "OPT-10 record identity differs",
+    )
     for name in collect.SOURCE_FILES:
         path = bundle / name
-        collect.require(path.is_file() and not path.is_symlink() and
-                        collect.sha(path.read_bytes()) == record["source_sha256"][name],
-                        "OPT-10 source file differs: " + name)
-    collect.require(record["problem"] == {
-        "variables": [[0, 1], [-1, 1]], "rows": [],
-        "objective": "0.5*((x-2)^2+(y+2)^2)",
-        "gradient": ["x-2", "y+2"], "start": [0, 0],
-        "objective_claim": "caller-declared differentiable convex"},
-        "OPT-10 problem fixture differs")
-    collect.require(record["analytic"] == {
-        "point": [1, -1], "objective": 1,
-        "gradient": [-1, 1], "projected_residual": 0},
-        "OPT-10 analytic answer differs")
+        collect.require(
+            path.is_file()
+            and not path.is_symlink()
+            and collect.sha(path.read_bytes()) == record["source_sha256"][name],
+            "OPT-10 source file differs: " + name,
+        )
+    collect.require(
+        record["problem"]
+        == {
+            "variables": [[0, 1], [-1, 1]],
+            "rows": [],
+            "objective": "0.5*((x-2)^2+(y+2)^2)",
+            "gradient": ["x-2", "y+2"],
+            "start": [0, 0],
+            "objective_claim": "caller-declared differentiable convex",
+        },
+        "OPT-10 problem fixture differs",
+    )
+    collect.require(
+        record["analytic"]
+        == {"point": [1, -1], "objective": 1, "gradient": [-1, 1], "projected_residual": 0},
+        "OPT-10 analytic answer differs",
+    )
     pre, post = (record["source_receipts"][key] for key in ("prebuild", "postrun"))
-    collect.require(pre["status"] == post["status"] == [] and
-                    pre["commit"] == post["commit"] == record["source_commit"] ==
-                    record["environment"]["source_commit"] and
-                    pre["tree"] == post["tree"] == record["source_tree"] ==
-                    record["environment"]["source_tree"] and
-                    pre["observed_utc"] < post["observed_utc"] <=
-                    record["environment"]["collected_utc"] and
-                    (bundle / "smoke.stderr.txt").read_bytes() ==
-                    (bundle / "measure.stderr.txt").read_bytes() == b"",
-                    "OPT-10 saved capture receipts differ")
+    collect.require(
+        pre["status"] == post["status"] == []
+        and pre["commit"]
+        == post["commit"]
+        == record["source_commit"]
+        == record["environment"]["source_commit"]
+        and pre["tree"]
+        == post["tree"]
+        == record["source_tree"]
+        == record["environment"]["source_tree"]
+        and pre["observed_utc"] < post["observed_utc"] <= record["environment"]["collected_utc"]
+        and (bundle / "smoke.stderr.txt").read_bytes()
+        == (bundle / "measure.stderr.txt").read_bytes()
+        == b"",
+        "OPT-10 saved capture receipts differ",
+    )
     collect.rows(bundle / "smoke.csv", "smoke")
     measure = collect.rows(bundle / "measure.csv", "measure")
-    collect.require(record["measurement"]["warmup"] == measure[0] and
-                    record["measurement"]["trials"] == measure[1:] and
-                    record["measurement"]["raw_smoke_sha256"] ==
-                    record["source_sha256"]["smoke.csv"] and
-                    record["measurement"]["raw_measure_sha256"] ==
-                    record["source_sha256"]["measure.csv"] and
-                    record["measurement"]["measured_calls"] == 700 and
-                    record["measurement"]["failures"] == 0,
-                    "OPT-10 measurement record differs")
+    collect.require(
+        record["measurement"]["warmup"] == measure[0]
+        and record["measurement"]["trials"] == measure[1:]
+        and record["measurement"]["raw_smoke_sha256"] == record["source_sha256"]["smoke.csv"]
+        and record["measurement"]["raw_measure_sha256"] == record["source_sha256"]["measure.csv"]
+        and record["measurement"]["measured_calls"] == 700
+        and record["measurement"]["failures"] == 0,
+        "OPT-10 measurement record differs",
+    )
     durations = [int(row["elapsed_ns"]) for row in measure[1:]]
-    collect.require(record["measurement"]["median_batch_ns"] == sorted(durations)[3] and
-                    record["measurement"]["min_batch_ns"] == min(durations) and
-                    record["measurement"]["max_batch_ns"] == max(durations),
-                    "OPT-10 timing summary differs")
+    collect.require(
+        record["measurement"]["median_batch_ns"] == sorted(durations)[3]
+        and record["measurement"]["min_batch_ns"] == min(durations)
+        and record["measurement"]["max_batch_ns"] == max(durations),
+        "OPT-10 timing summary differs",
+    )
     return record
 
 
 def figure() -> bytes:
-    svg = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 440" role="img" aria-labelledby="title desc">
+    svg = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 440" role="img" aria-labelledby="title desc">
 <title id="title">OPT-10 feasible box and analytic minimizer</title>
 <desc id="desc">The feasible box spans x from zero to one and y from minus one to one. The supplied start is at zero, zero. The independently derived minimizer is at one, minus one. The connecting segment illustrates feasibility and is not a saved iteration trace.</desc>
 <rect width="700" height="440" fill="#16161e"/>
@@ -92,19 +116,38 @@ def figure() -> bytes:
 <text x="106" y="70">y = 1</text><text x="106" y="343">y = -1</text>
 <text x="105" y="375">x = 0</text><text x="453" y="375">x = 1</text>
 </g>
-</svg>'''
+</svg>"""
     return (svg + "\n").encode()
 
 
 def summary_csv(record: dict) -> bytes:
     output = io.StringIO(newline="")
     writer = csv.writer(output, lineterminator="\n")
-    writer.writerow(["case", "measured_batches", "calls_per_batch", "successes",
-                     "failures", "median_batch_ns", "min_batch_ns", "max_batch_ns"])
+    writer.writerow(
+        [
+            "case",
+            "measured_batches",
+            "calls_per_batch",
+            "successes",
+            "failures",
+            "median_batch_ns",
+            "min_batch_ns",
+            "max_batch_ns",
+        ]
+    )
     measurement = record["measurement"]
-    writer.writerow(["box-quadratic", 7, 100, 700, 0,
-                     measurement["median_batch_ns"], measurement["min_batch_ns"],
-                     measurement["max_batch_ns"]])
+    writer.writerow(
+        [
+            "box-quadratic",
+            7,
+            100,
+            700,
+            0,
+            measurement["median_batch_ns"],
+            measurement["min_batch_ns"],
+            measurement["max_batch_ns"],
+        ]
+    )
     return output.getvalue().encode()
 
 
@@ -113,8 +156,11 @@ def page(record: dict, example: bool) -> bytes:
     source = escape(record["source_commit"])
     measurement = record["measurement"]
     title = "2D feasible-direction example" if example else "Declared smooth-convex adapter report"
-    lead = ("An analytic quadratic on a box shows the feasible start and constrained minimizer."
-            if example else "Saved numerical observations of the public OPT-10 adapter route.")
+    lead = (
+        "An analytic quadratic on a box shows the feasible start and constrained minimizer."
+        if example
+        else "Saved numerical observations of the public OPT-10 adapter route."
+    )
     html = f'''<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>OPT-10 · {title}</title><style>
@@ -146,8 +192,8 @@ conditional on the caller's convexity and gradient assertions. It is not a
 validated convexity certificate, numerical global-error bound or complete optimal family.</p></div>
 <div class="section"><h2>Measurement and scope</h2>
 <p>One excluded 100-call warmup preceded seven measured 100-call batches: 700 verified
-calls, zero observed failures. Median batch duration was {measurement['median_batch_ns']:,} ns
-(range {measurement['min_batch_ns']:,}–{measurement['max_batch_ns']:,} ns). Each interval includes
+calls, zero observed failures. Median batch duration was {measurement["median_batch_ns"]:,} ns
+(range {measurement["min_batch_ns"]:,}–{measurement["max_batch_ns"]:,} ns). Each interval includes
 feasible-set/objective construction, production LP registration and workspace creation,
 the public minimization call and literal checks. It excludes CSV output and rendering.
 These are descriptive single-adapter durations on the recorded host; no comparator,
@@ -159,7 +205,7 @@ thread activity were unavailable.</p>
 bind the observation to the build and host receipts. Reproduce with
 <code>python scripts/reports/opt10/capture.py --source &lt;clean-checkout&gt; --capture &lt;new-directory&gt; --commit {source} --cmake &lt;cmake&gt;</code>,
 then run <code>collect.py</code> and <code>render_saved.py</code> on the saved capture.</p></div>
-<p><a href="{'index.html' if example else 'example-2d.html'}">{'Full report' if example else '2D example'}</a></p>
+<p><a href="{"index.html" if example else "example-2d.html"}">{"Full report" if example else "2D example"}</a></p>
 </div><div class="footer">OPT-10 · saved binary64 evidence only</div></body></html>'''
     return html.encode()
 
@@ -178,10 +224,12 @@ def offline_zip(files: dict[str, bytes]) -> bytes:
 
 def render(bundle: Path, check: bool) -> dict:
     record = validate(bundle)
-    files = {"index.html": page(record, False),
-             "example-2d.html": page(record, True),
-             "feasible-box-2d.svg": figure(),
-             "summary.csv": summary_csv(record)}
+    files = {
+        "index.html": page(record, False),
+        "example-2d.html": page(record, True),
+        "feasible-box-2d.svg": figure(),
+        "summary.csv": summary_csv(record),
+    }
     for name, data in files.items():
         path = bundle / name
         if check:
@@ -189,14 +237,19 @@ def render(bundle: Path, check: bool) -> dict:
         else:
             collect.require(not path.exists(), "OPT-10 rendered file already exists: " + name)
             path.write_bytes(data)
-    inventory = {name: collect.sha((bundle / name).read_bytes()) for name in
-                 (*collect.SOURCE_FILES, "records.json", *RENDERED)}
-    manifest = {"schema": "csl.opt10-manifest/1", "report_id": bundle.name,
-                "source_commit": record["source_commit"], "sha256": inventory}
+    inventory = {
+        name: collect.sha((bundle / name).read_bytes())
+        for name in (*collect.SOURCE_FILES, "records.json", *RENDERED)
+    }
+    manifest = {
+        "schema": "csl.opt10-manifest/1",
+        "report_id": bundle.name,
+        "source_commit": record["source_commit"],
+        "sha256": inventory,
+    }
     path = bundle / "manifest.json"
     if check:
-        collect.require(path.read_bytes() == collect.encoded(manifest),
-                        "OPT-10 manifest differs")
+        collect.require(path.read_bytes() == collect.encoded(manifest), "OPT-10 manifest differs")
     else:
         collect.require(not path.exists(), "OPT-10 manifest already exists")
         path.write_bytes(collect.encoded(manifest))
@@ -208,12 +261,17 @@ def render(bundle: Path, check: bool) -> dict:
     else:
         collect.require(not zip_path.exists(), "OPT-10 ZIP already exists")
         zip_path.write_bytes(archive)
-    collect.require({path.name for path in bundle.iterdir()} ==
-                    set((*all_files, zip_path.name)), "OPT-10 bundle inventory differs")
-    return {"report_id": bundle.name, "source_commit": record["source_commit"],
-            "manifest_sha256": collect.sha(path.read_bytes()),
-            "zip_sha256": collect.sha(archive),
-            "index_sha256": collect.sha(files["index.html"])}
+    collect.require(
+        {path.name for path in bundle.iterdir()} == set((*all_files, zip_path.name)),
+        "OPT-10 bundle inventory differs",
+    )
+    return {
+        "report_id": bundle.name,
+        "source_commit": record["source_commit"],
+        "manifest_sha256": collect.sha(path.read_bytes()),
+        "zip_sha256": collect.sha(archive),
+        "index_sha256": collect.sha(files["index.html"]),
+    }
 
 
 if __name__ == "__main__":

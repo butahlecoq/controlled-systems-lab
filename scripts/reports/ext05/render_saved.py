@@ -1,4 +1,5 @@
 """Render the EXT-05 HTML, 2D example, manifest and offline ZIP from saved bytes."""
+
 from __future__ import annotations
 
 import argparse
@@ -10,7 +11,9 @@ import json
 from pathlib import Path
 import zipfile
 
-spec = importlib.util.spec_from_file_location("ext05_collect", Path(__file__).with_name("collect.py"))
+spec = importlib.util.spec_from_file_location(
+    "ext05_collect", Path(__file__).with_name("collect.py")
+)
 collect = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
 spec.loader.exec_module(collect)
@@ -22,66 +25,96 @@ def validate(bundle: Path) -> dict:
     collect.require(bundle.is_dir() and not bundle.is_symlink(), "EXT-05 bundle missing")
     record = collect.read_json(bundle / "records.json")
     unsigned = {key: value for key, value in record.items() if key != "report_id"}
-    collect.require(record.get("schema") == "csl.ext05-discretization-report/1" and
-                    record.get("report_id") == bundle.name ==
-                    "ext05-discretization-" + collect.sha(collect.encoded(unsigned))[:16],
-                    "EXT-05 record identity differs")
+    collect.require(
+        record.get("schema") == "csl.ext05-discretization-report/1"
+        and record.get("report_id")
+        == bundle.name
+        == "ext05-discretization-" + collect.sha(collect.encoded(unsigned))[:16],
+        "EXT-05 record identity differs",
+    )
     for name in collect.SOURCE_FILES:
         path = bundle / name
-        collect.require(path.is_file() and not path.is_symlink() and
-                        collect.sha(path.read_bytes()) == record["source_sha256"][name],
-                        "EXT-05 source file differs: " + name)
-    collect.require(record["model"] == {
-        "time_domain": "continuous", "coefficient_variation": "constant_lti",
-        "hold": "zero_order_hold", "times": [0, 1, 3],
-        "A": [[0, 1], [0, 0]], "B": [[0], [1]],
-        "E_shape": [2, 0], "offset": [0, 0],
-        "controls": [2, -1], "initial_state": [0, 0]},
-        "EXT-05 model fixture differs")
-    collect.require(record["analytic"] == {
-        "transition_A01": [1, 2], "transition_B0": [0.5, 2],
-        "transition_B1": [1, 2], "trajectory": [[0, 0], [1, 2], [3, 0]]},
-        "EXT-05 analytic reference differs")
+        collect.require(
+            path.is_file()
+            and not path.is_symlink()
+            and collect.sha(path.read_bytes()) == record["source_sha256"][name],
+            "EXT-05 source file differs: " + name,
+        )
+    collect.require(
+        record["model"]
+        == {
+            "time_domain": "continuous",
+            "coefficient_variation": "constant_lti",
+            "hold": "zero_order_hold",
+            "times": [0, 1, 3],
+            "A": [[0, 1], [0, 0]],
+            "B": [[0], [1]],
+            "E_shape": [2, 0],
+            "offset": [0, 0],
+            "controls": [2, -1],
+            "initial_state": [0, 0],
+        },
+        "EXT-05 model fixture differs",
+    )
+    collect.require(
+        record["analytic"]
+        == {
+            "transition_A01": [1, 2],
+            "transition_B0": [0.5, 2],
+            "transition_B1": [1, 2],
+            "trajectory": [[0, 0], [1, 2], [3, 0]],
+        },
+        "EXT-05 analytic reference differs",
+    )
     pre, post = (record["source_receipts"][key] for key in ("prebuild", "postrun"))
-    collect.require(pre["status"] == post["status"] == [] and
-                    pre["commit"] == post["commit"] == record["source_commit"] ==
-                    record["environment"]["source_commit"] and
-                    pre["tree"] == post["tree"] == record["source_tree"] ==
-                    record["environment"]["source_tree"] and
-                    pre["observed_utc"] < post["observed_utc"] <=
-                    record["environment"]["collected_utc"] and
-                    (bundle / "smoke.stderr.txt").read_bytes() ==
-                    (bundle / "measure.stderr.txt").read_bytes() == b"",
-                    "EXT-05 saved capture receipts differ")
+    collect.require(
+        pre["status"] == post["status"] == []
+        and pre["commit"]
+        == post["commit"]
+        == record["source_commit"]
+        == record["environment"]["source_commit"]
+        and pre["tree"]
+        == post["tree"]
+        == record["source_tree"]
+        == record["environment"]["source_tree"]
+        and pre["observed_utc"] < post["observed_utc"] <= record["environment"]["collected_utc"]
+        and (bundle / "smoke.stderr.txt").read_bytes()
+        == (bundle / "measure.stderr.txt").read_bytes()
+        == b"",
+        "EXT-05 saved capture receipts differ",
+    )
     collect.rows(bundle / "smoke.csv", "smoke")
     measure = collect.rows(bundle / "measure.csv", "measure")
-    collect.require(record["measurement"]["warmup"] == measure[0] and
-                    record["measurement"]["trials"] == measure[1:] and
-                    record["measurement"]["raw_smoke_sha256"] ==
-                    record["source_sha256"]["smoke.csv"] and
-                    record["measurement"]["raw_measure_sha256"] ==
-                    record["source_sha256"]["measure.csv"] and
-                    record["measurement"]["measured_calls"] == 700 and
-                    record["measurement"]["failures"] == 0,
-                    "EXT-05 measurement record differs")
+    collect.require(
+        record["measurement"]["warmup"] == measure[0]
+        and record["measurement"]["trials"] == measure[1:]
+        and record["measurement"]["raw_smoke_sha256"] == record["source_sha256"]["smoke.csv"]
+        and record["measurement"]["raw_measure_sha256"] == record["source_sha256"]["measure.csv"]
+        and record["measurement"]["measured_calls"] == 700
+        and record["measurement"]["failures"] == 0,
+        "EXT-05 measurement record differs",
+    )
     durations = [int(row["elapsed_ns"]) for row in measure[1:]]
-    collect.require(record["measurement"]["median_batch_ns"] == sorted(durations)[3] and
-                    record["measurement"]["min_batch_ns"] == min(durations) and
-                    record["measurement"]["max_batch_ns"] == max(durations),
-                    "EXT-05 timing summary differs")
+    collect.require(
+        record["measurement"]["median_batch_ns"] == sorted(durations)[3]
+        and record["measurement"]["min_batch_ns"] == min(durations)
+        and record["measurement"]["max_batch_ns"] == max(durations),
+        "EXT-05 timing summary differs",
+    )
     return record
 
 
 def figure() -> bytes:
     # Physical axes: position horizontally, velocity vertically.
     points = [(0, 0), (1, 2), (3, 0)]
-    xy = [(110 + 160*x, 330 - 110*y) for x, y in points]
+    xy = [(110 + 160 * x, 330 - 110 * y) for x, y in points]
     circles = "\n".join(
         f'<circle cx="{x}" cy="{y}" r="6" fill="#f6c177"/>'
-        f'<text x="{x+10}" y="{y-10}" fill="#e0def4" font-size="15">'
-        f'x{k}=({points[k][0]},{points[k][1]})</text>'
-        for k, (x, y) in enumerate(xy))
-    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 410" role="img" aria-labelledby="title desc">
+        f'<text x="{x + 10}" y="{y - 10}" fill="#e0def4" font-size="15">'
+        f"x{k}=({points[k][0]},{points[k][1]})</text>"
+        for k, (x, y) in enumerate(xy)
+    )
+    svg = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 410" role="img" aria-labelledby="title desc">
 <title id="title">EXT-05 analytic double-integrator state trajectory</title>
 <desc id="desc">Exact quadratic position-velocity paths connect sampled states at times zero, one and three: (0,0), (1,2), (3,0).</desc>
 <rect width="700" height="410" fill="#16161e"/>
@@ -93,19 +126,38 @@ def figure() -> bytes:
 </g>
 <path d="M 110 330 Q 110 220 270 110 Q 590 220 590 330" fill="none" stroke="#9ccfd8" stroke-width="3"/>
 {circles}
-</svg>'''
+</svg>"""
     return (svg + "\n").encode()
 
 
 def summary_csv(record: dict) -> bytes:
     output = io.StringIO(newline="")
     writer = csv.writer(output, lineterminator="\n")
-    writer.writerow(["case", "measured_batches", "calls_per_batch", "successes",
-                     "failures", "median_batch_ns", "min_batch_ns", "max_batch_ns"])
+    writer.writerow(
+        [
+            "case",
+            "measured_batches",
+            "calls_per_batch",
+            "successes",
+            "failures",
+            "median_batch_ns",
+            "min_batch_ns",
+            "max_batch_ns",
+        ]
+    )
     measurement = record["measurement"]
-    writer.writerow(["double-integrator", 7, 100, 700, 0,
-                     measurement["median_batch_ns"], measurement["min_batch_ns"],
-                     measurement["max_batch_ns"]])
+    writer.writerow(
+        [
+            "double-integrator",
+            7,
+            100,
+            700,
+            0,
+            measurement["median_batch_ns"],
+            measurement["min_batch_ns"],
+            measurement["max_batch_ns"],
+        ]
+    )
     return output.getvalue().encode()
 
 
@@ -115,8 +167,11 @@ def page(record: dict, example: bool) -> bytes:
     measurement = record["measurement"]
     median = measurement["median_batch_ns"]
     title = "2D double-integrator example" if example else "Continuous-model discretization report"
-    lead = ("A two-state continuous plant is converted over physical intervals of one and two time units."
-            if example else "Saved numerical observations of the public EXT-05 conversion route.")
+    lead = (
+        "A two-state continuous plant is converted over physical intervals of one and two time units."
+        if example
+        else "Saved numerical observations of the public EXT-05 conversion route."
+    )
     html = f'''<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>EXT-05 · {title}</title><style>
@@ -145,7 +200,7 @@ certified global error bound.</p></div>
 <div class="section"><h2>Measurement and scope</h2>
 <p>One excluded 100-call warmup preceded seven measured 100-call batches: 700 verified calls,
 zero observed failures. Median batch duration was {median:,} ns (range
-{measurement['min_batch_ns']:,}–{measurement['max_batch_ns']:,} ns). Each interval includes
+{measurement["min_batch_ns"]:,}–{measurement["max_batch_ns"]:,} ns). Each interval includes
 fixture construction, the public discretizer, snapshot, two state steps and literal checks;
 it excludes CSV output and rendering. These are single-adapter descriptive durations on
 the recorded host, with no comparator, speedup or limiter attribution. Native internal
@@ -156,7 +211,7 @@ counters and actual thread activity were unavailable.</p>
 bind the result to the build and host receipts. Reproduce with
 <code>python scripts/reports/ext05/capture.py --source &lt;clean-checkout&gt; --capture &lt;new-directory&gt; --commit {source} --cmake &lt;cmake&gt;</code>,
 then run <code>collect.py</code> and <code>render_saved.py</code> on the saved capture.</p></div>
-<p><a href="{'index.html' if example else 'example-2d.html'}">{'Full report' if example else '2D example'}</a></p>
+<p><a href="{"index.html" if example else "example-2d.html"}">{"Full report" if example else "2D example"}</a></p>
 </div><div class="footer">EXT-05 · saved binary64 evidence only</div></body></html>'''
     return html.encode()
 
@@ -175,10 +230,12 @@ def offline_zip(files: dict[str, bytes]) -> bytes:
 
 def render(bundle: Path, check: bool) -> dict:
     record = validate(bundle)
-    files = {"index.html": page(record, False),
-             "example-2d.html": page(record, True),
-             "trajectory-2d.svg": figure(),
-             "summary.csv": summary_csv(record)}
+    files = {
+        "index.html": page(record, False),
+        "example-2d.html": page(record, True),
+        "trajectory-2d.svg": figure(),
+        "summary.csv": summary_csv(record),
+    }
     for name, data in files.items():
         path = bundle / name
         if check:
@@ -186,14 +243,19 @@ def render(bundle: Path, check: bool) -> dict:
         else:
             collect.require(not path.exists(), "EXT-05 rendered file already exists: " + name)
             path.write_bytes(data)
-    inventory = {name: collect.sha((bundle / name).read_bytes()) for name in
-                 (*collect.SOURCE_FILES, "records.json", *RENDERED)}
-    manifest = {"schema": "csl.ext05-manifest/1", "report_id": bundle.name,
-                "source_commit": record["source_commit"], "sha256": inventory}
+    inventory = {
+        name: collect.sha((bundle / name).read_bytes())
+        for name in (*collect.SOURCE_FILES, "records.json", *RENDERED)
+    }
+    manifest = {
+        "schema": "csl.ext05-manifest/1",
+        "report_id": bundle.name,
+        "source_commit": record["source_commit"],
+        "sha256": inventory,
+    }
     path = bundle / "manifest.json"
     if check:
-        collect.require(path.read_bytes() == collect.encoded(manifest),
-                        "EXT-05 manifest differs")
+        collect.require(path.read_bytes() == collect.encoded(manifest), "EXT-05 manifest differs")
     else:
         collect.require(not path.exists(), "EXT-05 manifest already exists")
         path.write_bytes(collect.encoded(manifest))
@@ -205,12 +267,17 @@ def render(bundle: Path, check: bool) -> dict:
     else:
         collect.require(not zip_path.exists(), "EXT-05 ZIP already exists")
         zip_path.write_bytes(archive)
-    collect.require({path.name for path in bundle.iterdir()} ==
-                    set((*all_files, zip_path.name)), "EXT-05 bundle inventory differs")
-    return {"report_id": bundle.name, "source_commit": record["source_commit"],
-            "manifest_sha256": collect.sha(path.read_bytes()),
-            "zip_sha256": collect.sha(archive),
-            "index_sha256": collect.sha(files["index.html"])}
+    collect.require(
+        {path.name for path in bundle.iterdir()} == set((*all_files, zip_path.name)),
+        "EXT-05 bundle inventory differs",
+    )
+    return {
+        "report_id": bundle.name,
+        "source_commit": record["source_commit"],
+        "manifest_sha256": collect.sha(path.read_bytes()),
+        "zip_sha256": collect.sha(archive),
+        "index_sha256": collect.sha(files["index.html"]),
+    }
 
 
 if __name__ == "__main__":
