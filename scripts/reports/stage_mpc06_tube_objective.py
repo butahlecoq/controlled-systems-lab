@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import html
 import json
-from pathlib import Path
 import re
 import sys
 import zipfile
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from mpc06 import render_tube_objective
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/mpc06-tube-objective-v1"
@@ -47,8 +49,6 @@ SOURCE_SNAPSHOT_SHA256 = {
     "scripts/reports/stage_mpc06_tube_objective.py": "99710a4a6a5399d64cf741ce63fad89f61b836681fbccd494c45c53fc818bfef",
     "tests/reporting/test_mpc06_tube_objective.py": "519c00e0e1530bbd33b8f195972fa7efab32d521c5ee7375cb7a4343f7483613",
 }
-sys.path.insert(0, str(ROOT / "scripts/reports/mpc06"))
-import render_tube_objective
 
 
 def digest(data: bytes) -> str:

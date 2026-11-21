@@ -6,22 +6,24 @@ import argparse
 import hashlib
 import importlib.util
 import json
-from pathlib import Path
 import re
 import tempfile
 import zipfile
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/mpc06-nilpotent-tube-pilot-v1"
 CHECKER_PATH = ROOT / "scripts/reports/mpc06/check_tube.py"
 RENDERER_PATH = ROOT / "scripts/reports/mpc06/render_tube.py"
 spec = importlib.util.spec_from_file_location("mpc06_tube_checker", CHECKER_PATH)
+if spec is None or spec.loader is None:
+    raise ImportError("Cannot load the saved report dependency")
 checker = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(checker)
 render_spec = importlib.util.spec_from_file_location("mpc06_tube_renderer", RENDERER_PATH)
+if render_spec is None or render_spec.loader is None:
+    raise ImportError("Cannot load the saved report dependency")
 renderer = importlib.util.module_from_spec(render_spec)
-assert render_spec.loader is not None
 render_spec.loader.exec_module(renderer)
 FILES = (
     "README.md",

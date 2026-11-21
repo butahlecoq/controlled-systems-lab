@@ -3,18 +3,19 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
-from pathlib import Path
 import shutil
 import tempfile
 import unittest
 import zipfile
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location(
     "stage_mpc06_tube", ROOT / "scripts/reports/stage_mpc06_tube.py"
 )
+if SPEC is None or SPEC.loader is None:
+    raise ImportError("Cannot load the saved report dependency")
 stage_module = importlib.util.module_from_spec(SPEC)
-assert SPEC.loader is not None
 SPEC.loader.exec_module(stage_module)
 
 

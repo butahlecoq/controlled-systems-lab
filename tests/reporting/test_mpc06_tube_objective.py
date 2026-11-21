@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-from fractions import Fraction as Q
 import json
-from pathlib import Path
 import sys
 import unittest
+from fractions import Fraction as Q
+from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports/mpc06"))
-import build_tube_objective
-import check_tube_objective
-from tube_objective import SCENARIO_PATH, simulate
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports/mpc06"))
+from mpc06 import build_tube_objective, check_tube_objective
+from mpc06.tube_objective import SCENARIO_PATH, simulate
 
 
 class Mpc06TubeObjectiveTests(unittest.TestCase):

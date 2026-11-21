@@ -6,17 +6,18 @@ import argparse
 import hashlib
 import importlib.util
 import json
-from pathlib import Path
 import subprocess
 import tempfile
 import zipfile
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/mpc05-causal-tree-pilot-v2"
 CHECKER_PATH = ROOT / "scripts/reports/mpc05/reference.py"
 spec = importlib.util.spec_from_file_location("mpc05_causal_reference", CHECKER_PATH)
+if spec is None or spec.loader is None:
+    raise ImportError("Cannot load the saved report dependency")
 reference = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(reference)
 FILES = (
     "README.md",

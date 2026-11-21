@@ -1,24 +1,26 @@
 from __future__ import annotations
 
 import importlib.util
-from pathlib import Path
 import shutil
 import tempfile
 import unittest
+from pathlib import Path
 from zipfile import ZipFile
 
 ROOT = Path(__file__).resolve().parents[2]
 LANDING_SPEC = importlib.util.spec_from_file_location(
     "landing", ROOT / "scripts/reports/landing.py"
 )
+if LANDING_SPEC is None or LANDING_SPEC.loader is None:
+    raise ImportError("Cannot load the saved report dependency")
 landing = importlib.util.module_from_spec(LANDING_SPEC)
-assert LANDING_SPEC.loader is not None
 LANDING_SPEC.loader.exec_module(landing)
 SPEC = importlib.util.spec_from_file_location(
     "stage_mpc05_causal_tree_test", ROOT / "scripts/reports/stage_mpc05_causal_tree.py"
 )
+if SPEC is None or SPEC.loader is None:
+    raise ImportError("Cannot load the saved report dependency")
 stage_report = importlib.util.module_from_spec(SPEC)
-assert SPEC.loader is not None
 SPEC.loader.exec_module(stage_report)
 
 
