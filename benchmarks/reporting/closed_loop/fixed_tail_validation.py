@@ -11,7 +11,7 @@ def validate_regions(response, state_dimension, horizon, *, atol=1e-7, rtol=1e-8
     if len(regions) != horizon + 1 or len(witnesses) != len(regions):
         raise ValueError("native fixed-tail response must retain every physical stage and witness")
     checks = []
-    for stage, (region, witness) in enumerate(zip(regions, witnesses)):
+    for stage, (region, witness) in enumerate(zip(regions, witnesses, strict=True)):
         if region["stage"] != stage or region["family"] != response["family"]:
             raise ValueError("native physical region identity or stage differs")
         x = history[stage * state_dimension : (stage + 1) * state_dimension]
@@ -37,7 +37,7 @@ def validate_regions(response, state_dimension, horizon, *, atol=1e-7, rtol=1e-8
                 raise ValueError("malformed native physical reference")
             lhs = matrix @ x
             residual = abs(lhs - rhs) if equality else np.maximum(lhs - rhs, 0)
-            passed &= bool(np.all(residual <= atol + rtol * np.maximum(abs(lhs), abs(rhs))))
+            passed &= bool(np.all(residual <= atol + rtol * np.maximum(np.abs(lhs), np.abs(rhs))))
         member = region["membership"]
         if "center" in member:
             center, factor = np.asarray(member["center"]), np.asarray(member["factor"])

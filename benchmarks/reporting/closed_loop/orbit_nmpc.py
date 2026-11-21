@@ -28,7 +28,7 @@ def solve(task: dict, observed: np.ndarray, stage: int, previous_prediction=None
         opti.subject_to(opti.bounded(bounds[0][0], u[0, k], bounds[0][1]))
         opti.subject_to(opti.bounded(bounds[1][0], u[1, k], bounds[1][1]))
 
-        def f(z):
+        def f(z, k=k):
             r, v, theta, omega = [z[i] * scales[i] for i in range(4)]
             mu = p["G"] * p["M_earth"]
             return ca.vertcat(

@@ -5,12 +5,13 @@ from __future__ import annotations
 
 import argparse
 import json
-from pathlib import Path
 import subprocess
 import tempfile
+from pathlib import Path
+
+from task_models import make_replay_request, objective, prediction_receipt, validate_source_binding
 
 from contracts import load_task, manifest_sha256
-from task_models import make_replay_request, objective, prediction_receipt, validate_source_binding
 
 
 def main() -> int:

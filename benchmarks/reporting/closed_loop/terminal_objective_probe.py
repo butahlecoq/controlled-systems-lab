@@ -7,13 +7,14 @@ import hashlib
 import json
 import math
 import os
-from pathlib import Path
 import subprocess
+from pathlib import Path
 
-from contracts import ROOT, load_task, manifest_sha256
+import affine
 from native_graph_policy import NativeGraphPolicy
 from task_models import source_scenario
-import affine
+
+from contracts import ROOT, load_task, manifest_sha256
 
 
 def main() -> int:
@@ -64,7 +65,10 @@ def main() -> int:
                 task["control_domains"]["finite"]["problem_id"],
             )
             response = policy.query(task["task_id"], target, n - 1)
-            native = policy.last_query_capture["parsed_response"]
+            capture = policy.last_query_capture
+            native = capture.get("parsed_response") if capture is not None else None
+            if not isinstance(native, dict):
+                raise ValueError("Native diagnostic did not return a parsed response")
             row.update({"adapter_status": response["status"], "native_status": native["status"]})
             if native["status"] != "accepted":
                 raise ValueError("Native diagnostic did not return a selected plan")
@@ -73,7 +77,11 @@ def main() -> int:
             terminal = sum(
                 w * ((x - t) / scale) ** 2
                 for w, x, t, scale in zip(
-                    definition["terminal_weights"], point, target, definition["terminal_scale"]
+                    definition["terminal_weights"],
+                    point,
+                    target,
+                    definition["terminal_scale"],
+                    strict=True,
                 )
             )
             references = affine.model(source_scenario(task))["reference_commands"]
@@ -82,9 +90,11 @@ def main() -> int:
                 / n
                 * sum(
                     ((u - reference) / scale) ** 2
-                    for control, reference_row in zip(plan["controls"], references[n - 1 :])
+                    for control, reference_row in zip(
+                        plan["controls"], references[n - 1 :], strict=True
+                    )
                     for u, reference, scale in zip(
-                        control, reference_row, definition["running_scale"]
+                        control, reference_row, definition["running_scale"], strict=True
                     )
                 )
             )

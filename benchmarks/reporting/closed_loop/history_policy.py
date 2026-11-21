@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from native_graph_policy import _prediction_stages, _source_cost, _terminal_objective
+from typing import Any
 
+from native_graph_policy import _prediction_stages, _source_cost, _terminal_objective
 
 FAMILIES = ("polytope", "box", "zonotope", "parallelotope", "ellipsoid")
 LIFTED_POLYTOPE_CONTROLLER = "native-continuous-history-lifted-polytope-ipopt/1"
@@ -237,8 +238,10 @@ class HistoryPolicy:
         import os
         import subprocess
         from pathlib import Path
-        from contracts import manifest_sha256
+
         from task_models import prediction_receipt, validate_source_binding
+
+        from contracts import manifest_sha256
 
         validate_source_binding(task)
         if manifest_sha256(task) != task_sha256:
@@ -325,6 +328,7 @@ class HistoryPolicy:
     def query(self, task_id, observed_physical_state, absolute_update_index):
         import hashlib
         import json
+
         import numpy as np
         from history_validation import validate
 
@@ -366,12 +370,15 @@ class HistoryPolicy:
         self._capture()
         self.last_query_capture["bridge_request_transmission_status"] = "attempted"
         self._capture()
-        self.process.stdin.write(raw)
-        self.process.stdin.flush()
+        stdin, stdout = self.process.stdin, self.process.stdout
+        if stdin is None or stdout is None:
+            raise RuntimeError("native history bridge does not expose query streams")
+        stdin.write(raw)
+        stdin.flush()
         self.last_query_capture["bridge_request_sent"] = True
         self.last_query_capture["bridge_request_transmission_status"] = "sent"
         self._capture()
-        response_raw = self.process.stdout.readline()
+        response_raw = stdout.readline()
         self.last_query_capture["bridge_response_raw"] = response_raw
         self.last_query_capture["bridge_response_sha256"] = hashlib.sha256(
             response_raw.encode()
@@ -398,7 +405,7 @@ class HistoryPolicy:
             or response.get("action_profile_id") != self.action_profile_id
         ):
             raise ValueError("native history response has a different task identity")
-        result = {
+        result: dict[str, Any] = {
             "task_sha256": self.task_sha256,
             "action_profile_id": self.action_profile_id,
             "policy_id": self.controller_id,
@@ -744,16 +751,21 @@ class HistoryPolicy:
         if phase:
             initialization["policy"] = phase
 
+        stdin, stdout = self.process.stdin, self.process.stdout
+        capture = self.last_query_capture
+        if stdin is None or stdout is None or capture is None:
+            raise RuntimeError("native strategy solve requires an active bridge exchange")
+
         def exchange(raw):
-            self.process.stdin.write(raw)
-            self.process.stdin.flush()
-            raw_response = self.process.stdout.readline()
+            stdin.write(raw)
+            stdin.flush()
+            raw_response = stdout.readline()
             if not raw_response:
                 raise RuntimeError("Native strategy bridge exited before returning a solve receipt")
             return raw_response
 
         def checkpoint(attempts):
-            self.last_query_capture["native_strategy_attempts"] = attempts
+            capture["native_strategy_attempts"] = attempts
             self._capture()
 
         response, checks, attempts = solve_strategy(

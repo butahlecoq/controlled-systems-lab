@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
-import json
 import hashlib
+import json
 import math
 import sys
+from typing import TYPE_CHECKING
 
 from contracts import ROOT, canonical_sha256, source_sha256
+
+if TYPE_CHECKING:
+    import numpy as np
 
 MPC11 = ROOT / "benchmarks/reporting/mpc11"
 if str(MPC11) not in sys.path:
@@ -274,7 +278,7 @@ def _validate_control(task: dict, control) -> list[float]:
     fields = task["model"]["controls"]
     if len(u) != len(fields) or not all(math.isfinite(value) for value in u):
         raise ValueError("control has wrong dimension or a nonfinite coordinate")
-    for value, field in zip(u, fields):
+    for value, field in zip(u, fields, strict=True):
         if field["bounds"] is not None and not field["bounds"][0] <= value <= field["bounds"][1]:
             raise ValueError(f"control {field['name']} is outside its physical bounds")
     return u
@@ -369,6 +373,7 @@ def make_held_step_request(
     identity.  The derived scenario hash is never used for objective scaling.
     """
     import copy
+
     import numpy as np
 
     n = task["episode"]["intervals"]

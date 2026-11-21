@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import numpy as np
-
 from task_models import objective
 
 
@@ -58,7 +57,7 @@ def validate(
 
     compare("initial", states[0], observed)
     expected = []
-    for x, u, row in zip(states, controls, predictor_stages):
+    for x, u, row in zip(states[:-1], controls, predictor_stages, strict=True):
         expected.append(np.asarray(row["A"]) @ x + np.asarray(row["B"]) @ u + np.asarray(row["c"]))
     compare("dynamics", states[1:], expected)
     for key, bounds, equality in (

@@ -47,7 +47,7 @@ def solve(
             raise ValueError(
                 "physical scales must be finite and positive for each history coordinate"
             )
-        ratios = {i: scales[i] / initial[i] for i in positive}
+        ratios: dict[int, float] = {i: scales[i] / initial[i] for i in positive}
         if any(not np.isfinite(value) or value <= 0 for value in ratios.values()):
             raise ValueError("positive coordinate scale cannot be represented")
         start = np.zeros_like(initial)
@@ -190,6 +190,8 @@ def solve(
         )
     opti.solver("ipopt", {"print_time": False}, options)
 
+    # CasADi initializes this at import time, and its binding stubs omit it.
+    provider_version = ca.__version__  # ty: ignore[missing-attribute]
     try:
         solution = opti.solve()
         primal = np.asarray(solution.value(z), dtype=float).reshape(-1)
@@ -203,7 +205,7 @@ def solve(
                 "numerical_profile": profile,
                 "solver": "casadi-ipopt/full-history-separate-norm-epigraphs/1",
                 "provider": "casadi-ipopt",
-                "version": f"casadi {ca.__version__}; IPOPT version unavailable",
+                "version": f"casadi {provider_version}; IPOPT version unavailable",
             }
         witnesses = dict(fixed_witnesses)
         for index, variable in zip(active, factor_variables, strict=True):
@@ -226,7 +228,7 @@ def solve(
             "iterations": stats.get("iter_count"),
             "solver": "casadi-ipopt/full-history-separate-norm-epigraphs/1",
             "provider": "casadi-ipopt",
-            "version": f"casadi {ca.__version__}; IPOPT version unavailable",
+            "version": f"casadi {provider_version}; IPOPT version unavailable",
             "assurance": "local numerical NLP solution; no global optimality certificate",
         }
     except Exception as error:
@@ -238,5 +240,5 @@ def solve(
             "numerical_profile": profile,
             "solver": "casadi-ipopt/full-history-separate-norm-epigraphs/1",
             "provider": "casadi-ipopt",
-            "version": f"casadi {ca.__version__}; IPOPT version unavailable",
+            "version": f"casadi {provider_version}; IPOPT version unavailable",
         }

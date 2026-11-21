@@ -191,7 +191,7 @@ def verify(entries, primal, factors, *, tolerance=1e-7):
     if len(entries) != len(factors) or z.ndim != 1 or not np.isfinite(z).all():
         raise ValueError("invalid geometry witness")
     checks = []
-    for entry, witness in zip(entries, factors):
+    for entry, witness in zip(entries, factors, strict=True):
         kind, indices, *data = entry
         x = z[indices]
         if kind == "lifted-h":

@@ -8,9 +8,9 @@ import json
 import subprocess
 from pathlib import Path
 
-from contracts import ROOT, canonical_bytes
 from nominal_tube_source import build_request
 
+from contracts import ROOT, canonical_bytes
 
 SOURCE_PATHS = (
     "CMakeLists.txt",

@@ -6,9 +6,9 @@ import hashlib
 import json
 from pathlib import Path
 
-from contracts import ROOT, load_task, manifest_sha256
 from task_models import prediction_receipt, source_scenario
 
+from contracts import ROOT, load_task, manifest_sha256
 
 LOTKA_TASK = "syn-nl-lv-01"
 SAVED_NMPC = Path(
@@ -43,7 +43,7 @@ def build_request(task: dict | None = None) -> dict:
 
     receipt = prediction_receipt(task)
     task_sha = manifest_sha256(task)
-    scenario = source_scenario(task)
+    source_scenario(task)
     count = task["episode"]["intervals"]
     dt = task["episode"]["dt"]
     if count != 30 or dt != 0.1 or task["episode"]["final_time"] != 3:

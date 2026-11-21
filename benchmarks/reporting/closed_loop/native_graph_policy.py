@@ -10,9 +10,9 @@ import os
 import subprocess
 from collections.abc import Mapping
 from pathlib import Path
+from typing import cast
 
 from task_models import prediction_receipt, source_scenario
-
 
 _PROFILES = {
     "native-exact-polytope-backward-graph/1": (0, True, "exact-polytope"),
@@ -603,7 +603,9 @@ class NativeGraphPolicy:
             }
             failed["native_query_capture"] = _capture_safe(self.last_query_capture)
             return failed
-        expected_build_profile = self.preparation_receipt["build_backend_profile"]
+        expected_build_profile = cast(
+            Mapping[str, object], self.preparation_receipt["build_backend_profile"]
+        )
         if any(
             value != "unspecified" and actual_build_profile.get(key) != value
             for key, value in expected_build_profile.items()

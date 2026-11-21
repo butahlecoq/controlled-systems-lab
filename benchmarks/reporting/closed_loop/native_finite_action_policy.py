@@ -7,16 +7,17 @@ controls are still executed and checked by the common independent plant runner.
 
 from __future__ import annotations
 
-import json
 import hashlib
+import json
 import math
 import os
-from pathlib import Path
 import subprocess
-from typing import Any, Mapping
+from pathlib import Path
+from typing import Any, Mapping, cast
+
+from task_models import prediction_receipt, validate_source_binding
 
 from contracts import manifest_sha256
-from task_models import prediction_receipt, validate_source_binding
 
 
 def _positive_limit(
@@ -77,7 +78,7 @@ def _terminal_objective(task: dict[str, Any]) -> dict[str, Any]:
         q = [[0.0] * dimension for _ in range(dimension)]
         linear = [0.0] * dimension
         offset = 0.0
-        for i, (target_i, scale, weight) in enumerate(zip(target, scales, weights)):
+        for i, (target_i, scale, weight) in enumerate(zip(target, scales, weights, strict=True)):
             q[i][i] = 2.0 * weight / (scale * scale)
             linear[i] = -2.0 * weight * target_i / (scale * scale)
             offset += weight * (target_i / scale) ** 2
@@ -406,7 +407,9 @@ class NativeFiniteActionPolicy:
                 "invocations": [],
                 "reason": "native executable omitted its compiled backend profile",
             }
-        expected_build_profile = self.preparation_receipt["build_backend_profile"]
+        expected_build_profile = cast(
+            Mapping[str, object], self.preparation_receipt["build_backend_profile"]
+        )
         if any(
             value != "unspecified" and actual_build_profile.get(key) != value
             for key, value in expected_build_profile.items()
