@@ -2,9 +2,9 @@
 
 import argparse
 import hashlib
-from pathlib import Path
 import shutil
 import zipfile
+from pathlib import Path
 
 if __package__:
     from . import history_warm_gap_report, native_parallelotope_functional
@@ -99,13 +99,23 @@ def stage(source: Path, site: Path) -> None:
     if marker not in html and CARD not in html:
         raise ValueError("Gallery insertion point missing")
     route = site / REPORT
+    pending = []
     for path in files:
         target = route / path.relative_to(source)
-        target.parent.mkdir(parents=True, exist_ok=True)
-        if target.exists() and (target.is_symlink() or target.read_bytes() != path.read_bytes()):
+        if target.is_symlink() or any(
+            parent.is_symlink() or (parent.exists() and not parent.is_dir())
+            for parent in target.parents
+            if parent.is_relative_to(route)
+        ):
             raise ValueError("Existing route differs: " + str(target))
-        if not target.exists():
-            shutil.copyfile(path, target)
+        if target.exists():
+            if not target.is_file() or target.read_bytes() != path.read_bytes():
+                raise ValueError("Existing route differs: " + str(target))
+        else:
+            pending.append((path, target))
+    for path, target in pending:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(path, target)
     if CARD not in html:
         gallery.write_text(html.replace(marker, CARD + marker, 1), encoding="utf-8")
 

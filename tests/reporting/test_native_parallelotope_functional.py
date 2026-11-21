@@ -1,15 +1,15 @@
 """The published finite-plan figures must describe the actual frozen episodes."""
 
 import json
-from pathlib import Path
 import shutil
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import native_parallelotope_functional as report
+import native_parallelotope_functional as report  # noqa: E402
 
 
 class NativeParallelotopePublicationTest(unittest.TestCase):
@@ -59,7 +59,7 @@ class NativeParallelotopePublicationTest(unittest.TestCase):
                     query["sets"][0]["stages"][0], data["source_derived_frame"]
                 )
                 center = [sum(p[i] for p in corners) / len(corners) for i in range(4)]
-                for actual, expected in zip(center, data["states"][query["update"]]):
+                for actual, expected in zip(center, data["states"][query["update"]], strict=True):
                     self.assertAlmostEqual(actual, expected, places=9)
 
     def test_changed_raw_member_is_rejected(self):

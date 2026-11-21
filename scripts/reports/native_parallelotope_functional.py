@@ -3,27 +3,27 @@
 from __future__ import annotations
 
 import argparse
-from collections import Counter
 import hashlib
-from html import escape
-import json
-from pathlib import Path
-import shutil
 import itertools
+import json
 import re
+import shutil
 import subprocess
 import sys
 import zipfile
+from collections import Counter
+from html import escape
+from pathlib import Path
 
 if __package__:
-    from .package_history_functional import archive_attempt
-    from .native_fixed_tail_episode_report import checked_files
     from .figure_style import configure_numeric_axis
+    from .native_fixed_tail_episode_report import checked_files
+    from .package_history_functional import archive_attempt
     from .recorded_closed_loop_figures import _convex_hull
 else:
-    from package_history_functional import archive_attempt
-    from native_fixed_tail_episode_report import checked_files
     from figure_style import configure_numeric_axis
+    from native_fixed_tail_episode_report import checked_files
+    from package_history_functional import archive_attempt
     from recorded_closed_loop_figures import _convex_hull
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -72,7 +72,7 @@ def physical_corners(bounds, matrix):
     dimension = len(matrix)
     return [
         [sum(matrix[i][j] * point[j] for j in range(dimension)) for i in range(dimension)]
-        for point in itertools.product(*zip(bounds["lower"], bounds["upper"]))
+        for point in itertools.product(*zip(bounds["lower"], bounds["upper"], strict=False))
     ]
 
 
@@ -160,20 +160,20 @@ def check_physical_sets(data):
     matrix = np.asarray(data["source_derived_frame"], dtype=float)
     inverse = np.linalg.inv(matrix)
     for query in data["queries"]:
-        for bounds, state in zip(query["sets"][0]["stages"], query["plan"]["states"]):
+        for bounds, state in zip(query["sets"][0]["stages"], query["plan"]["states"], strict=False):
             # A selected affine path must lie in the corresponding transported frame box.
             y = inverse @ np.asarray(state)
             tolerance = 1e-10 + 1e-12 * max(abs(v) for v in y)
             if any(
                 v < lo - tolerance or v > hi + tolerance
-                for v, lo, hi in zip(y, bounds["lower"], bounds["upper"])
+                for v, lo, hi in zip(y, bounds["lower"], bounds["upper"], strict=False)
             ):
                 raise ValueError("selected affine path lies outside source-derived frame bounds")
             for corner in physical_corners(bounds, data["source_derived_frame"]):
                 recovered = inverse @ np.asarray(corner)
                 if any(
                     v < lo - tolerance or v > hi + tolerance
-                    for v, lo, hi in zip(recovered, bounds["lower"], bounds["upper"])
+                    for v, lo, hi in zip(recovered, bounds["lower"], bounds["upper"], strict=False)
                 ):
                     raise ValueError("physical corner does not recover its raw frame box")
 
@@ -215,7 +215,7 @@ def freeze(episodes, qualification, output):
         "scope": "Saved numerical functional episodes; bounded finite-candidate search; no performance claim",
         "tasks": {},
     }
-    for name, _, horizon, _ in TASKS:
+    for name, _, _horizon, _ in TASKS:
         attempts = list((episodes / name / "attempts").glob("*/attempt.json"))
         if len(attempts) != 1:
             raise ValueError("expected one saved episode per task")
@@ -286,8 +286,8 @@ def render(bundle):
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    from matplotlib.patches import Polygon
     import numpy as np
+    from matplotlib.patches import Polygon
 
     plt.rcParams.update({"font.family": "DejaVu Sans", "svg.hashsalt": NAME})
     manifest = json.loads((bundle / "manifest.json").read_bytes())
