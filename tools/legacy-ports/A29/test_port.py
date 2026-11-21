@@ -9,13 +9,13 @@ from pathlib import Path
 from unittest.mock import patch
 
 import numpy as np
-
 import oracle
 import port
 
-
 HERE = Path(__file__).resolve().parent
-SQUARE = json.loads((HERE / "fixtures" / "square.json").read_text(encoding="utf-8"))["points"]
+SQUARE: list[list[float]] = json.loads(
+    (HERE / "fixtures" / "square.json").read_text(encoding="utf-8")
+)["points"]
 CORNERS = [[0, 0], [2, 0], [2, 2], [0, 2]]
 
 
@@ -55,8 +55,10 @@ class A29PortTests(unittest.TestCase):
         self.assertFalse(result["grouping_executed"])
         self.assertEqual(result["stage2_scanned"], 7)
         self.assertEqual(result["final_scanned"], 6)
-        self.assertEqual(calls[-result["final_scanned"]:],
-                         [result["final_scanned"] - 1] * result["final_scanned"])
+        self.assertEqual(
+            calls[-result["final_scanned"] :],
+            [result["final_scanned"] - 1] * result["final_scanned"],
+        )
         self.assertEqual(result["helper_calls"], result["stage2_scanned"] + result["final_scanned"])
         self.assertEqual(result["itrt"], result["stage2_pivots"] + result["final_pivots"])
         self.assertEqual(result["itrt"], 36)
@@ -65,8 +67,9 @@ class A29PortTests(unittest.TestCase):
         self.assertEqual(oracle.check(SQUARE, result["output"])["status"], "verified")
 
     def test_duplicates_boundary_and_rank_deficiency(self):
-        for points in (SQUARE + [[0, 0], [1, 1]],
-                       [[0, 0], [1, 1], [2, 2], [0.5, 0.5]]):
+        collinear: list[list[float]] = [[0, 0], [1, 1], [2, 2], [0.5, 0.5]]
+        extra: list[list[float]] = [[0, 0], [1, 1]]
+        for points in (SQUARE + extra, collinear):
             result = port.run(points)
             self.assertEqual(result["algorithm_status"], "completed")
             self.assertEqual(oracle.check(points, result["output"])["status"], "verified")
@@ -94,7 +97,10 @@ class A29PortTests(unittest.TestCase):
     def test_cli_serializes_success_and_failure_without_losing_quality_status(self):
         completed = subprocess.run(
             [sys.executable, str(HERE / "port.py"), str(HERE / "fixtures" / "square.json")],
-            capture_output=True, text=True, check=True)
+            capture_output=True,
+            text=True,
+            check=True,
+        )
         result = json.loads(completed.stdout)
         self.assertEqual(result["algorithm_status"], "completed")
         self.assertEqual(result["quality"]["status"], "verified")
@@ -103,8 +109,12 @@ class A29PortTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             malformed = Path(directory) / "malformed.json"
             malformed.write_text("{broken", encoding="utf-8")
-            failed = subprocess.run([sys.executable, str(HERE / "port.py"), str(malformed)],
-                                    capture_output=True, text=True, check=False)
+            failed = subprocess.run(
+                [sys.executable, str(HERE / "port.py"), str(malformed)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
             self.assertEqual(failed.returncode, 2)
             failure = json.loads(failed.stdout)
             self.assertEqual(failure["algorithm_status"], "failed")
