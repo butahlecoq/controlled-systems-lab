@@ -2871,6 +2871,16 @@
       "companion_route": "examples/catalogue-forward-reachability-v1/index.html"
     },
     {
+      "route": "catalogue-ring-initial-support-v1",
+      "source_bundle": "catalogue-ring-initial-support-v1",
+      "assets": [
+        "initial-support.svg"
+      ],
+      "index_sha256": "f9328690b8647d408fa8f8af2e91953a5979256b41caefe6824cf1fed5e25faf",
+      "disposition": "reviewed: projected feasible zero-control history and fixed stage-zero support line",
+      "companion_route": "examples/catalogue-ring-initial-support-v1/index.html"
+    },
+    {
       "route": "convex-20261012T041854Z-4d54a407c9b2",
       "source_bundle": "convex-20261012T041854Z-4d54a407c9b2",
       "assets": [
@@ -4430,6 +4440,8 @@
         "catalogue-forward-reachability-v1/platoon-forward.svg",
         "catalogue-feasible-history-v1/index.html",
         "catalogue-feasible-history-v1/battery-history-projections.svg",
+        "catalogue-ring-initial-support-v1/index.html",
+        "catalogue-ring-initial-support-v1/initial-support.svg",
         "catalogue-exact-support-v1/index.html",
         "catalogue-exact-support-v1/building-budget-projection.svg",
         "catalogue-backward-reachability-v1/index.html",
