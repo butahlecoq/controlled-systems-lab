@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import html
 import csv
 import hashlib
+import html
 import importlib.util
 import io
 import json
@@ -399,8 +399,11 @@ def render_svg(record):
         for e in record["measurement"]["events"][1:]
         if not e["warmup"]
     ]
-    low, high = 0.0, max(values) * 1.12 if values else 1.0
-    y = lambda value: 190 - value / high * 145
+    high = max(values) * 1.12 if values else 1.0
+
+    def y(value: float) -> float:
+        return 190 - value / high * 145
+
     marks = []
     colors = {STRATEGIES[0]: "#2166ac", STRATEGIES[1]: "#b35806"}
     offsets = {STRATEGIES[0]: -4, STRATEGIES[1]: 4}
@@ -442,7 +445,10 @@ def render_html(record):
     errors = validate(record)
     if errors:
         raise ValueError("invalid paired T-S01 report: " + ", ".join(errors))
-    esc = lambda value: html.escape(str(value))
+
+    def esc(value: object) -> str:
+        return html.escape(str(value))
+
     resource_policy = html.escape(
         json.dumps(record["request"]["resource_policy"], sort_keys=True, separators=(",", ":"))
     )

@@ -11,13 +11,12 @@ import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
-
 ROOT = Path(__file__).resolve().parents[2]
 REPORTS = ROOT / "reports" / "algorithm-results"
 SOURCE_ID = "syn-ts01-paired-20261014-b7f1ac0"
 SOURCE = REPORTS / SOURCE_ID
 sys.path.insert(0, str(ROOT / "scripts" / "reports"))
-import syn_ts01_paired_registered_reports as paired
+paired = importlib.import_module("syn_ts01_paired_registered_reports")
 
 SITE_SPEC = importlib.util.spec_from_file_location(
     "syn_ts01_paired_test_site", ROOT / "scripts/reports/site.py"
@@ -50,7 +49,8 @@ class PairedTs01PublicationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             shutil.copytree(SOURCE, root / SOURCE_ID)
-            (root / (item.report_id + ".zip")).write_bytes(archive)
+            committed_zip = root / (item.report_id + ".zip")
+            committed_zip.write_bytes(archive)
             catalogue = {
                 "schema": "csl.algorithm-report-catalog/3",
                 "artifact_ref": "main",
@@ -65,6 +65,9 @@ class PairedTs01PublicationTests(unittest.TestCase):
 
             with patch.object(SITE, "legacy_pins", return_value={}):
                 staged = SITE.stage(catalog_path, root / "site", check=True)
+                committed_zip.write_bytes(b"changed publication archive")
+                with self.assertRaisesRegex(ValueError, "committed offline ZIP differs"):
+                    SITE.stage(catalog_path, root / "changed-archive", check=True)
 
             site_index = (staged / "index.html").read_text(encoding="utf-8")
             self.assertIn(item.report_id + "/index.html", site_index)
