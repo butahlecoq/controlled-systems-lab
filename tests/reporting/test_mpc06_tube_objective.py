@@ -4,21 +4,22 @@ import json
 import sys
 import unittest
 from fractions import Fraction as Q
+from importlib import import_module
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports/mpc06"))
-from mpc06 import build_tube_objective, check_tube_objective
-from mpc06.tube_objective import SCENARIO_PATH, simulate
+build_tube_objective = import_module("build_tube_objective")
+check_tube_objective = import_module("check_tube_objective")
+tube_objective = import_module("tube_objective")
 
 
 class Mpc06TubeObjectiveTests(unittest.TestCase):
     def test_nonzero_nominal_input_is_in_surrogate_cost(self):
-        scenario = json.loads(SCENARIO_PATH.read_text(encoding="utf-8"))
+        scenario = json.loads(tube_objective.SCENARIO_PATH.read_text(encoding="utf-8"))
         scenario["nominal_plan"]["controls"] = ["1/8", "0", "0"]
         disturbances = (Q(0), Q(0), Q(0))
 
-        result = simulate(scenario, disturbances)
+        result = tube_objective.simulate(scenario, disturbances)
 
         self.assertEqual(Q(result["nominal_surrogate_cost"]), Q(9, 64))
 

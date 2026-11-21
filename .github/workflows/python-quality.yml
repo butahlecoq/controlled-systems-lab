@@ -604,16 +604,16 @@ jobs:
         run: python -m unittest tests.reporting.test_env717_stager_publication
       - name: Replay the saved causal-tree and tube MPC publications
         run: |
-          python -m unittest tests.reporting.test_mpc05_causal_tree_publication tests.reporting.test_mpc06_tube_publication tests.reporting.test_mpc06_route_policy_sources tests.reporting.test_mpc06_tube_objective tests.reporting.test_mpc06_tube_objective_pages_augmentation
+          # A separately installed mpc06 package must not shadow the saved tooling.
+          pythonpath=$(mktemp -d "$RUNNER_TEMP/tube-pythonpath.XXXXXXXX")
+          mkdir "$pythonpath/mpc06"
+          touch "$pythonpath/mpc06/__init__.py"
+          PYTHONPATH="$pythonpath" python -m unittest tests.reporting.test_mpc05_causal_tree_publication tests.reporting.test_mpc06_tube_publication tests.reporting.test_mpc06_route_policy_sources tests.reporting.test_mpc06_tube_objective tests.reporting.test_mpc06_tube_objective_pages_augmentation
           site=$(mktemp -d "$RUNNER_TEMP/causal-tube.XXXXXXXX")
           printf '<html><body><ul></ul></body></html>\n' > "$site/index.html"
           reports=reports/algorithm-results
           python scripts/reports/stage_mpc05_causal_tree.py --source "$reports/mpc05-causal-tree-pilot-v2" --site "$site"
           python scripts/reports/stage_mpc06_tube.py --source "$reports/mpc06-nilpotent-tube-pilot-v1" --site "$site"
-          # A separately installed mpc06 package must not shadow the saved renderer.
-          pythonpath=$(mktemp -d "$RUNNER_TEMP/tube-pythonpath.XXXXXXXX")
-          mkdir "$pythonpath/mpc06"
-          touch "$pythonpath/mpc06/__init__.py"
           PYTHONPATH="$pythonpath" python scripts/reports/stage_mpc06_tube_objective.py --site "$site"
 
           python - "$site" <<'PYZIP'
