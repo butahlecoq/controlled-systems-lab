@@ -1,4 +1,5 @@
 """Run the committed native Lotka H-tube producer into a new raw directory."""
+
 from __future__ import annotations
 
 import argparse
@@ -40,15 +41,23 @@ def sha256_file(path: Path) -> str:
 
 
 def source_identity(root: Path = ROOT) -> dict:
-    revision = subprocess.run(["git", "-C", str(root), "rev-parse", "HEAD"],
-        check=True, capture_output=True, text=True).stdout.strip()
-    status = subprocess.run(["git", "-C", str(root), "status", "--porcelain"],
-        check=True, capture_output=True, text=True).stdout
+    revision = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "HEAD"], check=True, capture_output=True, text=True
+    ).stdout.strip()
+    status = subprocess.run(
+        ["git", "-C", str(root), "status", "--porcelain"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
     if status:
         raise ValueError("capture requires a committed clean source worktree")
     files = {name: sha256_file(root / name) for name in SOURCE_PATHS}
-    return {"commit": revision, "source_files_sha256": files,
-        "source_tree_clean_before_capture": True}
+    return {
+        "commit": revision,
+        "source_files_sha256": files,
+        "source_tree_clean_before_capture": True,
+    }
 
 
 def provider_inventory(record: dict | None) -> list[dict]:
@@ -64,41 +73,82 @@ def provider_inventory(record: dict | None) -> list[dict]:
     return found
 
 
-def capture(binary: Path, destination: Path, *, max_projection_rows: int,
-        deadline_seconds: float, process_timeout_seconds: float, root: Path = ROOT) -> dict:
+def capture(
+    binary: Path,
+    destination: Path,
+    *,
+    max_projection_rows: int,
+    deadline_seconds: float,
+    process_timeout_seconds: float,
+    root: Path = ROOT,
+) -> dict:
     binary = binary.resolve()
     destination = destination.resolve()
     if not binary.is_file():
         raise ValueError("native capture executable does not exist")
     if destination.exists():
-        raise FileExistsError("raw capture destination already exists; archived outputs are append-only")
-    if max_projection_rows <= 0 or deadline_seconds <= 0 or process_timeout_seconds <= deadline_seconds:
-        raise ValueError("row capacity must be positive and process timeout must exceed the operation deadline")
+        raise FileExistsError(
+            "raw capture destination already exists; archived outputs are append-only"
+        )
+    if (
+        max_projection_rows <= 0
+        or deadline_seconds <= 0
+        or process_timeout_seconds <= deadline_seconds
+    ):
+        raise ValueError(
+            "row capacity must be positive and process timeout must exceed the operation deadline"
+        )
     source = source_identity(root)
     request = build_request()
     destination.mkdir(parents=True)
     request_path = destination / "request.json"
     request_path.write_bytes(canonical_bytes(request) + b"\n")
     output_path = destination / "raw-record.json"
-    command = [str(binary), "--input", str(request_path), "--output", str(output_path),
-        "--max-projection-rows", str(max_projection_rows), "--deadline-seconds", str(deadline_seconds)]
+    command = [
+        str(binary),
+        "--input",
+        str(request_path),
+        "--output",
+        str(output_path),
+        "--max-projection-rows",
+        str(max_projection_rows),
+        "--deadline-seconds",
+        str(deadline_seconds),
+    ]
     timed_out = False
     try:
-        result = subprocess.run(command, cwd=root, capture_output=True, text=True,
-            timeout=process_timeout_seconds, check=False)
+        result = subprocess.run(
+            command,
+            cwd=root,
+            capture_output=True,
+            text=True,
+            timeout=process_timeout_seconds,
+            check=False,
+        )
         return_code = result.returncode
         stdout, stderr = result.stdout, result.stderr
     except subprocess.TimeoutExpired as failure:
         timed_out = True
         return_code = None
-        stdout = failure.stdout.decode() if isinstance(failure.stdout, bytes) else (failure.stdout or "")
-        stderr = failure.stderr.decode() if isinstance(failure.stderr, bytes) else (failure.stderr or "")
+        stdout = (
+            failure.stdout.decode() if isinstance(failure.stdout, bytes) else (failure.stdout or "")
+        )
+        stderr = (
+            failure.stderr.decode() if isinstance(failure.stderr, bytes) else (failure.stderr or "")
+        )
     (destination / "stdout.txt").write_text(stdout)
     (destination / "stderr.txt").write_text(stderr)
-    (destination / "command.json").write_bytes(canonical_bytes({
-        "argv": command, "cwd": str(root), "operation_deadline_seconds": deadline_seconds,
-        "process_timeout_seconds": process_timeout_seconds,
-    }) + b"\n")
+    (destination / "command.json").write_bytes(
+        canonical_bytes(
+            {
+                "argv": command,
+                "cwd": str(root),
+                "operation_deadline_seconds": deadline_seconds,
+                "process_timeout_seconds": process_timeout_seconds,
+            }
+        )
+        + b"\n"
+    )
     record = None
     if output_path.exists():
         try:
@@ -110,14 +160,19 @@ def capture(binary: Path, destination: Path, *, max_projection_rows: int,
         "source": source,
         "binary": {"path": str(binary), "sha256": sha256_file(binary)},
         "request": {"path": "request.json", "sha256": sha256_file(request_path)},
-        "record": {"path": "raw-record.json", "sha256": sha256_file(output_path) if output_path.exists() else None,
+        "record": {
+            "path": "raw-record.json",
+            "sha256": sha256_file(output_path) if output_path.exists() else None,
             "completion": record.get("completion") if record else "missing_or_unparseable",
-            "providers": provider_inventory(record)},
+            "providers": provider_inventory(record),
+        },
         "process": {"return_code": return_code, "timed_out": timed_out},
-        "resource_profile": {"max_projection_rows": max_projection_rows,
+        "resource_profile": {
+            "max_projection_rows": max_projection_rows,
             "operation_deadline_seconds": deadline_seconds,
             "process_timeout_seconds": process_timeout_seconds,
-            "memory_limit_enforced": False},
+            "memory_limit_enforced": False,
+        },
     }
     manifest_path = destination / "capture-manifest.json"
     manifest_path.write_bytes(canonical_bytes(manifest) + b"\n")
@@ -133,10 +188,13 @@ def main() -> int:
     parser.add_argument("--deadline-seconds", type=float, required=True)
     parser.add_argument("--process-timeout-seconds", type=float, required=True)
     options = parser.parse_args()
-    result = capture(options.binary, options.capture_dir,
+    result = capture(
+        options.binary,
+        options.capture_dir,
         max_projection_rows=options.max_projection_rows,
         deadline_seconds=options.deadline_seconds,
-        process_timeout_seconds=options.process_timeout_seconds)
+        process_timeout_seconds=options.process_timeout_seconds,
+    )
     print(json.dumps(result, indent=2))
     return 0 if result["record"]["completion"] not in {"missing_or_unparseable"} else 2
 

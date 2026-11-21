@@ -1,4 +1,5 @@
 """Versioned attempt storage with canonical stage records and checked references."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -57,6 +58,7 @@ class _HashingWriter:
 def _json_default(value: Any) -> Any:
     try:
         import numpy as np
+
         if isinstance(value, np.ndarray):
             return value.tolist()
         if isinstance(value, np.generic):
@@ -86,8 +88,13 @@ def atomic_json(path: Path, value: Any) -> WriteReceipt:
     finally:
         temporary.unlink(missing_ok=True)
     assert writer is not None
-    return WriteReceipt(path.name, writer.bytes_written, writer.digest.hexdigest(),
-                        serialization_seconds, fsync_seconds)
+    return WriteReceipt(
+        path.name,
+        writer.bytes_written,
+        writer.digest.hexdigest(),
+        serialization_seconds,
+        fsync_seconds,
+    )
 
 
 def append_jsonl(path: Path, value: Mapping[str, Any]) -> WriteReceipt:
@@ -99,8 +106,13 @@ def append_jsonl(path: Path, value: Mapping[str, Any]) -> WriteReceipt:
         stream.write(encoded)
         stream.flush()
         os.fsync(stream.fileno())
-    return WriteReceipt(path.name, len(encoded), hashlib.sha256(encoded).hexdigest(),
-                        serialization_seconds, time.perf_counter() - fsync_started)
+    return WriteReceipt(
+        path.name,
+        len(encoded),
+        hashlib.sha256(encoded).hexdigest(),
+        serialization_seconds,
+        time.perf_counter() - fsync_started,
+    )
 
 
 def append_io_event(attempt_dir: Path, event: Mapping[str, Any]) -> None:
@@ -110,8 +122,9 @@ def append_io_event(attempt_dir: Path, event: Mapping[str, Any]) -> None:
         # The journal is diagnostic. A failure here must not undo an already
         # durable attempt or stage checkpoint.
         try:
-            _mark_io_invalid(attempt_dir,
-                f"{type(error).__name__}: {error}; telemetry append disabled")
+            _mark_io_invalid(
+                attempt_dir, f"{type(error).__name__}: {error}; telemetry append disabled"
+            )
         except OSError:
             pass
 
@@ -123,8 +136,7 @@ def _append_io_event(attempt_dir: Path, event: Mapping[str, Any]) -> None:
     if recovery is not None and recovery.get("integrity_status") == "invalid":
         return
     if recovery is not None:
-        recovery_row = {"schema": IO_SCHEMA,
-            "operation": "record-io-tail-recovery", **recovery}
+        recovery_row = {"schema": IO_SCHEMA, "operation": "record-io-tail-recovery", **recovery}
         try:
             _validate_io_event(recovery_row, 0)
         except ValueError as error:
@@ -137,8 +149,11 @@ def _append_io_event(attempt_dir: Path, event: Mapping[str, Any]) -> None:
         _validate_io_event(row, 0)
         append_jsonl(attempt_dir / IO_LOG, row)
     except (TypeError, ValueError, OverflowError) as error:
-        _mark_io_invalid(attempt_dir, f"generated event is invalid: {type(error).__name__}: {error}",
-            operation=row.get("operation"))
+        _mark_io_invalid(
+            attempt_dir,
+            f"generated event is invalid: {type(error).__name__}: {error}",
+            operation=row.get("operation"),
+        )
 
 
 def _read_io_status(attempt_dir: Path) -> dict[str, Any] | None:
@@ -148,21 +163,39 @@ def _read_io_status(attempt_dir: Path) -> dict[str, Any] | None:
     try:
         status = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError):
-        return {"schema": IO_STATUS_SCHEMA, "integrity_status": "invalid",
-            "integrity_diagnostic": "record I/O integrity sidecar is unreadable"}
-    if not isinstance(status, dict) or status.get("schema") != IO_STATUS_SCHEMA or \
-            status.get("integrity_status") != "invalid":
-        return {"schema": IO_STATUS_SCHEMA, "integrity_status": "invalid",
-            "integrity_diagnostic": "record I/O integrity sidecar has an invalid schema"}
+        return {
+            "schema": IO_STATUS_SCHEMA,
+            "integrity_status": "invalid",
+            "integrity_diagnostic": "record I/O integrity sidecar is unreadable",
+        }
+    if (
+        not isinstance(status, dict)
+        or status.get("schema") != IO_STATUS_SCHEMA
+        or status.get("integrity_status") != "invalid"
+    ):
+        return {
+            "schema": IO_STATUS_SCHEMA,
+            "integrity_status": "invalid",
+            "integrity_diagnostic": "record I/O integrity sidecar has an invalid schema",
+        }
     return status
 
 
-def _mark_io_invalid(attempt_dir: Path, diagnostic: str, *, operation: Any = None,
-                     recovery_evidence: list[dict[str, Any]] | None = None) -> dict[str, Any]:
-    status = {"schema": IO_STATUS_SCHEMA, "integrity_status": "invalid",
-        "metric_totals_complete": False, "metric_totals_available": False,
+def _mark_io_invalid(
+    attempt_dir: Path,
+    diagnostic: str,
+    *,
+    operation: Any = None,
+    recovery_evidence: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    status = {
+        "schema": IO_STATUS_SCHEMA,
+        "integrity_status": "invalid",
+        "metric_totals_complete": False,
+        "metric_totals_available": False,
         "integrity_diagnostic": diagnostic,
-        "recovery_evidence": recovery_evidence or []}
+        "recovery_evidence": recovery_evidence or [],
+    }
     if isinstance(operation, str):
         status["operation"] = operation
     atomic_json(attempt_dir / IO_STATUS, status)
@@ -178,12 +211,54 @@ def _validate_io_event(event: Any, row_number: int) -> None:
         raise _RecordIoIntegrityError(f"invalid record I/O schema at row {row_number}")
     operation = event.get("operation")
     required: dict[str, tuple[str, ...]] = {
-        "attempt-checkpoint": ("path", "bytes_written", "sha256", "serialization_seconds", "fsync_seconds"),
-        "stage-checkpoint": ("update_index", "path", "bytes_written", "sha256", "serialization_seconds", "fsync_seconds"),
-        "stage-reference": ("update_index", "path", "index_bytes_written", "sha256", "serialization_seconds", "fsync_seconds"),
-        "native-payload": ("payload", "update_index", "path", "bytes_written", "sha256", "serialization_seconds", "fsync_seconds"),
-        "native-capture-checkpoint": ("update_index", "path", "bytes_written", "sha256", "serialization_seconds", "fsync_seconds"),
-        "record-artifact": ("scope", "path", "bytes_written", "sha256", "serialization_seconds", "fsync_seconds"),
+        "attempt-checkpoint": (
+            "path",
+            "bytes_written",
+            "sha256",
+            "serialization_seconds",
+            "fsync_seconds",
+        ),
+        "stage-checkpoint": (
+            "update_index",
+            "path",
+            "bytes_written",
+            "sha256",
+            "serialization_seconds",
+            "fsync_seconds",
+        ),
+        "stage-reference": (
+            "update_index",
+            "path",
+            "index_bytes_written",
+            "sha256",
+            "serialization_seconds",
+            "fsync_seconds",
+        ),
+        "native-payload": (
+            "payload",
+            "update_index",
+            "path",
+            "bytes_written",
+            "sha256",
+            "serialization_seconds",
+            "fsync_seconds",
+        ),
+        "native-capture-checkpoint": (
+            "update_index",
+            "path",
+            "bytes_written",
+            "sha256",
+            "serialization_seconds",
+            "fsync_seconds",
+        ),
+        "record-artifact": (
+            "scope",
+            "path",
+            "bytes_written",
+            "sha256",
+            "serialization_seconds",
+            "fsync_seconds",
+        ),
         "stage-reference-hash": ("path", "bytes_read", "verification_seconds", "sha256"),
         "stage-reference-verification": ("path", "bytes_read", "verification_seconds", "sha256"),
         "native-capture-verification": ("path", "bytes_read", "verification_seconds", "sha256"),
@@ -191,13 +266,34 @@ def _validate_io_event(event: Any, row_number: int) -> None:
         "stage-index-recovery-read": ("path", "bytes_read", "parse_seconds"),
         "stage-index-read": ("path", "bytes_read", "parse_seconds"),
         "stage-index-tail-verified": ("path", "bytes_read", "verification_seconds", "sha256"),
-        "stage-index-tail-preserved": ("path", "bytes_written", "sha256", "serialization_seconds", "fsync_seconds"),
-        "stage-index-prefix-restored": ("path", "bytes_written", "sha256", "serialization_seconds", "fsync_seconds"),
+        "stage-index-tail-preserved": (
+            "path",
+            "bytes_written",
+            "sha256",
+            "serialization_seconds",
+            "fsync_seconds",
+        ),
+        "stage-index-prefix-restored": (
+            "path",
+            "bytes_written",
+            "sha256",
+            "serialization_seconds",
+            "fsync_seconds",
+        ),
         "attempt-read": ("path", "bytes_read", "parse_seconds"),
         "stage-summary-read": ("path", "bytes_read", "parse_seconds"),
-        "record-io-tail-recovery": ("path", "bytes", "sha256", "bytes_read", "verification_seconds",
-            "tail_bytes_written", "prefix_repair_bytes_written", "serialization_seconds", "fsync_seconds",
-            "metric_effect"),
+        "record-io-tail-recovery": (
+            "path",
+            "bytes",
+            "sha256",
+            "bytes_read",
+            "verification_seconds",
+            "tail_bytes_written",
+            "prefix_repair_bytes_written",
+            "serialization_seconds",
+            "fsync_seconds",
+            "metric_effect",
+        ),
     }
     if not isinstance(operation, str) or operation not in required:
         raise _RecordIoIntegrityError(f"unknown record I/O operation at row {row_number}")
@@ -205,21 +301,40 @@ def _validate_io_event(event: Any, row_number: int) -> None:
         if key not in event:
             raise _RecordIoIntegrityError(f"{operation} is missing {key} at row {row_number}")
     string_fields = {"path", "sha256", "scope", "payload", "metric_effect"}
-    integer_fields = {"update_index", "bytes", "bytes_written", "bytes_read", "index_bytes_written",
-        "stage_bytes", "tail_bytes_written", "prefix_repair_bytes_written"}
-    number_fields = {"serialization_seconds", "fsync_seconds", "verification_seconds", "parse_seconds"}
+    integer_fields = {
+        "update_index",
+        "bytes",
+        "bytes_written",
+        "bytes_read",
+        "index_bytes_written",
+        "stage_bytes",
+        "tail_bytes_written",
+        "prefix_repair_bytes_written",
+    }
+    number_fields = {
+        "serialization_seconds",
+        "fsync_seconds",
+        "verification_seconds",
+        "parse_seconds",
+    }
     for key in string_fields.intersection(event):
         if not isinstance(event[key], str) or not event[key]:
-            raise _RecordIoIntegrityError(f"{operation}.{key} must be a nonempty string at row {row_number}")
+            raise _RecordIoIntegrityError(
+                f"{operation}.{key} must be a nonempty string at row {row_number}"
+            )
     for key in integer_fields.intersection(event):
         value = event[key]
         if isinstance(value, bool) or not isinstance(value, int) or value < 0:
-            raise _RecordIoIntegrityError(f"{operation}.{key} must be a nonnegative integer at row {row_number}")
+            raise _RecordIoIntegrityError(
+                f"{operation}.{key} must be a nonnegative integer at row {row_number}"
+            )
     for key in number_fields.intersection(event):
         value = event[key]
         finite = isinstance(value, int) or (isinstance(value, float) and math.isfinite(value))
         if isinstance(value, bool) or not finite or value < 0:
-            raise _RecordIoIntegrityError(f"{operation}.{key} must be a finite nonnegative number at row {row_number}")
+            raise _RecordIoIntegrityError(
+                f"{operation}.{key} must be a finite nonnegative number at row {row_number}"
+            )
 
 
 def _recover_io_log_tail(attempt_dir: Path) -> dict[str, Any] | None:
@@ -251,8 +366,11 @@ def _recover_io_log_tail(attempt_dir: Path) -> dict[str, Any] | None:
         if tail:
             evidence = _preserve_io_tail(attempt_dir, tail)
             recovery_evidence.append(evidence)
-        _mark_io_invalid(attempt_dir, f"{error}; original journal bytes preserved",
-            recovery_evidence=recovery_evidence)
+        _mark_io_invalid(
+            attempt_dir,
+            f"{error}; original journal bytes preserved",
+            recovery_evidence=recovery_evidence,
+        )
         return {"integrity_status": "invalid"}
     digest = hashlib.sha256(tail).hexdigest()
     tail_name = f"record-io-tail-{digest}.bin"
@@ -261,8 +379,11 @@ def _recover_io_log_tail(attempt_dir: Path) -> dict[str, Any] | None:
         existing = tail_path.read_bytes()
         if existing != tail:
             evidence = _preserve_io_tail(attempt_dir, tail, collision=True)
-            _mark_io_invalid(attempt_dir, "preserved record I/O tail path has changed contents",
-                recovery_evidence=[evidence])
+            _mark_io_invalid(
+                attempt_dir,
+                "preserved record I/O tail path has changed contents",
+                recovery_evidence=[evidence],
+            )
             return {"integrity_status": "invalid"}
         tail_bytes_written = 0
         tail_receipt = None
@@ -270,15 +391,23 @@ def _recover_io_log_tail(attempt_dir: Path) -> dict[str, Any] | None:
         tail_receipt = atomic_bytes(tail_path, tail)
         tail_bytes_written = len(tail)
     prefix_receipt = atomic_bytes(path, prefix)
-    return {"path": tail_name, "bytes": len(tail), "sha256": digest,
-        "bytes_read": len(data), "verification_seconds": time.perf_counter() - started,
+    return {
+        "path": tail_name,
+        "bytes": len(tail),
+        "sha256": digest,
+        "bytes_read": len(data),
+        "verification_seconds": time.perf_counter() - started,
         "tail_bytes_written": tail_bytes_written,
         "prefix_repair_bytes_written": prefix_receipt.bytes_written,
-        "serialization_seconds": ((tail_receipt.serialization_seconds if tail_receipt else 0.0)
-            + prefix_receipt.serialization_seconds),
-        "fsync_seconds": ((tail_receipt.fsync_seconds if tail_receipt else 0.0)
-            + prefix_receipt.fsync_seconds),
-        "metric_effect": "torn source event is unknown; only the preserved evidence write is counted"}
+        "serialization_seconds": (
+            (tail_receipt.serialization_seconds if tail_receipt else 0.0)
+            + prefix_receipt.serialization_seconds
+        ),
+        "fsync_seconds": (
+            (tail_receipt.fsync_seconds if tail_receipt else 0.0) + prefix_receipt.fsync_seconds
+        ),
+        "metric_effect": "torn source event is unknown; only the preserved evidence write is counted",
+    }
 
 
 def _preserve_io_tail(attempt_dir: Path, tail: bytes, *, collision: bool = False) -> dict[str, Any]:
@@ -293,8 +422,7 @@ def _preserve_io_tail(attempt_dir: Path, tail: bytes, *, collision: bool = False
     else:
         receipt = atomic_bytes(tail_path, tail)
         bytes_written = receipt.bytes_written
-    return {"path": tail_name, "bytes": len(tail), "sha256": digest,
-        "bytes_written": bytes_written}
+    return {"path": tail_name, "bytes": len(tail), "sha256": digest, "bytes_written": bytes_written}
 
 
 def atomic_bytes(path: Path, value: bytes) -> WriteReceipt:
@@ -326,7 +454,7 @@ def atomic_text(path: Path, value: str) -> WriteReceipt:
     try:
         with temporary.open("wb") as stream:
             for offset in range(0, len(value), 1024 * 1024):
-                block = encoder.encode(value[offset:offset + 1024 * 1024])
+                block = encoder.encode(value[offset : offset + 1024 * 1024])
                 digest.update(block)
                 byte_count += len(block)
                 stream.write(block)
@@ -342,11 +470,14 @@ def atomic_text(path: Path, value: str) -> WriteReceipt:
         os.replace(temporary, path)
     finally:
         temporary.unlink(missing_ok=True)
-    return WriteReceipt(path.name, byte_count, digest.hexdigest(), serialization_seconds, fsync_seconds)
+    return WriteReceipt(
+        path.name, byte_count, digest.hexdigest(), serialization_seconds, fsync_seconds
+    )
 
 
-def persist_native_capture(attempt_dir: Path, update_index: int, capture: dict,
-                           saved: dict[str, Any]) -> dict[str, Any]:
+def persist_native_capture(
+    attempt_dir: Path, update_index: int, capture: dict, saved: dict[str, Any]
+) -> dict[str, Any]:
     """Persist raw protocol payloads once and checkpoint only their checked references."""
     if not isinstance(capture, dict):
         raise ValueError("native query capture must be a mapping")
@@ -354,53 +485,121 @@ def persist_native_capture(attempt_dir: Path, update_index: int, capture: dict,
     request_value = capture.get("bridge_request_raw")
     if isinstance(request_value, str) and "request" not in saved:
         receipt = atomic_text(attempt_dir / f"{stem}-request.jsonl", request_value)
-        saved["request"] = {"path": receipt.path, "bytes": receipt.bytes_written, "sha256": receipt.sha256}
-        append_io_event(attempt_dir, {"operation": "native-payload", "payload": "request",
-            "update_index": update_index, "path": receipt.path, "bytes_written": receipt.bytes_written,
-            "sha256": receipt.sha256, "serialization_seconds": receipt.serialization_seconds,
-            "fsync_seconds": receipt.fsync_seconds})
+        saved["request"] = {
+            "path": receipt.path,
+            "bytes": receipt.bytes_written,
+            "sha256": receipt.sha256,
+        }
+        append_io_event(
+            attempt_dir,
+            {
+                "operation": "native-payload",
+                "payload": "request",
+                "update_index": update_index,
+                "path": receipt.path,
+                "bytes_written": receipt.bytes_written,
+                "sha256": receipt.sha256,
+                "serialization_seconds": receipt.serialization_seconds,
+                "fsync_seconds": receipt.fsync_seconds,
+            },
+        )
     response_value = capture.get("bridge_response_raw")
     if isinstance(response_value, str) and "response" not in saved:
         receipt = atomic_text(attempt_dir / f"{stem}-response.jsonl", response_value)
-        saved["response"] = {"path": receipt.path, "bytes": receipt.bytes_written, "sha256": receipt.sha256}
-        append_io_event(attempt_dir, {"operation": "native-payload", "payload": "response",
-            "update_index": update_index, "path": receipt.path, "bytes_written": receipt.bytes_written,
-            "sha256": receipt.sha256, "serialization_seconds": receipt.serialization_seconds,
-            "fsync_seconds": receipt.fsync_seconds})
+        saved["response"] = {
+            "path": receipt.path,
+            "bytes": receipt.bytes_written,
+            "sha256": receipt.sha256,
+        }
+        append_io_event(
+            attempt_dir,
+            {
+                "operation": "native-payload",
+                "payload": "response",
+                "update_index": update_index,
+                "path": receipt.path,
+                "bytes_written": receipt.bytes_written,
+                "sha256": receipt.sha256,
+                "serialization_seconds": receipt.serialization_seconds,
+                "fsync_seconds": receipt.fsync_seconds,
+            },
+        )
     if capture.get("capture_kind") == "adapter-preflight" and "request" not in saved:
         request = capture.get("request")
         if request is not None:
-            encoded = (json.dumps(request, separators=(",", ":"), allow_nan=False) + "\n").encode("utf-8")
+            encoded = (json.dumps(request, separators=(",", ":"), allow_nan=False) + "\n").encode(
+                "utf-8"
+            )
             receipt = atomic_bytes(attempt_dir / f"{stem}-request.json", encoded)
-            saved["request"] = {"path": receipt.path, "bytes": receipt.bytes_written,
-                "sha256": receipt.sha256, "encoding": "adapter-preflight-json"}
-            append_io_event(attempt_dir, {"operation": "native-payload", "payload": "request",
-                "update_index": update_index, "path": receipt.path, "bytes_written": receipt.bytes_written,
-                "sha256": receipt.sha256, "serialization_seconds": receipt.serialization_seconds,
-                "fsync_seconds": receipt.fsync_seconds})
-    if capture.get("capture_kind") == "adapter-preflight" and capture.get("adapter_response") is not None and "response" not in saved:
-        encoded = (json.dumps(capture["adapter_response"], separators=(",", ":"), allow_nan=False) + "\n").encode("utf-8")
+            saved["request"] = {
+                "path": receipt.path,
+                "bytes": receipt.bytes_written,
+                "sha256": receipt.sha256,
+                "encoding": "adapter-preflight-json",
+            }
+            append_io_event(
+                attempt_dir,
+                {
+                    "operation": "native-payload",
+                    "payload": "request",
+                    "update_index": update_index,
+                    "path": receipt.path,
+                    "bytes_written": receipt.bytes_written,
+                    "sha256": receipt.sha256,
+                    "serialization_seconds": receipt.serialization_seconds,
+                    "fsync_seconds": receipt.fsync_seconds,
+                },
+            )
+    if (
+        capture.get("capture_kind") == "adapter-preflight"
+        and capture.get("adapter_response") is not None
+        and "response" not in saved
+    ):
+        encoded = (
+            json.dumps(capture["adapter_response"], separators=(",", ":"), allow_nan=False) + "\n"
+        ).encode("utf-8")
         receipt = atomic_bytes(attempt_dir / f"{stem}-response.json", encoded)
-        saved["response"] = {"path": receipt.path, "bytes": receipt.bytes_written,
-            "sha256": receipt.sha256, "encoding": "adapter-response-json"}
-        append_io_event(attempt_dir, {"operation": "native-payload", "payload": "response",
-            "update_index": update_index, "path": receipt.path, "bytes_written": receipt.bytes_written,
-            "sha256": receipt.sha256, "serialization_seconds": receipt.serialization_seconds,
-            "fsync_seconds": receipt.fsync_seconds})
-    metadata = {"schema": "csl.closed-loop.native-query-capture/3", "update_index": update_index,
+        saved["response"] = {
+            "path": receipt.path,
+            "bytes": receipt.bytes_written,
+            "sha256": receipt.sha256,
+            "encoding": "adapter-response-json",
+        }
+        append_io_event(
+            attempt_dir,
+            {
+                "operation": "native-payload",
+                "payload": "response",
+                "update_index": update_index,
+                "path": receipt.path,
+                "bytes_written": receipt.bytes_written,
+                "sha256": receipt.sha256,
+                "serialization_seconds": receipt.serialization_seconds,
+                "fsync_seconds": receipt.fsync_seconds,
+            },
+        )
+    metadata = {
+        "schema": "csl.closed-loop.native-query-capture/3",
+        "update_index": update_index,
         "capture_kind": capture.get("capture_kind"),
         "bridge_request_sent": capture.get("bridge_request_sent"),
         "bridge_request_transmission_status": capture.get("bridge_request_transmission_status"),
-        "request_sha256": capture.get("request_sha256"), "request": saved.get("request"),
+        "request_sha256": capture.get("request_sha256"),
+        "request": saved.get("request"),
         "bridge_response_sha256": capture.get("bridge_response_sha256"),
         "response_parse_status": capture.get("response_parse_status"),
-        "response": saved.get("response")}
+        "response": saved.get("response"),
+    }
     if "start_recovery" in capture:
         metadata["start_recovery"] = capture["start_recovery"]
     if "native_strategy_attempts" in capture:
         attempt_rows = []
         for ordinal, attempt in enumerate(capture["native_strategy_attempts"]):
-            fields = {key: value for key, value in attempt.items() if key not in {"request_raw", "response_raw"}}
+            fields = {
+                key: value
+                for key, value in attempt.items()
+                if key not in {"request_raw", "response_raw"}
+            }
             for direction in ("request", "response"):
                 raw = attempt.get(f"{direction}_raw")
                 if not isinstance(raw, str):
@@ -408,11 +607,24 @@ def persist_native_capture(attempt_dir: Path, update_index: int, capture: dict,
                 name = f"strategy-{ordinal}-{direction}"
                 if name not in saved:
                     written = atomic_text(attempt_dir / f"{stem}-{name}.jsonl", raw)
-                    saved[name] = {"path": written.path, "bytes": written.bytes_written, "sha256": written.sha256}
-                    append_io_event(attempt_dir, {"operation": "native-payload", "payload": name,
-                        "update_index": update_index, "path": written.path, "bytes_written": written.bytes_written,
-                        "sha256": written.sha256, "serialization_seconds": written.serialization_seconds,
-                        "fsync_seconds": written.fsync_seconds})
+                    saved[name] = {
+                        "path": written.path,
+                        "bytes": written.bytes_written,
+                        "sha256": written.sha256,
+                    }
+                    append_io_event(
+                        attempt_dir,
+                        {
+                            "operation": "native-payload",
+                            "payload": name,
+                            "update_index": update_index,
+                            "path": written.path,
+                            "bytes_written": written.bytes_written,
+                            "sha256": written.sha256,
+                            "serialization_seconds": written.serialization_seconds,
+                            "fsync_seconds": written.fsync_seconds,
+                        },
+                    )
                 fields[direction] = saved[name]
             attempt_rows.append(fields)
         metadata["native_strategy_attempts"] = attempt_rows
@@ -422,51 +634,108 @@ def persist_native_capture(attempt_dir: Path, update_index: int, capture: dict,
     metadata_digest = hashlib.sha256(metadata_bytes).hexdigest()
     meta_path = attempt_dir / f"{stem}-{metadata_digest}.json"
     if meta_path.exists():
-        if meta_path.stat().st_size != len(metadata_bytes) or file_sha256(meta_path) != metadata_digest:
-            raise ValueError("content-addressed native capture metadata exists with different contents")
-        receipt = WriteReceipt(meta_path.name, len(metadata_bytes), metadata_digest,
-            metadata_serialization_seconds, 0.0)
+        if (
+            meta_path.stat().st_size != len(metadata_bytes)
+            or file_sha256(meta_path) != metadata_digest
+        ):
+            raise ValueError(
+                "content-addressed native capture metadata exists with different contents"
+            )
+        receipt = WriteReceipt(
+            meta_path.name,
+            len(metadata_bytes),
+            metadata_digest,
+            metadata_serialization_seconds,
+            0.0,
+        )
     else:
         written = atomic_bytes(meta_path, metadata_bytes)
-        receipt = WriteReceipt(written.path, written.bytes_written, written.sha256,
-            written.serialization_seconds + metadata_serialization_seconds, written.fsync_seconds)
-    append_io_event(attempt_dir, {"operation": "native-capture-checkpoint", "update_index": update_index,
-        "path": receipt.path, "bytes_written": receipt.bytes_written, "sha256": receipt.sha256,
-        "serialization_seconds": receipt.serialization_seconds, "fsync_seconds": receipt.fsync_seconds})
-    for field in ("request", "request_json", "bridge_request_raw", "parsed_response",
-                  "bridge_response_raw", "adapter_response", "native_strategy_attempts"):
+        receipt = WriteReceipt(
+            written.path,
+            written.bytes_written,
+            written.sha256,
+            written.serialization_seconds + metadata_serialization_seconds,
+            written.fsync_seconds,
+        )
+    append_io_event(
+        attempt_dir,
+        {
+            "operation": "native-capture-checkpoint",
+            "update_index": update_index,
+            "path": receipt.path,
+            "bytes_written": receipt.bytes_written,
+            "sha256": receipt.sha256,
+            "serialization_seconds": receipt.serialization_seconds,
+            "fsync_seconds": receipt.fsync_seconds,
+        },
+    )
+    for field in (
+        "request",
+        "request_json",
+        "bridge_request_raw",
+        "parsed_response",
+        "bridge_response_raw",
+        "adapter_response",
+        "native_strategy_attempts",
+    ):
         capture.pop(field, None)
-    return {"schema": "csl.closed-loop.native-query-capture-reference/1", "update_index": update_index,
+    return {
+        "schema": "csl.closed-loop.native-query-capture-reference/1",
+        "update_index": update_index,
         "path": meta_path.name,
-        "bytes": receipt.bytes_written, "sha256": receipt.sha256}
+        "bytes": receipt.bytes_written,
+        "sha256": receipt.sha256,
+    }
 
 
 def write_attempt(attempt_dir: Path, value: Mapping[str, Any]) -> WriteReceipt:
     receipt = atomic_json(attempt_dir / "attempt.json", value)
-    append_io_event(attempt_dir, {"operation": "attempt-checkpoint", "path": receipt.path,
-        "bytes_written": receipt.bytes_written, "sha256": receipt.sha256,
-        "serialization_seconds": receipt.serialization_seconds,
-        "fsync_seconds": receipt.fsync_seconds})
+    append_io_event(
+        attempt_dir,
+        {
+            "operation": "attempt-checkpoint",
+            "path": receipt.path,
+            "bytes_written": receipt.bytes_written,
+            "sha256": receipt.sha256,
+            "serialization_seconds": receipt.serialization_seconds,
+            "fsync_seconds": receipt.fsync_seconds,
+        },
+    )
     return receipt
 
 
-def write_record_artifact(attempt_dir: Path, path: Path, value: Any,
-                          scope: str) -> WriteReceipt:
+def write_record_artifact(attempt_dir: Path, path: Path, value: Any, scope: str) -> WriteReceipt:
     receipt = atomic_json(path, value)
-    append_io_event(attempt_dir, {"operation": "record-artifact", "scope": scope,
-        "path": str(path.relative_to(attempt_dir)), "bytes_written": receipt.bytes_written,
-        "sha256": receipt.sha256, "serialization_seconds": receipt.serialization_seconds,
-        "fsync_seconds": receipt.fsync_seconds})
+    append_io_event(
+        attempt_dir,
+        {
+            "operation": "record-artifact",
+            "scope": scope,
+            "path": str(path.relative_to(attempt_dir)),
+            "bytes_written": receipt.bytes_written,
+            "sha256": receipt.sha256,
+            "serialization_seconds": receipt.serialization_seconds,
+            "fsync_seconds": receipt.fsync_seconds,
+        },
+    )
     return receipt
 
 
 def write_stage(attempt_dir: Path, update_index: int, value: Mapping[str, Any]) -> WriteReceipt:
     path = f"stage-{update_index:03d}.json"
     receipt = atomic_json(attempt_dir / path, value)
-    append_io_event(attempt_dir, {"operation": "stage-checkpoint", "update_index": update_index,
-        "path": receipt.path, "bytes_written": receipt.bytes_written, "sha256": receipt.sha256,
-        "serialization_seconds": receipt.serialization_seconds,
-        "fsync_seconds": receipt.fsync_seconds})
+    append_io_event(
+        attempt_dir,
+        {
+            "operation": "stage-checkpoint",
+            "update_index": update_index,
+            "path": receipt.path,
+            "bytes_written": receipt.bytes_written,
+            "sha256": receipt.sha256,
+            "serialization_seconds": receipt.serialization_seconds,
+            "fsync_seconds": receipt.fsync_seconds,
+        },
+    )
     return receipt
 
 
@@ -476,25 +745,52 @@ def _append_reference(attempt_dir: Path, update_index: int, path: Path) -> dict[
         raise ValueError("stage record path does not match its update index")
     byte_count = path.stat().st_size
     digest = _record_hash_read(attempt_dir, path, "stage-reference-hash")
-    row = {"schema": STAGE_REFERENCE_SCHEMA, "update_index": update_index,
-        "path": relative, "bytes": byte_count, "sha256": digest}
+    row = {
+        "schema": STAGE_REFERENCE_SCHEMA,
+        "update_index": update_index,
+        "path": relative,
+        "bytes": byte_count,
+        "sha256": digest,
+    }
     index_receipt = append_jsonl(attempt_dir / STAGE_INDEX, row)
-    append_io_event(attempt_dir, {"operation": "stage-reference", "update_index": update_index,
-        "path": relative, "stage_bytes": byte_count, "index_bytes_written": index_receipt.bytes_written,
-        "sha256": digest, "serialization_seconds": index_receipt.serialization_seconds,
-        "fsync_seconds": index_receipt.fsync_seconds})
+    append_io_event(
+        attempt_dir,
+        {
+            "operation": "stage-reference",
+            "update_index": update_index,
+            "path": relative,
+            "stage_bytes": byte_count,
+            "index_bytes_written": index_receipt.bytes_written,
+            "sha256": digest,
+            "serialization_seconds": index_receipt.serialization_seconds,
+            "fsync_seconds": index_receipt.fsync_seconds,
+        },
+    )
     return row
 
 
-def finalize_stage(attempt_dir: Path, update_index: int, value: Mapping[str, Any]) -> dict[str, Any]:
+def finalize_stage(
+    attempt_dir: Path, update_index: int, value: Mapping[str, Any]
+) -> dict[str, Any]:
     receipt = write_stage(attempt_dir, update_index, value)
-    reference = {"schema": STAGE_REFERENCE_SCHEMA, "update_index": update_index,
-        "path": receipt.path, "bytes": receipt.bytes_written, "sha256": receipt.sha256}
+    reference = {
+        "schema": STAGE_REFERENCE_SCHEMA,
+        "update_index": update_index,
+        "path": receipt.path,
+        "bytes": receipt.bytes_written,
+        "sha256": receipt.sha256,
+    }
     index_receipt = append_jsonl(attempt_dir / STAGE_INDEX, reference)
-    append_io_event(attempt_dir, {"operation": "stage-reference", **reference,
-        "index_bytes_written": index_receipt.bytes_written,
-        "serialization_seconds": index_receipt.serialization_seconds,
-        "fsync_seconds": index_receipt.fsync_seconds})
+    append_io_event(
+        attempt_dir,
+        {
+            "operation": "stage-reference",
+            **reference,
+            "index_bytes_written": index_receipt.bytes_written,
+            "serialization_seconds": index_receipt.serialization_seconds,
+            "fsync_seconds": index_receipt.fsync_seconds,
+        },
+    )
     return reference
 
 
@@ -518,21 +814,31 @@ def _verified_index_prefix(attempt_dir: Path) -> tuple[list[dict[str, Any]], byt
                 reference = json.loads(raw_line)
             except json.JSONDecodeError as error:
                 raise ValueError(f"stage reference index is malformed at row {expected}") from error
-            if (not isinstance(reference, dict) or reference.get("schema") != STAGE_REFERENCE_SCHEMA
-                    or reference.get("update_index") != expected):
+            if (
+                not isinstance(reference, dict)
+                or reference.get("schema") != STAGE_REFERENCE_SCHEMA
+                or reference.get("update_index") != expected
+            ):
                 raise ValueError(f"stage reference index is not contiguous at row {expected}")
             _reference_path(attempt_dir, reference)
             references.append(reference)
             expected += 1
     finally:
-        append_io_event(attempt_dir, {"operation": "stage-index-recovery-read",
-            "path": STAGE_INDEX, "bytes_read": len(data),
-            "parse_seconds": time.perf_counter() - started})
+        append_io_event(
+            attempt_dir,
+            {
+                "operation": "stage-index-recovery-read",
+                "path": STAGE_INDEX,
+                "bytes_read": len(data),
+                "parse_seconds": time.perf_counter() - started,
+            },
+        )
     return references, prefix, tail
 
 
-def register_orphan_stages(attempt_dir: Path,
-                           diagnostics: list[dict[str, Any]] | None = None) -> int:
+def register_orphan_stages(
+    attempt_dir: Path, diagnostics: list[dict[str, Any]] | None = None
+) -> int:
     """Recover a verified index prefix and index stage files left after interruption.
 
     Only an unterminated final JSONL fragment is recoverable. Its exact bytes are
@@ -549,26 +855,52 @@ def register_orphan_stages(attempt_dir: Path,
             if tail_path.stat().st_size != len(torn_tail) or file_sha256(tail_path) != digest:
                 raise ValueError("preserved stage-index tail file exists with different contents")
             tail_receipt = WriteReceipt(tail_name, 0, digest, 0.0, 0.0)
-            append_io_event(attempt_dir, {"operation": "stage-index-tail-verified",
-                "path": tail_name, "bytes_read": len(torn_tail),
-                "verification_seconds": time.perf_counter() - verify_started,
-                "sha256": digest})
+            append_io_event(
+                attempt_dir,
+                {
+                    "operation": "stage-index-tail-verified",
+                    "path": tail_name,
+                    "bytes_read": len(torn_tail),
+                    "verification_seconds": time.perf_counter() - verify_started,
+                    "sha256": digest,
+                },
+            )
         else:
             tail_receipt = atomic_bytes(tail_path, torn_tail)
-            append_io_event(attempt_dir, {"operation": "stage-index-tail-preserved",
-                "path": tail_name, "bytes_written": tail_receipt.bytes_written,
-                "sha256": tail_receipt.sha256, "serialization_seconds": tail_receipt.serialization_seconds,
-                "fsync_seconds": tail_receipt.fsync_seconds})
+            append_io_event(
+                attempt_dir,
+                {
+                    "operation": "stage-index-tail-preserved",
+                    "path": tail_name,
+                    "bytes_written": tail_receipt.bytes_written,
+                    "sha256": tail_receipt.sha256,
+                    "serialization_seconds": tail_receipt.serialization_seconds,
+                    "fsync_seconds": tail_receipt.fsync_seconds,
+                },
+            )
         index_path = attempt_dir / STAGE_INDEX
         index_receipt = atomic_bytes(index_path, prefix)
-        append_io_event(attempt_dir, {"operation": "stage-index-prefix-restored",
-            "path": STAGE_INDEX, "bytes_written": index_receipt.bytes_written,
-            "sha256": index_receipt.sha256, "serialization_seconds": index_receipt.serialization_seconds,
-            "fsync_seconds": index_receipt.fsync_seconds})
+        append_io_event(
+            attempt_dir,
+            {
+                "operation": "stage-index-prefix-restored",
+                "path": STAGE_INDEX,
+                "bytes_written": index_receipt.bytes_written,
+                "sha256": index_receipt.sha256,
+                "serialization_seconds": index_receipt.serialization_seconds,
+                "fsync_seconds": index_receipt.fsync_seconds,
+            },
+        )
         if diagnostics is not None:
-            diagnostics.append({"kind": "unterminated-jsonl-tail", "path": tail_name,
-                "bytes": len(torn_tail), "sha256": tail_receipt.sha256,
-                "diagnostic": "preserved unterminated final stage reference and restored the verified index prefix"})
+            diagnostics.append(
+                {
+                    "kind": "unterminated-jsonl-tail",
+                    "path": tail_name,
+                    "bytes": len(torn_tail),
+                    "sha256": tail_receipt.sha256,
+                    "diagnostic": "preserved unterminated final stage reference and restored the verified index prefix",
+                }
+            )
     next_index = len(indexed)
     recovered = 0
     while True:
@@ -593,12 +925,16 @@ def _reference_path(attempt_dir: Path, reference: Mapping[str, Any]) -> Path:
         raise ValueError(f"referenced stage record is missing: {name}")
     if path.stat().st_size != reference.get("bytes"):
         raise ValueError(f"referenced stage byte count changed: {name}")
-    if _record_hash_read(attempt_dir, path, "stage-reference-verification") != reference.get("sha256"):
+    if _record_hash_read(attempt_dir, path, "stage-reference-verification") != reference.get(
+        "sha256"
+    ):
         raise ValueError(f"referenced stage hash changed: {name}")
     return path
 
 
-def iter_stage_references(attempt_dir: Path, *, verify_hashes: bool = True) -> Iterable[dict[str, Any]]:
+def iter_stage_references(
+    attempt_dir: Path, *, verify_hashes: bool = True
+) -> Iterable[dict[str, Any]]:
     index_path = attempt_dir / STAGE_INDEX
     if not index_path.exists():
         return
@@ -614,10 +950,15 @@ def iter_stage_references(attempt_dir: Path, *, verify_hashes: bool = True) -> I
                 try:
                     reference = json.loads(line)
                 except json.JSONDecodeError as error:
-                    raise ValueError(f"stage reference index is malformed at row {expected}") from error
+                    raise ValueError(
+                        f"stage reference index is malformed at row {expected}"
+                    ) from error
                 parse_seconds += time.perf_counter() - parse_started
-                if (not isinstance(reference, dict) or reference.get("schema") != STAGE_REFERENCE_SCHEMA
-                        or reference.get("update_index") != expected):
+                if (
+                    not isinstance(reference, dict)
+                    or reference.get("schema") != STAGE_REFERENCE_SCHEMA
+                    or reference.get("update_index") != expected
+                ):
                     raise ValueError(f"stage reference index is not contiguous at row {expected}")
                 if verify_hashes:
                     _reference_path(attempt_dir, reference)
@@ -628,8 +969,15 @@ def iter_stage_references(attempt_dir: Path, *, verify_hashes: bool = True) -> I
                 yield reference
                 expected += 1
     finally:
-        append_io_event(attempt_dir, {"operation": "stage-index-read", "path": STAGE_INDEX,
-            "bytes_read": bytes_read, "parse_seconds": parse_seconds})
+        append_io_event(
+            attempt_dir,
+            {
+                "operation": "stage-index-read",
+                "path": STAGE_INDEX,
+                "bytes_read": bytes_read,
+                "parse_seconds": parse_seconds,
+            },
+        )
 
 
 def file_sha256(path: Path) -> str:
@@ -649,9 +997,16 @@ def _hash_file(path: Path) -> tuple[str, int, float]:
 
 def _record_hash_read(attempt_dir: Path, path: Path, operation: str) -> str:
     digest, byte_count, elapsed = _hash_file(path)
-    append_io_event(attempt_dir, {"operation": operation,
-        "path": str(path.relative_to(attempt_dir)), "bytes_read": byte_count,
-        "verification_seconds": elapsed, "sha256": digest})
+    append_io_event(
+        attempt_dir,
+        {
+            "operation": operation,
+            "path": str(path.relative_to(attempt_dir)),
+            "bytes_read": byte_count,
+            "verification_seconds": elapsed,
+            "sha256": digest,
+        },
+    )
     return digest
 
 
@@ -680,8 +1035,9 @@ def _string_end(data: mmap.mmap, start: int) -> int:
         if escaped in b'"\\/bfnrt':
             position = slash + 2
         elif escaped == ord("u"):
-            if slash + 6 > len(data) or any(byte not in b"0123456789abcdefABCDEF"
-                    for byte in data[slash + 2:slash + 6]):
+            if slash + 6 > len(data) or any(
+                byte not in b"0123456789abcdefABCDEF" for byte in data[slash + 2 : slash + 6]
+            ):
                 raise ValueError("JSON string has an invalid unicode escape")
             position = slash + 6
         else:
@@ -697,44 +1053,44 @@ def _parse_json_value(data: mmap.mmap, start: int) -> int:
         return _string_end(data, position)
     if first == 91:
         position = _skip_whitespace(data, position + 1)
-        if data[position:position + 1] == b"]":
+        if data[position : position + 1] == b"]":
             return position + 1
         while True:
             position = _parse_json_value(data, position)
             position = _skip_whitespace(data, position)
-            delimiter = data[position:position + 1]
+            delimiter = data[position : position + 1]
             if delimiter == b"]":
                 return position + 1
             if delimiter != b",":
                 raise ValueError("JSON array has an invalid delimiter")
             position = _skip_whitespace(data, position + 1)
-            if data[position:position + 1] == b"]":
+            if data[position : position + 1] == b"]":
                 raise ValueError("JSON array has a trailing comma")
     if first == 123:
         position = _skip_whitespace(data, position + 1)
-        if data[position:position + 1] == b"}":
+        if data[position : position + 1] == b"}":
             return position + 1
         while True:
-            if data[position:position + 1] != b'"':
+            if data[position : position + 1] != b'"':
                 raise ValueError("JSON object key is not a string")
             position = _skip_whitespace(data, _string_end(data, position))
-            if data[position:position + 1] != b":":
+            if data[position : position + 1] != b":":
                 raise ValueError("JSON object key is missing a colon")
             position = _parse_json_value(data, position + 1)
             position = _skip_whitespace(data, position)
-            delimiter = data[position:position + 1]
+            delimiter = data[position : position + 1]
             if delimiter == b"}":
                 return position + 1
             if delimiter != b",":
                 raise ValueError("JSON object has an invalid delimiter")
             position = _skip_whitespace(data, position + 1)
-            if data[position:position + 1] == b"}":
+            if data[position : position + 1] == b"}":
                 raise ValueError("JSON object has a trailing comma")
-    if data[position:position + 4] == b"true":
+    if data[position : position + 4] == b"true":
         return position + 4
-    if data[position:position + 5] == b"false":
+    if data[position : position + 5] == b"false":
         return position + 5
-    if data[position:position + 4] == b"null":
+    if data[position : position + 4] == b"null":
         return position + 4
     end = position
     while end < len(data) and data[end] not in (32, 9, 10, 13, 44, 93, 125):
@@ -744,8 +1100,9 @@ def _parse_json_value(data: mmap.mmap, start: int) -> int:
     return end
 
 
-def read_object_fields(path: Path, *, selected: set[str] | None = None,
-                       omitted: set[str] | None = None) -> tuple[dict[str, Any], IoReceipt]:
+def read_object_fields(
+    path: Path, *, selected: set[str] | None = None, omitted: set[str] | None = None
+) -> tuple[dict[str, Any], IoReceipt]:
     """Read selected top-level JSON fields without allocating omitted values."""
     started = time.perf_counter()
     result: dict[str, Any] = {}
@@ -756,16 +1113,16 @@ def read_object_fields(path: Path, *, selected: set[str] | None = None,
         with mmap.mmap(stream.fileno(), 0, access=mmap.ACCESS_READ) as data:
             decoder = codecs.getincrementaldecoder("utf-8")("strict")
             for offset in range(0, len(data), 64 * 1024):
-                decoder.decode(data[offset:offset + 64 * 1024], final=False)
+                decoder.decode(data[offset : offset + 64 * 1024], final=False)
             decoder.decode(b"", final=True)
             position = _skip_whitespace(data, 0)
-            if data[position:position + 1] != b"{":
+            if data[position : position + 1] != b"{":
                 raise ValueError(f"JSON record must be an object: {path}")
             position += 1
             after_comma = False
             while True:
                 position = _skip_whitespace(data, position)
-                if data[position:position + 1] == b"}":
+                if data[position : position + 1] == b"}":
                     if after_comma:
                         raise ValueError("JSON object has a trailing comma")
                     position += 1
@@ -774,13 +1131,13 @@ def read_object_fields(path: Path, *, selected: set[str] | None = None,
                 key_end = _string_end(data, key_start)
                 key = json.loads(data[key_start:key_end])
                 position = _skip_whitespace(data, key_end)
-                if data[position:position + 1] != b":":
+                if data[position : position + 1] != b":":
                     raise ValueError(f"JSON object is missing a colon after {key!r}")
                 value_start = _skip_whitespace(data, position + 1)
                 value_end = _parse_json_value(data, value_start)
                 _capture_value(data, result, key, value_start, value_end, selected, omitted)
                 position = _skip_whitespace(data, value_end)
-                delimiter = data[position:position + 1]
+                delimiter = data[position : position + 1]
                 if delimiter == b",":
                     position += 1
                     after_comma = True
@@ -795,9 +1152,15 @@ def read_object_fields(path: Path, *, selected: set[str] | None = None,
     return result, IoReceipt(path.name, path.stat().st_size, time.perf_counter() - started)
 
 
-def _capture_value(data: mmap.mmap, result: dict[str, Any], key: str,
-                   start: int | None, end: int, selected: set[str] | None,
-                   omitted: set[str]) -> None:
+def _capture_value(
+    data: mmap.mmap,
+    result: dict[str, Any],
+    key: str,
+    start: int | None,
+    end: int,
+    selected: set[str] | None,
+    omitted: set[str],
+) -> None:
     if key in omitted or selected is not None and key not in selected:
         return
     if start is None:
@@ -809,21 +1172,25 @@ def _capture_value(data: mmap.mmap, result: dict[str, Any], key: str,
         raise ValueError(f"JSON field is malformed: {key}") from error
 
 
-def read_attempt(path: Path, *, selected: set[str] | None = None,
-                 include_embedded_stages: bool = False) -> tuple[dict[str, Any], IoReceipt]:
+def read_attempt(
+    path: Path, *, selected: set[str] | None = None, include_embedded_stages: bool = False
+) -> tuple[dict[str, Any], IoReceipt]:
     """Read an attempt while skipping the duplicated v1 stage array."""
     omitted = set() if include_embedded_stages else {"stages"}
     return read_object_fields(path, selected=selected, omitted=omitted)
 
 
-def read_stage_fields(attempt_dir: Path, reference: Mapping[str, Any],
-                      selected: set[str]) -> tuple[dict[str, Any], IoReceipt]:
+def read_stage_fields(
+    attempt_dir: Path, reference: Mapping[str, Any], selected: set[str]
+) -> tuple[dict[str, Any], IoReceipt]:
     path = _reference_path(attempt_dir, reference)
     fields, receipt = read_object_fields(path, selected=selected)
     return fields, receipt
 
 
-def read_native_capture_metadata(attempt_dir: Path, reference: Mapping[str, Any]) -> tuple[dict[str, Any], dict[str, Path]]:
+def read_native_capture_metadata(
+    attempt_dir: Path, reference: Mapping[str, Any]
+) -> tuple[dict[str, Any], dict[str, Path]]:
     index = reference.get("update_index")
     path = reference.get("path")
     prefix = f"native-query-{index:03d}"
@@ -836,12 +1203,18 @@ def read_native_capture_metadata(attempt_dir: Path, reference: Mapping[str, Any]
     if versioned and path != f"{prefix}-{reference.get('sha256')}.json":
         raise ValueError("native capture content-addressed path differs from its checked hash")
     meta_path = attempt_dir / path
-    if not meta_path.is_file() or meta_path.stat().st_size != reference.get("bytes") or \
-            _record_hash_read(attempt_dir, meta_path, "native-capture-verification") != reference.get("sha256"):
+    if (
+        not meta_path.is_file()
+        or meta_path.stat().st_size != reference.get("bytes")
+        or _record_hash_read(attempt_dir, meta_path, "native-capture-verification")
+        != reference.get("sha256")
+    ):
         raise ValueError("native capture metadata reference is missing or changed")
     metadata = json.loads(meta_path.read_text(encoding="utf-8"))
-    if metadata.get("schema") != "csl.closed-loop.native-query-capture/3" or \
-            metadata.get("update_index") != index:
+    if (
+        metadata.get("schema") != "csl.closed-loop.native-query-capture/3"
+        or metadata.get("update_index") != index
+    ):
         raise ValueError("native capture metadata identity differs from its reference")
     payload_paths = {}
     references = {name: metadata.get(name) for name in ("request", "response")}
@@ -853,18 +1226,27 @@ def read_native_capture_metadata(attempt_dir: Path, reference: Mapping[str, Any]
             continue
         payload_path = payload.get("path")
         expected_prefix = f"native-query-{index:03d}-"
-        if not isinstance(payload_path, str) or not payload_path.startswith(expected_prefix) or \
-                Path(payload_path).name != payload_path:
+        if (
+            not isinstance(payload_path, str)
+            or not payload_path.startswith(expected_prefix)
+            or Path(payload_path).name != payload_path
+        ):
             raise ValueError(f"native {name} payload path escapes the attempt directory")
         resolved = attempt_dir / payload_path
-        if not resolved.is_file() or resolved.stat().st_size != payload.get("bytes") or \
-                _record_hash_read(attempt_dir, resolved, "native-payload-verification") != payload.get("sha256"):
+        if (
+            not resolved.is_file()
+            or resolved.stat().st_size != payload.get("bytes")
+            or _record_hash_read(attempt_dir, resolved, "native-payload-verification")
+            != payload.get("sha256")
+        ):
             raise ValueError(f"native {name} payload reference is missing or changed")
         payload_paths[name] = resolved
     return metadata, payload_paths
 
 
-def materialize_episode_summary(attempt_dir: Path, record: Mapping[str, Any]) -> tuple[list, list, list[IoReceipt]]:
+def materialize_episode_summary(
+    attempt_dir: Path, record: Mapping[str, Any]
+) -> tuple[list, list, list[IoReceipt]]:
     """Build replay summaries from checked stage references, retaining no rich stage rows."""
     controls: list = []
     states: list = []
@@ -875,14 +1257,24 @@ def materialize_episode_summary(attempt_dir: Path, record: Mapping[str, Any]) ->
     count = 0
     for reference in iter_stage_references(attempt_dir):
         count += 1
-        fields, receipt = read_stage_fields(attempt_dir, reference,
-            {"status", "observed_physical", "applied_control", "observed_next_physical",
-             "native_query_capture"})
+        fields, receipt = read_stage_fields(
+            attempt_dir,
+            reference,
+            {
+                "status",
+                "observed_physical",
+                "applied_control",
+                "observed_next_physical",
+                "native_query_capture",
+            },
+        )
         reads.append(receipt)
         capture = fields.get("native_query_capture")
         if capture is not None:
-            if not isinstance(capture, dict) or capture.get("schema") != \
-                    "csl.closed-loop.native-query-capture-reference/1":
+            if (
+                not isinstance(capture, dict)
+                or capture.get("schema") != "csl.closed-loop.native-query-capture-reference/1"
+            ):
                 raise ValueError("v2 stage has an invalid native capture reference")
             read_native_capture_metadata(attempt_dir, capture)
         if not states and isinstance(fields.get("observed_physical"), list):
@@ -900,7 +1292,9 @@ def materialize_episode_summary(attempt_dir: Path, record: Mapping[str, Any]) ->
     return controls, states, reads
 
 
-def verify_v2_attempt(attempt_dir: Path, record: Mapping[str, Any]) -> tuple[list, list, list[IoReceipt]] | None:
+def verify_v2_attempt(
+    attempt_dir: Path, record: Mapping[str, Any]
+) -> tuple[list, list, list[IoReceipt]] | None:
     """Verify canonical stage/native evidence and match it to cached replay summaries."""
     if record.get("format_version") != 2:
         return None
@@ -918,22 +1312,36 @@ def verify_v2_attempt(attempt_dir: Path, record: Mapping[str, Any]) -> tuple[lis
         raise ValueError("cached completed-hold count differs from checked stage records")
     if record.get("status") == "complete":
         expected_holds = record.get("original_intervals")
-        if isinstance(expected_holds, bool) or not isinstance(expected_holds, int) or \
-                len(controls) != expected_holds or stage_records.get("count") != expected_holds:
+        if (
+            isinstance(expected_holds, bool)
+            or not isinstance(expected_holds, int)
+            or len(controls) != expected_holds
+            or stage_records.get("count") != expected_holds
+        ):
             raise ValueError("complete attempt does not contain every checked stage")
-    controls_digest = hashlib.sha256(json.dumps(controls, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
-    if record.get("controls_sha256") is not None and record.get("controls_sha256") != controls_digest:
+    controls_digest = hashlib.sha256(
+        json.dumps(controls, separators=(",", ":"), allow_nan=False).encode()
+    ).hexdigest()
+    if (
+        record.get("controls_sha256") is not None
+        and record.get("controls_sha256") != controls_digest
+    ):
         raise ValueError("cached controls hash differs from checked stage records")
     return controls, states, reads
 
 
 def _io_unavailable(status: Mapping[str, Any]) -> dict[str, Any]:
-    result = {"integrity_status": status.get("integrity_status", "invalid"),
-        "metric_totals_complete": False, "metric_totals_available": False,
-        "integrity_diagnostic": status.get("integrity_diagnostic", "record I/O metrics are unavailable"),
+    result = {
+        "integrity_status": status.get("integrity_status", "invalid"),
+        "metric_totals_complete": False,
+        "metric_totals_available": False,
+        "integrity_diagnostic": status.get(
+            "integrity_diagnostic", "record I/O metrics are unavailable"
+        ),
         "recovery_evidence": status.get("recovery_evidence", []),
         "integrity_record": IO_STATUS,
-        "scope": "record I/O aggregates withheld because the diagnostic journal is unavailable; canonical attempt/stage data is independent"}
+        "scope": "record I/O aggregates withheld because the diagnostic journal is unavailable; canonical attempt/stage data is independent",
+    }
     if isinstance(status.get("operation"), str):
         result["invalid_operation"] = status["operation"]
     return result
@@ -945,8 +1353,13 @@ def summarize_io(attempt_dir: Path) -> dict[str, Any]:
     if prior_status is not None:
         return _io_unavailable(prior_status)
     if not path.is_file():
-        return _io_unavailable({"integrity_status": "incomplete",
-            "integrity_diagnostic": "record I/O log is missing", "recovery_evidence": []})
+        return _io_unavailable(
+            {
+                "integrity_status": "incomplete",
+                "integrity_diagnostic": "record I/O log is missing",
+                "recovery_evidence": [],
+            }
+        )
     recovery = _recover_io_log_tail(attempt_dir)
     if recovery is not None and recovery.get("integrity_status") == "invalid":
         return _io_unavailable(_read_io_status(attempt_dir) or {})
@@ -956,21 +1369,34 @@ def summarize_io(attempt_dir: Path) -> dict[str, Any]:
             _validate_io_event(recovery_row, 0)
             append_jsonl(path, recovery_row)
         except (TypeError, ValueError, OverflowError) as error:
-            status = _mark_io_invalid(attempt_dir,
+            status = _mark_io_invalid(
+                attempt_dir,
                 f"recovery event is invalid: {type(error).__name__}: {error}",
-                operation="record-io-tail-recovery")
+                operation="record-io-tail-recovery",
+            )
             return _io_unavailable(status)
 
-    totals: dict[str, Any] = {"checkpoint_writes": 0, "stage_writes": 0,
-        "reference_writes": 0, "attempt_json_bytes_written": 0,
-        "stage_json_bytes_written": 0, "native_payload_bytes_written": 0,
-        "native_capture_checkpoint_bytes_written": 0, "reference_index_bytes_written": 0,
-        "record_artifact_bytes_written": 0, "recovery_evidence_bytes_written": 0,
+    totals: dict[str, Any] = {
+        "checkpoint_writes": 0,
+        "stage_writes": 0,
+        "reference_writes": 0,
+        "attempt_json_bytes_written": 0,
+        "stage_json_bytes_written": 0,
+        "native_payload_bytes_written": 0,
+        "native_capture_checkpoint_bytes_written": 0,
+        "reference_index_bytes_written": 0,
+        "record_artifact_bytes_written": 0,
+        "recovery_evidence_bytes_written": 0,
         "record_io_recovery_evidence_bytes_written": 0,
         "record_io_prefix_repair_bytes_written": 0,
-        "index_repair_bytes_written": 0, "total_record_bytes_written": 0,
-        "bytes_read": 0, "parse_seconds": 0.0, "verification_seconds": 0.0,
-        "serialization_seconds": 0.0, "fsync_seconds": 0.0}
+        "index_repair_bytes_written": 0,
+        "total_record_bytes_written": 0,
+        "bytes_read": 0,
+        "parse_seconds": 0.0,
+        "verification_seconds": 0.0,
+        "serialization_seconds": 0.0,
+        "fsync_seconds": 0.0,
+    }
     try:
         with path.open("r", encoding="utf-8") as stream:
             for row_number, line in enumerate(stream, start=1):
@@ -980,7 +1406,8 @@ def summarize_io(attempt_dir: Path) -> dict[str, Any]:
                     event = json.loads(line)
                 except json.JSONDecodeError as error:
                     raise _RecordIoIntegrityError(
-                        f"malformed completed row {row_number}") from error
+                        f"malformed completed row {row_number}"
+                    ) from error
                 _validate_io_event(event, row_number)
                 operation = event["operation"]
                 if operation == "attempt-checkpoint":
@@ -1012,8 +1439,12 @@ def summarize_io(attempt_dir: Path) -> dict[str, Any]:
                     totals["index_repair_bytes_written"] += event["bytes_written"]
                     totals["total_record_bytes_written"] += event["bytes_written"]
                 elif operation == "record-io-tail-recovery":
-                    totals["record_io_recovery_evidence_bytes_written"] += event["tail_bytes_written"]
-                    totals["record_io_prefix_repair_bytes_written"] += event["prefix_repair_bytes_written"]
+                    totals["record_io_recovery_evidence_bytes_written"] += event[
+                        "tail_bytes_written"
+                    ]
+                    totals["record_io_prefix_repair_bytes_written"] += event[
+                        "prefix_repair_bytes_written"
+                    ]
                     totals["total_record_bytes_written"] += event["tail_bytes_written"]
                 if "bytes_read" in event:
                     totals["bytes_read"] += event["bytes_read"]
@@ -1021,20 +1452,36 @@ def summarize_io(attempt_dir: Path) -> dict[str, Any]:
                     totals["verification_seconds"] += event.get("verification_seconds", 0.0)
                 totals["serialization_seconds"] += event.get("serialization_seconds", 0.0)
                 totals["fsync_seconds"] += event.get("fsync_seconds", 0.0)
-    except (OSError, UnicodeError, json.JSONDecodeError, TypeError, ValueError, KeyError, OverflowError) as error:
-        status = _mark_io_invalid(attempt_dir,
-            f"{type(error).__name__}: {error}; metric aggregates withheld")
+    except (
+        OSError,
+        UnicodeError,
+        json.JSONDecodeError,
+        TypeError,
+        ValueError,
+        KeyError,
+        OverflowError,
+    ) as error:
+        status = _mark_io_invalid(
+            attempt_dir, f"{type(error).__name__}: {error}; metric aggregates withheld"
+        )
         return _io_unavailable(status)
 
-    totals["scope"] = ("attempt/stage checkpoints, native payload and capture records, stage-reference index, "
+    totals["scope"] = (
+        "attempt/stage checkpoints, native payload and capture records, stage-reference index, "
         "checked reference hash reads, held-step request artifacts, torn stage/telemetry tail preservation and journal repair, "
         "and selective record reads; "
-        "excludes controller query, execution process, replay/checker/render, and telemetry-log append scopes")
+        "excludes controller query, execution process, replay/checker/render, and telemetry-log append scopes"
+    )
     evidence = []
     for tail_path in sorted(attempt_dir.glob("record-io-tail-*.bin")):
         tail_bytes = tail_path.read_bytes()
-        evidence.append({"path": tail_path.name, "bytes": len(tail_bytes),
-            "sha256": hashlib.sha256(tail_bytes).hexdigest()})
+        evidence.append(
+            {
+                "path": tail_path.name,
+                "bytes": len(tail_bytes),
+                "sha256": hashlib.sha256(tail_bytes).hexdigest(),
+            }
+        )
     totals["integrity_status"] = "incomplete" if evidence else "complete"
     totals["metric_totals_complete"] = not evidence
     totals["metric_totals_available"] = True
@@ -1042,5 +1489,6 @@ def summarize_io(attempt_dir: Path) -> dict[str, Any]:
     if evidence:
         totals["metric_totals_scope"] = (
             "totals cover only verified complete telemetry rows; preserved torn bytes are excluded and "
-            "missing metric values are unknown")
+            "missing metric values are unknown"
+        )
     return totals
