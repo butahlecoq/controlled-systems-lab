@@ -20,8 +20,8 @@ class Mpc04PublicationTests(unittest.TestCase):
         self.site = self.root / "site"
         self.site.mkdir()
         (self.site / "index.html").write_text(
-            '<!doctype html><html><body><h1>Reports</h1><ul></ul></body></html>',
-            encoding="utf-8")
+            "<!doctype html><html><body><h1>Reports</h1><ul></ul></body></html>", encoding="utf-8"
+        )
 
     def test_stages_replay_verified_immutable_route_and_archive(self):
         route = publication.stage(publication.SOURCE, self.site)
@@ -38,11 +38,13 @@ class Mpc04PublicationTests(unittest.TestCase):
         self.assertIn("MaxCoordinateGame replanning and QP comparison", page)
         self.assertIn("four-step source-derived MaxCoordinateGame task", page)
         self.assertIn(manifest["source_commit"], page)
-        self.assertIn(f'{route}/index.html', page)
-        self.assertIn(f'{route}/trajectory.svg', page)
+        self.assertIn(f"{route}/index.html", page)
+        self.assertIn(f"{route}/trajectory.svg", page)
         with zipfile.ZipFile(self.site / f"{route}.zip") as archive:
             self.assertIn(f"{route}/publication-manifest.json", archive.namelist())
-            self.assertEqual(archive.read(f"{route}/index.html"), (report_dir / "index.html").read_bytes())
+            self.assertEqual(
+                archive.read(f"{route}/index.html"), (report_dir / "index.html").read_bytes()
+            )
 
     def test_source_tampering_fails_before_any_route_is_written(self):
         source = self.root / "tampered-source"
@@ -61,7 +63,8 @@ class Mpc04PublicationTests(unittest.TestCase):
         fingerprints["native_driver"] = "0" * 64
         with self.assertRaisesRegex(ValueError, "source fingerprint differs: native_driver"):
             publication.verify_source_fingerprints(
-                capture["source"]["report_code_commit"], fingerprints)
+                capture["source"]["report_code_commit"], fingerprints
+            )
 
     def test_immutable_route_collision_is_rejected(self):
         route = publication.stage(publication.SOURCE, self.site)
