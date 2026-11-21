@@ -6,6 +6,7 @@ import argparse
 import csv
 import datetime as dt
 import hashlib
+import io
 import json
 import os
 import platform
@@ -333,34 +334,24 @@ def main():
     before = sha(exe.read_bytes())
     command = [str(exe), "--repetitions", str(a.repetitions), "--warmups", str(a.warmups)]
     try:
-        proc = subprocess.run(
-            command, capture_output=True, text=True, timeout=600, check=False, cwd=build
-        )
+        proc = subprocess.run(command, capture_output=True, timeout=600, check=False, cwd=build)
         code = proc.returncode
         stdout = proc.stdout
         stderr = proc.stderr
         aborted = False
     except subprocess.TimeoutExpired as error:
         code = None
-        stdout = (
-            error.stdout.decode(errors="replace")
-            if isinstance(error.stdout, bytes)
-            else (error.stdout or "")
-        )
-        stderr = (
-            error.stderr.decode(errors="replace")
-            if isinstance(error.stderr, bytes)
-            else (error.stderr or "")
-        )
+        stdout = error.stdout or b""
+        stderr = error.stderr or b""
         aborted = True
+    (out / "raw-driver-output.csv").write_bytes(stdout)
+    (out / "process-stderr.txt").write_bytes(stderr)
     if sha(exe.read_bytes()) != before:
         raise SystemExit("executable changed during collection")
     try:
         provenance.require_clean_tracked_tree()
     except ValueError as error:
         raise SystemExit(str(error)) from error
-    (out / "raw-driver-output.csv").write_text(stdout, encoding="utf8")
-    (out / "process-stderr.txt").write_text(stderr, encoding="utf8")
     source_root = Path(provenance.git("rev-parse", "--show-toplevel")).resolve()
     safe_command = provenance.redact(subprocess.list2cmdline(command), source_root, build)
     (out / "measurement-command.txt").write_text(
@@ -384,7 +375,7 @@ def main():
 
     warmups = []
     try:
-        for line in stderr.splitlines():
+        for line in stderr.decode("utf-8").splitlines():
             if line.startswith("geo02_warmup="):
                 warmups.append(json.loads(line[len("geo02_warmup=") :]))
         warmup_keys = {(row["scenario"], row["repetition"]) for row in warmups}
@@ -395,11 +386,15 @@ def main():
             raise ValueError("missing/duplicate warmup outcomes")
         for row in warmups:
             require_driver_geometry(row["output_points"], row["support_values"])
+            if type(row.get("support_checks")) is not int:
+                raise ValueError("warmup support_checks must be an integer")
+            canonical(row)
             if row["status"] == "passed" and (
                 not row["oracle_passed"]
                 or not render.check_candidate_reduction(row["scenario"], row)
                 or not render.check_oracle(row["scenario"], row["output_points"])
                 or not render.check_supports(row["scenario"], row["support_values"])
+                or row["support_checks"] != len(SCENARIOS[row["scenario"]]["directions"])
             ):
                 row["status"] = "oracle_failed"
                 row["oracle_passed"] = False
@@ -413,7 +408,7 @@ def main():
     else:
         warmup_parse_error = None
     try:
-        reader = csv.DictReader(stdout.splitlines())
+        reader = csv.DictReader(io.StringIO(stdout.decode("utf-8"), newline=""))
         if tuple(reader.fieldnames or ()) != FIELDS:
             raise ValueError("unexpected driver CSV header")
         trials: list[Trial] = []
