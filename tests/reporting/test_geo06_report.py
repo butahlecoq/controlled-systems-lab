@@ -10,6 +10,8 @@ from pathlib import Path
 
 MODULE = Path(__file__).resolve().parents[2] / "scripts" / "reports" / "geo06_report.py"
 SPEC = importlib.util.spec_from_file_location("geo06_report", MODULE)
+if SPEC is None or SPEC.loader is None:
+    raise ImportError(f"cannot load the GEO-06 report from {MODULE}")
 report = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(report)
 

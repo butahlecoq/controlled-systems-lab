@@ -15,9 +15,9 @@ import platform
 import re
 import statistics
 import subprocess
-import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import TypedDict
 
 SCHEMA = "csl.geo06-quickhull-report/1"
 INTERVAL = (
@@ -25,7 +25,14 @@ INTERVAL = (
     "excludes process startup, CSV serialization and Python saved-row verification"
 )
 SOURCE = "ce63bff5a0face88c3c5e977f7d96337e8cbe948"
-CASES = {
+
+
+class HullFixture(TypedDict):
+    points: list[list[int | float]]
+    indices: str
+
+
+CASES: dict[str, HullFixture] = {
     "square_duplicates": {
         "points": [[0, 0], [1, 0], [1, 1], [0, 1], [0.5, 0.5], [0, 0], [1, 0]],
         "indices": "0:1:2:3",
@@ -103,7 +110,7 @@ def validate_rows(rows, repetitions, warmups, calls):
     ]
     if len(rows) != len(expected):
         raise ValueError("missing or extra trial")
-    for row, identity in zip(rows, expected):
+    for row, identity in zip(rows, expected, strict=True):
         if (row["scenario"], row["repetition"], row["warmup"]) != identity:
             raise ValueError("trial order or identity differs")
         if row["calls"] != calls or row["duration_ns"] < 0:
