@@ -85,6 +85,18 @@ on:
       - 'scripts/reports/figure_style.py'
       - 'scripts/reports/control_figure_data.py'
       - 'scripts/reports/control_figures.py'
+      - 'scripts/reports/stage_ext01.py'
+      - 'scripts/reports/stage_syn06.py'
+      - 'tests/reporting/test_ext01_saved_report.py'
+      - 'tests/reporting/test_syn06_report.py'
+      - 'scripts/reports/ext01/render_saved.py'
+      - 'scripts/reports/syn06/collect.py'
+      - 'reports/algorithm-results/tooling/syn06/collect.py'
+      - 'reports/algorithm-results/catalog.json'
+      - 'reports/algorithm-results/ext01-publications.json'
+      - 'reports/algorithm-results/syn06-publications.json'
+      - 'reports/algorithm-results/ext01-fixed-plan-20261016-11b7bc74/**'
+      - 'reports/algorithm-results/syn06-verifier-20261012-f0e32e2b/**'
       - 'scripts/reports/recorded_closed_loop_figures.py'
       - 'tests/reporting/test_recorded_closed_loop_figures.py'
       - 'tests/reporting/test_viz03_control_figures.py'
@@ -323,6 +335,18 @@ on:
       - 'scripts/reports/figure_style.py'
       - 'scripts/reports/control_figure_data.py'
       - 'scripts/reports/control_figures.py'
+      - 'scripts/reports/stage_ext01.py'
+      - 'scripts/reports/stage_syn06.py'
+      - 'tests/reporting/test_ext01_saved_report.py'
+      - 'tests/reporting/test_syn06_report.py'
+      - 'scripts/reports/ext01/render_saved.py'
+      - 'scripts/reports/syn06/collect.py'
+      - 'reports/algorithm-results/tooling/syn06/collect.py'
+      - 'reports/algorithm-results/catalog.json'
+      - 'reports/algorithm-results/ext01-publications.json'
+      - 'reports/algorithm-results/syn06-publications.json'
+      - 'reports/algorithm-results/ext01-fixed-plan-20261016-11b7bc74/**'
+      - 'reports/algorithm-results/syn06-verifier-20261012-f0e32e2b/**'
       - 'scripts/reports/recorded_closed_loop_figures.py'
       - 'tests/reporting/test_recorded_closed_loop_figures.py'
       - 'tests/reporting/test_viz03_control_figures.py'
@@ -500,6 +524,26 @@ jobs:
         run: ruff format --check
       - name: Check types
         run: ty check
+      - name: Replay the saved EXT-01 fixed-plan and SYN-06 verifier catalogues
+        env:
+          MPLBACKEND: Agg
+        run: |
+          python -m unittest tests.reporting.test_ext01_saved_report tests.reporting.test_syn06_report
+          reports=reports/algorithm-results
+          site=$(mktemp -d "$RUNNER_TEMP/fixed-plan-verifier.XXXXXXXX")
+          printf '<html><body><ul></ul></body></html>\n' > "$site/index.html"
+          for topic in ext01 syn06; do
+            catalogue="$reports/$topic-publications.json"
+            source_id=$(jq -er '.reports[0].source_report_id' "$catalogue")
+            report_id=$(jq -er '.reports[0].report_id' "$catalogue")
+            checksum=$(jq -er '.reports[0].zip_sha256' "$catalogue")
+            stager="scripts/reports/stage_$topic.py"
+            python "$stager" --source "$reports/$source_id" > "$site/$topic.catalogue.json"
+            jq --sort-keys . "$catalogue" > "$site/$topic.expected.json"
+            jq --sort-keys . "$site/$topic.catalogue.json" | cmp "$site/$topic.expected.json" -
+            python "$stager" --catalog "$catalogue" --site "$site"
+            printf '%s  %s\n' "$checksum" "$site/$report_id.zip" | sha256sum --check
+          done
       - name: Check closed-loop task and replay input shapes
         run: python -m unittest tests.reporting.test_closed_loop_tasks
       - name: Exercise real Git and process behavior
