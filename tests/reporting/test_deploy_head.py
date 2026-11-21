@@ -166,6 +166,7 @@ class DeploymentHeadTest(unittest.TestCase):
         else:
             self.fail("Unsupported deploy queue policy")
 
+        published = "0" * 40
         for commit in pending:
             result, output, _ = self.run_gate(commit)
             self.assertEqual(result.returncode, 0, result.stderr)
