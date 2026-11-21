@@ -588,7 +588,7 @@ jobs:
         run: python -m unittest tests.reporting.test_closed_loop_tasks
       - name: Exercise real Git and process behavior
         run: python -m unittest discover -s tests/ci -p 'test_*.py'
-      - name: Exercise report staging and capture admission
+      - name: Exercise site additions and the APP02 staging caller
         run: |
           python -m unittest tests.reporting.test_ext07_capture
           for name in capture capability_capture two_parameter_capture; do
