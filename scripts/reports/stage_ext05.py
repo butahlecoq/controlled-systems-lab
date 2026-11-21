@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 HISTORICAL_REPORT_ID = "ext05-discretization-a40ba9647cc023dc"
 HISTORICAL_MANIFEST_SHA256 = "0e43afb313cc6fe28e52a9c690484257cfe421f5affd38bdc9a3f059cc6fc1c7"
 HISTORICAL_ZIP_SHA256 = "8dd0a3d8d0e84f284e01dfcb6f137580fc9a5cb68d54778f25f70e7d102a6853"
+HISTORICAL_RENDERER_SHA256 = "430d74139a1f70ecdcd122cb0068fcc3a8312b6eff0046d2ed0dc7ffe588db4c"
 HISTORICAL_STAGER_SHA256 = "755db9d956a147976ea4a936211dc3ec1833c37bef7ee713737864031aba7054"
 spec = importlib.util.spec_from_file_location(
     "ext05_saved_renderer", ROOT / "scripts/reports/ext05/render_saved.py"
@@ -59,6 +60,7 @@ def catalog_entry(bundle: Path) -> dict:
             and entry["zip_sha256"] == HISTORICAL_ZIP_SHA256,
             "Historical saved report manifest or ZIP checksum differs",
         )
+        entry["renderer_sha256"] = HISTORICAL_RENDERER_SHA256
         entry["stager_sha256"] = HISTORICAL_STAGER_SHA256
     return entry
 

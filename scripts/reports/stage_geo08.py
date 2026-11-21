@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 HISTORICAL_REPORT_ID = "geo08-lazy-6dbdd6b2f9235837"
 HISTORICAL_MANIFEST_SHA256 = "bfd55047b6febf948e634e75a06f84dde9c8b8cf78d27ecc73df9b62214d7fe6"
 HISTORICAL_ZIP_SHA256 = "f969b231052677f1e2b35f15bfe11f2bbc68792462b133f17e47b33309b87d30"
+HISTORICAL_RENDERER_SHA256 = "725677f7c25edb7c6cc75d850a6a31eb3a692782a57b58f0f0fdc16feac5e003"
 HISTORICAL_STAGER_SHA256 = "462b2c79c838c383e198fc5a373d40fc06d16d18a0acc10caf1d0dd064afdf75"
 spec = importlib.util.spec_from_file_location(
     "geo08_saved_renderer", ROOT / "scripts/reports/geo08/render_saved.py"
@@ -58,6 +59,7 @@ def catalog_entry(bundle: Path) -> dict:
             and entry["zip_sha256"] == HISTORICAL_ZIP_SHA256,
             "Historical saved report manifest or ZIP checksum differs",
         )
+        entry["renderer_sha256"] = HISTORICAL_RENDERER_SHA256
         entry["stager_sha256"] = HISTORICAL_STAGER_SHA256
     return entry
 
