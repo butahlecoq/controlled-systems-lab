@@ -698,7 +698,9 @@ jobs:
         run: |
           python -m unittest tests.reporting.test_report_data tests.reporting.test_render tests.reporting.test_publication_policy tests.reporting.test_report_source_identity tests.reporting.test_registered_kinds tests.reporting.test_landing tests.reporting.test_learning_book tests.reporting.test_plot tests.reporting.test_b04_publication_source_snapshot tests.reporting.test_publication_spine_boundaries
       - name: Replay the nominal-forward and terminal-minimizer saved reports
-        run: python -m unittest tests.reporting.test_syn01_publication tests.reporting.test_syn02_publication
+        run: |
+          python -m unittest tests.reporting.test_syn01_publication tests.reporting.test_syn02_publication
+          python -m unittest discover -s reports/algorithm-results/tooling/syn02 -p 'test_report.py'
       - name: Check cumulative Pages artifact identity and output
         run: python -m unittest tests.reporting.test_pages_augmentation_waiter
       - name: Check mathematical presentation and frozen HTML
