@@ -35,7 +35,7 @@ def plain(value):
 
 
 def dot(a, b):
-    return sum(x * y for x, y in zip(a, b))
+    return sum(x * y for x, y in zip(a, b, strict=True))
 
 
 def mv(a, x):
@@ -86,7 +86,7 @@ def construct(data):
     a = [[Q(v) for v in row] for row in p["A"]]
     b = [Q(row[0]) for row in p["B"]]
     e = [Q(row[0]) for row in p["E"]]
-    k = list(map(Q, data["K"]))
+    k = [Q(value) for value in data["K"]]
     r = Q(p["W"][1])
     f = [[a[i][j] + b[i] * k[j] for j in range(2)] for i in range(2)]
     first = [v * r for v in e]
@@ -107,14 +107,14 @@ def construct(data):
         state_support=supports,
         input_support=input_support,
         tightenings=bounds,
-        terminal=list(map(Q, data["nominal_terminal"])),
+        terminal=[Q(value) for value in data["nominal_terminal"]],
         gain_origin="prescribed; no optimization",
     )
 
 
 def nominal_problem(anchor, artifact):
     """The unchanged operational nominal-QP constructor consumes these bounds."""
-    return model.problem(tuple(map(Q, anchor)), artifact["tightenings"])
+    return model.problem(tuple(Q(value) for value in anchor), artifact["tightenings"])
 
 
 def verify(data, artifact):
@@ -124,7 +124,7 @@ def verify(data, artifact):
     a = [[Q(v) for v in row] for row in p["A"]]
     b = [Q(row[0]) for row in p["B"]]
     e = [Q(row[0]) for row in p["E"]]
-    k = list(map(Q, data["K"]))
+    k = [Q(value) for value in data["K"]]
     require(
         artifact["K"] == k and artifact["gain_origin"] == "prescribed; no optimization",
         "prescribed gain differs",
@@ -144,7 +144,10 @@ def verify(data, artifact):
         "tube generator shape differs",
     )
     vertices = {
-        tuple(sum(sign * g[i] for sign, g in zip(signs, artifact["generators"])) for i in range(2))
+        tuple(
+            sum(sign * g[i] for sign, g in zip(signs, artifact["generators"], strict=True))
+            for i in range(2)
+        )
         for signs in product((-1, 1), repeat=2)
     }
     expected = {(s, t - s) for s, t in product((-r, r), repeat=2)}
@@ -154,9 +157,12 @@ def verify(data, artifact):
         "exact H relation differs",
     )
     for x, w in product(vertices, (-r, r)):
-        successor = [v + ew * w for v, ew in zip(mv(f, x), e)]
+        successor = [v + ew * w for v, ew in zip(mv(f, x), e, strict=True)]
         require(
-            all(dot(row, successor) <= rhs for row, rhs in zip(artifact["H"], artifact["h"])),
+            all(
+                dot(row, successor) <= rhs
+                for row, rhs in zip(artifact["H"], artifact["h"], strict=True)
+            ),
             "RPI image escapes Z",
         )
     supports = [max(abs(x[i]) for x in vertices) for i in range(2)]

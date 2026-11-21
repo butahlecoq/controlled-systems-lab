@@ -93,8 +93,12 @@ def worker(data):
 
 
 def admission():
-    resource.setrlimit(resource.RLIMIT_CPU, (LIMITS["cpu_seconds"],) * 2)
-    resource.setrlimit(resource.RLIMIT_AS, (LIMITS["address_space_bytes"],) * 2)
+    if resource is None:
+        raise ValueError("process limits require POSIX resource support")
+    cpu = LIMITS["cpu_seconds"]
+    memory = LIMITS["address_space_bytes"]
+    resource.setrlimit(resource.RLIMIT_CPU, (cpu, cpu))
+    resource.setrlimit(resource.RLIMIT_AS, (memory, memory))
 
 
 def supervised(command, folder):
@@ -169,7 +173,7 @@ def capture(output):
             != data
         ):
             raise ValueError("capture source differs from committed bytes")
-    inputs = builder.input_record()
+    builder.input_record()
     output.mkdir(parents=True)
     for name, data in sources.items():
         target = output / "source" / name

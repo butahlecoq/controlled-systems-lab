@@ -18,7 +18,7 @@ from pathlib import Path, PurePosixPath
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-from scripts.reports.mpc06_offline import study
+from scripts.reports.mpc06_offline import study  # noqa: E402 (direct CLI needs the repository root)
 
 SOURCE = ROOT / "reports/algorithm-results/mpc06-offline-costs-8f58473d-20261110"
 ANCHOR = "4a6572d0fb95f7e95d1e93df79e2f81f03e31f4a74440c7a896df489f1705349"
@@ -56,7 +56,8 @@ def sums(data):
     values = {}
     for line in data.decode("ascii").splitlines():
         m = re.fullmatch(r"([0-9a-f]{64})  (.+)", line)
-        require(m is not None, "invalid checksum line")
+        if m is None:
+            raise ValueError("invalid checksum line")
         safe(m[2])
         require(m[2] not in values, "duplicate checksum path")
         values[m[2]] = m[1]

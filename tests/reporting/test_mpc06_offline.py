@@ -94,7 +94,6 @@ class SavedEvidenceTests(unittest.TestCase):
     def test_saved_work_and_forged_source_process_clock_inputs(self):
         import hashlib
         import json
-        import subprocess
         import tempfile
         import zipfile
 

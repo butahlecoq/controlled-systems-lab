@@ -158,10 +158,11 @@ def replay_episode(data, row):
     # Decode numeric arrays explicitly; no arbitrary result is regenerated/blessed.
     artifact = json.loads(body)
     for name in ("K", "center", "h", "state_support", "terminal"):
-        artifact[name] = list(map(Q, artifact[name]))
+        artifact[name] = [Q(value) for value in artifact[name]]
     for name in ("F", "generators", "tightenings"):
         artifact[name] = [
-            list(map(Q, r)) if name != "tightenings" else tuple(map(Q, r)) for r in artifact[name]
+            [Q(value) for value in r] if name != "tightenings" else tuple(Q(value) for value in r)
+            for r in artifact[name]
         ]
     artifact["input_support"] = Q(artifact["input_support"])
     checked = builder.verify(data, artifact)
