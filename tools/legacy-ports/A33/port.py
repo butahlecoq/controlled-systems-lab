@@ -103,8 +103,9 @@ def simplex_hull_mod(points: np.ndarray, column: int) -> HelperResult:
             remove = np.unique(np.concatenate((small, moved)))
             kept = np.delete(x, remove, axis=1)
             front = x[:, moved]
-            return HelperResult(np.concatenate((front, kept), axis=1), False,
-                                pivots, int(moved.size))
+            return HelperResult(
+                np.concatenate((front, kept), axis=1), False, pivots, int(moved.size)
+            )
         if pivots >= MAX_HELPER_PIVOTS:
             raise PortStop("inconclusive", "A16", "pivot capacity exceeded")
         entering, leaving = _entering_row(tableau, column, "A16")
@@ -130,22 +131,22 @@ def modified_sm(points: np.ndarray, candidate: np.ndarray) -> MembershipResult:
     while True:
         # max([]) is undefined in the archived helper. Preserve uncertainty.
         if count == 0:
-            raise PortStop("inconclusive", "constrained Modified_SM",
-                           "empty support has no MATLAB max result")
+            raise PortStop(
+                "inconclusive", "constrained Modified_SM", "empty support has no MATLAB max result"
+            )
         if np.max(tableau[-1, 1:]) <= EPS:
-            return MembershipResult(bool(tableau[-1, 0] > EPS), pivots,
-                                    tuple(int(x) for x in basis_columns))
+            return MembershipResult(
+                bool(tableau[-1, 0] > EPS), pivots, tuple(int(x) for x in basis_columns)
+            )
         if pivots >= MAX_HELPER_PIVOTS:
-            raise PortStop("inconclusive", "constrained Modified_SM",
-                           "pivot capacity exceeded")
+            raise PortStop("inconclusive", "constrained Modified_SM", "pivot capacity exceeded")
         entering = int(np.argmax(tableau[-1, 1:])) + 1
         column = tableau[:-1, entering].copy()
         column[column < EPS] = np.nan
         with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
             ratio = tableau[:-1, 0] / column
         if np.all(np.isnan(ratio)):
-            raise PortStop("inconclusive", "constrained Modified_SM",
-                           "no eligible leaving row")
+            raise PortStop("inconclusive", "constrained Modified_SM", "no eligible leaving row")
         leaving = int(np.nanargmin(ratio))
         basis_matrix[:, leaving] = original[:, entering]
         tableau = _solve(basis_matrix, original, "constrained Modified_SM")
@@ -154,21 +155,33 @@ def modified_sm(points: np.ndarray, candidate: np.ndarray) -> MembershipResult:
 
 
 def _record(status: str, reason: str = "", stage: str = "") -> dict:
-    return {"algorithm": "A33 Python 3 transcription", "algorithm_status": status,
-            "source_sha256": SOURCE_SHA256,
-            "reason": reason, "stage": stage, "output": None,
-            "itrt": 0, "observed_helper_pivots": 0, "helper_calls": {"A16": 0,
-            "constrained_Modified_SM": 0}, "stage2_scanned": 0,
-            "stage3_scanned": 0, "grouping_triggered": False,
-            "group_fixed_count": 0, "group_nearby_appends": 0}
+    return {
+        "algorithm": "A33 Python 3 transcription",
+        "algorithm_status": status,
+        "source_sha256": SOURCE_SHA256,
+        "reason": reason,
+        "stage": stage,
+        "output": None,
+        "itrt": 0,
+        "observed_helper_pivots": 0,
+        "helper_calls": {"A16": 0, "constrained_Modified_SM": 0},
+        "stage2_scanned": 0,
+        "stage3_scanned": 0,
+        "grouping_triggered": False,
+        "group_fixed_count": 0,
+        "group_nearby_appends": 0,
+    }
 
 
 def preprocess(cloud: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """A33's unique rows and signed max-abs box score, before Step 2."""
     unique = np.unique(cloud, axis=0)
     if len(unique) < 2:
-        raise PortStop("failed", "A33 preprocessing",
-                       "source selects columns 1:2 but fewer than two unique points exist")
+        raise PortStop(
+            "failed",
+            "A33 preprocessing",
+            "source selects columns 1:2 but fewer than two unique points exist",
+        )
     matrix = unique.T
     maximum, minimum = np.max(matrix, axis=1), np.min(matrix, axis=1)
     midpoint = 0.5 * (maximum + minimum)
@@ -176,8 +189,9 @@ def preprocess(cloud: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     if not np.all(np.isfinite(midpoint)) or not np.all(np.isfinite(widths)):
         raise PortStop("inconclusive", "A33 sorting", "nonfinite box arithmetic")
     if np.any(widths == 0):
-        raise PortStop("inconclusive", "A33 sorting",
-                       "zero-range axis makes source normalized score NaN")
+        raise PortStop(
+            "inconclusive", "A33 sorting", "zero-range axis makes source normalized score NaN"
+        )
     with np.errstate(all="raise"):
         scores = np.max(np.abs((matrix - midpoint[:, None]) / widths[:, None]), axis=0)
     # sortrows([unique,score],-last): descending signed max-abs score.
@@ -221,7 +235,9 @@ def run(points: list[list[float]]) -> dict:
                 # Cj persists across candidates, and current C grows only for
                 # points classified outside by the constrained sibling helper.
                 for previous in range(retained.shape[1]):
-                    if np.linalg.norm(candidate - retained[:, previous]) <= GROUP_RADIUS_FACTOR * np.min(widths):
+                    if np.linalg.norm(
+                        candidate - retained[:, previous]
+                    ) <= GROUP_RADIUS_FACTOR * np.min(widths):
                         nearby = np.column_stack((nearby, retained[:, previous]))
                         result["group_nearby_appends"] += 1
                 checked = modified_sm(np.column_stack((fixed, nearby)), candidate)
@@ -239,16 +255,23 @@ def run(points: list[list[float]]) -> dict:
             retained = checked.points
             column += 1 if checked.outside else checked.front_count
             if column < 0 or result["helper_calls"]["A16"] > MAX_HELPER_PIVOTS:
-                raise PortStop("inconclusive", "A33 final reduction",
-                               "final scan capacity exceeded")
+                raise PortStop(
+                    "inconclusive", "A33 final reduction", "final scan capacity exceeded"
+                )
         result["algorithm_status"] = "completed"
         result["output"] = retained.T.tolist()
     except PortStop as stop:
         result["algorithm_status"] = stop.status
         result["reason"] = stop.reason
         result["stage"] = stop.stage
-    except (FloatingPointError, OverflowError, ValueError, TypeError, IndexError,
-            np.linalg.LinAlgError) as error:
+    except (
+        FloatingPointError,
+        OverflowError,
+        ValueError,
+        TypeError,
+        IndexError,
+        np.linalg.LinAlgError,
+    ) as error:
         result["algorithm_status"] = "inconclusive"
         result["reason"] = f"numerical or shape failure: {error}"
         result["stage"] = "runtime"

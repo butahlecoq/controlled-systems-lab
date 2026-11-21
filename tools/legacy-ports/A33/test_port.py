@@ -45,8 +45,7 @@ class A33PortTests(unittest.TestCase):
         self.assertFalse(result["grouping_triggered"])
 
     def test_tenth_redundant_triggers_grouping_including_tenth_point(self):
-        points = CORNERS + [[i / 16, j / 16]
-                            for i in range(4, 13, 2) for j in range(4, 13, 2)]
+        points = CORNERS + [[i / 16, j / 16] for i in range(4, 13, 2) for j in range(4, 13, 2)]
         result = port.run(points)
         self.assertEqual(result["algorithm_status"], "completed")
         self.assertTrue(result["grouping_triggered"])
@@ -57,9 +56,11 @@ class A33PortTests(unittest.TestCase):
         self.assertEqual(oracle.check(points, result["output"])["status"], "verified")
 
     def test_grouping_retains_late_outside_point_and_accumulates_nearby(self):
-        points = ([[-1, 0], [1, 0], [0, -1], [0, 1]]
-                  + [[x, 0.75] for x in (0.61, 0.66, 0.70)]
-                  + [[k / 64, 0] for k in range(49, 64)])
+        points = (
+            [[-1, 0], [1, 0], [0, -1], [0, 1]]
+            + [[x, 0.75] for x in (0.61, 0.66, 0.70)]
+            + [[k / 64, 0] for k in range(49, 64)]
+        )
         original = port.modified_sm
         nearby_sizes = {}
 
@@ -74,17 +75,19 @@ class A33PortTests(unittest.TestCase):
         self.assertEqual(result["algorithm_status"], "completed")
         self.assertTrue(result["grouping_triggered"])
         self.assertEqual(result["group_nearby_appends"], 3)
-        self.assertEqual(nearby_sizes, {
-            (0.61, 0.75): 0,
-            (0.66, 0.75): 1,
-            (0.70, 0.75): 3,
-        })
+        self.assertEqual(
+            nearby_sizes,
+            {
+                (0.61, 0.75): 0,
+                (0.66, 0.75): 1,
+                (0.70, 0.75): 3,
+            },
+        )
         self.assertIn([0.7, 0.75], result["output"])
         self.assertEqual(oracle.check(points, result["output"])["status"], "verified")
 
     def test_tenth_redundant_at_last_column_is_checked_again_in_group(self):
-        interior = [[i / 16, j / 16]
-                    for i in range(4, 13, 2) for j in range(4, 13, 2)][:10]
+        interior = [[i / 16, j / 16] for i in range(4, 13, 2) for j in range(4, 13, 2)][:10]
         points = CORNERS + interior
         result = port.run(points)
         self.assertEqual(result["algorithm_status"], "completed")
@@ -130,7 +133,10 @@ class A33PortTests(unittest.TestCase):
     def test_cli_retains_status_and_quality_in_one_json_record(self):
         completed = subprocess.run(
             [sys.executable, str(HERE / "port.py"), str(HERE / "fixtures" / "square.json")],
-            capture_output=True, text=True, check=True)
+            capture_output=True,
+            text=True,
+            check=True,
+        )
         result = json.loads(completed.stdout)
         self.assertEqual(result["algorithm_status"], "completed")
         self.assertEqual(result["quality"]["status"], "verified")
@@ -139,8 +145,12 @@ class A33PortTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             malformed = Path(directory) / "malformed.json"
             malformed.write_text("{broken", encoding="utf-8")
-            failed = subprocess.run([sys.executable, str(HERE / "port.py"), str(malformed)],
-                                    capture_output=True, text=True, check=False)
+            failed = subprocess.run(
+                [sys.executable, str(HERE / "port.py"), str(malformed)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
             self.assertEqual(failed.returncode, 2)
             failure = json.loads(failed.stdout)
             self.assertEqual(failure["algorithm_status"], "failed")

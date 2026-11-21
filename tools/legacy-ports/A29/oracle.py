@@ -1,4 +1,5 @@
 """A29 identity wrapper for the shared exact binary64 source-hull checker."""
+
 from __future__ import annotations
 
 import importlib.util
@@ -17,6 +18,7 @@ def manifest_digest(points: list[list[float]]) -> str:
     return _SHARED.manifest_digest(points, _DIGEST_DOMAIN)
 
 
-def check(input_points: list[list[float]], output_points: list[list[float]] | None,
-          max_points: int = 64) -> dict:
+def check(
+    input_points: list[list[float]], output_points: list[list[float]] | None, max_points: int = 64
+) -> dict:
     return _SHARED.check(input_points, output_points, max_points, _DIGEST_DOMAIN)
