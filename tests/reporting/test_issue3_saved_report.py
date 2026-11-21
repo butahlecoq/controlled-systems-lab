@@ -1,4 +1,5 @@
 """Saved-only checks for the frozen issue #3 accepted report."""
+
 from __future__ import annotations
 
 import hashlib
@@ -25,14 +26,17 @@ class Issue3SavedReportTests(unittest.TestCase):
         record = native.render(BUNDLE, check=True)
         self.assertEqual(record["source_commit"], native.SOURCE)
         self.assertEqual(record["harness_commit"], native.HARNESS)
-        self.assertEqual((record["warmups"], record["measured_batches"],
-                          record["failed_batches"]), (8, 56, 0))
+        self.assertEqual(
+            (record["warmups"], record["measured_batches"], record["failed_batches"]), (8, 56, 0)
+        )
         by_name = {r["fixture"]: r for r in record["summary"]}
         self.assertEqual(by_name["b08_rounded"]["median_batch_ns"], 84_898_000)
         self.assertEqual(by_name["b08_rounded"]["batch_checked_calls"], 1)
         self.assertEqual(by_name["l19"]["batch_checked_calls"], 10000)
-        self.assertEqual(by_name["all_infeasible"]["result"]["rejected_plans"],
-                         native.LITERALS["all_infeasible"]["rejected_plans"])
+        self.assertEqual(
+            by_name["all_infeasible"]["result"]["rejected_plans"],
+            native.LITERALS["all_infeasible"]["rejected_plans"],
+        )
         self.assertIn("contention", record["concurrent_work_note"])
         self.assertIn("Inconclusive", record["performance_conclusion"])
 
@@ -41,8 +45,9 @@ class Issue3SavedReportTests(unittest.TestCase):
             target = Path(temporary) / native.REPORT_ID
             shutil.copytree(BUNDLE, target)
             raw = target / "evidence/accepted-001/accepted.stdout"
-            raw.write_bytes(raw.read_bytes().replace(b'"checked_calls":10000',
-                                                   b'"checked_calls":9999', 1))
+            raw.write_bytes(
+                raw.read_bytes().replace(b'"checked_calls":10000', b'"checked_calls":9999', 1)
+            )
             with self.assertRaisesRegex(ValueError, "accepted.*capture|raw JSONL pin"):
                 native.validate_evidence(target)
             shutil.copyfile(BUNDLE / "evidence/accepted-001/accepted.stdout", raw)
@@ -71,11 +76,14 @@ class Issue3SavedReportTests(unittest.TestCase):
         files = publication.publication_artifacts(BUNDLE, item)
         archive = publication.offline_zip(BUNDLE, item)
         with zipfile.ZipFile(io.BytesIO(archive)) as zipped:
-            self.assertEqual(zipped.read(item.report_id + "/evidence/accepted-001/accepted.stdout"),
-                             native.evidence(BUNDLE, "accepted.stdout"))
+            self.assertEqual(
+                zipped.read(item.report_id + "/evidence/accepted-001/accepted.stdout"),
+                native.evidence(BUNDLE, "accepted.stdout"),
+            )
             self.assertEqual(zipped.read("index.html"), files["index.html"])
-        self.assertEqual(publication.catalogue_entry(BUNDLE)["zip_sha256"],
-                         hashlib.sha256(archive).hexdigest())
+        self.assertEqual(
+            publication.catalogue_entry(BUNDLE)["zip_sha256"], hashlib.sha256(archive).hexdigest()
+        )
 
     def test_public_route_tracks_normalized_publisher_bytes(self):
         original = publication.adapt(BUNDLE).report_id
