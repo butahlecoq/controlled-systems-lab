@@ -668,10 +668,6 @@ jobs:
         run: |
           python -m unittest discover -s tests/reporting -p 'test_syn03_strategy_a_report.py'
           python -m unittest discover -s tests/reporting -p 'test_syn03_ts02_report.py'
-      - name: Verify both saved Strategy A offline ZIPs
-        run: >-
-          python scripts/reports/site.py --catalog reports/algorithm-results/catalog.json
-          --check --out "$RUNNER_TEMP/strategy-a-site"
       - name: Check six saved environment routes and offline ZIPs
         run: >-
           python -m unittest
