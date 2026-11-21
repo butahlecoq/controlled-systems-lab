@@ -69,6 +69,15 @@ on:
       - 'reports/algorithm-results/geo06-b010fb3df212604b/**'
       - 'reports/algorithm-results/geo06-b010fb3df212604b.source.zip'
       - 'scripts/reports/report_data.py'
+      - 'scripts/reports/mpc03/b08_report.py'
+      - 'scripts/reports/mpc05/reference.py'
+      - 'scripts/reports/stage_mpc03_b08.py'
+      - 'scripts/reports/stage_mpc05_causal_tree.py'
+      - 'tests/reporting/test_mpc03_b08_report.py'
+      - 'tests/reporting/test_mpc05_causal_tree_publication.py'
+      - 'tests/reporting/test_mpc05_reference.py'
+      - 'reports/algorithm-results/mpc03-b08-l04-miQCP-v1/**'
+      - 'reports/algorithm-results/mpc05-causal-tree-pilot-v2/**'
       - 'tests/reporting/test_report_data.py'
       - 'tests/reporting/test_render.py'
       - 'tests/reporting/test_publication_policy.py'
@@ -1135,6 +1144,8 @@ jobs:
           route=$(python scripts/reports/stage_perf03.py --source "$source" --site "$site")
           test "$route" = perf03-ts01-single-process-correlation-20261014-365f6e659e316219
           diff -r "$source" "$site/$route"
+      - name: Replay the MPC-03 B08 and MPC-05 causal-tree saved reports
+        run: python -m unittest tests.reporting.test_mpc03_b08_report tests.reporting.test_mpc05_causal_tree_publication tests.reporting.test_mpc05_reference
       - name: Check the four-state projection approximation report
         run: python -m unittest discover -s tests/reporting -p 'test_four_state_projection_approximations.py'
       - name: Replay saved EXP-04, EXT-05, GEO-08 and OPT-10 catalogues
