@@ -1,15 +1,16 @@
 """Source/report staging preserves inputs and rejects stale evidence."""
 
-from pathlib import Path
+import hashlib
+import importlib.util
+import json
 import tempfile
 import unittest
-from unittest import mock
-import json
-import hashlib
 import zipfile
-import importlib.util
-from scripts.reports.mpc06_delivery import records, figures
+from pathlib import Path
+from unittest import mock
+
 from scripts.reports import stage_mpc06_delivery as STAGE
+from scripts.reports.mpc06_delivery import figures, records
 
 HAS_MATPLOTLIB = importlib.util.find_spec("matplotlib") is not None
 

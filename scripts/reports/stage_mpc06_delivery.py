@@ -1,27 +1,28 @@
 """Validate and stage the complete MPC-06 source/report artifact, never a binary."""
 
 from __future__ import annotations
+
 import argparse
 import hashlib
 import json
-from pathlib import Path
 import sys
 import tempfile
 import zipfile
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-from scripts.reports.mpc06_delivery import records, figures
+from scripts.reports.mpc06_delivery import figures, records  # noqa: E402
 
 SOURCE = ROOT / "reports/algorithm-results/mpc06-completion-v2"
 
 
-def digest(data):
+def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def validate(source):
+def validate(source: Path) -> dict[str, bytes]:
     contents = records.inventory(source)
     records.validate(source / "input")
     with tempfile.TemporaryDirectory(prefix="mpc06-publication-check-") as temporary:
@@ -37,7 +38,7 @@ def validate(source):
     return contents
 
 
-def stage(source, site):
+def stage(source: Path, site: Path) -> str:
     contents = validate(source)
     if site.is_symlink() or not site.is_dir():
         raise ValueError("publication site must be a regular directory")

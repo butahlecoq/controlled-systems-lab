@@ -63,6 +63,7 @@ def build(initial, gain):
     if tuple(gain) not in GAINS:
         raise ValueError("unsupported gain/policy")
     paths = []
+    common: set[Q] = set()
     constraints = []
     lower = None
     upper = None
@@ -73,13 +74,14 @@ def build(initial, gain):
         minus = trajectory(initial, Q(-1), gain, disturbances)
         f0, f1, fm = zero["cost"], plus["cost"], minus["cost"]
         q = (f1 + fm) / 2 - f0
+        common.add(q)
         b = (f1 - fm) / 2
         paths.append(
             dict(index=index, disturbances=disturbances, quadratic=q, linear=b, constant=f0)
         )
         coordinates0 = [x for state in zero["states"] for x in state] + list(zero["controls"])
         coordinates1 = [x for state in plus["states"] for x in state] + list(plus["controls"])
-        for coordinate, (constant, end) in enumerate(zip(coordinates0, coordinates1)):
+        for coordinate, (constant, end) in enumerate(zip(coordinates0, coordinates1, strict=True)):
             slope = end - constant
             for sign in (-1, 1):
                 coefficient = sign * slope
@@ -97,7 +99,6 @@ def build(initial, gain):
                     )
                 elif bound < 0:
                     feasible = False
-    common = {path["quadratic"] for path in paths}
     if len(common) != 1 or next(iter(common)) <= 0:
         raise ValueError("common positive quadratic premise failed")
     if lower is None or upper is None:
@@ -112,7 +113,7 @@ def build(initial, gain):
 
 
 def solve(initial, gain):
-    initial = tuple(map(Q, initial))
+    initial = tuple(Q(value) for value in initial)
     gain = tuple(gain)
     built = build(initial, gain)
     result = dict(
@@ -220,7 +221,7 @@ def check(result):
             raise ValueError("lower bound contains inactive cost")
         derivative = sum(
             w * (2 * paths[i]["quadratic"] * a + paths[i]["linear"])
-            for i, w in zip(indices, weights)
+            for i, w in zip(indices, weights, strict=True)
         )
         if derivative != 0:
             raise ValueError("active convex lower bound is not stationary")
@@ -234,14 +235,14 @@ def check(result):
 def decode(record):
     """Decode only the declared rational fields; identifiers stay identifiers."""
     result = dict(record)
-    result["initial"] = tuple(map(Q, record["initial"]))
+    result["initial"] = tuple(Q(value) for value in record["initial"])
     result["gain"] = tuple(record["gain"])
-    result["interval"] = tuple(map(Q, record["interval"]))
+    result["interval"] = tuple(Q(value) for value in record["interval"])
     result["common_quadratic"] = Q(record["common_quadratic"])
     result["paths"] = [
         dict(
             path,
-            disturbances=tuple(map(Q, path["disturbances"])),
+            disturbances=tuple(Q(value) for value in path["disturbances"]),
             **{key: Q(path[key]) for key in ("quadratic", "linear", "constant")},
         )
         for path in record["paths"]
@@ -253,11 +254,11 @@ def decode(record):
     if record["feasible"]:
         for key in ("a", "worst_cost"):
             result[key] = Q(record[key])
-        result["candidates"] = list(map(Q, record["candidates"]))
+        result["candidates"] = [Q(value) for value in record["candidates"]]
         proof = dict(record["certificate"])
         if "slope" in proof:
             proof["slope"] = Q(proof["slope"])
         if "weights" in proof:
-            proof["weights"] = list(map(Q, proof["weights"]))
+            proof["weights"] = [Q(value) for value in proof["weights"]]
         result["certificate"] = proof
     return result

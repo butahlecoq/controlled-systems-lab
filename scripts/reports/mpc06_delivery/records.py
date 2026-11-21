@@ -1,22 +1,23 @@
 """Build and independently validate the exact-reference delivery record."""
 
 from __future__ import annotations
+
 import argparse
-from fractions import Fraction as Q
-import hashlib
 import json
-from pathlib import Path
 import re
 import shutil
 import subprocess
 import sys
 import time
+from fractions import Fraction as Q
+from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-from scripts.reports.mpc06_delivery import reference
-from scripts.reports.mpc06_online import evidence, model
+from scripts.reports.mpc06_delivery import reference  # noqa: E402
+from scripts.reports.mpc06_online import evidence, model  # noqa: E402
 
 UPSTREAM = ROOT / "reports/algorithm-results/mpc06-online-anchor-portable-v3"
 REVIEWED_UPSTREAM_MANIFEST_SHA256 = (
@@ -47,7 +48,7 @@ def plain(value):
     return json.loads(json.dumps(value, default=encode))
 
 
-def inventory(source):
+def inventory(source: Path) -> dict[str, bytes]:
     contents = evidence.files(source)
     actual = {
         name: evidence.digest(data) for name, data in contents.items() if name != "SHA256SUMS"
@@ -117,7 +118,7 @@ def held_plan(initial, a):
 
 
 def make_record(online, upstream_files):
-    result = dict(
+    result: dict[str, Any] = dict(
         schema="csl.mpc06-delivery/1",
         source_commit=subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
@@ -154,7 +155,7 @@ def make_record(online, upstream_files):
         ],
     )
     for initial_text in cases(online):
-        initial = tuple(map(Q, initial_text))
+        initial = tuple(Q(value) for value in initial_text)
         references = [reference.solve(initial, gain) for gain in reference.GAINS]
         k_value = references[1]["worst_cost"]
         held = []
@@ -226,7 +227,7 @@ def check(record, online, upstream_files, source_files=None):
     reference_count = 0
     held_count = 0
     for case in record["cases"]:
-        initial = tuple(map(Q, case["initial"]))
+        initial = tuple(Q(value) for value in case["initial"])
         if [tuple(row["gain"]) for row in case["references"]] != list(reference.GAINS):
             raise ValueError("reference policy classes changed")
         for value in case["references"]:
