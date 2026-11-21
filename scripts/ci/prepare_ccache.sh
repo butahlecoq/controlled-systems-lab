@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -u
 
-# ccache only improves build time. Its absence must never prevent validation.
 enabled=false
 if [[ "${RUNNER_OS:-}" == Linux && "${CACHE_CLEAN:-false}" != true ]]; then
   if ! command -v ccache >/dev/null 2>&1 || ! ccache --version >/dev/null 2>&1; then

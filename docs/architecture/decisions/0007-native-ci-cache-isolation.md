@@ -13,6 +13,8 @@ Pull requests can read trusted main snapshots. Only trusted main runs publish to
 
 Each build lane owns its immutable archive snapshots. The core lane can finish before a full or probe lane and may have only a subset of its dependencies. Including the lane in the cache identity prevents the core lane from claiming the full or probe archive key with a partial snapshot.
 
+The compiler cache is an optional build-time optimization. A missing cache binary or a failed installation attempt disables compiler-object caching without failing validation. The setup script reports it as enabled only after `ccache --version` succeeds, and compiler-cache operations run only when that output is true. Raw dependency-archive caching is independent of compiler-cache availability.
+
 ## Verification
 
-The policy is implemented in `scripts/ci/cache_keys.py` and exercised by `tests/ci/test_cache_keys.py`. The original cache work is tracked in [PR #490](https://github.com/butahlecoq/controlled-systems-lab/pull/490).
+Cache namespace policy is implemented in `scripts/ci/cache_keys.py` and exercised by `tests/ci/test_cache_keys.py`. Optional compiler-cache setup is implemented in [`prepare_ccache.sh`](../../../scripts/ci/prepare_ccache.sh) and covered by [`test_prepare_ccache.py`](../../../tests/ci/test_prepare_ccache.py). The original cache work is tracked in [PR #490](https://github.com/butahlecoq/controlled-systems-lab/pull/490).
