@@ -63,7 +63,7 @@ def adapt(bundle: Path, allow_test: bool = False) -> common.PublicationRecord:
         f"{len(measured)} alternating baseline/recursive pairs across {fixture_count} fixed clouds; "
         f"{complete_pairs} pairs complete; performance interpretation inconclusive"
     )
-    return common.PublicationRecord(
+    publication = common.PublicationRecord(
         KIND,
         public_id,
         common._digest(record),
@@ -75,6 +75,7 @@ def adapt(bundle: Path, allow_test: bool = False) -> common.PublicationRecord:
         record["payload_sha256"],
         bundle.name,
     )
+    return common.preserve_historical_publication(bundle, publication, offline_zip)
 
 
 def render_page(

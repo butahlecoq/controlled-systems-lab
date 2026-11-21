@@ -21,6 +21,8 @@ sys.path.insert(0, str(ROOT / "scripts/reports"))
 
 def load(name, path):
     spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"cannot load {name} from {path}")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -68,8 +70,14 @@ def make_records():
         row = copy.deepcopy(base)
         primal = fixture["expected_phase_one_primal"]
         original_rows_max_violation = max(
-            abs(sum(coefficient * value for coefficient, value in zip(matrix_row, primal)) - target)
-            for matrix_row, target in zip(fixture["matrix"], fixture["rhs"])
+            abs(
+                sum(
+                    coefficient * value
+                    for coefficient, value in zip(matrix_row, primal, strict=True)
+                )
+                - target
+            )
+            for matrix_row, target in zip(fixture["matrix"], fixture["rhs"], strict=True)
         )
         row.update(
             {
@@ -189,8 +197,8 @@ class Opt04PublicationTests(unittest.TestCase):
         )
         primal = row["result"]["primal"]
         expected = max(
-            abs(sum(a * x for a, x in zip(matrix_row, primal)) - target)
-            for matrix_row, target in zip(fixture["matrix"], fixture["rhs"])
+            abs(sum(a * x for a, x in zip(matrix_row, primal, strict=True)) - target)
+            for matrix_row, target in zip(fixture["matrix"], fixture["rhs"], strict=True)
         )
         self.assertEqual(1.0, expected)
         self.assertEqual(expected, row["original_rows_max_violation"])
@@ -324,7 +332,9 @@ class Opt04PublicationTests(unittest.TestCase):
             ):
                 with self.subTest(field=field):
                     changed = copy.deepcopy(catalogue)
-                    changed["reports"][-1][field] = bad
+                    reports = changed["reports"]
+                    assert isinstance(reports, list)
+                    reports[-1][field] = bad
                     catalog_path.write_text(json.dumps(changed))
                     rejected = root / ("rejected-" + field)
                     with self.assertRaises(ValueError):

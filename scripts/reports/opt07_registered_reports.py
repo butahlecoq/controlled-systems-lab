@@ -61,7 +61,7 @@ def adapt(bundle: Path) -> common.PublicationRecord:
         "21 verified measured 100-call batches across three fixed ordered-hull "
         "clouds; performance interpretation inconclusive"
     )
-    return common.PublicationRecord(
+    publication = common.PublicationRecord(
         KIND,
         public_id,
         common._digest(record),
@@ -73,6 +73,7 @@ def adapt(bundle: Path) -> common.PublicationRecord:
         record["payload_sha256"],
         bundle.name,
     )
+    return common.preserve_historical_publication(bundle, publication, offline_zip)
 
 
 def render_page(bundle: Path, publication: common.PublicationRecord) -> str:

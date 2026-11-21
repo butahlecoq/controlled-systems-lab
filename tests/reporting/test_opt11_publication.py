@@ -14,6 +14,8 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts" / "reports"))
 SITE_PATH = ROOT / "scripts" / "reports" / "site.py"
 SITE_SPEC = importlib.util.spec_from_file_location("csl_opt11_test_report_site", SITE_PATH)
+if SITE_SPEC is None or SITE_SPEC.loader is None:
+    raise ImportError("cannot load the CSL report site")
 report_site = importlib.util.module_from_spec(SITE_SPEC)
 SITE_SPEC.loader.exec_module(report_site)
 
@@ -211,6 +213,20 @@ class Opt11PublicationTests(unittest.TestCase):
         out_root = root / "algorithm-results"
         out_root.mkdir()
         return builder.build(collection, out_root, allow_test=True)
+
+    def test_committed_report_keeps_its_reviewed_publication(self):
+        import opt11_registered_reports as adapter
+
+        bundle = ROOT / "reports/algorithm-results/opt11-8cfbc0c65f420dfd"
+        publication = adapter.adapt(bundle)
+        self.assertEqual(
+            publication.report_id,
+            "opt11-a43ae7725dd3ab72d2034473aeb6c5805f2d1820b2ccd70b8383ef300a4b9865",
+        )
+        self.assertEqual(
+            hashlib.sha256(adapter.offline_zip(bundle, publication)).hexdigest(),
+            "90b609866df72e0432ae7ef9dbe4f4692a321c6d7b84225a0cb1bf6254704767",
+        )
 
     def test_saved_collection_rejects_compiler_path_mismatch(self):
         with tempfile.TemporaryDirectory() as temp:

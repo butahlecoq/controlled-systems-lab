@@ -1060,6 +1060,22 @@ _HISTORICAL_PUBLICATIONS: dict[str, _HistoricalPublicationPin] = {
         "report_id": "opt04-20261013T172839Z-bf1844fdf81c94c82ca91aadbd9d0988c7367093c5cf70269c2d0e0ca7d44b2f",
         "zip_sha256": "4e9d2d193cf83d56fa308ba3b7b3ebddf2728d8090e804ed0c2178ab0fbf3db7",
     },
+    "opt07-bbb4aee749d643ff": {
+        "identity_files_sha256": {
+            "opt07-bbb4aee749d643ff.source.zip": "d4cfaff0dc93c0008c28f86c234a28f29a6b1eebce53d194e094030c09112a2b"
+        },
+        "inventory_sha256": "f6ee1e9a0ce0aa3a4eb00451e5995dde9376871c5023492f06e6babd912ae239",
+        "report_id": "opt07-6e77b298e159fa0b80d5d69ccd8c14233eb8830513a5d060f98ee76d8e414c96",
+        "zip_sha256": "287ac701e0c1f2d19d36f31747bde732fefa548398e8632738065e1b85bc167d",
+    },
+    "opt11-8cfbc0c65f420dfd": {
+        "identity_files_sha256": {
+            "opt11-8cfbc0c65f420dfd.source.zip": "0538dac12c7b6892b297f712a4bcb2ba1c4252ad1c73056480ea65692898b6a6"
+        },
+        "inventory_sha256": "0e63f0c546c13fe33743256d25c4896b8512f9a5f41c43d920c230b462ae5f7d",
+        "report_id": "opt11-a43ae7725dd3ab72d2034473aeb6c5805f2d1820b2ccd70b8383ef300a4b9865",
+        "zip_sha256": "90b609866df72e0432ae7ef9dbe4f4692a321c6d7b84225a0cb1bf6254704767",
+    },
     "opt05-hull-20261012-d1c211c2": {
         "inventory_sha256": "a5b97b8f4ac0acb877d2bc9776ea0a991244c87c7cac2313d61513b5e7939bc3",
         "report_id": "opt05-hull-20261012-d6d3282081d5ea90d8a0c440ccc1ec774d40221e209a01d8207ebd06a551dbf5",

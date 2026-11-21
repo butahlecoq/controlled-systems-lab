@@ -21,6 +21,8 @@ FIXTURES = report.FIXTURES
 site_spec = importlib.util.spec_from_file_location(
     "opt07_report_site", Path(__file__).resolve().parents[2] / "scripts/reports/site.py"
 )
+if site_spec is None or site_spec.loader is None:
+    raise ImportError("cannot load the CSL report site")
 report_site = importlib.util.module_from_spec(site_spec)
 site_spec.loader.exec_module(report_site)
 
@@ -158,6 +160,20 @@ def synthetic_collection(directory: Path) -> None:
 
 
 class SavedReportTests(unittest.TestCase):
+    def test_committed_report_keeps_its_reviewed_publication(self):
+        bundle = (
+            Path(__file__).resolve().parents[2] / "reports/algorithm-results/opt07-bbb4aee749d643ff"
+        )
+        publication = publisher.adapt(bundle)
+        self.assertEqual(
+            publication.report_id,
+            "opt07-6e77b298e159fa0b80d5d69ccd8c14233eb8830513a5d060f98ee76d8e414c96",
+        )
+        self.assertEqual(
+            hashlib.sha256(publisher.offline_zip(bundle, publication)).hexdigest(),
+            "287ac701e0c1f2d19d36f31747bde732fefa548398e8632738065e1b85bc167d",
+        )
+
     def test_build_check_and_literal_batch_median_from_synthetic_raw(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
