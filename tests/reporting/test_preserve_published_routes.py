@@ -89,7 +89,15 @@ class PublishedRoutePreservationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             site = Path(directory)
             assets = preservation.payloads()
-            self.assertEqual(preservation.stage(site)["preserved_routes"], 671)
+            manifest = json.loads((preservation.SOURCE / "manifest.json").read_bytes())
+            routes = {alias["route"] for alias in manifest["aliases"]}
+            for archive in manifest["archives"]:
+                routes.add(archive["path"])
+                routes.update(
+                    name for name, member in archive["members"].items() if member["publish"]
+                )
+            self.assertEqual(set(assets), routes)
+            self.assertEqual(preservation.stage(site)["preserved_routes"], len(routes))
             self.assertEqual(
                 {
                     p.relative_to(site).as_posix(): p.read_bytes()
@@ -98,13 +106,15 @@ class PublishedRoutePreservationTests(unittest.TestCase):
                 },
                 assets,
             )
-            self.assertEqual(preservation.stage(site)["preserved_routes"], 671)
-            self.assertEqual(preservation.stage(site)["preserved_top_level_zips"], 7)
-            self.assertEqual(sum(n.endswith(".zip") for n in assets), 33)
+            self.assertEqual(preservation.stage(site)["preserved_routes"], len(routes))
+            self.assertEqual(
+                preservation.stage(site)["preserved_top_level_zips"], len(manifest["archives"])
+            )
             self.assertFalse(any(".git" in Path(n).parts for n in assets))
 
-    def test_original_mpc08_mpc10_namespaces_and_offline_source_objects_survive(self):
+    def test_original_report_namespaces_and_offline_source_objects_survive(self):
         archives = {
+            "mpc06-offline-costs-ff0186caf3e1ac2f4425": "10c782f2e033382204ba97bc8ffc900f731b1f52418bb32910cff0980dbac108",
             "mpc08-complete-5a9414f2ae07b6708738": "8e8351b8cca2eed02f80d0f9930d2fd78ecff8cdd242b35b75f1d651b9c26dd6",
             "mpc10-comparison-cbf22e8c7e22c30bf91f": "05c9be1e826fb032caf11108ae9bea2644bf60f039f296205e2114aa9f787224",
         }
