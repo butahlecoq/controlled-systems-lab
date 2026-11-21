@@ -1,6 +1,7 @@
 """Saved-input rendering and offline safety behavior."""
 
 import csv
+import errno
 import hashlib
 import importlib
 import importlib.util
@@ -9,6 +10,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
@@ -128,7 +130,7 @@ assert "jsonschema" not in sys.modules
             with self.subTest(content=content), self.assertRaises(ValueError):
                 data.validate_svg(content)
 
-    def test_path_traversal_absolute_and_escape_symlink_rejected(self):
+    def test_path_traversal_and_absolute_names_rejected(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp) / "bundle"
             root.mkdir()
@@ -137,15 +139,46 @@ assert "jsonschema" not in sys.modules
             for name in ("../x", "/x", "C:/x", "https://x", "a\\b", "a/../../x"):
                 with self.subTest(name=name), self.assertRaises(ValueError):
                     data.local_file(root, name)
+
+    def create_symlink_or_skip(self, link, target):
+        try:
+            link.symlink_to(target)
+        except NotImplementedError as error:
+            self.skipTest(f"symlink creation unsupported: {error}")
+        except OSError as error:
+            unavailable = {
+                getattr(errno, name)
+                for name in ("EPERM", "ENOSYS", "EOPNOTSUPP", "ENOTSUP")
+                if hasattr(errno, name)
+            }
+            if error.errno in unavailable or getattr(error, "winerror", None) == 1314:
+                self.skipTest(f"symlink creation unavailable: {error}")
+            raise
+
+    def test_symlink_escape_is_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp) / "bundle"
+            root.mkdir()
             outside = Path(temp) / "outside.json"
             outside.write_text("{}")
-            try:
-                (root / "link.json").symlink_to(outside)
-            except OSError:
-                return
-
+            self.create_symlink_or_skip(root / "link.json", outside)
             with self.assertRaises(ValueError):
                 data.local_file(root, "link.json")
+
+    def test_unexpected_symlink_creation_errors_are_not_skipped(self):
+        link = Path("unused-link")
+        with patch.object(Path, "symlink_to", side_effect=OSError(errno.EIO, "I/O error")):
+            with self.assertRaises(OSError) as raised:
+                self.create_symlink_or_skip(link, Path("unused-target"))
+        self.assertEqual(raised.exception.errno, errno.EIO)
+
+    def test_unsupported_symlink_creation_is_reported_as_skip(self):
+        link = Path("unused-link")
+        with patch.object(
+            Path, "symlink_to", side_effect=OSError(errno.EPERM, "operation not permitted")
+        ):
+            with self.assertRaises(unittest.SkipTest):
+                self.create_symlink_or_skip(link, Path("unused-target"))
 
     def test_site_rejects_unbound_raw_sidecar_and_external_inline_style(self):
         spec = importlib.util.spec_from_file_location(
