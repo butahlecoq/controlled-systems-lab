@@ -1,9 +1,9 @@
 """Observable checks on the candidate enclosure's saved numerical result."""
 
-from decimal import Decimal, localcontext
-from pathlib import Path
 import sys
 import unittest
+from decimal import Decimal, localcontext
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts" / "research"))
@@ -31,8 +31,9 @@ class CandidateEnclosureTest(unittest.TestCase):
             self.assertLessEqual(step_lo, step)
             self.assertLessEqual(step, step_hi)
             first = record["rows"][0]["same_control_error"]
-            for coordinate, exact in zip(first, (-Decimal("0.006") * step,
-                                                 Decimal("0.004") * step)):
+            for coordinate, exact in zip(
+                first, (-Decimal("0.006") * step, Decimal("0.004") * step), strict=True
+            ):
                 self.assertLessEqual(Decimal(coordinate[0]), exact)
                 self.assertLessEqual(exact, Decimal(coordinate[1]))
 
@@ -42,32 +43,53 @@ class CandidateEnclosureTest(unittest.TestCase):
             context.prec = 70
             step = (16 * arctan_inverse(5) - 4 * arctan_inverse(239)) / (18 * Decimal(2).sqrt())
             a, b, c, d, gain = map(Decimal, ("0.9", "0.003", "0.8", "0.002", "0.85"))
-            for history in (lambda i: Decimal("-0.3"), lambda i: Decimal(0),
-                            lambda i: Decimal("0.3"),
-                            lambda i: Decimal("0.3") if i % 2 else Decimal("-0.3")):
+
+            def advance(
+                state: list[Decimal],
+                matrix: tuple[tuple[Decimal, Decimal], tuple[Decimal, Decimal]],
+                control: Decimal,
+            ) -> list[Decimal]:
+                return [
+                    matrix[0][0] * state[0] + matrix[0][1] * state[1] + step * gain * control,
+                    matrix[1][0] * state[0] + matrix[1][1] * state[1],
+                ]
+
+            for history in (
+                lambda i: Decimal("-0.3"),
+                lambda i: Decimal(0),
+                lambda i: Decimal("0.3"),
+                lambda i: Decimal("0.3") if i % 2 else Decimal("-0.3"),
+            ):
                 reference = [Decimal(410), Decimal(300)]
                 linear = [Decimal(1), Decimal(2)]
                 nonlinear = linear.copy()
                 for index, row in enumerate(record["rows"]):
                     r1, r2 = reference
-                    reference = [r1 + step * (a * r1 - b * r1 * r2),
-                                 r2 + step * (-c * r2 + d * r1 * r2)]
+                    reference = [
+                        r1 + step * (a * r1 - b * r1 * r2),
+                        r2 + step * (-c * r2 + d * r1 * r2),
+                    ]
                     r1, r2 = reference
-                    matrix = ((1 + step * (a - b * r2), -step * b * r1),
-                              (step * d * r2, 1 + step * (-c + d * r1)))
+                    matrix = (
+                        (1 + step * (a - b * r2), -step * b * r1),
+                        (step * d * r2, 1 + step * (-c + d * r1)),
+                    )
                     u = history(index)
-                    def advance(state):
-                        return [matrix[0][0] * state[0] + matrix[0][1] * state[1] + step * gain * u,
-                                matrix[1][0] * state[0] + matrix[1][1] * state[1]]
+
                     product = nonlinear[0] * nonlinear[1]
-                    nonlinear = advance(nonlinear)
-                    nonlinear = [nonlinear[0] - step * b * product,
-                                 nonlinear[1] + step * d * product]
-                    linear = advance(linear)
-                    for label, values in (("reference", reference), ("linear", linear),
-                                          ("nonlinear", nonlinear),
-                                          ("same_control_error", [nonlinear[j] - linear[j] for j in range(2)])):
-                        for bounds, value in zip(row[label], values):
+                    nonlinear = advance(nonlinear, matrix, u)
+                    nonlinear = [
+                        nonlinear[0] - step * b * product,
+                        nonlinear[1] + step * d * product,
+                    ]
+                    linear = advance(linear, matrix, u)
+                    for label, values in (
+                        ("reference", reference),
+                        ("linear", linear),
+                        ("nonlinear", nonlinear),
+                        ("same_control_error", [nonlinear[j] - linear[j] for j in range(2)]),
+                    ):
+                        for bounds, value in zip(row[label], values, strict=True):
                             self.assertLessEqual(Decimal(bounds[0]), value, (index, label))
                             self.assertLessEqual(value, Decimal(bounds[1]), (index, label))
         self.assertEqual(record["error_linf_upper"], "11.384829795848264")
