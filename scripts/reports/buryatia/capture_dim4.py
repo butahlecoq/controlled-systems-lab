@@ -43,8 +43,13 @@ def sha256(path: Path) -> str:
 
 
 def git_value(source: Path, *args: str) -> str | None:
-    result = subprocess.run(["git", "-C", str(source), *args], check=False,
-                            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+    result = subprocess.run(
+        ["git", "-C", str(source), *args],
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+    )
     return result.stdout.strip() if result.returncode == 0 else None
 
 
@@ -56,23 +61,34 @@ def build_receipt(cache: Path) -> dict:
         left, value = line.split("=", 1)
         key = left.split(":", 1)[0]
         if key in {
-            "CMAKE_BUILD_TYPE", "CMAKE_GENERATOR", "CMAKE_CXX_COMPILER",
-            "CMAKE_CXX_FLAGS", "CMAKE_CXX_FLAGS_RELEASE", "CSL_BUILD_BURYATIA_REPORT",
-            "CSL_ENABLE_HIGHS", "CSL_ENABLE_QHULL", "BUILD_TESTING",
+            "CMAKE_BUILD_TYPE",
+            "CMAKE_GENERATOR",
+            "CMAKE_CXX_COMPILER",
+            "CMAKE_CXX_FLAGS",
+            "CMAKE_CXX_FLAGS_RELEASE",
+            "CSL_BUILD_BURYATIA_REPORT",
+            "CSL_ENABLE_HIGHS",
+            "CSL_ENABLE_QHULL",
+            "BUILD_TESTING",
         }:
             values[key] = Path(value).name if key == "CMAKE_CXX_COMPILER" else value
     compiler_files = sorted(cache.parent.glob("CMakeFiles/*/CMakeCXXCompiler.cmake"))
     if compiler_files:
         text = compiler_files[0].read_text(encoding="utf-8", errors="replace")
-        for key in ("CMAKE_CXX_COMPILER_ID", "CMAKE_CXX_COMPILER_VERSION", "CMAKE_CXX_COMPILER_FRONTEND_VARIANT"):
+        for key in (
+            "CMAKE_CXX_COMPILER_ID",
+            "CMAKE_CXX_COMPILER_VERSION",
+            "CMAKE_CXX_COMPILER_FRONTEND_VARIANT",
+        ):
             match = re.search(rf'^set\({key} "([^"]*)"\)$', text, re.MULTILINE)
             if match:
                 values[key] = match.group(1)
     return values
 
 
-def capture(command: list[str], source: Path, build_cache: Path,
-            destination: Path, mode: str) -> dict:
+def capture(
+    command: list[str], source: Path, build_cache: Path, destination: Path, mode: str
+) -> dict:
     source = source.resolve(strict=True)
     build_cache = build_cache.resolve(strict=True)
     destination = destination.resolve()
@@ -121,8 +137,14 @@ def capture(command: list[str], source: Path, build_cache: Path,
     spawn_error: str | None = None
     with os.fdopen(stdout_fd, "wb") as stdout, os.fdopen(stderr_fd, "wb") as stderr:
         try:
-            result = subprocess.run(command, cwd=source, stdin=subprocess.DEVNULL,
-                                    stdout=stdout, stderr=stderr, check=False)
+            result = subprocess.run(
+                command,
+                cwd=source,
+                stdin=subprocess.DEVNULL,
+                stdout=stdout,
+                stderr=stderr,
+                check=False,
+            )
             return_code = result.returncode
         except OSError as error:
             spawn_error = f"{type(error).__name__}: {error}"
@@ -151,7 +173,9 @@ def capture(command: list[str], source: Path, build_cache: Path,
         os.fsync(metadata.fileno())
     os.replace(temporary_metadata, metadata_path)
     if spawn_error:
-        raise RuntimeError(f"native report could not start; evidence retained in {destination}: {spawn_error}")
+        raise RuntimeError(
+            f"native report could not start; evidence retained in {destination}: {spawn_error}"
+        )
     if return_code != 0:
         raise subprocess.CalledProcessError(return_code, command)
     return after
@@ -162,10 +186,17 @@ def main() -> int:
     parser.add_argument("--executable", type=Path, required=True)
     parser.add_argument("--source", type=Path, default=Path(__file__).resolve().parents[3])
     parser.add_argument("--build-cache", type=Path, required=True)
-    parser.add_argument("--capture", type=Path, required=True,
-                        help="new attempt directory; existing destinations are rejected")
-    parser.add_argument("--mode", choices=("--dim4-literal-affine", "--diagnose-v-h"),
-                        default="--dim4-literal-affine")
+    parser.add_argument(
+        "--capture",
+        type=Path,
+        required=True,
+        help="new attempt directory; existing destinations are rejected",
+    )
+    parser.add_argument(
+        "--mode",
+        choices=("--dim4-literal-affine", "--diagnose-v-h"),
+        default="--dim4-literal-affine",
+    )
     args = parser.parse_args()
     command = [str(args.executable.resolve(strict=True)), args.mode]
     try:

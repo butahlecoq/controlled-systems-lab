@@ -12,8 +12,12 @@ from pathlib import Path
 
 
 FAMILIES = {
-    "exact_affine_polytope", "unreduced_zonotope", "reduced_zonotope",
-    "parallelotope", "box", "ellipsoid",
+    "exact_affine_polytope",
+    "unreduced_zonotope",
+    "reduced_zonotope",
+    "parallelotope",
+    "box",
+    "ellipsoid",
 }
 SOURCE_SHA256 = "c26fc2424fa8b3325a864d1afbc67920ba1c05665bfdf4562bed79548b60a4f1"
 REFERENCE_AREA = 4.619042908487405
@@ -39,9 +43,18 @@ IMPLEMENTATION_SOURCES = (
 
 
 def polygon_area(points):
-    return abs(sum(points[i][0] * points[(i + 1) % len(points)][1]
-                   - points[i][1] * points[(i + 1) % len(points)][0]
-                   for i in range(len(points))) / 2.0) if len(points) > 2 else 0.0
+    return (
+        abs(
+            sum(
+                points[i][0] * points[(i + 1) % len(points)][1]
+                - points[i][1] * points[(i + 1) % len(points)][0]
+                for i in range(len(points))
+            )
+            / 2.0
+        )
+        if len(points) > 2
+        else 0.0
+    )
 
 
 def ellipse_contains(ellipse, point):
@@ -64,8 +77,10 @@ def ellipse_contains(ellipse, point):
     along_minor = -dx * s + dy * c
     scale = max(1.0, math.sqrt(major2))
     if minor2 <= 1e-24 * scale * scale:
-        return (abs(along_minor) <= 1e-9 * scale and
-                along_major * along_major <= major2 + 1e-9 * scale * scale)
+        return (
+            abs(along_minor) <= 1e-9 * scale
+            and along_major * along_major <= major2 + 1e-9 * scale * scale
+        )
     return along_major * along_major / major2 + along_minor * along_minor / minor2 <= 1 + 1e-9
 
 
@@ -73,9 +88,17 @@ def native_receipt(exe, cmake_cache):
     cache = {}
     if cmake_cache:
         for line in cmake_cache.read_text(encoding="utf-8").splitlines():
-            if line.startswith(("CMAKE_CXX_COMPILER:", "CMAKE_CXX_COMPILER_ID:",
-                                "CMAKE_CXX_COMPILER_VERSION:", "CMAKE_BUILD_TYPE:",
-                                "CMAKE_GENERATOR:", "CMAKE_CXX_FLAGS:", "CMAKE_CXX_FLAGS_RELEASE:")):
+            if line.startswith(
+                (
+                    "CMAKE_CXX_COMPILER:",
+                    "CMAKE_CXX_COMPILER_ID:",
+                    "CMAKE_CXX_COMPILER_VERSION:",
+                    "CMAKE_BUILD_TYPE:",
+                    "CMAKE_GENERATOR:",
+                    "CMAKE_CXX_FLAGS:",
+                    "CMAKE_CXX_FLAGS_RELEASE:",
+                )
+            ):
                 key, value = line.split("=", 1)
                 cache[key.split(":", 1)[0]] = value
         compiler_files = sorted(cmake_cache.parent.glob("CMakeFiles/*/CMakeCXXCompiler.cmake"))
@@ -85,8 +108,9 @@ def native_receipt(exe, cmake_cache):
                 found = re.search(rf'^set\({name} "([^"]*)"\)$', compiler_text, re.MULTILINE)
                 if found:
                     cache[name] = found.group(1)
-    revision = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, check=True,
-                              capture_output=True, text=True).stdout.strip()
+    revision = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, check=True, capture_output=True, text=True
+    ).stdout.strip()
     return {
         "git_revision": revision,
         "executable_sha256": hashlib.sha256(exe.read_bytes()).hexdigest(),
@@ -133,22 +157,38 @@ def validate(record, *, require_current_sources=False):
     assert terminal["unreduced_zonotope"]["generator_count"] == 60
     assert terminal["reduced_zonotope"]["generator_count"] <= 8
     for family in ("box", "parallelotope", "reduced_zonotope"):
-        assert all("registered" in row["containment_check"]
-                   for row in rows if row["family"] == family and row["stage"] > 0)
-    assert all(any(call.get("operation") == "factor-outer-minkowski-sum" and
-                   call.get("implementation") == "csl.geometry.ellipsoidal.factor-minkowski/1"
-                   for call in row["module_invocations"])
-               for row in rows if row["family"] == "ellipsoid" and row["stage"] > 0)
+        assert all(
+            "registered" in row["containment_check"]
+            for row in rows
+            if row["family"] == family and row["stage"] > 0
+        )
+    assert all(
+        any(
+            call.get("operation") == "factor-outer-minkowski-sum"
+            and call.get("implementation") == "csl.geometry.ellipsoidal.factor-minkowski/1"
+            for call in row["module_invocations"]
+        )
+        for row in rows
+        if row["family"] == "ellipsoid" and row["stage"] > 0
+    )
     ellipse_terminal = terminal["ellipsoid"]
     ellipse = ellipse_terminal["represented_set"]
     direction = (1.0, 1.0)
-    factor_support = math.sqrt(sum(
-        (direction[0] * ellipse["factor_row_major"][column] +
-         direction[1] * ellipse["factor_row_major"][ellipse["factor_columns"] + column]) ** 2
-        for column in range(ellipse["factor_columns"])))
+    factor_support = math.sqrt(
+        sum(
+            (
+                direction[0] * ellipse["factor_row_major"][column]
+                + direction[1] * ellipse["factor_row_major"][ellipse["factor_columns"] + column]
+            )
+            ** 2
+            for column in range(ellipse["factor_columns"])
+        )
+    )
     actual_support = sum(direction[i] * ellipse["center"][i] for i in range(2)) + factor_support
-    drawn_support = max(sum(direction[i] * point[i] for i in range(2))
-                        for point in ellipse_terminal["rendering_vertices"])
+    drawn_support = max(
+        sum(direction[i] * point[i] for i in range(2))
+        for point in ellipse_terminal["rendering_vertices"]
+    )
     assert abs(actual_support - 6.1446607192856675) <= 1e-9
     assert drawn_support <= actual_support + 1e-9
     assert record.get("native_build", {}).get("source_sha256")
@@ -157,12 +197,14 @@ def validate(record, *, require_current_sources=False):
     receipt = record["native_build"]
     revision = receipt["git_revision"]
     for name, digest in receipt["source_sha256"].items():
-        committed = subprocess.run(["git", "show", f"{revision}:{name}"], cwd=ROOT,
-                                   check=True, capture_output=True).stdout
+        committed = subprocess.run(
+            ["git", "show", f"{revision}:{name}"], cwd=ROOT, check=True, capture_output=True
+        ).stdout
         assert hashlib.sha256(committed).hexdigest() == digest
     if require_current_sources:
-        head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, check=True,
-                              capture_output=True, text=True).stdout.strip()
+        head = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, check=True, capture_output=True, text=True
+        ).stdout.strip()
         assert revision == head
         current_hashes = {
             name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
@@ -183,8 +225,9 @@ def main():
         raise SystemExit("provide exactly one of --exe or --raw")
     if args.exe:
         try:
-            completed = subprocess.run([str(args.exe), "--volterra-2d"], check=True,
-                                       capture_output=True, text=True)
+            completed = subprocess.run(
+                [str(args.exe), "--volterra-2d"], check=True, capture_output=True, text=True
+            )
         except subprocess.CalledProcessError as error:
             raise SystemExit(f"native report refused: {error.stderr.strip()}") from error
         record = json.loads(completed.stdout)
@@ -195,7 +238,9 @@ def main():
     if args.record_out:
         args.record_out.parent.mkdir(parents=True, exist_ok=True)
         args.record_out.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
-    print("validated 61 stages × six native tracks; terminal affine hull: 120 vertices, area 4.619042908487405")
+    print(
+        "validated 61 stages × six native tracks; terminal affine hull: 120 vertices, area 4.619042908487405"
+    )
 
 
 if __name__ == "__main__":

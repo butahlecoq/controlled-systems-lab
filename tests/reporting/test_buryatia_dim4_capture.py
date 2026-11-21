@@ -7,12 +7,12 @@ import unittest
 from pathlib import Path
 
 
-SCRIPT = (Path(__file__).resolve().parents[2] / "scripts/reports/buryatia/capture_dim4.py")
+SCRIPT = Path(__file__).resolve().parents[2] / "scripts/reports/buryatia/capture_dim4.py"
 SPEC = importlib.util.spec_from_file_location("buryatia_capture_dim4", SCRIPT)
 CAPTURE = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader
 SPEC.loader.exec_module(CAPTURE)
-CHECK_SCRIPT = (Path(__file__).resolve().parents[2] / "scripts/reports/buryatia/check_dim4.py")
+CHECK_SCRIPT = Path(__file__).resolve().parents[2] / "scripts/reports/buryatia/check_dim4.py"
 CHECK_SPEC = importlib.util.spec_from_file_location("buryatia_check_dim4", CHECK_SCRIPT)
 CHECK = importlib.util.module_from_spec(CHECK_SPEC)
 assert CHECK_SPEC and CHECK_SPEC.loader
@@ -37,7 +37,11 @@ class BuryatiaCaptureTests(unittest.TestCase):
 
     def test_reused_attempt_directory_is_rejected_without_changing_streams(self):
         attempt = self.root / "attempt-001"
-        command = [sys.executable, "-c", "import sys; print('record'); print('trace', file=sys.stderr)"]
+        command = [
+            sys.executable,
+            "-c",
+            "import sys; print('record'); print('trace', file=sys.stderr)",
+        ]
         CAPTURE.capture(command, self.source, self.build_cache, attempt, "test")
         stdout = (attempt / "stdout.json").read_bytes()
         stderr = (attempt / "stderr.txt").read_bytes()
@@ -57,8 +61,13 @@ class BuryatiaCaptureTests(unittest.TestCase):
             "assert Path(sys.argv[1]).is_file() and Path(sys.argv[2]).is_file(); "
             "print('streams ready')"
         )
-        command = [sys.executable, "-c", code,
-                   str(attempt / "stdout.json"), str(attempt / "stderr.txt")]
+        command = [
+            sys.executable,
+            "-c",
+            code,
+            str(attempt / "stdout.json"),
+            str(attempt / "stderr.txt"),
+        ]
 
         CAPTURE.capture(command, self.source, self.build_cache, attempt, "test-precreated")
 
@@ -66,7 +75,11 @@ class BuryatiaCaptureTests(unittest.TestCase):
 
     def test_nonzero_child_retains_both_streams_and_failure_metadata(self):
         attempt = self.root / "attempt-failed"
-        command = [sys.executable, "-c", "import sys; print('partial-json'); print('solver failed', file=sys.stderr); sys.exit(7)"]
+        command = [
+            sys.executable,
+            "-c",
+            "import sys; print('partial-json'); print('solver failed', file=sys.stderr); sys.exit(7)",
+        ]
 
         with self.assertRaises(subprocess.CalledProcessError) as raised:
             CAPTURE.capture(command, self.source, self.build_cache, attempt, "test-failure")
@@ -82,8 +95,11 @@ class BuryatiaCaptureTests(unittest.TestCase):
 
     def test_full_state_orientation_gate_marks_old_trace_and_accepts_corrected_record(self):
         root = Path(__file__).resolve().parents[2]
-        record = json.loads((root / "docs/examples/buryatia-dim4-literal-affine-v1-records.json")
-                            .read_text(encoding="utf-8"))
+        record = json.loads(
+            (root / "docs/examples/buryatia-dim4-literal-affine-v1-records.json").read_text(
+                encoding="utf-8"
+            )
+        )
         CHECK.validate(record)
         with self.assertRaises(AssertionError):
             CHECK.validate(record, require_full_box_orientation=True)
@@ -91,8 +107,9 @@ class BuryatiaCaptureTests(unittest.TestCase):
         corrected = json.loads(json.dumps(record))
         for stage in corrected["records"][1:]:
             box = next(family for family in stage["families"] if family["family"] == "box")
-            box["module_invocations"]["operation"]["inclusion_evidence"][0] = \
+            box["module_invocations"]["operation"]["inclusion_evidence"][0] = (
                 CHECK.box_orientation_rows(corrected["state_dimension"])
+            )
         CHECK.validate(corrected, require_full_box_orientation=True)
 
 

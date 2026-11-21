@@ -26,10 +26,13 @@ class Buryatia2DProvenanceTests(unittest.TestCase):
 
     def test_saved_raw_cli_accepts_declared_producer_after_source_update(self):
         name = "src/geometry/approximation/box_parallelotope.cpp"
-        self.assertNotEqual(self.saved["native_build"]["source_sha256"][name],
-                            hashlib.sha256((ROOT / name).read_bytes()).hexdigest())
-        result = subprocess.run([sys.executable, str(SCRIPT), "--raw", str(RAW)],
-                                capture_output=True, text=True)
+        self.assertNotEqual(
+            self.saved["native_build"]["source_sha256"][name],
+            hashlib.sha256((ROOT / name).read_bytes()).hexdigest(),
+        )
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT), "--raw", str(RAW)], capture_output=True, text=True
+        )
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("validated 61 stages", result.stdout)
 
@@ -42,13 +45,18 @@ class Buryatia2DProvenanceTests(unittest.TestCase):
             with self.subTest(field=field), tempfile.TemporaryDirectory() as temporary:
                 record = copy.deepcopy(self.saved)
                 if field == "hash":
-                    record["native_build"]["source_sha256"][CHECK.IMPLEMENTATION_SOURCES[0]] = "0" * 64
+                    record["native_build"]["source_sha256"][CHECK.IMPLEMENTATION_SOURCES[0]] = (
+                        "0" * 64
+                    )
                 else:
                     record["native_build"]["git_revision"] = false_producer
                 path = Path(temporary) / "tampered.json"
                 path.write_text(json.dumps(record), encoding="utf-8")
-                result = subprocess.run([sys.executable, str(SCRIPT), "--raw", str(path)],
-                                        capture_output=True, text=True)
+                result = subprocess.run(
+                    [sys.executable, str(SCRIPT), "--raw", str(path)],
+                    capture_output=True,
+                    text=True,
+                )
                 self.assertNotEqual(result.returncode, 0)
 
     def test_historical_receipt_cannot_be_labeled_current(self):
@@ -63,9 +71,11 @@ class Buryatia2DProvenanceTests(unittest.TestCase):
                 return subprocess.CompletedProcess(command, 0, json.dumps(self.saved), "")
             return run(command, **kwargs)
 
-        with patch.object(sys, "argv", [str(SCRIPT), "--exe", "native-fixture"]), \
-             patch.object(CHECK.subprocess, "run", side_effect=native_or_git), \
-             patch.object(CHECK, "native_receipt", return_value=self.saved["native_build"]):
+        with (
+            patch.object(sys, "argv", [str(SCRIPT), "--exe", "native-fixture"]),
+            patch.object(CHECK.subprocess, "run", side_effect=native_or_git),
+            patch.object(CHECK, "native_receipt", return_value=self.saved["native_build"]),
+        ):
             with self.assertRaises(AssertionError):
                 CHECK.main()
 
@@ -81,9 +91,20 @@ class Buryatia2DProvenanceTests(unittest.TestCase):
             (root / old).write_bytes((ROOT / old).read_bytes())
             subprocess.run(["git", "init", "-q", str(root)], check=True)
             subprocess.run(["git", "add", "."], cwd=root, check=True)
-            subprocess.run(["git", "-c", "user.name=Provenance test", "-c",
-                            "user.email=provenance@example.invalid", "commit", "-qm", "fixture"],
-                           cwd=root, check=True)
+            subprocess.run(
+                [
+                    "git",
+                    "-c",
+                    "user.name=Provenance test",
+                    "-c",
+                    "user.email=provenance@example.invalid",
+                    "commit",
+                    "-qm",
+                    "fixture",
+                ],
+                cwd=root,
+                check=True,
+            )
             with patch.object(CHECK, "ROOT", root):
                 record = copy.deepcopy(self.saved)
                 record["native_build"] = CHECK.native_receipt(Path(sys.executable), None)
