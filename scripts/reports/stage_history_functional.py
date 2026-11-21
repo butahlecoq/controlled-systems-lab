@@ -1,9 +1,10 @@
 """Stage the affine-history functional evidence and its gallery link."""
+
 import argparse
 import hashlib
-from pathlib import Path
 import shutil
 import zipfile
+from pathlib import Path
 
 if __package__:
     from . import history_warm_gap_report, native_parallelotope_functional
@@ -13,14 +14,30 @@ else:
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORT = "closed-loop-history-functional"
-RECORDS = ("lv-highs-f4", "orbit-ipopt-f4", "fuel-ipopt-3c", "fuel-highs-f4-timeout",
-           "lv-box-fd28", "fuel-box-a800", "orbit-box-a800-incomplete", "orbit-box-aeac-incomplete",
-           "lv-zonotope-b78", "lv-parallelotope-b78", "lv-ellipsoid-b78", "lv-box-warm-a488", "orbit-box-warm-a488-incomplete",
-           "warm-tiny-a488", "lv-box-warm-a488-execution-failure", "orbit-box-warm-a488-execution-failure")
-CARD = ('<article class="saved-figure" id="closed-loop-history-functional">'
-        '<h3>Continuous affine-history control: functional evidence</h3>'
-        '<p>Original-horizon affine-history and selected F/B/I episodes, plus three native parallelotope finite-plan episodes with saved numerical prediction bounds. Source-qualified functional evidence, with failures retained; no performance ranking.</p>'
-        '<p><a href="../closed-loop-history-functional/index.html">Open functional evidence →</a></p></article>')
+RECORDS = (
+    "lv-highs-f4",
+    "orbit-ipopt-f4",
+    "fuel-ipopt-3c",
+    "fuel-highs-f4-timeout",
+    "lv-box-fd28",
+    "fuel-box-a800",
+    "orbit-box-a800-incomplete",
+    "orbit-box-aeac-incomplete",
+    "lv-zonotope-b78",
+    "lv-parallelotope-b78",
+    "lv-ellipsoid-b78",
+    "lv-box-warm-a488",
+    "orbit-box-warm-a488-incomplete",
+    "warm-tiny-a488",
+    "lv-box-warm-a488-execution-failure",
+    "orbit-box-warm-a488-execution-failure",
+)
+CARD = (
+    '<article class="saved-figure" id="closed-loop-history-functional">'
+    "<h3>Continuous affine-history control: functional evidence</h3>"
+    "<p>Original-horizon affine-history and selected F/B/I episodes, plus three native parallelotope finite-plan episodes with saved numerical prediction bounds. Source-qualified functional evidence, with failures retained; no performance ranking.</p>"
+    '<p><a href="../closed-loop-history-functional/index.html">Open functional evidence →</a></p></article>'
+)
 
 
 def stage(source: Path, site: Path) -> None:
@@ -40,14 +57,23 @@ def stage(source: Path, site: Path) -> None:
         for line in checksums.read_text(encoding="utf-8").splitlines():
             expected, name = line.split("  ", 1)
             path = directory / name
-            if path.is_symlink() or path.resolve().parent != directory.resolve() or not path.is_file():
+            if (
+                path.is_symlink()
+                or path.resolve().parent != directory.resolve()
+                or not path.is_file()
+            ):
                 raise ValueError("Unsafe evidence member: " + name)
             if hashlib.sha256(path.read_bytes()).hexdigest() != expected:
                 raise ValueError("Evidence digest differs: " + name)
         with zipfile.ZipFile(directory / "raw.zip") as archive:
             if archive.testzip() is not None:
                 raise ValueError("Evidence ZIP CRC failure: " + record)
-    for name in ("lv-box-stages-fd28", "lv-box-overlay-fd28", "fuel-box-overlay-a800", "lv-box-warm-overlay-a488"):
+    for name in (
+        "lv-box-stages-fd28",
+        "lv-box-overlay-fd28",
+        "fuel-box-overlay-a800",
+        "lv-box-warm-overlay-a488",
+    ):
         directory = source / name
         sums = directory / "SHA256SUMS"
         if not sums.is_file() or sums.is_symlink():
@@ -55,8 +81,12 @@ def stage(source: Path, site: Path) -> None:
         for line in sums.read_text(encoding="utf-8").splitlines():
             expected, member = line.split("  ", 1)
             path = directory / member
-            if (path.is_symlink() or path.resolve().parent != directory.resolve() or not path.is_file()
-                    or hashlib.sha256(path.read_bytes()).hexdigest() != expected):
+            if (
+                path.is_symlink()
+                or path.resolve().parent != directory.resolve()
+                or not path.is_file()
+                or hashlib.sha256(path.read_bytes()).hexdigest() != expected
+            ):
                 raise ValueError("Unsafe or changed figure member: " + member)
     files = [path for path in sorted(source.rglob("*")) if path.is_file()]
     if any(path.is_symlink() or source not in path.resolve().parents for path in files):
@@ -69,13 +99,23 @@ def stage(source: Path, site: Path) -> None:
     if marker not in html and CARD not in html:
         raise ValueError("Gallery insertion point missing")
     route = site / REPORT
+    pending = []
     for path in files:
         target = route / path.relative_to(source)
-        target.parent.mkdir(parents=True, exist_ok=True)
-        if target.exists() and (target.is_symlink() or target.read_bytes() != path.read_bytes()):
+        if target.is_symlink() or any(
+            parent.is_symlink() or (parent.exists() and not parent.is_dir())
+            for parent in target.parents
+            if parent.is_relative_to(route)
+        ):
             raise ValueError("Existing route differs: " + str(target))
-        if not target.exists():
-            shutil.copyfile(path, target)
+        if target.exists():
+            if not target.is_file() or target.read_bytes() != path.read_bytes():
+                raise ValueError("Existing route differs: " + str(target))
+        else:
+            pending.append((path, target))
+    for path, target in pending:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(path, target)
     if CARD not in html:
         gallery.write_text(html.replace(marker, CARD + marker, 1), encoding="utf-8")
 
