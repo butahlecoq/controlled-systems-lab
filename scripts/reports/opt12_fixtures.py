@@ -1,4 +1,5 @@
 """Canonical input descriptions for the OPT-12 measurement scenarios."""
+
 from __future__ import annotations
 
 import hashlib
@@ -12,27 +13,40 @@ def fixture_descriptions() -> dict[str, dict]:
     """Return fresh, hash-sealed descriptions of the measured LP inputs."""
     fixtures = {
         "tiny-overhead": {
-            "rows": 1, "columns": 1,
-            "source_objective": [-1.0], "changed_objective": [-1.0], "coefficient": [1.0],
-            "variable_bounds": {"lower": 0.0, "upper": None}, "row_sense": "upper",
-            "source_rhs": 1.0, "changed_rhs": 0.5, "expected_objective": -0.5,
+            "rows": 1,
+            "columns": 1,
+            "source_objective": [-1.0],
+            "changed_objective": [-1.0],
+            "coefficient": [1.0],
+            "variable_bounds": {"lower": 0.0, "upper": None},
+            "row_sense": "upper",
+            "source_rhs": 1.0,
+            "changed_rhs": 0.5,
+            "expected_objective": -0.5,
         },
         "small-reuse": {
-            "rows": 1, "columns": 40,
-            "source_objective": [-1.0] * 40, "changed_objective": [-1.0] * 40,
+            "rows": 1,
+            "columns": 40,
+            "source_objective": [-1.0] * 40,
+            "changed_objective": [-1.0] * 40,
             "coefficient": [1.0] * 40,
-            "variable_bounds": {"lower": 0.0, "upper": None}, "row_sense": "upper",
+            "variable_bounds": {"lower": 0.0, "upper": None},
+            "row_sense": "upper",
             "source_rhs": 20.0,
-            "changed_rhs": 19.0, "expected_objective": -19.0,
+            "changed_rhs": 19.0,
+            "expected_objective": -19.0,
         },
         "transfer-cost": {
-            "rows": 1, "columns": 100000,
+            "rows": 1,
+            "columns": 100000,
             "source_objective": {"all_columns": 1.0, "column_0": -1.0},
             "changed_objective": {"all_columns": 1.0, "column_99999": -2.0},
             "coefficient": {"all_columns": 1.0},
-            "variable_bounds": {"lower": 0.0, "upper": None}, "row_sense": "upper",
+            "variable_bounds": {"lower": 0.0, "upper": None},
+            "row_sense": "upper",
             "source_rhs": 50000.0,
-            "changed_rhs": 49999.0, "expected_objective": -99998.0,
+            "changed_rhs": 49999.0,
+            "expected_objective": -99998.0,
             "objective_change": "column 0: -1 to 1; column 99999: 1 to -2",
         },
     }

@@ -15,7 +15,10 @@ sys.path.insert(0, str(ROOT / "scripts" / "reports"))
 
 import opt12_registered_reports as publisher
 import registered_reports
-site_spec = importlib.util.spec_from_file_location("opt12_publication_site", ROOT / "scripts" / "reports" / "site.py")
+
+site_spec = importlib.util.spec_from_file_location(
+    "opt12_publication_site", ROOT / "scripts" / "reports" / "site.py"
+)
 report_site = importlib.util.module_from_spec(site_spec)
 sys.modules[site_spec.name] = report_site
 site_spec.loader.exec_module(report_site)
@@ -39,12 +42,17 @@ class Opt12PublicationTests(unittest.TestCase):
         artifacts = publisher.publication_artifacts(bundle, item)
         archive = publisher.offline_zip(bundle, item)
         self.assertEqual(report["zip_sha256"], hashlib.sha256(archive).hexdigest())
-        expected = {"report_id": item.report_id, "report_kind": item.kind,
-                    "payload_schema": item.payload_schema, "payload_sha256": item.payload_sha256,
-                    "source_commit": item.source_commit, "measured_scope": item.measured_scope,
-                    "evidence_limits": item.evidence_limits,
-                    "native_payload_sha256": item.native_payload_sha256,
-                    "source_report_id": item.source_report_id}
+        expected = {
+            "report_id": item.report_id,
+            "report_kind": item.kind,
+            "payload_schema": item.payload_schema,
+            "payload_sha256": item.payload_sha256,
+            "source_commit": item.source_commit,
+            "measured_scope": item.measured_scope,
+            "evidence_limits": item.evidence_limits,
+            "native_payload_sha256": item.native_payload_sha256,
+            "source_report_id": item.source_report_id,
+        }
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / item.report_id
             output.mkdir()
@@ -54,8 +62,11 @@ class Opt12PublicationTests(unittest.TestCase):
                 destination.write_bytes(content)
             self.assertTrue(registered_reports.validate_publication_manifest(output, expected))
 
-        page_files = set(item.files) | {"report-envelope.json", "publication-manifest.json",
-                                        "../" + item.report_id + ".zip"}
+        page_files = set(item.files) | {
+            "report-envelope.json",
+            "publication-manifest.json",
+            "../" + item.report_id + ".zip",
+        }
         report_site.OfflineHTML(page_files).feed(artifacts["index.html"].decode("utf-8"))
 
 
