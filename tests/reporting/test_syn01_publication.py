@@ -126,10 +126,16 @@ class Syn01PublicationTests(unittest.TestCase):
                 check=True,
             )
             with zipfile.ZipFile(source.with_suffix(".zip")) as archive:
-                for name in ("index.html", "latency.svg"):
-                    archived = archive.read(f"{source.name}/{name}")
-                    self.assertEqual((source / name).read_bytes(), archived)
-                    self.assertEqual((output / name).read_bytes(), archived)
+                files = {
+                    f"{source.name}/{path.name}": path
+                    for path in source.iterdir()
+                    if path.is_file()
+                }
+                self.assertCountEqual(archive.namelist(), ["index.html", *files])
+                for name, path in files.items():
+                    self.assertEqual(path.read_bytes(), archive.read(name), name)
+            for name in ("index.html", "latency.svg"):
+                self.assertEqual((output / name).read_bytes(), (source / name).read_bytes(), name)
 
     def test_future_capture_excludes_working_reproduction_note(self):
         self.assertNotIn("README.md", adapter.FILES)

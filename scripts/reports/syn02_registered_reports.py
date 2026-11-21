@@ -5,11 +5,10 @@ import hashlib
 import importlib.util
 import io
 import json
-from pathlib import Path
 import re
 import statistics
-import zipfile
 from html import escape
+from pathlib import Path
 
 import registered_reports as common
 import report_data as data
@@ -161,15 +160,21 @@ def _validate_record(record, rows):
     hashes = record.get("scenario_hashes")
     if not isinstance(hashes, dict) or set(hashes) != set(EXPECTED):
         raise ValueError("SYN-02 scenario hash catalog is incomplete")
-    scenario_hash = lambda name: hashlib.sha256(
-        json.dumps(
-            {"scenario": scenario_catalog[name], "terminal_slice": record.get("terminal_slice")},
-            ensure_ascii=False,
-            sort_keys=True,
-            separators=(",", ":"),
-            allow_nan=False,
-        ).encode("utf-8")
-    ).hexdigest()
+
+    def scenario_hash(name):
+        return hashlib.sha256(
+            json.dumps(
+                {
+                    "scenario": scenario_catalog[name],
+                    "terminal_slice": record.get("terminal_slice"),
+                },
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+                allow_nan=False,
+            ).encode("utf-8")
+        ).hexdigest()
+
     if any(hashes[name] != scenario_hash(name) for name in EXPECTED):
         raise ValueError("SYN-02 scenario hash does not match saved fixture")
     if (
@@ -427,6 +432,7 @@ def _validate_summary_csv(bundle, summary):
         raise ValueError("SYN-02 summary.csv differs from recomputed records summary")
 
 
+@common.preserve_publication
 @common.preserve_publication
 def adapt(bundle):
     bundle = Path(bundle)

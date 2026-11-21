@@ -154,11 +154,14 @@ class Syn02PublicationTests(unittest.TestCase):
                 check=True,
             )
             with zipfile.ZipFile(source.with_suffix(".zip")) as archive:
-                page = archive.read("index.html")
-                plot = archive.read("latency.svg")
-            self.assertEqual((source / "index.html").read_bytes(), page)
-            self.assertEqual((source / "latency.svg").read_bytes(), plot)
-            self.assertEqual((output / "latency.svg").read_bytes(), plot)
+                files = {path.name: path for path in source.iterdir() if path.is_file()}
+                self.assertCountEqual(archive.namelist(), files)
+                for name, path in files.items():
+                    self.assertEqual(path.read_bytes(), archive.read(name), name)
+            page = (source / "index.html").read_bytes()
+            self.assertEqual(
+                (output / "latency.svg").read_bytes(), (source / "latency.svg").read_bytes()
+            )
 
             # The archived presentation distinguished the harness and the later saved-data repack.
             expected = page.replace(b"Measurement harness commit:", b"Harness/artifact commit:")

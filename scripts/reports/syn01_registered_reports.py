@@ -1,13 +1,13 @@
 """Validated publication adapter for SYN-01 nominal-forward reports."""
 
 from __future__ import annotations
+
 import hashlib
 import importlib.util
 import json
-from pathlib import Path
 import re
-import sys
 from html import escape
+from pathlib import Path
 
 import registered_reports as common
 import report_data as data
@@ -51,8 +51,8 @@ def _json(path):
 
 
 def _trial_csv(record):
-    import io
     import csv
+    import io
 
     fields = (
         "scenario",
@@ -95,8 +95,8 @@ def _trial_csv(record):
 
 
 def _summary_csv(record):
-    import io
     import csv
+    import io
 
     fields = (
         "scenario",
@@ -125,6 +125,8 @@ def _validate_bundle(bundle, record):
 
     tooling = Path(__file__).resolve().parents[2] / "scripts" / "reports" / "syn01" / "report.py"
     spec = importlib.util.spec_from_file_location("csl_syn01_saved_report", tooling)
+    if spec is None or spec.loader is None:
+        raise ValueError("SYN-01 saved report reader is unavailable")
     report = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(report)
     errors = report.validate_record(record)
@@ -176,6 +178,7 @@ def _validate_bundle(bundle, record):
         raise ValueError("SYN-01 profiling limitation is not explicit")
 
 
+@common.preserve_publication
 @common.preserve_publication
 def adapt(bundle):
     bundle = Path(bundle)
@@ -241,6 +244,8 @@ def render_page(bundle, publication):
         Path(__file__).resolve().parents[2] / "scripts" / "reports" / "syn01" / "report.py"
     )
     spec = importlib.util.spec_from_file_location("csl_syn01_page_report", report_path)
+    if spec is None or spec.loader is None:
+        raise ValueError("SYN-01 saved report reader is unavailable")
     report = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(report)
     page = report.render_html(record)
