@@ -1,12 +1,13 @@
 """Validate and summarize EXT-07 capability-profile measurements."""
+
 from __future__ import annotations
 
 import argparse
 import csv
 import json
-from pathlib import Path
 import statistics
 from collections import defaultdict
+from pathlib import Path
 
 EXPECTED = {
     (1, 1, 1, 2, 1, 1): (2, "single-chain"),
@@ -20,13 +21,20 @@ EXPECTED = {
     (1, 1, 4, 8, 8, 1): (16, "single-chain"),
     (1, 1, 8, 2, 4, 256): (256, "parallel-branching"),
 }
-PROFILE = ("state_dimension", "control_dimension", "horizon", "mode_count",
-           "edge_count", "path_count")
+PROFILE = (
+    "state_dimension",
+    "control_dimension",
+    "horizon",
+    "mode_count",
+    "edge_count",
+    "path_count",
+)
 
 
 def collect(raw: Path, output: Path) -> list[dict]:
-    rows = [json.loads(line) for line in raw.read_text(encoding="utf-8").splitlines()
-            if line.strip()]
+    rows = [
+        json.loads(line) for line in raw.read_text(encoding="utf-8").splitlines() if line.strip()
+    ]
     groups: dict[tuple, list[dict]] = defaultdict(list)
     for row in rows:
         key = tuple(row[field] for field in PROFILE)
@@ -51,20 +59,23 @@ def collect(raw: Path, output: Path) -> list[dict]:
         durations = [row["batch_ns"] for row in group]
         profile = dict(zip(PROFILE, key))
         median_ns = statistics.median(durations)
-        summary.append({
-            **profile,
-            "path_cap": group[0]["path_cap"],
-            "family": group[0]["family"],
-            "repetitions": len(group),
-            "calls_per_batch": group[0]["calls"],
-            "median_batch_ns": median_ns,
-            "min_batch_ns": min(durations),
-            "max_batch_ns": max(durations),
-            "median_ns_per_call": median_ns / group[0]["calls"],
-        })
+        summary.append(
+            {
+                **profile,
+                "path_cap": group[0]["path_cap"],
+                "family": group[0]["family"],
+                "repetitions": len(group),
+                "calls_per_batch": group[0]["calls"],
+                "median_batch_ns": median_ns,
+                "min_batch_ns": min(durations),
+                "max_batch_ns": max(durations),
+                "median_ns_per_call": median_ns / group[0]["calls"],
+            }
+        )
 
     (output / "summary.json").write_text(
-        json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     with (output / "summary.csv").open("w", encoding="utf-8", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=list(summary[0]))
         writer.writeheader()
