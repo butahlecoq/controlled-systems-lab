@@ -397,6 +397,25 @@ def persist_native_capture(attempt_dir: Path, update_index: int, capture: dict,
         "response": saved.get("response")}
     if "start_recovery" in capture:
         metadata["start_recovery"] = capture["start_recovery"]
+    if "native_strategy_attempts" in capture:
+        attempt_rows = []
+        for ordinal, attempt in enumerate(capture["native_strategy_attempts"]):
+            fields = {key: value for key, value in attempt.items() if key not in {"request_raw", "response_raw"}}
+            for direction in ("request", "response"):
+                raw = attempt.get(f"{direction}_raw")
+                if not isinstance(raw, str):
+                    continue
+                name = f"strategy-{ordinal}-{direction}"
+                if name not in saved:
+                    written = atomic_text(attempt_dir / f"{stem}-{name}.jsonl", raw)
+                    saved[name] = {"path": written.path, "bytes": written.bytes_written, "sha256": written.sha256}
+                    append_io_event(attempt_dir, {"operation": "native-payload", "payload": name,
+                        "update_index": update_index, "path": written.path, "bytes_written": written.bytes_written,
+                        "sha256": written.sha256, "serialization_seconds": written.serialization_seconds,
+                        "fsync_seconds": written.fsync_seconds})
+                fields[direction] = saved[name]
+            attempt_rows.append(fields)
+        metadata["native_strategy_attempts"] = attempt_rows
     metadata_serialization_started = time.perf_counter()
     metadata_bytes = (json.dumps(metadata, indent=2, allow_nan=False) + "\n").encode("utf-8")
     metadata_serialization_seconds = time.perf_counter() - metadata_serialization_started
@@ -415,7 +434,7 @@ def persist_native_capture(attempt_dir: Path, update_index: int, capture: dict,
         "path": receipt.path, "bytes_written": receipt.bytes_written, "sha256": receipt.sha256,
         "serialization_seconds": receipt.serialization_seconds, "fsync_seconds": receipt.fsync_seconds})
     for field in ("request", "request_json", "bridge_request_raw", "parsed_response",
-                  "bridge_response_raw", "adapter_response"):
+                  "bridge_response_raw", "adapter_response", "native_strategy_attempts"):
         capture.pop(field, None)
     return {"schema": "csl.closed-loop.native-query-capture-reference/1", "update_index": update_index,
         "path": meta_path.name,
@@ -825,8 +844,11 @@ def read_native_capture_metadata(attempt_dir: Path, reference: Mapping[str, Any]
             metadata.get("update_index") != index:
         raise ValueError("native capture metadata identity differs from its reference")
     payload_paths = {}
-    for name in ("request", "response"):
-        payload = metadata.get(name)
+    references = {name: metadata.get(name) for name in ("request", "response")}
+    for ordinal, row in enumerate(metadata.get("native_strategy_attempts", [])):
+        for direction in ("request", "response"):
+            references[f"strategy-{ordinal}-{direction}"] = row.get(direction)
+    for name, payload in references.items():
         if payload is None:
             continue
         payload_path = payload.get("path")

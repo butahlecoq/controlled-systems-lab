@@ -102,10 +102,10 @@ std::optional<ob::TimingScope> start_planned_program_scope(const ExecutionContex
     }
     return {};
 }
-class NominalExactHRelation final : public JointRelationPayload {
+class RecordedJointHRelation final : public JointRelationPayload {
     sets::SetData relation_;
 public:
-    explicit NominalExactHRelation(sets::SetData relation) : relation_(std::move(relation)) {}
+    explicit RecordedJointHRelation(sets::SetData relation) : relation_(std::move(relation)) {}
     const sets::SetData* h_relation_for_recording() const noexcept override { return &relation_; }
 };
 Diagnostic unsupported(std::string field, std::string text) {
@@ -217,16 +217,14 @@ TerminalObjective lift(const TerminalObjective& objective,std::size_t width,std:
         }
     },objective);
 }
-JointProgramOutcome build_joint_program_impl(const problem::ResolvedProblem& p,const FamilyRequest& request,
-    const ExecutionContext* context) {
-    auto diagnostics=capabilities(p,request); if(!diagnostics.empty()) return diagnostics;
-    const auto source=p.description();const auto coords=p.constraints().coordinates();
-    const auto width=p.constraints().joint_dimension();const auto n=coords.dimensions.state;
-    const auto m=coords.dimensions.control;const auto T=coords.horizon;
-    const auto max=std::numeric_limits<std::size_t>::max();
-    if(width!=0 && width>max/width) return Diagnostics{unsupported("joint.capacity","Objective storage width overflows size_t.")};
-    if(const auto* residual=std::get_if<ResidualNormTerminal>(&source->objective); residual && width!=0 && residual->map.rows>max/width)
-        return Diagnostics{unsupported("joint.capacity","Residual map storage overflows size_t.")};
+Assembly assemble_joint_constraints(const problem::ResolvedProblem &p,
+                                    const ExecutionContext *context) {
+    const auto source = p.description();
+    const auto coordinates = p.constraints().coordinates();
+    const auto n = coordinates.dimensions.state;
+    const auto m = coordinates.dimensions.control;
+    const auto T = coordinates.horizon;
+    const auto width = p.constraints().joint_dimension();
     auto assembly_scope=context?start_planned_operation_scope(*context,"strategy-b/joint-h-assembly",strategy_id,strategy_version):std::optional<ob::TimingScope>{};
     if(assembly_scope)assembly_scope->observe_input_size(width);
     Assembly a(width);
@@ -251,6 +249,19 @@ JointProgramOutcome build_joint_program_impl(const problem::ResolvedProblem& p,c
         assembly_scope->observe_output_size(a.matrix.values.size());
         assembly_scope->close(Termination::completed);
     }
+    return a;
+}
+JointProgramOutcome build_joint_program_impl(const problem::ResolvedProblem& p,const FamilyRequest& request,
+    const ExecutionContext* context) {
+    auto diagnostics=capabilities(p,request); if(!diagnostics.empty()) return diagnostics;
+    const auto source=p.description();const auto coords=p.constraints().coordinates();
+    const auto width=p.constraints().joint_dimension();const auto n=coords.dimensions.state;
+    const auto T=coords.horizon;
+    const auto max=std::numeric_limits<std::size_t>::max();
+    if(width!=0 && width>max/width) return Diagnostics{unsupported("joint.capacity","Objective storage width overflows size_t.")};
+    if(const auto* residual=std::get_if<ResidualNormTerminal>(&source->objective); residual && width!=0 && residual->map.rows>max/width)
+        return Diagnostics{unsupported("joint.capacity","Residual map storage overflows size_t.")};
+    auto a = assemble_joint_constraints(p, context);
     auto objective_scope=context?start_planned_operation_scope(*context,"strategy-b/objective-lift",strategy_id,strategy_version):std::optional<ob::TimingScope>{};
     if(objective_scope)objective_scope->observe_input_size(n);
     auto objective=lift(source->objective,width,T*n,n);
@@ -331,11 +342,23 @@ struct RelationRows {
         return std::get<sets::SetData>(std::move(r));
     }
 };
-RelationRows feasible_rows(const JointProgram& p) {
-    RelationRows r(p.constraints.cols);
-    for(std::size_t i=0;i<p.constraints.rows;++i) {
-        Vector row(p.constraints.cols);for(auto j=p.constraints.row_offsets[i];j<p.constraints.row_offsets[i+1];++j)row[p.constraints.column_indices[j]]=p.constraints.values[j];
-        const auto& bound=p.bounds[i];
+bool fits_feasible_row_limit(const std::vector<Interval> &bounds, std::size_t remaining) {
+    for (const auto &bound : bounds) {
+        const std::size_t rows = bound.lower && bound.upper && *bound.lower == *bound.upper
+            ? 1
+            : static_cast<std::size_t>(bound.lower.has_value()) +
+                  static_cast<std::size_t>(bound.upper.has_value());
+        if (rows > remaining)
+            return false;
+        remaining -= rows;
+    }
+    return true;
+}
+RelationRows feasible_rows(const SparseMatrix &constraints, const std::vector<Interval> &bounds) {
+    RelationRows r(constraints.cols);
+    for(std::size_t i=0;i<constraints.rows;++i) {
+        Vector row(constraints.cols);for(auto j=constraints.row_offsets[i];j<constraints.row_offsets[i+1];++j)row[constraints.column_indices[j]]=constraints.values[j];
+        const auto& bound=bounds[i];
         if(bound.lower && bound.upper && *bound.lower==*bound.upper)r.equality(row,*bound.upper);
         else {
             if(bound.upper)r.inequality(row,*bound.upper);
@@ -395,6 +418,9 @@ class DirectJointExecutionRunner final : public SynthesisWorkspace, public regis
     std::optional<registry::StrategyRegistration::CompleteFamilyVerifierKey> verifier_binding_;
     std::optional<registry::detail::StrategyBRuntimeLineageReceipt> receipt_;
     SynthesisResult solve_impl(const problem::ResolvedProblem&,const FamilyRequest&,const ExecutionContext&);
+    SynthesisResult solve_source_history(const problem::ResolvedProblem &, const FamilyRequest &,
+                                         const ExecutionContext &, SynthesisResult);
+
 public:
   DirectJointExecutionRunner(
       registry::PreparedProvider<registry::LPPort> lp,
@@ -426,6 +452,187 @@ SynthesisResult detail::DirectJointExecutionRunner::solve(const problem::Resolve
     if(run_scope)run_scope->close(result.termination);
     return result;
 }
+SynthesisResult detail::DirectJointExecutionRunner::solve_source_history(
+    const problem::ResolvedProblem &p, const FamilyRequest &request,
+    const ExecutionContext &context, SynthesisResult result) {
+    const auto &profile = *prepared_request_->history_optimization;
+    const auto assembly = assemble_joint_constraints(p, &context);
+    if (request.materialization_limit &&
+        !fits_feasible_row_limit(assembly.bounds, *request.materialization_limit)) {
+        result.termination = Termination::resource_limit;
+        result.stop = ScopedOperationStopped{
+            {StopReason::resource_limit, "Feasible relation exceeds the caller's row materialization limit."},
+            {{"syn04-materialization:" + p.identity().value}, "strategy", {strategy_id},
+             strategy_version, ModuleId{strategy_id}, strategy_version},
+            retained(result)};
+        return result;
+    }
+
+    const SetId feasible_id{"syn04-feasible:" + p.identity().value};
+    auto relation = feasible_rows(assembly.matrix, assembly.bounds).finish(feasible_id);
+    if (const auto *errors = std::get_if<Diagnostics>(&relation)) {
+        result.termination = Termination::contract_rejected;
+        result.stop = ContractValidationFailure{*errors, retained(result), std::monostate{}};
+        return result;
+    }
+    const synthesis::JointHistoryRelation full_history{
+        p.constraints().coordinates(), std::get<sets::SetData>(std::move(relation))};
+    const std::vector<TransformStepIdentity> lineage{
+        {{"syn04-build:" + p.identity().value}, {p.identity().value}, feasible_id,
+         {strategy_id}, strategy_version}};
+    const auto payload = std::make_shared<const RecordedJointHRelation>(full_history.relation);
+    const auto publish = [&](CandidateFeasibility feasibility) {
+        auto family = FamilyPublisher::publish(
+            {p.identity(), request, full_history.coordinates, {strategy_id}, strategy_version, lineage},
+            CandidateFamily{{full_history.coordinates, request.representation, payload},
+                            HeuristicRelationEvidence{"binary64 full joint feasible-history relation"},
+                            std::move(feasibility)});
+        if (const auto *errors = std::get_if<Diagnostics>(&family)) {
+            result.termination = Termination::contract_rejected;
+            result.stop = ContractValidationFailure{*errors, retained(result), std::monostate{}};
+            return false;
+        }
+        result.family = std::get<OptimalFamily>(std::move(family));
+        return true;
+    };
+    if (!publish(Unestablished{}))
+        return result;
+    if (!history_optimizer_) {
+        result.termination = Termination::operation_rejected;
+        result.stop = ScopedRequestRejection{
+            {{"syn04-admission:" + p.identity().value}, "strategy", {strategy_id},
+             strategy_version, ModuleId{strategy_id}, strategy_version},
+            {unsupported("joint.history_optimizer",
+                         "No history-optimizer provider was frozen for this request.")},
+            lineage, retained(result)};
+        return result;
+    }
+    auto optimized = optimization::run_strategy_history_optimization(
+        *history_optimizer_, prepared_request_->configuration.history_optimizer, p,
+        full_history, profile, context);
+    if (const auto *rejection = std::get_if<registry::Rejection>(&optimized)) {
+        result.termination = Termination::operation_rejected;
+        result.stop = ScopedRequestRejection{
+            scope({p.identity(), profile.program}, rejection->provenance),
+            rejection->diagnostics, lineage, retained(result)};
+        return result;
+    }
+    if (const auto *errors = std::get_if<Diagnostics>(&optimized)) {
+        result.termination = Termination::contract_rejected;
+        result.stop = ContractValidationFailure{*errors, retained(result), std::monostate{}};
+        return result;
+    }
+    if (const auto *diagnostic = std::get_if<Diagnostic>(&optimized)) {
+        result.termination = Termination::contract_rejected;
+        result.stop =
+            ContractValidationFailure{{*diagnostic}, retained(result), std::monostate{}};
+        return result;
+    }
+    if (const auto *stopped = std::get_if<OperationStopped>(&optimized)) {
+        result.termination = stopped_termination(stopped->reason);
+        result.stop = ScopedOperationStopped{
+            *stopped,
+            {{"syn04-history:" + p.identity().value},
+             registry::HistoryOptimizerPort::name,
+             history_optimizer_->provenance().requested.id,
+             history_optimizer_->provenance().requested.version,
+             history_optimizer_->provenance().actual
+                 ? std::optional<ModuleId>{history_optimizer_->provenance().actual->id}
+                 : std::nullopt,
+             history_optimizer_->provenance().actual
+                 ? std::optional<std::string>{history_optimizer_->provenance().actual->version}
+                 : std::nullopt},
+            retained(result)};
+        return result;
+    }
+    auto call = std::get<optimization::HistoryOptimizationCall>(std::move(optimized));
+    auto optimized_result =
+        std::make_shared<const optimization::HistoryOptimizationResult>(std::move(call.result));
+    result.history_optimization = HistoryOptimizationExecution{
+        scope(optimized_result->identity, call.provider), optimized_result->identity.problem,
+        optimized_result->identity.program, optimized_result};
+    const auto coordinates = full_history.coordinates;
+    const auto n = coordinates.dimensions.state, m = coordinates.dimensions.control,
+               T = coordinates.horizon;
+    const auto expected = (T + 1) * n + T * m;
+    if (optimized_result->history.size() != expected) {
+        const Diagnostics errors{
+            {DiagnosticCode::evidence_mismatch, "joint.history_optimizer.history",
+             "Checked optimizer result does not match Strategy B canonical history coordinates."}};
+        result.termination = Termination::contract_rejected;
+        result.stop = ContractValidationFailure{errors, retained(result), std::monostate{}};
+        return result;
+    }
+    Witness witness{p.identity(), {}, {}, 0};
+    for (std::size_t stage = 0; stage <= T; ++stage)
+        witness.states.emplace_back(
+            optimized_result->history.begin() + static_cast<std::ptrdiff_t>(stage * n),
+            optimized_result->history.begin() + static_cast<std::ptrdiff_t>((stage + 1) * n));
+    for (std::size_t stage = 0; stage < T; ++stage) {
+        const auto offset = (T + 1) * n + stage * m;
+        witness.controls.emplace_back(
+            optimized_result->history.begin() + static_cast<std::ptrdiff_t>(offset),
+            optimized_result->history.begin() + static_cast<std::ptrdiff_t>(offset + m));
+    }
+    const auto objective = optimization::evaluate(p.objective(), witness.states.back());
+    if (const auto *value = std::get_if<double>(&objective)) {
+        witness.original_objective = *value;
+        verification::TrajectoryRequest query;
+        query.witness = witness;
+        const auto checked = verification::verify_trajectory(p, query, context);
+        if (checked.termination != Termination::completed) {
+            const StopReason reason =
+                checked.termination == Termination::cancelled
+                    ? StopReason::cancelled
+                : checked.termination == Termination::deadline_expired
+                    ? StopReason::deadline_expired
+                : checked.termination == Termination::resource_limit
+                    ? StopReason::resource_limit
+                    : StopReason::numerical_failure;
+            result.termination = stopped_termination(reason);
+            const auto &verifier = checked.verifier;
+            result.stop = ScopedOperationStopped{
+                {reason, "Independent source trajectory verification stopped."},
+                {{"syn04-history-trajectory-verification:" + p.identity().value}, "verification",
+                 verifier.id, verifier.version, verifier.id, verifier.version},
+                retained(result)};
+            return result;
+        }
+        if (checked.bindings != verification::CheckStatus::numerical_pass ||
+            checked.feasibility != verification::CheckStatus::numerical_pass ||
+            checked.objective != verification::CheckStatus::numerical_pass) {
+            auto errors = checked.diagnostics;
+            if (errors.empty())
+                errors.push_back(
+                    {DiagnosticCode::evidence_mismatch, "joint.history_optimizer.trajectory",
+                     "Independent source trajectory verification rejected the optimizer history."});
+            result.termination = Termination::contract_rejected;
+            result.stop = ContractValidationFailure{errors, retained(result), std::monostate{}};
+            return result;
+        }
+        double residual = 0;
+        for (const auto &item : checked.residuals)
+            residual = std::max(residual, item.measure.violation);
+        const ClaimEvidence feasibility{p.identity(),
+                                        NumericalCheck{request.numerical.absolute_tolerance,
+                                                       request.numerical.relative_tolerance,
+                                                       residual, checked.verifier.id}};
+        result.incumbents.push_back({std::move(witness), feasibility});
+        const auto &incumbent = result.incumbents.back();
+        publish(WitnessFeasibilityEvidence{incumbent.witness, incumbent.feasibility_claim});
+    } else if (const auto *errors = std::get_if<Diagnostic>(&objective)) {
+        result.termination = Termination::contract_rejected;
+        result.stop = ContractValidationFailure{{*errors}, retained(result), std::monostate{}};
+        return result;
+    } else {
+        const auto stopped = std::get<OperationStopped>(objective);
+        result.termination = stopped_termination(stopped.reason);
+        result.stop = ScopedOperationStopped{
+            stopped, scope(optimized_result->identity, call.provider), retained(result)};
+        return result;
+    }
+    return result;
+}
 SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::ResolvedProblem& p,const FamilyRequest& request,const ExecutionContext& context) {
     receipt_.reset();
     SynthesisResult result{Termination::completed,{p.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},{},{},{},{},{}};
@@ -451,6 +658,8 @@ SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::Re
         result.stop=ScopedOperationStopped{{reason,"Stopped before joint program construction."},
             {{"syn04-build:"+p.identity().value},"strategy",{strategy_id},{},ModuleId{strategy_id},strategy_version},retained(result)};return result;
     }
+    if (prepared_request_ && prepared_request_->history_optimization)
+        return solve_source_history(p, request, context, std::move(result));
     auto build_timing=start_planned_operation_scope(context,"strategy-b/program-build",strategy_id,strategy_version);
     auto built=build_joint_program_impl(p,request,&context);
     if(build_timing)build_timing->close(std::holds_alternative<JointProgram>(built)?Termination::completed:
@@ -462,7 +671,7 @@ SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::Re
     }
     auto construction=std::get<JointProgram>(std::move(built));
     auto build_artifact=std::make_shared<const JointProgram>(std::move(construction));
-    auto rows=feasible_rows(*build_artifact);
+    auto rows=feasible_rows(build_artifact->constraints, build_artifact->bounds);
     if(request.materialization_limit && rows.inequalities.rows+rows.equalities.rows>*request.materialization_limit) {
         result.termination=Termination::resource_limit;
         result.stop=ScopedOperationStopped{{StopReason::resource_limit,"Feasible relation exceeds the caller's row materialization limit."},
@@ -524,140 +733,6 @@ SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::Re
         result.family=std::get<OptimalFamily>(std::move(family));
     };
     publish();
-    if (prepared_request_ && prepared_request_->history_optimization) {
-        if (!history_optimizer_) {
-            reject({unsupported("joint.history_optimizer",
-                                "No history-optimizer provider was frozen for this request.")},
-                   Termination::operation_rejected);
-            return result;
-        }
-        const synthesis::JointHistoryRelation full_history{build_artifact->coordinates,
-                                                           *feasible_artifact};
-        auto optimized = optimization::run_strategy_history_optimization(
-            *history_optimizer_, prepared_request_->configuration.history_optimizer, p,
-            full_history, *prepared_request_->history_optimization, context);
-        if (const auto *rejection = std::get_if<registry::Rejection>(&optimized)) {
-            result.termination = Termination::operation_rejected;
-            result.stop = ScopedRequestRejection{
-                scope({p.identity(), prepared_request_->history_optimization->program},
-                      rejection->provenance),
-                rejection->diagnostics, lineage, retained(result)};
-            data->diagnostics = rejection->diagnostics;
-            return result;
-        }
-        if (const auto *errors = std::get_if<Diagnostics>(&optimized)) {
-            result.termination = Termination::contract_rejected;
-            result.stop = ContractValidationFailure{*errors, retained(result), std::monostate{}};
-            data->diagnostics = *errors;
-            return result;
-        }
-        if (const auto *diagnostic = std::get_if<Diagnostic>(&optimized)) {
-            result.termination = Termination::contract_rejected;
-            result.stop =
-                ContractValidationFailure{{*diagnostic}, retained(result), std::monostate{}};
-            data->diagnostics = {*diagnostic};
-            return result;
-        }
-        if (const auto *stopped = std::get_if<OperationStopped>(&optimized)) {
-            result.termination = stopped_termination(stopped->reason);
-            result.stop = ScopedOperationStopped{
-                *stopped,
-                {{"syn04-history:" + p.identity().value},
-                 registry::HistoryOptimizerPort::name,
-                 history_optimizer_->provenance().requested.id,
-                 history_optimizer_->provenance().requested.version,
-                 history_optimizer_->provenance().actual
-                     ? std::optional<ModuleId>{history_optimizer_->provenance().actual->id}
-                     : std::nullopt,
-                 history_optimizer_->provenance().actual
-                     ? std::optional<std::string>{history_optimizer_->provenance().actual->version}
-                     : std::nullopt},
-                retained(result)};
-            return result;
-        }
-        auto call = std::get<optimization::HistoryOptimizationCall>(std::move(optimized));
-        auto optimized_result =
-            std::make_shared<const optimization::HistoryOptimizationResult>(std::move(call.result));
-        result.history_optimization = HistoryOptimizationExecution{
-            scope(optimized_result->identity, call.provider), optimized_result->identity.problem,
-            optimized_result->identity.program, optimized_result};
-        const auto coordinates = build_artifact->coordinates;
-        const auto n = coordinates.dimensions.state, m = coordinates.dimensions.control,
-                   T = coordinates.horizon;
-        const auto expected = (T + 1) * n + T * m;
-        if (optimized_result->history.size() != expected) {
-            const Diagnostics errors{
-                {DiagnosticCode::evidence_mismatch, "joint.history_optimizer.history",
-                 "Checked optimizer result does not match Strategy B canonical history coordinates."}};
-            result.termination = Termination::contract_rejected;
-            result.stop = ContractValidationFailure{errors, retained(result), std::monostate{}};
-            data->diagnostics = errors;
-            return result;
-        }
-        Witness witness{p.identity(), {}, {}, 0};
-        for (std::size_t stage = 0; stage <= T; ++stage)
-            witness.states.emplace_back(
-                optimized_result->history.begin() + static_cast<std::ptrdiff_t>(stage * n),
-                optimized_result->history.begin() + static_cast<std::ptrdiff_t>((stage + 1) * n));
-        for (std::size_t stage = 0; stage < T; ++stage) {
-            const auto offset = (T + 1) * n + stage * m;
-            witness.controls.emplace_back(
-                optimized_result->history.begin() + static_cast<std::ptrdiff_t>(offset),
-                optimized_result->history.begin() + static_cast<std::ptrdiff_t>(offset + m));
-        }
-        const auto objective = optimization::evaluate(p.objective(), witness.states.back());
-        if (const auto *value = std::get_if<double>(&objective)) {
-            witness.original_objective = *value;
-            verification::TrajectoryRequest query;
-            query.witness = witness;
-            const auto checked = verification::verify_trajectory(p, query, context);
-            if (checked.termination != Termination::completed) {
-                const StopReason reason = checked.termination == Termination::deadline_expired
-                                              ? StopReason::deadline_expired
-                                          : checked.termination == Termination::resource_limit
-                                              ? StopReason::resource_limit
-                                              : StopReason::numerical_failure;
-                const OperationStopped stopped{
-                    reason,
-                    "Independent source trajectory check of whole-history optimizer output stopped."};
-                result.termination = stopped_termination(reason);
-                result.stop = ScopedOperationStopped{
-                    stopped, scope(optimized_result->identity, call.provider), retained(result)};
-                return result;
-            }
-            if (checked.bindings != verification::CheckStatus::numerical_pass ||
-                checked.feasibility != verification::CheckStatus::numerical_pass ||
-                checked.objective != verification::CheckStatus::numerical_pass) {
-                auto errors = checked.diagnostics;
-                if (errors.empty())
-                    errors.push_back(
-                        {DiagnosticCode::evidence_mismatch, "joint.history_optimizer.trajectory",
-                         "Independent source trajectory verification rejected the optimizer history."});
-                result.termination = Termination::contract_rejected;
-                result.stop = ContractValidationFailure{errors, retained(result), std::monostate{}};
-                return result;
-            }
-            double residual = 0;
-            for (const auto &item : checked.residuals)
-                residual = std::max(residual, item.measure.violation);
-            const ClaimEvidence feasibility{p.identity(),
-                                            NumericalCheck{request.numerical.absolute_tolerance,
-                                                           request.numerical.relative_tolerance,
-                                                           residual, checked.verifier.id}};
-            result.incumbents.push_back({std::move(witness), feasibility});
-        } else if (const auto *errors = std::get_if<Diagnostic>(&objective)) {
-            result.termination = Termination::contract_rejected;
-            result.stop = ContractValidationFailure{{*errors}, retained(result), std::monostate{}};
-            data->diagnostics = {*errors};
-            return result;
-        } else {
-            const auto stopped = std::get<OperationStopped>(objective);
-            result.termination = stopped_termination(stopped.reason);
-            result.stop = ScopedOperationStopped{
-                stopped, scope(optimized_result->identity, call.provider), retained(result)};
-            return result;
-        }
-    }
     std::shared_ptr<const sets::SetData> extracted_artifact;
     auto run_program=[&]<class Program,class Port>(const Program& program,const registry::PreparedProvider<Port>& provider) {
         data->provider=provider.provenance();const auto provenance=scope(program.identity(),provider.provenance());
@@ -822,7 +897,7 @@ SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::Re
                     const ClaimEvidence claim{p.identity(),SymbolicArgument{"bounded nominal Strategy B exact-H face",
                         "The compiled verifier independently reconstructs the source feasible histories and verifies both exact optimal-face inclusions over binary64 dyadic inputs."}};
                     const OptimumEvidence optimum{claim,{ObjectiveBound{bounds->first,claim},ObjectiveBound{bounds->second,claim}}};
-                    auto payload=std::make_shared<const NominalExactHRelation>(std::get<sets::SetData>(std::move(relation)));
+                    auto payload=std::make_shared<const RecordedJointHRelation>(std::get<sets::SetData>(std::move(relation)));
                     const auto exact_lineage=registry::detail::strategy_b_nominal_linear_exact_lineage(p.identity());
                     const FamilyIdentity identity{p.identity(),request,build_artifact->coordinates,{strategy_id},strategy_version,exact_lineage};
                     CompleteOptimalFamily complete{{build_artifact->coordinates,request.representation,payload},optimum,

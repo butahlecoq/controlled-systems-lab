@@ -137,7 +137,16 @@ class HistoryNormSolverTest(unittest.TestCase):
         manifest = build_history_manifest()
         self.assertEqual(validate_manifest(manifest_path=HISTORY_MANIFEST), manifest)
         graphs = manifest["graphs"]
-        self.assertEqual(len(graphs), 38)
+        self.assertEqual(len(graphs), 68)
+        from history_policy import NATIVE_STRATEGY_IDS
+        strategy_graphs = [row for row in graphs if row["controller"]["id"] in NATIVE_STRATEGY_IDS]
+        self.assertEqual(len(strategy_graphs), 30)
+        for row in strategy_graphs:
+            controller = row["controller"]
+            family, strategy = NATIVE_STRATEGY_IDS[controller["id"]]
+            self.assertEqual(controller["strategy"], strategy)
+            self.assertEqual(row["role_bindings"]["representation"]["id"], family)
+            self.assertIn("csl.nlp.casadi-ipopt.mumps-history-cost", controller["solver"]["fallbacks"])
         feedback = next(row for row in graphs if row["controller"]["id"] == "native-continuous-history-box-ipopt/1")
         self.assertEqual(feedback["role_bindings"]["representation"]["id"], "box")
         self.assertEqual(feedback["role_bindings"]["control_optimizer"]["id"], "casadi-ipopt")

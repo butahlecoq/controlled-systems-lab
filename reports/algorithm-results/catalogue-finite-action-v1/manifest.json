@@ -1,0 +1,20 @@
+{
+  "schema": "csl.catalogue-finite-action-capture/1",
+  "source_commit": "0bca2bf882ba7c63440c9f32470c25f5b27e612c",
+  "baseline_sdk_commit": "dc6801dc5f02c4000b4f1272361752581a55873a",
+  "candidate_sdk_commit": "0ae7082aed158a6538e68cd2ad645cfb3ffa53c1",
+  "files_sha256": {
+    "catalogue-parallelotope-replay-evidence.zip": "94820383074fe5b13ba603f1aedbe5f3a45160d31572a83248bc6c360eeba679",
+    "catalogue-separable-box-evidence.zip": "2e13a7cfc0a7c19ce08452dab9eae5f1c40b6ba3d3d5e624602bc4be74a772b8",
+    "catalogue-zonotope-replay-evidence.zip": "422fc348a48ea8f39a452a67190b86aa0ee4f3ce4661f107856ac85d43c25d6a",
+    "catalogue_finite_action.cpp": "318afc1bac8a277bff56dc4892d26b64d5dd90457ae2179cbb2d0ed525adbd70",
+    "examples.css": "11ded2b69cec694ff61ecad0493f175becbfc47bce3d641f2ee512543bb82cf4",
+    "hospital-finite-actions.svg": "088ee26727bde62929b9ae3c579cf27798002c905b6e3e470588ea734a08e599",
+    "index.html": "ff236f0f9265b41b61c3d01d9281cdf54cfd83029b904a1f7af2b8d94a34f19a",
+    "pair-shear-projection.svg": "56527f2659a67fd640c8d2a7de9dc17881d4553fb0542cc947543e682620904d",
+    "terminal-box-corner.svg": "3228797a6a9a562af4bbcf1e2a10b36afb7854ff3c1df0cf3a66ce01d375298b",
+    "zonotope-certificate-coverage.svg": "f041db89611cf16e1fddc665554172b19a721d4610541d7678218aaf5eca3453"
+  },
+  "candidate_zonotope_sdk_commit": "d65a76002e687f6dc82860d8d02bf300acff34bb",
+  "candidate_parallelotope_sdk_commit": "c518b4dcc1f40b285b5d6163523bab1b178f63f4"
+}

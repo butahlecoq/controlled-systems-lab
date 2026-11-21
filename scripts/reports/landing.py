@@ -146,6 +146,12 @@ FAMILIES = {
         "Checks 1,120 predecessor support values for authored control boxes and terminal sets. "
         "The battery example shows both sets, their intersections and its terminal-optimal trajectory.",
     ),
+    "catalogue-finite-action-v1": Family(
+        r"examples/catalogue-finite-action-v1",
+        "synthesis",
+        "Finite-action control across 35 catalogue models",
+        "Completes both finite-action decisions in 175 routes, recovering 45 baseline refusals.",
+    ),
     "mpc-crossover": Family(
         r"examples/mpc-crossover-6b7308c4",
         "synthesis",
@@ -1346,6 +1352,30 @@ def build(site: Path) -> None:
                 links=(
                     ("Source and hashes", backward + "/manifest.json"),
                     ("Offline evidence", backward + "/catalogue-backward-support-evidence.zip"),
+                ),
+            )
+        )
+    finite_action = "examples/catalogue-finite-action-v1"
+    if (site / finite_action / "index.html").is_file():
+        manifest = json.loads((site / finite_action / "manifest.json").read_text(encoding="utf-8"))
+        detailed = [entry for entry in detailed if entry.report_id != finite_action]
+        detailed.append(
+            Entry(
+                report_id=finite_action,
+                scope="175 native representation outcomes on the two-decision finite-action hold task.",
+                limits="Same authored inputs and budgets for the baseline, isolated scoring changes and joint replay.",
+                commit=manifest["source_commit"],
+                links=(
+                    ("Source and hashes", finite_action + "/manifest.json"),
+                    ("Box replay", finite_action + "/catalogue-separable-box-evidence.zip"),
+                    (
+                        "Zonotope replay",
+                        finite_action + "/catalogue-zonotope-replay-evidence.zip",
+                    ),
+                    (
+                        "Joint replay",
+                        finite_action + "/catalogue-parallelotope-replay-evidence.zip",
+                    ),
                 ),
             )
         )
