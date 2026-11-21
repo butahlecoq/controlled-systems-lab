@@ -112,6 +112,12 @@ if(report_headers)
   if(NOT generator OR NOT EXISTS "${ninja}" OR NOT report_objects)
     message(FATAL_ERROR "Configure and build the reports with the Ninja HiGHS profile first")
   endif()
+  foreach(object_file IN LISTS report_objects)
+    cmake_path(ABSOLUTE_PATH object_file BASE_DIRECTORY "${build_root}" NORMALIZE)
+    if(NOT EXISTS "${object_file}")
+      message(FATAL_ERROR "Build the native report object before analysis: ${object_file}")
+    endif()
+  endforeach()
   execute_process(COMMAND "${ninja}" -t deps ${report_objects}
     WORKING_DIRECTORY "${build_root}" OUTPUT_VARIABLE report_dependencies
     COMMAND_ERROR_IS_FATAL ANY)
