@@ -285,6 +285,19 @@ on:
       - 'reports/closed-loop-initial-baselines-v1.zip'
       - 'tests/reporting/test_syn03_strategy_a_report.py'
       - 'tests/reporting/test_syn03_ts02_report.py'
+      - 'scripts/reports/syn03/strategy_a_report.py'
+      - 'scripts/reports/syn03_ts02/report.py'
+      - 'scripts/reports/syn03_ts02/provenance.py'
+      - 'scripts/reports/syn03_strategy_a_*_reports.py'
+      - 'scripts/reports/syn03_strategy_a_*publication_policy.py'
+      - 'reports/algorithm-results/catalog.json'
+      - 'reports/algorithm-results/index.html'
+      - 'reports/algorithm-results/legacy-publications.json'
+      - 'reports/algorithm-results/syn03-strategy-a-ts0[12]-*/**'
+      - 'reports/algorithm-results/syn03-strategy-a-ts0[12]-*.zip'
+      - 'reports/algorithm-results/tooling/syn03/strategy_a_report.py'
+      - 'reports/algorithm-results/tooling/syn03/strategy_a_collect.py'
+      - 'reports/algorithm-results/tooling/syn03_ts02/report.py'
       - 'tests/reporting/test_opt07_*.py'
       - 'tests/reporting/test_opt11_publication.py'
       - 'pyproject.toml'
@@ -575,6 +588,19 @@ on:
       - 'reports/closed-loop-initial-baselines-v1.zip'
       - 'tests/reporting/test_syn03_strategy_a_report.py'
       - 'tests/reporting/test_syn03_ts02_report.py'
+      - 'scripts/reports/syn03/strategy_a_report.py'
+      - 'scripts/reports/syn03_ts02/report.py'
+      - 'scripts/reports/syn03_ts02/provenance.py'
+      - 'scripts/reports/syn03_strategy_a_*_reports.py'
+      - 'scripts/reports/syn03_strategy_a_*publication_policy.py'
+      - 'reports/algorithm-results/catalog.json'
+      - 'reports/algorithm-results/index.html'
+      - 'reports/algorithm-results/legacy-publications.json'
+      - 'reports/algorithm-results/syn03-strategy-a-ts0[12]-*/**'
+      - 'reports/algorithm-results/syn03-strategy-a-ts0[12]-*.zip'
+      - 'reports/algorithm-results/tooling/syn03/strategy_a_report.py'
+      - 'reports/algorithm-results/tooling/syn03/strategy_a_collect.py'
+      - 'reports/algorithm-results/tooling/syn03_ts02/report.py'
       - 'tests/reporting/test_opt07_*.py'
       - 'tests/reporting/test_opt11_publication.py'
       - 'pyproject.toml'
@@ -650,6 +676,15 @@ jobs:
         run: |
           python -m unittest discover -s tests/reporting -p 'test_syn03_strategy_a_report.py'
           python -m unittest discover -s tests/reporting -p 'test_syn03_ts02_report.py'
+      - name: Verify both saved Strategy A offline ZIPs
+        run: |
+          reports=reports/algorithm-results
+          python scripts/reports/site.py --catalog "$reports/catalog.json" --check --out "$RUNNER_TEMP/strategy-a-site"
+          for profile in ts01 ts02; do
+            for archive in "$reports"/syn03-strategy-a-"$profile"-*.zip; do
+              cmp "$archive" "$RUNNER_TEMP/strategy-a-site/${archive##*/}"
+            done
+          done
       - name: Check six saved environment routes and offline ZIPs
         run: >-
           python -m unittest
