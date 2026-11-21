@@ -52,6 +52,8 @@ on:
       - 'reports/algorithm-results/b04-c-exact-dyadic-v1/**'
       - 'scripts/reports/schema3_publication_policies.py'
       - 'scripts/reports/registered_reports.py'
+      - 'scripts/reports/geo05/**'
+      - 'reports/algorithm-results/geo05-*/records.json'
       - 'scripts/reports/collector_common.py'
       - 'scripts/reports/render.py'
       - 'scripts/reports/site.py'
@@ -328,6 +330,8 @@ on:
       - 'reports/algorithm-results/b04-c-exact-dyadic-v1/**'
       - 'scripts/reports/schema3_publication_policies.py'
       - 'scripts/reports/registered_reports.py'
+      - 'scripts/reports/geo05/**'
+      - 'reports/algorithm-results/geo05-*/records.json'
       - 'scripts/reports/collector_common.py'
       - 'scripts/reports/render.py'
       - 'scripts/reports/site.py'
@@ -607,6 +611,16 @@ jobs:
           python scripts/reports/native_fixed_tail_geometry.py --output "$RUNNER_TEMP/fixed-tail-geometry-site"
           cmp docs/examples/examples.css "$RUNNER_TEMP/fixed-tail-episode-site/examples/examples.css"
           cmp docs/examples/examples.css "$RUNNER_TEMP/fixed-tail-geometry-site/examples.css"
+      - name: Exercise GEO-05 report tools with saved records
+        run: |
+          python -m unittest discover -s scripts/reports/geo05 -p 'test_*.py'
+          for report_id in geo05-4dc3c0557570a52e geo05-7fddaba0c7698f72; do
+            records="reports/algorithm-results/$report_id/records.json"
+            output="$RUNNER_TEMP/$report_id"
+            python scripts/reports/geo05/render.py --records "$records" --out "$output"
+            python reports/algorithm-results/tooling/geo05/render.py --records "$records" --out "$output-compat"
+            cmp "$output/index.html" "$output-compat/index.html"
+          done
       - name: Exercise the composed Pages route finalizer
         run: python -m unittest tests.reporting.test_pages_route_retirement
       - name: Exercise maintained compatibility entry points
