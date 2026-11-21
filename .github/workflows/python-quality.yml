@@ -112,6 +112,7 @@ on:
       - 'docs/examples/qhull-highs-strategy-a-2d-record.json'
       - 'docs/examples/examples.css'
       - 'scripts/reports/mathematical_notation.py'
+      - 'tests/reporting/test_mathematical_notation.py'
       - 'scripts/reports/stage_finite_feedback.py'
       - 'scripts/reports/stage_geo07.py'
       - 'scripts/reports/environment_report_publication.py'
@@ -388,6 +389,7 @@ on:
       - 'docs/examples/qhull-highs-strategy-a-2d-record.json'
       - 'docs/examples/examples.css'
       - 'scripts/reports/mathematical_notation.py'
+      - 'tests/reporting/test_mathematical_notation.py'
       - 'scripts/reports/stage_finite_feedback.py'
       - 'scripts/reports/stage_geo07.py'
       - 'scripts/reports/environment_report_publication.py'
@@ -627,6 +629,7 @@ jobs:
         env:
           MPLBACKEND: Agg
         run: |
+          python -m unittest tests.reporting.test_mathematical_notation
           python -m unittest tests.reporting.test_report_data tests.reporting.test_render tests.reporting.test_publication_policy tests.reporting.test_report_source_identity tests.reporting.test_registered_kinds tests.reporting.test_landing tests.reporting.test_learning_book tests.reporting.test_plot tests.reporting.test_b04_publication_source_snapshot tests.reporting.test_publication_spine_boundaries
       - name: Check cumulative Pages artifact identity and output
         run: python -m unittest tests.reporting.test_pages_augmentation_waiter
