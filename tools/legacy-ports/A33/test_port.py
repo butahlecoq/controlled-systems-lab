@@ -5,18 +5,16 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from unittest import mock
 from pathlib import Path
+from unittest import mock
 
 import numpy as np
-
 import oracle
 import port
 
-
 HERE = Path(__file__).resolve().parent
 SQUARE = json.loads((HERE / "fixtures" / "square.json").read_text(encoding="utf-8"))["points"]
-CORNERS = [[0, 0], [2, 0], [2, 2], [0, 2]]
+CORNERS: list[list[float]] = [[0, 0], [2, 0], [2, 2], [0, 2]]
 
 
 class A33PortTests(unittest.TestCase):
@@ -56,7 +54,7 @@ class A33PortTests(unittest.TestCase):
         self.assertEqual(oracle.check(points, result["output"])["status"], "verified")
 
     def test_grouping_retains_late_outside_point_and_accumulates_nearby(self):
-        points = (
+        points: list[list[float]] = (
             [[-1, 0], [1, 0], [0, -1], [0, 1]]
             + [[x, 0.75] for x in (0.61, 0.66, 0.70)]
             + [[k / 64, 0] for k in range(49, 64)]
@@ -87,7 +85,9 @@ class A33PortTests(unittest.TestCase):
         self.assertEqual(oracle.check(points, result["output"])["status"], "verified")
 
     def test_tenth_redundant_at_last_column_is_checked_again_in_group(self):
-        interior = [[i / 16, j / 16] for i in range(4, 13, 2) for j in range(4, 13, 2)][:10]
+        interior: list[list[float]] = [
+            [i / 16, j / 16] for i in range(4, 13, 2) for j in range(4, 13, 2)
+        ][:10]
         points = CORNERS + interior
         result = port.run(points)
         self.assertEqual(result["algorithm_status"], "completed")
@@ -118,7 +118,7 @@ class A33PortTests(unittest.TestCase):
         self.assertEqual(one_unique["algorithm_status"], "failed")
         self.assertEqual(one_unique["stage"], "A33 preprocessing")
         # Non-axis-flat rank-deficient points still exercise the source tableau.
-        line = [[0, 0], [1, 1], [2, 2], [0.5, 0.5]]
+        line: list[list[float]] = [[0, 0], [1, 1], [2, 2], [0.5, 0.5]]
         line_result = port.run(line)
         self.assertEqual(line_result["algorithm_status"], "completed")
         self.assertEqual(oracle.check(line, line_result["output"])["status"], "verified")

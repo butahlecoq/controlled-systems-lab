@@ -9,13 +9,13 @@ from pathlib import Path
 from unittest.mock import patch
 
 import numpy as np
-
 import oracle
 import port
 
-
 HERE = Path(__file__).resolve().parent
-SQUARE = json.loads((HERE / "fixtures" / "square.json").read_text(encoding="utf-8"))["points"]
+SQUARE: list[list[float]] = json.loads(
+    (HERE / "fixtures" / "square.json").read_text(encoding="utf-8")
+)["points"]
 CORNERS = [[0, 0], [2, 0], [2, 2], [0, 2]]
 
 
@@ -67,7 +67,9 @@ class A29PortTests(unittest.TestCase):
         self.assertEqual(oracle.check(SQUARE, result["output"])["status"], "verified")
 
     def test_duplicates_boundary_and_rank_deficiency(self):
-        for points in (SQUARE + [[0, 0], [1, 1]], [[0, 0], [1, 1], [2, 2], [0.5, 0.5]]):
+        collinear: list[list[float]] = [[0, 0], [1, 1], [2, 2], [0.5, 0.5]]
+        extra: list[list[float]] = [[0, 0], [1, 1]]
+        for points in (SQUARE + extra, collinear):
             result = port.run(points)
             self.assertEqual(result["algorithm_status"], "completed")
             self.assertEqual(oracle.check(points, result["output"])["status"], "verified")

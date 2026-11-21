@@ -11,8 +11,10 @@ import json
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
 
 import numpy as np
+from numpy.typing import NDArray
 
 EPS = 1e-9
 CONSECUTIVE_REDUNDANT = 10
@@ -101,7 +103,7 @@ def simplex_hull_mod(points: np.ndarray, column: int) -> HelperResult:
             reduced[:, active] = np.nan
             small = np.flatnonzero(np.sum(np.abs(reduced), axis=0) < 1 + EPS)
             remove = np.unique(np.concatenate((small, moved)))
-            kept = np.delete(x, remove, axis=1)
+            kept = np.delete(x, cast(NDArray[np.intp], remove), axis=1)
             front = x[:, moved]
             return HelperResult(
                 np.concatenate((front, kept), axis=1), False, pivots, int(moved.size)
