@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import shutil
 import sys
 import tempfile
@@ -20,6 +21,20 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class NativeTerminalCostPublicationTests(unittest.TestCase):
+    def test_renderer_reproduces_the_saved_cost_page_and_contours(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bundle = root / "source" / example.ROUTE
+            shutil.copytree(example.BUNDLE, bundle)
+            example.render(bundle)
+            for name in ("index.html", "cost-contours.svg", "cost-contours-print.svg"):
+                self.assertEqual((bundle / name).read_bytes(), (example.BUNDLE / name).read_bytes())
+            receipt = json.loads((bundle / "presentation.json").read_text())
+            renderer_sha256 = hashlib.sha256(Path(example.__file__).read_bytes()).hexdigest()
+            self.assertEqual(receipt["renderer_sha256"], renderer_sha256)
+            with mock.patch.object(example, "BUNDLE", bundle):
+                example.stage(root / "site")
+
     def test_original_and_corrected_minima_match_the_source_formulas(self):
         before, after, specs = example.load_records(example.BUNDLE)
         target = next(
