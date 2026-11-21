@@ -10,8 +10,12 @@ import statistics
 from collections import Counter, defaultdict
 from fractions import Fraction as Q
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
-from evidence import checked_sources
+if TYPE_CHECKING or __package__:
+    from .evidence import checked_sources
+else:
+    from evidence import checked_sources
 
 
 def render(bundle, receipt_path, output):
@@ -48,7 +52,7 @@ def render(bundle, receipt_path, output):
                 metrics[attempt["method"], name].append(step[name])
     methods = ("finite-reference", "polytope", "inflated-zonotope", "ellipsoid-certified")
     for method in methods:
-        row = dict(
+        row: dict[str, Any] = dict(
             method=method,
             grid_feasible=counts[method],
             feasibility_loss=counts["finite-reference"] - counts[method],
@@ -72,7 +76,7 @@ def render(bundle, receipt_path, output):
             for a in record["attempts"]
             if a["status"] == "completed" and a["method"] == method
         ]
-        actual = list(map(Q, row["actual_worst_costs"]))
+        actual = [Q(cost) for cost in row["actual_worst_costs"]]
         row["actual_worst_cost_range"] = (
             [float(min(actual)), float(max(actual))] if actual else None
         )

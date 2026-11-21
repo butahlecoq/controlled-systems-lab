@@ -11,8 +11,12 @@ import subprocess
 import time
 from fractions import Fraction as Q
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
-from model import R, optimizer, plan, problem, replay, representation_checks, tightenings, value
+if TYPE_CHECKING or __package__:
+    from .model import R, optimizer, problem, replay, representation_checks, tightenings, value
+else:
+    from model import R, optimizer, problem, replay, representation_checks, tightenings, value
 
 METHODS = ("finite-reference", "polytope", "inflated-zonotope", "ellipsoid-certified")
 INITIAL = ((Q(1, 8), Q(0)), (Q(3, 8), -Q(1, 8)), (-Q(1, 4), Q(1, 8)))
@@ -29,7 +33,7 @@ def exact_approximation_check(record):
         raise ValueError("APP-04 binding mismatch")
     if record["orientation"] != [[1, 0], [1, 1]] or record["center"] != [0, 0]:
         raise ValueError("APP-04 geometry mismatch")
-    radii = list(map(Q, record["radii"]))
+    radii = [Q(radius) for radius in record["radii"]]
     for s in (-R, R):
         for t in (-R, R):
             if s * s / radii[0] ** 2 + t * t / radii[1] ** 2 > 1:
@@ -104,7 +108,7 @@ def run(driver, output, repetitions):
     root = Path(__file__).resolve().parents[3]
     base_scenario = root / "benchmarks/scenarios/mpc06-nilpotent-tube-v1.json"
     (output / "base-scenario.json").write_bytes(base_scenario.read_bytes())
-    result = dict(
+    result: dict[str, Any] = dict(
         schema="csl.mpc06-online-study/1",
         base_scenario_sha256=hashlib.sha256(base_scenario.read_bytes()).hexdigest(),
         plant=dict(
@@ -208,8 +212,10 @@ def run(driver, output, repetitions):
                 start_new_session=True,
                 preexec_fn=process_limits,
             )
+            stdin, stdout_stream = process.stdin, process.stdout
+            assert stdin is not None and stdout_stream is not None
             selector = selectors.DefaultSelector()
-            selector.register(process.stdout, selectors.EVENT_READ)
+            selector.register(stdout_stream, selectors.EVENT_READ)
             try:
                 line, approx = read_line(process, selector, stdout)
                 approx_check_start = time.perf_counter_ns()
@@ -232,7 +238,7 @@ def run(driver, output, repetitions):
                         controls = []
                         steps = []
                         failed = False
-                        attempt = dict(
+                        attempt: dict[str, Any] = dict(
                             repetition=repetition,
                             initial=initial,
                             method=method,
@@ -269,8 +275,8 @@ def run(driver, output, repetitions):
                             )
                             steps.append(row)
                             begin = time.perf_counter_ns()
-                            process.stdin.write(request_text)
-                            process.stdin.flush()
+                            stdin.write(request_text)
+                            stdin.flush()
                             line, native = read_line(process, selector, stdout)
                             wall = time.perf_counter_ns() - begin
                             check_start = time.perf_counter_ns()
@@ -311,7 +317,7 @@ def run(driver, output, repetitions):
                                 actual=actual,
                                 actual_checker_ns=time.perf_counter_ns() - checking,
                             )
-                process.stdin.close()
+                stdin.close()
                 process.wait(timeout=15)
                 proc["returncode"] = process.returncode
                 if process.returncode:
@@ -328,9 +334,9 @@ def run(driver, output, repetitions):
             finally:
                 selector.close()
                 (folder / "stdout.txt").write_text("".join(stdout))
-                process.stdout.close()
-                if not process.stdin.closed:
-                    process.stdin.close()
+                stdout_stream.close()
+                if not stdin.closed:
+                    stdin.close()
     result["load_after"] = os.getloadavg()
     result["limitations"] = [
         "bounded deterministic-anchor profile only",

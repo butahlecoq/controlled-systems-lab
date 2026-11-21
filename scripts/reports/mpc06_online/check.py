@@ -2,16 +2,21 @@
 """Recheck saved MPC-06 native controls, matched references and worst costs."""
 
 import argparse
-import hashlib
 import json
 import time
 from fractions import Fraction as Q
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from evidence import checked_sources, load_sources, make_receipt
-from study import encode, exact_approximation_check
+if TYPE_CHECKING or __package__:
+    from .evidence import checked_sources, load_sources, make_receipt
+    from .model import optimizer, problem, replay, representation_checks, tightenings, value
+    from .study import encode, exact_approximation_check
+else:
+    from evidence import checked_sources, load_sources, make_receipt
+    from study import encode, exact_approximation_check
 
-from model import optimizer, problem, replay, representation_checks, tightenings, value
+    from model import optimizer, problem, replay, representation_checks, tightenings, value
 
 
 def plain(value):
@@ -41,7 +46,9 @@ def verify(record):
     if record["representations"] != representation_checks():
         raise ValueError("representation evidence changed")
     for row in record["grid"]["rows"]:
-        qp = problem(tuple(map(Q, row["anchor"])), tightenings(row["method"]))
+        qp = problem(
+            tuple(Q(coordinate) for coordinate in row["anchor"]), tightenings(row["method"])
+        )
         if row["qp"] != plain(qp):
             raise ValueError("exact matched feasible interval changed")
         expected = plain(value(qp, optimizer(qp))) if qp["feasible"] else None
@@ -59,7 +66,7 @@ def verify(record):
     for attempt in record["attempts"]:
         if attempt["status"] != "completed":
             continue
-        initial = tuple(map(Q, attempt["initial"]))
+        initial = tuple(Q(coordinate) for coordinate in attempt["initial"])
         anchor = initial
         controls = []
         if len(attempt["steps"]) != 3:
