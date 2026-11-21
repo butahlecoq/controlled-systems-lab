@@ -70,6 +70,9 @@ class StrategyATs02ReportTests(unittest.TestCase):
             isolated={key:value for key,value in catalogue.items() if key!="reports"}
             isolated["reports"]=[next(row for row in catalogue["reports"] if row["report_kind"]==item.kind)]
             shutil.copytree(bundle,stage_root/item.source_report_id)
+            archive_name = f"{item.report_id}.zip"
+            archive_copy = stage_root / archive_name
+            shutil.copyfile(bundle.parent / archive_name, archive_copy)
             empty_pins={"schema":"csl.legacy-report-pins/1","reports":{}}
             (stage_root/"legacy-publications.json").write_text(json.dumps(empty_pins),encoding="utf-8")
             isolated_catalog=stage_root/"catalog.json"
@@ -78,6 +81,9 @@ class StrategyATs02ReportTests(unittest.TestCase):
             # This one-entry catalogue deliberately excludes legacy publications unrelated to this report.
             with mock.patch.object(site,"LEGACY_PINS_SHA256",site.registered._digest(empty_pins)):
                 staged=site.stage(isolated_catalog,stage_root/"site",check=True)
+                archive_copy.write_bytes(b"changed committed ZIP")
+                with self.assertRaisesRegex(ValueError, "committed offline ZIP differs from validated source"):
+                    site.stage(isolated_catalog, stage_root / "changed-archive", check=True)
             published=staged/item.report_id
             for root_page in (staged/"catalog.json",staged/"index.html"):
                 content=root_page.read_bytes().lower()
