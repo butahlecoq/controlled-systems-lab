@@ -8,7 +8,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from contextlib import nullcontext, redirect_stdout
+from contextlib import nullcontext, redirect_stderr, redirect_stdout
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -134,6 +134,39 @@ class Ts01SavedReportTests(unittest.TestCase):
             for path in self.bundle.iterdir():
                 self.assertEqual((output / path.name).read_bytes(), path.read_bytes(), path.name)
 
+    def test_interrupted_measurement_retains_flushed_output(self):
+        with tempfile.TemporaryDirectory() as directory:
+            build_root = Path(directory)
+
+            def interrupted_process(command, **outputs):
+                if "stdout" in outputs:
+                    outputs["stdout"].write(b"partial stdout")
+                    outputs["stderr"].write(b"partial stderr")
+                raise KeyboardInterrupt
+
+            with (
+                patch.object(collector, "subprocess", Mock(run=interrupted_process)),
+                redirect_stderr(io.StringIO()),
+                self.assertRaises(KeyboardInterrupt),
+                collector.measurement_attempt(
+                    build_root, build_root / "driver.exe", "b" * 64, "a" * 40
+                ),
+            ):
+                self.fail("interrupted process has no result")
+
+            (attempt,) = build_root.glob("measurement-attempt.*")
+            self.assertEqual((attempt / "stdout.bin").read_bytes(), b"partial stdout")
+            self.assertEqual((attempt / "stderr.bin").read_bytes(), b"partial stderr")
+            receipt = json.loads((attempt / "attempt.json").read_bytes())
+            self.assertEqual(receipt["status"], "cancelled")
+            self.assertIsNone(receipt["returncode"])
+            self.assertEqual(
+                receipt["stdout_sha256"], hashlib.sha256(b"partial stdout").hexdigest()
+            )
+            self.assertEqual(
+                receipt["stderr_sha256"], hashlib.sha256(b"partial stderr").hexdigest()
+            )
+
     def test_collector_records_native_attempts_and_exports_only_accepted_results(self):
         attempts = (
             (7, b"partial native output\r\n", "measurement executable failed with status 7"),
@@ -149,7 +182,7 @@ class Ts01SavedReportTests(unittest.TestCase):
                 cmake = scratch / "cmake"
                 cmake.touch()
                 build_root = scratch / "build"
-                output = scratch / "collection"
+                output = build_root / "measurement-attempt"
                 stderr = b"native diagnostic\r\n"
 
                 def build_step(command, build_root=build_root):
@@ -200,7 +233,21 @@ class Ts01SavedReportTests(unittest.TestCase):
                     "--out",
                     str(output),
                 ]
-                process = subprocess.CompletedProcess(["driver"], returncode, stdout, stderr)
+
+                def run_driver(
+                    command,
+                    *,
+                    stdout,
+                    stderr,
+                    check,
+                    raw_stdout=stdout,
+                    raw_stderr=stderr,
+                    status=returncode,
+                ):
+                    stdout.write(raw_stdout)
+                    stderr.write(raw_stderr)
+                    return subprocess.CompletedProcess(command, status)
+
                 expected = (
                     nullcontext() if reason is None else self.assertRaisesRegex(SystemExit, reason)
                 )
@@ -209,13 +256,14 @@ class Ts01SavedReportTests(unittest.TestCase):
                     patch.object(collector, "git", side_effect=git_response),
                     patch.object(collector, "run", side_effect=build_step),
                     patch.object(collector, "psutil", None),
-                    patch.object(collector, "subprocess", Mock(run=Mock(return_value=process))),
+                    patch.object(collector, "subprocess", Mock(run=run_driver)),
                     redirect_stdout(io.StringIO()),
+                    redirect_stderr(io.StringIO()),
                     expected,
                 ):
                     collector.main()
 
-                attempt = build_root / "measurement-attempt"
+                (attempt,) = build_root.glob("measurement-attempt.*")
                 self.assertEqual((attempt / "stdout.bin").read_bytes(), stdout)
                 self.assertEqual((attempt / "stderr.bin").read_bytes(), stderr)
                 receipt = json.loads((attempt / "attempt.json").read_bytes())

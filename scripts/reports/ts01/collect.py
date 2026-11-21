@@ -11,6 +11,7 @@ import platform
 import statistics
 import subprocess
 import sys
+import tempfile
 import xml.etree.ElementTree as ET
 from contextlib import contextmanager
 from pathlib import Path
@@ -42,8 +43,9 @@ def git(root, *args):
 
 
 @contextmanager
-def measurement_attempt(attempt, executable, binary_sha256, harness_commit):
-    attempt.mkdir()
+def measurement_attempt(build_root, executable, binary_sha256, harness_commit):
+    """Save the process streams and mark acceptance only after the collection is complete."""
+    attempt = Path(tempfile.mkdtemp(prefix="measurement-attempt.", dir=build_root))
     receipt = {
         "schema": "csl.syn07-ts01-measurement-attempt/1",
         "source_commit": report.SOURCE_COMMIT,
@@ -64,27 +66,37 @@ def measurement_attempt(attempt, executable, binary_sha256, harness_commit):
         )
         pending.replace(receipt_path)
 
+    stdout_path = attempt / "stdout.bin"
+    stderr_path = attempt / "stderr.bin"
     write_receipt()
     try:
-        result = subprocess.run(receipt["command"], capture_output=True, check=False)
         try:
-            cpu_after = psutil.cpu_percent(interval=1.0) if psutil is not None else None
+            with stdout_path.open("xb") as stdout, stderr_path.open("xb") as stderr:
+                result = subprocess.run(
+                    receipt["command"], stdout=stdout, stderr=stderr, check=False
+                )
+                receipt.update(status="returned", returncode=result.returncode)
+                cpu_after = psutil.cpu_percent(interval=1.0) if psutil is not None else None
         finally:
-            (attempt / "stdout.bin").write_bytes(result.stdout)
-            (attempt / "stderr.bin").write_bytes(result.stderr)
+            stdout_bytes = stdout_path.read_bytes() if stdout_path.exists() else None
+            stderr_bytes = stderr_path.read_bytes() if stderr_path.exists() else None
             receipt.update(
-                status="returned",
-                returncode=result.returncode,
-                stdout_sha256=sha(result.stdout),
-                stderr_sha256=sha(result.stderr),
+                stdout_sha256=sha(stdout_bytes) if stdout_bytes is not None else None,
+                stderr_sha256=sha(stderr_bytes) if stderr_bytes is not None else None,
             )
             write_receipt()
+        if stdout_bytes is None or stderr_bytes is None:
+            raise OSError("measurement attempt streams are missing")
+        result.stdout = stdout_bytes
+        result.stderr = stderr_bytes
         yield result, cpu_after
     except KeyboardInterrupt:
         receipt.update(status="cancelled", reason="measurement interrupted")
+        print(f"Raw measurement evidence: {attempt}", file=sys.stderr)
         raise
     except (Exception, SystemExit) as error:
         receipt.update(status="failed", reason=str(error))
+        print(f"Raw measurement evidence: {attempt}", file=sys.stderr)
         raise
     else:
         receipt["status"] = "accepted"
@@ -226,9 +238,10 @@ def main():
     executable = build_dir / "Release" / "csl_syn07_ts01_report.exe"
     binary = executable.read_bytes()
     cpu_before = psutil.cpu_percent(interval=1.0) if psutil is not None else None
-    with measurement_attempt(
-        build_root / "measurement-attempt", executable, sha(binary), harness_commit
-    ) as (result, cpu_after):
+    with measurement_attempt(build_root, executable, sha(binary), harness_commit) as (
+        result,
+        cpu_after,
+    ):
         if result.returncode:
             raise SystemExit(f"measurement executable failed with status {result.returncode}")
         if git(source_checkout, "rev-parse", "HEAD") != report.SOURCE_COMMIT or git(
@@ -408,11 +421,6 @@ def main():
         out.mkdir(parents=True, exist_ok=False)
         (out / "events.jsonl").write_bytes(result.stdout)
         (out / "stderr.txt").write_bytes(result.stderr)
-        (out / "collection.json").write_text(
-            json.dumps(measurement, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
-            encoding="utf-8",
-            newline="\n",
-        )
         (out / "command.txt").write_text(
             json.dumps(
                 {"configure": configure_command, "build": build_command, "run": [executable]},
@@ -423,6 +431,13 @@ def main():
             encoding="utf-8",
             newline="\n",
         )
+        pending = out / "collection.json.tmp"
+        pending.write_text(
+            json.dumps(measurement, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        pending.replace(out / "collection.json")
     print(json.dumps(measurement, ensure_ascii=False, sort_keys=True))
 
 
