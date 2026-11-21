@@ -31,6 +31,8 @@ on:
       - 'benchmarks/reporting/closed_loop/contracts.py'
       - 'tests/reporting/test_closed_loop_tasks.py'
       - 'scripts/ci/**'
+      - 'scripts/reports/await_pages_augmentation_runs.py'
+      - 'tests/reporting/test_pages_augmentation_waiter.py'
       - 'tests/ci/**'
       - 'scripts/catalogue/**'
       - 'reports/algorithm-results/tooling/**'
@@ -180,6 +182,8 @@ on:
       - 'benchmarks/reporting/closed_loop/contracts.py'
       - 'tests/reporting/test_closed_loop_tasks.py'
       - 'scripts/ci/**'
+      - 'scripts/reports/await_pages_augmentation_runs.py'
+      - 'tests/reporting/test_pages_augmentation_waiter.py'
       - 'tests/ci/**'
       - 'scripts/catalogue/**'
       - 'reports/algorithm-results/tooling/**'
@@ -340,6 +344,8 @@ jobs:
           MPLBACKEND: Agg
         run: |
           python -m unittest tests.reporting.test_report_data tests.reporting.test_render tests.reporting.test_publication_policy tests.reporting.test_report_source_identity tests.reporting.test_registered_kinds tests.reporting.test_landing tests.reporting.test_learning_book tests.reporting.test_plot tests.reporting.test_b04_publication_source_snapshot tests.reporting.test_publication_spine_boundaries
+      - name: Check cumulative Pages artifact identity and output
+        run: python -m unittest tests.reporting.test_pages_augmentation_waiter
       - name: Check mathematical presentation and frozen HTML
         run: python -m unittest tests.reporting.test_mathematical_presentation
       - name: Exercise Pages deployment freshness and source identity
