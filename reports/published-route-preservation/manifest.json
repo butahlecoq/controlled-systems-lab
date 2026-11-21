@@ -23,6 +23,288 @@
   "archives": [
     {
       "members": {
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/OFFLINE_SHA256SUMS": {
+          "publish": true,
+          "sha256": "37a9d1ecefb9c2e676a0360d69cbbe492f7ad0cdf91561040476ad0b92ef8743",
+          "size": 6448
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/README.md": {
+          "publish": true,
+          "sha256": "4172f329fad19a25bf17197782aeba3447174c4f4c8bbb212956ed9992758b7f",
+          "size": 1357
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/SHA256SUMS": {
+          "publish": true,
+          "sha256": "f5c77154ba4d39908c86fe7dfdf8dd6f1d159fe0ca340465e56ace901ab14f59",
+          "size": 2395
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/evidence/mpc06-offline-costs-8f58473d-20261110/README.md": {
+          "publish": true,
+          "sha256": "52ed04fb47ea6faa67fedd81453962688b79c994b15fedc154e0844b16c7dee7",
+          "size": 2717
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/evidence/mpc06-offline-costs-8f58473d-20261110/SHA256SUMS": {
+          "publish": true,
+          "sha256": "4a6572d0fb95f7e95d1e93df79e2f81f03e31f4a74440c7a896df489f1705349",
+          "size": 323
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/evidence/mpc06-offline-costs-8f58473d-20261110/capture.zip": {
+          "publish": true,
+          "sha256": "fb66fdcf5de670a6ad09180590b1c9538ec6d798d8f1e07a072d00cae6e90497",
+          "size": 98368
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/evidence/mpc06-offline-costs-8f58473d-20261110/qualification.json": {
+          "publish": true,
+          "sha256": "b217f989e8cb4dbf89cd2c23d32581558491f6943788ba78eaeb6622ce8543c6",
+          "size": 3622
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/evidence/mpc06-offline-costs-8f58473d-20261110/verification.json": {
+          "publish": true,
+          "sha256": "b20cc65eaf71d305dfc10f3a29b4490f79c42f9da38eb8378d4625a13457332c",
+          "size": 4464
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/index.html": {
+          "publish": true,
+          "sha256": "c80e695d278c9d7b466a49e9ea41fca029b69f7bd6c650ce9d8d82b017267680",
+          "size": 4091
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/invariant-tightenings.svg": {
+          "publish": true,
+          "sha256": "a41340078df2332822e201f6529f4bb9ad49c3182a451cd33d47c6522a5a9ebe",
+          "size": 71336
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/minimal-inputs.json": {
+          "publish": true,
+          "sha256": "7cd2be0d827c7a00df090725126aa94ff9a5d7ec5678f054f7a5fef48d68822d",
+          "size": 2532
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/offline_check.py": {
+          "publish": true,
+          "sha256": "6144afabd4c9b89496adfb940ac64e373a4f2cfad5d5ce47d0305f8fd9dafbda",
+          "size": 524
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/publication-manifest.json": {
+          "publish": true,
+          "sha256": "b41acc4538b3702c67c03d84fc7d5db658a4e48f56571f47c1eaaf308a7959b3",
+          "size": 8253
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-files.json": {
+          "publish": true,
+          "sha256": "3b001a5810d2a98f3b9c4851ba13fb82135c6c664b1ebd86f7a81e82303a4384",
+          "size": 1159
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/HEAD": {
+          "publish": false,
+          "sha256": "940dd8c63a2f9c99f124f89091842a06f8f4a66b6a376407eb15728d483bfd62",
+          "size": 25
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/config": {
+          "publish": false,
+          "sha256": "4db84cec131596e0ab82bd869bb291a9b1cfcb3552970ea15a55dacb0b1e3282",
+          "size": 48
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/05/14331f28a191f8cd1f3fc9f911173330a652b4": {
+          "publish": false,
+          "sha256": "10809b29d4e346b674b0982ebee68c2389c2a013bad7a8b9d73f91446e206a57",
+          "size": 7434
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/16/38c79f60b7a9bc14ad807fb33a5fc6280c397e": {
+          "publish": false,
+          "sha256": "40fcb8a67b700761fac5d07da28e452fedad798623b9930e5aa1ff8c2cac4fe8",
+          "size": 3272
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/16/d3ffc8156e157caace2d753041f1ed5be72700": {
+          "publish": false,
+          "sha256": "4664d838c62f16b7f9ebff456fd138c32b9b0d74307506ed7cfee84119a698da",
+          "size": 2256
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/29/bab9ae23e46928a4d9e114b5936541f7f8b293": {
+          "publish": false,
+          "sha256": "fcaf3ed22fede1ef1a2fc706afce8a127a8b6a3cd7a64baa415a1f926edeba26",
+          "size": 68495
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/31/478a17823f3360ec43b87ac7c35b3a6767fe69": {
+          "publish": false,
+          "sha256": "552b35717cd2631870297929b43e874cff213e79fe1546b0a4c69a2104440987",
+          "size": 2195
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/32/be3617dadf847e5625da58eb4a30e50b2a66b7": {
+          "publish": false,
+          "sha256": "3681b07a3ae405d50e3795a74aeccec5c6973db5f3a3d8c915d749119b37796a",
+          "size": 949
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/37/936fe9202889236be7086ccd9fdbcfe1d6496c": {
+          "publish": false,
+          "sha256": "cbb599e3eedda20700ebd8c756e6c906152841fab3bfe9e6984a64ae1640596b",
+          "size": 6770
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/44/2438343fb80e9d6338b6a0bd06e56bd1d5dcf1": {
+          "publish": false,
+          "sha256": "a751b8c0c7c978b71e46b168b549038f2b441fff2060e0b501a82366fab9cde1",
+          "size": 206
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/4f/11949b43cd34eb8d94dc210b2efca4da7d7b86": {
+          "publish": false,
+          "sha256": "87972229d65ade1c1e9120de516170309f44c93c20ae5e85b68c0469e5f09d8e",
+          "size": 141
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/52/f7b312f289851901de2862eb4ea9901cdd31af": {
+          "publish": false,
+          "sha256": "3301b2b7d168570674e7f9ff8e5b4e7fc3b6dfb1e9494f9f76887137ddfc654a",
+          "size": 908
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/5c/2eb1380a7c90297f69372ba9abb3a15e0ea7be": {
+          "publish": false,
+          "sha256": "c8c2cef2e1ff973507d83bed6a6d05395ee31e422426ef3c4441308889333776",
+          "size": 432
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/62/f9b13113d79851551e62a7af32946b752648d1": {
+          "publish": false,
+          "sha256": "e5ad8ec8bb5f7500fbc137a3fe4de5906f5281f5363c9c6e2ecaeba5f8832b84",
+          "size": 2989
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/63/bfa5a16764199a7c5785b466958d1ff2df3231": {
+          "publish": false,
+          "sha256": "607c69b848a6df75f83ec1c2610f94efe6d94fa5991626f9de9126d1f584ec71",
+          "size": 154
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/6d/11b1b322ddfdb21d41b6d6d25779d89be998fa": {
+          "publish": false,
+          "sha256": "fc77f89a505bbab504d4acec7542067ea9c7020b1cbe4a095b9173b12f6dcf96",
+          "size": 205
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/8b/33a404770fc89978e47232d1ea8fc34263a5d8": {
+          "publish": false,
+          "sha256": "71c11d928abc235b6fa1eec024e4baf76664d786ca45445fe62e9857180f01bb",
+          "size": 2961
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/8f/58473d7ff8005c7b775706e1e1be8a7dfa7e57": {
+          "publish": false,
+          "sha256": "b556ff19b77548186879e775db52bde85e55b0743e2a084d3b06bbc1296f96e2",
+          "size": 202
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/96/64663c7ba043b791c63556621bb6210b7d1d69": {
+          "publish": false,
+          "sha256": "ab52bd0753856cffd3d9feeb094e53bf9fe3297c4c74cad17b9ead8cebcfc570",
+          "size": 59
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/9b/93b85b4624e31bb7670e8e4869305ab54977b8": {
+          "publish": false,
+          "sha256": "64431c9efda4fbe8610decf9022388e0816879d22dfb4d66e3657b276301c79a",
+          "size": 184
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/b4/6bd42eddffc44d8ca6a8da5de992abb446c87d": {
+          "publish": false,
+          "sha256": "30cf167112b4c13d432558bfa128266db738e56add178bcff046421df166e90a",
+          "size": 680
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/b7/68a2115576dd465b0cc8625edfc77e6cbc44cc": {
+          "publish": false,
+          "sha256": "71d41a883ec7df22b0b040e4cf1ccdc6ef6d886323ec33a2f3d7e82411734c2f",
+          "size": 7120
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/b9/63c4f47ae60d3a951a2895db9ba573ace1ab97": {
+          "publish": false,
+          "sha256": "ef74e64579bb290bf2a8e52ddca7c37cbc0d24b5238f41d33b509d3024bcd558",
+          "size": 588
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/cf/e50ffbb9d9f303b105c3e4c8bbc7d8c6492828": {
+          "publish": false,
+          "sha256": "945890c332807b5fbe333cc08408a374e7b5959ec32e555f4c7378a14bcf6313",
+          "size": 187
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/d1/b39cfe67ce96f9202053a3a9d0e9bbee49547b": {
+          "publish": false,
+          "sha256": "28a77b7d855e88273ee68abf63b49545986e9531c8673ace0e18f3e629857a64",
+          "size": 151
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/d6/bf0bbda18c74c4d335737082a409db40d7441c": {
+          "publish": false,
+          "sha256": "d6b67e4cc8bd94381e9ed222ac7484e2bc02f54fad7d9b2c036e34c293388731",
+          "size": 1132
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/dc/95d071147f03824a97df5c09707d91310af459": {
+          "publish": false,
+          "sha256": "4b4cb6f70286a1f534d28473e9d0f18c209efb03100f90c54c82d403d8eafc3c",
+          "size": 10018
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/e9/d19a6117b332de4d0a720f0aae2f7cb581b14c": {
+          "publish": false,
+          "sha256": "8177f0f12963a57f7983a09022b0789ef2fb08e08a43801908faf097d0c80d9f",
+          "size": 10316
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/f5/b66548a383b0861aa3264e2ede8dbf5e068234": {
+          "publish": false,
+          "sha256": "f73fab34074b2f58042369d0a4c2e1011bf55e659aa83ccaab607ae3c73ce776",
+          "size": 3242
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/f6/8371eb926be3ae70bb0d674da449ab6a03703f": {
+          "publish": false,
+          "sha256": "b5fe91fd7848bb70549a74f6ae38d6ed1445880a042fdd240c2ed90cf42460e6",
+          "size": 12118
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/objects/f8/bee528af99f365e6d42b57c046283d6e7c3927": {
+          "publish": false,
+          "sha256": "831c7044ce43c2ac25a28000f7294d9dad95080162eefb2e67de36afa58dffd2",
+          "size": 650
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/.git/refs/heads/evidence": {
+          "publish": false,
+          "sha256": "6b418803ec0453d85f8ade17c87a79f5d8ad735fec93554974db19b3ce1e687c",
+          "size": 41
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/reports/algorithm-results/mpc06-completion-v2/invariant-tightenings.svg": {
+          "publish": true,
+          "sha256": "a41340078df2332822e201f6529f4bb9ad49c3182a451cd33d47c6522a5a9ebe",
+          "size": 71336
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/reports/algorithm-results/mpc06-online-anchor-v1/result.json": {
+          "publish": true,
+          "sha256": "a8ae1ea557907ceb2b5bcb41104de8ec81bfcef550e9eda6e4221db22f05be1a",
+          "size": 1159485
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/scripts/reports/mpc06_offline/builder.py": {
+          "publish": true,
+          "sha256": "236d66e21c0011a5ff727c780fea10a6941b1dad1246331794f09fe20d8b4370",
+          "size": 5717
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/scripts/reports/mpc06_offline/check.py": {
+          "publish": true,
+          "sha256": "41a685e8af262512677b6a3d5262f45445ccbf8ce2c2f521fd28680e4180d344",
+          "size": 9721
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/scripts/reports/mpc06_offline/inputs.json": {
+          "publish": true,
+          "sha256": "7cd2be0d827c7a00df090725126aa94ff9a5d7ec5678f054f7a5fef48d68822d",
+          "size": 2532
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/scripts/reports/mpc06_offline/study.py": {
+          "publish": true,
+          "sha256": "658bb4bba6d064514964df183568f9e73e60047a2415233f98d2f9b31b35dbb4",
+          "size": 7796
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/scripts/reports/mpc06_online/model.py": {
+          "publish": true,
+          "sha256": "0b86d33d7b27cd7d9ae55f16b5cfbee8f53cbf9f135c77082c8b250a174c51c4",
+          "size": 5529
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/source-root/scripts/reports/stage_mpc06_offline_costs.py": {
+          "publish": true,
+          "sha256": "fdf017b5cd6ada9e7a123317ab0079c92ca6716e0806cfa4469a395dc14004e8",
+          "size": 18536
+        },
+        "mpc06-offline-costs-ff0186caf3e1ac2f4425/verification.json": {
+          "publish": true,
+          "sha256": "b20cc65eaf71d305dfc10f3a29b4490f79c42f9da38eb8378d4625a13457332c",
+          "size": 4464
+        }
+      },
+      "path": "mpc06-offline-costs-ff0186caf3e1ac2f4425.zip",
+      "sha256": "10c782f2e033382204ba97bc8ffc900f731b1f52418bb32910cff0980dbac108",
+      "size": 385505
+    },
+    {
+      "members": {
         "mpc06-offline-costs-3dc087df21e7c19c2d37/OFFLINE_SHA256SUMS": {
           "publish": true,
           "sha256": "6339e36839015d644624c592e31604f87ac8eafd7080ee0eda9ecd2952803173",

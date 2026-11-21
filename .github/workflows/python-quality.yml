@@ -70,6 +70,14 @@ on:
       - 'docs/catalogue/learning-book-v1.json'
       - 'tests/reporting/test_learning_book.py'
       - 'docs/examples/closed-loop/figure-index.json'
+      - 'scripts/reports/mpc06_offline/**'
+      - 'scripts/reports/mpc06_online/model.py'
+      - 'scripts/reports/stage_mpc06_offline_costs.py'
+      - 'tests/reporting/test_mpc06_offline.py'
+      - 'reports/algorithm-results/mpc06-online-anchor-v1/result.json'
+      - 'reports/algorithm-results/mpc06-completion-v2/invariant-tightenings.svg'
+      - 'reports/algorithm-results/mpc06-offline-costs-8f58473d-20261110/**'
+      - 'reports/published-route-preservation/mpc06-offline-costs-*.zip'
       - 'docs/examples/learning/chapters/orbit-capstone.html'
       - 'reports/published-route-preservation/manifest.json'
       - 'docs/examples/closed-loop/figures/lotka-populations.plotted-data.json'
@@ -353,6 +361,14 @@ on:
       - 'docs/catalogue/learning-book-v1.json'
       - 'tests/reporting/test_learning_book.py'
       - 'docs/examples/closed-loop/figure-index.json'
+      - 'scripts/reports/mpc06_offline/**'
+      - 'scripts/reports/mpc06_online/model.py'
+      - 'scripts/reports/stage_mpc06_offline_costs.py'
+      - 'tests/reporting/test_mpc06_offline.py'
+      - 'reports/algorithm-results/mpc06-online-anchor-v1/result.json'
+      - 'reports/algorithm-results/mpc06-completion-v2/invariant-tightenings.svg'
+      - 'reports/algorithm-results/mpc06-offline-costs-8f58473d-20261110/**'
+      - 'reports/published-route-preservation/mpc06-offline-costs-*.zip'
       - 'docs/examples/learning/chapters/orbit-capstone.html'
       - 'reports/published-route-preservation/manifest.json'
       - 'docs/examples/closed-loop/figures/lotka-populations.plotted-data.json'
@@ -597,6 +613,7 @@ jobs:
       - name: Exercise site additions and the APP02 staging caller
         run: |
           python -m unittest discover -s tests/reporting -p 'test_site_additions.py'
+          python -m unittest tests.reporting.test_mpc06_offline
           python -m unittest discover -s tests/reporting -p 'test_app02_saved.py'
           python -m unittest discover -s tests/reporting -p 'test_closed_loop_initial_baselines_publication.py'
       - name: Replay APP-03 and APP-04 saved reports and offline ZIPs
