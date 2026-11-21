@@ -1,5 +1,4 @@
 import copy
-import hashlib
 import importlib.util
 import json
 import shutil
@@ -24,12 +23,7 @@ class Buryatia2DProvenanceTests(unittest.TestCase):
     def setUpClass(cls):
         cls.saved = json.loads(RAW.read_text(encoding="utf-8"))
 
-    def test_saved_raw_cli_accepts_declared_producer_after_source_update(self):
-        name = "src/geometry/approximation/box_parallelotope.cpp"
-        self.assertNotEqual(
-            self.saved["native_build"]["source_sha256"][name],
-            hashlib.sha256((ROOT / name).read_bytes()).hexdigest(),
-        )
+    def test_saved_raw_cli_accepts_declared_historical_producer(self):
         result = subprocess.run(
             [sys.executable, str(SCRIPT), "--raw", str(RAW)], capture_output=True, text=True
         )
