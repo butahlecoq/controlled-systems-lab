@@ -14,8 +14,6 @@ on:
 permissions:
   contents: read
 
-# A PR synchronization already validates its branch: do not also build pushes
-# to feature branches. Keep every main/manual run; supersede only the same PR.
 concurrency:
   group: native-${{ github.event_name }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
