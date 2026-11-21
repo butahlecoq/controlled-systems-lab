@@ -244,15 +244,14 @@ class SavedConvexTests(unittest.TestCase):
         self.assertIn('not_exposed_by_adapter',page)
 
     def test_legacy_published_lp_still_validates_without_rewriting(self):
-        import site as unused_stdlib_site
-        import importlib.util
-        spec=importlib.util.spec_from_file_location('report_site',Path(data.__file__).with_name('site.py'))
-        site=importlib.util.module_from_spec(spec);spec.loader.exec_module(site)
+        import site as standard_library_site
+        import report_site
+        self.assertIsNot(standard_library_site, report_site)
         root=Path(__file__).resolve().parents[2]/'reports'/'algorithm-results'
         for bundle in root.glob('lp-*'):
             if bundle.is_dir():
                 before={p.name:data.file_digest(p) for p in bundle.iterdir()}
-                self.assertEqual(site.validate_bundle(bundle)['schema'],data.SCHEMA)
+                self.assertEqual(report_site.validate_bundle(bundle)['schema'],data.SCHEMA)
                 self.assertEqual(before,{p.name:data.file_digest(p) for p in bundle.iterdir()})
 
 
@@ -304,9 +303,8 @@ class ConvexProjectionTests(unittest.TestCase):
             with self.subTest(change=change),self.assertRaises(ValueError):data.validate_view(data.seal(v['payload']))
 
     def test_raw_event_and_profile_sidecars_cannot_be_resealed_into_different_results(self):
-        import collector_common as collector,importlib.util,json,tempfile
-        spec=importlib.util.spec_from_file_location('convex_sidecar_site',Path(data.__file__).with_name('site.py'))
-        site=importlib.util.module_from_spec(spec);spec.loader.exec_module(site)
+        import collector_common as collector,json,tempfile
+        import report_site
         original=self.fixture()['payload']
         header={'schema':data.CONVEX_EVENT_SCHEMA,'event':'header','purpose':'test','repetitions':1,'warmups':0,'build':original['provenance']['build'],'clock':original['environment']['clock'],'scenarios':original['scenarios']}
         events=[header]
@@ -324,12 +322,12 @@ class ConvexProjectionTests(unittest.TestCase):
             (root/'profile.json').write_text(json.dumps(profile),encoding='utf-8')
             pointer={'available':True,'valid':True,'file':'profile.json','sha256':data.file_digest(root/'profile.json'),'scope':'separate profile'}
             p=collector.event_payload(events,0,raw,b'',original['provenance'],original['environment'],pointer)
-            view=data.validate_view(data.seal(p));site.validate_convex_sidecars(root,view)
+            view=data.validate_view(data.seal(p));report_site.validate_convex_sidecars(root,view)
             changed=copy.deepcopy(view['payload']);changed['trials'][0]['timings']['public_run'].update(end_tick='36',duration_ns=6)
-            with self.assertRaises(ValueError):site.validate_convex_sidecars(root,data.seal(changed))
+            with self.assertRaises(ValueError):report_site.validate_convex_sidecars(root,data.seal(changed))
             profile['events'][1]['trials']=5;(root/'profile.json').write_text(json.dumps(profile),encoding='utf-8')
             changed=copy.deepcopy(p);changed['profile']['sha256']=data.file_digest(root/'profile.json')
-            with self.assertRaises(ValueError):site.validate_convex_sidecars(root,data.seal(changed))
+            with self.assertRaises(ValueError):report_site.validate_convex_sidecars(root,data.seal(changed))
             broken=copy.deepcopy(events);broken[2]['sequence']=99
             with self.assertRaises(ValueError):collector.event_payload(broken,0,raw,b'',original['provenance'],original['environment'],pointer)
             broken=copy.deepcopy(events);broken[-1]['warmup_failures']=1
@@ -351,8 +349,7 @@ class ConvexPlotTests(unittest.TestCase):
         # for the actual saved-data producer/consumer operations below.
         matplotlib.use('Agg')
         import matplotlib.pyplot
-        spec=importlib.util.spec_from_file_location('convex_report_site',Path(data.__file__).with_name('site.py'))
-        site=importlib.util.module_from_spec(spec);spec.loader.exec_module(site)
+        import report_site
         view=data.load_view(Path(__file__).parent/'fixtures'/'convex-view-v2.json')
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp)
@@ -365,11 +362,11 @@ class ConvexPlotTests(unittest.TestCase):
                 self.assertFalse(svg.startswith(b'<?xml'));self.assertNotIn(b'<!DOCTYPE',svg);self.assertNotIn(b'<metadata',svg)
                 self.assertEqual(metadata['series']['public_run'][2]['values'],[5])
                 bundle=render.render(view,root/view['report_id'],root/'figures')
-                self.assertEqual(site.validate_bundle(bundle,allow_test=True),view)
+                self.assertEqual(report_site.validate_bundle(bundle,allow_test=True),view)
                 regenerated=render.render(view,root/'regenerated',root/'figures')
                 for name in ('index.html','records.json','scenarios.json','trials.csv','summary.csv','latency.svg','latency.png'):
                     self.assertEqual((bundle/name).read_bytes(),(regenerated/name).read_bytes())
-            site.make_zip(bundle,root/(view['report_id']+'.zip'),allow_test=True)
+            report_site.make_zip(bundle,root/(view['report_id']+'.zip'),allow_test=True)
             catalog={'schema':'csl.algorithm-report-catalog/2','reports':[{'report_kind':'convex','report_id':view['report_id'],'payload_sha256':view['payload_sha256'],'source_commit':'0'*40,'zip_sha256':data.file_digest(root/(view['report_id']+'.zip'))}]}
             import shutil
             published=Path(__file__).resolve().parents[2]/'reports'/'algorithm-results'
@@ -383,19 +380,19 @@ class ConvexPlotTests(unittest.TestCase):
             legacy_old['payload_sha256']=source_view['payload_sha256']
             legacy_old['zip_sha256']=data.file_digest(source_archive)
             catalog['reports'].insert(0,{**legacy_old,'report_kind':'lp'})
-            self.assertTrue(rid+'/index.html' in site.catalogue_index(catalog))
-            (root/'catalog.json').write_text(json.dumps(catalog),encoding='utf-8');(root/'index.html').write_text(site.catalogue_index(catalog),encoding='utf-8')
-            site.stage(root/'catalog.json',root/'site',allow_test=True)
+            self.assertTrue(rid+'/index.html' in report_site.catalogue_index(catalog))
+            (root/'catalog.json').write_text(json.dumps(catalog),encoding='utf-8');(root/'index.html').write_text(report_site.catalogue_index(catalog),encoding='utf-8')
+            report_site.stage(root/'catalog.json',root/'site',allow_test=True)
             def replace(name,content):
                 (bundle/name).write_bytes(content);manifest=data.parse_json((bundle/'manifest.json').read_text(encoding='utf-8'));manifest['files'][name]=data.file_digest(bundle/name);(bundle/'manifest.json').write_text(json.dumps(manifest),encoding='utf-8')
             original=(bundle/'trials.csv').read_bytes()
             for column,value in [('solver_objective','999'),('candidate','[999]'),('complementarity_violation','999'),('stationarity_scale','999'),('qp_execution_state','unknown'),('qp_iterations_value','999'),('qp_elapsed_value_ns','0')]:
                 reader=csv.DictReader(io.StringIO(original.decode()));rows=list(reader);rows[0][column]=value
                 out=io.StringIO(newline='');writer=csv.DictWriter(out,reader.fieldnames);writer.writeheader();writer.writerows(rows);replace('trials.csv',out.getvalue().encode())
-                with self.subTest(column=column),self.assertRaises(ValueError):site.validate_bundle(bundle,allow_test=True)
+                with self.subTest(column=column),self.assertRaises(ValueError):report_site.validate_bundle(bundle,allow_test=True)
             replace('trials.csv',original)
             page=(bundle/'index.html').read_bytes();replace('index.html',page.replace(b'Registered HiGHS reference convex',b'False numerical claim',1))
-            with self.assertRaises(ValueError):site.validate_bundle(bundle,allow_test=True)
+            with self.assertRaises(ValueError):report_site.validate_bundle(bundle,allow_test=True)
             for unsafe in (b'<!DOCTYPE svg><svg/>',b'<svg xmlns="http://www.w3.org/2000/svg"><use href="https://bad.invalid/a"/></svg>'):
                 with self.assertRaises(ValueError):data.validate_svg(unsafe)
 

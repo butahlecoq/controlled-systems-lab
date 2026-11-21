@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts" / "reports"))
 sys.path.insert(0, str(ROOT / "scripts" / "reports" / "syn02"))
 import registered_reports
+import report_site
 import report_data
 def _load_module(name, path):
     spec = importlib.util.spec_from_file_location(name, path)
@@ -24,9 +25,6 @@ def _load_module(name, path):
 publication_map = _load_module("csl_syn02_test_publication_map", ROOT / "scripts/reports/syn02/publication_map.py")
 sys.modules["publication_map"] = publication_map
 collect = _load_module("csl_syn02_test_collect", ROOT / "scripts/reports/syn02/collect.py")
-SITE_SPEC = importlib.util.spec_from_file_location("csl_syn02_test_site", ROOT / "scripts" / "reports" / "site.py")
-report_site = importlib.util.module_from_spec(SITE_SPEC)
-SITE_SPEC.loader.exec_module(report_site)
 import syn02_registered_reports as syn02
 
 SOURCE = "c234a1a04b2f90e34776a2bfa349a91a1d30257d"

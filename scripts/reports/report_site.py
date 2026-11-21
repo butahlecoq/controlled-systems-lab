@@ -31,6 +31,7 @@ def register_publication_policies():
 
     return schema3_publication_policies
 
+
 FILES = {
     "index.html",
     "records.json",

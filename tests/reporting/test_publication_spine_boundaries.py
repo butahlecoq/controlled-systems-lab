@@ -20,13 +20,7 @@ collector = importlib.import_module("collector_common")
 figure_style = importlib.import_module("figure_style")
 site_design = importlib.import_module("site_design")
 visual_examples = importlib.import_module("visual_examples")
-site_spec = importlib.util.spec_from_file_location(
-    "spine_report_site", ROOT / "scripts/reports/site.py"
-)
-if site_spec is None or site_spec.loader is None:
-    raise ImportError("report site helper is unavailable")
-report_site = importlib.util.module_from_spec(site_spec)
-site_spec.loader.exec_module(report_site)
+report_site = importlib.import_module("report_site")
 
 
 HISTORICAL_OWNERS = (

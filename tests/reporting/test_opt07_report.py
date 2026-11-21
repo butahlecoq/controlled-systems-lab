@@ -12,17 +12,11 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
 import opt07_registered_reports as publisher  # noqa: E402
+import report_site
 report = publisher.source
 SOURCE_PATHS = report.SOURCE_PATHS
 fixture_sha256 = report.fixture_sha256
 FIXTURES = report.FIXTURES
-site_spec = importlib.util.spec_from_file_location(
-    "opt07_report_site", Path(__file__).resolve().parents[2] /
-    "scripts/reports/site.py")
-report_site = importlib.util.module_from_spec(site_spec)
-site_spec.loader.exec_module(report_site)
-
-
 CERTIFICATES = {
     "signed-score": ([0, 1, 2, 3],
                      [(5, [(2, 0.125), (3, 0.875)]),
