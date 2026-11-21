@@ -609,7 +609,8 @@ jobs:
         env:
           MPLBACKEND: Agg
         run: |
-          python -m unittest tests.reporting.test_stage_mpc03 tests.reporting.test_mpc03_b08_report tests.reporting.test_mpc08_publication tests.reporting.test_mpc08_nonunique_publication
+          python -m unittest tests.reporting.test_mpc08_publication
+          python -m unittest tests.reporting.test_stage_mpc03 tests.reporting.test_mpc03_b08_report tests.reporting.test_mpc08_nonunique_publication
           site=$(mktemp -d "$RUNNER_TEMP/saved-mpc.XXXXXXXX")
           mkdir "$site/examples"
           printf '<ul></ul>\n' > "$site/index.html"

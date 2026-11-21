@@ -17,7 +17,10 @@ from html import escape
 from html.parser import HTMLParser
 from pathlib import Path
 
-import report_data
+if __package__:
+    from . import report_data
+else:
+    import report_data
 
 REPORT_ID = "mpc08-explicit-pilot-v1"
 ROOT = Path(__file__).resolve().parents[2]
