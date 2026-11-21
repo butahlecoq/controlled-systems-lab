@@ -109,6 +109,7 @@ on:
       - 'reports/algorithm-results/history-membership-zonotope-2d-v1/**'
       - 'scripts/reports/visual_examples.py'
       - 'scripts/reports/pages_route_retirement.py'
+      - 'tests/reporting/test_pages_route_retirement.py'
       - 'scripts/reports/audit_visual_routes.py'
       - 'scripts/reports/audit_mathematical_presentation.py'
       - 'scripts/reports/augment_pages_bundle.py'
@@ -266,6 +267,7 @@ on:
       - 'reports/algorithm-results/history-membership-zonotope-2d-v1/**'
       - 'scripts/reports/visual_examples.py'
       - 'scripts/reports/pages_route_retirement.py'
+      - 'tests/reporting/test_pages_route_retirement.py'
       - 'scripts/reports/audit_visual_routes.py'
       - 'scripts/reports/audit_mathematical_presentation.py'
       - 'scripts/reports/augment_pages_bundle.py'
@@ -347,6 +349,8 @@ jobs:
           python -m unittest discover -s tests/reporting -p 'test_site_additions.py'
           python -m unittest discover -s tests/reporting -p 'test_app02_saved.py'
           python -m unittest discover -s tests/reporting -p 'test_closed_loop_initial_baselines_publication.py'
+      - name: Exercise the composed Pages route finalizer
+        run: python -m unittest tests.reporting.test_pages_route_retirement
       - name: Exercise maintained compatibility entry points
         run: |
           python -m unittest discover -s tests/reporting -p 'test_syn03_strategy_a_report.py'
