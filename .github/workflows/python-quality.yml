@@ -83,6 +83,19 @@ on:
       - 'scripts/reports/render_full_profile_campaign.py'
       - 'docs/examples/closed-loop/campaign-2026-11-18/**'
       - 'scripts/reports/figure_style.py'
+      - 'scripts/reports/viz10_plot_companions.py'
+      - 'tests/reporting/test_viz10_plot_companions.py'
+      - 'docs/examples/viz10/**'
+      - 'reports/algorithm-results/catalog.json'
+      - 'reports/algorithm-results/b07-owner-approved-eight-case-v1/README.md'
+      - 'reports/algorithm-results/b07-owner-approved-eight-case-v1/results.jsonl'
+      - 'reports/algorithm-results/b08-exact-b0d0e85d4d338f56/records.json'
+      - 'reports/algorithm-results/b09-a08-source-reference-4818ddde/results.jsonl'
+      - 'reports/algorithm-results/b09-a08-source-reference-4818ddde/scenario.json'
+      - 'reports/algorithm-results/exp04-replay-93fe3b87795e1d3a/records.json'
+      - 'reports/algorithm-results/issue3-finite-catalogue-b4632ce76510aa4f/records.json'
+      - 'reports/algorithm-results/issue3-validated-minimax-20261023-r1/records.json'
+      - 'reports/algorithm-results/issue4-volterra-7dce05b47c50c27a/records.json'
       - 'scripts/reports/control_figure_data.py'
       - 'scripts/reports/control_figures.py'
       - 'scripts/reports/recorded_closed_loop_figures.py'
@@ -373,6 +386,19 @@ on:
       - 'scripts/reports/render_full_profile_campaign.py'
       - 'docs/examples/closed-loop/campaign-2026-11-18/**'
       - 'scripts/reports/figure_style.py'
+      - 'scripts/reports/viz10_plot_companions.py'
+      - 'tests/reporting/test_viz10_plot_companions.py'
+      - 'docs/examples/viz10/**'
+      - 'reports/algorithm-results/catalog.json'
+      - 'reports/algorithm-results/b07-owner-approved-eight-case-v1/README.md'
+      - 'reports/algorithm-results/b07-owner-approved-eight-case-v1/results.jsonl'
+      - 'reports/algorithm-results/b08-exact-b0d0e85d4d338f56/records.json'
+      - 'reports/algorithm-results/b09-a08-source-reference-4818ddde/results.jsonl'
+      - 'reports/algorithm-results/b09-a08-source-reference-4818ddde/scenario.json'
+      - 'reports/algorithm-results/exp04-replay-93fe3b87795e1d3a/records.json'
+      - 'reports/algorithm-results/issue3-finite-catalogue-b4632ce76510aa4f/records.json'
+      - 'reports/algorithm-results/issue3-validated-minimax-20261023-r1/records.json'
+      - 'reports/algorithm-results/issue4-volterra-7dce05b47c50c27a/records.json'
       - 'scripts/reports/control_figure_data.py'
       - 'scripts/reports/control_figures.py'
       - 'scripts/reports/recorded_closed_loop_figures.py'
@@ -714,6 +740,10 @@ jobs:
         run: python -m unittest tests.reporting.test_lotka_volterra_sampled
       - name: Check the saved typed-membership 2D example
         run: python -m unittest discover -s tests/reporting -p 'test_history_membership_2d.py'
+      - name: Replay the saved VIZ-10 plots and manifest
+        env:
+          MPLBACKEND: Agg
+        run: python -m unittest tests.reporting.test_viz10_plot_companions
       - name: Check the four-state projection approximation report
         run: python -m unittest discover -s tests/reporting -p 'test_four_state_projection_approximations.py'
       - name: Check the matched discrete MPC example and visual gallery
