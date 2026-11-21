@@ -239,6 +239,7 @@ on:
       - 'tests/reporting/test_ext02_report.py'
       - 'tests/reporting/test_stage_exp03_two_points_approx.py'
       - 'tests/reporting/test_perf03_publication.py'
+      - 'tests/reporting/test_stage_syn03_nominal_exact_example.py'
       - 'scripts/reports/exp03/build_comparison_records.py'
       - 'scripts/reports/exp03/check_two_points_approximation.py'
       - 'scripts/reports/ext02/collect.py'
@@ -495,6 +496,7 @@ on:
       - 'tests/reporting/test_ext02_report.py'
       - 'tests/reporting/test_stage_exp03_two_points_approx.py'
       - 'tests/reporting/test_perf03_publication.py'
+      - 'tests/reporting/test_stage_syn03_nominal_exact_example.py'
       - 'scripts/reports/exp03/build_comparison_records.py'
       - 'scripts/reports/exp03/check_two_points_approximation.py'
       - 'scripts/reports/ext02/collect.py'
@@ -606,11 +608,12 @@ jobs:
           MPLBACKEND: Agg
         run: |
           python -m unittest tests.reporting.test_ext02_report tests.reporting.test_stage_exp03_two_points_approx tests.reporting.test_perf03_publication
-          python -m unittest tests.reporting.test_visual_examples.GalleryTests.test_nominal_exact_example_stages_its_hash_checked_bundle tests.reporting.test_visual_examples.GalleryTests.test_nominal_exact_example_rejects_changed_bytes
+          python -m unittest tests.reporting.test_stage_syn03_nominal_exact_example
           site=$(mktemp -d "$RUNNER_TEMP/saved-report-replay.XXXXXXXX")
           printf '<ul></ul>\n' > "$site/index.html"
           reports=reports/algorithm-results
           route=$(python scripts/reports/stage_ext02.py --catalog "$reports/ext02-publications.json" --site "$site")
+          test "$route" = ext02-two-state-mixed-v1
           for source_file in "$reports/$route"/*; do
             cmp "$source_file" "$site/$route/${source_file##*/}"
           done
@@ -631,6 +634,7 @@ jobs:
           diff -r "$source" "$site/$route"
           source="$reports/perf03-ts01-single-process-correlation-20261014"
           route=$(python scripts/reports/stage_perf03.py --source "$source" --site "$site")
+          test "$route" = perf03-ts01-single-process-correlation-20261014-365f6e659e316219
           diff -r "$source" "$site/$route"
       - name: Check the four-state projection approximation report
         run: python -m unittest discover -s tests/reporting -p 'test_four_state_projection_approximations.py'

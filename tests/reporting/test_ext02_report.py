@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
@@ -38,6 +39,15 @@ def load_collector():
 
 
 class Ext02ReportTests(unittest.TestCase):
+    def test_frozen_zip_contains_the_saved_report(self) -> None:
+        bundle = ROOT / "reports/algorithm-results/ext02-two-state-mixed-v1"
+        members = {path.name: path for path in bundle.iterdir()}
+        with zipfile.ZipFile(bundle.with_suffix(".zip")) as archive:
+            self.assertIsNone(archive.testzip())
+            self.assertCountEqual(archive.namelist(), members)
+            for name, source in members.items():
+                self.assertEqual(archive.read(name), source.read_bytes())
+
     def test_collector_checks_scenario_manifest_against_driver_fixture(self) -> None:
         collector = load_collector()
         scenario = json.loads(
