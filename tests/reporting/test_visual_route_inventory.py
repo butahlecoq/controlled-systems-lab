@@ -350,6 +350,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
                 "catalogue-finite-action-v1/pair-shear-projection.svg",
             "mpc-crossover-6b7308c4/index.html", "mpc-crossover-6b7308c4/feedback-geometry.svg",
             "native-source-constrained-mpc-v1/index.html", "native-source-constrained-mpc-v1/platoon.svg",
+            "native-history-strategies-d57739b3/index.html",
+            "native-history-strategies-d57739b3/figures/lotka-polytope.svg",
             "mpc-crossover-6b7308c4/deployment-time.svg",
             "discrete-mpc-2d.html", "discrete-mpc-2d.svg", "discrete-mpc-2d.json",
             "discrete_mpc_2d-output.csv", "discrete_mpc_2d-output.txt",
