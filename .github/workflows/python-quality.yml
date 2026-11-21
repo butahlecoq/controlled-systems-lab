@@ -166,6 +166,19 @@ on:
       - 'scripts/reports/stage_app02.py'
       - 'tests/reporting/test_site_additions.py'
       - 'tests/reporting/test_app02_saved.py'
+      - 'scripts/reports/stage_app03.py'
+      - 'scripts/reports/stage_app04.py'
+      - 'tests/reporting/test_app03_saved.py'
+      - 'tests/reporting/test_app04_saved.py'
+      - 'reports/algorithm-results/app03-publications.json'
+      - 'reports/algorithm-results/app03-zonotope-4522855018fa9b0b/**'
+      - 'scripts/reports/app03/render_saved.py'
+      - 'scripts/reports/app03/collect.py'
+      - 'reports/algorithm-results/app04-publications.json'
+      - 'reports/algorithm-results/app04-ellipsoid-fd302c34092f8b19/**'
+      - 'scripts/reports/app04/render_saved.py'
+      - 'scripts/reports/app04/collect.py'
+      - 'reports/algorithm-results/app04-ellipsoid-fd302c34092f8b19.zip'
       - 'scripts/reports/capture_history_optimizer_native.py'
       - 'scripts/reports/stage_history_optimizer_native.py'
       - 'tests/reporting/test_history_optimizer_native.py'
@@ -429,6 +442,19 @@ on:
       - 'scripts/reports/stage_app02.py'
       - 'tests/reporting/test_site_additions.py'
       - 'tests/reporting/test_app02_saved.py'
+      - 'scripts/reports/stage_app03.py'
+      - 'scripts/reports/stage_app04.py'
+      - 'tests/reporting/test_app03_saved.py'
+      - 'tests/reporting/test_app04_saved.py'
+      - 'reports/algorithm-results/app03-publications.json'
+      - 'reports/algorithm-results/app03-zonotope-4522855018fa9b0b/**'
+      - 'scripts/reports/app03/render_saved.py'
+      - 'scripts/reports/app03/collect.py'
+      - 'reports/algorithm-results/app04-publications.json'
+      - 'reports/algorithm-results/app04-ellipsoid-fd302c34092f8b19/**'
+      - 'scripts/reports/app04/render_saved.py'
+      - 'scripts/reports/app04/collect.py'
+      - 'reports/algorithm-results/app04-ellipsoid-fd302c34092f8b19.zip'
       - 'scripts/reports/capture_history_optimizer_native.py'
       - 'scripts/reports/stage_history_optimizer_native.py'
       - 'tests/reporting/test_history_optimizer_native.py'
@@ -559,6 +585,19 @@ jobs:
           python -m unittest discover -s tests/reporting -p 'test_site_additions.py'
           python -m unittest discover -s tests/reporting -p 'test_app02_saved.py'
           python -m unittest discover -s tests/reporting -p 'test_closed_loop_initial_baselines_publication.py'
+      - name: Replay APP-03 and APP-04 saved reports and offline ZIPs
+        run: |
+          python -m unittest tests.reporting.test_app03_saved tests.reporting.test_app04_saved
+          for app in app03 app04; do
+            site="$RUNNER_TEMP/$app-saved-site"
+            mkdir "$site"
+            printf '<ul></ul>\n' > "$site/index.html"
+            route=$(python "scripts/reports/stage_$app.py" --catalog "reports/algorithm-results/$app-publications.json" --site "$site")
+            diff -r "reports/algorithm-results/$route" "$site/$route"
+            if [ "$app" = app04 ]; then
+              cmp "reports/algorithm-results/$route.zip" "$site/$route.zip"
+            fi
+          done
       - name: Check saved five-family fixed-tail geometry and episodes
         env:
           MPLBACKEND: Agg

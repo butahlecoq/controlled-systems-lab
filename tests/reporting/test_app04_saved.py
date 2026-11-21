@@ -1,17 +1,18 @@
 """APP-04 saved report: raw oracle, regeneration, ZIP and staging behavior."""
+
 from __future__ import annotations
 
 import json
-from pathlib import Path
 import shutil
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-from app04 import collect, render_saved  # noqa: E402
 import stage_app04  # noqa: E402
+from app04 import collect, render_saved  # noqa: E402
 
 
 class SavedApp04Tests(unittest.TestCase):
@@ -23,12 +24,13 @@ class SavedApp04Tests(unittest.TestCase):
         cls.bundle = cls.catalog_path.parent / cls.report_id
 
     def test_saved_bundle_and_catalog_regenerate_exactly(self) -> None:
-        self.assertEqual(render_saved.render(self.bundle, check=True),
-                         self.bundle.parent / (self.report_id + ".zip"))
+        self.assertEqual(
+            render_saved.render(self.bundle, check=True),
+            self.bundle.parent / (self.report_id + ".zip"),
+        )
         self.assertEqual(stage_app04.catalog_entry(self.bundle), self.catalog["reports"][0])
         record = render_saved.validate(self.bundle)
-        self.assertEqual(sum(row["successes"] for row in record["measurement"]["summary"]),
-                         2100)
+        self.assertEqual(sum(row["successes"] for row in record["measurement"]["summary"]), 2100)
         self.assertEqual(record["measurement"]["failures"], 0)
 
     def test_changed_radius_fails_literal_oracle(self) -> None:
@@ -61,13 +63,17 @@ class SavedApp04Tests(unittest.TestCase):
             site = Path(temporary) / "site"
             site.mkdir()
             (site / "index.html").write_text(
-                '<!doctype html><html lang="en"><body><ul></ul></body></html>',
-                encoding="utf-8")
+                '<!doctype html><html lang="en"><body><ul></ul></body></html>', encoding="utf-8"
+            )
             self.assertEqual(stage_app04.stage(self.catalog_path, site), self.report_id)
-            self.assertEqual((site / self.report_id / "index.html").read_bytes(),
-                             (self.bundle / "index.html").read_bytes())
-            self.assertEqual((site / (self.report_id + ".zip")).read_bytes(),
-                             (self.bundle.parent / (self.report_id + ".zip")).read_bytes())
+            self.assertEqual(
+                (site / self.report_id / "index.html").read_bytes(),
+                (self.bundle / "index.html").read_bytes(),
+            )
+            self.assertEqual(
+                (site / (self.report_id + ".zip")).read_bytes(),
+                (self.bundle.parent / (self.report_id + ".zip")).read_bytes(),
+            )
             index = (site / "index.html").read_text(encoding="utf-8")
             self.assertIn(self.report_id + "/example-2d.html", index)
 
