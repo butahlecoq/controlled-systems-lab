@@ -30,7 +30,30 @@ def _hash(raw: bytes) -> str:
     return hashlib.sha256(raw).hexdigest()
 
 
-def _validate(root: Path) -> tuple[dict, dict, bytes, bytes, bytes, bytes]:
+def _plot_value(value: object) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float, str)):
+        raise ValueError("B04 state coordinate must be numeric")
+    result = float(Fraction(value)) if isinstance(value, str) else float(value)
+    if not math.isfinite(result):
+        raise ValueError("B04 state coordinate must be finite")
+    return result
+
+
+def _valid_history(states: object, stages: int) -> bool:
+    if not isinstance(states, list) or len(states) != stages:
+        return False
+    try:
+        for state in states:
+            if not isinstance(state, list) or len(state) != 4:
+                return False
+            for value in state:
+                _plot_value(value)
+    except (ValueError, ZeroDivisionError, OverflowError):
+        return False
+    return True
+
+
+def _validate(root: Path) -> tuple[dict, dict, list[dict], dict, dict[str, bytes]]:
     evidence = root / "docs/research/evidence/b04-reference-v1"
     smoke = evidence / "native-smoke-20261026"
     paths = {
@@ -69,12 +92,8 @@ def _validate(root: Path) -> tuple[dict, dict, bytes, bytes, bytes, bytes]:
     ):
         raise ValueError("B04 exact-reference check does not report the saved optimal outcome")
     exact_states = reference.get("exact_optimal_states_one_solution")
-    if (
-        not isinstance(exact_states, list)
-        or len(exact_states) != case.get("horizon", -1) + 1
-        or any(not isinstance(state, list) or len(state) != 4 for state in exact_states)
-    ):
-        raise ValueError("B04 exact saved witness has an unexpected state shape")
+    if not _valid_history(exact_states, case.get("horizon", -1) + 1):
+        raise ValueError("B04 exact saved witness has an invalid state history")
     if reference.get("exact_norm_optimum_decimal") != exact_check.get(
         "exact_global_optimum", {}
     ).get("exact_norm_optimum_decimal"):
@@ -105,8 +124,7 @@ def _validate(root: Path) -> tuple[dict, dict, bytes, bytes, bytes, bytes]:
             or row.get("termination") != "completed"
             or row.get("mathematical_outcome") != "optimal"
             or diagnostics.get("evidence_status") != "inconclusive"
-            or len(states) != case["horizon"] + 1
-            or any(len(state) != 4 for state in states)
+            or not _valid_history(states, case["horizon"] + 1)
             or not all(
                 isinstance(value, (int, float)) and math.isfinite(value) and value >= 0
                 for value in residuals
@@ -117,7 +135,7 @@ def _validate(root: Path) -> tuple[dict, dict, bytes, bytes, bytes, bytes]:
             raise ValueError(
                 "B04 saved native attempt is incomplete or exceeds its evidence status"
             )
-    return case, reference, raw["case"], raw["reference"], raw["attempts"], raw["manifest"]
+    return case, reference, rows, manifest, raw
 
 
 def _plot(case: dict, reference: dict, rows: list[dict], style_path: Path, out: Path) -> dict:
@@ -149,26 +167,23 @@ def _plot(case: dict, reference: dict, rows: list[dict], style_path: Path, out: 
         item["coordinate"]: (float(item["lower"]), float(item["upper"]))
         for item in case["state_bounds_each_stage"]
     }
-    rc = {
-        "font.family": style["font_family"],
-        "font.size": style["font_size"],
-        "svg.hashsalt": style["style_id"],
-        "svg.fonttype": "none",
-    }
     out.mkdir(parents=True, exist_ok=True)
-    with matplotlib.rc_context(rc):
+    with matplotlib.rc_context(
+        {
+            "font.family": style["font_family"],
+            "font.size": style["font_size"],
+            "svg.hashsalt": style["style_id"],
+            "svg.fonttype": "none",
+        }
+    ):
         fig, axes = plt.subplots(1, 2, figsize=(11.5, 5.3))
         try:
-            for axis, (x_index, y_index, title, x_label, y_label) in zip(axes, projections):
+            for axis, (x_index, y_index, title, x_label, y_label) in zip(
+                axes, projections, strict=True
+            ):
                 for method, states in series:
                     name, color, linestyle = METHODS[method]
-                    points = [
-                        [
-                            float(Fraction(value)) if isinstance(value, str) else float(value)
-                            for value in state
-                        ]
-                        for state in states
-                    ]
+                    points = [[_plot_value(value) for value in state] for state in states]
                     axis.plot(
                         [point[x_index] for point in points],
                         [point[y_index] for point in points],
@@ -263,9 +278,7 @@ def _plot(case: dict, reference: dict, rows: list[dict], style_path: Path, out: 
 def build(style_path: Path) -> tuple[dict[str, bytes], str, dict]:
     """Render a paired, offline companion from immutable saved B04 inputs."""
     root = Path(__file__).resolve().parents[2]
-    case, reference, case_raw, reference_raw, attempts_raw, manifest_raw = _validate(root)
-    rows = [json.loads(line) for line in attempts_raw.decode("utf-8").splitlines() if line.strip()]
-    exact_check_path = root / "docs/research/evidence/b04-reference-v1/exact-check-report.json"
+    case, reference, rows, manifest, raw = _validate(root)
     style_path = Path(style_path)
     with tempfile.TemporaryDirectory(prefix="csl-viz09-b04-smoke-") as temporary:
         rendered = Path(temporary)
@@ -309,8 +322,8 @@ def build(style_path: Path) -> tuple[dict[str, bytes], str, dict]:
         "state_order": case["state_coordinates"],
         "state_units": case["state_units"],
         "horizon_steps": case["horizon"],
-        "capture": json.loads(manifest_raw)["capture"],
-        "runner_source_commit": json.loads(manifest_raw)["runner_source_commit"],
+        "capture": manifest["capture"],
+        "runner_source_commit": manifest["runner_source_commit"],
         "projection_data": projections,
         "exact_reference": {
             "norm_optimum": reference["exact_norm_optimum_decimal"],
@@ -321,11 +334,11 @@ def build(style_path: Path) -> tuple[dict[str, bytes], str, dict]:
             "stages": case["state_bound_stages"],
             "coordinate_bounds": case["state_bounds_each_stage"],
         },
-        "input_sha256": _hash(case_raw),
-        "exact_reference_sha256": _hash(reference_raw),
-        "exact_check_sha256": _hash(_read(exact_check_path)),
-        "attempt_rows_sha256": _hash(attempts_raw),
-        "attempt_manifest_sha256": _hash(manifest_raw),
+        "input_sha256": _hash(raw["case"]),
+        "exact_reference_sha256": _hash(raw["reference"]),
+        "exact_check_sha256": _hash(raw["exact_check"]),
+        "attempt_rows_sha256": _hash(raw["attempts"]),
+        "attempt_manifest_sha256": _hash(raw["manifest"]),
         "source_renderers": {
             "native_smoke_projection_sha256": _hash(
                 _read(root / "scripts/reports/mpc01/b04_native_smoke_projection.py")
@@ -348,11 +361,11 @@ def build(style_path: Path) -> tuple[dict[str, bytes], str, dict]:
         "control-witness/b04-native-smoke-projections.svg": svg,
         "control-witness/b04-native-smoke-projections.png": png,
         "control-witness/b04-native-smoke-evidence.json": evidence_raw,
-        "control-witness/b04-native-smoke-case.json": case_raw,
-        "control-witness/b04-native-smoke-reference.json": reference_raw,
-        "control-witness/b04-native-smoke-exact-check.json": _read(exact_check_path),
-        "control-witness/b04-native-smoke-attempts.jsonl": attempts_raw,
-        "control-witness/b04-native-smoke-manifest.json": manifest_raw,
+        "control-witness/b04-native-smoke-case.json": raw["case"],
+        "control-witness/b04-native-smoke-reference.json": raw["reference"],
+        "control-witness/b04-native-smoke-exact-check.json": raw["exact_check"],
+        "control-witness/b04-native-smoke-attempts.jsonl": raw["attempts"],
+        "control-witness/b04-native-smoke-manifest.json": raw["manifest"],
     }
     objectives = [
         {

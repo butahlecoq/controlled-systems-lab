@@ -198,6 +198,12 @@ on:
       - 'scripts/reports/pages_route_retirement.py'
       - 'tests/reporting/test_pages_route_retirement.py'
       - 'scripts/reports/audit_visual_routes.py'
+      - 'scripts/reports/b04_native_smoke_companion.py'
+      - 'tests/reporting/test_b04_native_smoke_companion.py'
+      - 'scripts/reports/visual-route-inventory.json'
+      - 'scripts/reports/mpc01/b04_native_smoke_projection.py'
+      - 'scripts/reports/mpc01/b04_projection_example.py'
+      - 'docs/research/evidence/b04-reference-v1/**'
       - 'scripts/reports/audit_mathematical_presentation.py'
       - 'scripts/reports/augment_pages_bundle.py'
       - 'tests/reporting/test_pages_augmentation_aggregation.py'
@@ -486,6 +492,12 @@ on:
       - 'scripts/reports/pages_route_retirement.py'
       - 'tests/reporting/test_pages_route_retirement.py'
       - 'scripts/reports/audit_visual_routes.py'
+      - 'scripts/reports/b04_native_smoke_companion.py'
+      - 'tests/reporting/test_b04_native_smoke_companion.py'
+      - 'scripts/reports/visual-route-inventory.json'
+      - 'scripts/reports/mpc01/b04_native_smoke_projection.py'
+      - 'scripts/reports/mpc01/b04_projection_example.py'
+      - 'docs/research/evidence/b04-reference-v1/**'
       - 'scripts/reports/audit_mathematical_presentation.py'
       - 'scripts/reports/augment_pages_bundle.py'
       - 'tests/reporting/test_pages_augmentation_aggregation.py'
@@ -697,6 +709,8 @@ jobs:
         run: python -m unittest tests.reporting.test_env717_cartpole_publication
       - name: Check the saved typed-membership 2D example
         run: python -m unittest discover -s tests/reporting -p 'test_history_membership_2d.py'
+      - name: Validate saved B04 phase-plane inputs
+        run: python -m unittest tests.reporting.test_b04_native_smoke_companion
       - name: Check the four-state projection approximation report
         run: python -m unittest discover -s tests/reporting -p 'test_four_state_projection_approximations.py'
       - name: Check the matched discrete MPC example and visual gallery
