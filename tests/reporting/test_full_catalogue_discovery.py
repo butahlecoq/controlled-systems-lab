@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+import copy
 import json
 import sys
 import unittest
-import copy
 from pathlib import Path
 from unittest import mock
 
@@ -13,25 +13,25 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/catalogue"))
 sys.path.insert(0, str(ROOT / "benchmarks/reporting/closed_loop"))
 import capabilities  # noqa: E402
+from check_full_catalogue import check_current_factory_rows  # noqa: E402
 from full_catalogue import (  # noqa: E402
     controller_catalogue,
     controller_graphs,
     predecessor_graphs,
     source_bound_capability_candidates,
 )
-from check_full_catalogue import check_current_factory_rows  # noqa: E402
 
 
 class FullCatalogueDiscoveryTests(unittest.TestCase):
     def test_discovers_current_factories_without_claiming_runtime_preparation(self) -> None:
         candidates = source_bound_capability_candidates(ROOT)
 
-        self.assertEqual(len(candidates), 68)
+        self.assertEqual(len(candidates), 98)
         self.assertEqual(
             sum(row["controller_route"] == "native_graph_policy" for row in candidates), 30
         )
         self.assertEqual(
-            sum(row["controller_route"] == "continuous_history" for row in candidates), 23
+            sum(row["controller_route"] == "continuous_history" for row in candidates), 53
         )
         self.assertEqual(
             sum(row["controller_route"] == "native_fixed_tail" for row in candidates), 15
@@ -66,7 +66,7 @@ class FullCatalogueDiscoveryTests(unittest.TestCase):
         self.assertTrue(
             all(row["catalogue_source"]["runtime_binary"] == "not_inspected" for row in candidates)
         )
-        self.assertEqual(len({row["graph_fingerprint"] for row in candidates}), 68)
+        self.assertEqual(len({row["graph_fingerprint"] for row in candidates}), 98)
         self.assertEqual(
             len(
                 {
@@ -80,8 +80,32 @@ class FullCatalogueDiscoveryTests(unittest.TestCase):
                     for row in candidates
                 }
             ),
-            68,
+            98,
         )
+
+    def test_discovers_every_native_strategy_task_and_set_representation(self) -> None:
+        candidates = source_bound_capability_candidates(ROOT)
+        observed = [
+            (
+                row["task_id"],
+                row["controller_id"],
+                row["module_tuple"]["role_bindings"]["representation"]["id"],
+            )
+            for row in candidates
+            if row["controller_id"].startswith("native-strategy-")
+        ]
+        expected = {
+            (task, f"native-strategy-{strategy}-history-{shape}/1", shape)
+            for task in (
+                "syn-nl-lv-01/continuous-receding/1",
+                "env717-earth-orbit/continuous-receding/1",
+                "syn-nl-fuel-01/continuous-receding/1",
+            )
+            for strategy in ("a", "b")
+            for shape in ("polytope", "zonotope", "parallelotope", "ellipsoid", "box")
+        }
+        self.assertEqual(len(observed), 30)
+        self.assertEqual(set(observed), expected)
 
     def test_factory_roles_and_provider_choices_are_kept_verbatim(self) -> None:
         candidates = source_bound_capability_candidates(ROOT)
@@ -128,7 +152,7 @@ class FullCatalogueDiscoveryTests(unittest.TestCase):
         combined = controller_catalogue(original, ROOT)
 
         self.assertEqual(combined[: len(original)], original)
-        self.assertEqual(len(combined), 3386)
+        self.assertEqual(len(combined), 3416)
         self.assertEqual(
             {row["controller_route"] for row in original},
             {
