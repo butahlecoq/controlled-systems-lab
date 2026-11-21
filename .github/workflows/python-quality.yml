@@ -132,6 +132,25 @@ on:
       - 'reports/algorithm-results/env717-pendulum-terminal-pilot-v1/**'
       - 'reports/algorithm-results/env717-earth-orbit-pilot-v1/**'
       - 'benchmarks/reporting/env717/earth_orbit.cpp'
+      - 'reports/algorithm-results/geo02-*.zip'
+      - 'reports/algorithm-results/catalog.json'
+      - 'reports/algorithm-results/geo02-*/**'
+      - 'reports/algorithm-results/geo04-*.zip'
+      - 'reports/algorithm-results/geo04-*/**'
+      - 'reports/algorithm-results/geo05-*.zip'
+      - 'reports/algorithm-results/geo05-*/**'
+      - 'reports/algorithm-results/geo06-*.zip'
+      - 'reports/algorithm-results/geo06-*/**'
+      - 'scripts/reports/geo02/**'
+      - 'scripts/reports/geo02_registered_reports.py'
+      - 'scripts/reports/geo04/**'
+      - 'scripts/reports/geo04_registered_reports.py'
+      - 'scripts/reports/geo05_registered_reports.py'
+      - 'scripts/reports/geo06_registered_reports.py'
+      - 'scripts/reports/geo06_report.py'
+      - 'tests/reporting/test_geo02_publication.py'
+      - 'tests/reporting/test_geo05_publication.py'
+      - 'tests/reporting/test_geo06_publication.py'
       - 'scripts/reports/stage_geo07_port.py'
       - 'scripts/reports/stage_env717_broken_triangle.py'
       - 'scripts/reports/stage_env717_multipoint_cost_game.py'
@@ -408,6 +427,25 @@ on:
       - 'reports/algorithm-results/env717-pendulum-terminal-pilot-v1/**'
       - 'reports/algorithm-results/env717-earth-orbit-pilot-v1/**'
       - 'benchmarks/reporting/env717/earth_orbit.cpp'
+      - 'reports/algorithm-results/geo02-*.zip'
+      - 'reports/algorithm-results/catalog.json'
+      - 'reports/algorithm-results/geo02-*/**'
+      - 'reports/algorithm-results/geo04-*.zip'
+      - 'reports/algorithm-results/geo04-*/**'
+      - 'reports/algorithm-results/geo05-*.zip'
+      - 'reports/algorithm-results/geo05-*/**'
+      - 'reports/algorithm-results/geo06-*.zip'
+      - 'reports/algorithm-results/geo06-*/**'
+      - 'scripts/reports/geo02/**'
+      - 'scripts/reports/geo02_registered_reports.py'
+      - 'scripts/reports/geo04/**'
+      - 'scripts/reports/geo04_registered_reports.py'
+      - 'scripts/reports/geo05_registered_reports.py'
+      - 'scripts/reports/geo06_registered_reports.py'
+      - 'scripts/reports/geo06_report.py'
+      - 'tests/reporting/test_geo02_publication.py'
+      - 'tests/reporting/test_geo05_publication.py'
+      - 'tests/reporting/test_geo06_publication.py'
       - 'scripts/reports/stage_geo07_port.py'
       - 'scripts/reports/stage_env717_broken_triangle.py'
       - 'scripts/reports/stage_env717_multipoint_cost_game.py'
@@ -613,6 +651,12 @@ jobs:
         run: |
           python -m unittest discover -s tests/reporting -p 'test_syn03_strategy_a_report.py'
           python -m unittest discover -s tests/reporting -p 'test_syn03_ts02_report.py'
+      - name: Verify the saved geometry publication adapters
+        run: >-
+          python -m unittest
+          tests.reporting.test_geo02_publication
+          tests.reporting.test_geo05_publication
+          tests.reporting.test_geo06_publication
       - name: Check six saved environment routes and offline ZIPs
         run: >-
           python -m unittest
