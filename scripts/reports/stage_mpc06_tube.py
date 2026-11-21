@@ -1,4 +1,5 @@
 """Validate and stage the saved exact tube-MPC report on Pages."""
+
 from __future__ import annotations
 
 import argparse
@@ -22,8 +23,16 @@ render_spec = importlib.util.spec_from_file_location("mpc06_tube_renderer", REND
 renderer = importlib.util.module_from_spec(render_spec)
 assert render_spec.loader is not None
 render_spec.loader.exec_module(renderer)
-FILES = ("README.md", "capture.json", "figure-data.json", "index.html",
-         "projection.svg", "result.json", "scenario.json", "SHA256SUMS")
+FILES = (
+    "README.md",
+    "capture.json",
+    "figure-data.json",
+    "index.html",
+    "projection.svg",
+    "result.json",
+    "scenario.json",
+    "SHA256SUMS",
+)
 
 
 def digest(data: bytes) -> str:
@@ -31,7 +40,11 @@ def digest(data: bytes) -> str:
 
 
 def inputs(source: Path) -> dict[str, bytes]:
-    if source.is_symlink() or not source.is_dir() or {p.name for p in source.iterdir()} != set(FILES):
+    if (
+        source.is_symlink()
+        or not source.is_dir()
+        or {p.name for p in source.iterdir()} != set(FILES)
+    ):
         raise ValueError("MPC-06 report inventory differs")
     files = {name: (source / name).read_bytes() for name in FILES}
     checksums = {}
@@ -46,14 +59,18 @@ def inputs(source: Path) -> dict[str, bytes]:
     capture = json.loads(files["capture.json"])
     if not re.fullmatch(r"[0-9a-f]{40}", record.get("source_commit", "")):
         raise ValueError("MPC-06 source commit is invalid")
-    if (capture.get("source_commit") != record["source_commit"] or
-            capture.get("driver_sha256") != record.get("driver_sha256") or
-            capture.get("checker_sha256") != record.get("checker_sha256") or
-            capture.get("scenario_sha256") != record.get("scenario_sha256")):
+    if (
+        capture.get("source_commit") != record["source_commit"]
+        or capture.get("driver_sha256") != record.get("driver_sha256")
+        or capture.get("checker_sha256") != record.get("checker_sha256")
+        or capture.get("scenario_sha256") != record.get("scenario_sha256")
+    ):
         raise ValueError("MPC-06 capture and result provenance differ")
-    if (capture.get("capture_environment") != record.get("capture_environment") or
-            capture.get("performance_measurement") != record.get("measurement") or
-            record.get("build", {}).get("configuration") != "Release"):
+    if (
+        capture.get("capture_environment") != record.get("capture_environment")
+        or capture.get("performance_measurement") != record.get("measurement")
+        or record.get("build", {}).get("configuration") != "Release"
+    ):
         raise ValueError("MPC-06 build/performance capture differs")
     if digest(CHECKER_PATH.read_bytes()) != record["checker_sha256"]:
         raise ValueError("MPC-06 checker identity differs")
@@ -75,33 +92,42 @@ def stage(source: Path, site: Path) -> str:
     index = site / "index.html"
     page = index.read_text(encoding="utf-8")
     identity = {name: digest(content) for name, content in sorted(files.items())}
-    route = "mpc06-tube-" + digest(json.dumps(identity, sort_keys=True,
-                                              separators=(",", ":")).encode())[:20]
+    route = (
+        "mpc06-tube-"
+        + digest(json.dumps(identity, sort_keys=True, separators=(",", ":")).encode())[:20]
+    )
     destination, archive_path = site / route, site / f"{route}.zip"
     if destination.exists() or archive_path.exists() or page.count("</body>") != 1:
         raise ValueError("MPC-06 Pages destination or landing insertion point differs")
     generated = dict(files)
     saved_page = generated["index.html"].decode("utf-8")
-    footer = (f'<p>Immutable report <code>{route}</code> · '
-              '<a href="publication-manifest.json">Publication manifest</a>.</p>')
+    footer = (
+        f"<p>Immutable report <code>{route}</code> · "
+        '<a href="publication-manifest.json">Publication manifest</a>.</p>'
+    )
     generated["index.html"] = saved_page.replace("</main>", footer + "</main>").encode("utf-8")
     generated["SHA256SUMS"] = "".join(
-        f"{digest(generated[name])}  {name}\n" for name in sorted(generated)
-        if name != "SHA256SUMS").encode("ascii")
-    manifest = {"schema": "csl.mpc06-tube-publication/1", "report_id": route,
-                "source_commit": json.loads(files["result.json"])["source_commit"],
-                "source_files": identity,
-                "published_files": {name: digest(value) for name, value in sorted(generated.items())}}
+        f"{digest(generated[name])}  {name}\n" for name in sorted(generated) if name != "SHA256SUMS"
+    ).encode("ascii")
+    manifest = {
+        "schema": "csl.mpc06-tube-publication/1",
+        "report_id": route,
+        "source_commit": json.loads(files["result.json"])["source_commit"],
+        "source_files": identity,
+        "published_files": {name: digest(value) for name, value in sorted(generated.items())},
+    }
     generated["publication-manifest.json"] = (json.dumps(manifest, indent=2) + "\n").encode()
     destination.mkdir()
     for name, value in generated.items():
         (destination / name).write_bytes(value)
-    link = (f'<section><h2>Exact tube-MPC feasibility pilot</h2>'
-            f'<p>Nilpotent two-state tube, exact RPI inclusion, support tightenings, and an independent '
-            f'eight-path disturbance reference. Scope is feasibility/safety only: no objective, minimax cost, '
-            f'general causal optimum, terminal invariance, or approximation comparison is claimed. '
-            f'<a href="{route}/index.html">Open the report</a> · '
-            f'<a href="{route}.zip">Download the offline report bundle</a>.</p></section>')
+    link = (
+        f"<section><h2>Exact tube-MPC feasibility pilot</h2>"
+        f"<p>Nilpotent two-state tube, exact RPI inclusion, support tightenings, and an independent "
+        f"eight-path disturbance reference. Scope is feasibility/safety only: no objective, minimax cost, "
+        f"general causal optimum, terminal invariance, or approximation comparison is claimed. "
+        f'<a href="{route}/index.html">Open the report</a> · '
+        f'<a href="{route}.zip">Download the offline report bundle</a>.</p></section>'
+    )
     index.write_text(page.replace("</body>", link + "</body>"), encoding="utf-8")
     with zipfile.ZipFile(archive_path, "w", zipfile.ZIP_DEFLATED) as archive:
         for name, value in sorted(generated.items()):

@@ -1,4 +1,5 @@
 """Regression coverage for legacy workflow_run commits without the MPC-06 report."""
+
 from __future__ import annotations
 
 import os
@@ -28,7 +29,7 @@ def scope_step() -> str:
     if lines[start + 2] != run_marker:
         raise AssertionError("scope guard must use an executable run block")
     block = []
-    for line in lines[start + 3:]:
+    for line in lines[start + 3 :]:
         if line and not line.startswith("          "):
             break
         block.append(line[10:] if line else "")
@@ -36,7 +37,9 @@ def scope_step() -> str:
 
 
 class Mpc06TubeObjectivePagesAugmentationTests(unittest.TestCase):
-    def run_scope(self, root: Path, output: Path | None = None) -> tuple[subprocess.CompletedProcess[str], str]:
+    def run_scope(
+        self, root: Path, output: Path | None = None
+    ) -> tuple[subprocess.CompletedProcess[str], str]:
         if output is None:
             output = root / "workflow-output.txt"
         environment = os.environ.copy()
