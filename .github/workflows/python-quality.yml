@@ -109,6 +109,7 @@ on:
       - 'scripts/reports/exp824/make_report.py'
       - 'scripts/reports/mpc05/reference.py'
       - 'reports/algorithm-results/catalog.json'
+      - 'reports/algorithm-results/index.html'
       - 'reports/algorithm-results/issue824-two-points-*/**'
       - 'scripts/reports/publication_policy.py'
       - 'scripts/reports/*_publication_policy.py'
