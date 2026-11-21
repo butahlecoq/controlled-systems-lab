@@ -16,5 +16,5 @@ description: Use when auditing or removing code comments, reviewing comment debt
    | Excuse | Delete the comment and file a linked issue identifying the workaround, its impact, and how a fix can be verified. |
    | Decision Record | Record the decision and rationale in the relevant numbered ADR, then delete the inline comment. |
 
-4. Run `python scripts/ci/check_comment_ratchet.py check --base BASE`. This checks tracked Python under `scripts/ci/`. Stage new files first. The Git base carries the per-file allowance, so each merged deletion reduces that allowance. Extend the scope in the checker with tests for the new parser or path behavior.
+4. Run `python scripts/ci/check_comment_ratchet.py check --base BASE`. This checks tracked Python under `scripts/ci/`, `scripts/catalogue/`, `tests/ci/` and `tests/cmake/`. Stage new files first. The Git base carries the per-file allowance, so each merged deletion reduces that allowance. Extend the scope in the checker with tests for the new parser or path behavior.
 5. Run the tests for affected callers. Report the exact base, comment-only lines removed, inline comments removed, and remaining audit scope. Inline deletion leaves the underlying code line. Link the ADRs and issues from the batch PR.

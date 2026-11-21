@@ -53,7 +53,6 @@ class RecordTests(unittest.TestCase):
             self.data.validate_view(view)
 
     def test_canonical_binary64_and_integer_hash_vocabulary(self):
-        # Independent literal UTF-8 bytes: declared floats are hexadecimal tags.
         self.assertEqual(
             self.data.canonical_bytes({"z": -0.0, "a": [1, 1.5]}),
             b'{"a":[1,{"$binary64":"0x1.8000000000000p+0"}],"z":{"$binary64":"-0x0.0p+0"}}',
@@ -93,7 +92,6 @@ class RecordTests(unittest.TestCase):
             view = self.fixture()
             mutate(view)
             with self.subTest(mutate=mutate), self.assertRaises(ValueError):
-                # Reseal envelope: nested structural/oracle checks must still run.
                 self.data.validate_view(self.data.seal(view["payload"]))
 
     def test_nonconvex_unestablished_record_without_assumptions_is_valid(self):
@@ -416,7 +414,6 @@ class RecordTests(unittest.TestCase):
             self.data.validate_view(self.data.seal(payload))
 
     def test_synthetic_measurement_shape_cannot_hide_spans_or_change_source(self):
-        # Literal data only, no process execution or real measurement claim.
         view = self.fixture()
         p = view["payload"]
         p["purpose"] = "measurement"
