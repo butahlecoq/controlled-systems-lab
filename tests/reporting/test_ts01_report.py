@@ -8,6 +8,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 TOOLS = ROOT / "reports" / "algorithm-results" / "tooling" / "ts01"
@@ -24,6 +25,8 @@ def load_tool(name):
 
 
 report = load_tool("report")
+with patch.dict(sys.modules, {"report": report}):
+    collector = load_tool("collect")
 publication_map = load_tool("publication_map")
 build_bundle = load_tool("build_bundle")
 ts01_registered_reports = importlib.import_module("ts01_registered_reports")
@@ -128,6 +131,83 @@ class Ts01SavedReportTests(unittest.TestCase):
             )
             for path in self.bundle.iterdir():
                 self.assertEqual((output / path.name).read_bytes(), path.read_bytes(), path.name)
+
+    def test_collector_retains_rejected_native_output(self):
+        attempts = (
+            (7, b"partial native output\r\n", "measurement executable failed with status 7"),
+            (0, b"invalid JSONL\n", "measurement executable emitted invalid JSONL"),
+        )
+        for returncode, stdout, reason in attempts:
+            with self.subTest(returncode=returncode), tempfile.TemporaryDirectory() as directory:
+                scratch = Path(directory)
+                cmake = scratch / "cmake"
+                cmake.touch()
+                build_root = scratch / "build"
+                output = scratch / "collection"
+                stderr = b"native diagnostic\r\n"
+
+                def build_step(command, build_root=build_root):
+                    if "--build" in command:
+                        build = build_root / "release-build"
+                        build.mkdir()
+                        (build / "CMakeCache.txt").write_text(
+                            "CMAKE_GENERATOR:INTERNAL=Visual Studio 17 2022\n"
+                            "CMAKE_GENERATOR_PLATFORM:INTERNAL=x64\n",
+                            encoding="utf-8",
+                        )
+                        (build / "csl_syn07_ts01_report.vcxproj").write_text(
+                            '<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">'
+                            '<ItemDefinitionGroup Condition="Release|x64"><ClCompile>'
+                            "<LanguageStandard>stdcpp20</LanguageStandard>"
+                            "<Optimization>MaxSpeed</Optimization>"
+                            "<PreprocessorDefinitions>NDEBUG</PreprocessorDefinitions>"
+                            "</ClCompile></ItemDefinitionGroup></Project>",
+                            encoding="utf-8",
+                        )
+                        executable = build / "Release" / "csl_syn07_ts01_report.exe"
+                        executable.parent.mkdir()
+                        executable.write_bytes(b"simulated executable")
+                    return subprocess.CompletedProcess(command, 0, b"", b"")
+
+                def git_response(root, *args, build_root=build_root):
+                    if args == ("status", "--porcelain"):
+                        return ""
+                    return (
+                        report.SOURCE_COMMIT if root == build_root / "solver-source" else "a" * 40
+                    )
+
+                argv = [
+                    "collect.py",
+                    "--cmake",
+                    str(cmake),
+                    "--build-root",
+                    str(build_root),
+                    "--out",
+                    str(output),
+                ]
+                process = subprocess.CompletedProcess(["driver"], returncode, stdout, stderr)
+                with (
+                    patch.object(sys, "argv", argv),
+                    patch.object(collector, "git", side_effect=git_response),
+                    patch.object(collector, "run", side_effect=build_step),
+                    patch.object(collector, "psutil", None),
+                    patch.object(collector.subprocess, "run", return_value=process),
+                    self.assertRaisesRegex(SystemExit, reason),
+                ):
+                    collector.main()
+
+                attempt = build_root / "measurement-attempt"
+                self.assertEqual((attempt / "stdout.bin").read_bytes(), stdout)
+                self.assertEqual((attempt / "stderr.bin").read_bytes(), stderr)
+                receipt = json.loads((attempt / "attempt.json").read_bytes())
+                self.assertEqual(receipt["status"], "failed")
+                self.assertEqual(receipt["reason"], reason)
+                self.assertEqual(receipt["returncode"], returncode)
+                self.assertEqual(receipt["source_commit"], report.SOURCE_COMMIT)
+                self.assertEqual(receipt["harness_commit"], "a" * 40)
+                self.assertEqual(receipt["stdout_sha256"], hashlib.sha256(stdout).hexdigest())
+                self.assertEqual(receipt["stderr_sha256"], hashlib.sha256(stderr).hexdigest())
+                self.assertFalse(output.exists())
 
     def test_registered_adapter_checks_bundle_and_creates_offline_archive(self):
         publication = ts01_registered_reports.adapt(self.bundle)
