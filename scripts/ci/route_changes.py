@@ -44,14 +44,15 @@ PRESENTATION_FILES = {
     "tests/reporting/test_viz10_plot_companions.py",
     "tests/reporting/test_landing.py",
 }
-# Pages preservation owns archived routes, navigation inventories and byte/hash
-# audits. These files have no native CMake target or executable smoke consumer.
+# Pages publication owns composition, archived routes, navigation inventories
+# and byte/hash audits. These files have no native smoke consumer.
 PAGES_PUBLICATION_FILES = {
     "docs/catalogue/learning-book-v1.json",
     "docs/examples/learning/chapters/native-substitution-matrix.html",
     "scripts/reports/learning_book.py",
     "scripts/reports/learning_model_tracks.py",
     "scripts/reports/render_full_profile_campaign.py",
+    "scripts/reports/augment_pages_bundle.py",
     "scripts/reports/audit_published_route_preservation.py",
     "scripts/reports/preserve_published_routes.py",
     "scripts/reports/pages_route_retirement.py",
@@ -59,7 +60,11 @@ PAGES_PUBLICATION_FILES = {
     "tests/reporting/test_published_route_audit_policy.py",
     "tests/reporting/test_preserve_published_routes.py",
     "tests/reporting/test_pages_route_retirement.py",
+    "tests/reporting/test_pages_augmentation_aggregation.py",
 }
+# The root TOML configures Ruff and ty. Both paths trigger Python tooling
+# quality directly and have no native build or test consumer.
+PYTHON_QUALITY_FILES = {".github/workflows/python-quality.yml", "pyproject.toml"}
 # Saved-episode publication reads contracts/captures and renders/checks records.
 # Shared controller/record-protocol implementations in benchmarks/ remain native.
 SAVED_EPISODE_PUBLICATION_FILES = {
@@ -92,7 +97,12 @@ def classify(paths):
     for path in paths:
         if path.startswith("docs/examples/closed-loop/campaign-2026-11-18/"):
             reports = True
-        elif path in PRESENTATION_FILES | PAGES_PUBLICATION_FILES | SAVED_EPISODE_PUBLICATION_FILES:
+        elif path in (
+            PRESENTATION_FILES
+            | PAGES_PUBLICATION_FILES
+            | PYTHON_QUALITY_FILES
+            | SAVED_EPISODE_PUBLICATION_FILES
+        ):
             reports = True
         elif path.startswith(SAVED_PUBLICATION_ROOTS):
             reports = True

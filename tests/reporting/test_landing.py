@@ -1,17 +1,20 @@
 """The published archive index explains every report instead of listing opaque IDs."""
+
+import importlib
 import importlib.util
-from html import escape
 import json
-from pathlib import Path
 import sys
 import tempfile
 import unittest
+from html import escape
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import landing
+landing = importlib.import_module("landing")
 
 spec = importlib.util.spec_from_file_location("report_site", ROOT / "scripts/reports/site.py")
+assert spec is not None and spec.loader is not None
 site = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(site)
 
@@ -33,8 +36,10 @@ class LandingTests(unittest.TestCase):
         self.assertEqual(self.page.count("</ul>"), 1)
         self.assertIn("<h1>Algorithm reports and research evidence</h1>", self.page)
         self.assertIn("How to read this archive", self.page)
-        published = {landing.FAMILIES[landing.family_for(report["report_id"])].group
-                     for report in self.catalogue["reports"]}
+        published = {
+            landing.FAMILIES[landing.family_for(report["report_id"])].group
+            for report in self.catalogue["reports"]
+        }
         for key, heading, _ in landing.GROUPS:
             if key in published:
                 self.assertIn("<h2>" + heading + "</h2>", self.page)
@@ -58,7 +63,10 @@ class LandingTests(unittest.TestCase):
             self.assertIn(report["source_commit"], self.page)
 
     def test_report_links_stay_inside_the_published_routes(self):
-        self.assertIn('href="lp-20261012T000346Z-9b916da6a4ffd6685e99df3129f6cbaaa73d85c9f12533a828c1e1714dd12ff0/records.json"', self.page)
+        self.assertIn(
+            'href="lp-20261012T000346Z-9b916da6a4ffd6685e99df3129f6cbaaa73d85c9f12533a828c1e1714dd12ff0/records.json"',
+            self.page,
+        )
         self.assertIn("Repository copy (current main)", self.page)
         self.assertNotIn("<script", self.page)
         self.assertNotIn("javascript:", self.page)
@@ -82,31 +90,29 @@ class LandingTests(unittest.TestCase):
         self.assertIn("do not establish a general performance comparison", family.summary)
 
     def test_repeated_it17_dyadic_pilot_has_a_geometry_family_description(self):
-        family = landing.FAMILIES[landing.family_for(
-            "exp02-it17-dyadic-interior-20261027-r1")]
+        family = landing.FAMILIES[landing.family_for("exp02-it17-dyadic-interior-20261027-r1")]
         self.assertEqual(family.group, "geometry")
         self.assertIn("six", family.summary)
         self.assertIn("inconclusive", family.summary)
 
     def test_it17_250_point_continuation_has_a_geometry_family_description(self):
-        family = landing.FAMILIES[landing.family_for(
-            "exp02-it17-dyadic-250-20261029-r1")]
+        family = landing.FAMILIES[landing.family_for("exp02-it17-dyadic-250-20261029-r1")]
         self.assertEqual(family.group, "geometry")
         self.assertIn("250-point", family.summary)
         self.assertIn("inconclusive", family.summary)
 
     def test_it17_3d_pilot_has_a_partial_geometry_family_description(self):
         for report_id in (
-                "exp02-it17-hull-3d-simplex-20261028-r1",
-                "exp02-it17-hull-3d-halton-cloud-20261028-r1"):
+            "exp02-it17-hull-3d-simplex-20261028-r1",
+            "exp02-it17-hull-3d-halton-cloud-20261028-r1",
+        ):
             family = landing.FAMILIES[landing.family_for(report_id)]
             self.assertEqual(family.group, "geometry")
             self.assertIn("Three of five LP reducers completed", family.summary)
             self.assertIn("no speedup", family.summary)
 
     def test_it17_4d_pilot_has_a_partial_geometry_family_description(self):
-        family = landing.FAMILIES[landing.family_for(
-            "exp02-it17-hull-4d-simplex-20261028-r1")]
+        family = landing.FAMILIES[landing.family_for("exp02-it17-hull-4d-simplex-20261028-r1")]
         self.assertEqual(family.group, "geometry")
         self.assertIn("245 exactly representable interior points", family.summary)
         self.assertIn("two exact but incomplete outputs have withheld timings", family.summary)
@@ -122,58 +128,56 @@ class LandingTests(unittest.TestCase):
         self.assertIn("do not establish a general speedup", family.summary)
 
     def test_a44_v2_description_does_not_relabel_the_historical_adaptation_route(self):
-        historical = landing.FAMILIES[landing.family_for(
-            "quickhull-it17-paper-adaptations-20261024-r1")]
-        current = landing.FAMILIES[landing.family_for(
-            "exp02-it17-a44-paper-order-20261027-r2")]
+        historical = landing.FAMILIES[
+            landing.family_for("quickhull-it17-paper-adaptations-20261024-r1")
+        ]
+        current = landing.FAMILIES[landing.family_for("exp02-it17-a44-paper-order-20261027-r2")]
         self.assertIn("A43 and A44 are paper-informed adaptations", historical.summary)
         self.assertNotIn("A44 v2", historical.summary)
         self.assertIn("A44 interpretation", current.summary)
 
     def test_max_coordinate_game_route_has_a_differential_game_description(self):
-        family = landing.FAMILIES[landing.family_for(
-            "env717-max-coordinate-0123456789abcdefabcd")]
+        family = landing.FAMILIES[landing.family_for("env717-max-coordinate-0123456789abcdefabcd")]
         self.assertEqual(family.group, "synthesis")
         self.assertIn("eight fixed control plans", family.summary)
         self.assertIn("one descriptive observation", family.summary)
         self.assertIn("not a performance comparison", family.summary)
 
     def test_pendulum_terminal_route_discloses_finite_scope_and_claim_limits(self):
-        family = landing.FAMILIES[landing.family_for(
-            "env717-pendulum-terminal-0123456789abcdefabcd")]
+        family = landing.FAMILIES[
+            landing.family_for("env717-pendulum-terminal-0123456789abcdefabcd")
+        ]
         self.assertEqual(family.group, "synthesis")
         self.assertIn("81 four-step finite-action plans", family.summary)
         self.assertIn("nonlinear source map", family.summary)
-        self.assertIn("does not establish continuous-action or full-horizon optimality", family.summary)
+        self.assertIn(
+            "does not establish continuous-action or full-horizon optimality", family.summary
+        )
         self.assertIn("no performance-comparison claim", family.summary)
 
     def test_unlimited_bolza_route_discloses_the_finite_adaptation_boundary(self):
-        family = landing.FAMILIES[landing.family_for(
-            "env717-unlimited-bolza-0123456789abcdefabcd")]
+        family = landing.FAMILIES[landing.family_for("env717-unlimited-bolza-0123456789abcdefabcd")]
         self.assertEqual(family.group, "synthesis")
         self.assertIn("analytic reference", family.summary)
         self.assertIn("exhaustive five-action finite-catalogue minimum", family.summary)
         self.assertIn("not the original unbounded continuous-action RL result", family.summary)
 
     def test_sphere_game_route_has_a_differential_game_description(self):
-        family = landing.FAMILIES[landing.family_for(
-            "env717-sphere-game-0123456789abcdefabcd")]
+        family = landing.FAMILIES[landing.family_for("env717-sphere-game-0123456789abcdefabcd")]
         self.assertEqual(family.group, "synthesis")
         self.assertIn("27 fixed control plans", family.summary)
         self.assertIn("open-loop minimax value", family.summary)
         self.assertIn("no performance comparison", family.summary)
 
     def test_point_on_plane_route_describes_both_physical_projections(self):
-        family = landing.FAMILIES[landing.family_for(
-            "env717-point-on-plane-0123456789abcdefabcd")]
+        family = landing.FAMILIES[landing.family_for("env717-point-on-plane-0123456789abcdefabcd")]
         self.assertEqual(family.group, "synthesis")
         self.assertIn("position (x1,x2)", family.summary)
         self.assertIn("velocity (x3,x4)", family.summary)
         self.assertIn("three stages", family.summary)
 
     def test_dubins_car_route_discloses_nonlinear_finite_catalogue_scope(self):
-        family = landing.FAMILIES[landing.family_for(
-            "env717-dubins-car-0123456789abcdefabcd")]
+        family = landing.FAMILIES[landing.family_for("env717-dubins-car-0123456789abcdefabcd")]
         self.assertEqual(family.group, "synthesis")
         self.assertIn("125 three-block control plans", family.summary)
         self.assertIn("full terminal horizon", family.summary)
@@ -181,8 +185,7 @@ class LandingTests(unittest.TestCase):
         self.assertIn("no minimax or performance comparison claim", family.summary)
 
     def test_vanderpol_route_discloses_source_defect_and_finite_catalogue_scope(self):
-        family = landing.FAMILIES[landing.family_for(
-            "env717-vanderpol-0123456789abcdefabcd")]
+        family = landing.FAMILIES[landing.family_for("env717-vanderpol-0123456789abcdefabcd")]
         self.assertEqual(family.group, "synthesis")
         self.assertIn("243 five-block control plans", family.summary)
         self.assertIn("111 source steps (about 11.1 seconds)", family.summary)
@@ -190,8 +193,7 @@ class LandingTests(unittest.TestCase):
         self.assertIn("not a direct run", family.summary)
 
     def test_cartpole_route_discloses_adopted_simulator_and_finite_scope(self):
-        family = landing.FAMILIES[landing.family_for(
-            "env717-cartpole-0123456789abcdefabcd")]
+        family = landing.FAMILIES[landing.family_for("env717-cartpole-0123456789abcdefabcd")]
         self.assertEqual(family.group, "synthesis")
         self.assertIn("Gym v0.21.0", family.summary)
         self.assertIn("does not pin Gym", family.summary)
@@ -199,8 +201,7 @@ class LandingTests(unittest.TestCase):
         self.assertIn("not a learned policy, minimax result", family.summary)
 
     def test_time_sphere_route_describes_nominal_target_reachability(self):
-        family = landing.FAMILIES[landing.family_for(
-            "env717-time-sphere-0123456789abcdefabcd")]
+        family = landing.FAMILIES[landing.family_for("env717-time-sphere-0123456789abcdefabcd")]
         self.assertEqual(family.group, "synthesis")
         self.assertIn("unit-disk", family.summary)
         self.assertIn("backward finite-feedback sweep", family.summary)
@@ -208,8 +209,9 @@ class LandingTests(unittest.TestCase):
         self.assertIn("not the continuous two-player RL optimum", family.summary)
 
     def test_two_particle_route_describes_checked_game_projections_and_adaptation(self):
-        family = landing.FAMILIES[landing.family_for(
-            "env717-two-particle-minimax-0123456789abcdefabcd")]
+        family = landing.FAMILIES[
+            landing.family_for("env717-two-particle-minimax-0123456789abcdefabcd")
+        ]
         self.assertEqual(family.group, "synthesis")
         self.assertIn("position (x1,x2)", family.summary)
         self.assertIn("velocity (v1,v2)", family.summary)
@@ -217,8 +219,9 @@ class LandingTests(unittest.TestCase):
         self.assertIn("not a continuous-action RL reproduction", family.summary)
 
     def test_homicidal_chauffeur_route_discloses_projected_game_adaptations(self):
-        family = landing.FAMILIES[landing.family_for(
-            "env717-homicidal-chauffeur-0123456789abcdefabcd")]
+        family = landing.FAMILIES[
+            landing.family_for("env717-homicidal-chauffeur-0123456789abcdefabcd")
+        ]
         self.assertEqual(family.group, "synthesis")
         self.assertIn("pursuer and evader position planes", family.summary)
         self.assertIn("zero-sum payoff signs", family.summary)
@@ -234,27 +237,47 @@ class AssembledIndexTests(unittest.TestCase):
         self.site = Path(self.temp.name)
         self.report_id = "app02-box-8ff979de60ea9d22"
         (self.site / self.report_id).mkdir(parents=True)
-        (self.site / self.report_id / "records.json").write_text(json.dumps({
-            "scope": "Five authored interval and 2D polygon fixtures",
-            "limits": ["Exact containment applies to stored binary64 vertices.",
-                       "No comparator or speedup claim is supported."],
-            "source_commit": "8fecba49e34c37e5e01c40218a8f014a179818fd"}), encoding="utf-8")
-        (self.site / self.report_id / "index.html").write_text("<html><body>Report</body></html>", encoding="utf-8")
+        (self.site / self.report_id / "records.json").write_text(
+            json.dumps(
+                {
+                    "scope": "Five authored interval and 2D polygon fixtures",
+                    "limits": [
+                        "Exact containment applies to stored binary64 vertices.",
+                        "No comparator or speedup claim is supported.",
+                    ],
+                    "source_commit": "8fecba49e34c37e5e01c40218a8f014a179818fd",
+                }
+            ),
+            encoding="utf-8",
+        )
+        (self.site / self.report_id / "index.html").write_text(
+            "<html><body>Report</body></html>", encoding="utf-8"
+        )
         (self.site / self.report_id / "bundle.zip").write_text("{}", encoding="utf-8")
         (self.site / "app02-example").mkdir()
-        (self.site / "app02-example" / "index.html").write_text("<html><body>Example</body></html>", encoding="utf-8")
+        (self.site / "app02-example" / "index.html").write_text(
+            "<html><body>Example</body></html>", encoding="utf-8"
+        )
         (self.site / "examples").mkdir()
-        (self.site / "examples" / "index.html").write_text("<html><body>Examples</body></html>", encoding="utf-8")
+        (self.site / "examples" / "index.html").write_text(
+            "<html><body>Examples</body></html>", encoding="utf-8"
+        )
         assembled = site.catalogue_index({"reports": []}).replace(
             "</ul>",
-            '<li><a href="' + self.report_id + '/index.html">APP-02 box and parallelotope report</a>'
+            '<li><a href="'
+            + self.report_id
+            + '/index.html">APP-02 box and parallelotope report</a>'
             " - five exact stored-binary64 examples and 3,500 verified measured calls"
             ' \xb7 <a href="app02-example/index.html">2D visual example</a>'
             ' \xb7 <a href="' + self.report_id + '/records.json">raw JSON</a>'
-            ' \xb7 <a href="' + self.report_id + '/bundle.zip">offline ZIP</a></li></ul>')
+            ' \xb7 <a href="' + self.report_id + '/bundle.zip">offline ZIP</a></li></ul>',
+        )
         assembled = assembled.replace(
-            "<body>", '<body><p id="visual-examples-link">'
-            '<a href="examples/index.html">Visual examples</a></p>', 1)
+            "<body>",
+            '<body><p id="visual-examples-link">'
+            '<a href="examples/index.html">Visual examples</a></p>',
+            1,
+        )
         (self.site / "index.html").write_text(assembled, encoding="utf-8")
 
     def test_staged_items_become_cards_with_the_scope_recorded_with_the_report(self):
@@ -282,11 +305,16 @@ class AssembledIndexTests(unittest.TestCase):
         report = self.site / report_id
         report.mkdir()
         (report / "index.html").write_text("<html><body>MPC-03</body></html>", encoding="utf-8")
-        (report / "record.json").write_text(json.dumps({
-            "source_commit": "1b5ec86a7b5d1cc91b707a0588a43cd6517b23b2",
-            "measured_scope": "One synthetic two-stage scalar formulation cross-check; no timing measured",
-            "evidence_limits": ["No performance timing or comparative winner"],
-        }), encoding="utf-8")
+        (report / "record.json").write_text(
+            json.dumps(
+                {
+                    "source_commit": "1b5ec86a7b5d1cc91b707a0588a43cd6517b23b2",
+                    "measured_scope": "One synthetic two-stage scalar formulation cross-check; no timing measured",
+                    "evidence_limits": ["No performance timing or comparative winner"],
+                }
+            ),
+            encoding="utf-8",
+        )
         for filename in ("pilot-output.json", "build-provenance.json"):
             (report / filename).write_text("{}", encoding="utf-8")
         landing.build(self.site)
@@ -306,8 +334,10 @@ class AssembledIndexTests(unittest.TestCase):
             landing.build(self.site)
 
     def test_links_outside_the_staged_site_are_rejected(self):
-        page = ('<!doctype html><html lang="en"><body><p class="links">'
-                '<a href="https://example.com/page">Elsewhere</a></p></body></html>')
+        page = (
+            '<!doctype html><html lang="en"><body><p class="links">'
+            '<a href="https://example.com/page">Elsewhere</a></p></body></html>'
+        )
         with self.assertRaisesRegex(ValueError, "outside the staged site"):
             landing.validate(page, self.site)
 

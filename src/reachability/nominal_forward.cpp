@@ -184,10 +184,12 @@ sets::SetData relabel(const sets::SetData &data, SetId id, std::vector<std::stri
 }
 }
 
-NominalForwardOutcome nominal_forward(const problem::ResolvedProblem &resolved, RequestId request,
-                                      const ForwardDependencies &dependencies,
-                                      const ExecutionContext &context) {
-    const auto &provider = dependencies.projection;
+namespace {
+NominalForwardOutcome
+nominal_forward_impl(const problem::ResolvedProblem &resolved, RequestId request,
+                     const registry::PreparedProvider<registry::GeometryPort> &provider,
+                     const ForwardDependencies *vertex_dependencies,
+                     const ExecutionContext &context) {
     ForwardTube tube{resolved.identity(), std::move(request), {}};
     StageIndex stage{0};
     std::optional<GeometryReference> active;
@@ -247,8 +249,9 @@ NominalForwardOutcome nominal_forward(const problem::ResolvedProblem &resolved, 
                    output.relation == SetRelation::equivalent &&
                    output.assurance == Assurance::numerical;
         };
-        if (!admitted(dependencies.affine_sum, "csl.polyhedron.v") ||
-            !admitted(dependencies.to_h, "csl.polyhedron.h"))
+        if (vertex_dependencies &&
+            (!admitted(vertex_dependencies->affine_sum, "csl.polyhedron.v") ||
+             !admitted(vertex_dependencies->to_h, "csl.polyhedron.h")))
             return failure(Unsupported{
                 error("forward.provider",
                       "Equivalent numerical V affine/sum and H conversion providers required.")});
@@ -319,7 +322,7 @@ NominalForwardOutcome nominal_forward(const problem::ResolvedProblem &resolved, 
         };
         const auto run_affine = [&](GeometryOperation operation, const char *suffix)
             -> std::variant<OperationResult, Unsupported, OperationStopped> {
-            const auto &selected = dependencies.affine_sum;
+            const auto &selected = vertex_dependencies->affine_sum;
             OperationRequest request_{
                 {tube.problem,
                  {child(tube.problem, tube.request, stage.value, suffix)},
@@ -379,7 +382,7 @@ NominalForwardOutcome nominal_forward(const problem::ResolvedProblem &resolved, 
         };
         const auto convert =
             [&](SetHandle input) -> std::variant<OperationResult, Unsupported, OperationStopped> {
-            const auto &selected = dependencies.to_h;
+            const auto &selected = vertex_dependencies->to_h;
             ConversionRequest request_{
                 {tube.problem,
                  {child(tube.problem, tube.request, stage.value, "/to-h")},
@@ -557,7 +560,7 @@ NominalForwardOutcome nominal_forward(const problem::ResolvedProblem &resolved, 
                                    .as_handle();
             auto propagation = joint;
             auto marginal_coordinates = next;
-            if (t) {
+            if (t && vertex_dependencies) {
                 const auto bridge = [&](SetHandle source, std::vector<std::string> target_labels,
                                         const char *suffix) {
                     const auto data = take(sets::from_handle(source));
@@ -639,7 +642,9 @@ NominalForwardOutcome nominal_forward(const problem::ResolvedProblem &resolved, 
             marginal.evidence.support = Unestablished{};
             marginal.evidence.error_bound.reset();
             marginal.evidence.assumptions.push_back(
-                "selected affine-image, sum, conversion and projection evidence retained separately; authored aggregate recurrence and compiled recovery-factor support remain unestablished");
+                vertex_dependencies
+                    ? "selected affine-image, sum, conversion and projection evidence retained separately; authored aggregate recurrence and compiled recovery-factor support remain unestablished"
+                    : "direct projection of each joint H factor; authored aggregate recurrence and compiled recovery-factor support remain unestablished");
             marginal.evidence.assumptions.push_back(
                 "stage marginal only; no optimality or joint-history completeness claim");
             partial_relation =
@@ -681,5 +686,20 @@ NominalForwardOutcome nominal_forward(const problem::ResolvedProblem &resolved, 
         return failure(OperationStopped{StopReason::resource_limit,
                                         "Forward stage storage exceeds container capacity."});
     }
+}
+} // namespace
+
+NominalForwardOutcome nominal_forward(const problem::ResolvedProblem &resolved, RequestId request,
+                                      const ForwardDependencies &dependencies,
+                                      const ExecutionContext &context) {
+    return nominal_forward_impl(resolved, std::move(request), dependencies.projection,
+                                &dependencies, context);
+}
+
+NominalForwardOutcome
+nominal_forward_projected(const problem::ResolvedProblem &resolved, RequestId request,
+                          const registry::PreparedProvider<registry::GeometryPort> &projection,
+                          const ExecutionContext &context) {
+    return nominal_forward_impl(resolved, std::move(request), projection, nullptr, context);
 }
 } // namespace csl::reachability

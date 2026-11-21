@@ -18,7 +18,7 @@ struct ForwardStage {
     OperationResult marginal;
     SetHandle joint_factor;
     GeometryEvidence recovery_evidence; // authored joint relation unestablished
-    SetHandle propagation_factor;       // provider sum intersect next constraints
+    SetHandle propagation_factor;       // source of the stage projection
     std::vector<SetId> source_factors;
     std::vector<std::size_t> state_coordinates, control_coordinates, next_coordinates;
     std::vector<GeometryEvidence> operation_lineage;
@@ -70,5 +70,12 @@ struct ForwardDependencies {
 // Each generated request is admitted before creating its exclusive workspace.
 NominalForwardOutcome nominal_forward(const problem::ResolvedProblem &, RequestId,
                                       const ForwardDependencies &, const ExecutionContext &);
+
+// Project each joint transition factor directly. The equivalent numerical H
+// projection provider receives [x,u,y] and eliminates [x,u].
+NominalForwardOutcome
+nominal_forward_projected(const problem::ResolvedProblem &, RequestId,
+                          const registry::PreparedProvider<registry::GeometryPort> &,
+                          const ExecutionContext &);
 
 } // namespace csl::reachability

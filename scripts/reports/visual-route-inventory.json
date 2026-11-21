@@ -1480,11 +1480,12 @@
     },
     {
       "source": "scripts/reports/stage_catalogue_forward_reachability.py",
-      "signal_count": 4,
+      "signal_count": 5,
       "asset_name_literals": [
         "battery-forward-backward.svg",
         "battery-history-projections.svg",
         "building-budget-projection.svg",
+        "hospital-finite-actions.svg",
         "platoon-forward.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
@@ -2025,6 +2026,14 @@
       "signal_count": 1,
       "asset_name_literals": [
         "8-state-plane-0.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_native_history_strategies.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "lotka-polytope.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
     },
@@ -2847,6 +2856,19 @@
       "companion_route": "examples/catalogue-feasible-history-v1/index.html"
     },
     {
+      "route": "catalogue-finite-action-v1",
+      "source_bundle": "catalogue-finite-action-v1",
+      "assets": [
+        "hospital-finite-actions.svg",
+        "pair-shear-projection.svg",
+        "terminal-box-corner.svg",
+        "zonotope-certificate-coverage.svg"
+      ],
+      "index_sha256": "ff236f0f9265b41b61c3d01d9281cdf54cfd83029b904a1f7af2b8d94a34f19a",
+      "disposition": "reviewed: finite action alternatives, executed path, box and zonotope scoring, and paired shear projections across three stages",
+      "companion_route": "examples/catalogue-finite-action-v1/index.html"
+    },
+    {
       "route": "catalogue-forward-reachability-v1",
       "source_bundle": "catalogue-forward-reachability-v1",
       "assets": [
@@ -2855,6 +2877,16 @@
       "index_sha256": "a2dccc7b3c2f84a61c2f05c6a60be39d37faf3b55e2006f9fbdbb43447415906",
       "disposition": "reviewed: physical and centred coordinates show the same stagewise platoon projection",
       "companion_route": "examples/catalogue-forward-reachability-v1/index.html"
+    },
+    {
+      "route": "catalogue-ring-initial-support-v1",
+      "source_bundle": "catalogue-ring-initial-support-v1",
+      "assets": [
+        "initial-support.svg"
+      ],
+      "index_sha256": "f9328690b8647d408fa8f8af2e91953a5979256b41caefe6824cf1fed5e25faf",
+      "disposition": "reviewed: projected feasible zero-control history and fixed stage-zero support line",
+      "companion_route": "examples/catalogue-ring-initial-support-v1/index.html"
     },
     {
       "route": "convex-20261012T041854Z-4d54a407c9b2",
@@ -4416,13 +4448,22 @@
         "catalogue-forward-reachability-v1/platoon-forward.svg",
         "catalogue-feasible-history-v1/index.html",
         "catalogue-feasible-history-v1/battery-history-projections.svg",
+        "catalogue-ring-initial-support-v1/index.html",
+        "catalogue-ring-initial-support-v1/initial-support.svg",
         "catalogue-exact-support-v1/index.html",
         "catalogue-exact-support-v1/building-budget-projection.svg",
         "catalogue-backward-reachability-v1/index.html",
         "catalogue-backward-reachability-v1/battery-forward-backward.svg",
+        "catalogue-finite-action-v1/index.html",
+        "catalogue-finite-action-v1/hospital-finite-actions.svg",
+        "catalogue-finite-action-v1/terminal-box-corner.svg",
+        "catalogue-finite-action-v1/zonotope-certificate-coverage.svg",
+        "catalogue-finite-action-v1/pair-shear-projection.svg",
         "mpc-crossover-6b7308c4/index.html",
         "native-source-constrained-mpc-v1/index.html",
         "native-source-constrained-mpc-v1/platoon.svg",
+        "native-history-strategies-d57739b3/index.html",
+        "native-history-strategies-d57739b3/figures/lotka-polytope.svg",
         "mpc-crossover-6b7308c4/feedback-geometry.svg",
         "mpc-crossover-6b7308c4/deployment-time.svg",
         "discrete-mpc-2d.html",

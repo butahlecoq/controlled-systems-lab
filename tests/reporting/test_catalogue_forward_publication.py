@@ -2,6 +2,8 @@
 
 import importlib
 import json
+import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -104,8 +106,9 @@ class CatalogueForwardPublicationTests(unittest.TestCase):
                 path.write_bytes(content)
             ledger = json.loads(presentation.REGISTRY.read_bytes())
             page = "examples/" + entry["page"]
-            [record] = [item for item in ledger["routes"] if item["route"] == page]
-            presentation_audit = presentation.audit_site(site, {"routes": [record]})
+            audited_pages = {page, f"examples/{stage.RING_INITIAL_SUPPORT}/index.html"}
+            records = [item for item in ledger["routes"] if item["route"] in audited_pages]
+            presentation_audit = presentation.audit_site(site, {"routes": records})
             self.assertTrue(presentation_audit["passed"], presentation_audit["findings"])
             index = site / "index.html"
             index.write_text("<ul></ul>", encoding="utf-8")
@@ -116,6 +119,66 @@ class CatalogueForwardPublicationTests(unittest.TestCase):
             self.assertEqual(archive_entry.commit, stage.FEASIBLE_HISTORY.source_commit)
             for _, path in archive_entry.links:
                 self.assertTrue((site / path).is_file(), path)
+
+    def test_ring_certificate_replays_from_the_offline_companion(self) -> None:
+        files, _, card = stage.build_feasible_history(ROOT)
+        route = stage.RING_INITIAL_SUPPORT
+        archive_path = f"{route}/{route}.zip"
+        self.assertIn(archive_path, card)
+        self.assertIn(f"{route}/index.html", card)
+        original = stage.HISTORY_EVIDENCE
+        self.assertEqual(
+            files[f"{route}/{original}"], files[f"{stage.FEASIBLE_HISTORY.route}/{original}"]
+        )
+        with (
+            ZipFile(BytesIO(files[archive_path])) as archive,
+            tempfile.TemporaryDirectory() as directory,
+        ):
+            names = {
+                path.removeprefix(f"{route}/") for path in files if path.startswith(f"{route}/")
+            }
+            self.assertEqual(set(archive.namelist()), names - {f"{route}.zip"})
+            for name in archive.namelist():
+                self.assertEqual(archive.read(name), files[f"{route}/{name}"])
+            archive.extractall(directory)
+            saved = Path(directory)
+            replay = subprocess.check_output([sys.executable, "verify_support.py"], cwd=saved)
+            self.assertEqual(replay, archive.read("certificate.json"))
+            result = json.loads(replay)
+            self.assertEqual(result["native_status"], "undetermined")
+            self.assertEqual(result["certificate_status"], "exact-optimal")
+            self.assertEqual(result["support"], "13914569883186085/72057594037927936")
+            page = (saved / "index.html").read_text(encoding="utf-8")
+            self.assertEqual(presentation.inspect_html(page), [])
+            for asset in (
+                "examples.css",
+                "verify_support.py",
+                "certificate.json",
+                original,
+                "initial-support.svg",
+                "plot_support.py",
+                "manifest.json",
+            ):
+                self.assertIn(f'="{asset}"', page)
+                self.assertTrue((saved / asset).is_file())
+            (saved / original).write_bytes(b"invalid archive")
+            rejected = subprocess.run(
+                [sys.executable, "verify_support.py"], cwd=saved, capture_output=True, check=False
+            )
+            self.assertNotEqual(rejected.returncode, 0)
+            self.assertIn(b"Unexpected input archive SHA-256", rejected.stderr)
+
+    def test_ring_stager_rejects_a_modified_figure(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = Path(directory)
+            relative = Path("reports/algorithm-results")
+            for route in (stage.FEASIBLE_HISTORY.route, stage.RING_INITIAL_SUPPORT):
+                shutil.copytree(ROOT / relative / route, fixture / relative / route)
+            (fixture / relative / stage.RING_INITIAL_SUPPORT / "initial-support.svg").write_bytes(
+                b"<svg/>"
+            )
+            with self.assertRaisesRegex(ValueError, "asset digest differs: initial-support.svg"):
+                stage.build_feasible_history(fixture)
 
     def test_exact_support_keeps_the_refusals_and_primal_dual_certificates(self) -> None:
         files, [entry], card = stage.build_exact_support(ROOT)
@@ -219,5 +282,106 @@ class CatalogueForwardPublicationTests(unittest.TestCase):
             [archive_entry], _ = landing.parse_index(index.read_text(encoding="utf-8"))
             self.assertEqual(archive_entry.report_id + "/index.html", page)
             self.assertEqual(archive_entry.commit, stage.BACKWARD_REACHABILITY.source_commit)
+            for _, path in archive_entry.links:
+                self.assertTrue((site / path).is_file(), path)
+
+    def test_finite_action_keeps_both_runs_and_their_figures(self) -> None:
+        files, [entry], card = stage.build_finite_action(ROOT)
+        route = stage.FINITE_ACTION.route
+        evidence = f"{route}/catalogue-separable-box-evidence.zip"
+        package = f"{route}/{route}.zip"
+        self.assertIn("all 175 routes", card)
+        self.assertIn("45 baseline refusals", card)
+        for path in (entry["page"], entry["figure"], package):
+            self.assertIn(path, files)
+            self.assertIn(path, card)
+        with ZipFile(BytesIO(files[evidence])) as candidate:
+            comparison = json.loads(candidate.read("comparison.json"))
+            manifest = json.loads(files[entry["raw_record"]])
+            self.assertEqual(
+                manifest["candidate_sdk_commit"],
+                json.loads(candidate.read("provenance.json"))["candidate_sdk_commit"],
+            )
+            self.assertEqual(
+                files[f"{route}/terminal-box-corner.svg"], candidate.read("terminal-box-corner.svg")
+            )
+            self.assertEqual(
+                files[f"{route}/catalogue_finite_action.cpp"],
+                candidate.read("catalogue_finite_action.cpp"),
+            )
+            with ZipFile(
+                BytesIO(candidate.read("baseline-finite-action-evidence.zip"))
+            ) as baseline:
+                self.assertEqual(
+                    files[entry["figure"]], baseline.read("hospital-finite-actions.svg")
+                )
+                original = json.loads(baseline.read("audit.json"))
+                self.assertEqual(original["feedback_counts"]["box"]["selected"], 25)
+        self.assertEqual(comparison["recovered_box_models"], list(range(26, 36)))
+        self.assertEqual(comparison["retained_box_models"], list(range(1, 26)))
+        self.assertEqual(comparison["matching_nonbox_outcomes"], 140)
+
+        zonotope_replay = f"{route}/catalogue-zonotope-replay-evidence.zip"
+        with ZipFile(BytesIO(files[zonotope_replay])) as candidate:
+            comparison = json.loads(candidate.read("comparison.json"))
+            self.assertEqual(
+                manifest["candidate_zonotope_sdk_commit"],
+                json.loads(candidate.read("provenance.json"))["candidate_zonotope_sdk"],
+            )
+            combined = json.loads(candidate.read("combined/audit.json"))
+            counts = combined["feedback_counts"]
+            for profile in ("box", "zonotope", "ellipsoid", "polytope"):
+                self.assertEqual(counts[profile]["selected"], 35)
+            self.assertEqual(counts["parallelotope"]["selected"], 15)
+            with ZipFile(BytesIO(candidate.read("zonotope-proof-evidence.zip"))) as proof:
+                self.assertEqual(
+                    files[f"{route}/zonotope-certificate-coverage.svg"],
+                    proof.read("zonotope-certificate-coverage.svg"),
+                )
+        self.assertEqual(comparison["recovered_zonotope_models"], list(range(21, 36)))
+        self.assertEqual(comparison["unchanged_zonotope_models"], list(range(1, 21)))
+        self.assertEqual(comparison["matching_other_outcomes"], 140)
+
+        parallelotope_replay = f"{route}/catalogue-parallelotope-replay-evidence.zip"
+        with ZipFile(BytesIO(files[parallelotope_replay])) as candidate:
+            comparison = json.loads(candidate.read("comparison.json"))
+            provenance = json.loads(candidate.read("provenance.json"))
+            self.assertEqual(
+                manifest["candidate_parallelotope_sdk_commit"],
+                provenance["candidate_parallelotope_sdk"],
+            )
+            counts = json.loads(candidate.read("audit.json"))["feedback_counts"]
+            self.assertEqual(len(counts), 5)
+            self.assertTrue(all(result == {"selected": 35} for result in counts.values()))
+            self.assertEqual(comparison["unchanged_rows"], 155)
+            self.assertEqual(len(comparison["recovered"]), 20)
+            self.assertEqual(
+                files[f"{route}/pair-shear-projection.svg"],
+                candidate.read("pair-shear-projection.svg"),
+            )
+
+        book = json.loads((ROOT / "docs/catalogue/learning-book-v1.json").read_bytes())
+        [chapter] = [
+            item for item in book["chapters"] if item["id"] == "native-model-tracking-first-pass"
+        ]
+        page = "examples/" + entry["page"]
+        self.assertIn("../" + page, {item["href"] for item in chapter["records"]})
+        with tempfile.TemporaryDirectory() as directory:
+            site = Path(directory)
+            for name, content in files.items():
+                target = site / "examples" / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(content)
+            ledger = json.loads(presentation.REGISTRY.read_bytes())
+            [record] = [item for item in ledger["routes"] if item["route"] == page]
+            report = presentation.audit_site(site, {"routes": [record]})
+            self.assertTrue(report["passed"], report["findings"])
+            index = site / "index.html"
+            index.write_text("<ul></ul>", encoding="utf-8")
+            (site / "archive.html").touch()
+            landing.build(site)
+            [archive_entry], _ = landing.parse_index(index.read_text(encoding="utf-8"))
+            self.assertEqual(archive_entry.commit, stage.FINITE_ACTION.source_commit)
+            self.assertIn(("Joint replay", "examples/" + parallelotope_replay), archive_entry.links)
             for _, path in archive_entry.links:
                 self.assertTrue((site / path).is_file(), path)

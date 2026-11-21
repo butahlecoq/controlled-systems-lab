@@ -272,7 +272,8 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
     def test_adjacent_or_repeated_chapter_insertions_fail_closed(self):
         manifest = json.loads((preservation.SOURCE / "manifest.json").read_text())
         forward = next(
-            row for row in manifest["learning_navigation_insertions_reviewed_separately"]
+            row
+            for row in manifest["learning_navigation_insertions_reviewed_separately"]
             if row["chapter_id"] == "native-forward-models"
         )
         chapters = json.loads(baseline_audit.BOOK_MANIFEST.read_text())["chapters"]

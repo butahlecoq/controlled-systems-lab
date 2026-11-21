@@ -110,6 +110,67 @@ class LearningBookTests(unittest.TestCase):
             {chapter["group"] for chapter in chapters},
         )
 
+    def test_task_capstones_distinguish_figures_pilots_and_full_profile_outcomes(self):
+        ledger = "examples/closed-loop/campaign-2026-11-18/raw/coverage.json"
+        coverage = json.loads((ROOT / "docs" / ledger).read_bytes())
+        tasks = {
+            "lotka-capstone": ("syn-nl-lv-01", {"lotka-populations": [0, 1]}),
+            "orbit-capstone": ("earth-orbit", {"earth-orbit": [0, 3]}),
+            "fuel-capstone": (
+                "syn-nl-fuel-01", {"fuel-state": [2, 0], "fuel-fuel-flow": [3, 1]}
+            ),
+        }
+        chapters = {chapter["id"]: chapter for chapter in self.manifest["chapters"]}
+        index = json.loads((ROOT / "docs/examples/closed-loop/figure-index.json").read_bytes())
+        figure_records = {figure["id"]: figure for figure in index["figures"]}
+        outcomes = ("complete", "failed", "inconclusive", "unsupported")
+        for chapter_id, (task, figures) in tasks.items():
+            with self.subTest(chapter=chapter_id):
+                chapter = chapters[chapter_id]
+                counts = Counter(
+                    cell["attempts"][-1]["category"]
+                    for cell in coverage["cells"]
+                    if cell["task_name"] == task
+                )
+                limits = chapter["support_limits"]
+                self.assertEqual(chapter["figure_ids"], list(figures))
+                self.assertIn("separate local-NLP pilot report", chapter["expected_output"])
+                for figure_id, indices in figures.items():
+                    figure = figure_records[figure_id]
+                    self.assertEqual(figure["coordinate_transform"]["raw_indices"], indices)
+                    plotted = json.loads((ROOT / "docs" / figure["plotted_data_href"]).read_bytes())
+                    controllers = {run["controller_id"] for run in plotted["runs"]}
+                    self.assertTrue(all(name.startswith("native-") for name in controllers))
+                    self.assertIn(f"{len(controllers)} saved native controller runs", limits)
+                self.assertIn(f"admitted {sum(counts.values())} graphs", limits)
+                self.assertIn(", ".join(f"{counts[name]} {name}" for name in outcomes), limits)
+                self.assertNotIn("#943", chapter["summary"] + limits)
+                self.assertIn("../" + ledger, {record["href"] for record in chapter["records"]})
+
+        geometry = chapters["orbit-capstone"]["intermediate_geometry"]
+        self.assertIn("angular rate ω [rad/s]", geometry)
+        body = (ROOT / "docs/examples/learning/chapters/orbit-capstone.html").read_text()
+        self.assertIn("radius r [km] and angular rate ω [rad/s]", body)
+        self.assertNotIn("Plot r against v", body)
+
+    def test_generated_capstone_pages_match_reviewed_preservation_pins(self):
+        preservation = ROOT / "reports/published-route-preservation/manifest.json"
+        manifest = json.loads(preservation.read_bytes())
+        pins = manifest["mutable_routes_reviewed_sha256"]
+        routes = (
+            "learn/index.html", "learn/lotka-capstone.html",
+            "learn/orbit-capstone.html", "learn/fuel-capstone.html",
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            site = Path(directory)
+            learning_book.build(
+                site, figure_index_path=ROOT / "docs/examples/closed-loop/figure-index.json"
+            )
+            for route in routes:
+                with self.subTest(route=route):
+                    self.assertIn(route, manifest["mutable_routes_reviewed_separately"])
+                    self.assertEqual(hashlib.sha256((site / route).read_bytes()).hexdigest(), pins[route])
+
     def test_campaign_tables_match_frozen_full_profile_coverage(self):
         chapter = next(
             item for item in self.manifest["chapters"] if item["id"] == "native-substitution-matrix"
