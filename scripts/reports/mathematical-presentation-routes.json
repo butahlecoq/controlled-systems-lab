@@ -751,6 +751,13 @@
       "witness": "Frozen catalogue finite-action outcomes and stagewise projection of the pair shear"
     },
     {
+      "route": "examples/catalogue-constrained-predecessors-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/catalogue-constrained-predecessors-v1/index.html",
+      "sha256": "299825bb789b9cc1bf27a775b9fb51da3593e345bfe0c0b70f3299f189cfc26e",
+      "witness": "Matched 35-model predecessor supports, native outcomes and exact building certificates"
+    },
+    {
       "route": "examples/catalogue-exact-support-v1/index.html",
       "disposition": "frozen",
       "owner": "reports/algorithm-results/catalogue-exact-support-v1/index.html",

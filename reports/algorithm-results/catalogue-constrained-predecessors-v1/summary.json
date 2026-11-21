@@ -1,0 +1,215 @@
+{
+  "threshold": 1e-07,
+  "counts": {
+    "authored": {
+      "matched-optimal": 1120
+    },
+    "saved_controls": {
+      "matched-optimal": 1072,
+      "unbounded/unbounded": 18,
+      "unbounded/infeasible": 30
+    },
+    "full": {
+      "infeasible/infeasible": 96,
+      "matched-optimal": 1015,
+      "numerical/optimal": 9
+    }
+  },
+  "statuses": {
+    "authored": {
+      "optimal/optimal": 1120
+    },
+    "saved_controls": {
+      "optimal/optimal": 1072,
+      "unbounded/unbounded": 18,
+      "unbounded/infeasible": 30
+    },
+    "full": {
+      "infeasible/infeasible": 96,
+      "optimal/optimal": 1015,
+      "numerical/optimal": 9
+    }
+  },
+  "models_with_checked_strict_contraction": {
+    "5": 10,
+    "8": 13,
+    "10": 5,
+    "11": 12,
+    "13": 15,
+    "15": 9,
+    "20": 12,
+    "21": 16,
+    "23": 12,
+    "30": 1
+  },
+  "analytically_empty_roots": {
+    "1": {
+      "coordinate": 3,
+      "target": [
+        "-77/5",
+        "-63/5"
+      ],
+      "state": [
+        0.0,
+        100.0
+      ]
+    },
+    "9": {
+      "coordinate": 1,
+      "target": [
+        "-33/10",
+        "-27/10"
+      ],
+      "state": [
+        0.0,
+        24.0
+      ]
+    },
+    "12": {
+      "coordinate": 2,
+      "target": [
+        "-121",
+        "-99"
+      ],
+      "state": [
+        0.0,
+        500.0
+      ]
+    }
+  },
+  "battery_rectangles": {
+    "saved_controls": [
+      [
+        [
+          -29.999999999999996,
+          96.156
+        ],
+        [
+          -19.800000000000004,
+          174.82999999999998
+        ]
+      ],
+      [
+        [
+          -10.999999999999998,
+          75.104
+        ],
+        [
+          7.799999999999997,
+          142.22
+        ]
+      ],
+      [
+        [
+          8.0,
+          54.052
+        ],
+        [
+          35.4,
+          109.61
+        ]
+      ],
+      [
+        [
+          27.0,
+          33.0
+        ],
+        [
+          63.0,
+          77.0
+        ]
+      ]
+    ],
+    "full": [
+      [
+        [
+          0.0,
+          96.156
+        ],
+        [
+          0.0,
+          150.0
+        ]
+      ],
+      [
+        [
+          0.0,
+          75.104
+        ],
+        [
+          7.799999999999997,
+          142.22
+        ]
+      ],
+      [
+        [
+          8.0,
+          54.052
+        ],
+        [
+          35.4,
+          109.61
+        ]
+      ],
+      [
+        [
+          27.0,
+          33.0
+        ],
+        [
+          63.0,
+          77.0
+        ]
+      ]
+    ]
+  },
+  "max_scaled_gap_before_filter": {
+    "authored": 6.029654731065648e-08,
+    "saved_controls": 5.702402749996338e-08,
+    "full": 5.696793770049169e-08
+  },
+  "max_scaled_violation_before_filter": {
+    "authored": 2.898563095544179e-09,
+    "saved_controls": 4.467805747157267e-09,
+    "full": 4.467196899951154e-09
+  },
+  "failed_cross_checks": {
+    "authored": {},
+    "saved_controls": {},
+    "full": {}
+  },
+  "non_optimal_pairs": {
+    "authored": {},
+    "saved_controls": {
+      "3": {
+        "unbounded/unbounded": 8,
+        "unbounded/infeasible": 10
+      },
+      "4": {
+        "unbounded/infeasible": 10,
+        "unbounded/unbounded": 5
+      },
+      "18": {
+        "unbounded/infeasible": 10,
+        "unbounded/unbounded": 5
+      }
+    },
+    "full": {
+      "1": {
+        "infeasible/infeasible": 32
+      },
+      "9": {
+        "infeasible/infeasible": 32
+      },
+      "12": {
+        "infeasible/infeasible": 32
+      },
+      "28": {
+        "numerical/optimal": 1
+      },
+      "30": {
+        "numerical/optimal": 8
+      }
+    }
+  }
+}

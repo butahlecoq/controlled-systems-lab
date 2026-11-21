@@ -1,5 +1,6 @@
 """Check that the catalogue forward sweep reaches readers with its frozen evidence."""
 
+import hashlib
 import importlib
 import json
 import shutil
@@ -7,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from dataclasses import replace
 from io import BytesIO
 from pathlib import Path
 from zipfile import ZipFile
@@ -317,8 +319,9 @@ class CatalogueForwardPublicationTests(unittest.TestCase):
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_bytes(content)
             ledger = json.loads(presentation.REGISTRY.read_bytes())
-            [record] = [item for item in ledger["routes"] if item["route"] == page]
-            report = presentation.audit_site(site, {"routes": [record]})
+            audited_pages = {page, f"examples/{stage.CONSTRAINED_PREDECESSORS.route}/index.html"}
+            records = [item for item in ledger["routes"] if item["route"] in audited_pages]
+            report = presentation.audit_site(site, {"routes": records})
             self.assertTrue(report["passed"], report["findings"])
             index = site / "index.html"
             index.write_text("<ul></ul>", encoding="utf-8")
@@ -329,6 +332,78 @@ class CatalogueForwardPublicationTests(unittest.TestCase):
             self.assertEqual(archive_entry.commit, stage.BACKWARD_REACHABILITY.source_commit)
             for _, path in archive_entry.links:
                 self.assertTrue((site / path).is_file(), path)
+
+    def test_constrained_predecessor_companion_keeps_rational_and_native_receipts(self) -> None:
+        files, _, card = stage.build_backward_reachability(ROOT)
+        route = stage.CONSTRAINED_PREDECESSORS.route
+        page = f"{route}/index.html"
+        bundled = f"{route}/{route}.zip"
+        self.assertIn(page, card)
+        self.assertIn(bundled, card)
+        self.assertFalse(any(name.startswith(f"{route}/replay/") for name in files))
+        book = json.loads((ROOT / "docs/catalogue/learning-book-v1.json").read_bytes())
+        [chapter] = [
+            chapter for chapter in book["chapters"] if chapter["id"] == "native-forward-models"
+        ]
+        self.assertIn("../examples/" + page, {item["href"] for item in chapter["records"]})
+        with ZipFile(BytesIO(files[bundled])) as offline:
+            manifest = json.loads(offline.read("manifest.json"))
+            self.assertTrue(manifest["offline_files_sha256"])
+            self.assertEqual(offline.read("REPLAY.txt"), files[f"{route}/REPLAY.txt"])
+            self.assertEqual(offline.read("index.html"), files[page])
+            numeric = json.loads(offline.read("replay/native/audit-with-ipopt.json"))
+            exact = json.loads(offline.read("replay/native/audit-building-exact.json"))
+            self.assertEqual(
+                numeric["checked"], {"authored": 1120, "saved_controls": 1120, "full": 1110}
+            )
+            self.assertEqual(numeric["fails"], [])
+            self.assertEqual(exact["certificate_count"], 32)
+            remaining = {
+                (item["stage"], tuple(item["direction"])) for item in numeric["exceptions"]
+            }
+            self.assertEqual(
+                {item["model_id"] for item in numeric["exceptions"]}, {"catalogue-2026/model-28/1"}
+            )
+            self.assertEqual(len(remaining), 10)
+            self.assertLessEqual(remaining, {(k, tuple(d)) for k, d in exact["certified"]})
+
+    def test_frozen_bundle_rejects_changed_offline_bytes_even_with_archive_pin(self) -> None:
+        original = stage.CONSTRAINED_PREDECESSORS
+        route = original.route
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            fixture = root / "reports/algorithm-results" / route
+            fixture.mkdir(parents=True)
+
+            def sha(data: bytes) -> str:
+                return hashlib.sha256(data).hexdigest()
+
+            page = b"saved page"
+            manifest = json.dumps(
+                {
+                    "schema": original.schema,
+                    "source_commit": original.source_commit,
+                    "files_sha256": {"index.html": sha(page)},
+                    "offline_files_sha256": {"replay/audit.json": sha(b"correct")},
+                }
+            ).encode()
+            (fixture / "manifest.json").write_bytes(manifest)
+            (fixture / "index.html").write_bytes(page)
+            archive = fixture / f"{route}.zip"
+            with ZipFile(archive, "w") as bundle:
+                for name, value in {
+                    "index.html": page,
+                    "manifest.json": manifest,
+                    "replay/audit.json": b"changed",
+                }.items():
+                    bundle.writestr(name, value)
+            digest = sha(archive.read_bytes())
+            (fixture / f"{archive.name}.sha256").write_text(f"{digest}  {archive.name}\n")
+            identity = replace(original, manifest_sha256=sha(manifest), archive_sha256=digest)
+            with self.assertRaisesRegex(
+                ValueError, "offline asset digest differs: replay/audit.json"
+            ):
+                stage.read_bundle(root, identity)
 
     def test_finite_action_keeps_both_runs_and_their_figures(self) -> None:
         files, [entry], card = stage.build_finite_action(ROOT)
