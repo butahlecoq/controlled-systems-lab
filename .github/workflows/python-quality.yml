@@ -158,6 +158,9 @@ on:
       - 'scripts/reports/stage_native_model_catalogue.py'
       - 'scripts/reports/stage_native_extended_models.py'
       - 'scripts/reports/site_additions.py'
+      - 'scripts/reports/stage_app01.py'
+      - 'reports/algorithm-results/app01-publications.json'
+      - 'reports/algorithm-results/app01-plan-20261016-22d406fd/**'
       - 'scripts/reports/*published_route*.py'
       - 'reports/published-route-preservation/**'
       - 'scripts/reports/stage_app02.py'
@@ -395,6 +398,9 @@ on:
       - 'scripts/reports/stage_native_model_catalogue.py'
       - 'scripts/reports/stage_native_extended_models.py'
       - 'scripts/reports/site_additions.py'
+      - 'scripts/reports/stage_app01.py'
+      - 'reports/algorithm-results/app01-publications.json'
+      - 'reports/algorithm-results/app01-plan-20261016-22d406fd/**'
       - 'scripts/reports/*published_route*.py'
       - 'reports/published-route-preservation/**'
       - 'scripts/reports/stage_app02.py'
@@ -502,6 +508,18 @@ jobs:
         run: python -m unittest tests.reporting.test_closed_loop_tasks
       - name: Exercise real Git and process behavior
         run: python -m unittest discover -s tests/ci -p 'test_*.py'
+      - name: Verify the saved APP-01 catalogue and offline ZIP
+        run: |
+          catalogue=reports/algorithm-results/app01-publications.json
+          source_id=$(jq -er '.reports[0].source_report_id' "$catalogue")
+          site="$RUNNER_TEMP/app01-saved-site"
+          mkdir "$site"
+          printf '<ul></ul>\n' > "$site/index.html"
+          python scripts/reports/stage_app01.py --source "reports/algorithm-results/$source_id" > "$RUNNER_TEMP/app01-catalogue.json"
+          diff -u <(jq -S . "$catalogue") <(jq -S . "$RUNNER_TEMP/app01-catalogue.json")
+          route=$(python scripts/reports/stage_app01.py --catalog "$catalogue" --site "$site")
+          test "$route" = "$(jq -er '.reports[0].report_id' "$catalogue")"
+          printf '%s  %s\n' "$(jq -er '.reports[0].zip_sha256' "$catalogue")" "$site/$route.zip" | sha256sum --check -
       - name: Exercise site additions and the APP02 staging caller
         run: |
           python -m unittest discover -s tests/reporting -p 'test_site_additions.py'
