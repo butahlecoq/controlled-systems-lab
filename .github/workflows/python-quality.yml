@@ -64,6 +64,10 @@ on:
       - 'scripts/reports/landing.py'
       - 'scripts/reports/visual_examples.py'
       - 'scripts/reports/learning_book.py'
+      - 'tests/reporting/test_mpc06_online.py'
+      - 'scripts/reports/mpc06_online/**'
+      - 'reports/algorithm-results/mpc06-online-anchor-v1/**'
+      - 'reports/algorithm-results/mpc06-online-anchor-portable-v3/**'
       - 'scripts/reports/learning_closed_loop_toy.py'
       - 'scripts/reports/learning_geometry_toy.py'
       - 'scripts/reports/learning_model_tracks.py'
@@ -305,6 +309,10 @@ on:
       - 'scripts/reports/landing.py'
       - 'scripts/reports/visual_examples.py'
       - 'scripts/reports/learning_book.py'
+      - 'tests/reporting/test_mpc06_online.py'
+      - 'scripts/reports/mpc06_online/**'
+      - 'reports/algorithm-results/mpc06-online-anchor-v1/**'
+      - 'reports/algorithm-results/mpc06-online-anchor-portable-v3/**'
       - 'scripts/reports/learning_closed_loop_toy.py'
       - 'scripts/reports/learning_geometry_toy.py'
       - 'scripts/reports/learning_model_tracks.py'
@@ -551,6 +559,8 @@ jobs:
         run: |
           python -m unittest tests.reporting.test_convex_report tests.reporting.test_opt07_collector tests.reporting.test_opt12_collector tests.reporting.test_visual_examples tests.reporting.test_geo07_publication tests.reporting.test_geo07_port_publication tests.reporting.test_geo07_dependent_publication tests.reporting.test_finite_feedback_publication tests.reporting.test_ext04_publication tests.reporting.test_report_lifecycle
 
+      - name: Check the saved MPC-06 online smoke evidence
+        run: python -m unittest tests.reporting.test_mpc06_online
 
       - name: Check both saved Strategy A choice-pipeline publications
         env:
