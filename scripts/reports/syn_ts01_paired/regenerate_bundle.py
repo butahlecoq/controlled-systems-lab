@@ -10,16 +10,12 @@ from pathlib import Path
 import report
 
 
-def pretty(value):
-    return (
-        json.dumps(value, ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False) + "\n"
-    ).encode("utf-8")
-
-
 def regenerate(source: Path, out: Path):
     record = report.validate_bundle(source)
     if out.exists():
         raise ValueError("refusing to overwrite regenerated bundle")
+    if out.name != record["report_id"]:
+        raise ValueError(f"output directory must be named {record['report_id']}")
     out.mkdir(parents=True)
     derived = {"index.html", "performance.svg", "trials.csv", "manifest.json"}
     for name in sorted(report.BUNDLE_FILES - derived):

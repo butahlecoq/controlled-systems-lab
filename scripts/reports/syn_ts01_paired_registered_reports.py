@@ -5,8 +5,8 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import registered_reports as common
 
@@ -15,6 +15,8 @@ REPORT_SPEC = importlib.util.spec_from_file_location(
     "csl_syn_ts01_paired_report_contract",
     ROOT / "scripts/reports/syn_ts01_paired/report.py",
 )
+if REPORT_SPEC is None or REPORT_SPEC.loader is None:
+    raise ImportError("Cannot load the paired T-S01 saved report validator")
 report = importlib.util.module_from_spec(REPORT_SPEC)
 sys.modules[REPORT_SPEC.name] = report
 REPORT_SPEC.loader.exec_module(report)

@@ -4,21 +4,19 @@ import hashlib
 import importlib.util
 import json
 import shutil
-import tempfile
+import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
-
 
 ROOT = Path(__file__).resolve().parents[2]
 TOOL_DIR = ROOT / "scripts" / "reports" / "syn_ts01_paired"
 REPORT_DIR = ROOT / "reports" / "algorithm-results" / "syn-ts01-paired-20261014-b7f1ac0"
-sys.path.insert(0, str(TOOL_DIR))
 SPEC = importlib.util.spec_from_file_location("syn_ts01_paired_report", TOOL_DIR / "report.py")
 assert SPEC is not None and SPEC.loader is not None
 REPORT = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(REPORT)
-import regenerate_bundle
 
 
 class PairedTs01ReportTests(unittest.TestCase):
@@ -83,11 +81,43 @@ class PairedTs01ReportTests(unittest.TestCase):
         self.assertNotIn("<saved-run>", commands["report_regeneration"][0])
         with tempfile.TemporaryDirectory() as temp:
             output = Path(temp) / REPORT.REPORT_ID
-            regenerate_bundle.regenerate(REPORT_DIR, output)
+            replay = subprocess.run(
+                [
+                    sys.executable,
+                    TOOL_DIR / "regenerate_bundle.py",
+                    "--source",
+                    REPORT_DIR,
+                    "--out",
+                    output,
+                ],
+                check=True,
+                capture_output=True,
+            )
+            self.assertIs(json.loads(replay.stdout)["solver_ran"], False)
             for name in sorted(REPORT.BUNDLE_FILES):
                 self.assertEqual(
                     (REPORT_DIR / name).read_bytes(), (output / name).read_bytes(), name
                 )
+
+    def test_invalid_output_name_leaves_no_bundle(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp) / "wrong-name"
+            replay = subprocess.run(
+                [
+                    sys.executable,
+                    TOOL_DIR / "regenerate_bundle.py",
+                    "--source",
+                    REPORT_DIR,
+                    "--out",
+                    output,
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertNotEqual(replay.returncode, 0)
+            self.assertFalse(output.exists())
+            self.assertIn(f"output directory must be named {REPORT.REPORT_ID}", replay.stderr)
 
     def test_trial_csv_is_bound_to_saved_raw_and_typed_events(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
