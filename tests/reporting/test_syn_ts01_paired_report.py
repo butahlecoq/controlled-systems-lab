@@ -13,6 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 TOOL_DIR = ROOT / "scripts" / "reports" / "syn_ts01_paired"
 REPORT_DIR = ROOT / "reports" / "algorithm-results" / "syn-ts01-paired-20261014-b7f1ac0"
+REPRODUCTION_CLI = REPORT_DIR.parent / "tooling" / "syn_ts01_paired" / "regenerate_bundle.py"
 SPEC = importlib.util.spec_from_file_location("syn_ts01_paired_report", TOOL_DIR / "report.py")
 assert SPEC is not None and SPEC.loader is not None
 REPORT = importlib.util.module_from_spec(SPEC)
@@ -77,14 +78,16 @@ class PairedTs01ReportTests(unittest.TestCase):
         commands = json.loads((REPORT_DIR / "commands.json").read_text(encoding="utf-8"))
         self.assertTrue(commands["saved_bundle_is_complete_regeneration_source"])
         self.assertFalse(commands["regeneration_runs_solver"])
-        self.assertIn("regenerate_bundle.py", commands["report_regeneration"][0])
+        self.assertIn(
+            REPRODUCTION_CLI.relative_to(ROOT).as_posix(), commands["report_regeneration"][0]
+        )
         self.assertNotIn("<saved-run>", commands["report_regeneration"][0])
         with tempfile.TemporaryDirectory() as temp:
             output = Path(temp) / REPORT.REPORT_ID
             replay = subprocess.run(
                 [
                     sys.executable,
-                    TOOL_DIR / "regenerate_bundle.py",
+                    REPRODUCTION_CLI,
                     "--source",
                     REPORT_DIR,
                     "--out",
@@ -101,7 +104,7 @@ class PairedTs01ReportTests(unittest.TestCase):
 
     def test_invalid_output_name_leaves_no_bundle(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
-            output = Path(temp) / "wrong-name"
+            output = Path(temp) / "uncreated" / "wrong-name"
             replay = subprocess.run(
                 [
                     sys.executable,
@@ -116,7 +119,7 @@ class PairedTs01ReportTests(unittest.TestCase):
                 text=True,
             )
             self.assertNotEqual(replay.returncode, 0)
-            self.assertFalse(output.exists())
+            self.assertFalse(output.parent.exists())
             self.assertIn(f"output directory must be named {REPORT.REPORT_ID}", replay.stderr)
 
     def test_trial_csv_is_bound_to_saved_raw_and_typed_events(self) -> None:
