@@ -1,4 +1,5 @@
 """Saved EXP-04 numerical evidence and immutable site staging regressions."""
+
 from __future__ import annotations
 
 import importlib.util
@@ -10,7 +11,9 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-spec = importlib.util.spec_from_file_location("exp04_stage_test", ROOT / "scripts/reports/stage_exp04.py")
+spec = importlib.util.spec_from_file_location(
+    "exp04_stage_test", ROOT / "scripts/reports/stage_exp04.py"
+)
 stage = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
 spec.loader.exec_module(stage)
@@ -27,11 +30,14 @@ class Exp04SavedReportTests(unittest.TestCase):
             shutil.copyfile(CATALOG, root / CATALOG.name)
             site_dir = root / "site"
             site_dir.mkdir()
-            (site_dir / "index.html").write_text("<!doctype html><html lang=\"en\"><body><ul></ul></body></html>",
-                                                 encoding="utf-8")
+            (site_dir / "index.html").write_text(
+                '<!doctype html><html lang="en"><body><ul></ul></body></html>', encoding="utf-8"
+            )
             self.assertEqual(stage.stage(root / CATALOG.name, site_dir), BUNDLE.name)
-            self.assertEqual((site_dir / BUNDLE.name / "records.json").read_bytes(),
-                             (BUNDLE / "records.json").read_bytes())
+            self.assertEqual(
+                (site_dir / BUNDLE.name / "records.json").read_bytes(),
+                (BUNDLE / "records.json").read_bytes(),
+            )
             self.assertIn(BUNDLE.name + "/bundle.zip", (site_dir / "index.html").read_text())
 
     def test_raw_numeric_mutation_is_rejected(self) -> None:

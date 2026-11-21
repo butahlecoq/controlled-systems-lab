@@ -1,4 +1,5 @@
 """EXT-05 saved records regenerate and stage only their reviewed bytes."""
+
 from __future__ import annotations
 
 import json
@@ -24,19 +25,23 @@ class SavedContinuousReport(unittest.TestCase):
 
     def test_saved_numerical_report_regenerates(self) -> None:
         details = render_saved.render(self.bundle, check=True)
-        self.assertEqual(details["source_commit"],
-                         "6cc1740a59ca95e4a575e921cef793c2ac262e9f")
-        self.assertEqual(details["index_sha256"],
-                         "291c9e51e95d68bf83a91af850399825d66f7b888c05bfd351ac723a136c52ee")
+        self.assertEqual(details["source_commit"], "6cc1740a59ca95e4a575e921cef793c2ac262e9f")
+        self.assertEqual(
+            details["index_sha256"],
+            "291c9e51e95d68bf83a91af850399825d66f7b888c05bfd351ac723a136c52ee",
+        )
         self.assertEqual(stage_ext05.catalog_entry(self.bundle), self.entry)
         record = render_saved.validate(self.bundle)
         self.assertEqual(record["analytic"]["trajectory"], [[0, 0], [1, 2], [3, 0]])
         self.assertEqual(record["measurement"]["measured_calls"], 700)
         self.assertEqual(record["measurement"]["failures"], 0)
         with zipfile.ZipFile(self.bundle / (self.bundle.name + ".zip")) as archive:
-            self.assertTrue(all(item.compress_type == zipfile.ZIP_STORED and
-                                item.create_system == 3
-                                for item in archive.infolist()))
+            self.assertTrue(
+                all(
+                    item.compress_type == zipfile.ZIP_STORED and item.create_system == 3
+                    for item in archive.infolist()
+                )
+            )
 
     def test_changed_raw_observation_refuses_publication(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -50,22 +55,27 @@ class SavedContinuousReport(unittest.TestCase):
     def test_stage_creates_2d_route_and_offline_download(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             site = Path(directory)
-            (site / "index.html").write_text("<html><body><ul></ul></body></html>",
-                                             encoding="utf-8")
+            (site / "index.html").write_text(
+                "<html><body><ul></ul></body></html>", encoding="utf-8"
+            )
             self.assertEqual(stage_ext05.stage(self.catalog, site), self.bundle.name)
             staged = site / self.bundle.name
-            self.assertEqual((staged / "index.html").read_bytes(),
-                             (self.bundle / "index.html").read_bytes())
-            self.assertEqual((staged / (self.bundle.name + ".zip")).read_bytes(),
-                             (self.bundle / (self.bundle.name + ".zip")).read_bytes())
-            self.assertIn(self.bundle.name + "/example-2d.html",
-                          (site / "index.html").read_text(encoding="utf-8"))
+            self.assertEqual(
+                (staged / "index.html").read_bytes(), (self.bundle / "index.html").read_bytes()
+            )
+            self.assertEqual(
+                (staged / (self.bundle.name + ".zip")).read_bytes(),
+                (self.bundle / (self.bundle.name + ".zip")).read_bytes(),
+            )
+            self.assertIn(
+                self.bundle.name + "/example-2d.html",
+                (site / "index.html").read_text(encoding="utf-8"),
+            )
 
     def test_bad_site_index_leaves_no_partial_report(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             site = Path(directory)
-            (site / "index.html").write_text("<html><body></body></html>",
-                                             encoding="utf-8")
+            (site / "index.html").write_text("<html><body></body></html>", encoding="utf-8")
             with self.assertRaises(ValueError):
                 stage_ext05.stage(self.catalog, site)
             self.assertFalse((site / self.bundle.name).exists())
