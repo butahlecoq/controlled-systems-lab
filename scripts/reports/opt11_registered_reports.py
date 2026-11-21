@@ -1,13 +1,14 @@
 """Schema-3 publication adapter for a reviewed OPT-11 native report bundle."""
+
 from __future__ import annotations
 
 import hashlib
 import html
 import importlib
 import json
-from pathlib import Path
 import re
 import sys
+from pathlib import Path
 from types import ModuleType
 
 import registered_reports as common
@@ -33,7 +34,9 @@ LIMITS = (
 def adapt(bundle: Path, allow_test: bool = False) -> common.PublicationRecord:
     bundle = Path(bundle)
     record = source.check(bundle, allow_test=allow_test)
-    if record.get("purpose") != "measurement" and not (allow_test and record.get("purpose") == "test"):
+    if record.get("purpose") != "measurement" and not (
+        allow_test and record.get("purpose") == "test"
+    ):
         raise ValueError("test-only OPT-11 artifact cannot be published")
     if re.fullmatch(r"opt11-[0-9a-f]{16}", bundle.name) is None:
         raise ValueError("unsafe OPT-11 source identity")
@@ -56,28 +59,43 @@ def adapt(bundle: Path, allow_test: bool = False) -> common.PublicationRecord:
     measured = [trial for trial in record["trials"] if not trial["warmup"]]
     complete_pairs = sum(trial["status"] == "complete" for trial in measured)
     fixture_count = len(source.FIXTURES)
-    scope = (f"{len(measured)} alternating baseline/recursive pairs across {fixture_count} fixed clouds; "
-             f"{complete_pairs} pairs complete; performance interpretation inconclusive")
+    scope = (
+        f"{len(measured)} alternating baseline/recursive pairs across {fixture_count} fixed clouds; "
+        f"{complete_pairs} pairs complete; performance interpretation inconclusive"
+    )
     return common.PublicationRecord(
-        KIND, public_id, common._digest(record), record["source_commit"], scope, LIMITS,
-        tuple(sorted(STAGE_FILES)), source.SCHEMA, record["payload_sha256"], bundle.name,
+        KIND,
+        public_id,
+        common._digest(record),
+        record["source_commit"],
+        scope,
+        LIMITS,
+        tuple(sorted(STAGE_FILES)),
+        source.SCHEMA,
+        record["payload_sha256"],
+        bundle.name,
     )
 
 
-def render_page(bundle: Path, publication: common.PublicationRecord, allow_test: bool = False) -> str:
+def render_page(
+    bundle: Path, publication: common.PublicationRecord, allow_test: bool = False
+) -> str:
     record = source.check(Path(bundle), allow_test=allow_test)
     original = source.page(record)
     if original.count("</body>") != 1:
         raise ValueError("OPT-11 source HTML structure is malformed")
-    links = (f'<p>Publication <code>{html.escape(publication.report_id)}</code>; '
-             f'native report <code>{html.escape(publication.source_report_id)}</code>. '
-             '<a href="report-envelope.json">Versioned envelope</a> · '
-             '<a href="publication-manifest.json">Publication manifest</a>.</p>')
+    links = (
+        f"<p>Publication <code>{html.escape(publication.report_id)}</code>; "
+        f"native report <code>{html.escape(publication.source_report_id)}</code>. "
+        '<a href="report-envelope.json">Versioned envelope</a> · '
+        '<a href="publication-manifest.json">Publication manifest</a>.</p>'
+    )
     return original.replace("</body>", links + "</body>")
 
 
-def publication_artifacts(bundle: Path, publication: common.PublicationRecord,
-                          allow_test: bool = False) -> dict:
+def publication_artifacts(
+    bundle: Path, publication: common.PublicationRecord, allow_test: bool = False
+) -> dict:
     bundle = Path(bundle)
     record = source.check(bundle, allow_test=allow_test)
     envelope = {
@@ -94,12 +112,17 @@ def publication_artifacts(bundle: Path, publication: common.PublicationRecord,
         "payload": record,
     }
     return common.assemble_publication(
-        bundle, publication, page=render_page(bundle, publication, allow_test=allow_test),
-        envelope=envelope, source_files=publication.files,
+        bundle,
+        publication,
+        page=render_page(bundle, publication, allow_test=allow_test),
+        envelope=envelope,
+        source_files=publication.files,
     )
 
 
-def offline_zip(bundle: Path, publication: common.PublicationRecord,
-                allow_test: bool = False) -> bytes:
-    return common.publication_zip(publication.report_id,
-                                  publication_artifacts(bundle, publication, allow_test=allow_test))
+def offline_zip(
+    bundle: Path, publication: common.PublicationRecord, allow_test: bool = False
+) -> bytes:
+    return common.publication_zip(
+        publication.report_id, publication_artifacts(bundle, publication, allow_test=allow_test)
+    )
