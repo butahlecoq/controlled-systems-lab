@@ -101,6 +101,15 @@ on:
       - 'reports/algorithm-results/catalog.json'
       - 'reports/algorithm-results/index.html'
       - 'reports/algorithm-results/legacy-publications.json'
+      - 'scripts/reports/syn01/**'
+      - 'scripts/reports/syn02/**'
+      - 'scripts/reports/syn0[12]_registered_reports.py'
+      - 'tests/reporting/test_syn01_publication.py'
+      - 'tests/reporting/test_syn02_publication.py'
+      - 'reports/algorithm-results/syn01-nominal-*/**'
+      - 'reports/algorithm-results/syn01-nominal-*.zip'
+      - 'reports/algorithm-results/syn02-terminal-*/**'
+      - 'reports/algorithm-results/syn02-terminal-*.zip'
       - 'tests/reporting/test_landing.py'
       - 'tests/reporting/test_ext07_resource_observation.py'
       - 'tests/reporting/test_plot.py'
@@ -877,6 +886,8 @@ jobs:
           python -m unittest discover -s reports/algorithm-results/tooling/geo02 -p test_report_tools.py
       - name: Replay the saved paired T-S01 report and offline ZIP
         run: python -m unittest tests.reporting.test_syn_ts01_paired_report tests.reporting.test_syn_ts01_paired_publication
+      - name: Replay the nominal-forward and terminal-minimizer saved reports
+        run: python -m unittest tests.reporting.test_syn01_publication tests.reporting.test_syn02_publication
       - name: Replay saved MPC replanning and output feedback
         run: |
           reports=reports/algorithm-results

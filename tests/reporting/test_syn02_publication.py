@@ -1,37 +1,39 @@
 """SYN-02 registered Pages adapter boundary tests."""
 
-import csv
 import hashlib
+import importlib
 import importlib.util
 import json
-from pathlib import Path
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
+import zipfile
+from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts" / "reports"))
-sys.path.insert(0, str(ROOT / "scripts" / "reports" / "syn02"))
-import registered_reports
-import report_site
-import report_data
+REPORT_SCRIPTS = ROOT / "scripts" / "reports"
+SAVED_REPORTS = ROOT / "reports" / "algorithm-results"
+sys.path.insert(0, str(REPORT_SCRIPTS))
+TOOLING = REPORT_SCRIPTS / "syn02"
 
 
 def _load_module(name, path):
     spec = importlib.util.spec_from_file_location(name, path)
+    assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
-    sys.modules[name] = module
     spec.loader.exec_module(module)
     return module
 
 
-publication_map = _load_module(
-    "csl_syn02_test_publication_map", ROOT / "scripts/reports/syn02/publication_map.py"
-)
-sys.modules["publication_map"] = publication_map
-collect = _load_module("csl_syn02_test_collect", ROOT / "scripts/reports/syn02/collect.py")
-import syn02_registered_reports as syn02
+publication_map = _load_module("csl_syn02_test_map", TOOLING / "publication_map.py")
+with mock.patch.dict(sys.modules, {"publication_map": publication_map}):
+    collect = _load_module("csl_syn02_test_collect", TOOLING / "collect.py")
+report_data = importlib.import_module("report_data")
+report_site = _load_module("csl_syn02_test_site", REPORT_SCRIPTS / "site.py")
+syn02 = importlib.import_module("syn02_registered_reports")
 
 SOURCE = "c234a1a04b2f90e34776a2bfa349a91a1d30257d"
 HARNESS = "985c5e88916383e2e98464744ee685fd71b6cd4e"
@@ -129,6 +131,44 @@ def _csv_value(value):
 
 
 class Syn02PublicationTests(unittest.TestCase):
+    def test_saved_renderer_retains_the_archived_numerical_failure(self):
+        source = SAVED_REPORTS / "syn02-terminal-20261013-c234a1a0-35de886a7fb4"
+        records = json.loads((source / "records.json").read_bytes())
+        shifted = next(
+            row for row in records["summary"] if row["scenario"] == "shifted-residual-degenerate"
+        )
+        self.assertEqual(shifted["observed_outcomes"], {"undetermined": 7})
+        self.assertEqual(shifted["observed_terminations"], {"numerical_failure": 7})
+        self.assertEqual(shifted["relation_count"], 0)
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary) / "rendered"
+            subprocess.run(
+                [
+                    sys.executable,
+                    TOOLING / "render_saved.py",
+                    "--records",
+                    source / "records.json",
+                    "--out-dir",
+                    output,
+                ],
+                check=True,
+            )
+            with zipfile.ZipFile(source.with_suffix(".zip")) as archive:
+                page = archive.read("index.html")
+                plot = archive.read("latency.svg")
+            self.assertEqual((source / "index.html").read_bytes(), page)
+            self.assertEqual((source / "latency.svg").read_bytes(), plot)
+            self.assertEqual((output / "latency.svg").read_bytes(), plot)
+
+            # The archived presentation distinguished the harness and the later saved-data repack.
+            expected = page.replace(b"Measurement harness commit:", b"Harness/artifact commit:")
+            expected = expected.replace(
+                b"<p>Artifact note: this report presentation and package were regenerated from the "
+                b"saved accepted records and raw trial evidence; no measurement trials were rerun.</p>",
+                b"",
+            )
+            self.assertEqual((output / "index.html").read_bytes(), expected)
+
     @staticmethod
     def project_for_bundle(bundle, record):
         projection = publication_map.project(record)

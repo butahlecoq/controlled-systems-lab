@@ -1,6 +1,7 @@
 """Explicit projection from the SYN-02 native record to the shared report contract."""
 
 from __future__ import annotations
+
 import hashlib
 import json
 
