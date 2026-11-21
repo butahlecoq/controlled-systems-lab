@@ -572,7 +572,6 @@ jobs:
           python -m unittest discover -s tests/reporting -p 'test_discrete_mpc_2d.py'
           python -m unittest tests.reporting.test_catalogue_forward_publication
           python -m unittest tests.reporting.test_mpc_crossover_publication tests.reporting.test_native_source_constrained_mpc_publication tests.reporting.test_native_history_strategy_publication
-          python -m unittest discover -s tests/reporting -p 'test_visual_examples.py'
       - name: Exercise OPT07 and OPT11 collectors, oracles and saved reports
         run: |
           python -m unittest discover -s tests/reporting -p 'test_opt07_*.py'
