@@ -3,15 +3,13 @@
 from __future__ import annotations
 
 import hashlib
-from html import escape
-from html.parser import HTMLParser
-from functools import lru_cache
 import json
 import math
+from html import escape
+from html.parser import HTMLParser
 from pathlib import Path
 
 from report_data import require
-
 
 ROUTE = "buryatia-dim4-literal-affine-v1"
 SOURCE = "136e30f33fca849ec8814747702ab720e76e22bd"
@@ -133,12 +131,6 @@ class _Links(HTMLParser):
         self.values.extend(value for key, value in attrs if key in {"href", "src"} and value)
 
 
-@lru_cache(maxsize=1)
-def _saved_record() -> dict:
-    path = Path(__file__).resolve().parents[2] / "docs/examples" / (ROUTE + "-records.json")
-    return json.loads(path.read_text(encoding="utf-8"))
-
-
 def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]], str]:
     repository_root = Path(repository_root)
     docs = repository_root / "docs/examples"
@@ -167,7 +159,7 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
     )
     receipt = json.loads(capture_bytes)
     trace_proof = json.loads(box_trace_proof)
-    record = _saved_record()
+    record = json.loads(raw)
     scenario_data = json.loads(scenario)
     require(
         receipt["source_commit"] == SOURCE and receipt["stdout_sha256"] == RAW_SHA256,
@@ -205,7 +197,11 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
     require(parsed == expected, "Buryatia source checksum manifest differs")
 
     page_path = _safe_file(docs, "buryatia-dim4-literal-affine.html")
-    page = page_path.read_text(encoding="utf-8")
+    page_bytes = page_path.read_bytes()
+    require(
+        hashlib.sha256(page_bytes).hexdigest() == PAGE_SHA256, "Buryatia source page hash differs"
+    )
+    page = page_bytes.decode("utf-8")
     page = page.replace('href="examples.css"', 'href="../examples.css"')
     page = page.replace(
         'href="../../benchmarks/scenarios/' + scenario_name + '"',

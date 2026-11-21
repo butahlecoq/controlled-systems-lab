@@ -147,6 +147,13 @@ on:
       - 'tests/reporting/test_opt07_collector.py'
       - 'tests/reporting/test_opt12_collector.py'
       - 'tests/reporting/test_visual_examples.py'
+      - 'scripts/reports/stage_buryatia_dim4.py'
+      - 'scripts/reports/stage_buryatia_volterra.py'
+      - 'tests/reporting/test_stage_buryatia_dim4.py'
+      - 'tests/reporting/test_stage_buryatia_volterra.py'
+      - 'docs/examples/buryatia-dim4-*'
+      - 'docs/examples/buryatia-volterra-affine-2d*'
+      - 'benchmarks/scenarios/buryatia-dim4-matlab-literal-affine-v1.json'
       - 'tests/reporting/test_geo07_publication.py'
       - 'tests/reporting/test_geo07_port_publication.py'
       - 'tests/reporting/test_geo07_dependent_publication.py'
@@ -382,6 +389,13 @@ on:
       - 'tests/reporting/test_opt07_collector.py'
       - 'tests/reporting/test_opt12_collector.py'
       - 'tests/reporting/test_visual_examples.py'
+      - 'scripts/reports/stage_buryatia_dim4.py'
+      - 'scripts/reports/stage_buryatia_volterra.py'
+      - 'tests/reporting/test_stage_buryatia_dim4.py'
+      - 'tests/reporting/test_stage_buryatia_volterra.py'
+      - 'docs/examples/buryatia-dim4-*'
+      - 'docs/examples/buryatia-volterra-affine-2d*'
+      - 'benchmarks/scenarios/buryatia-dim4-matlab-literal-affine-v1.json'
       - 'tests/reporting/test_geo07_publication.py'
       - 'tests/reporting/test_geo07_port_publication.py'
       - 'tests/reporting/test_geo07_dependent_publication.py'
@@ -533,6 +547,8 @@ jobs:
         run: python -m unittest tests.reporting.test_recorded_closed_loop_figures tests.reporting.test_viz03_control_figures
       - name: Exercise Pages deployment freshness and source identity
         run: python -m unittest tests.reporting.test_deploy_head
+      - name: Check the frozen Buryatia reachability lessons
+        run: python -m unittest tests.reporting.test_stage_buryatia_dim4 tests.reporting.test_stage_buryatia_volterra
       - name: Exercise saved publication and collector consumer families
         env:
           MPLBACKEND: Agg
