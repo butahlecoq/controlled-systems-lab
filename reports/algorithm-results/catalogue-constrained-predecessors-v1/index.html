@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Backward reachable sets with saved constraints</title>
+<link rel="stylesheet" href="examples.css">
+</head>
+<body>
+<main class="page-content">
+<h1>Backward reachable sets with saved constraints</h1>
+<p>Which states can reach the same target when the controls and trajectories must satisfy the catalogue’s saved constraints? Compare three nominal profiles on 35 models, with the current state free at each stage.</p>
+<figure>
+<a href="battery-predecessor.svg"><img src="battery-predecessor.svg" alt="Four stage panels compare two-battery predecessor rectangles. Including the state bounds removes the negative-energy regions and clips the upper edge in stage zero. The two profiles coincide at stages two and three."></a>
+<figcaption>Battery pair. The dashed rectangles use the saved control intervals. The blue rectangles also impose the saved state bounds. Both profiles reach the same terminal box.</figcaption>
+</figure>
+<h2>Define the feasible suffix</h2>
+<p>At stage <var>k</var>, seek a state <var>x</var><sub>k</sub> and controls <var>u</var><sub>k</sub>, …, <var>u</var><sub>2</sub> that satisfy the remaining affine dynamics and put <var>x</var><sub>3</sub> in the target. Each profile keeps the same dynamics, stage grid, fixed external forecast and authored target. With a fixed forecast, each support query maximizes <var>d</var><sup>T</sup><var>P x</var><sub>k</sub> over that feasible suffix, where <var>P</var> selects the recorded coordinate pair.</p>
+<ol>
+<li><strong>Authored controls.</strong> Allow [−1, 1] in each control coordinate.</li>
+<li><strong>Saved controls.</strong> Replace the authored box with the saved control intervals.</li>
+<li><strong>Full saved domain.</strong> Keep those same controls and add the saved state bounds, coupled stage and terminal rows, and positive-part budgets.</li>
+</ol>
+<p>The third profile is contained in the second. Comparing them isolates the retained constraints. The first profile sets a different control box. The captures include 29 source-continuous models, three continuous relaxations, and three authored continuous domains.</p>
+<h2>Read the battery example</h2>
+<p>At stage zero, the control-only rectangle is [−30, 96.156] × [−19.8, 174.83] MWh. Adding the state bounds gives [0, 96.156] × [0, 150] MWh. The maximum total stored energy in direction (1, 1) decreases by 24.83 MWh. At stage three both profiles give [27, 33] × [63, 77] MWh. These rectangle values follow from the decoupled dynamics and are rounded for display.</p>
+<h2>Check the 3,360 queries</h2>
+<table>
+<thead><tr><th scope="col">Profile</th><th scope="col">Finite support</th><th scope="col">Unbounded</th><th scope="col">Empty set</th></tr></thead>
+<tbody>
+<tr><th scope="row">Authored controls</th><td>1,120</td><td>0</td><td>0</td></tr>
+<tr><th scope="row">Saved controls</th><td>1,072</td><td>48</td><td>0</td></tr>
+<tr><th scope="row">Full saved domain</th><td>1,024</td><td>0</td><td>96</td></tr>
+</tbody>
+</table>
+<p>Eight directions are sampled at each of four stages. In the full domain, models 1, 9 and 12 have empty sets at every stage because their terminal state bounds exclude the target. In the other models, adding the saved rows lowered 105 sampled supports across ten models at the numerical comparison tolerance of 10<sup>−7</sup>.</p>
+<p>The original HiGHS replay refused 216 coefficient-sensitive queries. Reversible row scaling recovered 72. The optional Ipopt replay recovered another 134 and withheld optimality on ten building queries. A rational witness and matching upper bound resolve all ten, alongside 22 other exact building stage-direction checks. The raw records retain each solver outcome. Exact control-interval rays also contradict 30 infeasibility reports from the presolved condensed comparison. Disabling presolve gives unboundedness for those directions.</p>
+<p>The independent checker tests the returned histories against the original dynamics and domain. The largest scaled support difference from the reference is below 7.90 × 10<sup>−9</sup>. The general full-domain comparisons are numerical. The building proofs, interval-only values and rays, and three terminal conflicts are exact for these fixtures. The results describe nominal feasible suffixes and sampled directions.</p>
+<h2>Replay the calculations</h2>
+<p>The offline download on the gallery card contains this lesson, the two checksum-pinned source captures, the native and exact producers, and their audits. Open <a href="REPLAY.txt">the replay instructions</a> before extracting it. The <a href="summary.json">machine-readable summary</a> records the initial numerical attempts. The <a href="manifest.json">manifest</a> binds the published figure, lesson and replay contents.</p>
+</main>
+</body>
+</html>

@@ -2836,6 +2836,16 @@
       "companion_route": "examples/catalogue-backward-reachability-v1/index.html"
     },
     {
+      "route": "catalogue-constrained-predecessors-v1",
+      "source_bundle": "catalogue-constrained-predecessors-v1",
+      "assets": [
+        "battery-predecessor.svg"
+      ],
+      "index_sha256": "299825bb789b9cc1bf27a775b9fb51da3593e345bfe0c0b70f3299f189cfc26e",
+      "disposition": "reviewed: four battery panels compare exact predecessor rectangles under the same controls",
+      "companion_route": "examples/catalogue-constrained-predecessors-v1/index.html"
+    },
+    {
       "route": "catalogue-exact-support-v1",
       "source_bundle": "catalogue-exact-support-v1",
       "assets": [
@@ -4454,6 +4464,8 @@
         "catalogue-exact-support-v1/building-budget-projection.svg",
         "catalogue-backward-reachability-v1/index.html",
         "catalogue-backward-reachability-v1/battery-forward-backward.svg",
+        "catalogue-constrained-predecessors-v1/index.html",
+        "catalogue-constrained-predecessors-v1/battery-predecessor.svg",
         "catalogue-finite-action-v1/index.html",
         "catalogue-finite-action-v1/hospital-finite-actions.svg",
         "catalogue-finite-action-v1/terminal-box-corner.svg",
