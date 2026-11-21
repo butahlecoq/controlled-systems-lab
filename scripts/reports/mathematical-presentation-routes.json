@@ -772,6 +772,13 @@
       "witness": "Frozen reachability sweep from CSL SDK v0.1.1; retained source reports/algorithm-results/catalogue-forward-reachability-v1/index.html"
     },
     {
+      "route": "examples/catalogue-ring-initial-support-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/catalogue-ring-initial-support-v1/index.html",
+      "sha256": "f9328690b8647d408fa8f8af2e91953a5979256b41caefe6824cf1fed5e25faf",
+      "witness": "Exact feasible witness and fixed-initial-state support for model 30"
+    },
+    {
       "route": "examples/mpc-crossover-6b7308c4/index.html",
       "disposition": "maintained",
       "owner": "scripts/reports/stage_mpc_crossover.py"
@@ -789,6 +796,13 @@
       "owner": "reports/algorithm-results/native-catalogue-convex-backends-v1/index.html",
       "sha256": "da0f6b352e141d32f3f0f9f836cab12911b4610ad8a11207935b157cadbf3f32",
       "witness": "Frozen companion archive and SHA-256 inventory in reports/algorithm-results/native-catalogue-convex-backends-v1"
+    },
+    {
+      "route": "examples/native-history-strategies-d57739b3/index.html",
+      "disposition": "frozen",
+      "owner": "scripts/reports/stage_native_history_strategies.py",
+      "sha256": "a984a37b356636238b94ef85db0380203cbce6c3297edb11cd29c6eb7f64261f",
+      "witness": "Byte-identical HTML in the native-history-strategies-d57739b3 offline archive"
     },
     {
       "route": "examples/native-discrete-models.html",

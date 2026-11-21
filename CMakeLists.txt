@@ -155,6 +155,10 @@ else()
 endif()
 if(CSL_ENABLE_HIGHS AND CSL_ENABLE_QHULL)
   target_link_libraries(csl_closed_loop_native_policy PRIVATE CSL::qhull_conversion)
+  if(CSL_ENABLE_CASADI)
+    target_link_libraries(csl_closed_loop_native_policy PRIVATE
+      CSL::casadi_history_optimizer CSL::strategy_a CSL::strategy_b CSL::approximation)
+  endif()
 endif()
 target_compile_definitions(csl_closed_loop_native_policy PRIVATE
   CSL_NATIVE_HAS_QHULL=$<BOOL:${CSL_ENABLE_QHULL}>

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Certify a fixed initial-state support</title>
+<link rel="stylesheet" href="examples.css">
+</head>
+<body>
+<main class="page-content">
+<h1>Certify a fixed initial-state support</h1>
+<p>The Thirty-bank ring starts from a fixed 30-dimensional state. The original three-transition feasible-history sweep returned <code>undetermined</code> for its stage-zero support in direction (−1, −1) on the first two coordinates.</p>
+<figure>
+<img src="initial-support.svg" alt="In the plane of the first two state coordinates, the zero-control trajectory starts on a diagonal support line and proceeds through stages one, two and three.">
+<figcaption>The solid path is one feasible history projected onto the first two state coordinates. The diagonal line passes through the stage-zero singleton. The later marked points belong to different stages.</figcaption>
+</figure>
+<h2>Prove the stage-zero value</h2>
+<p>Every feasible history starts at the same state. To establish that the stage-zero projection is a singleton, first exhibit a history that satisfies the full domain. The zero-control sequence does this under the archived zero-external forecast. The verifier propagates all three transitions in exact rational arithmetic using the saved binary64 coefficients and checks the state bounds, control bounds and positive-part budgets.</p>
+<p>The support is −<var>x</var><sub>1</sub>(0) − <var>x</var><sub>2</sub>(0) = 13914569883186085 / 72057594037927936 ≈ 0.19310344827586207. The saved HiGHS status remains <code>undetermined</code>. The separate certificate establishes the value for this direction, projection and fixture.</p>
+<h2>Replay the certificate</h2>
+<p>Save the <a href="verify_support.py">verifier</a>, the <a href="catalogue-feasible-history-evidence.zip">original evidence</a> and the <a href="certificate.json">saved exact certificate</a> in one directory. The verifier uses the Python standard library and checks the original archive’s SHA-256.</p>
+<pre><code>python3 verify_support.py &gt; replay.json
+diff -u certificate.json replay.json</code></pre>
+<p>Use Matplotlib 3.11.2 and the <a href="plot_support.py">plot script</a> to regenerate the figure to a separate file. The <a href="manifest.json">manifest</a> records the saved asset checksums.</p>
+<pre><code>python3 plot_support.py replay.svg</code></pre>
+</main>
+</body>
+</html>
