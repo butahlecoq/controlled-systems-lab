@@ -1,4 +1,5 @@
 """Stage the saved Strategy A nominal linear exact 2D example for Pages."""
+
 from __future__ import annotations
 
 import argparse
@@ -7,7 +8,9 @@ import importlib.util
 from pathlib import Path
 import shutil
 
-site_spec = importlib.util.spec_from_file_location("nominal_exact_site", Path(__file__).with_name("site.py"))
+site_spec = importlib.util.spec_from_file_location(
+    "nominal_exact_site", Path(__file__).with_name("site.py")
+)
 site = importlib.util.module_from_spec(site_spec)
 assert site_spec.loader is not None
 site_spec.loader.exec_module(site)
@@ -32,7 +35,8 @@ def stage(source: Path, site_root: Path) -> str:
         if (source / name).is_symlink() or not (source / name).is_file():
             raise ValueError("missing or unsafe nominal exact example file: " + name)
     site.OfflineHTML(FILES | {"../examples/index.html"}).feed(
-        (source / "index.html").read_text(encoding="utf-8"))
+        (source / "index.html").read_text(encoding="utf-8")
+    )
     destination = site_root / REPORT_ID
     if not site_root.is_dir() or destination.exists():
         raise ValueError("site must exist and the nominal exact example route must be fresh")
@@ -42,8 +46,11 @@ def stage(source: Path, site_root: Path) -> str:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", type=Path,
-        default=Path(__file__).resolve().parents[2] / "reports/algorithm-results" / REPORT_ID)
+    parser.add_argument(
+        "--source",
+        type=Path,
+        default=Path(__file__).resolve().parents[2] / "reports/algorithm-results" / REPORT_ID,
+    )
     parser.add_argument("--site", type=Path, required=True)
     arguments = parser.parse_args()
     print(stage(arguments.source, arguments.site))
