@@ -7,11 +7,21 @@ import json
 import os
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import Any, TypedDict
 
 import figure_style
 
 
-def render(document: dict, style_path: Path, out: Path) -> dict:
+class FigureExport(TypedDict):
+    schema: str
+    style_id: str
+    quantitative_axis_policy: str
+    style_sha256: str
+    matplotlib: str
+    files: dict[str, str]
+
+
+def render(document: dict[str, Any], style_path: Path, out: Path) -> FigureExport:
     """Render polygons, curves, points and circles without computing geometry."""
     if document.get("schema") != "csl.saved-geometric-plot/1":
         raise ValueError("expected csl.saved-geometric-plot/1")
@@ -81,13 +91,14 @@ def render(document: dict, style_path: Path, out: Path) -> dict:
     import matplotlib.pyplot as plt
     from matplotlib.patches import Circle, Polygon
 
-    rc = {
-        "font.family": style["font_family"],
-        "font.size": style["font_size"],
-        "svg.hashsalt": style["style_id"],
-        "svg.fonttype": "none",
-    }
-    with matplotlib.rc_context(rc):
+    with matplotlib.rc_context(
+        {
+            "font.family": style["font_family"],
+            "font.size": style["font_size"],
+            "svg.hashsalt": style["style_id"],
+            "svg.fonttype": "none",
+        }
+    ):
         fig, axis = plt.subplots(figsize=tuple(style["projection_size"]))
         try:
             for item in series:
@@ -161,12 +172,13 @@ def render(document: dict, style_path: Path, out: Path) -> dict:
                 framealpha=0.94,
             )
             fig.subplots_adjust(left=0.2, right=0.92, bottom=0.18, top=0.66)
-            for suffix, save_args in (
-                ("svg", {"metadata": {"Date": None, "Creator": "CSL saved geometry exporter"}}),
-                ("png", {"dpi": style["png_dpi"], "metadata": {"Software": style["style_id"]}}),
-            ):
-                fig.savefig(out / ("geometry." + suffix), **save_args)
             svg_path = out / "geometry.svg"
+            fig.savefig(svg_path, metadata={"Date": None, "Creator": "CSL saved geometry exporter"})
+            fig.savefig(
+                out / "geometry.png",
+                dpi=style["png_dpi"],
+                metadata={"Software": style["style_id"]},
+            )
             tree = ET.parse(svg_path)
             root = tree.getroot()
             root.set("role", "img")
@@ -186,7 +198,7 @@ def render(document: dict, style_path: Path, out: Path) -> dict:
             tree.write(svg_path, encoding="utf-8", xml_declaration=True)
         finally:
             plt.close(fig)
-    receipt = {
+    receipt: FigureExport = {
         "schema": "csl.figure-export/1",
         "style_id": style["style_id"],
         "quantitative_axis_policy": figure_style.STYLE_ID,

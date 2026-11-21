@@ -1,3 +1,4 @@
+import hashlib
 import json
 import sys
 import tempfile
@@ -56,8 +57,11 @@ class GeometryFigureTests(unittest.TestCase):
             self.assertIn("major gridlines", text)
             self.assertIn("outer enclosure", text)
             self.assertEqual(
-                receipt["files"]["geometry.svg"],
-                __import__("hashlib").sha256((out / "geometry.svg").read_bytes()).hexdigest(),
+                receipt["files"],
+                {
+                    name: hashlib.sha256((out / name).read_bytes()).hexdigest()
+                    for name in ("geometry.svg", "geometry.png")
+                },
             )
             export = json.loads((out / "export.json").read_text())
             self.assertEqual(export, receipt)
