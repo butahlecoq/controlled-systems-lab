@@ -1,17 +1,18 @@
 """Validate the reviewed MPC-03 report staging route."""
 
 import json
-from pathlib import Path
 import re
 import shutil
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
 import landing
 import stage_mpc03
+
+ROOT = Path(__file__).resolve().parents[2]
 
 
 class StageMpc03Tests(unittest.TestCase):
@@ -74,7 +75,8 @@ class StageMpc03Tests(unittest.TestCase):
         )
         svg = stage_mpc03.render_svg(record)
         match = re.search(r'<path d="([ML0-9 .-]+Z)" fill="#dce9f7"', svg)
-        self.assertIsNotNone(match)
+        if match is None:
+            self.fail("Saved SVG is missing the projected tube path")
         vertices = [
             (float(x), float(y)) for x, y in re.findall(r"[ML]([\d.]+) ([\d.]+)", match.group(1))
         ]

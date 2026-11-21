@@ -1,9 +1,8 @@
 import importlib.util
 import json
+import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
-import unittest
-
 
 SCRIPT = Path(__file__).parents[2] / "scripts/reports/stage_mpc08_nonunique.py"
 SPEC = importlib.util.spec_from_file_location("stage_mpc08_nonunique", SCRIPT)

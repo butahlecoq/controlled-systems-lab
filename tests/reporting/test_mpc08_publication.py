@@ -1,4 +1,3 @@
-from pathlib import Path
 import hashlib
 import io
 import json
@@ -8,13 +7,15 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from unittest.mock import patch
 import zipfile
+from pathlib import Path
+from unittest.mock import patch
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from scripts.reports import stage_mpc08 as explicit_pilot
+from scripts.reports import stage_mpc08_complete as S
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT))
-from scripts.reports import stage_mpc08_complete as S
-from scripts.reports import stage_mpc08 as explicit_pilot
 
 
 def site(folder):

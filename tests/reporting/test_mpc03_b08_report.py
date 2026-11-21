@@ -2,18 +2,19 @@
 
 import json
 import os
-from pathlib import Path
 import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports"))
-from mpc03.b08_report import render_html, render_svg
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
 import stage_mpc03_b08
+from mpc03.b08_report import render_html, render_svg
+
+ROOT = Path(__file__).resolve().parents[2]
 
 
 class Mpc03B08ReportTests(unittest.TestCase):

@@ -5,10 +5,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from pathlib import Path
 import re
 import shutil
-
+from pathlib import Path
 
 REPORT_ID = "mpc03-open-loop-pilot-v1"
 FILES = (
@@ -58,7 +57,9 @@ def result_points(record: dict) -> list[tuple[str, float, float]]:
             all(weight in (0, 1) for weight in weights) and sum(weights) == 1,
             "MPC-03 saved MILP plan is not one-hot",
         )
-        controls.append(sum(value * weight for value, weight in zip(catalogue, weights)))
+        controls.append(
+            sum(value * weight for value, weight in zip(catalogue, weights, strict=False))
+        )
     require(controls == [1, 1], "unsupported MPC-03 projection control plan")
     initial = float(scenario["initial_state"])
     points = []
@@ -78,7 +79,8 @@ def result_points(record: dict) -> list[tuple[str, float, float]]:
 def render_svg(record: dict) -> str:
     points = result_points(record)
     safe_match = re.search(r"(-?\d+(?:\.\d+)?)\s*<=\s*x2\s*<=", record["result"]["safe_stages"][-1])
-    require(safe_match is not None, "MPC-03 terminal safety threshold is missing")
+    if safe_match is None:
+        raise ValueError("MPC-03 terminal safety threshold is missing")
     safety_lower = float(safe_match.group(1))
     x_values = [point[1] for point in points]
     y_values = [point[2] for point in points]

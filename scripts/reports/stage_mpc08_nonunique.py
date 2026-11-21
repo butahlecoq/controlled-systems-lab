@@ -6,11 +6,11 @@ import argparse
 import hashlib
 import html
 import json
-from pathlib import Path
 import shutil
 import statistics
 import sys
 import zipfile
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORT_ID = "mpc08-explicit-nonunique-v1"
@@ -52,7 +52,7 @@ def read_json(path: Path):
 
 
 def build_readme() -> str:
-    return f"""# MPC-08 nonunique optimizer-fiber pilot
+    return """# MPC-08 nonunique optimizer-fiber pilot
 
 This is a finite, exact two-step double-integrator case for [issue #604](https://github.com/butahlecoq/controlled-systems-lab/issues/604). It complements the separate unique one-step explicit-MPC report. It does not complete #604.
 
@@ -177,7 +177,7 @@ def package() -> None:
     )
 
     expected_hashes = provenance["artifact_sha256"]
-    for name, source_name in DATA.items():
+    for source_name in DATA.values():
         path = GENERATED / source_name
         require(
             digest(path) == expected_hashes[source_name], f"capture hash differs for {source_name}"

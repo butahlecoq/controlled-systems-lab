@@ -4,22 +4,20 @@ from __future__ import annotations
 
 import argparse
 import base64
-from datetime import datetime, timezone
 import hashlib
-from html import escape
-from html.parser import HTMLParser
 import json
 import platform
-from pathlib import Path
 import re
 import shutil
 import statistics
 import subprocess
 import zipfile
 from collections import Counter
+from html import escape
+from html.parser import HTMLParser
+from pathlib import Path
 
 import report_data
-
 
 REPORT_ID = "mpc08-explicit-pilot-v1"
 ROOT = Path(__file__).resolve().parents[2]
@@ -469,10 +467,10 @@ class SafeHTML(HTMLParser):
         if tag == "style":
             self.style = False
 
-    def handle_data(self, value):
+    def handle_data(self, data: str) -> None:
         if self.style:
             require(
-                re.search(r"@import|url\s*\(", value, re.I) is None,
+                re.search(r"@import|url\s*\(", data, re.I) is None,
                 "external CSS resource is not allowed",
             )
 
@@ -517,7 +515,7 @@ def validate_bundle(source: Path) -> dict:
     ]
     online = [row for row in observations if row["strategy"] == "online-condensed-qp"]
     require(
-        online
+        bool(online)
         and all(
             not row["candidate_contains_exact_reference_history"]
             and row["action_and_value_match_exact_reference"]

@@ -5,13 +5,14 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from pathlib import Path
 import shutil
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
+from mpc03.b08_report import render_html, render_svg
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports"))
-from mpc03.b08_report import render_html, render_svg
 
 REPORT_ID = "mpc03-b08-l04-miQCP-v1"
 FILES = (
