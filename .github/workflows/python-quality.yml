@@ -39,6 +39,12 @@ on:
       - 'tests/reporting/test_publication_policy.py'
       - 'tests/reporting/test_report_source_identity.py'
       - 'tests/reporting/test_registered_kinds.py'
+      - 'scripts/reports/geo02/**'
+      - 'reports/algorithm-results/geo02-*/**'
+      - 'reports/algorithm-results/geo02-*.zip'
+      - 'reports/algorithm-results/catalog.json'
+      - 'reports/algorithm-results/index.html'
+      - 'reports/algorithm-results/legacy-publications.json'
       - 'tests/reporting/test_landing.py'
       - 'tests/reporting/test_plot.py'
       - 'scripts/reports/report_source_identity.py'
@@ -329,6 +335,12 @@ on:
       - 'tests/reporting/test_publication_policy.py'
       - 'tests/reporting/test_report_source_identity.py'
       - 'tests/reporting/test_registered_kinds.py'
+      - 'scripts/reports/geo02/**'
+      - 'reports/algorithm-results/geo02-*/**'
+      - 'reports/algorithm-results/geo02-*.zip'
+      - 'reports/algorithm-results/catalog.json'
+      - 'reports/algorithm-results/index.html'
+      - 'reports/algorithm-results/legacy-publications.json'
       - 'tests/reporting/test_landing.py'
       - 'tests/reporting/test_plot.py'
       - 'scripts/reports/report_source_identity.py'
@@ -665,6 +677,8 @@ jobs:
           MPLBACKEND: Agg
         run: |
           python -m unittest tests.reporting.test_report_data tests.reporting.test_render tests.reporting.test_publication_policy tests.reporting.test_report_source_identity tests.reporting.test_registered_kinds tests.reporting.test_landing tests.reporting.test_learning_book tests.reporting.test_plot tests.reporting.test_b04_publication_source_snapshot tests.reporting.test_publication_spine_boundaries
+      - name: Replay the saved GEO-02 collection and renderer
+        run: python -m unittest discover -s reports/algorithm-results/tooling/geo02 -p test_report_tools.py
       - name: Check cumulative Pages artifact identity and output
         run: python -m unittest tests.reporting.test_pages_augmentation_waiter
       - name: Check mathematical presentation and frozen HTML

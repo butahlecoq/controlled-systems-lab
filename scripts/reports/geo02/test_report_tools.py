@@ -1,15 +1,81 @@
 """Focused contract tests for immutable GEO-02 numerical reports."""
 
-import copy, hashlib, json, sys, unittest, tempfile, subprocess, zipfile
-from unittest import mock
+import copy
+import hashlib
+import importlib
+import json
+import subprocess
+import sys
+import tempfile
+import unittest
+import zipfile
 from pathlib import Path
+from typing import TYPE_CHECKING
+from unittest import mock
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-import collect, render, provenance
+if TYPE_CHECKING:
+    from scripts.reports.geo02 import collect, provenance, render
+else:
+    collect = importlib.import_module("collect")
+    provenance = importlib.import_module("provenance")
+    render = importlib.import_module("render")
 
 
 class ContractTests(unittest.TestCase):
+    def test_collector_preserves_the_archived_driver_rows(self):
+        root = HERE.parents[2]
+        saved = root / "reports" / "algorithm-results" / "geo02-20261013T061151Z-338ff7d1d63c"
+        records = json.loads((saved / "records.json").read_bytes())
+        with tempfile.TemporaryDirectory() as directory:
+            scratch = Path(directory)
+            exe = scratch / "driver.exe"
+            exe.write_bytes(b"simulated GEO-02 driver")
+            note = scratch / "note.txt"
+            note.write_text("simulated collection", encoding="utf-8")
+            output = scratch / "collection"
+            argv = [
+                "collect.py",
+                "--exe",
+                str(exe),
+                "--build-dir",
+                str(scratch),
+                "--source-commit",
+                records["algorithm"]["source_commit"],
+                "--harness-commit",
+                records["algorithm"]["harness_commit"],
+                "--concurrent-work",
+                str(note),
+                "--profile-evidence",
+                str(note),
+                "--out",
+                str(output),
+                "--reviewed",
+            ]
+            process = mock.Mock(wraps=subprocess)
+            process.run.return_value = subprocess.CompletedProcess(
+                [str(exe)],
+                0,
+                (saved / "raw-driver-output.csv").read_text(encoding="utf-8"),
+                (saved / "process-stderr.txt").read_text(encoding="utf-8"),
+            )
+            with (
+                mock.patch.object(sys, "argv", argv),
+                mock.patch.object(collect, "subprocess", process),
+                mock.patch.object(provenance, "git", return_value=str(root)),
+                mock.patch.object(provenance, "require_clean_tracked_tree"),
+                mock.patch.object(
+                    provenance, "final_build_provenance", return_value=({}, "", "", "")
+                ),
+            ):
+                self.assertEqual(collect.main(), 0)
+            replay = json.loads((output / "records.json").read_bytes())
+            self.assertEqual(replay["collection"]["state"], "complete")
+            self.assertEqual(replay["trials"], records["trials"])
+            self.assertEqual(replay["summary"], records["summary"])
+            render.validate(replay)
+
     def test_signed_payload_hash_and_tamper_detection(self):
         p = collect.fixture_payload("20261013T000000Z")
         self.assertEqual(p["schema"], "csl.geo02-affine-sum-report/2")

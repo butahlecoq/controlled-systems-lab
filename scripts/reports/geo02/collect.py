@@ -1,8 +1,18 @@
 """GEO-02 collection and canonical saved-record validation."""
 
 from __future__ import annotations
-import argparse, csv, datetime as dt, hashlib, json, os, platform, subprocess, sys
+
+import argparse
+import csv
+import datetime as dt
+import hashlib
+import json
+import os
+import platform
+import subprocess
 from pathlib import Path
+from typing import TYPE_CHECKING, TypedDict
+
 import provenance
 
 SCHEMA = "csl.geo02-affine-sum-report/2"
@@ -14,7 +24,36 @@ TIMING_SCOPES = {
     "oracle_ns": "Literal expected-point and support-value checks; excludes output extraction and serialization.",
     "total_ns": "End-to-end driver time from fixture construction through output extraction, serialization, and oracle checks; includes the named phases plus intervening harness work.",
 }
-SCENARIOS = {
+
+
+class Scenario(TypedDict):
+    inputs: dict[str, list[float] | list[list[float]]]
+    candidate_count: int
+    outputs: list[list[float]]
+    directions: list[list[float]]
+    support: list[float]
+
+
+class Trial(TypedDict):
+    scenario: str
+    repetition: int
+    status: str
+    detail: str
+    setup_ns: int
+    operation_ns: int
+    oracle_ns: int
+    total_ns: int
+    generated_candidate_count: int
+    materialized_output_point_count: int
+    reduction_status: str
+    output_points: list[list[float]]
+    support_checks: int
+    support_values: list[float]
+    oracle_passed: bool
+    input_sha256: str
+
+
+SCENARIOS: dict[str, Scenario] = {
     "scalar_interval_affine_image": {
         "inputs": {"vertices": [[-1.0], [1.0]], "A": [[2.0]], "b": [0.0]},
         "candidate_count": 2,
@@ -303,7 +342,7 @@ def main():
     try:
         provenance.require_clean_tracked_tree()
     except ValueError as error:
-        raise SystemExit(str(error))
+        raise SystemExit(str(error)) from error
     (out / "raw-driver-output.csv").write_text(stdout, encoding="utf8")
     (out / "process-stderr.txt").write_text(stderr, encoding="utf8")
     source_root = Path(provenance.git("rev-parse", "--show-toplevel")).resolve()
@@ -322,7 +361,10 @@ def main():
     (out / "scenarios.json").write_text(
         json.dumps(SCENARIOS, indent=2, ensure_ascii=False) + "\n", encoding="utf8"
     )
-    import render
+    if TYPE_CHECKING:
+        from scripts.reports.geo02 import render
+    else:
+        import render
 
     warmups = []
     try:
@@ -357,26 +399,35 @@ def main():
         reader = csv.DictReader(stdout.splitlines())
         if tuple(reader.fieldnames or ()) != FIELDS:
             raise ValueError("unexpected driver CSV header")
-        trials = []
+        trials: list[Trial] = []
         for row in reader:
-            x = {key: row[key] for key in FIELDS}
-            x["repetition"] = int(x["repetition"])
-            for phase in PHASES:
-                x[phase] = int(x[phase])
-            if any(x[phase] < 0 for phase in PHASES) or x["total_ns"] < sum(
-                x[phase] for phase in PHASES[:-1]
+            durations = {phase: int(row[phase]) for phase in PHASES}
+            if any(duration < 0 for duration in durations.values()) or durations["total_ns"] < sum(
+                durations[phase] for phase in PHASES[:-1]
             ):
                 raise ValueError("invalid or non-covering phase durations")
-            x["generated_candidate_count"] = int(x["generated_candidate_count"])
-            x["materialized_output_point_count"] = int(x["materialized_output_point_count"])
-            x["output_points"] = json.loads(x["output_points"])
-            x["support_values"] = json.loads(x["support_values"])
-            x["support_checks"] = int(x["support_checks"])
-            if x["oracle_passed"] not in ("true", "false"):
+            if row["oracle_passed"] not in ("true", "false"):
                 raise ValueError("invalid boolean")
-            x["oracle_passed"] = x["oracle_passed"] == "true"
-            x["input_sha256"] = sha(canonical(SCENARIOS[x["scenario"]]["inputs"]))
-            trials.append(x)
+            scenario = row["scenario"]
+            trial: Trial = {
+                "scenario": scenario,
+                "repetition": int(row["repetition"]),
+                "status": row["status"],
+                "detail": row["detail"],
+                "setup_ns": durations["setup_ns"],
+                "operation_ns": durations["operation_ns"],
+                "oracle_ns": durations["oracle_ns"],
+                "total_ns": durations["total_ns"],
+                "reduction_status": row["reduction_status"],
+                "generated_candidate_count": int(row["generated_candidate_count"]),
+                "materialized_output_point_count": int(row["materialized_output_point_count"]),
+                "output_points": json.loads(row["output_points"]),
+                "support_values": json.loads(row["support_values"]),
+                "support_checks": int(row["support_checks"]),
+                "oracle_passed": row["oracle_passed"] == "true",
+                "input_sha256": sha(canonical(SCENARIOS[scenario]["inputs"])),
+            }
+            trials.append(trial)
         expected = {
             (scenario, repetition) for scenario in SCENARIOS for repetition in range(a.repetitions)
         }
@@ -397,7 +448,7 @@ def main():
             or len(trial["support_values"]) != len(case["support"])
             or any(
                 abs(float(value) - expected) > 1e-8
-                for value, expected in zip(trial["support_values"], case["support"])
+                for value, expected in zip(trial["support_values"], case["support"], strict=True)
             )
         ):
             trial["status"] = "oracle_failed"
