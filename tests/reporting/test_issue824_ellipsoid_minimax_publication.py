@@ -22,7 +22,9 @@ class Issue824EllipsoidMinimaxPublicationTests(unittest.TestCase):
             site = Path(temporary)
             route = previous_publisher.stage(source, site)
             staged = site / route
-            self.assertEqual({item.name for item in staged.iterdir()}, set(previous_publisher.FILES))
+            self.assertEqual(
+                {item.name for item in staged.iterdir()}, set(previous_publisher.FILES)
+            )
             for name, content in files.items():
                 self.assertEqual((staged / name).read_bytes(), content)
 
@@ -57,18 +59,24 @@ class Issue824EllipsoidMinimaxPublicationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             site = Path(temporary)
             self.assertEqual(publisher.stage(source, site), source.name)
-            self.assertEqual({item.name for item in (site / source.name).iterdir()}, set(publisher.FILES))
+            self.assertEqual(
+                {item.name for item in (site / source.name).iterdir()}, set(publisher.FILES)
+            )
 
     def test_gallery_card_links_the_live_minimax_bundle(self):
-        entry = next(row for row in visual_examples.SAVED_FIGURES
-                     if row.get("route") == publisher.ROUTE)
+        entry = next(
+            row for row in visual_examples.SAVED_FIGURES if row.get("route") == publisher.ROUTE
+        )
         self.assertEqual(entry["records"], "result.json")
         self.assertEqual(entry["page"], "ellipsoid-planar-example.html")
         self.assertEqual(entry["image"], "ellipsoid-planar-example.svg")
 
     def test_v2_gallery_card_links_the_exact_shared_membership_report(self):
-        entry = next(row for row in visual_examples.SAVED_FIGURES
-                     if row.get("route") == "issue824-two-points-ellipsoid-minimax-v2")
+        entry = next(
+            row
+            for row in visual_examples.SAVED_FIGURES
+            if row.get("route") == "issue824-two-points-ellipsoid-minimax-v2"
+        )
         self.assertEqual(entry["records"], "result.json")
         self.assertEqual(entry["page"], "ellipsoid-planar-example.html")
         self.assertEqual(entry["image"], "ellipsoid-planar-example.svg")

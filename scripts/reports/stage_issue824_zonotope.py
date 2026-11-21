@@ -1,4 +1,5 @@
 """Verify and stage the issue #824 zonotope bundle for the visual gallery."""
+
 from __future__ import annotations
 
 import argparse
@@ -14,8 +15,18 @@ import report_source_identity
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/issue824-two-points-zonotope-pilot-v2"
 ROUTE = "issue824-two-points-zonotope-pilot-v2"
-FILES = ("README.md", "capture.json", "check.json", "figure-data.json", "index.html",
-         "planar-example.html", "planar-example.svg", "projections.svg", "result.json", "SHA256SUMS")
+FILES = (
+    "README.md",
+    "capture.json",
+    "check.json",
+    "figure-data.json",
+    "index.html",
+    "planar-example.html",
+    "planar-example.svg",
+    "projections.svg",
+    "result.json",
+    "SHA256SUMS",
+)
 
 
 def digest(data: bytes) -> str:
@@ -23,7 +34,11 @@ def digest(data: bytes) -> str:
 
 
 def verified_bundle(source: Path) -> dict[str, bytes]:
-    if source.is_symlink() or not source.is_dir() or {item.name for item in source.iterdir()} != set(FILES):
+    if (
+        source.is_symlink()
+        or not source.is_dir()
+        or {item.name for item in source.iterdir()} != set(FILES)
+    ):
         raise ValueError("issue #824 zonotope report inventory differs")
     files = {name: (source / name).read_bytes() for name in FILES}
     sums = {}
@@ -37,13 +52,16 @@ def verified_bundle(source: Path) -> dict[str, bytes]:
     capture = json.loads(files["capture.json"])
     check = json.loads(files["check.json"])
     result = json.loads(files["result.json"])
-    if (capture.get("source_tree_clean_before_report_generation") is not True or
-            result.get("schema") != "csl.issue824-two-points-box-minimax/2" or
-            check.get("status") != "verified" or
-            not check.get("planar_zonotope_inclusion")):
+    if (
+        capture.get("source_tree_clean_before_report_generation") is not True
+        or result.get("schema") != "csl.issue824-two-points-box-minimax/2"
+        or check.get("status") != "verified"
+        or not check.get("planar_zonotope_inclusion")
+    ):
         raise ValueError("issue #824 report lacks a clean capture or verified planar inclusion")
     if not report_source_identity.source_hashes_match_commit(
-            ROOT, capture.get("source_commit", ""), capture.get("source_files_sha256", {})):
+        ROOT, capture.get("source_commit", ""), capture.get("source_files_sha256", {})
+    ):
         raise ValueError("issue #824 source files do not match the captured source commit")
     planar = files["planar-example.html"].decode("utf-8")
     if "Complete minimal input" not in planar or "Exact reachable corners" not in planar:

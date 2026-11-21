@@ -9,6 +9,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
 import stage_issue824_zonotope as publisher
+
 sys.path.insert(0, str(ROOT / "scripts/reports/exp824"))
 import make_report
 
@@ -19,11 +20,14 @@ def reseal_capture(source: Path, changed: Path, update_capture) -> None:
     capture = json.loads(capture_path.read_text(encoding="utf-8"))
     update_capture(capture)
     capture_path.write_text(json.dumps(capture, indent=2) + "\n", encoding="utf-8")
-    sums = {name: publisher.digest((changed / name).read_bytes())
-            for name in publisher.FILES if name != "SHA256SUMS"}
+    sums = {
+        name: publisher.digest((changed / name).read_bytes())
+        for name in publisher.FILES
+        if name != "SHA256SUMS"
+    }
     (changed / "SHA256SUMS").write_text(
-        "".join(f"{checksum}  {name}\n" for name, checksum in sums.items()),
-        encoding="ascii")
+        "".join(f"{checksum}  {name}\n" for name, checksum in sums.items()), encoding="ascii"
+    )
 
 
 class Issue824ZonotopePublicationTests(unittest.TestCase):
@@ -59,9 +63,11 @@ class Issue824ZonotopePublicationTests(unittest.TestCase):
             changed = Path(temporary) / "changed"
 
             def use_tree_path(capture):
-                tree = subprocess.run(["git", "-C", str(ROOT), "show",
-                    f"{capture['source_commit']}:scripts"], check=True,
-                    capture_output=True).stdout
+                tree = subprocess.run(
+                    ["git", "-C", str(ROOT), "show", f"{capture['source_commit']}:scripts"],
+                    check=True,
+                    capture_output=True,
+                ).stdout
                 capture["source_files_sha256"] = {"scripts": publisher.digest(tree)}
 
             reseal_capture(source, changed, use_tree_path)
@@ -74,9 +80,21 @@ class Issue824ZonotopePublicationTests(unittest.TestCase):
             changed = Path(temporary) / "changed"
 
             def use_tree_commit(capture):
-                tree = subprocess.run(["git", "-C", str(ROOT), "rev-parse",
-                    f"{capture['source_commit']}^{{tree}}"], check=True,
-                    capture_output=True).stdout.decode("ascii").strip()
+                tree = (
+                    subprocess.run(
+                        [
+                            "git",
+                            "-C",
+                            str(ROOT),
+                            "rev-parse",
+                            f"{capture['source_commit']}^{{tree}}",
+                        ],
+                        check=True,
+                        capture_output=True,
+                    )
+                    .stdout.decode("ascii")
+                    .strip()
+                )
                 capture["source_commit"] = tree
 
             reseal_capture(source, changed, use_tree_commit)
@@ -84,7 +102,9 @@ class Issue824ZonotopePublicationTests(unittest.TestCase):
                 publisher.verified_bundle(changed)
 
     def test_planar_projection_contains_all_four_rectangle_corners(self):
-        source = ROOT / "reports/algorithm-results/issue824-two-points-zonotope-pilot-v2/result.json"
+        source = (
+            ROOT / "reports/algorithm-results/issue824-two-points-zonotope-pilot-v2/result.json"
+        )
         result = json.loads(source.read_text(encoding="utf-8"))
         stage = result["planar_example"]["stages"][1]
         polygon = make_report.projected_zonotope(stage, 0, 1)
@@ -94,9 +114,16 @@ class Issue824ZonotopePublicationTests(unittest.TestCase):
         self.assertGreaterEqual(max(xs), 2.0)
         self.assertLessEqual(min(ys), -1.0)
         self.assertGreaterEqual(max(ys), 1.0)
-        area = abs(sum(polygon[index][0] * polygon[(index + 1) % 4][1] -
-                       polygon[index][1] * polygon[(index + 1) % 4][0]
-                       for index in range(4))) / 2
+        area = (
+            abs(
+                sum(
+                    polygon[index][0] * polygon[(index + 1) % 4][1]
+                    - polygon[index][1] * polygon[(index + 1) % 4][0]
+                    for index in range(4)
+                )
+            )
+            / 2
+        )
         self.assertGreaterEqual(area, 8.0)
 
 
