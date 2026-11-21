@@ -232,6 +232,26 @@ on:
       - 'reports/closed-loop-initial-baselines-v1.zip'
       - 'tests/reporting/test_syn03_strategy_a_report.py'
       - 'tests/reporting/test_syn03_ts02_report.py'
+      - 'scripts/reports/stage_ext02.py'
+      - 'scripts/reports/stage_exp03_two_points_approx.py'
+      - 'scripts/reports/stage_syn03_nominal_exact_example.py'
+      - 'scripts/reports/stage_perf03.py'
+      - 'tests/reporting/test_ext02_report.py'
+      - 'tests/reporting/test_stage_exp03_two_points_approx.py'
+      - 'tests/reporting/test_perf03_publication.py'
+      - 'tests/reporting/test_stage_syn03_nominal_exact_example.py'
+      - 'scripts/reports/exp03/build_comparison_records.py'
+      - 'scripts/reports/exp03/check_two_points_approximation.py'
+      - 'scripts/reports/ext02/collect.py'
+      - 'scripts/reports/ext02/render_saved.py'
+      - 'benchmarks/scenarios/ext02-analytic-two-state-mixed-v1.json'
+      - 'benchmarks/reporting/syn04/strategy_b_measure.cpp'
+      - 'reports/algorithm-results/ext02-publications.json'
+      - 'reports/algorithm-results/ext02-two-state-mixed-v1/**'
+      - 'reports/algorithm-results/ext02-two-state-mixed-v1.zip'
+      - 'reports/algorithm-results/exp03-two-points-approx-pilot-*/**'
+      - 'reports/algorithm-results/syn03-nominal-exact-2d-8b94095/**'
+      - 'reports/algorithm-results/perf03-ts01-single-process-correlation-20261014/**'
       - 'tests/reporting/test_opt07_*.py'
       - 'tests/reporting/test_opt11_publication.py'
       - 'pyproject.toml'
@@ -469,6 +489,26 @@ on:
       - 'reports/closed-loop-initial-baselines-v1.zip'
       - 'tests/reporting/test_syn03_strategy_a_report.py'
       - 'tests/reporting/test_syn03_ts02_report.py'
+      - 'scripts/reports/stage_ext02.py'
+      - 'scripts/reports/stage_exp03_two_points_approx.py'
+      - 'scripts/reports/stage_syn03_nominal_exact_example.py'
+      - 'scripts/reports/stage_perf03.py'
+      - 'tests/reporting/test_ext02_report.py'
+      - 'tests/reporting/test_stage_exp03_two_points_approx.py'
+      - 'tests/reporting/test_perf03_publication.py'
+      - 'tests/reporting/test_stage_syn03_nominal_exact_example.py'
+      - 'scripts/reports/exp03/build_comparison_records.py'
+      - 'scripts/reports/exp03/check_two_points_approximation.py'
+      - 'scripts/reports/ext02/collect.py'
+      - 'scripts/reports/ext02/render_saved.py'
+      - 'benchmarks/scenarios/ext02-analytic-two-state-mixed-v1.json'
+      - 'benchmarks/reporting/syn04/strategy_b_measure.cpp'
+      - 'reports/algorithm-results/ext02-publications.json'
+      - 'reports/algorithm-results/ext02-two-state-mixed-v1/**'
+      - 'reports/algorithm-results/ext02-two-state-mixed-v1.zip'
+      - 'reports/algorithm-results/exp03-two-points-approx-pilot-*/**'
+      - 'reports/algorithm-results/syn03-nominal-exact-2d-8b94095/**'
+      - 'reports/algorithm-results/perf03-ts01-single-process-correlation-20261014/**'
       - 'tests/reporting/test_opt07_*.py'
       - 'tests/reporting/test_opt11_publication.py'
       - 'pyproject.toml'
@@ -563,6 +603,39 @@ jobs:
         run: python -m unittest tests.reporting.test_env717_cartpole_publication
       - name: Check the saved typed-membership 2D example
         run: python -m unittest discover -s tests/reporting -p 'test_history_membership_2d.py'
+      - name: Replay saved EXT-02, EXP-03, SYN-03 and PERF-03 reports
+        env:
+          MPLBACKEND: Agg
+        run: |
+          python -m unittest tests.reporting.test_ext02_report tests.reporting.test_stage_exp03_two_points_approx tests.reporting.test_perf03_publication
+          python -m unittest tests.reporting.test_stage_syn03_nominal_exact_example
+          site=$(mktemp -d "$RUNNER_TEMP/saved-report-replay.XXXXXXXX")
+          printf '<ul></ul>\n' > "$site/index.html"
+          reports=reports/algorithm-results
+          route=$(python scripts/reports/stage_ext02.py --catalog "$reports/ext02-publications.json" --site "$site")
+          test "$route" = ext02-two-state-mixed-v1
+          for source_file in "$reports/$route"/*; do
+            cmp "$source_file" "$site/$route/${source_file##*/}"
+          done
+          cmp "$reports/$route.zip" "$site/$route/$route.zip"
+          for revision in v1 v2; do
+            source="$reports/exp03-two-points-approx-pilot-$revision"
+            route=$(python scripts/reports/stage_exp03_two_points_approx.py --source "$source" --site "$site")
+            (cd "$site/$route" && sha256sum -c SHA256SUMS --quiet)
+            for source_file in "$source"/*; do
+              case "${source_file##*/}" in
+                index.html|SHA256SUMS) continue ;;
+              esac
+              cmp "$source_file" "$site/$route/${source_file##*/}"
+            done
+          done
+          source="$reports/syn03-nominal-exact-2d-8b94095"
+          route=$(python scripts/reports/stage_syn03_nominal_exact_example.py --source "$source" --site "$site")
+          diff -r "$source" "$site/$route"
+          source="$reports/perf03-ts01-single-process-correlation-20261014"
+          route=$(python scripts/reports/stage_perf03.py --source "$source" --site "$site")
+          test "$route" = perf03-ts01-single-process-correlation-20261014-365f6e659e316219
+          diff -r "$source" "$site/$route"
       - name: Check the four-state projection approximation report
         run: python -m unittest discover -s tests/reporting -p 'test_four_state_projection_approximations.py'
       - name: Check the matched discrete MPC example and visual gallery
