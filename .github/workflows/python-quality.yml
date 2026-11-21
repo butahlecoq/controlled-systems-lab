@@ -828,10 +828,6 @@ jobs:
           python -m unittest discover -s tests/reporting -p 'test_syn03_strategy_a_report.py'
           python -m unittest tests.reporting.test_review05_build_phases tests.reporting.test_review05_capture_tools tests.reporting.test_review05_family_query tests.reporting.test_review05_publication tests.reporting.test_review05_resource_receipt tests.reporting.test_scalar_query_oracle
           python -m unittest discover -s tests/reporting -p 'test_syn03_ts02_report.py'
-      - name: Verify both saved Strategy A offline ZIPs
-        run: >-
-          python scripts/reports/site.py --catalog reports/algorithm-results/catalog.json
-          --check --out "$RUNNER_TEMP/strategy-a-site"
       - name: Check six saved environment routes and offline ZIPs
         run: >-
           python -m unittest
