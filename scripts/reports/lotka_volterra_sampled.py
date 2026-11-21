@@ -6,9 +6,9 @@ import argparse
 import hashlib
 import json
 import math
-from pathlib import Path
 import random
 import re
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORT_ID = "lotka-volterra-sampled-20261023"
@@ -159,7 +159,7 @@ def draw(record: dict) -> str:
         (790, 375, 160, 150),
         (990, 375, 160, 150),
     )
-    for stage, panel, color in zip(STAGES, panels, COLORS):
+    for stage, panel, color in zip(STAGES, panels, COLORS, strict=True):
         cloud = [trace[stage] for trace in traces]
         min_x, max_x = min(p[0] for p in cloud), max(p[0] for p in cloud)
         min_y, max_y = min(p[1] for p in cloud), max(p[1] for p in cloud)

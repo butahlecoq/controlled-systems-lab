@@ -5,30 +5,27 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
-from pathlib import Path
 import shutil
+from pathlib import Path
+from types import ModuleType
 
-ROOT = Path(__file__).resolve().parents[2]
-spec = importlib.util.spec_from_file_location(
-    "lotka_volterra_report", Path(__file__).with_name("lotka_volterra_sampled.py")
-)
-report = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
-spec.loader.exec_module(report)
 FROZEN_GENERATOR_SHA256 = "321ac099e8185c8b1b9a76af9859c9b818682b429ba705f1410a19d648238f1c"
-frozen_spec = importlib.util.spec_from_file_location(
-    "lotka_volterra_frozen_report",
-    Path(__file__).with_name("lotka_volterra_sampled_frozen_321ac099.py"),
+
+
+def _load_sibling(name: str, filename: str) -> ModuleType:
+    spec = importlib.util.spec_from_file_location(name, Path(__file__).with_name(filename))
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Sampled Lotka publication requires {filename}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+report = _load_sibling("lotka_volterra_report", "lotka_volterra_sampled.py")
+frozen_report = _load_sibling(
+    "lotka_volterra_frozen_report", "lotka_volterra_sampled_frozen_321ac099.py"
 )
-frozen_report = importlib.util.module_from_spec(frozen_spec)
-assert frozen_spec.loader is not None
-frozen_spec.loader.exec_module(frozen_report)
-site_spec = importlib.util.spec_from_file_location(
-    "lotka_volterra_site", Path(__file__).with_name("site.py")
-)
-site = importlib.util.module_from_spec(site_spec)
-assert site_spec.loader is not None
-site_spec.loader.exec_module(site)
+site = _load_sibling("lotka_volterra_site", "site.py")
 
 
 def stage(source: Path, site_root: Path) -> str:

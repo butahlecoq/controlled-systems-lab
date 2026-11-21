@@ -2,32 +2,34 @@
 
 import importlib.util
 import json
-from pathlib import Path
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import lotka_volterra_sampled as report
-import stage_lotka_volterra_sampled as publisher
+report = importlib.import_module("lotka_volterra_sampled")
+publisher = importlib.import_module("stage_lotka_volterra_sampled")
 
 FROZEN_GENERATOR = ROOT / "scripts/reports/lotka_volterra_sampled_frozen_321ac099.py"
 FROZEN_GENERATOR_SHA256 = "321ac099e8185c8b1b9a76af9859c9b818682b429ba705f1410a19d648238f1c"
 frozen_spec = importlib.util.spec_from_file_location(
     "frozen_lotka_volterra_sampled", FROZEN_GENERATOR
 )
+if frozen_spec is None or frozen_spec.loader is None:
+    raise ImportError("The saved sample report requires its frozen generator")
 frozen_report = importlib.util.module_from_spec(frozen_spec)
 frozen_spec.loader.exec_module(frozen_report)
 
 
 class SampledLotkaVolterraTests(unittest.TestCase):
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         cls.commit = "987e6c8117aa95d186383deb2f03b56297f4facb"
         cls.record = report.simulate(cls.commit)
 
-    def test_samples_replay_from_saved_controls(self):
+    def test_samples_replay_from_saved_controls(self) -> None:
         record = self.record
         self.assertEqual(
             record["claim_scope"],
@@ -37,7 +39,9 @@ class SampledLotkaVolterraTests(unittest.TestCase):
         self.assertEqual(len(record["sampled_states"]), report.SAMPLES)
         a, b, c, d, e = (report.PARAMETERS[key] for key in ("a", "b", "c", "d", "e"))
         step = record["model"]["step"]["value"]
-        for controls, states in zip(record["sampled_controls"], record["sampled_states"]):
+        for controls, states in zip(
+            record["sampled_controls"], record["sampled_states"], strict=True
+        ):
             self.assertEqual(len(controls), report.HORIZON)
             self.assertEqual(len(states), report.HORIZON + 1)
             self.assertEqual(states[0], [410.0, 300.0])
@@ -48,7 +52,7 @@ class SampledLotkaVolterraTests(unittest.TestCase):
                 self.assertEqual(states[index + 1], expected)
                 self.assertTrue(report.CONTROL[0] <= control <= report.CONTROL[1])
 
-    def test_publication_is_deterministic_and_labels_sample_hulls(self):
+    def test_publication_is_deterministic_and_labels_sample_hulls(self) -> None:
         first = report.generated_files(self.commit)
         second = report.generated_files(self.commit)
         self.assertEqual(first, second)
@@ -69,7 +73,24 @@ class SampledLotkaVolterraTests(unittest.TestCase):
         cloud = [trace[15] for trace in record["sampled_states"]]
         self.assertGreaterEqual(len(report.convex_hull(cloud)), 3)
 
-    def test_saved_bundle_is_reproducible_and_stages_as_a_local_page(self):
+    def test_current_bundle_stages_with_its_own_generator_hash(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            bundle = root / "current"
+            site = root / "site"
+            site.mkdir()
+            report.build(bundle, self.commit, False)
+            route = site / publisher.stage(bundle, site)
+            manifest = json.loads((bundle / "manifest.json").read_bytes())
+            self.assertEqual(
+                manifest["generator_sha256"], report.sha(Path(report.__file__).read_bytes())
+            )
+            self.assertEqual(
+                {path.name: path.read_bytes() for path in route.iterdir()},
+                {path.name: path.read_bytes() for path in bundle.iterdir()},
+            )
+
+    def test_saved_bundle_is_reproducible_and_stages_as_a_local_page(self) -> None:
         self.assertEqual(report.sha(FROZEN_GENERATOR.read_bytes()), FROZEN_GENERATOR_SHA256)
         frozen_report.build(report.REPORT_DIR, None, True)
         with tempfile.TemporaryDirectory() as directory:
