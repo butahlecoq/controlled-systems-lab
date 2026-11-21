@@ -1,28 +1,32 @@
 """Frozen native flexible-pitch publication rejects altered and unsafe inputs."""
 
 import hashlib
-from html.parser import HTMLParser
-from pathlib import Path
+import importlib
 import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
 import zipfile
+from html.parser import HTMLParser
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import stage_native_flexible_pitch as native
-import stage_nominal_quadratic_history as history
+native = importlib.import_module("stage_native_flexible_pitch")
+history = importlib.import_module("stage_nominal_quadratic_history")
 
 
 class Links(HTMLParser):
     def __init__(self):
         super().__init__()
-        self.links = []
+        self.links: list[str] = []
 
-    def handle_starttag(self, tag, attrs):
-        self.links.extend(value for name, value in attrs if name in {"href", "src"})
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        for name, value in attrs:
+            if name in {"href", "src"}:
+                assert value is not None, f"Missing value for {name}"
+                self.links.append(value)
 
 
 class FlexiblePitchPublicationTests(unittest.TestCase):

@@ -22,10 +22,13 @@ capture_tracking = importlib.import_module("native_model_tracking_first_pass")
 class Links(HTMLParser):
     def __init__(self):
         super().__init__()
-        self.links = []
+        self.links: list[str] = []
 
-    def handle_starttag(self, tag, attributes):
-        self.links.extend(value for name, value in attributes if name in {"href", "src"})
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        for name, value in attrs:
+            if name in {"href", "src"}:
+                assert value is not None, f"Missing value for {name}"
+                self.links.append(value)
 
 
 class NativeDiscreteTests(unittest.TestCase):

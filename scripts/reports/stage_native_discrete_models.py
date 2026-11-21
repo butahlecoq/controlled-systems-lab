@@ -9,8 +9,8 @@ from html import escape
 from io import BytesIO
 from pathlib import Path
 
+from frozen_native_bundle import checked_file
 from report_data import require
-from stage_native_model_catalogue import _file
 
 ROUTE = "native-discrete-models-v1"
 SOURCE = "856d7a77c49fca0c6f6cdb8c1a1db9a651da85cb"
@@ -25,7 +25,7 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
     for part in ("reports", "algorithm-results", ROUTE):
         root /= part
         require(not root.is_symlink(), "native discrete bundle ancestor is symlinked")
-    manifest_bytes = _file(root, "manifest.json").read_bytes()
+    manifest_bytes = checked_file(root, "manifest.json").read_bytes()
     require(
         hashlib.sha256(manifest_bytes).hexdigest() == MANIFEST_SHA256,
         "native discrete manifest differs from frozen publication identity",
@@ -38,7 +38,7 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
     )
     files = {"manifest.json": manifest_bytes}
     for name, expected in manifest["files_sha256"].items():
-        content = _file(root, name).read_bytes()
+        content = checked_file(root, name).read_bytes()
         require(
             hashlib.sha256(content).hexdigest() == expected,
             "native discrete digest differs: " + name,
@@ -46,7 +46,7 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
         files[name] = content
     pages = {}
     for name, expected in manifest["lesson_sha256"].items():
-        content = _file(repository_root / "docs/examples", name).read_bytes()
+        content = checked_file(repository_root / "docs/examples", name).read_bytes()
         require(
             hashlib.sha256(content).hexdigest() == expected,
             "native discrete lesson differs: " + name,
@@ -56,7 +56,7 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
     expected_archive = {ROUTE + "/" + name: content for name, content in files.items()} | pages
     expected_archive["examples.css"] = files["offline-examples.css"]
     archive_name = ROUTE + ".zip"
-    archive_bytes = _file(root, archive_name).read_bytes()
+    archive_bytes = checked_file(root, archive_name).read_bytes()
     require(
         hashlib.sha256(archive_bytes).hexdigest() == ARCHIVE_SHA256,
         "native discrete archive differs from frozen publication identity",
@@ -71,7 +71,7 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
         for name, content in expected_archive.items():
             require(archive.read(name) == content, "native discrete archive bytes differ: " + name)
     files[archive_name] = archive_bytes
-    checksum = _file(root, archive_name + ".sha256").read_bytes()
+    checksum = checked_file(root, archive_name + ".sha256").read_bytes()
     require(
         checksum == (ARCHIVE_SHA256 + "  " + archive_name + "\n").encode("ascii"),
         "native discrete archive checksum differs",
