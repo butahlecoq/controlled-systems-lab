@@ -5,6 +5,10 @@ on:
     paths:
       - '.github/actions/pages-deploy/**'
       - 'benchmarks/reporting/closed_loop/**'
+      - 'benchmarks/reporting/mpc11/affine.py'
+      - 'benchmarks/reporting/mpc11/nmpc.py'
+      - 'tests/reporting/test_closed_loop_native_capabilities.py'
+      - 'tests/reporting/test_closed_loop_runner_failures.py'
       - 'docs/catalogue/closed-loop-*-capabilities-v1.*'
       - 'tests/reporting/test_history_geometry.py'
       - 'tests/reporting/test_history_norm_solver.py'
@@ -235,6 +239,10 @@ on:
     paths:
       - '.github/actions/pages-deploy/**'
       - 'benchmarks/reporting/closed_loop/**'
+      - 'benchmarks/reporting/mpc11/affine.py'
+      - 'benchmarks/reporting/mpc11/nmpc.py'
+      - 'tests/reporting/test_closed_loop_native_capabilities.py'
+      - 'tests/reporting/test_closed_loop_runner_failures.py'
       - 'docs/catalogue/closed-loop-*-capabilities-v1.*'
       - 'tests/reporting/test_history_geometry.py'
       - 'tests/reporting/test_history_norm_solver.py'
