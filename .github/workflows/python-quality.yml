@@ -70,6 +70,7 @@ on:
       - 'reports/algorithm-results/geo06-b010fb3df212604b.source.zip'
       - 'scripts/reports/report_data.py'
       - 'scripts/reports/mpc03/b08_report.py'
+      - 'scripts/reports/mpc03/b08_miqcp.py'
       - 'scripts/reports/mpc05/reference.py'
       - 'scripts/reports/stage_mpc03_b08.py'
       - 'scripts/reports/stage_mpc05_causal_tree.py'
