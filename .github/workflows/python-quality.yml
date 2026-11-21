@@ -41,6 +41,10 @@ on:
       - 'tests/reporting/test_render.py'
       - 'tests/reporting/test_publication_policy.py'
       - 'tests/reporting/test_report_source_identity.py'
+      - 'scripts/reports/ext07/capture.py'
+      - 'scripts/reports/ext07/capability_capture.py'
+      - 'scripts/reports/ext07/two_parameter_capture.py'
+      - 'tests/reporting/test_ext07_capture.py'
       - 'tests/reporting/test_registered_kinds.py'
       - 'tests/reporting/test_landing.py'
       - 'tests/reporting/test_plot.py'
@@ -317,6 +321,10 @@ on:
       - 'tests/reporting/test_render.py'
       - 'tests/reporting/test_publication_policy.py'
       - 'tests/reporting/test_report_source_identity.py'
+      - 'scripts/reports/ext07/capture.py'
+      - 'scripts/reports/ext07/capability_capture.py'
+      - 'scripts/reports/ext07/two_parameter_capture.py'
+      - 'tests/reporting/test_ext07_capture.py'
       - 'tests/reporting/test_registered_kinds.py'
       - 'tests/reporting/test_landing.py'
       - 'tests/reporting/test_plot.py'
@@ -582,6 +590,12 @@ jobs:
         run: python -m unittest discover -s tests/ci -p 'test_*.py'
       - name: Exercise site additions and the APP02 staging caller
         run: |
+          python -m unittest tests.reporting.test_ext07_capture
+          for name in capture capability_capture two_parameter_capture; do
+            python "scripts/reports/ext07/$name.py" --help > "$RUNNER_TEMP/$name-direct-help"
+            python -m "scripts.reports.ext07.$name" --help > "$RUNNER_TEMP/$name-module-help"
+            cmp "$RUNNER_TEMP/$name-direct-help" "$RUNNER_TEMP/$name-module-help"
+          done
           python -m unittest discover -s tests/reporting -p 'test_site_additions.py'
           python -m unittest discover -s tests/reporting -p 'test_app02_saved.py'
           python -m unittest discover -s tests/reporting -p 'test_closed_loop_initial_baselines_publication.py'
