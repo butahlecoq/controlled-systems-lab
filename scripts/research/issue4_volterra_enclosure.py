@@ -72,8 +72,10 @@ def fixed(value: int) -> str:
 def arctan_bounds(inverse: int, terms: int = 24) -> tuple[Fraction, Fraction]:
     def partial(count: int) -> Fraction:
         return sum(
-            (Fraction(-1 if k % 2 else 1, (2 * k + 1) * inverse ** (2 * k + 1))
-             for k in range(count)),
+            (
+                Fraction(-1 if k % 2 else 1, (2 * k + 1) * inverse ** (2 * k + 1))
+                for k in range(count)
+            ),
             Fraction(),
         )
 
@@ -126,19 +128,22 @@ def run() -> dict:
 
         product = nonlinear[0] * nonlinear[1]
         nonlinear_next = affine(nonlinear)
-        nonlinear = [nonlinear_next[0] - step * b * product,
-                     nonlinear_next[1] + step * d * product]
+        nonlinear = [nonlinear_next[0] - step * b * product, nonlinear_next[1] + step * d * product]
         linear = affine(linear)
         # The identical control cancels algebraically in this recurrence.
-        error = [matrix[0][0] * error[0] + matrix[0][1] * error[1] - step * b * product,
-                 matrix[1][0] * error[0] + matrix[1][1] * error[1] + step * d * product]
-        rows.append({
-            "stage": stage,
-            "reference": [x.strings() for x in reference],
-            "linear": [x.strings() for x in linear],
-            "nonlinear": [x.strings() for x in nonlinear],
-            "same_control_error": [x.strings() for x in error],
-        })
+        error = [
+            matrix[0][0] * error[0] + matrix[0][1] * error[1] - step * b * product,
+            matrix[1][0] * error[0] + matrix[1][1] * error[1] + step * d * product,
+        ]
+        rows.append(
+            {
+                "stage": stage,
+                "reference": [x.strings() for x in reference],
+                "linear": [x.strings() for x in linear],
+                "nonlinear": [x.strings() for x in nonlinear],
+                "same_control_error": [x.strings() for x in error],
+            }
+        )
     radius = max(abs(v) for coordinate in error for v in (coordinate.lo, coordinate.hi))
     return {
         "schema": "issue4-volterra-enclosure-v1",
@@ -157,7 +162,9 @@ def run() -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--source", type=Path, help="optional private candidate for hash verification")
+    parser.add_argument(
+        "--source", type=Path, help="optional private candidate for hash verification"
+    )
     args = parser.parse_args()
     if args.source and hashlib.sha256(args.source.read_bytes()).hexdigest() != SOURCE_SHA256:
         raise SystemExit("candidate source SHA-256 mismatch")
