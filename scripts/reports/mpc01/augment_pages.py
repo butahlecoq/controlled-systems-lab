@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import argparse
-from pathlib import Path, PurePosixPath
+import shutil
 import tarfile
+from pathlib import Path, PurePosixPath
 
 
 def extract_pages_site(downloaded: Path, destination: Path) -> Path:
@@ -29,6 +30,7 @@ def extract_pages_site(downloaded: Path, destination: Path) -> Path:
                 raise ValueError("Pages artifact is empty")
             files: set[PurePosixPath] = set()
             directories: set[PurePosixPath] = set()
+            required_directories: set[PurePosixPath] = set()
             for member in members:
                 path = PurePosixPath(member.name)
                 if path.is_absolute() or ".." in path.parts:
@@ -45,11 +47,7 @@ def extract_pages_site(downloaded: Path, destination: Path) -> Path:
                         f"Pages artifact member is nested under a file: {member.name!r}"
                     )
                 if member.isfile():
-                    if (
-                        path in files
-                        or path in directories
-                        or any(path in existing.parents for existing in files | directories)
-                    ):
+                    if path in files or path in directories or path in required_directories:
                         raise ValueError(
                             f"duplicate or conflicting Pages artifact path: {member.name!r}"
                         )
@@ -60,13 +58,13 @@ def extract_pages_site(downloaded: Path, destination: Path) -> Path:
                             f"duplicate or conflicting Pages artifact path: {member.name!r}"
                         )
                     directories.add(path)
+                # A descendant can appear before its explicit directory in the archive.
+                required_directories.update(parents)
             archive.extractall(destination, filter="data")
         if not (destination / "index.html").is_file() or (destination / "index.html").is_symlink():
             raise ValueError("upstream Pages artifact has no regular root index.html")
     except Exception:
         # Do not leave a partial site that a later run could mistake for a complete extraction.
-        import shutil
-
         shutil.rmtree(destination, ignore_errors=True)
         raise
     return destination

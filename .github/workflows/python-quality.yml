@@ -48,6 +48,8 @@ on:
       - 'scripts/reports/publication_policy.py'
       - 'scripts/reports/*_publication_policy.py'
       - 'scripts/reports/registered_report_policies.py'
+      - 'scripts/reports/mpc01/augment_pages.py'
+      - 'tests/reporting/test_mpc01_pages_augmentation.py'
       - 'docs/research/evidence/b04-c-publication-registration-source-v1/**'
       - 'reports/algorithm-results/b04-c-exact-dyadic-v1/**'
       - 'scripts/reports/schema3_publication_policies.py'
@@ -286,6 +288,8 @@ on:
       - 'scripts/reports/publication_policy.py'
       - 'scripts/reports/*_publication_policy.py'
       - 'scripts/reports/registered_report_policies.py'
+      - 'scripts/reports/mpc01/augment_pages.py'
+      - 'tests/reporting/test_mpc01_pages_augmentation.py'
       - 'docs/research/evidence/b04-c-publication-registration-source-v1/**'
       - 'reports/algorithm-results/b04-c-exact-dyadic-v1/**'
       - 'scripts/reports/schema3_publication_policies.py'
@@ -498,6 +502,8 @@ jobs:
         run: ruff check
       - name: Check formatting
         run: ruff format --check
+      - name: Check the upstream Pages archive extractor
+        run: python -m unittest tests.reporting.test_mpc01_pages_augmentation
       - name: Check types
         run: ty check
       - name: Check closed-loop task and replay input shapes
