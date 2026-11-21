@@ -173,6 +173,21 @@ on:
       - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
       - 'scripts/reports/stage_closed_loop_initial_baselines.py'
+      - 'scripts/reports/fixed_tail_example.py'
+      - 'scripts/reports/native_fixed_tail_episode_report.py'
+      - 'scripts/reports/native_fixed_tail_geometry.py'
+      - 'tests/reporting/test_fixed_tail_example.py'
+      - 'tests/reporting/test_native_fixed_tail_episode_report.py'
+      - 'tests/reporting/test_native_fixed_tail_geometry.py'
+      - 'examples/fixed-tail-tiny-a6/**'
+      - 'reports/closed-loop-native-fixed-tail/a6-v1/**'
+      - 'scripts/reports/assets/native-fixed-tail-geometry/**'
+      - 'docs/contracts/closed-loop/syn-nl-lv-01.json'
+      - 'docs/contracts/closed-loop/syn-nl-lv-01.sha256'
+      - 'docs/contracts/closed-loop/syn-nl-fuel-01.json'
+      - 'docs/contracts/closed-loop/syn-nl-fuel-01.sha256'
+      - 'docs/contracts/closed-loop/earth-orbit.json'
+      - 'docs/contracts/closed-loop/earth-orbit.sha256'
       - 'tests/reporting/test_closed_loop_initial_baselines_publication.py'
       - 'scripts/reports/stage_discrete_mpc_2d.py'
       - 'scripts/reports/stage_catalogue_forward_reachability.py'
@@ -382,6 +397,21 @@ on:
       - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
       - 'scripts/reports/stage_closed_loop_initial_baselines.py'
+      - 'scripts/reports/fixed_tail_example.py'
+      - 'scripts/reports/native_fixed_tail_episode_report.py'
+      - 'scripts/reports/native_fixed_tail_geometry.py'
+      - 'tests/reporting/test_fixed_tail_example.py'
+      - 'tests/reporting/test_native_fixed_tail_episode_report.py'
+      - 'tests/reporting/test_native_fixed_tail_geometry.py'
+      - 'examples/fixed-tail-tiny-a6/**'
+      - 'reports/closed-loop-native-fixed-tail/a6-v1/**'
+      - 'scripts/reports/assets/native-fixed-tail-geometry/**'
+      - 'docs/contracts/closed-loop/syn-nl-lv-01.json'
+      - 'docs/contracts/closed-loop/syn-nl-lv-01.sha256'
+      - 'docs/contracts/closed-loop/syn-nl-fuel-01.json'
+      - 'docs/contracts/closed-loop/syn-nl-fuel-01.sha256'
+      - 'docs/contracts/closed-loop/earth-orbit.json'
+      - 'docs/contracts/closed-loop/earth-orbit.sha256'
       - 'tests/reporting/test_closed_loop_initial_baselines_publication.py'
       - 'scripts/reports/stage_discrete_mpc_2d.py'
       - 'scripts/reports/stage_catalogue_forward_reachability.py'
@@ -451,6 +481,15 @@ jobs:
           python -m unittest discover -s tests/reporting -p 'test_site_additions.py'
           python -m unittest discover -s tests/reporting -p 'test_app02_saved.py'
           python -m unittest discover -s tests/reporting -p 'test_closed_loop_initial_baselines_publication.py'
+      - name: Check saved five-family fixed-tail geometry and episodes
+        env:
+          MPLBACKEND: Agg
+        run: |
+          python -m unittest tests.reporting.test_fixed_tail_example tests.reporting.test_native_fixed_tail_episode_report tests.reporting.test_native_fixed_tail_geometry
+          python scripts/reports/native_fixed_tail_episode_report.py --out "$RUNNER_TEMP/fixed-tail-episode-site"
+          python scripts/reports/native_fixed_tail_geometry.py --output "$RUNNER_TEMP/fixed-tail-geometry-site"
+          cmp docs/examples/examples.css "$RUNNER_TEMP/fixed-tail-episode-site/examples/examples.css"
+          cmp docs/examples/examples.css "$RUNNER_TEMP/fixed-tail-geometry-site/examples.css"
       - name: Exercise the composed Pages route finalizer
         run: python -m unittest tests.reporting.test_pages_route_retirement
       - name: Exercise maintained compatibility entry points
