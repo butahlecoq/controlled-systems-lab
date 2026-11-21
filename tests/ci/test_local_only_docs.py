@@ -73,7 +73,7 @@ class LocalOnlyDocsTests(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("docs/superpowers/plans/accidental.md", result.stderr)
 
-    def test_rejects_working_text_and_json_documents_outside_docs(self) -> None:
+    def test_rejects_working_text_and_json_documents(self) -> None:
         for relative in (
             "docs/notes/working-plan.txt",
             "docs/notes/working-plan.json",
