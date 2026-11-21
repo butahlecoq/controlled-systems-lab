@@ -1,5 +1,6 @@
 """GEO-06's saved measurement must stage as a verifiable offline report."""
 
+import hashlib
 import io
 import json
 import shutil
@@ -9,16 +10,20 @@ import unittest
 import zipfile
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts" / "reports"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "reports"))
 import geo06_registered_reports as geo06
 
+ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports" / "algorithm-results" / "geo06-b010fb3df212604b"
 
 
 class Geo06PublicationTests(unittest.TestCase):
     def test_saved_report_has_verified_trials_and_self_contained_offline_zip(self):
         item = geo06.adapt(SOURCE)
+        self.assertEqual(
+            item.report_id,
+            "geo06-f8bee6d8f950343215dd24afeff5091669b8940e7d2106e6834e904b6ec4c074",
+        )
         self.assertEqual(item.source_commit, "ce63bff5a0face88c3c5e977f7d96337e8cbe948")
         record = json.loads((SOURCE / "records.json").read_text(encoding="utf-8"))
         measured = [row for row in record["rows"] if row["warmup"] == 0]
@@ -30,6 +35,10 @@ class Geo06PublicationTests(unittest.TestCase):
         self.assertIn(b"2494000", artifacts["index.html"])
         self.assertIn(b"Square fixture", artifacts["index.html"])
         archive = geo06.offline_zip(SOURCE, item)
+        self.assertEqual(
+            hashlib.sha256(archive).hexdigest(),
+            "9523a907b67dd576c6a107b849b6cd415095a711e839bcbdc4f52e77d8d6b6d8",
+        )
         with zipfile.ZipFile(io.BytesIO(archive)) as zipped:
             self.assertEqual(zipped.read("index.html"), artifacts["index.html"])
             self.assertEqual(

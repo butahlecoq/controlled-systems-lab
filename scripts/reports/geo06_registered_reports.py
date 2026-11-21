@@ -5,7 +5,6 @@ from __future__ import annotations
 import contextlib
 import hashlib
 import io
-import json
 import re
 import zipfile
 from pathlib import Path
@@ -104,7 +103,7 @@ def adapt(bundle):
         "publisher_sha256": hashlib.sha256(publisher_bytes).hexdigest(),
     }
     public_id = native.source_report_id.rsplit("-", 1)[0] + "-" + common._digest(identity)
-    return common.PublicationRecord(
+    publication = common.PublicationRecord(
         native.kind,
         public_id,
         native.payload_sha256,
@@ -116,6 +115,7 @@ def adapt(bundle):
         native.native_payload_sha256,
         native.source_report_id,
     )
+    return common.preserve_historical_publication(bundle, publication, offline_zip)
 
 
 def render_page(bundle, publication):

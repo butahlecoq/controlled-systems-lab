@@ -193,7 +193,7 @@ def _validate_saved_data(bundle, record):
         raise ValueError("invalid GEO-04 raw CSV") from error
     if len(actual_trials) != len(record["trials"]):
         raise ValueError("GEO-04 raw CSV row count differs from validated records")
-    for actual, expected in zip(actual_trials, record["trials"]):
+    for actual, expected in zip(actual_trials, record["trials"], strict=True):
         try:
             vertices = json.loads(actual["vertices_json"])
         except (json.JSONDecodeError, TypeError) as error:
@@ -265,7 +265,7 @@ def _compare_csv(path, fields, expected_rows):
         raise ValueError(path.name + " row count differs from validated records")
     if any(
         any(row.get(field) != str(expected[field]) for field in fields)
-        for row, expected in zip(actual_rows, expected_rows)
+        for row, expected in zip(actual_rows, expected_rows, strict=True)
     ):
         raise ValueError(path.name + " differs from validated records")
 

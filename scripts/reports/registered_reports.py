@@ -1055,6 +1055,14 @@ _HISTORICAL_PUBLICATIONS: dict[str, _HistoricalPublicationPin] = {
         "report_id": "geo05-8918ad3ac4b0b3d1ff9c8b807d6b509f324ef3e9b11716be496c8e6e437f6795",
         "zip_sha256": "51826297b765b011423ca58fb3160fbdd4884c176d73adaf5eabc5f2508fefba",
     },
+    "geo06-b010fb3df212604b": {
+        "identity_files_sha256": {
+            "geo06-b010fb3df212604b.source.zip": "6aa7302c1f50f57006d66af5b5833dc9e7944c0a263513e529f1e924138f093b"
+        },
+        "inventory_sha256": "9842dc91055aa2c4c1984a706028684ea72ca713d0117b2c8ff450faddb58336",
+        "report_id": "geo06-f8bee6d8f950343215dd24afeff5091669b8940e7d2106e6834e904b6ec4c074",
+        "zip_sha256": "9523a907b67dd576c6a107b849b6cd415095a711e839bcbdc4f52e77d8d6b6d8",
+    },
     "opt04-20261013T172839Z-6451c4b89d3b": {
         "inventory_sha256": "238ff015f68d98e385593d844436a562317e12bb0f7cdedbe07e96af7f32bda7",
         "report_id": "opt04-20261013T172839Z-bf1844fdf81c94c82ca91aadbd9d0988c7367093c5cf70269c2d0e0ca7d44b2f",

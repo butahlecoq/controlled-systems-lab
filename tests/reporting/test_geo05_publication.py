@@ -17,6 +17,8 @@ import geo05_registered_reports as geo05
 
 SITE_PATH = Path(__file__).resolve().parents[2] / "scripts" / "reports" / "site.py"
 SITE_SPEC = importlib.util.spec_from_file_location("csl_geo05_report_site", SITE_PATH)
+if SITE_SPEC is None or SITE_SPEC.loader is None:
+    raise ImportError(f"cannot load CSL report site from {SITE_PATH}")
 report_site = importlib.util.module_from_spec(SITE_SPEC)
 SITE_SPEC.loader.exec_module(report_site)
 
@@ -147,13 +149,14 @@ def record(
     invalid = failed or missing
     phases = {}
     for phase in PHASES:
-        values = [
-            row["durations_ns"][phase]
-            for row in trials
-            if row["status"] == "passed"
-            and row["oracle_passed"] is True
-            and type(row["durations_ns"].get(phase)) is int
-        ]
+        values = []
+        for row in trials:
+            durations = row["durations_ns"]
+            assert isinstance(durations, dict)
+            if row["status"] == "passed" and row["oracle_passed"] is True:
+                value = durations.get(phase)
+                if type(value) is int:
+                    values.append(value)
         phases[phase] = {
             "median_ns": None if invalid or not values else 10,
             "min_ns": None if invalid or not values else 10,

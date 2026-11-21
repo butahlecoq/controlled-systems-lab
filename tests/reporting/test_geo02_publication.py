@@ -14,29 +14,23 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "reports"))
 import geo02_registered_reports as geo02
 
-SITE_PATH = Path(__file__).resolve().parents[2] / "scripts" / "reports" / "site.py"
-SITE_SPEC = importlib.util.spec_from_file_location("csl_geo02_test_site", SITE_PATH)
-report_site = importlib.util.module_from_spec(SITE_SPEC)
-SITE_SPEC.loader.exec_module(report_site)
-sys.path.insert(
-    0,
-    str(
-        Path(__file__).resolve().parents[2] / "reports" / "algorithm-results" / "tooling" / "geo02"
-    ),
-)
-import collect
+ROOT = Path(__file__).resolve().parents[2]
+REPORTS = ROOT / "scripts" / "reports"
+TOOLING = ROOT / "reports" / "algorithm-results" / "tooling" / "geo02"
 
-RENDER_PATH = (
-    Path(__file__).resolve().parents[2]
-    / "reports"
-    / "algorithm-results"
-    / "tooling"
-    / "geo02"
-    / "render.py"
-)
-RENDER_SPEC = importlib.util.spec_from_file_location("csl_geo02_test_renderer", RENDER_PATH)
-geo02_renderer = importlib.util.module_from_spec(RENDER_SPEC)
-RENDER_SPEC.loader.exec_module(geo02_renderer)
+
+def load(name: str, path: Path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"cannot load {name} from {path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+report_site = load("csl_geo02_test_site", REPORTS / "site.py")
+collect = load("csl_geo02_test_collector", TOOLING / "collect.py")
+geo02_renderer = load("csl_geo02_test_renderer", TOOLING / "render.py")
 
 
 def fixture_record():

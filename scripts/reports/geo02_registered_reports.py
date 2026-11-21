@@ -326,7 +326,7 @@ def _compare_csv(path, fields, rows):
 
     if len(actual) != len(rows) or any(
         any(row.get(key) != text(value) for key, value in expected.items())
-        for row, expected in zip(actual, rows)
+        for row, expected in zip(actual, rows, strict=True)
     ):
         raise ValueError(path.name + " differs from saved records")
 
@@ -356,7 +356,7 @@ def _validate_driver_csv(path, trials):
         raise ValueError("invalid GEO-02 raw-driver CSV") from error
     if len(rows) != len(trials):
         raise ValueError("GEO-02 raw-driver CSV row count differs")
-    for row, trial in zip(rows, trials):
+    for row, trial in zip(rows, trials, strict=True):
         for field in fields:
             if field in ("output_points", "support_values"):
                 try:
