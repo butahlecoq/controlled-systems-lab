@@ -8,7 +8,6 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "reports"))
-# Load the report site under a unique name; its imports register the concrete policies.
 import importlib.util
 
 import publication_policy

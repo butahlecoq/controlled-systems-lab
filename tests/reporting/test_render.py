@@ -142,7 +142,8 @@ assert "jsonschema" not in sys.modules
             try:
                 (root / "link.json").symlink_to(outside)
             except OSError:
-                return  # OS policy may deny symlink creation; traversal checks above still ran.
+                return
+
             with self.assertRaises(ValueError):
                 data.local_file(root, "link.json")
 

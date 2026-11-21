@@ -34,7 +34,6 @@ class PlotTests(unittest.TestCase):
     def test_real_pinned_drawing_roundtrips_renderer_site_and_zip_final_bytes(self):
         import render
 
-        # Avoid Python's already-loaded stdlib site module.
         spec = importlib.util.spec_from_file_location(
             "report_site", ROOT / "scripts/reports/site.py"
         )

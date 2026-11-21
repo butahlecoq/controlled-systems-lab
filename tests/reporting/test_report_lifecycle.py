@@ -83,7 +83,6 @@ class CaptureTests(unittest.TestCase):
                 historical = adapter.adapt(bundle)
                 self.assertEqual(historical.report_id, publications._HISTORICAL_PUBLICATIONS[source_id]["report_id"])
                 before = archive_path.read_bytes()
-                # ZIP comments alter source identity without changing any admitted entry.
                 with zipfile.ZipFile(archive_path, "a") as archive:
                     archive.comment = b"repacked source identity fixture"
                 self.assertNotEqual(before, archive_path.read_bytes())
