@@ -1,9 +1,20 @@
 """Offline renderer for GEO-02 immutable saved numerical records."""
 
 from __future__ import annotations
-import argparse, hashlib, html, json, shutil, zipfile
+
+import argparse
+import hashlib
+import html
+import json
+import shutil
+import zipfile
 from pathlib import Path
-import collect
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from scripts.reports.geo02 import collect
+else:
+    import collect
 
 COLLECTION_FILES = {
     "records.json",
@@ -23,7 +34,7 @@ COLLECTION_FILES = {
 
 def check_oracle(scenario, points, tol=1e-8):
     c = collect.SCENARIOS.get(scenario)
-    expected = c.get("outputs", []) if c else []
+    expected = c["outputs"] if c else []
     if not expected or not isinstance(points, list) or not points:
         return False
     dim = len(expected[0])
@@ -33,7 +44,8 @@ def check_oracle(scenario, points, tol=1e-8):
     # literal extreme and verify that every retained point lies in the target segment.
     for extreme in (expected[0], expected[-1]):
         if not any(
-            all(abs(float(x) - float(y)) <= tol for x, y in zip(p, extreme)) for p in points
+            all(abs(float(x) - float(y)) <= tol for x, y in zip(p, extreme, strict=True))
+            for p in points
         ):
             return False
     if dim == 1:
@@ -56,11 +68,12 @@ def check_oracle(scenario, points, tol=1e-8):
 
 
 def check_supports(scenario, values, tol=1e-8):
-    expected = collect.SCENARIOS.get(scenario, {}).get("support", [])
+    case = collect.SCENARIOS.get(scenario)
+    expected = case["support"] if case else []
     return (
         isinstance(values, list)
         and len(values) == len(expected)
-        and all(abs(float(x) - float(y)) <= tol for x, y in zip(values, expected))
+        and all(abs(float(x) - float(y)) <= tol for x, y in zip(values, expected, strict=True))
     )
 
 
@@ -292,7 +305,6 @@ def render_html(payload):
         + "</td></tr>"
         for t in payload["collection"]["warmup_results"]
     )
-    svg = render_svg(payload)
     scope = "Five tiny deterministic analytic fixtures. Raw records report generated candidates, materialized output points, and whether the cloud was reduced or preserved. Exact dyadic deletion certificates establish equality only for the generated binary64 candidate cloud; affine/sum operations remain numerical and do not establish validated geometry of the source model. Descriptive timing only: no competitor, speedup, application-scale, or scalability claim. CPU counters, native-thread observations, peak-memory measurements, internal LP timings, and OS limiter profiling were unavailable/not collected."
     timing = (
         "<ul>"
