@@ -33,7 +33,7 @@ CASES: tuple[AnalyticIllustration, ...] = (
         "id": "geo02-minkowski-triangles",
         "family": "Affine maps and Minkowski sums · GEO-02",
         "title": "Add two planar polytopes",
-        "summary": "For A=conv{(0,0),(2,0),(0,1)} and B=conv{(0,0),(1,0),(0,1)}, the Minkowski sum A+B is the pentagon shown. This is a hand-derived exact illustration, separate from the saved GEO-02 measurement.",
+        "summary": "For A=conv{(0,0),(2,0),(0,1)} and B=conv{(0,0),(1,0),(0,1)}, the Minkowski sum A+B is the quadrilateral shown. This is a hand-derived exact illustration, separate from the saved GEO-02 measurement.",
         "figure": "geo02-minkowski.svg",
         "record": "geo02-minkowski.json",
         "kind": "analytic-illustration",
