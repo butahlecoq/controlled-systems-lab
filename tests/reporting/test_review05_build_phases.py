@@ -1,4 +1,3 @@
-import copy
 import importlib.util
 import unittest
 from pathlib import Path
@@ -7,6 +6,8 @@ ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location(
     "build_phase_checker", ROOT / "benchmarks/reporting/review05/check_build_phases.py"
 )
+if SPEC is None or SPEC.loader is None:
+    raise ImportError("Cannot load the maintained REVIEW-05 build-phase verifier")
 MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 
@@ -20,7 +21,9 @@ class BuildPhaseChecks(unittest.TestCase):
             "strategy-b/objective-lift",
             "strategy-b/program-freeze",
         )
-        for i, (name, start, end) in enumerate(zip(names, (0, 1, 4, 7), (10, 3, 6, 9))):
+        for i, (name, start, end) in enumerate(
+            zip(names, (0, 1, 4, 7), (10, 3, 6, 9), strict=True)
+        ):
             spans.append(
                 {
                     "id": 2 if i == 0 else i + 3,
