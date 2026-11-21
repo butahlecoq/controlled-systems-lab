@@ -1,6 +1,7 @@
 """Typed saved-data report for registered SYN-04 Strategy B on T-S01."""
 
 from __future__ import annotations
+
 import hashlib
 import html
 import json
@@ -190,7 +191,10 @@ def render_html(record):
     errors = validate(record)
     if errors:
         raise ValueError("invalid SYN-04 report: " + ", ".join(errors))
-    esc = lambda value: html.escape(str(value))
+
+    def esc(value: object) -> str:
+        return html.escape(str(value))
+
     measurement = record["measurement"]
     timing = measurement["timing_ns"]
     residuals = [e["trajectory_max_residual"] for e in measurement["events"]]

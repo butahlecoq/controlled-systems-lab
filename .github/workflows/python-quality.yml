@@ -634,6 +634,14 @@ on:
       - 'scripts/reports/exp03/check_two_points_approximation.py'
       - 'scripts/reports/ext02/collect.py'
       - 'scripts/reports/ext02/render_saved.py'
+      - 'scripts/reports/syn04/**'
+      - 'scripts/reports/syn04*_registered_reports.py'
+      - 'scripts/reports/syn04*_publication_policy.py'
+      - 'reports/algorithm-results/tooling/syn04/**'
+      - 'reports/algorithm-results/tooling/syn04_ts02/**'
+      - 'reports/algorithm-results/tooling/syn04_ts03/**'
+      - 'reports/algorithm-results/syn04-strategy-b-ts0*.zip'
+      - 'tests/reporting/test_syn04_*.py'
       - 'benchmarks/scenarios/ext02-analytic-two-state-mixed-v1.json'
       - 'benchmarks/reporting/syn04/strategy_b_measure.cpp'
       - 'reports/algorithm-results/ext02-publications.json'
@@ -1164,6 +1172,8 @@ jobs:
           diff -r "$source" "$site/$route"
       - name: Replay the saved MPC-06 completion report and archive
         run: python -m unittest tests.reporting.test_mpc06_delivery tests.reporting.test_mpc06_delivery_publication
+      - name: Replay all three saved Strategy B profiles
+        run: python -m unittest tests.reporting.test_syn04_strategy_b_report tests.reporting.test_syn04_ts02_report tests.reporting.test_syn04_ts03_report
       - name: Check the four-state projection approximation report
         run: python -m unittest discover -s tests/reporting -p 'test_four_state_projection_approximations.py'
       - name: Replay saved EXP-04, EXT-05, GEO-08 and OPT-10 catalogues

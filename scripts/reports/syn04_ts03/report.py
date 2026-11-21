@@ -1,7 +1,12 @@
 """Typed saved-data contract for the separately measured SYN-04 T-S03 profile."""
 
 from __future__ import annotations
-import hashlib, html, json, statistics, re
+
+import hashlib
+import html
+import json
+import re
+import statistics
 
 SCHEMA = "csl.syn04-strategy-b-ts03-report/1"
 EVENT_SCHEMA = "csl.syn04-strategy-b-ts03-measurement-event/1"
@@ -264,7 +269,10 @@ def render_html(record):
     errors = validate(record)
     if errors:
         raise ValueError("invalid SYN-04 T-S03 report: " + ", ".join(errors))
-    esc = lambda v: html.escape(str(v))
+
+    def esc(value: object) -> str:
+        return html.escape(str(value))
+
     m = record["measurement"]
     timing = m["timing_ns"]
     rows = "".join(
