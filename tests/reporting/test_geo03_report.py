@@ -141,7 +141,7 @@ class Geo03ReportCsvProjectionTests(unittest.TestCase):
                 reader = csv.DictReader(stream)
                 fields = reader.fieldnames
                 rows = list(reader)
-            self.assertIsNotNone(fields)
+            assert fields is not None, "saved CSV has no header"
             rows[0]["run_ns"] = str(int(rows[0]["run_ns"]) + 1)
             with path.open("w", newline="", encoding="utf-8") as stream:
                 writer = csv.DictWriter(stream, fieldnames=fields)
@@ -159,7 +159,7 @@ class Geo03ReportCsvProjectionTests(unittest.TestCase):
                 reader = csv.DictReader(stream)
                 fields = reader.fieldnames
                 rows = list(reader)
-            self.assertIsNotNone(fields)
+            assert fields is not None, "saved CSV has no header"
             rows[0]["run_ns_median_ns"] = str(int(rows[0]["run_ns_median_ns"]) + 1)
             with path.open("w", newline="", encoding="utf-8") as stream:
                 writer = csv.DictWriter(stream, fieldnames=fields)

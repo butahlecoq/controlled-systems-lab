@@ -17,11 +17,24 @@ import subprocess
 import zipfile
 from collections import Counter
 from pathlib import Path
+from typing import NoReturn, TypedDict
 
 SCHEMA = "csl.geo03-hv-report/1"
 CONVERTER = {"id": "csl.conversion.qhull", "version": "1.0.0+qhull.8.0.2"}
 LP = {"id": "csl.lp.highs", "version": "1.0.0+highs.1.11.0"}
-FIXTURES = {
+
+
+class Fixture(TypedDict):
+    dimension: int
+    inequalities: int
+    equalities: int
+    vertices: int
+    rays: int
+    analytic_set: str
+    oracle: str
+
+
+FIXTURES: dict[str, Fixture] = {
     "square": {
         "dimension": 2,
         "inequalities": 4,
@@ -104,7 +117,15 @@ INTEGER_FIELDS = (
     "output_rays",
     "oracle_checks",
 )
-LINEAGE_AUDIT = {
+
+
+class LineageAudit(TypedDict):
+    status: str
+    contract_reference: str
+    sources: dict[str, dict[str, str]]
+
+
+LINEAGE_AUDIT: LineageAudit = {
     "status": "source-level review; executable equivalence not established",
     "contract_reference": "https://github.com/butahlecoq/controlled-systems-lab/blob/68db559016fcfffea3aa052c65f7757386e35075/docs/contracts/polyhedral-conversion.md#lineage-audit-a17-and-a18",
     "sources": {
@@ -239,7 +260,7 @@ def summarize(rows: list[dict]) -> list[dict]:
 
 
 def svg_chart(summary: list[dict]) -> str:
-    width, height, left, right = 980, 450, 285, 920
+    left, right = 285, 920
     minimum, maximum = 1_000, 10_000_000
 
     def x(value: int) -> float:
@@ -512,7 +533,7 @@ def collect(args: argparse.Namespace) -> None:
     ]
     expected_rows = args.repetitions * len(EXPECTED_ROWS)
 
-    def reject(reason: str, parsed_rows: int | None = None) -> None:
+    def reject(reason: str, parsed_rows: int | None = None) -> NoReturn:
         # Failed collections are evidence, not accepted reports: retain actual output
         # and status without constructing records, summaries, a manifest, or a ZIP.
         args.out.mkdir(parents=True, exist_ok=False)
@@ -557,7 +578,7 @@ def collect(args: argparse.Namespace) -> None:
         reject("negative numeric measurement CSV field", len(rows))
     if any(
         row[key] != str(numbers[key])
-        for row, numbers in zip(rows, parsed_numbers)
+        for row, numbers in zip(rows, parsed_numbers, strict=True)
         for key in INTEGER_FIELDS
     ):
         reject("noncanonical numeric measurement CSV field", len(rows))
@@ -566,7 +587,7 @@ def collect(args: argparse.Namespace) -> None:
     rounds = {
         key: {
             numbers["round"]
-            for row, numbers in zip(rows, parsed_numbers)
+            for row, numbers in zip(rows, parsed_numbers, strict=True)
             if (row["fixture"], row["direction"]) == key
         }
         for key in EXPECTED_ROWS

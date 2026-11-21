@@ -89,6 +89,10 @@ on:
       - 'scripts/reports/control_figure_data.py'
       - 'scripts/reports/control_figures.py'
       - 'scripts/reports/recorded_closed_loop_figures.py'
+      - 'scripts/reports/geo03/**'
+      - 'tests/reporting/test_geo03_report.py'
+      - 'reports/algorithm-results/geo03-*/**'
+      - 'reports/algorithm-results/geo03-*.zip'
       - 'tests/reporting/test_recorded_closed_loop_figures.py'
       - 'tests/reporting/test_viz03_control_figures.py'
       - 'scripts/reports/adapt_fuel_record.py'
@@ -365,6 +369,10 @@ on:
       - 'scripts/reports/control_figure_data.py'
       - 'scripts/reports/control_figures.py'
       - 'scripts/reports/recorded_closed_loop_figures.py'
+      - 'scripts/reports/geo03/**'
+      - 'tests/reporting/test_geo03_report.py'
+      - 'reports/algorithm-results/geo03-*/**'
+      - 'reports/algorithm-results/geo03-*.zip'
       - 'tests/reporting/test_recorded_closed_loop_figures.py'
       - 'tests/reporting/test_viz03_control_figures.py'
       - 'scripts/reports/adapt_fuel_record.py'
@@ -598,6 +606,10 @@ jobs:
               cmp "reports/algorithm-results/$route.zip" "$site/$route.zip"
             fi
           done
+      - name: Check the saved GEO-03 report and compatibility entry points
+        run: |
+          python -m unittest tests.reporting.test_geo03_report
+          python reports/algorithm-results/tooling/geo03/validate_report.py reports/algorithm-results/geo03-20261012-3c12ca125831
       - name: Check saved five-family fixed-tail geometry and episodes
         env:
           MPLBACKEND: Agg

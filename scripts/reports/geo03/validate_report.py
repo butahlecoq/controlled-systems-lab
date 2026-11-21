@@ -11,6 +11,7 @@ import re
 import statistics
 import zipfile
 from pathlib import Path
+from typing import TypedDict
 
 SCHEMA = "csl.geo03-hv-report/1"
 CONVERTER = ("csl.conversion.qhull", "1.0.0+qhull.8.0.2")
@@ -72,9 +73,17 @@ SUMMARY_FIELDS = (
     ),
 )
 
+
 # Independent contract oracle: geometry dimensions and expected conversion shapes,
 # authored here so CSV validation does not trust the report's own scenario metadata.
-FIXTURES = {
+class FixtureOracle(TypedDict):
+    inequalities: int
+    equalities: int
+    vertices: int
+    oracle_checks: dict[str, int]
+
+
+FIXTURES: dict[str, FixtureOracle] = {
     "square": {
         "inequalities": 4,
         "equalities": 0,
@@ -138,9 +147,7 @@ def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def expected_shape(
-    fixture: str, direction: str
-) -> tuple[dict[str, int | str], dict[str, int | str]]:
+def expected_shape(fixture: str, direction: str) -> tuple[dict[str, int | str], dict[str, int]]:
     spec = FIXTURES[fixture]
     h_to_v = direction == "H-to-V"
     input_shape = {
