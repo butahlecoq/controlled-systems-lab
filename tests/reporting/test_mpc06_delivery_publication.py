@@ -41,6 +41,22 @@ class Mpc06DeliveryPublicationTests(unittest.TestCase):
             )
         )
 
+    def test_frozen_completion_replays_into_the_published_route_and_archive(self):
+        saved = records.inventory(STAGE.SOURCE)
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary)
+            (site / "index.html").write_text("<html><body></body></html>", encoding="utf-8")
+            route = STAGE.stage(STAGE.SOURCE, site)
+            self.assertEqual(route, "mpc06-complete-6b7059d62473d32d4210")
+            staged = records.inventory(site / route)
+            for name, data in saved.items():
+                if name != "SHA256SUMS":
+                    self.assertEqual(staged[name], data, name)
+            with zipfile.ZipFile(site / f"{route}.zip") as archive:
+                self.assertEqual(archive.namelist(), [f"{route}/{name}" for name in sorted(staged)])
+                for name, data in staged.items():
+                    self.assertEqual(archive.read(f"{route}/{name}"), data, name)
+
     def test_deterministic_stage_keeps_inputs_old_routes_and_offline_members(self):
         with tempfile.TemporaryDirectory() as temporary:
             folder = Path(temporary)
