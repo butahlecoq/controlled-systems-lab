@@ -1,18 +1,44 @@
 """Stage the independently replayed Gym Pendulum finite-action pilot."""
+
 from __future__ import annotations
 
 import argparse
 import hashlib
 import html
+import importlib.util
 import json
 from pathlib import Path
-import zipfile
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from scripts.reports import environment_report_publication as publication
+else:
+    publication_path = Path(__file__).with_name("environment_report_publication.py")
+    publication_spec = importlib.util.spec_from_file_location(
+        "environment_report_publication", publication_path
+    )
+    if publication_spec is None or publication_spec.loader is None:
+        raise ImportError(f"cannot load the environment publication helper: {publication_path}")
+    publication = importlib.util.module_from_spec(publication_spec)
+    publication_spec.loader.exec_module(publication)
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/env717-pendulum-pilot-v1"
 CHECKER = ROOT / "scripts/reports/env717/check_pendulum.py"
-FILES = ("README.md", "capture.json", "figure-data.json", "index.html",
-         "phase-plane.svg", "result.json", "SHA256SUMS")
+spec = importlib.util.spec_from_file_location("env717_pendulum_checker", CHECKER)
+if spec is None or spec.loader is None:
+    raise ImportError("cannot load the environment report dependency")
+checker = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(checker)
+FILES = (
+    "README.md",
+    "capture.json",
+    "figure-data.json",
+    "index.html",
+    "phase-plane.svg",
+    "result.json",
+    "SHA256SUMS",
+)
 UPSTREAM_SOURCE_COMMIT = "f4d76c60f4003f50954174e96eafd8e514bd5441"
 
 
@@ -21,7 +47,11 @@ def digest(data: bytes) -> str:
 
 
 def verified_bundle(source: Path) -> dict[str, bytes]:
-    if source.is_symlink() or not source.is_dir() or {p.name for p in source.iterdir()} != set(FILES):
+    if (
+        source.is_symlink()
+        or not source.is_dir()
+        or {p.name for p in source.iterdir()} != set(FILES)
+    ):
         raise ValueError("Pendulum report inventory differs")
     files = {}
     for name in FILES:
@@ -38,9 +68,6 @@ def verified_bundle(source: Path) -> dict[str, bytes]:
     if checksums != {name: digest(data) for name, data in files.items() if name != "SHA256SUMS"}:
         raise ValueError("Pendulum report checksum mismatch")
 
-    import sys
-    sys.path.insert(0, str(CHECKER.parent))
-    import check_pendulum as checker
     result = json.loads(files["result.json"])
     checker.verify_result_and_bundle(result, source)
     return files
@@ -50,12 +77,19 @@ def stage(source: Path, site: Path) -> str:
     if not site.is_dir() or source.name != "env717-pendulum-pilot-v1":
         raise ValueError("unknown Pendulum report source or Pages directory")
     files = verified_bundle(source)
-    identity = {"source_repository_commit": UPSTREAM_SOURCE_COMMIT,
-                "result_sha256": digest(files["result.json"]),
-                "stager_sha256": digest(Path(__file__).read_bytes()),
-                "source_files": {name: digest(data) for name, data in sorted(files.items())}}
-    route_id = "env717-pendulum-" + digest(
-        json.dumps(identity, sort_keys=True, separators=(",", ":")).encode())[:20]
+    publisher, archived_zip_sha256 = publication.archive_identity(
+        source.name, files["SHA256SUMS"], Path(__file__)
+    )
+    identity = {
+        "source_repository_commit": UPSTREAM_SOURCE_COMMIT,
+        "result_sha256": digest(files["result.json"]),
+        **publisher,
+        "source_files": {name: digest(data) for name, data in sorted(files.items())},
+    }
+    route_id = (
+        "env717-pendulum-"
+        + digest(json.dumps(identity, sort_keys=True, separators=(",", ":")).encode())[:20]
+    )
     destination, archive_path = site / route_id, site / f"{route_id}.zip"
     if destination.exists() or archive_path.exists():
         raise ValueError("content-addressed Pendulum route already exists")
@@ -64,32 +98,45 @@ def stage(source: Path, site: Path) -> str:
     if page.count("</ul>") != 1 or route_id in page:
         raise ValueError("Pages index insertion point differs")
     output = dict(files)
-    output["index.html"] = files["index.html"].decode().replace(
-        "</main>", f'<p>Immutable Pages report <code>{html.escape(route_id)}</code>. '
-        '<a href="publication-manifest.json">Publication manifest</a> · '
-        f'<a href="../{html.escape(route_id)}.zip">Offline report ZIP</a>.</p></main>').encode()
+    output["index.html"] = (
+        files["index.html"]
+        .decode()
+        .replace(
+            "</main>",
+            f"<p>Immutable Pages report <code>{html.escape(route_id)}</code>. "
+            '<a href="publication-manifest.json">Publication manifest</a> · '
+            f'<a href="../{html.escape(route_id)}.zip">Offline report ZIP</a>.</p></main>',
+        )
+        .encode()
+    )
     output["SHA256SUMS"] = "".join(
-        f"{digest(output[name])}  {name}\n" for name in sorted(output) if name != "SHA256SUMS").encode()
-    manifest = {"schema": "csl.env717-publication/1", "report_id": route_id,
-                "source_report_id": source.name, **identity,
-                "published_files": {name: digest(data) for name, data in sorted(output.items())}}
+        f"{digest(output[name])}  {name}\n" for name in sorted(output) if name != "SHA256SUMS"
+    ).encode()
+    manifest = {
+        "schema": "csl.env717-publication/1",
+        "report_id": route_id,
+        "source_report_id": source.name,
+        **identity,
+        "published_files": {name: digest(data) for name, data in sorted(output.items())},
+    }
     output["publication-manifest.json"] = (json.dumps(manifest, indent=2) + "\n").encode()
-    route = (f'<li><a href="{route_id}/index.html">Gym Pendulum finite-action control pilot</a>'
-             f' · <a href="{route_id}/phase-plane.svg">phase plane</a>'
-             f' · <a href="{route_id}/result.json">result JSON</a>'
-             f' · <a href="{route_id}.zip">offline ZIP</a></li>')
+    route = (
+        f'<li><a href="{route_id}/index.html">Gym Pendulum finite-action control pilot</a>'
+        f' · <a href="{route_id}/phase-plane.svg">phase plane</a>'
+        f' · <a href="{route_id}/result.json">result JSON</a>'
+        f' · <a href="{route_id}.zip">offline ZIP</a></li>'
+    )
+    offline = (
+        f'<!doctype html><html lang="en"><meta charset="utf-8">'
+        f'<title>Offline Pendulum report</title><a href="{route_id}/index.html">Open report</a></html>'
+    ).encode()
+    archive_bytes = publication.offline_zip(
+        route_id, offline, output, expected_sha256=archived_zip_sha256
+    )
     destination.mkdir()
     for name, data in output.items():
         (destination / name).write_bytes(data)
-    with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-        offline = (f'<!doctype html><html lang="en"><meta charset="utf-8">'
-                   f'<title>Offline Pendulum report</title><a href="{route_id}/index.html">Open report</a></html>').encode()
-        for name, data in [("index.html", offline)] + [
-                (f"{route_id}/{name}", data) for name, data in sorted(output.items())]:
-            item = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
-            item.compress_type = zipfile.ZIP_DEFLATED
-            item.external_attr = 0o100644 << 16
-            archive.writestr(item, data)
+    archive_path.write_bytes(archive_bytes)
     index.write_text(page.replace("</ul>", route + "</ul>"), encoding="utf-8")
     return route_id
 

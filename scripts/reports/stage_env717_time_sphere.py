@@ -1,26 +1,48 @@
 """Stage the verified TimeOptimalSphereGame report on Pages."""
+
 from __future__ import annotations
 
 import argparse
 import hashlib
-from html import escape
-from html.parser import HTMLParser
 import importlib.util
 import json
+from html import escape
+from html.parser import HTMLParser
 from pathlib import Path
-import zipfile
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from scripts.reports import environment_report_publication as publication
+else:
+    publication_path = Path(__file__).with_name("environment_report_publication.py")
+    publication_spec = importlib.util.spec_from_file_location(
+        "environment_report_publication", publication_path
+    )
+    if publication_spec is None or publication_spec.loader is None:
+        raise ImportError(f"cannot load the environment publication helper: {publication_path}")
+    publication = importlib.util.module_from_spec(publication_spec)
+    publication_spec.loader.exec_module(publication)
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/env717-time-sphere-pilot-v1"
 CHECKER = ROOT / "scripts/reports/env717/check_time_sphere.py"
 SOURCE_COMMIT = "f4d76c60f4003f50954174e96eafd8e514bd5441"
 spec = importlib.util.spec_from_file_location("env717_time_sphere_checker", CHECKER)
+if spec is None or spec.loader is None:
+    raise ImportError("cannot load the environment report dependency")
 checker = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(checker)
 
-FILES = ("README.md", "capture.json", "environment.json", "figure-data.json",
-         "index.html", "reachability.svg", "result.json", "SHA256SUMS")
+FILES = (
+    "README.md",
+    "capture.json",
+    "environment.json",
+    "figure-data.json",
+    "index.html",
+    "reachability.svg",
+    "result.json",
+    "SHA256SUMS",
+)
 
 
 class LocalLinks(HTMLParser):
@@ -28,9 +50,13 @@ class LocalLinks(HTMLParser):
         super().__init__()
         self.hrefs: list[str] = []
 
-    def handle_starttag(self, tag, attrs) -> None:
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         if tag == "a":
-            self.hrefs.extend(value for key, value in attrs if key == "href")
+            for key, value in attrs:
+                if key == "href":
+                    if value is None:
+                        raise ValueError("report contains a link without a destination")
+                    self.hrefs.append(value)
 
 
 def digest(data: bytes) -> str:
@@ -53,8 +79,7 @@ def _inputs(source: Path) -> tuple[dict[str, bytes], dict, dict]:
         if name in sums:
             raise ValueError("duplicate report checksum")
         sums[name] = sha
-    if sums != {name: digest(content) for name, content in files.items()
-                if name != "SHA256SUMS"}:
+    if sums != {name: digest(content) for name, content in files.items() if name != "SHA256SUMS"}:
         raise ValueError("report checksum mismatch")
     try:
         result = json.loads(files["result.json"])
@@ -63,8 +88,10 @@ def _inputs(source: Path) -> tuple[dict[str, bytes], dict, dict]:
         capture = json.loads(files["capture.json"])
     except (UnicodeDecodeError, ValueError) as error:
         raise ValueError("report contains invalid JSON") from error
-    if (result.get("source_repository_commit") != SOURCE_COMMIT or
-            result.get("source_file_blob") != checker.SOURCE_BLOB):
+    if (
+        result.get("source_repository_commit") != SOURCE_COMMIT
+        or result.get("source_file_blob") != checker.SOURCE_BLOB
+    ):
         raise ValueError("upstream source identity differs")
     try:
         analysis = checker.verify(result)
@@ -76,35 +103,52 @@ def _inputs(source: Path) -> tuple[dict[str, bytes], dict, dict]:
         raise ValueError("saved SVG differs from independently derived reachability data")
     if files["index.html"].decode("utf-8") != checker.report_page(result, analysis):
         raise ValueError("saved HTML differs from verified result and figure data")
-    if (environment.get("source_repository_commit") != SOURCE_COMMIT or
-            environment.get("source_file_blob") != checker.SOURCE_BLOB or
-            environment.get("algorithm_source_sha256") != result["algorithm_source_sha256"]):
+    if (
+        environment.get("source_repository_commit") != SOURCE_COMMIT
+        or environment.get("source_file_blob") != checker.SOURCE_BLOB
+        or environment.get("algorithm_source_sha256") != result["algorithm_source_sha256"]
+    ):
         raise ValueError("environment metadata differs from measured result")
-    if (capture.get("source_commit") != result["source_commit"] or
-            capture.get("driver_sha256") != result["driver_sha256"] or
-            capture.get("algorithm_source_sha256") != result["algorithm_source_sha256"]):
+    if (
+        capture.get("source_commit") != result["source_commit"]
+        or capture.get("driver_sha256") != result["driver_sha256"]
+        or capture.get("algorithm_source_sha256") != result["algorithm_source_sha256"]
+    ):
         raise ValueError("capture metadata differs from measured result")
     if not isinstance(capture.get("host_processor"), str) or not capture["host_processor"].strip():
         raise ValueError("capture metadata must identify the host processor or say unavailable")
     parser = LocalLinks()
     parser.feed(files["index.html"].decode("utf-8"))
     local_links = [href for href in parser.hrefs if not href.startswith("https://")]
-    if (not local_links or any(href not in files for href in local_links) or
-            any(not href.startswith("https://github.com/") for href in parser.hrefs
-                if href not in local_links)):
+    if (
+        not local_links
+        or any(href not in files for href in local_links)
+        or any(
+            not href.startswith("https://github.com/")
+            for href in parser.hrefs
+            if href not in local_links
+        )
+    ):
         raise ValueError("report contains a missing local or unpinned external link")
     return files, result, analysis
 
 
 def stage(source: Path, site: Path) -> str:
     files, result, analysis = _inputs(source)
-    identity = {"source_repository_commit": SOURCE_COMMIT,
+    publisher, archived_zip_sha256 = publication.archive_identity(
+        source.name, files["SHA256SUMS"], Path(__file__)
+    )
+    identity = {
+        "source_repository_commit": SOURCE_COMMIT,
         "source_commit": result["source_commit"],
         "result_sha256": digest(files["result.json"]),
-        "stager_sha256": digest(Path(__file__).read_bytes()),
-        "source_files": {name: digest(content) for name, content in sorted(files.items())}}
-    report_id = "env717-time-sphere-" + digest(
-        json.dumps(identity, sort_keys=True, separators=(",", ":")).encode())[:20]
+        **publisher,
+        "source_files": {name: digest(content) for name, content in sorted(files.items())},
+    }
+    report_id = (
+        "env717-time-sphere-"
+        + digest(json.dumps(identity, sort_keys=True, separators=(",", ":")).encode())[:20]
+    )
     if not site.is_dir():
         raise ValueError("staged Pages site directory does not exist")
     destination, archive_path = site / report_id, site / f"{report_id}.zip"
@@ -117,39 +161,48 @@ def stage(source: Path, site: Path) -> str:
 
     generated = dict(files)
     page = files["index.html"].decode("utf-8")
-    footer = (f'<p>Immutable Pages report <code>{escape(report_id)}</code>. '
-              f'<a href="publication-manifest.json">Publication manifest</a> · '
-              f'<a href="../{escape(report_id)}.zip">Offline report ZIP</a>.</p>')
+    footer = (
+        f"<p>Immutable Pages report <code>{escape(report_id)}</code>. "
+        f'<a href="publication-manifest.json">Publication manifest</a> · '
+        f'<a href="../{escape(report_id)}.zip">Offline report ZIP</a>.</p>'
+    )
     generated["index.html"] = page.replace("</main>", footer + "</main>").encode("utf-8")
     generated["SHA256SUMS"] = "".join(
         f"{digest(generated[name])}  {name}\n"
-        for name in sorted(generated) if name not in ("SHA256SUMS", "publication-manifest.json")
+        for name in sorted(generated)
+        if name not in ("SHA256SUMS", "publication-manifest.json")
     ).encode("ascii")
-    manifest = {"schema": "csl.env717-publication/1", "report_id": report_id,
-        "source_report_id": source.name, "source_repository_commit": SOURCE_COMMIT,
-        "source_commit": result["source_commit"], "result_sha256": digest(files["result.json"]),
-        "stager_sha256": identity["stager_sha256"], "source_files": identity["source_files"],
-        "published_files": {name: digest(content) for name, content in sorted(generated.items())}}
+    manifest = {
+        "schema": "csl.env717-publication/1",
+        "report_id": report_id,
+        "source_report_id": source.name,
+        "source_repository_commit": SOURCE_COMMIT,
+        "source_commit": result["source_commit"],
+        "result_sha256": digest(files["result.json"]),
+        **publisher,
+        "source_files": identity["source_files"],
+        "published_files": {name: digest(content) for name, content in sorted(generated.items())},
+    }
     generated["publication-manifest.json"] = (json.dumps(manifest, indent=2) + "\n").encode()
-    route_link = (f'<li><a href="{report_id}/index.html">TimeOptimalSphereGame nominal reachability</a>'
-                  f' — unit-disk target; finite-feedback horizon sweep'
-                  f' · <a href="{report_id}/result.json">result JSON</a>'
-                  f' · <a href="{report_id}/reachability.svg">reachability figure</a>'
-                  f' · <a href="{report_id}.zip">offline ZIP</a></li>')
+    route_link = (
+        f'<li><a href="{report_id}/index.html">TimeOptimalSphereGame nominal reachability</a>'
+        f" — unit-disk target; finite-feedback horizon sweep"
+        f' · <a href="{report_id}/result.json">result JSON</a>'
+        f' · <a href="{report_id}/reachability.svg">reachability figure</a>'
+        f' · <a href="{report_id}.zip">offline ZIP</a></li>'
+    )
+    offline_index = (
+        f'<!doctype html><html lang="en"><meta charset="utf-8">'
+        f"<title>Offline TimeOptimalSphereGame report</title>"
+        f'<a href="{report_id}/index.html">Open the report</a></html>'
+    ).encode()
+    archive_bytes = publication.offline_zip(
+        report_id, offline_index, generated, expected_sha256=archived_zip_sha256
+    )
     destination.mkdir()
     for name, content in generated.items():
         (destination / name).write_bytes(content)
-    offline_index = (f'<!doctype html><html lang="en"><meta charset="utf-8">'
-                     f'<title>Offline TimeOptimalSphereGame report</title>'
-                     f'<a href="{report_id}/index.html">Open the report</a></html>').encode()
-    with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-        entries = [("index.html", offline_index)] + [
-            (f"{report_id}/{name}", content) for name, content in sorted(generated.items())]
-        for name, content in entries:
-            info = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
-            info.compress_type = zipfile.ZIP_DEFLATED
-            info.external_attr = 0o100644 << 16
-            archive.writestr(info, content)
+    archive_path.write_bytes(archive_bytes)
     index.write_text(index_text.replace("</ul>", route_link + "</ul>"), encoding="utf-8")
     return report_id
 
