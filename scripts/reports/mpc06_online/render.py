@@ -117,7 +117,7 @@ def render(bundle, receipt_path, output):
         verdict="descriptive restricted-policy study; no universal winner or real-time claim",
     )
     (bundle / "render-source").mkdir(exist_ok=True)
-    (bundle / "render-source/render.py").write_bytes(Path(__file__).read_bytes())
+    (bundle / "render-source/render.py").write_bytes(tool_sources["render.py"])
     (bundle / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     # A genuine two-state phase plot from saved actual disturbance histories.
     colors = {

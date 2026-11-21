@@ -114,8 +114,23 @@ class OnlineTubeTests(unittest.TestCase):
             saved = json.loads(receipt.read_text())
             self.assertEqual(saved["checked_sources"], ONLINE_EVIDENCE.tool_bindings())
             output = Path(folder) / "rendered"
-            ONLINE_RENDER.render(bundle, receipt, output)
+            renderer_source = P.with_name("render.py")
+            original_read = Path.read_bytes
+            expected = original_read(renderer_source)
+            copied_tool = output / "review-tools/render.py"
+
+            def read_during_render(path):
+                if path == renderer_source and copied_tool.exists():
+                    return expected + b"\n# edited during rendering\n"
+                return original_read(path)
+
+            with mock.patch.object(Path, "read_bytes", read_during_render):
+                ONLINE_RENDER.render(bundle, receipt, output)
             self.assertTrue((output / "index.html").is_file())
+            self.assertEqual(copied_tool.read_bytes(), expected)
+            self.assertEqual((output / "render-source/render.py").read_bytes(), expected)
+            summary = json.loads((output / "summary.json").read_text())
+            self.assertEqual(summary["renderer_sha256"], hashlib.sha256(expected).hexdigest())
 
     def test_terminal_elimination_and_unique_nominal_optimum(self):
         for p, q in [(Q(1, 8), Q(0)), (Q(-1, 4), Q(1, 8)), (Q(0), Q(0))]:
