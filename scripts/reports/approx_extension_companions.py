@@ -7,11 +7,22 @@ import tempfile
 from html import escape
 from itertools import product
 from pathlib import Path
+from typing import Literal, TypedDict
 
 import geometry_figures
 import site_design
 
 STAGE_BANDS = ((1, 15, "#D55E00"), (16, 30, "#E69F00"), (31, 45, "#0072B2"), (46, 60, "#CC79A7"))
+
+
+class TimingSummary(TypedDict):
+    scenario: str
+    attempts: int
+    matches: int
+    failures: int
+    min_ns: int
+    median_ns: int
+    max_ns: int
 
 
 def _render_companion(document: dict, style_path: Path, stem: str) -> dict[str, bytes]:
@@ -162,8 +173,8 @@ def app03_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
     """Plot APP-03's saved planar zonotope and saved axis-cover generators."""
     record = json.loads(Path(record_path).read_text(encoding="utf-8"))
     fixture = record["fixtures"]["diamond-axis-cover"]
-    generators = fixture["input_generators"]
-    output = fixture["expected_generators"]
+    generators: list[list[float]] = fixture["input_generators"]
+    output: list[list[float]] = fixture["expected_generators"]
     _require(
         record.get("schema") == "csl.app03-zonotope-reduction/1"
         and record.get("report_id") == "app03-zonotope-4522855018fa9b0b"
@@ -743,7 +754,7 @@ def finite_feedback_timing_companion(record_path: Path, style_path: Path) -> dic
     """Plot saved finite-feedback median execution times and observed ranges."""
     record = json.loads(Path(record_path).read_text(encoding="utf-8"))
     expected = ("clipping", "branching", "empty-action", "nominal")
-    summary = record.get("summary", [])
+    summary: list[TimingSummary] = record.get("summary", [])
     _require(
         record.get("schema") == "csl.finite-feedback-records/2"
         and record.get("report_id") == "finite-feedback-a6e96fd96c7ac7cc"
@@ -758,7 +769,9 @@ def finite_feedback_timing_companion(record_path: Path, style_path: Path) -> dic
     )
     colors = ("#0072B2", "#D55E00", "#009E73", "#6A4C93")
     series = []
-    for ordinal, (name, row, color) in enumerate(zip(expected, summary, colors), start=1):
+    for ordinal, (name, row, color) in enumerate(
+        zip(expected, summary, colors, strict=True), start=1
+    ):
         series.append(
             {
                 "kind": "path",
@@ -819,7 +832,9 @@ def _companion_page(
     stem: str,
     report_id: str,
     summary: str,
-    axis_context: str = "equal",
+    axis_context: Literal[
+        "equal", "independent", "numeric", "batch-timing", "call-timing", "fixture-timing"
+    ] = "equal",
     source_commit: str | None = None,
     image_alt: str | None = None,
     report_route: str | None = None,
