@@ -1,4 +1,5 @@
 """Package and stage the EXP-02 3D hull pilot reports."""
+
 from __future__ import annotations
 
 import argparse
@@ -12,7 +13,9 @@ ROOT = Path(__file__).resolve().parents[2]
 PRIMARY_ID = "exp02-it17-hull-3d-simplex-20261028-r1"
 INITIAL_ID = "exp02-it17-hull-3d-halton-cloud-20261028-r1"
 REPORTS = ROOT / "reports/algorithm-results"
-site_spec = importlib.util.spec_from_file_location("exp02_report_site", Path(__file__).with_name("site.py"))
+site_spec = importlib.util.spec_from_file_location(
+    "exp02_report_site", Path(__file__).with_name("site.py")
+)
 site = importlib.util.module_from_spec(site_spec)
 assert site_spec.loader is not None
 site_spec.loader.exec_module(site)
@@ -72,7 +75,8 @@ def verify_bundle(bundle: Path) -> str:
         entries[relative] = digest
     actual = {
         path.relative_to(bundle).as_posix(): path
-        for path in files if path not in {archive_path, manifest_path}
+        for path in files
+        if path not in {archive_path, manifest_path}
     }
     if set(entries) != set(actual):
         raise ValueError("bundle contents differ from SHA256SUMS")
@@ -111,14 +115,20 @@ def stage(primary: Path, initial: Path, site_root: Path) -> str:
         raise ValueError("Pages index insertion point differs or route already exists")
     routes = (
         f'<li><a href="{PRIMARY_ID}/index.html">EXP-02 3D hull reducers: tetrahedron with exact interior redundancy</a>'
-        ' — one deterministic 250-point fixture; three of five LP reducers completed, and no speedup is claimed.'
+        " — one deterministic 250-point fixture; three of five LP reducers completed, and no speedup is claimed."
         f' · <a href="{PRIMARY_ID}/{PRIMARY_ID}.zip">offline bundle</a>'
         f' · <a href="{INITIAL_ID}/index.html">initial pure-Halton attempt</a>'
         f' · <a href="{INITIAL_ID}/{INITIAL_ID}.zip">raw exploratory bundle</a>'
-        f' · bundle SHA256 {primary_sha[:12]} / {initial_sha[:12]}</li>'
+        f" · bundle SHA256 {primary_sha[:12]} / {initial_sha[:12]}</li>"
     )
-    site.OfflineHTML({f"{PRIMARY_ID}/index.html", f"{PRIMARY_ID}/{PRIMARY_ID}.zip",
-                      f"{INITIAL_ID}/index.html", f"{INITIAL_ID}/{INITIAL_ID}.zip"}).feed(routes)
+    site.OfflineHTML(
+        {
+            f"{PRIMARY_ID}/index.html",
+            f"{PRIMARY_ID}/{PRIMARY_ID}.zip",
+            f"{INITIAL_ID}/index.html",
+            f"{INITIAL_ID}/{INITIAL_ID}.zip",
+        }
+    ).feed(routes)
     primary_destination, initial_destination = site_root / PRIMARY_ID, site_root / INITIAL_ID
     if primary_destination.exists() or initial_destination.exists():
         raise ValueError("EXP-02 Pages routes must be fresh")

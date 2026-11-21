@@ -1,4 +1,5 @@
 """Package and stage the EXP-02 4D simplex hull pilot."""
+
 from __future__ import annotations
 
 import argparse
@@ -10,7 +11,8 @@ import zipfile
 
 REPORT_ID = "exp02-it17-hull-4d-simplex-20261028-r1"
 site_spec = importlib.util.spec_from_file_location(
-    "exp02_hull4d_site", Path(__file__).with_name("site.py"))
+    "exp02_hull4d_site", Path(__file__).with_name("site.py")
+)
 site = importlib.util.module_from_spec(site_spec)
 assert site_spec.loader is not None
 site_spec.loader.exec_module(site)
@@ -41,8 +43,9 @@ def package(bundle: Path) -> str:
     manifest_path.write_text(manifest, encoding="utf-8")
     with zipfile.ZipFile(archive_path, "w") as archive:
         for path in [*files, manifest_path]:
-            info = zipfile.ZipInfo(path.relative_to(bundle).as_posix(),
-                                   date_time=(1980, 1, 1, 0, 0, 0))
+            info = zipfile.ZipInfo(
+                path.relative_to(bundle).as_posix(), date_time=(1980, 1, 1, 0, 0, 0)
+            )
             info.compress_type = zipfile.ZIP_DEFLATED
             info.external_attr = 0o100644 << 16
             archive.writestr(info, path.read_bytes())
@@ -67,7 +70,8 @@ def verify_bundle(bundle: Path) -> str:
         entries[relative] = digest
     actual = {
         path.relative_to(bundle).as_posix(): path
-        for path in files if path not in {archive_path, manifest_path}
+        for path in files
+        if path not in {archive_path, manifest_path}
     }
     if set(entries) != set(actual):
         raise ValueError("bundle contents differ from SHA256SUMS")
@@ -84,7 +88,8 @@ def verify_bundle(bundle: Path) -> str:
             if hashlib.sha256(archive.read(relative)).hexdigest() != digest:
                 raise ValueError("offline ZIP checksum mismatch: " + relative)
     site.OfflineHTML(set(entries) | {"SHA256SUMS", archive_path.name}).feed(
-        (bundle / "index.html").read_text(encoding="utf-8"))
+        (bundle / "index.html").read_text(encoding="utf-8")
+    )
     return hashlib.sha256(archive_path.read_bytes()).hexdigest()
 
 
@@ -101,10 +106,10 @@ def stage(bundle: Path, site_root: Path) -> str:
         raise ValueError("Pages index insertion point differs or route already exists")
     route = (
         f'<li><a href="{REPORT_ID}/index.html">EXP-02 4D simplex hull reducer pilot</a>'
-        ' — one deterministic 250-point fixture; three of five LP reducers completed, '
-        'two exact but incomplete outputs have withheld timings, and no speedup is claimed.'
+        " — one deterministic 250-point fixture; three of five LP reducers completed, "
+        "two exact but incomplete outputs have withheld timings, and no speedup is claimed."
         f' · <a href="{REPORT_ID}/{REPORT_ID}.zip">offline bundle</a>'
-        f' · bundle SHA256 {archive_sha[:12]}</li>'
+        f" · bundle SHA256 {archive_sha[:12]}</li>"
     )
     site.OfflineHTML({f"{REPORT_ID}/index.html", f"{REPORT_ID}/{REPORT_ID}.zip"}).feed(route)
     destination = site_root / REPORT_ID

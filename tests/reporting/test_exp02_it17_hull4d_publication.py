@@ -31,20 +31,33 @@ class Exp02Hull4DPublicationTests(unittest.TestCase):
         self.assertTrue(all(row["independent_hull_check"] for row in lp_measured))
         self.assertEqual(sum(row["evidence_status"] == "verified" for row in lp_measured), 15)
         self.assertEqual(sum(row["evidence_status"] == "inconclusive" for row in lp_measured), 10)
-        self.assertTrue(all(row["evidence_status"] == "inconclusive"
-                            for row in lp_measured if row["reducer_status_complete"] is False))
+        self.assertTrue(
+            all(
+                row["evidence_status"] == "inconclusive"
+                for row in lp_measured
+                if row["reducer_status_complete"] is False
+            )
+        )
         self.assertEqual(sum(row["reducer_status_complete"] is True for row in lp_measured), 15)
-        self.assertTrue(all(row["outcome"] == "unsupported_dimension" and row["elapsed_ns"] == 0
-                            for row in rows if row["method"] == "geometric-quickhull"))
+        self.assertTrue(
+            all(
+                row["outcome"] == "unsupported_dimension" and row["elapsed_ns"] == 0
+                for row in rows
+                if row["method"] == "geometric-quickhull"
+            )
+        )
         config = json.loads((BUNDLE / "raw/run-config.json").read_text(encoding="utf-8"))
         self.assertEqual(config["input_sha256"], rows[0]["input_sha256"])
         renderer_hash = hashlib.sha256(Path(summarize_4d.__file__).read_bytes()).hexdigest()
-        self.assertEqual((BUNDLE / "raw/summarizer.sha256").read_text(encoding="utf-8").strip(),
-                         renderer_hash)
+        self.assertEqual(
+            (BUNDLE / "raw/summarizer.sha256").read_text(encoding="utf-8").strip(), renderer_hash
+        )
 
     def test_validator_rejects_rows_with_a_shared_but_wrong_input_hash(self) -> None:
-        rows = [json.loads(line) for line in
-                (BUNDLE / "raw/raw-rows.jsonl").read_text(encoding="utf-8").splitlines()]
+        rows = [
+            json.loads(line)
+            for line in (BUNDLE / "raw/raw-rows.jsonl").read_text(encoding="utf-8").splitlines()
+        ]
         for row in rows:
             row["input_sha256"] = "0" * 64
         with tempfile.TemporaryDirectory() as temporary:
@@ -54,20 +67,33 @@ class Exp02Hull4DPublicationTests(unittest.TestCase):
                 summarize_4d.read_rows(raw)
 
     def test_failed_attempt_is_retained_as_inconclusive_with_a_stable_code(self) -> None:
-        rows = [json.loads(line) for line in
-                (BUNDLE / "raw/raw-rows.jsonl").read_text(encoding="utf-8").splitlines()]
-        failed = next(row for row in rows
-                      if row["method"] == summarize_4d.METHODS[0] and not row["warmup"])
-        failed.update({"outcome": "failed", "diagnostic_code": "workspace_creation_failed",
-                       "reducer_status_complete": None, "elapsed_ns": 0, "retained": 0,
-                       "removed": 0, "lp_calls": 0, "retained_ids": [],
-                       "removal_certificates": []})
+        rows = [
+            json.loads(line)
+            for line in (BUNDLE / "raw/raw-rows.jsonl").read_text(encoding="utf-8").splitlines()
+        ]
+        failed = next(
+            row for row in rows if row["method"] == summarize_4d.METHODS[0] and not row["warmup"]
+        )
+        failed.update(
+            {
+                "outcome": "failed",
+                "diagnostic_code": "workspace_creation_failed",
+                "reducer_status_complete": None,
+                "elapsed_ns": 0,
+                "retained": 0,
+                "removed": 0,
+                "lp_calls": 0,
+                "retained_ids": [],
+                "removal_certificates": [],
+            }
+        )
         with tempfile.TemporaryDirectory() as temporary:
             raw = Path(temporary) / "failure.jsonl"
             raw.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
             validated = summarize_4d.read_rows(raw)
-        preserved = next(row for row in validated
-                         if row.get("diagnostic_code") == "workspace_creation_failed")
+        preserved = next(
+            row for row in validated if row.get("diagnostic_code") == "workspace_creation_failed"
+        )
         self.assertEqual(preserved["outcome"], "failed")
         self.assertIsNone(preserved["independent_hull_check"])
         self.assertEqual(preserved["evidence_status"], "inconclusive")
@@ -78,8 +104,7 @@ class Exp02Hull4DPublicationTests(unittest.TestCase):
         for method in (summarize_4d.METHODS[0], summarize_4d.METHODS[2]):
             self.assertEqual(summary[method]["reducer_complete"], "0/5")
             self.assertEqual(summary[method]["elapsed_median_ms"], "")
-        for method in (summarize_4d.METHODS[1], summarize_4d.METHODS[3],
-                       summarize_4d.METHODS[4]):
+        for method in (summarize_4d.METHODS[1], summarize_4d.METHODS[3], summarize_4d.METHODS[4]):
             self.assertEqual(summary[method]["reducer_complete"], "5/5")
             self.assertIn("verified 5/5", summary[method]["evidence_status"])
             self.assertNotEqual(summary[method]["elapsed_median_ms"], "")
@@ -112,8 +137,9 @@ class Exp02Hull4DPublicationTests(unittest.TestCase):
             shutil.copytree(BUNDLE, bundle)
             site = root / "site"
             site.mkdir()
-            (site / "index.html").write_text("<!doctype html><html><ul></ul></html>",
-                                              encoding="utf-8")
+            (site / "index.html").write_text(
+                "<!doctype html><html><ul></ul></html>", encoding="utf-8"
+            )
             self.assertEqual(publication.stage(bundle, site), BUNDLE.name)
             index = (site / "index.html").read_text(encoding="utf-8")
             self.assertIn(f"{BUNDLE.name}/index.html", index)

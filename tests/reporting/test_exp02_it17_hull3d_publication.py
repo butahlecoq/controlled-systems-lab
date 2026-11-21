@@ -1,4 +1,5 @@
 """Publication and exact-record checks for the first EXP-02 3D hull cell."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -22,12 +23,19 @@ class Exp02Hull3DPublicationTests(unittest.TestCase):
     def test_all_raw_attempts_have_exact_independent_hull_checks(self) -> None:
         rows = summarize_3d.read_rows(PRIMARY / "raw/raw-rows.jsonl")
         self.assertEqual(len(rows), 36)
-        measured = [row for row in rows if not row["warmup"] and row["method"] != "geometric-quickhull"]
+        measured = [
+            row for row in rows if not row["warmup"] and row["method"] != "geometric-quickhull"
+        ]
         self.assertEqual(len(measured), 25)
         self.assertTrue(all(row["independent_hull_check"] for row in measured))
         self.assertEqual(sum(row["reducer_status_complete"] is True for row in measured), 15)
-        self.assertTrue(all(row["outcome"] == "unsupported_dimension"
-                            for row in rows if row["method"] == "geometric-quickhull"))
+        self.assertTrue(
+            all(
+                row["outcome"] == "unsupported_dimension"
+                for row in rows
+                if row["method"] == "geometric-quickhull"
+            )
+        )
 
     def test_bundles_and_offline_archives_match_their_checksums(self) -> None:
         self.assertEqual(len(publication.verify_bundle(PRIMARY)), 64)
@@ -42,7 +50,9 @@ class Exp02Hull3DPublicationTests(unittest.TestCase):
             shutil.copytree(INITIAL, initial)
             site = temp / "site"
             site.mkdir()
-            (site / "index.html").write_text("<!doctype html><html><ul></ul></html>", encoding="utf-8")
+            (site / "index.html").write_text(
+                "<!doctype html><html><ul></ul></html>", encoding="utf-8"
+            )
             self.assertEqual(publication.stage(primary, initial, site), PRIMARY.name)
             index = (site / "index.html").read_text(encoding="utf-8")
             self.assertIn(f"{PRIMARY.name}/index.html", index)
@@ -52,7 +62,9 @@ class Exp02Hull3DPublicationTests(unittest.TestCase):
 
             second_site = temp / "second-site"
             second_site.mkdir()
-            (second_site / "index.html").write_text("<!doctype html><html><ul></ul></html>", encoding="utf-8")
+            (second_site / "index.html").write_text(
+                "<!doctype html><html><ul></ul></html>", encoding="utf-8"
+            )
             (primary / "summary.csv").write_text("tampered\n", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "checksum mismatch"):
                 publication.stage(primary, initial, second_site)
