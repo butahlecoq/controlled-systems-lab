@@ -3,7 +3,6 @@
 import copy
 import csv
 import hashlib
-import importlib.util
 import io
 import json
 import shutil
@@ -29,16 +28,13 @@ import issue3_validated_registered_reports as issue3_validated_publication
 import opt11_registered_reports as opt11_publication
 import opt12_registered_reports as opt12_publication
 import registered_reports as registered
+import report_site as site
 import stage_btulshor
 import syn01_registered_reports as syn01_publication
 import syn02_registered_reports as syn02_publication
 import syn_ts01_paired_registered_reports as syn_ts01_paired_publication
 
-SITE_PATH = Path(__file__).resolve().parents[2] / "scripts" / "reports" / "site.py"
-SITE_SPEC = importlib.util.spec_from_file_location("csl_report_site", SITE_PATH)
-assert SITE_SPEC is not None and SITE_SPEC.loader is not None
-site = importlib.util.module_from_spec(SITE_SPEC)
-SITE_SPEC.loader.exec_module(site)
+site.register_publication_policies()
 
 FIXTURES = Path(__file__).resolve().parents[2] / "reports" / "algorithm-results"
 
