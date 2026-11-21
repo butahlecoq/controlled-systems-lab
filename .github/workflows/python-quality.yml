@@ -52,6 +52,10 @@ on:
       - 'reports/algorithm-results/b04-c-exact-dyadic-v1/**'
       - 'scripts/reports/schema3_publication_policies.py'
       - 'scripts/reports/registered_reports.py'
+      - 'scripts/reports/ext07/capture.py'
+      - 'scripts/reports/ext07/capability_capture.py'
+      - 'scripts/reports/ext07/two_parameter_capture.py'
+      - 'tests/reporting/test_ext07_capture.py'
       - 'scripts/reports/collector_common.py'
       - 'scripts/reports/render.py'
       - 'scripts/reports/site.py'
@@ -328,6 +332,10 @@ on:
       - 'reports/algorithm-results/b04-c-exact-dyadic-v1/**'
       - 'scripts/reports/schema3_publication_policies.py'
       - 'scripts/reports/registered_reports.py'
+      - 'scripts/reports/ext07/capture.py'
+      - 'scripts/reports/ext07/capability_capture.py'
+      - 'scripts/reports/ext07/two_parameter_capture.py'
+      - 'tests/reporting/test_ext07_capture.py'
       - 'scripts/reports/collector_common.py'
       - 'scripts/reports/render.py'
       - 'scripts/reports/site.py'
@@ -582,6 +590,12 @@ jobs:
         run: python -m unittest discover -s tests/ci -p 'test_*.py'
       - name: Exercise site additions and the APP02 staging caller
         run: |
+          python -m unittest tests.reporting.test_ext07_capture
+          for name in capture capability_capture two_parameter_capture; do
+            python "scripts/reports/ext07/$name.py" --help > "$RUNNER_TEMP/$name-direct-help"
+            python -m "scripts.reports.ext07.$name" --help > "$RUNNER_TEMP/$name-module-help"
+            cmp "$RUNNER_TEMP/$name-direct-help" "$RUNNER_TEMP/$name-module-help"
+          done
           python -m unittest discover -s tests/reporting -p 'test_site_additions.py'
           python -m unittest discover -s tests/reporting -p 'test_app02_saved.py'
           python -m unittest discover -s tests/reporting -p 'test_closed_loop_initial_baselines_publication.py'
