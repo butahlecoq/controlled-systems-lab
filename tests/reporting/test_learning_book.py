@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from collections import Counter
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
@@ -92,6 +93,105 @@ class LearningBookTests(unittest.TestCase):
         self.assertEqual({"orientation", "vertex_lp_simplex", "reachable_set_representation",
                           "controller", "supporting_operations", "capstones"},
                          {chapter["group"] for chapter in chapters})
+
+    def test_task_capstones_distinguish_figures_pilots_and_full_profile_outcomes(self):
+        ledger = "examples/closed-loop/campaign-2026-11-18/raw/coverage.json"
+        coverage = json.loads((ROOT / "docs" / ledger).read_bytes())
+        tasks = {
+            "lotka-capstone": ("syn-nl-lv-01", {"lotka-populations": [0, 1]}),
+            "orbit-capstone": ("earth-orbit", {"earth-orbit": [0, 3]}),
+            "fuel-capstone": (
+                "syn-nl-fuel-01", {"fuel-state": [2, 0], "fuel-fuel-flow": [3, 1]}
+            ),
+        }
+        chapters = {chapter["id"]: chapter for chapter in self.manifest["chapters"]}
+        index = json.loads((ROOT / "docs/examples/closed-loop/figure-index.json").read_bytes())
+        figure_records = {figure["id"]: figure for figure in index["figures"]}
+        outcomes = ("complete", "failed", "inconclusive", "unsupported")
+        for chapter_id, (task, figures) in tasks.items():
+            with self.subTest(chapter=chapter_id):
+                chapter = chapters[chapter_id]
+                counts = Counter(
+                    cell["attempts"][-1]["category"]
+                    for cell in coverage["cells"]
+                    if cell["task_name"] == task
+                )
+                limits = chapter["support_limits"]
+                self.assertEqual(chapter["figure_ids"], list(figures))
+                self.assertIn("separate local-NLP pilot report", chapter["expected_output"])
+                for figure_id, indices in figures.items():
+                    figure = figure_records[figure_id]
+                    self.assertEqual(figure["coordinate_transform"]["raw_indices"], indices)
+                    plotted = json.loads((ROOT / "docs" / figure["plotted_data_href"]).read_bytes())
+                    controllers = {run["controller_id"] for run in plotted["runs"]}
+                    self.assertTrue(all(name.startswith("native-") for name in controllers))
+                    self.assertIn(f"{len(controllers)} saved native controller runs", limits)
+                self.assertIn(f"admitted {sum(counts.values())} graphs", limits)
+                self.assertIn(", ".join(f"{counts[name]} {name}" for name in outcomes), limits)
+                self.assertNotIn("#943", chapter["summary"] + limits)
+                self.assertIn("../" + ledger, {record["href"] for record in chapter["records"]})
+
+        geometry = chapters["orbit-capstone"]["intermediate_geometry"]
+        self.assertIn("angular rate ω [rad/s]", geometry)
+        body = (ROOT / "docs/examples/learning/chapters/orbit-capstone.html").read_text()
+        self.assertIn("radius r [km] and angular rate ω [rad/s]", body)
+        self.assertNotIn("Plot r against v", body)
+
+    def test_generated_capstone_pages_match_reviewed_preservation_pins(self):
+        preservation = ROOT / "reports/published-route-preservation/manifest.json"
+        manifest = json.loads(preservation.read_bytes())
+        pins = manifest["mutable_routes_reviewed_sha256"]
+        routes = (
+            "learn/index.html", "learn/lotka-capstone.html",
+            "learn/orbit-capstone.html", "learn/fuel-capstone.html",
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            site = Path(directory)
+            learning_book.build(
+                site, figure_index_path=ROOT / "docs/examples/closed-loop/figure-index.json"
+            )
+            for route in routes:
+                with self.subTest(route=route):
+                    self.assertIn(route, manifest["mutable_routes_reviewed_separately"])
+                    self.assertEqual(hashlib.sha256((site / route).read_bytes()).hexdigest(), pins[route])
+
+    def test_campaign_tables_match_frozen_full_profile_coverage(self):
+        chapter = next(
+            item for item in self.manifest["chapters"] if item["id"] == "native-substitution-matrix"
+        )
+        raw = ROOT / "docs/examples/closed-loop/campaign-2026-11-18/raw"
+        coverage = json.loads((raw / "coverage.json").read_text())
+        supplemental = json.loads((raw / "targeted-reruns-summary.json").read_text())
+        tasks = {
+            "syn-nl-lv-01": "Lotka–Volterra",
+            "earth-orbit": "Earth orbit",
+            "syn-nl-fuel-01": "Fuel transfer",
+        }
+        outcomes = ("complete", "failed", "inconclusive", "unsupported")
+        counts = {name: Counter() for name in tasks}
+        for cell in coverage["cells"]:
+            counts[cell["task_name"]][cell["attempts"][-1]["category"]] += 1
+        summary = coverage["outcomes"]
+        tables = {table["label"]: table for table in chapter["mathematical_tables"]}
+        graph_table = tables["Final graph outcomes by task"]
+        self.assertEqual(graph_table["columns"], ["task", "admitted", *outcomes])
+        expected_rows = [
+            [label, str(sum(counts[task].values())), *(str(counts[task][name]) for name in outcomes)]
+            for task, label in tasks.items()
+        ]
+        expected_rows.append([
+            "Total",
+            str(summary["admitted_graphs"]),
+            *(str(summary["by_graph_outcome"][name]) for name in outcomes),
+        ])
+        self.assertEqual(graph_table["rows"], expected_rows)
+        self.assertEqual(dict(tables["Campaign accounting"]["rows"]), {
+            "admitted and attempted full-profile graphs": str(summary["attempted_graphs"]),
+            "full-profile attempt records including retries": str(summary["attempt_rows"]),
+            "completed reruns in the separate compatible profile": str(supplemental["outcomes"]["complete"]),
+            "source-incompatible candidates with recorded reasons": str(summary["incompatible_candidates"]),
+            "duplicate catalogue graph references": str(summary["duplicate_catalogue_references"]),
+        })
 
     def test_source_permalinks_bind_to_the_executed_example_bytes(self):
         prefix = "https://github.com/butahlecoq/controlled-systems-lab/blob/"
@@ -638,7 +738,7 @@ Q subset E; E subset [-sqrt(2),sqrt(2)]^2; Q is [-1,1]^2
                 "native-substitution-matrix": [
                     "Retained graph layers and selected policy path",
                     "I_ret[k] = F_ret[k] ∩ B_ret[k]",
-                    "498",
+                    "<td>Total</td><td>513</td><td>483</td><td>7</td><td>15</td><td>8</td>",
                     "513",
                 ],
                 "controller-composition": [

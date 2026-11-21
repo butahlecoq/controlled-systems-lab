@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import hashlib
 import json
-from pathlib import Path
 import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
-from unittest.mock import patch
 import zipfile
+from pathlib import Path
+from unittest.mock import patch
 
 from scripts.reports import pages_route_retirement as retirement
 
@@ -18,43 +18,83 @@ class PagesRouteRetirementTests(unittest.TestCase):
     def test_real_finalizer_cli_accepts_staged_closed_loop_pilot_producers(self) -> None:
         repo = Path(__file__).resolve().parents[2]
         frozen_source = repo / "reports/closed-loop-pilot/closed-loop-pilot-v1"
-        frozen_before = {path.relative_to(frozen_source).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
-                         for path in frozen_source.rglob("*") if path.is_file()}
+        frozen_before = {
+            path.relative_to(frozen_source).as_posix(): hashlib.sha256(
+                path.read_bytes()
+            ).hexdigest()
+            for path in frozen_source.rglob("*")
+            if path.is_file()
+        }
         frozen_zip_before = hashlib.sha256(
-            (frozen_source.parent / "closed-loop-pilot-v1.zip").read_bytes()).hexdigest()
+            (frozen_source.parent / "closed-loop-pilot-v1.zip").read_bytes()
+        ).hexdigest()
         with tempfile.TemporaryDirectory() as temporary:
             site = Path(temporary) / "site"
             (site / "examples").mkdir(parents=True)
             shutil.copyfile(repo / "docs/examples/examples.css", site / "examples/examples.css")
             (site / "index.html").write_text(
                 '<!doctype html><html><body><a href="examples/index.html">Examples</a></body></html>',
-                encoding="utf-8")
+                encoding="utf-8",
+            )
             (site / "examples/index.html").write_text(
                 '<!doctype html><html><body><nav><a href="../index.html">Home</a></nav>'
                 '<h1 id="algorithm-coverage">Examples</h1>'
-                '<section id="analytic-illustrations"></section></body></html>', encoding="utf-8")
-            subprocess.run([sys.executable, str(repo / "scripts/reports/stage_closed_loop_pilot.py"),
-                "--site", str(site)], check=True, cwd=repo, capture_output=True, text=True)
+                '<section id="analytic-illustrations"></section></body></html>',
+                encoding="utf-8",
+            )
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(repo / "scripts/reports/stage_closed_loop_pilot.py"),
+                    "--site",
+                    str(site),
+                ],
+                check=True,
+                cwd=repo,
+                capture_output=True,
+                text=True,
+            )
             companion = (site / "examples/closed-loop-pilot-2d.html").read_text(encoding="utf-8")
             self.assertIn('href="examples.css"', companion)
             self.assertIn('aria-label="Breadcrumb"', companion)
             self.assertIn("Capture-time publication status", companion)
             self.assertIn('pre tabindex="0" role="region"', companion)
             self.assertNotIn('class="shell"', companion)
-            self.assertNotIn('<aside', companion)
-            frozen_after = {path.relative_to(frozen_source).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
-                            for path in frozen_source.rglob("*") if path.is_file()}
+            self.assertNotIn("<aside", companion)
+            frozen_after = {
+                path.relative_to(frozen_source).as_posix(): hashlib.sha256(
+                    path.read_bytes()
+                ).hexdigest()
+                for path in frozen_source.rglob("*")
+                if path.is_file()
+            }
             self.assertEqual(frozen_after, frozen_before)
-            self.assertEqual(hashlib.sha256(
-                (frozen_source.parent / "closed-loop-pilot-v1.zip").read_bytes()).hexdigest(),
-                frozen_zip_before)
-            completed = subprocess.run([sys.executable, str(repo / "scripts/reports/pages_route_retirement.py"),
-                "--site", str(site)], check=False, cwd=repo, capture_output=True, text=True)
+            self.assertEqual(
+                hashlib.sha256(
+                    (frozen_source.parent / "closed-loop-pilot-v1.zip").read_bytes()
+                ).hexdigest(),
+                frozen_zip_before,
+            )
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    str(repo / "scripts/reports/pages_route_retirement.py"),
+                    "--site",
+                    str(site),
+                ],
+                check=False,
+                cwd=repo,
+                capture_output=True,
+                text=True,
+            )
             self.assertEqual(completed.returncode, 0, completed.stderr)
             self.assertIn('"html_route_count"', completed.stdout)
-            self.assertEqual((site / "legacy-index.html").read_bytes(),
-                             retirement.legacy_root_snapshot())
-            inventory = json.loads((site / "pages-route-inventory.json").read_text(encoding="utf-8"))
+            self.assertEqual(
+                (site / "legacy-index.html").read_bytes(), retirement.legacy_root_snapshot()
+            )
+            inventory = json.loads(
+                (site / "pages-route-inventory.json").read_text(encoding="utf-8")
+            )
             expected_sources = {
                 "closed-loop-pilot-v1/index.html": "scripts/reports/render_closed_loop_pilot.py",
                 "closed-loop-pilot-v1/example-2d.html": "scripts/reports/render_closed_loop_pilot.py",
@@ -63,26 +103,43 @@ class PagesRouteRetirementTests(unittest.TestCase):
             for route, source in expected_sources.items():
                 with self.subTest(route=route):
                     producer = inventory["html_routes"][route]["producer"]
-                    self.assertEqual(producer["owner_status"], "exact" if route.startswith("closed-loop") else "gallery-aggregator")
+                    self.assertEqual(
+                        producer["owner_status"],
+                        "exact" if route.startswith("closed-loop") else "gallery-aggregator",
+                    )
                     self.assertIn(source, producer["files"])
 
     def test_real_finalizer_accepts_staged_history_functional_report(self) -> None:
         repo = Path(__file__).resolve().parents[2]
         from scripts.reports.stage_history_functional import stage
+
         with tempfile.TemporaryDirectory() as temporary:
             site = Path(temporary) / "site"
             (site / "examples").mkdir(parents=True)
             (site / "examples/index.html").write_text(
-                '<html><body><h1 id="algorithm-coverage">Examples</h1><section id="analytic-illustrations"></section></body></html>')
-            (site / "index.html").write_text('<html><body><a href="examples/index.html">Examples</a></body></html>')
+                '<html><body><h1 id="algorithm-coverage">Examples</h1><section id="analytic-illustrations"></section></body></html>'
+            )
+            (site / "index.html").write_text(
+                '<html><body><a href="examples/index.html">Examples</a></body></html>'
+            )
             (site / "examples/examples.css").write_text("body{color:inherit}")
             stage(repo / "reports/closed-loop-history-functional", site)
             completed = subprocess.run(
-                [sys.executable, str(repo / "scripts/reports/pages_route_retirement.py"),
-                 "--site", str(site)], cwd=repo, capture_output=True, text=True)
+                [
+                    sys.executable,
+                    str(repo / "scripts/reports/pages_route_retirement.py"),
+                    "--site",
+                    str(site),
+                ],
+                cwd=repo,
+                capture_output=True,
+                text=True,
+            )
             self.assertEqual(completed.returncode, 0, completed.stderr)
             inventory = json.loads((site / "pages-route-inventory.json").read_text())
-            producer = inventory["html_routes"]["closed-loop-history-functional/index.html"]["producer"]
+            producer = inventory["html_routes"]["closed-loop-history-functional/index.html"][
+                "producer"
+            ]
             self.assertEqual(producer["owner_status"], "exact")
             self.assertIn("scripts/reports/stage_history_functional.py", producer["files"])
             warm_route = "closed-loop-history-functional/warm-gap-9540-v1/index.html"
@@ -91,7 +148,8 @@ class PagesRouteRetirementTests(unittest.TestCase):
             self.assertIn("scripts/reports/history_warm_gap_report.py", warm_producer["files"])
             self.assertIn(
                 "reports/closed-loop-history-functional/warm-gap-9540-v1/render-source.py",
-                warm_producer["files"])
+                warm_producer["files"],
+            )
 
     def test_real_finalizer_accepts_initial_baseline_figure_routes(self) -> None:
         repo = Path(__file__).resolve().parents[2]
@@ -102,13 +160,23 @@ class PagesRouteRetirementTests(unittest.TestCase):
             (site / "examples").mkdir(parents=True)
             (site / "examples/index.html").write_text(
                 '<html><body><h1 id="algorithm-coverage">Examples</h1>'
-                '<section id="analytic-illustrations"></section></body></html>')
+                '<section id="analytic-illustrations"></section></body></html>'
+            )
             (site / "index.html").write_text(
-                '<html><body><a href="examples/index.html">Examples</a></body></html>')
+                '<html><body><a href="examples/index.html">Examples</a></body></html>'
+            )
             stage(repo / "reports/closed-loop-initial-baselines-v1", site)
             completed = subprocess.run(
-                [sys.executable, str(repo / "scripts/reports/pages_route_retirement.py"),
-                 "--site", str(site)], cwd=repo, capture_output=True, text=True)
+                [
+                    sys.executable,
+                    str(repo / "scripts/reports/pages_route_retirement.py"),
+                    "--site",
+                    str(site),
+                ],
+                cwd=repo,
+                capture_output=True,
+                text=True,
+            )
             self.assertEqual(completed.returncode, 0, completed.stderr)
             inventory = json.loads((site / "pages-route-inventory.json").read_text())
             expected = {
@@ -121,31 +189,44 @@ class PagesRouteRetirementTests(unittest.TestCase):
                 with self.subTest(route=route):
                     producer = inventory["html_routes"][route]["producer"]
                     self.assertEqual(producer["owner_status"], "exact")
-                    self.assertIn("scripts/reports/stage_closed_loop_initial_baselines.py",
-                                  producer["files"])
+                    self.assertIn(
+                        "scripts/reports/stage_closed_loop_initial_baselines.py", producer["files"]
+                    )
 
-    def make_site(self, root: Path, *, gallery: str | None = None,
-                  route: str | None = None) -> tuple[Path, str]:
+    def make_site(
+        self, root: Path, *, gallery: str | None = None, route: str | None = None
+    ) -> tuple[Path, str]:
         site = root / "site"
         (site / "examples").mkdir(parents=True)
         (site / "examples/examples.css").write_text("body{color:inherit}")
         route = route or next(iter(retirement.BARE_ROUTE_LESSONS))
-        (site / "catalog.json").write_text(json.dumps({
-            "schema": "csl.algorithm-report-catalog/3",
-            "reports": [{"report_id": route.split("/", 1)[0], "report_kind": "finite-feedback"}],
-        }))
+        (site / "catalog.json").write_text(
+            json.dumps(
+                {
+                    "schema": "csl.algorithm-report-catalog/3",
+                    "reports": [
+                        {"report_id": route.split("/", 1)[0], "report_kind": "finite-feedback"}
+                    ],
+                }
+            )
+        )
         (site / route).parent.mkdir(parents=True)
         (site / route).write_text("<!doctype html><html><body><h1>Saved report</h1></body></html>")
         replacement = retirement.BARE_ROUTE_REPLACEMENTS.get(route)
         if replacement:
             replacement_path = site / replacement.split("#", 1)[0]
             replacement_path.parent.mkdir(parents=True, exist_ok=True)
-            replacement_path.write_text("<!doctype html><html><body><h1>Related example</h1></body></html>")
+            replacement_path.write_text(
+                "<!doctype html><html><body><h1>Related example</h1></body></html>"
+            )
         (site / "index.html").write_text(
-            f'<!doctype html><html><body><ul><li><a href="{route}">Bare report</a></li></ul></body></html>')
-        (site / "examples/index.html").write_text(gallery or
-            f'<!doctype html><html><body><h1 id="algorithm-coverage">Examples</h1><a href="../index.html">All numerical reports ↗</a>'
-            f'<a href="../{route}">Saved report</a></body></html>')
+            f'<!doctype html><html><body><ul><li><a href="{route}">Bare report</a></li></ul></body></html>'
+        )
+        (site / "examples/index.html").write_text(
+            gallery
+            or f'<!doctype html><html><body><h1 id="algorithm-coverage">Examples</h1><a href="../index.html">All numerical reports ↗</a>'
+            f'<a href="../{route}">Saved report</a></body></html>'
+        )
         with zipfile.ZipFile(site / (route.split("/", 1)[0] + ".zip"), "w") as archive:
             archive.writestr("result.json", '{"saved":true}\n')
         return site, route
@@ -173,17 +254,25 @@ class PagesRouteRetirementTests(unittest.TestCase):
             self.assertIn("../archive.html#", (site / "examples/index.html").read_text())
             self.assertNotIn("../" + route, (site / "examples/index.html").read_text())
             self.assertIn(route, second["html_routes"])
-            self.assertEqual(second["artifact_transition"]["preserved_immutable_html"],
-                             sorted([route, "examples/finite-feedback-timing-v1.html"]))
-            self.assertEqual(second["artifact_transition"]["preserved_zip_routes"], [archive_path.name])
+            self.assertEqual(
+                second["artifact_transition"]["preserved_immutable_html"],
+                sorted([route, "examples/finite-feedback-timing-v1.html"]),
+            )
+            self.assertEqual(
+                second["artifact_transition"]["preserved_zip_routes"], [archive_path.name]
+            )
             self.assertIn('class="shell"', (site / "index.html").read_text())
             self.assertIn('class="report-home"', (site / "index.html").read_text())
             self.assertIn('class="coverage-row"', (site / "archive.html").read_text())
 
             (site / "late-report").mkdir()
-            (site / "late-report/index.html").write_text("<!doctype html><html><body>Late</body></html>")
+            (site / "late-report/index.html").write_text(
+                "<!doctype html><html><body>Late</body></html>"
+            )
             catalog = json.loads((site / "catalog.json").read_text())
-            catalog["reports"].append({"report_id": "late-report", "report_kind": "finite-feedback"})
+            catalog["reports"].append(
+                {"report_id": "late-report", "report_kind": "finite-feedback"}
+            )
             (site / "catalog.json").write_text(json.dumps(catalog))
             third = retirement.finalize(site, source_commit="fixture")
             self.assertIn("late-report/index.html", third["html_routes"])
@@ -195,7 +284,9 @@ class PagesRouteRetirementTests(unittest.TestCase):
             pinned = retirement.legacy_root_snapshot()
             retirement.finalize(site, source_commit="fixture", original_root_bytes=pinned)
             legacy = site / "legacy-index.html"
-            legacy.write_text("<!doctype html><style>body{font-family:system-ui}</style>", encoding="utf-8")
+            legacy.write_text(
+                "<!doctype html><style>body{font-family:system-ui}</style>", encoding="utf-8"
+            )
 
             retirement.finalize(site, source_commit="fixture", original_root_bytes=pinned)
 
@@ -203,14 +294,18 @@ class PagesRouteRetirementTests(unittest.TestCase):
             unverified = b"unverified root bytes"
             legacy.write_bytes(unverified)
             with self.assertRaisesRegex(ValueError, "hash-verified Pages snapshot"):
-                retirement.finalize(site, source_commit="fixture", original_root_bytes=b"forged snapshot")
+                retirement.finalize(
+                    site, source_commit="fixture", original_root_bytes=b"forged snapshot"
+                )
             self.assertEqual(legacy.read_bytes(), unverified)
 
     def test_finalization_retains_pre_augmentation_root_bytes(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             site, _ = self.make_site(Path(temporary))
             original_root = (site / "index.html").read_bytes()
-            (site / "index.html").write_bytes(original_root + b'<p id="augmentation">Added later</p>')
+            (site / "index.html").write_bytes(
+                original_root + b'<p id="augmentation">Added later</p>'
+            )
 
             retirement.finalize(site, source_commit="fixture", original_root_bytes=original_root)
 
@@ -219,8 +314,10 @@ class PagesRouteRetirementTests(unittest.TestCase):
     def test_pinned_legacy_root_snapshot_has_source_bound_provenance(self) -> None:
         snapshot = retirement.legacy_root_snapshot()
         self.assertEqual(len(snapshot), 176366)
-        self.assertEqual(hashlib.sha256(snapshot).hexdigest(),
-                         "29376974f806ad83816be9b42bda19fbeccaebc9a7ca79c291ed3d9ea3d522d2")
+        self.assertEqual(
+            hashlib.sha256(snapshot).hexdigest(),
+            "29376974f806ad83816be9b42bda19fbeccaebc9a7ca79c291ed3d9ea3d522d2",
+        )
         with self.assertRaisesRegex(ValueError, "snapshot provenance or bytes differ"):
             with patch.object(retirement, "sha256", return_value="0" * 64):
                 retirement.legacy_root_snapshot()
@@ -234,19 +331,26 @@ class PagesRouteRetirementTests(unittest.TestCase):
             report.write_text("<!doctype html><html><body><h1>Named report</h1></body></html>")
             original_root = (site / "index.html").read_bytes()
             (site / "index.html").write_text(
-                '<html><body><a href="' + route + '">Strategy summary</a></body></html>')
+                '<html><body><a href="' + route + '">Strategy summary</a></body></html>'
+            )
 
-            result = retirement.finalize(site, source_commit="fixture", original_root_bytes=original_root)
+            result = retirement.finalize(
+                site, source_commit="fixture", original_root_bytes=original_root
+            )
 
             archive = (site / "archive.html").read_text()
             self.assertIn(f'href="{route}"', archive)
             self.assertIn("archive.html", result["html_routes"][route]["inbound_html_references"])
-            self.assertEqual(result["navigation_transition"]["ordinary_archive_html_routes"].count(route), 1)
+            self.assertEqual(
+                result["navigation_transition"]["ordinary_archive_html_routes"].count(route), 1
+            )
 
     def test_bad_figure_link_fails_before_writing_navigation(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
-            site, _ = self.make_site(Path(temporary), gallery=
-                '<!doctype html><html><body><img src="missing.svg" alt="missing"></body></html>')
+            site, _ = self.make_site(
+                Path(temporary),
+                gallery='<!doctype html><html><body><img src="missing.svg" alt="missing"></body></html>',
+            )
             root_before = (site / "index.html").read_bytes()
             gallery_before = (site / "examples/index.html").read_bytes()
 
@@ -275,8 +379,10 @@ class PagesRouteRetirementTests(unittest.TestCase):
             site, route = self.make_site(Path(temporary))
             root_before = (site / "index.html").read_bytes()
             gallery_before = (site / "examples/index.html").read_bytes()
-            with patch.dict(retirement.BARE_ROUTE_REPLACEMENTS,
-                            {route: "examples/index.html#missing-example-anchor"}):
+            with patch.dict(
+                retirement.BARE_ROUTE_REPLACEMENTS,
+                {route: "examples/index.html#missing-example-anchor"},
+            ):
                 with self.assertRaisesRegex(ValueError, "replacement lesson fragment is missing"):
                     retirement.finalize(site, source_commit="fixture")
 
@@ -297,7 +403,7 @@ class PagesRouteRetirementTests(unittest.TestCase):
         repo = Path(__file__).resolve().parents[2]
         with tempfile.TemporaryDirectory() as temporary:
             site, _ = self.make_site(Path(temporary))
-            record = retirement._producer_record(site, "learn/module-catalogue.html", {}, "fixture")
+            record = retirement._producer_record(site, "learn/module-catalogue.html", {}, {})
             self.assertIn("scripts/reports/learning_book.py", record["files"])
             self.assertIn("docs/catalogue/module-composition-inventory-v1.json", record["files"])
             self.assertTrue(all((repo / source).is_file() for source in record["files"]))
@@ -306,17 +412,23 @@ class PagesRouteRetirementTests(unittest.TestCase):
         repo = Path(__file__).resolve().parents[2]
         with tempfile.TemporaryDirectory() as temporary:
             site, _ = self.make_site(Path(temporary))
-            record = retirement._producer_record(site, "learn/model-tracks.html", {}, "fixture")
+            record = retirement._producer_record(site, "learn/model-tracks.html", {}, {})
             self.assertIn("scripts/reports/learning_book.py", record["files"])
             self.assertIn("docs/catalogue/learning-book-v1.json", record["files"])
             self.assertIn("docs/examples/closed-loop/figure-index.json", record["files"])
             self.assertIn("scripts/reports/learning_model_tracks.py", record["files"])
-            self.assertIn("reports/algorithm-results/native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip", record["files"])
+            self.assertIn(
+                "reports/algorithm-results/native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip",
+                record["files"],
+            )
             manifest = json.loads((repo / "docs/catalogue/learning-book-v1.json").read_bytes())
             for chapter in manifest["chapters"]:
                 for item in chapter.get("records", []):
                     if "formulation_record" in item:
-                        self.assertIn("reports/algorithm-results/" + item["formulation_record"], record["files"])
+                        self.assertIn(
+                            "reports/algorithm-results/" + item["formulation_record"],
+                            record["files"],
+                        )
             for task_contract in (
                 "docs/contracts/closed-loop/syn-nl-lv-01.json",
                 "docs/contracts/closed-loop/earth-orbit.json",
@@ -330,7 +442,8 @@ class PagesRouteRetirementTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             site, _ = self.make_site(
                 Path(temporary),
-                gallery='<html><body><h1 id="algorithm-coverage">Examples</h1></body></html>')
+                gallery='<html><body><h1 id="algorithm-coverage">Examples</h1></body></html>',
+            )
             retirement.finalize(site, source_commit="fixture")
             gallery = (site / "examples/index.html").read_text()
 
@@ -365,7 +478,9 @@ class PagesRouteRetirementTests(unittest.TestCase):
             shutil.rmtree(examples)
             examples.symlink_to(site, target_is_directory=True)
 
-            with self.assertRaisesRegex(ValueError, "Pages output parent is not a regular directory"):
+            with self.assertRaisesRegex(
+                ValueError, "Pages output parent is not a regular directory"
+            ):
                 retirement.preflight(site)
 
 

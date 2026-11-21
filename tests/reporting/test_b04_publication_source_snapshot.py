@@ -24,7 +24,11 @@ def copy_sources(root: Path) -> None:
         target = root / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT / relative, target)
-    for relative in (publication.SNAPSHOT_ROOT, publication.SPINE_SNAPSHOT_ROOT):
+    for relative in (
+        publication.SNAPSHOT_ROOT,
+        publication.SPINE_SNAPSHOT_ROOT,
+        publication.REGISTRATION_SNAPSHOT_ROOT,
+    ):
         shutil.copytree(ROOT / relative, root / relative, dirs_exist_ok=True)
 
 
@@ -47,6 +51,8 @@ class B04PublicationSourceSnapshotTests(unittest.TestCase):
             with patch.object(publication, "ROOT", root):
                 for relative in (
                     publication.SNAPSHOT_ROOT / "scripts/reports/site.py",
+                    publication.REGISTRATION_SNAPSHOT_ROOT
+                    / Path(publication.REGISTRATION_SOURCE).name,
                     Path("docs/research/tools/check_b04_c_exact_fiber.py"),
                 ):
                     source = root / relative
@@ -68,12 +74,28 @@ class B04PublicationSourceSnapshotTests(unittest.TestCase):
             root = Path(directory)
             copy_sources(root)
             with patch.object(publication, "ROOT", root):
-                for name in publication.SPINE_SOURCE_FILES:
+                for name in (*publication.SPINE_SOURCE_FILES, publication.REGISTRATION_SOURCE):
                     source = root / name
                     source.write_bytes(source.read_bytes() + b"\n")
                 adapted = publication.adapt(BUNDLE)
                 self.assertEqual(adapted, original)
                 self.assertEqual(publication.offline_zip(BUNDLE, adapted), expected_archive)
+
+    def test_rejects_missing_or_symlinked_registration_source(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            copy_sources(root)
+            name = Path(publication.REGISTRATION_SOURCE).name
+            source = root / publication.REGISTRATION_SNAPSHOT_ROOT / name
+            exact_bytes = root / "recorded-registration.py"
+            exact_bytes.write_bytes(source.read_bytes())
+            source.unlink()
+            with patch.object(publication, "ROOT", root):
+                with self.assertRaisesRegex(ValueError, "source hash mismatch"):
+                    publication.adapt(BUNDLE)
+                source.symlink_to(exact_bytes)
+                with self.assertRaisesRegex(ValueError, "source hash mismatch"):
+                    publication.adapt(BUNDLE)
 
     def test_rejects_tampered_missing_and_symlinked_spine_source(self):
         with tempfile.TemporaryDirectory() as directory:

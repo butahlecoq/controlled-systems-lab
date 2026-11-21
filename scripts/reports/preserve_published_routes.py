@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import io
 import json
 import stat
 import zipfile
+from io import BytesIO
 from pathlib import Path, PurePosixPath
 
 SOURCE = Path(__file__).resolve().parents[2] / "reports/published-route-preservation"
@@ -47,7 +47,7 @@ def regular(path: Path) -> bytes:
     return path.read_bytes()
 
 
-def _manifest(source: Path) -> dict:
+def _load_manifest(source: Path) -> dict:
     if source.is_symlink() or not source.is_dir():
         raise ValueError("unsafe preservation source")
     manifest = json.loads(regular(source / "manifest.json"))
@@ -56,11 +56,7 @@ def _manifest(source: Path) -> dict:
     return manifest
 
 
-def payloads(source: Path = SOURCE) -> dict[str, bytes]:
-    return _payloads(source, _manifest(source))
-
-
-def _payloads(source: Path, manifest: dict) -> dict[str, bytes]:
+def _load_payloads(source: Path, manifest: dict) -> dict[str, bytes]:
     result = {}
     for archive in manifest["archives"]:
         name = safe(archive["path"]).as_posix()
@@ -68,7 +64,7 @@ def _payloads(source: Path, manifest: dict) -> dict[str, bytes]:
             raise ValueError("invalid preserved archive")
         data = checked(regular(source / name), archive)
         result[name] = data
-        with zipfile.ZipFile(io.BytesIO(data)) as bundle:
+        with zipfile.ZipFile(BytesIO(data)) as bundle:
             entries = bundle.infolist()
             if (
                 len(entries) != len(archive["members"])
@@ -105,6 +101,10 @@ def _payloads(source: Path, manifest: dict) -> dict[str, bytes]:
     return result
 
 
+def payloads(source: Path = SOURCE) -> dict[str, bytes]:
+    return _load_payloads(source, _load_manifest(source))
+
+
 def destination(site: Path, route: str) -> Path:
     path = site
     for part in safe(route).parts:
@@ -122,8 +122,8 @@ def stage(site: Path, source: Path = SOURCE) -> dict:
     site = Path(site)
     if any(p.is_symlink() for p in (site, *site.parents)) or not site.is_dir():
         raise ValueError("preservation needs an existing regular site directory")
-    manifest = _manifest(source)
-    assets = _payloads(source, manifest)
+    manifest = _load_manifest(source)
+    assets = _load_payloads(source, manifest)
     aliases = manifest["aliases"]
     replacements = {a["route"]: a.get("replaces_sha256") for a in aliases}
     # Validate the entire input and destination before changing any output.

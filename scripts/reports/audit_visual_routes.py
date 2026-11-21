@@ -82,6 +82,7 @@ FROZEN_DIAGRAM_EXCEPTIONS = {
 PUBLICATION_EXPORT_ROUTES = {
     "scripts/reports/stage_mpc_crossover.py",
     "scripts/reports/stage_native_source_constrained_mpc.py",
+    "scripts/reports/stage_native_history_strategies.py",
     "scripts/reports/stage_native_model_tracking_first_pass.py",
     "scripts/reports/stage_native_row_scaling_diagnostic.py",
     "scripts/reports/stage_native_extended_models.py",
@@ -279,6 +280,7 @@ SAVED_DATA_COMPANION_RENDERERS = {
     "benchmarks/reporting/review05/render_constraint_ladder.py",
 }
 FROZEN_COMPANIONS = {
+    "catalogue-ring-initial-support-v1": "examples/catalogue-ring-initial-support-v1/index.html",
     "catalogue-forward-reachability-v1": "examples/catalogue-forward-reachability-v1/index.html",
     "catalogue-feasible-history-v1": "examples/catalogue-feasible-history-v1/index.html",
     "catalogue-exact-support-v1": "examples/catalogue-exact-support-v1/index.html",
@@ -310,6 +312,8 @@ FROZEN_COMPANIONS = {
     "lotka-volterra-sampled-20261023": "examples/lotka-volterra-sampled-v1.html",
 }
 FROZEN_REVIEWED_ROUTES = {
+    "catalogue-ring-initial-support-v1":
+        "reviewed: projected feasible zero-control history and fixed stage-zero support line",
     "catalogue-backward-reachability-v1":
         "reviewed: all four battery stages show forward and backward rectangles, intersections and the trajectory",
     "catalogue-exact-support-v1":
@@ -545,6 +549,8 @@ def build(root: Path = ROOT) -> dict:
                     "catalogue-forward-reachability-v1/platoon-forward.svg",
                     "catalogue-feasible-history-v1/index.html",
                     "catalogue-feasible-history-v1/battery-history-projections.svg",
+                    "catalogue-ring-initial-support-v1/index.html",
+                    "catalogue-ring-initial-support-v1/initial-support.svg",
                     "catalogue-exact-support-v1/index.html",
                     "catalogue-exact-support-v1/building-budget-projection.svg",
                     "catalogue-backward-reachability-v1/index.html",
@@ -557,6 +563,8 @@ def build(root: Path = ROOT) -> dict:
                     "mpc-crossover-6b7308c4/index.html",
                     "native-source-constrained-mpc-v1/index.html",
                     "native-source-constrained-mpc-v1/platoon.svg",
+                    "native-history-strategies-d57739b3/index.html",
+                    "native-history-strategies-d57739b3/figures/lotka-polytope.svg",
                     "mpc-crossover-6b7308c4/feedback-geometry.svg",
                     "mpc-crossover-6b7308c4/deployment-time.svg",
                     "discrete-mpc-2d.html", "discrete-mpc-2d.svg", "discrete-mpc-2d.json",

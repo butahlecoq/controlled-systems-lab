@@ -2,6 +2,8 @@
 
 import importlib
 import json
+import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -104,8 +106,9 @@ class CatalogueForwardPublicationTests(unittest.TestCase):
                 path.write_bytes(content)
             ledger = json.loads(presentation.REGISTRY.read_bytes())
             page = "examples/" + entry["page"]
-            [record] = [item for item in ledger["routes"] if item["route"] == page]
-            presentation_audit = presentation.audit_site(site, {"routes": [record]})
+            audited_pages = {page, f"examples/{stage.RING_INITIAL_SUPPORT}/index.html"}
+            records = [item for item in ledger["routes"] if item["route"] in audited_pages]
+            presentation_audit = presentation.audit_site(site, {"routes": records})
             self.assertTrue(presentation_audit["passed"], presentation_audit["findings"])
             index = site / "index.html"
             index.write_text("<ul></ul>", encoding="utf-8")
@@ -116,6 +119,66 @@ class CatalogueForwardPublicationTests(unittest.TestCase):
             self.assertEqual(archive_entry.commit, stage.FEASIBLE_HISTORY.source_commit)
             for _, path in archive_entry.links:
                 self.assertTrue((site / path).is_file(), path)
+
+    def test_ring_certificate_replays_from_the_offline_companion(self) -> None:
+        files, _, card = stage.build_feasible_history(ROOT)
+        route = stage.RING_INITIAL_SUPPORT
+        archive_path = f"{route}/{route}.zip"
+        self.assertIn(archive_path, card)
+        self.assertIn(f"{route}/index.html", card)
+        original = stage.HISTORY_EVIDENCE
+        self.assertEqual(
+            files[f"{route}/{original}"], files[f"{stage.FEASIBLE_HISTORY.route}/{original}"]
+        )
+        with (
+            ZipFile(BytesIO(files[archive_path])) as archive,
+            tempfile.TemporaryDirectory() as directory,
+        ):
+            names = {
+                path.removeprefix(f"{route}/") for path in files if path.startswith(f"{route}/")
+            }
+            self.assertEqual(set(archive.namelist()), names - {f"{route}.zip"})
+            for name in archive.namelist():
+                self.assertEqual(archive.read(name), files[f"{route}/{name}"])
+            archive.extractall(directory)
+            saved = Path(directory)
+            replay = subprocess.check_output([sys.executable, "verify_support.py"], cwd=saved)
+            self.assertEqual(replay, archive.read("certificate.json"))
+            result = json.loads(replay)
+            self.assertEqual(result["native_status"], "undetermined")
+            self.assertEqual(result["certificate_status"], "exact-optimal")
+            self.assertEqual(result["support"], "13914569883186085/72057594037927936")
+            page = (saved / "index.html").read_text(encoding="utf-8")
+            self.assertEqual(presentation.inspect_html(page), [])
+            for asset in (
+                "examples.css",
+                "verify_support.py",
+                "certificate.json",
+                original,
+                "initial-support.svg",
+                "plot_support.py",
+                "manifest.json",
+            ):
+                self.assertIn(f'="{asset}"', page)
+                self.assertTrue((saved / asset).is_file())
+            (saved / original).write_bytes(b"invalid archive")
+            rejected = subprocess.run(
+                [sys.executable, "verify_support.py"], cwd=saved, capture_output=True, check=False
+            )
+            self.assertNotEqual(rejected.returncode, 0)
+            self.assertIn(b"Unexpected input archive SHA-256", rejected.stderr)
+
+    def test_ring_stager_rejects_a_modified_figure(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = Path(directory)
+            relative = Path("reports/algorithm-results")
+            for route in (stage.FEASIBLE_HISTORY.route, stage.RING_INITIAL_SUPPORT):
+                shutil.copytree(ROOT / relative / route, fixture / relative / route)
+            (fixture / relative / stage.RING_INITIAL_SUPPORT / "initial-support.svg").write_bytes(
+                b"<svg/>"
+            )
+            with self.assertRaisesRegex(ValueError, "asset digest differs: initial-support.svg"):
+                stage.build_feasible_history(fixture)
 
     def test_exact_support_keeps_the_refusals_and_primal_dual_certificates(self) -> None:
         files, [entry], card = stage.build_exact_support(ROOT)
