@@ -38,10 +38,16 @@ class B04NativeSmokeCompanionTests(unittest.TestCase):
         manifest_path = smoke / "manifest.json"
         original = attempts.read_text(encoding="utf-8")
         manifest = json.loads(manifest_path.read_bytes())
-        for invalid in (17, "1234", [float("nan"), 1, 2, 3], [True, 1, 2, 3]):
-            with self.subTest(state=invalid):
+        corrupted = [
+            ("state", invalid) for invalid in (17, "1234", [float("nan"), 1, 2, 3], [True, 1, 2, 3])
+        ] + [("trajectory", None), ("trajectory", [])]
+        for target, invalid in corrupted:
+            with self.subTest(target=target, value=invalid):
                 rows = [json.loads(line) for line in original.splitlines() if line.strip()]
-                rows[0]["trajectory"]["states"][0] = invalid
+                if target == "trajectory":
+                    rows[0]["trajectory"] = invalid
+                else:
+                    rows[0]["trajectory"]["states"][0] = invalid
                 raw = ("\n".join(json.dumps(row) for row in rows) + "\n").encode()
                 attempts.write_bytes(raw)
                 manifest["attempts_sha256"] = hashlib.sha256(raw).hexdigest()
@@ -61,3 +67,25 @@ class B04NativeSmokeCompanionTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "B04 exact saved witness"):
                     companion.build(STYLE)
                 self.plot.assert_not_called()
+
+    def test_exports_the_exact_check_bytes_that_were_validated(self):
+        sources = Path("scripts/reports/mpc01")
+        for name in ("b04_native_smoke_projection.py", "b04_projection_example.py"):
+            target = self.root / sources / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(ROOT / sources / name, target)
+
+        path = self.evidence / "exact-check-report.json"
+        checked_bytes = path.read_bytes()
+
+        def replace_after_validation(case, reference, rows, style_path, output):
+            path.write_bytes(b"contents replaced during rendering")
+            (output / "geometry.svg").write_bytes(b"test SVG")
+            (output / "geometry.png").write_bytes(b"test PNG")
+            return {}
+
+        self.plot.side_effect = replace_after_validation
+        files, _, _ = companion.build(STYLE)
+        self.assertEqual(files["control-witness/b04-native-smoke-exact-check.json"], checked_bytes)
+        evidence = json.loads(files["control-witness/b04-native-smoke-evidence.json"])
+        self.assertEqual(evidence["exact_check_sha256"], hashlib.sha256(checked_bytes).hexdigest())

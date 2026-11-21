@@ -106,8 +106,8 @@ def _validate(root: Path) -> tuple[dict, dict, list[dict], dict, dict[str, bytes
     if len(rows) != manifest["attempt_count"]:
         raise ValueError("B04 attempt count differs from its manifest")
     for row in rows:
-        trajectory = row.get("trajectory", {})
-        states = trajectory.get("states", [])
+        trajectory = row.get("trajectory")
+        states = trajectory.get("states") if isinstance(trajectory, dict) else None
         diagnostics = row.get("original_data_diagnostics", {})
         residuals = [
             diagnostics.get(name)
