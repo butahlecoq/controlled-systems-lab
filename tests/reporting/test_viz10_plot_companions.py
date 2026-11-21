@@ -14,6 +14,31 @@ import viz10_plot_companions as renderer  # noqa: E402
 
 
 class Viz10SavedPlotCompanionTests(unittest.TestCase):
+    def assert_manifest_matches_gallery(self, out: Path) -> None:
+        manifest = json.loads((out / "manifest.json").read_bytes())
+        self.assertEqual(manifest["schema"], "csl.viz10-gallery/1")
+        self.assertEqual(manifest["quantitative_axis_policy"], "csl-report-quantitative-v1")
+        assets = {path.name for path in out.iterdir() if path.is_file()} - {
+            "index.html",
+            "manifest.json",
+        }
+        self.assertEqual(set(manifest["figures"]), assets)
+        for suffix in (".svg", ".png", "-export.json"):
+            self.assertEqual(sum(name.endswith(suffix) for name in assets), 15)
+        self.assertEqual(
+            manifest["index_sha256"], hashlib.sha256((out / "index.html").read_bytes()).hexdigest()
+        )
+        recorded_sources = {}
+        for name, expected in manifest["figures"].items():
+            payload = (out / name).read_bytes()
+            self.assertEqual(hashlib.sha256(payload).hexdigest(), expected, name)
+            if name.endswith("-export.json"):
+                recorded_sources.update(json.loads(payload)["sources"])
+        self.assertEqual(len(recorded_sources), 9)
+        self.assertEqual(manifest["inputs"], recorded_sources)
+        for path, expected in recorded_sources.items():
+            self.assertEqual(hashlib.sha256((ROOT / path).read_bytes()).hexdigest(), expected, path)
+
     def test_fuel_figure_coordinates_match_saved_four_state_rows(self):
         b07_path = ROOT / "reports/algorithm-results/b07-owner-approved-eight-case-v1/results.jsonl"
         b09_path = (
@@ -109,15 +134,7 @@ class Viz10SavedPlotCompanionTests(unittest.TestCase):
             self.assertEqual(plotted_fuel_rows, expected_fuel_rows)
             self.assertEqual(len(plotted_fuel_rows), 20)
 
-            manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
-            self.assertEqual(manifest["schema"], "csl.viz10-gallery/1")
-            self.assertEqual(manifest["quantitative_axis_policy"], "csl-report-quantitative-v1")
-            self.assertEqual(
-                len([name for name in manifest["figures"] if name.endswith(".svg")]), 15
-            )
-            self.assertEqual(
-                len([name for name in manifest["figures"] if name.endswith(".png")]), 15
-            )
+            self.assert_manifest_matches_gallery(out)
 
             b07 = (out / "b07-b07-reconstruction-s0-l0-d0.svg").read_text(encoding="utf-8")
             self.assertIn("Oxidizer flow x₁ (kg/s)", b07)
@@ -131,14 +148,6 @@ class Viz10SavedPlotCompanionTests(unittest.TestCase):
             self.assertIn("Receding-horizon replay terminal state", b09)
             self.assertIn("no projected hull is recomputed", b09.lower())
 
-            for path, expected_hash in manifest["inputs"].items():
-                self.assertEqual(
-                    hashlib.sha256((ROOT / path).read_bytes()).hexdigest(), expected_hash, path
-                )
-            for name, expected_hash in manifest["figures"].items():
-                self.assertEqual(
-                    hashlib.sha256((out / name).read_bytes()).hexdigest(), expected_hash, name
-                )
             page = (out / "index.html").read_text(encoding="utf-8")
             self.assertIn(
                 "../../issue6-b07-reference-a394915af10636430cdcd757d95a9d987eaa6c4c0b742bef7ba1aa04638a2cdd/index.html",
@@ -158,19 +167,7 @@ class Viz10SavedPlotCompanionTests(unittest.TestCase):
             )
 
     def test_checked_in_manifest_describes_the_published_gallery(self):
-        published = ROOT / "docs/examples/viz10"
-        manifest = json.loads((published / "manifest.json").read_bytes())
-        self.assertNotIn("manifest.json", manifest["figures"])
-        self.assertEqual(
-            manifest["index_sha256"],
-            hashlib.sha256((published / "index.html").read_bytes()).hexdigest(),
-        )
-        for name, expected in manifest["figures"].items():
-            self.assertEqual(
-                hashlib.sha256((published / name).read_bytes()).hexdigest(), expected, name
-            )
-        for name, expected in manifest["inputs"].items():
-            self.assertEqual(hashlib.sha256((ROOT / name).read_bytes()).hexdigest(), expected, name)
+        self.assert_manifest_matches_gallery(ROOT / "docs/examples/viz10")
 
     def test_rerender_keeps_manifest_stable_in_an_existing_directory(self):
         with tempfile.TemporaryDirectory() as temporary:
