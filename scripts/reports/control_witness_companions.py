@@ -370,7 +370,7 @@ def _exp02_control_family_companion(style: Path) -> tuple[dict[str, bytes], str,
         },
     }
     scenario_keys = {"schema", "id", "horizon", "model", "initial_state", "controls", "objective"}
-    records = {}
+    event_details: dict[str, tuple[str, int]] = {}
     for scenario_id, properties in expected.items():
         scenario = scenarios[scenario_id]
         if (
@@ -408,12 +408,7 @@ def _exp02_control_family_companion(style: Path) -> tuple[dict[str, bytes], str,
             raise ValueError(
                 "Exp-02 paired-profile saved family evidence is incomplete: " + scenario_id
             )
-        records[scenario_id] = {
-            "scenario": scenario,
-            "rows": rows,
-            "event_name": event_name,
-            "measured_trials": len(measured),
-        }
+        event_details[scenario_id] = (event_name, len(measured))
 
     projections = (
         (
@@ -467,9 +462,9 @@ def _exp02_control_family_companion(style: Path) -> tuple[dict[str, bytes], str,
     outputs = {}
     articles = []
     for scenario_id, stem_id, title, description, series in projections:
-        item = records[scenario_id]
+        event_name, measured_trials = event_details[scenario_id]
         outputs[f"control-witness/exp02-{stem_id}-scenario.json"] = raw[f"{scenario_id}.json"]
-        outputs[f"control-witness/exp02-{stem_id}-events.jsonl"] = raw[item["event_name"]]
+        outputs[f"control-witness/exp02-{stem_id}-events.jsonl"] = raw[event_name]
         document = {
             "schema": "csl.saved-geometric-plot/1",
             "title": title,
@@ -491,10 +486,10 @@ def _exp02_control_family_companion(style: Path) -> tuple[dict[str, bytes], str,
             "schema": "csl.control-witness-exp02-family/1",
             "scenario_id": scenario_id,
             "scenario_sha256": hashes[f"{scenario_id}.json"],
-            "saved_profile_events_sha256": hashes[item["event_name"]],
+            "saved_profile_events_sha256": hashes[event_name],
             "frozen_index_sha256": hashes["index.html"],
             "frozen_renderer_sha256": hashes["render_report.py"],
-            "measured_trials": item["measured_trials"],
+            "measured_trials": measured_trials,
             "analytic_relation": description,
             "displayed_sets": {
                 "feasible_control_square": [[0, 0], [1, 0], [1, 1], [0, 1]],
@@ -706,7 +701,7 @@ def _b04_repeated_companion(style: Path) -> tuple[dict[str, bytes], str, dict]:
             "schema": "csl.saved-geometric-plot/1",
             "title": f"B04 repeated benchmark · {slug} projection",
             "description": (
-                f"Exact saved witness and one representative cold trajectory per native solver. "
+                "Exact saved witness and one representative cold trajectory per native solver. "
                 "Each solver path was selected from five cold repetitions by proximity to its median solve time; "
                 "it is an individual path, not an average. Solver residual evidence remains inconclusive."
             ),
@@ -1489,7 +1484,9 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
                         if sample["label"] == strategy
                     ],
                 }
-                for strategy, color in zip(paired["strategies"], ("#b23b33", "#2367a8"))
+                for strategy, color in zip(
+                    paired["strategies"], ("#b23b33", "#2367a8"), strict=False
+                )
             ]
         document = {
             "schema": "csl.saved-geometric-plot/1",
