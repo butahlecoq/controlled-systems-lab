@@ -27,6 +27,25 @@ class ClosedLoopAttemptRecordTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.temporary.cleanup()
 
+    def test_native_retry_checkpoints_retain_each_raw_exchange(self):
+        saved = {}
+        first = dict(requested_provider="ipopt", state="prepared", request_raw='{"provider":"ipopt"}\n')
+        capture = dict(capture_kind="bridge-exchange", native_strategy_attempts=[first])
+        prepared = persist_native_capture(self.attempt, 2, capture, saved)
+        first.update(state="returned", response_raw='{"status":"failed"}\n')
+        second = dict(requested_provider="mumps", state="prepared", request_raw='{"provider":"mumps"}\n')
+        capture["native_strategy_attempts"] = [first, second]
+        retried = persist_native_capture(self.attempt, 2, capture, saved)
+        before, _ = read_native_capture_metadata(self.attempt, prepared)
+        after, paths = read_native_capture_metadata(self.attempt, retried)
+        self.assertEqual(before["native_strategy_attempts"][0]["state"], "prepared")
+        self.assertEqual(after["native_strategy_attempts"][1]["state"], "prepared")
+        self.assertEqual(paths["strategy-0-response"].read_text(), first["response_raw"])
+        self.assertEqual(paths["strategy-1-request"].read_text(), second["request_raw"])
+        paths["strategy-0-response"].write_text('{"status":"forged"}\n')
+        with self.assertRaisesRegex(ValueError, "payload reference"):
+            read_native_capture_metadata(self.attempt, retried)
+
     def test_selective_reader_string_scan_work_is_bounded_by_record_size(self):
         record = self.attempt / "many-small-strings.json"
         record.write_text(json.dumps({"keep": 7, "omit": ["short" for _ in range(2000)],

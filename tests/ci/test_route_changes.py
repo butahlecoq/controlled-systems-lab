@@ -95,6 +95,22 @@ class RoutingTests(unittest.TestCase):
         self.commit()
         self.assertEqual(self.route(), ("true", "true"))
 
+    def test_pages_composer_and_python_quality_pr_runs_reporting_only(self):
+        # Complete PR #1111 diff at 224cad7804bfdaa162ebfb1f2affae8aafea476f.
+        for path in (
+            ".github/workflows/python-quality.yml",
+            "pyproject.toml",
+            "scripts/reports/augment_pages_bundle.py",
+            "tests/reporting/test_pages_augmentation_aggregation.py",
+        ):
+            self.write(path, "Pages composition or Python quality")
+        self.commit()
+        self.assertEqual(self.route(), ("false", "true"))
+
+        self.write("src/existing.cpp", "mixed Pages and native change")
+        self.commit()
+        self.assertEqual(self.route(), ("true", "true"))
+
     def test_publication_data_roots_include_archived_source_not_live_drivers(self):
         self.write("reports/published-route-preservation/reviewed-v2/raw.zip", "saved")
         self.write(

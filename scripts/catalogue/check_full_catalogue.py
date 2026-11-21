@@ -98,7 +98,7 @@ def check_current_factory_rows(rows: list[dict], root: Path) -> None:
             assert graph["graph_id"] not in expected
             expected[graph["graph_id"]] = (manifest, graph, path)
 
-    assert len(expected) == 68
+    assert len(expected) == 98
     assert {row["graph_id"] for row in rows} == set(expected)
     assert len({row["graph_id"] for row in rows}) == len(rows)
     assert len({row["graph_fingerprint"] for row in rows}) == len(rows)
@@ -261,9 +261,9 @@ def main() -> int:
     all_controllers = output["closed_loop_controller_candidates"]
     current_factory_rows = [row for row in all_controllers if "catalogue_source" in row]
     controllers = [row for row in all_controllers if "catalogue_source" not in row]
-    assert len(all_controllers) == 3386
+    assert len(all_controllers) == 3416
     assert len(controllers) == 3318
-    assert len(current_factory_rows) == 68
+    assert len(current_factory_rows) == 98
     assert {row["controller_route"] for row in controllers} == EXPECTED_ROUTES
     assert len({row["graph_id"] for row in all_controllers}) == len(all_controllers)
     assert len({row["graph_fingerprint"] for row in all_controllers}) == len(all_controllers)
@@ -276,7 +276,7 @@ def main() -> int:
         sum(row["controller_route"] == "native_graph_policy" for row in current_factory_rows) == 30
     )
     assert (
-        sum(row["controller_route"] == "continuous_history" for row in current_factory_rows) == 23
+        sum(row["controller_route"] == "continuous_history" for row in current_factory_rows) == 53
     )
     assert sum(row["controller_route"] == "native_fixed_tail" for row in current_factory_rows) == 15
     check_current_factory_rows(current_factory_rows, root)
@@ -301,7 +301,7 @@ def main() -> int:
         )
         for row in current_factory_rows
     }
-    assert len(current_identities) == 68
+    assert len(current_identities) == 98
     for row in controllers:
         contract = contracts[row["task_id"]]
         assert row["task_contract_sha256"]
@@ -678,7 +678,7 @@ def main() -> int:
         else "2 source-bound external prepares"
     )
     print(
-        f"full finite catalogue passed: 3,318 historical controller tuples plus 68 source-bound factory identities (runtime preparation not attempted), 45 predecessor/representation/terminal-LP tuples, 24 full-task legacy/QuickHull choices, {mpc11_count}"
+        f"full finite catalogue passed: 3,318 historical controller tuples plus {len(current_factory_rows)} source-bound factory identities (runtime preparation not attempted), 45 predecessor/representation/terminal-LP tuples, 24 full-task legacy/QuickHull choices, {mpc11_count}"
     )
     return 0
 

@@ -744,6 +744,13 @@
       "witness": "Frozen exact predecessor certificates and battery all-stage geometry"
     },
     {
+      "route": "examples/catalogue-finite-action-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/catalogue-finite-action-v1/index.html",
+      "sha256": "ff236f0f9265b41b61c3d01d9281cdf54cfd83029b904a1f7af2b8d94a34f19a",
+      "witness": "Frozen catalogue finite-action outcomes and stagewise projection of the pair shear"
+    },
+    {
       "route": "examples/catalogue-exact-support-v1/index.html",
       "disposition": "frozen",
       "owner": "reports/algorithm-results/catalogue-exact-support-v1/index.html",
@@ -765,6 +772,13 @@
       "witness": "Frozen reachability sweep from CSL SDK v0.1.1; retained source reports/algorithm-results/catalogue-forward-reachability-v1/index.html"
     },
     {
+      "route": "examples/catalogue-ring-initial-support-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/catalogue-ring-initial-support-v1/index.html",
+      "sha256": "f9328690b8647d408fa8f8af2e91953a5979256b41caefe6824cf1fed5e25faf",
+      "witness": "Exact feasible witness and fixed-initial-state support for model 30"
+    },
+    {
       "route": "examples/mpc-crossover-6b7308c4/index.html",
       "disposition": "maintained",
       "owner": "scripts/reports/stage_mpc_crossover.py"
@@ -775,6 +789,13 @@
       "owner": "reports/algorithm-results/native-source-constrained-mpc-v1/index.html",
       "sha256": "f4ace781c2b39154e7dcde5c6cd570b67f2db0ee0ce042cb49072d8e1478d507",
       "witness": "The source-only archive and SHA-256 inventory in reports/algorithm-results/native-source-constrained-mpc-v1"
+    },
+    {
+      "route": "examples/native-history-strategies-d57739b3/index.html",
+      "disposition": "frozen",
+      "owner": "scripts/reports/stage_native_history_strategies.py",
+      "sha256": "a984a37b356636238b94ef85db0380203cbce6c3297edb11cd29c6eb7f64261f",
+      "witness": "Byte-identical HTML in the native-history-strategies-d57739b3 offline archive"
     },
     {
       "route": "examples/native-discrete-models.html",
