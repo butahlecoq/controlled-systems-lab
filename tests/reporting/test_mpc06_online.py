@@ -47,6 +47,43 @@ class OnlineTubeTests(unittest.TestCase):
         self.assertEqual(receipt["verification"]["status"], "verified")
         self.assertNotEqual(receipt["checked_sources"], ONLINE_EVIDENCE.tool_bindings())
 
+    def test_live_renderer_authenticates_receipt_snapshot_before_writing(self):
+        bundle = P.parents[3] / "reports/algorithm-results/mpc06-online-anchor-v1"
+        with tempfile.TemporaryDirectory() as folder:
+            receipt = Path(folder) / "verification-v2.json"
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(P.with_name("check.py")),
+                    str(bundle),
+                    "--receipt-output",
+                    str(receipt),
+                ],
+                check=True,
+                capture_output=True,
+            )
+            original_read = Path.read_bytes
+            stale = json.loads(original_read(receipt))
+            stale["verification"]["completed_native_qps"] = float(
+                stale["verification"]["completed_native_qps"]
+            )
+            stale_snapshot = iter([json.dumps(stale).encode()])
+
+            def read_with_replacement(path):
+                if path == receipt:
+                    replacement = next(stale_snapshot, None)
+                    if replacement is not None:
+                        return replacement
+                return original_read(path)
+
+            output = Path(folder) / "rendered"
+            with (
+                mock.patch.object(Path, "read_bytes", read_with_replacement),
+                self.assertRaisesRegex(ValueError, "verification receipt changed"),
+            ):
+                ONLINE_RENDER.render(bundle, receipt, output)
+            self.assertFalse(output.exists())
+
     def test_live_renderer_refuses_archived_receipt_before_creating_output(self):
         report = P.parents[3] / "reports/algorithm-results/mpc06-online-anchor-portable-v3"
         bundle = report / "checked-inputs/mpc06-online-anchor-v1"

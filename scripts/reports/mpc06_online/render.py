@@ -13,15 +13,16 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING or __package__:
-    from .evidence import TOOLS, checked_sources, digest, json_value, load_sources
+    from .evidence import TOOLS, checked_sources, digest, json_value, load_sources, receipt_id
 else:
-    from evidence import TOOLS, checked_sources, digest, json_value, load_sources
+    from evidence import TOOLS, checked_sources, digest, json_value, load_sources, receipt_id
 
 
 def render(bundle, receipt_path, output):
     receipt_bytes = receipt_path.read_bytes()
     record, receipt = checked_sources(bundle, receipt_path)
-    if json_value(receipt_bytes) != receipt:
+    snapshot = json_value(receipt_bytes)
+    if snapshot != receipt or receipt_id(snapshot) != receipt["receipt_sha256"]:
         raise ValueError("verification receipt changed during validation")
     has_source_guide = (Path(bundle) / "source/README.md").is_file()
     verified = receipt["verification"]
