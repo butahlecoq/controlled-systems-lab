@@ -365,25 +365,15 @@ def render_html(payload: dict) -> str:
 
 def render_svg(payload: dict) -> str:
     scenarios = list(payload["summary"].items())
-    labels = (
-        "intersection",
-        "prepare",
-        "converter ws",
-        "conversion run",
-        "LP workspace",
-        "reduction + LP",
-        "whole trial",
+    phases = (
+        ("intersection", "intersection_ns", "#3568a8"),
+        ("prepare", "prepare_ns", "#4c956c"),
+        ("converter ws", "workspace_ns", "#db8b25"),
+        ("conversion run", "conversion_run_ns", "#8b63a8"),
+        ("LP workspace", "lp_workspace_ns", "#a97842"),
+        ("reduction + LP", "reduction_ns", "#bb5353"),
+        ("whole trial", "total_ns", "#4b8f9c"),
     )
-    keys = (
-        "intersection_ns",
-        "prepare_ns",
-        "workspace_ns",
-        "conversion_run_ns",
-        "lp_workspace_ns",
-        "reduction_ns",
-        "total_ns",
-    )
-    colors = ("#3568a8", "#4c956c", "#db8b25", "#8b63a8", "#a97842", "#bb5353", "#4b8f9c")
     max_value = max(
         (phase["median"] or 0 for _, group in scenarios for phase in group["phases"].values()),
         default=0,
@@ -398,7 +388,7 @@ def render_svg(payload: dict) -> str:
     for si, (scenario, group) in enumerate(scenarios):
         y0 = 20 + si * group_height
         parts.append(f'<text class="scenario" x="8" y="{y0 + 15}">{html.escape(scenario)}</text>')
-        for phase_index, (label, key, color) in enumerate(zip(labels, keys, colors, strict=True)):
+        for phase_index, (label, key, color) in enumerate(phases):
             y = y0 + phase_top + phase_index * phase_step
             parts.append(f'<text x="8" y="{y + 13}">{label}</text>')
             value = group["phases"][key]["median"]
