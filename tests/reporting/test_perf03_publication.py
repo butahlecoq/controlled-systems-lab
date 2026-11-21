@@ -1,13 +1,14 @@
-from pathlib import Path
 import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "reports"))
+import stage_perf03
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts" / "reports"))
-import stage_perf03
 
 SOURCE = ROOT / "reports" / "algorithm-results" / stage_perf03.BUNDLE_NAME
 HARNESS_PATH = "reports/algorithm-results/tooling/syn04/strategy_b_measure.cpp"

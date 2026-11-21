@@ -5,8 +5,11 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from exp03.build_comparison_records import validate_record
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/exp03-two-points-approx-pilot-v1"
@@ -24,8 +27,6 @@ BASE_FILES = (
     "run.json",
 )
 V2_RECORDS = ("comparison-record-projection-0.json", "comparison-record-projection-1.json")
-sys.path.insert(0, str(ROOT / "scripts/reports/exp03"))
-from build_comparison_records import validate_record
 
 
 def files_for(source: Path) -> tuple[str, ...]:

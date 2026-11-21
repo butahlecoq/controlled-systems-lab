@@ -4,11 +4,10 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-from html import escape
 import json
-from pathlib import Path
 import shutil
-
+from html import escape
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORT_ID = "ext02-two-state-mixed-v1"

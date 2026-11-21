@@ -4,12 +4,11 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-from html.parser import HTMLParser
 import json
-from pathlib import Path
 import re
+from html.parser import HTMLParser
+from pathlib import Path
 from urllib.parse import urlsplit
-
 
 BUNDLE_NAME = "perf03-ts01-single-process-correlation-20261014"
 PREFIX = BUNDLE_NAME + "-"
@@ -68,7 +67,8 @@ def validate(source: Path) -> tuple[str, dict[str, bytes]]:
     recorded: dict[str, str] = {}
     for line in manifest.splitlines():
         match = re.fullmatch(r"([0-9a-f]{64})  ([A-Za-z0-9_.-]+)", line)
-        require(match is not None, "malformed PERF-03 SHA256SUMS entry")
+        if match is None:
+            raise ValueError("malformed PERF-03 SHA256SUMS entry")
         digest, name = match.groups()
         require(name not in recorded, "duplicate PERF-03 manifest entry")
         recorded[name] = digest
@@ -96,7 +96,7 @@ def validate(source: Path) -> tuple[str, dict[str, bytes]]:
     parser.feed(contents["index.html"].decode("utf-8"))
     require(not parser.external_resources, "PERF-03 HTML must be self-contained")
     require(
-        parser.links and all(link in FILES for link in parser.links),
+        bool(parser.links) and all(link in FILES for link in parser.links),
         "PERF-03 HTML link escapes bundle",
     )
     route_hash = hashlib.sha256(contents["SHA256SUMS.txt"]).hexdigest()[:16]

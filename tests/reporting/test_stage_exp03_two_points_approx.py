@@ -1,13 +1,14 @@
 import hashlib
 import json
-from pathlib import Path
 import sys
 import tempfile
 import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
+import stage_exp03_two_points_approx as stager
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports"))
-import stage_exp03_two_points_approx as stager
 
 
 class StageExp03TwoPointsTests(unittest.TestCase):

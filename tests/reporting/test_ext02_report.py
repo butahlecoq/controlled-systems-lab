@@ -3,16 +3,16 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
-from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
+import landing
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports"))
-import landing
 
 RENDERER = ROOT / "scripts/reports/ext02/render_saved.py"
 STAGER_PATH = ROOT / "scripts/reports/stage_ext02.py"
@@ -21,16 +21,18 @@ COLLECTOR_PATH = ROOT / "scripts/reports/ext02/collect.py"
 
 def load_stager():
     spec = importlib.util.spec_from_file_location("csl_ext02_test_stager", STAGER_PATH)
+    if spec is None or spec.loader is None:
+        raise ImportError("Cannot load the EXT-02 test module")
     module = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None
     spec.loader.exec_module(module)
     return module
 
 
 def load_collector():
     spec = importlib.util.spec_from_file_location("csl_ext02_test_collector", COLLECTOR_PATH)
+    if spec is None or spec.loader is None:
+        raise ImportError("Cannot load the EXT-02 test module")
     module = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None
     spec.loader.exec_module(module)
     return module
 
