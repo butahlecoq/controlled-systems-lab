@@ -9,7 +9,7 @@ The Lab builds native modules as well as research reports and package consumers.
 
 ## Decision
 
-Modules own source membership and dependencies in `Module.cmake` and their tests in `Tests.cmake`. The root includes those declarations in project scope and uses the same module order for tests. Dependency pins and package configuration are therefore shared. The module policy centralizes target mechanics. Tests consume the targets they exercise with the same public include boundary as other clients.
+Modules own source membership and dependencies in `Module.cmake` and their tests in `Tests.cmake`. The root includes those declarations in project scope and uses the same module order for tests. Dependency pins and package configuration are therefore shared. The module policy centralizes target mechanics. The shared test helper adds no product include paths. Consumer-facing tests obtain public requirements by linking targets. Tests of implementation details declare their private include paths in their own registrations.
 
 Measurement executables are private reporting targets and can require an explicitly enabled adapter. The test verifier catalogue contains test-only authorities and stays outside the package exports.
 
