@@ -3,8 +3,6 @@ include_guard(GLOBAL)
 set(CSL_DEPENDENCY_ARCHIVE_CACHE "$ENV{CSL_DEPENDENCY_ARCHIVE_CACHE}" CACHE PATH
   "Optional absolute directory for verified dependency archives; empty keeps direct downloads")
 
-# Cache raw, pinned bytes only. FetchContent still extracts each dependency into
-# its own build tree and verifies URL_HASH, including under CMP0168 NEW.
 function(csl_dependency_archive_url output name remote_url sha256)
   if(NOT CSL_DEPENDENCY_ARCHIVE_CACHE)
     set(${output} "${remote_url}" PARENT_SCOPE)
@@ -15,8 +13,6 @@ function(csl_dependency_archive_url output name remote_url sha256)
   endif()
   file(MAKE_DIRECTORY "${CSL_DEPENDENCY_ARCHIVE_CACHE}")
   set(archive "${CSL_DEPENDENCY_ARCHIVE_CACHE}/${name}-${sha256}.tar.gz")
-  # Multiple local configure processes may intentionally share these immutable
-  # hash-addressed bytes. Serialize only their publication, never build trees.
   file(LOCK "${archive}.lock" GUARD FUNCTION TIMEOUT 120)
   if(EXISTS "${archive}")
     file(SHA256 "${archive}" actual_sha256)
