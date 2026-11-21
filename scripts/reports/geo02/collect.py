@@ -10,6 +10,7 @@ import json
 import os
 import platform
 import subprocess
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, TypedDict
 
@@ -263,6 +264,21 @@ def fixture_payload(stamp="manual"):
     return finalize(payload, stamp)
 
 
+def require_driver_geometry(points: object, support: object) -> None:
+    limit = sys.float_info.max
+
+    def finite_vector(value: object) -> bool:
+        return isinstance(value, list) and all(
+            type(coordinate) in (int, float) and -limit <= coordinate <= limit
+            for coordinate in value
+        )
+
+    if not isinstance(points, list) or not all(finite_vector(point) for point in points):
+        raise ValueError("output_points must be a list of finite numerical coordinate vectors")
+    if not finite_vector(support):
+        raise ValueError("support_values must be a list of finite numbers")
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--exe", type=Path, required=True)
@@ -378,6 +394,7 @@ def main():
         if len(warmup_keys) != len(warmups) or warmup_keys != expected_warmups:
             raise ValueError("missing/duplicate warmup outcomes")
         for row in warmups:
+            require_driver_geometry(row["output_points"], row["support_values"])
             if row["status"] == "passed" and (
                 not row["oracle_passed"]
                 or not render.check_candidate_reduction(row["scenario"], row)
@@ -414,6 +431,7 @@ def main():
             support_checks = int(row["support_checks"])
             if row["oracle_passed"] not in ("true", "false"):
                 raise ValueError("invalid boolean")
+            require_driver_geometry(output_points, support_values)
             scenario = row["scenario"]
             trial: Trial = {
                 "scenario": scenario,
@@ -450,11 +468,7 @@ def main():
             not render.check_candidate_reduction(trial["scenario"], trial)
             or not render.check_oracle(trial["scenario"], trial["output_points"])
             or trial["support_checks"] != len(case["directions"])
-            or len(trial["support_values"]) != len(case["support"])
-            or any(
-                abs(float(value) - expected) > 1e-8
-                for value, expected in zip(trial["support_values"], case["support"], strict=True)
-            )
+            or not render.check_supports(trial["scenario"], trial["support_values"])
         ):
             trial["status"] = "oracle_failed"
             trial["oracle_passed"] = False
