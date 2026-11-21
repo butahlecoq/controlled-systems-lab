@@ -13,7 +13,7 @@ FIGURE = "feedback_geometry_2d.svg"
 ANCHOR = "saved-feedback-geometry-2d"
 
 
-def build(root: Path = ROOT):
+def build(root: Path = ROOT) -> tuple[dict[str, bytes], dict[str, str], str]:
     source = root / "examples" / DATA
     page = root / "examples" / PAGE
     if source.is_symlink() or page.is_symlink() or not page.is_file():
@@ -21,9 +21,10 @@ def build(root: Path = ROOT):
     manifest = source / "files.sha256"
     if manifest.is_symlink() or not manifest.is_file():
         raise ValueError("feedback example evidence manifest is missing")
-    assets = {PAGE: page.read_bytes(), f"{DATA}/files.sha256": manifest.read_bytes()}
+    manifest_bytes = manifest.read_bytes()
+    assets = {PAGE: page.read_bytes(), f"{DATA}/files.sha256": manifest_bytes}
     names = set()
-    for line in manifest.read_text(encoding="utf-8").splitlines():
+    for line in manifest_bytes.decode("utf-8").splitlines():
         digest, name = line.split("  ", 1)
         path = source / name
         parts = Path(name).parts
@@ -36,11 +37,13 @@ def build(root: Path = ROOT):
             or not path.resolve().is_relative_to(source.resolve())
             or any((source.joinpath(*parts[:i])).is_symlink() for i in range(1, len(parts) + 1))
             or not path.is_file()
-            or hashlib.sha256(path.read_bytes()).hexdigest() != digest
         ):
             raise ValueError("feedback example evidence does not match its manifest: " + name)
+        contents = path.read_bytes()
+        if hashlib.sha256(contents).hexdigest() != digest:
+            raise ValueError("feedback example evidence does not match its manifest: " + name)
         names.add(name)
-        assets[f"{DATA}/{name}"] = path.read_bytes()
+        assets[f"{DATA}/{name}"] = contents
     actual = {
         p.relative_to(source).as_posix() for p in source.rglob("*") if p.is_file() and p != manifest
     }

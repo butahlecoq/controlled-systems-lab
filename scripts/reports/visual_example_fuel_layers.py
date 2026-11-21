@@ -12,10 +12,14 @@ FIGURE = "fuel-reachability-x1-x2.png"
 
 
 def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]], str]:
-    source = Path(repository_root) / "docs/examples" / ROUTE
+    source = Path(repository_root)
+    for component in ("docs", "examples", ROUTE):
+        source /= component
+        require(not source.is_symlink(), f"linked fuel reachability source: {source}")
     require(source.is_dir(), "missing source-bound fuel reachability illustration")
     files = {}
     for path in sorted(source.iterdir()):
+        require(not path.is_symlink(), f"linked fuel reachability asset: {path}")
         if path.is_file():
             files[f"{ROUTE}/{path.name}"] = path.read_bytes()
     page = f"{ROUTE}/index.html"
