@@ -2,24 +2,28 @@ from __future__ import annotations
 
 import importlib.util
 import json
-from pathlib import Path
 import shutil
 import sys
 import tempfile
 import unittest
+from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
 
+
 def load_module(name: str, path: Path):
     spec = importlib.util.spec_from_file_location(name, path)
+    assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None
     spec.loader.exec_module(module)
     return module
 
 
-render_saved = load_module("csl_ext07_test_renderer", ROOT / "scripts/reports/ext07/render_saved.py")
+render_saved = load_module(
+    "csl_ext07_test_renderer", ROOT / "scripts/reports/ext07/render_saved.py"
+)
 stage_ext07 = load_module("csl_ext07_test_stager", ROOT / "scripts/reports/stage_ext07.py")
 collect = render_saved.collect
 
@@ -28,38 +32,80 @@ class Ext07SavedReportTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         bundles = sorted((ROOT / "reports/algorithm-results").glob("ext07-hybrid-*"))
-        cls.bundle = next((path for path in bundles if path.is_dir()), None)
+        bundle = next((path for path in bundles if path.is_dir()), None)
         cls.two_parameter_bundle = next(
-            (path for path in bundles if path.is_dir() and
-             path.name == "ext07-hybrid-two-parameter-8ad871b5ea29fc7b"), None)
-        if cls.bundle is None:
+            (
+                path
+                for path in bundles
+                if path.is_dir() and path.name == "ext07-hybrid-two-parameter-8ad871b5ea29fc7b"
+            ),
+            None,
+        )
+        if bundle is None:
             raise unittest.SkipTest("EXT-07 report bundle is created from a frozen measured source")
+        cls.bundle = bundle
+
+    def test_frozen_catalogue_keeps_the_stager_hash_after_stager_changes(self) -> None:
+        catalogue = ROOT / "reports/algorithm-results/ext07-publications.json"
+        entries = json.loads(catalogue.read_text(encoding="utf-8"))["reports"]
+        with tempfile.TemporaryDirectory() as temporary:
+            revised = Path(temporary) / "stage_ext07.py"
+            revised.write_text("# Revised stager source\n", encoding="utf-8")
+            with patch.object(stage_ext07, "__file__", str(revised)):
+                regenerated = [
+                    stage_ext07.catalog_entry(catalogue.parent / entry["report_id"])
+                    for entry in entries
+                ]
+        self.assertEqual(regenerated, entries)
 
     def test_saved_report_rebuilds_and_catalogue_binds_every_file(self) -> None:
-        self.assertEqual(render_saved.render(self.bundle, check=True)["report_id"], self.bundle.name)
+        self.assertEqual(
+            render_saved.render(self.bundle, check=True)["report_id"], self.bundle.name
+        )
         entry = stage_ext07.catalog_entry(self.bundle)
-        self.assertEqual(entry["source_commit"], collect.read_json(self.bundle / "records.json")["source_commit"])
-        self.assertEqual(entry["collector_sha256"], collect.sha(
-            (ROOT / "scripts/reports/ext07/ext07_collect.py").read_bytes()))
-        self.assertEqual(entry["zip_sha256"], collect.sha((self.bundle / (self.bundle.name + ".zip")).read_bytes()))
+        self.assertEqual(
+            entry["source_commit"], collect.read_json(self.bundle / "records.json")["source_commit"]
+        )
+        self.assertEqual(
+            entry["collector_sha256"],
+            collect.sha((ROOT / "scripts/reports/ext07/ext07_collect.py").read_bytes()),
+        )
+        self.assertEqual(
+            entry["zip_sha256"],
+            collect.sha((self.bundle / (self.bundle.name + ".zip")).read_bytes()),
+        )
 
     def test_operation_cpu_records_validate_identity_counts_and_unavailable_reasons(self) -> None:
         operations = []
-        kinds = ["initial_state", "post_state_invariant", "mode_flow",
-                 "continuous_control", "pre_reset_invariant", "transition_guard",
-                 "reset_relation", "post_state_invariant"]
+        kinds = [
+            "initial_state",
+            "post_state_invariant",
+            "mode_flow",
+            "continuous_control",
+            "pre_reset_invariant",
+            "transition_guard",
+            "reset_relation",
+            "post_state_invariant",
+        ]
         for index, kind in enumerate(kinds):
-            operations.append({
-                "kind": kind, "stage": 0 if index < 7 else 1,
-                "mode": "source" if index < 7 else "target",
-                "edge": "switch" if kind in {"transition_guard", "reset_relation"} else None,
-                "implementation_id": "csl.model.hybrid.joint-h-composer",
-                "implementation_version": "1",
-                "joint_variables": 4, "rows_added": 1, "matrix_elements_added": 4,
-                "cumulative_rows": index + 1, "cumulative_matrix_elements": (index + 1) * 4,
-                "elapsed_wall_nanoseconds": 10, "completed": True,
-                "thread_cpu": {"status": "observed", "nanoseconds": index},
-            })
+            operations.append(
+                {
+                    "kind": kind,
+                    "stage": 0 if index < 7 else 1,
+                    "mode": "source" if index < 7 else "target",
+                    "edge": "switch" if kind in {"transition_guard", "reset_relation"} else None,
+                    "implementation_id": "csl.model.hybrid.joint-h-composer",
+                    "implementation_version": "1",
+                    "joint_variables": 4,
+                    "rows_added": 1,
+                    "matrix_elements_added": 4,
+                    "cumulative_rows": index + 1,
+                    "cumulative_matrix_elements": (index + 1) * 4,
+                    "elapsed_wall_nanoseconds": 10,
+                    "completed": True,
+                    "thread_cpu": {"status": "observed", "nanoseconds": index},
+                }
+            )
         row = {"operation_observations": [[operations]]}
         self.assertIsNone(collect.validate_operation_observations(row, 1, [8]))
         summary = collect.operation_cpu_summary([row])
@@ -72,22 +118,38 @@ class Ext07SavedReportTests(unittest.TestCase):
             collect.validate_operation_observations(row, 1, [8])
 
     def test_schema_source_lists_keep_historical_bundles_readable(self) -> None:
-        self.assertEqual(collect.source_files_for_record(
-            {"schema": "csl.ext07-hybrid-profile-report/1"}), collect.LEGACY_SOURCE_FILES)
-        self.assertEqual(collect.source_files_for_record(
-            {"schema": "csl.ext07-hybrid-profile-report/2"}), collect.PROCESS_CPU_SOURCE_FILES)
-        self.assertEqual(collect.source_files_for_record(
-            {"schema": "csl.ext07-hybrid-profile-report/3"}), collect.SOURCE_FILES)
-        self.assertEqual(collect.source_files_for_record(
-            {"schema": "csl.ext07-hybrid-profile-report/4"}), collect.SOURCE_FILES)
+        self.assertEqual(
+            collect.source_files_for_record({"schema": "csl.ext07-hybrid-profile-report/1"}),
+            collect.LEGACY_SOURCE_FILES,
+        )
+        self.assertEqual(
+            collect.source_files_for_record({"schema": "csl.ext07-hybrid-profile-report/2"}),
+            collect.PROCESS_CPU_SOURCE_FILES,
+        )
+        self.assertEqual(
+            collect.source_files_for_record({"schema": "csl.ext07-hybrid-profile-report/3"}),
+            collect.SOURCE_FILES,
+        )
+        self.assertEqual(
+            collect.source_files_for_record({"schema": "csl.ext07-hybrid-profile-report/4"}),
+            collect.SOURCE_FILES,
+        )
 
     def test_provider_invocation_records_validate_and_summarize_separate_scope(self) -> None:
-        row = {"provider_invocation_observations": [[
-            {"elapsed_wall_nanoseconds": 12,
-             "process_cpu": {"status": "observed", "nanoseconds": 9}},
-            {"elapsed_wall_nanoseconds": 20,
-             "process_cpu": {"status": "observed", "nanoseconds": 16}},
-        ]]}
+        row = {
+            "provider_invocation_observations": [
+                [
+                    {
+                        "elapsed_wall_nanoseconds": 12,
+                        "process_cpu": {"status": "observed", "nanoseconds": 9},
+                    },
+                    {
+                        "elapsed_wall_nanoseconds": 20,
+                        "process_cpu": {"status": "observed", "nanoseconds": 16},
+                    },
+                ]
+            ]
+        }
         self.assertIsNone(collect.validate_provider_invocation_observations(row, 1, 2))
         summary = collect.provider_invocation_summary([row], ["left", "right"])
         self.assertEqual(summary["branches"][0]["wall_median_nanoseconds"], 12)
@@ -104,13 +166,20 @@ class Ext07SavedReportTests(unittest.TestCase):
             staged_bundle = root / self.bundle.name
             shutil.copytree(self.bundle, staged_bundle)
             catalog = root / "ext07-publications.json"
-            catalog.write_text(json.dumps({"schema": "csl.ext07-publications/1",
-                                           "reports": [stage_ext07.catalog_entry(staged_bundle)]}),
-                               encoding="utf-8")
+            catalog.write_text(
+                json.dumps(
+                    {
+                        "schema": "csl.ext07-publications/1",
+                        "reports": [stage_ext07.catalog_entry(staged_bundle)],
+                    }
+                ),
+                encoding="utf-8",
+            )
             site = root / "site"
             site.mkdir()
             (site / "index.html").write_text(
-                "<!doctype html><html lang=\"en\"><body><ul></ul></body></html>", encoding="utf-8")
+                '<!doctype html><html lang="en"><body><ul></ul></body></html>', encoding="utf-8"
+            )
             self.assertEqual(stage_ext07.stage(catalog, site), self.bundle.name)
             self.assertTrue((site / self.bundle.name / "example-2d.html").is_file())
             self.assertIn("example-2d.html", (site / "index.html").read_text(encoding="utf-8"))
@@ -121,36 +190,59 @@ class Ext07SavedReportTests(unittest.TestCase):
         scenario = record["scenario"]
         page = (self.bundle / "example-2d.html").read_text(encoding="utf-8")
         self.assertEqual(scenario["allowed_terminal_modes"], ["terminal"])
-        self.assertEqual(scenario["terminal_mode_data"], {
-            "flow": {"A": [[1]], "B": [[1]], "offset": [0]},
-            "control_set": "universal",
-            "active_stages": [1],
-            "flow_used_by_horizon": False,
-        })
-        for phrase in ("state dimension is one", "one stage", "initial mode is", "coast-to-terminal",
-                       "allowed terminal set is the singleton", "terminal-mode flow has",
-                       "universal control set", "because the horizon ends at stage 1",
-                       "mode invariants are universal",
-                       "sets (they impose no additional state restrictions)", "no external channels",
-                       "x₀=0", "u₀∈[0,1]", "x_pre∈[0,0.5]", "identity reset", "minimize x₁",
-                       "scripts/reports/ext07/capture.py", "scripts/reports/ext07/ext07_collect.py"):
+        self.assertEqual(
+            scenario["terminal_mode_data"],
+            {
+                "flow": {"A": [[1]], "B": [[1]], "offset": [0]},
+                "control_set": "universal",
+                "active_stages": [1],
+                "flow_used_by_horizon": False,
+            },
+        )
+        for phrase in (
+            "state dimension is one",
+            "one stage",
+            "initial mode is",
+            "coast-to-terminal",
+            "allowed terminal set is the singleton",
+            "terminal-mode flow has",
+            "universal control set",
+            "because the horizon ends at stage 1",
+            "mode invariants are universal",
+            "sets (they impose no additional state restrictions)",
+            "no external channels",
+            "x₀=0",
+            "u₀∈[0,1]",
+            "x_pre∈[0,0.5]",
+            "identity reset",
+            "minimize x₁",
+            "scripts/reports/ext07/capture.py",
+            "scripts/reports/ext07/ext07_collect.py",
+        ):
             self.assertIn(phrase, page)
-        self.assertLess(page.index("ext07_collect.py"), page.index("render_saved.py --bundle", page.index("Reproduce")))
+        self.assertLess(
+            page.index("ext07_collect.py"),
+            page.index("render_saved.py --bundle", page.index("Reproduce")),
+        )
         render_lines = [line for line in page.splitlines() if "render_saved.py --bundle" in line]
         self.assertEqual(len(render_lines), 2)
         self.assertIn("--check", render_lines[1])
         self.assertNotIn("--check", render_lines[0])
         self.assertIn('href="records.json"', page)
-        self.assertIn(f'href="https://github.com/butahlecoq/controlled-systems-lab/commit/{source}"', page)
-        self.assertIn(f'commit {source}', page)
+        self.assertIn(
+            f'href="https://github.com/butahlecoq/controlled-systems-lab/commit/{source}"', page
+        )
+        self.assertIn(f"commit {source}", page)
 
     def test_offline_html_allows_only_repository_commit_links(self) -> None:
         source = collect.read_json(self.bundle / "records.json")["source_commit"]
         source_url = f"https://github.com/butahlecoq/controlled-systems-lab/commit/{source}"
         stage_ext07.site.OfflineHTML(set()).feed(f'<a href="{source_url}">source</a>')
-        for url in (f"https://github.com/another/repository/commit/{source}",
-                    "https://github.com/butahlecoq/controlled-systems-lab/commit/not-a-hash",
-                    f"http://github.com/butahlecoq/controlled-systems-lab/commit/{source}"):
+        for url in (
+            f"https://github.com/another/repository/commit/{source}",
+            "https://github.com/butahlecoq/controlled-systems-lab/commit/not-a-hash",
+            f"http://github.com/butahlecoq/controlled-systems-lab/commit/{source}",
+        ):
             with self.subTest(url=url), self.assertRaises(ValueError):
                 stage_ext07.site.OfflineHTML(set()).feed(f'<a href="{url}">source</a>')
 
@@ -168,15 +260,19 @@ class Ext07SavedReportTests(unittest.TestCase):
             self.skipTest("Two-parameter bundle is created from a frozen Release capture")
         renderer = load_module(
             "csl_ext07_two_parameter_test_renderer",
-            ROOT / "scripts/reports/ext07/two_parameter_render_saved.py")
-        self.assertEqual(renderer.render(self.two_parameter_bundle, check=True)
-                         ["report_id"], self.two_parameter_bundle.name)
+            ROOT / "scripts/reports/ext07/two_parameter_render_saved.py",
+        )
+        self.assertEqual(
+            renderer.render(self.two_parameter_bundle, check=True)["report_id"],
+            self.two_parameter_bundle.name,
+        )
         record = renderer.validate(self.two_parameter_bundle)
         self.assertEqual(record["analytic"]["global_minimum"], 0)
         self.assertEqual(record["analytic"]["tied_paths"], ["enter-half", "enter-full"])
         self.assertEqual(record["measurement"]["measured_calls"], 140)
         example = (self.two_parameter_bundle / "two-control-example.html").read_text(
-            encoding="utf-8")
+            encoding="utf-8"
+        )
         self.assertIn("u0 &lt;= 0.5", example)
         self.assertIn("u0 = 0, 0 &lt;= u1 &lt;= 1", example)
         self.assertIn("two_parameter_driver.cpp", example)
@@ -193,15 +289,20 @@ class Ext07SavedReportTests(unittest.TestCase):
                 shutil.copytree(source, destination)
                 copied.append(destination)
             catalog = root / "ext07-publications.json"
-            catalog.write_text(json.dumps({
-                "schema": "csl.ext07-publications/1",
-                "reports": [stage_ext07.catalog_entry(bundle) for bundle in copied],
-            }), encoding="utf-8")
+            catalog.write_text(
+                json.dumps(
+                    {
+                        "schema": "csl.ext07-publications/1",
+                        "reports": [stage_ext07.catalog_entry(bundle) for bundle in copied],
+                    }
+                ),
+                encoding="utf-8",
+            )
             site = root / "site"
             site.mkdir()
             (site / "index.html").write_text(
-                "<!doctype html><html lang=\"en\"><body><ul></ul></body></html>",
-                encoding="utf-8")
+                '<!doctype html><html lang="en"><body><ul></ul></body></html>', encoding="utf-8"
+            )
             staged = stage_ext07.stage(catalog, site)
             self.assertEqual(staged, ",".join(bundle.name for bundle in copied))
             self.assertTrue((site / copied[0].name / "example-2d.html").is_file())
@@ -223,11 +324,13 @@ class Ext07SavedReportTests(unittest.TestCase):
             entries = [stage_ext07.catalog_entry(bundle) for bundle in copied]
             entries[1]["zip_sha256"] = "0" * 64
             catalog = root / "ext07-publications.json"
-            catalog.write_text(json.dumps({"schema": "csl.ext07-publications/1",
-                                           "reports": entries}), encoding="utf-8")
+            catalog.write_text(
+                json.dumps({"schema": "csl.ext07-publications/1", "reports": entries}),
+                encoding="utf-8",
+            )
             site = root / "site"
             site.mkdir()
-            original_index = "<!doctype html><html lang=\"en\"><body><ul></ul></body></html>"
+            original_index = '<!doctype html><html lang="en"><body><ul></ul></body></html>'
             (site / "index.html").write_text(original_index, encoding="utf-8")
             with self.assertRaises(ValueError):
                 stage_ext07.stage(catalog, site)

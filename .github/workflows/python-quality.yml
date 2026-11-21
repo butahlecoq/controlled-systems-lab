@@ -55,6 +55,13 @@ on:
       - 'scripts/reports/collector_common.py'
       - 'scripts/reports/render.py'
       - 'scripts/reports/site.py'
+      - 'scripts/reports/stage_ext07.py'
+      - 'tests/reporting/test_ext07_saved.py'
+      - 'tests/reporting/test_ext07_resource_observation.py'
+      - 'scripts/reports/ext07/**'
+      - 'scripts/reports/visual_example_hybrid.py'
+      - 'reports/algorithm-results/ext07-publications.json'
+      - 'reports/algorithm-results/ext07-*/**'
       - 'scripts/reports/site_design.py'
       - 'scripts/reports/preserve_published_routes.py'
       - 'scripts/reports/audit_published_route_preservation.py'
@@ -296,6 +303,13 @@ on:
       - 'scripts/reports/collector_common.py'
       - 'scripts/reports/render.py'
       - 'scripts/reports/site.py'
+      - 'scripts/reports/stage_ext07.py'
+      - 'tests/reporting/test_ext07_saved.py'
+      - 'tests/reporting/test_ext07_resource_observation.py'
+      - 'scripts/reports/ext07/**'
+      - 'scripts/reports/visual_example_hybrid.py'
+      - 'reports/algorithm-results/ext07-publications.json'
+      - 'reports/algorithm-results/ext07-*/**'
       - 'scripts/reports/site_design.py'
       - 'scripts/reports/preserve_published_routes.py'
       - 'scripts/reports/audit_published_route_preservation.py'
@@ -500,6 +514,20 @@ jobs:
           python-version: '3.12'
       - name: Install pinned quality tools
         run: python -m pip install --disable-pip-version-check -r requirements-quality.txt -r scripts/reports/requirements.txt -r benchmarks/reporting/closed_loop/requirements.txt
+      - name: Replay the saved EXT-07 catalogue and report archives
+        run: |
+          python -m unittest tests.reporting.test_ext07_saved tests.reporting.test_ext07_resource_observation
+          catalog=reports/algorithm-results/ext07-publications.json
+          site="$RUNNER_TEMP/ext07-saved-site"
+          mkdir "$site"
+          printf '%s\n' '<html><body><ul></ul></body></html>' > "$site/index.html"
+          mapfile -t ids < <(jq -er '.reports[].report_id' "$catalog")
+          args=()
+          for id in "${ids[@]}"; do args+=(--source "reports/algorithm-results/$id"); done
+          python scripts/reports/stage_ext07.py "${args[@]}" > "$RUNNER_TEMP/ext07-catalogue.json"
+          diff -u "$catalog" "$RUNNER_TEMP/ext07-catalogue.json"
+          python scripts/reports/stage_ext07.py --catalog "$catalog" --site "$site"
+          for id in "${ids[@]}"; do diff -r "reports/algorithm-results/$id" "$site/$id"; done
       - name: Lint selected maintained Python tooling
         run: ruff check
       - name: Check formatting
