@@ -109,6 +109,11 @@ on:
       - 'reports/algorithm-results/env717-broken-triangle-pilot-v1/**'
       - 'reports/algorithm-results/env717-multipoint-cost-game-pilot-v1/**'
       - 'scripts/reports/stage_geo07_dependent.py'
+      - 'scripts/reports/stage_env717_cartpole.py'
+      - 'tests/reporting/test_env717_cartpole_publication.py'
+      - 'scripts/reports/env717/check_cartpole.py'
+      - 'scripts/reports/env717/capture_cartpole_report_generation.py'
+      - 'reports/algorithm-results/env717-cartpole-pilot-v1/**'
       - 'tests/reporting/test_convex_report.py'
       - 'tests/reporting/test_opt07_collector.py'
       - 'tests/reporting/test_opt12_collector.py'
@@ -295,6 +300,11 @@ on:
       - 'reports/algorithm-results/env717-broken-triangle-pilot-v1/**'
       - 'reports/algorithm-results/env717-multipoint-cost-game-pilot-v1/**'
       - 'scripts/reports/stage_geo07_dependent.py'
+      - 'scripts/reports/stage_env717_cartpole.py'
+      - 'tests/reporting/test_env717_cartpole_publication.py'
+      - 'scripts/reports/env717/check_cartpole.py'
+      - 'scripts/reports/env717/capture_cartpole_report_generation.py'
+      - 'reports/algorithm-results/env717-cartpole-pilot-v1/**'
       - 'tests/reporting/test_convex_report.py'
       - 'tests/reporting/test_opt07_collector.py'
       - 'tests/reporting/test_opt12_collector.py'
@@ -446,6 +456,8 @@ jobs:
         run: python -m unittest tests.reporting.test_native_strategy_history tests.reporting.test_closed_loop_attempt_records
       - name: Check the saved native whole-history optimizer route
         run: python -m unittest discover -s tests/reporting -p 'test_history_optimizer_native.py'
+      - name: Check the frozen CartPole route and offline ZIP
+        run: python -m unittest tests.reporting.test_env717_cartpole_publication
       - name: Check the saved typed-membership 2D example
         run: python -m unittest discover -s tests/reporting -p 'test_history_membership_2d.py'
       - name: Check the four-state projection approximation report
