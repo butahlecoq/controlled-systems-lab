@@ -6,13 +6,14 @@ import itertools
 import json
 import math
 import os
-from pathlib import Path
 import platform
 import shutil
 import statistics
 import subprocess
 import sys
 import time
+from pathlib import Path
+from typing import TypedDict
 
 SOURCE_COMMIT = "f4d76c60f4003f50954174e96eafd8e514bd5441"
 SOURCE_BLOB = "4c3ef514524fa98fab53b2de18dfa9127316263f"
@@ -72,7 +73,23 @@ def linearized_layers() -> list[list[list[float]]]:
     return layers
 
 
-def capture_runtime(executable: Path, blocks_count: int = 4, repetitions: int = 7) -> tuple[dict, dict]:
+class _CaptureBlock(TypedDict):
+    started_unix_ns: int
+    warmups: int
+    measured_calls: int
+    successful_calls: int
+    failed_calls: int
+    durations_ns: list[int]
+    median_ns: int | float
+    minimum_ns: int
+    maximum_ns: int
+    load_average_before: list[float] | None
+    load_average_after: list[float] | None
+
+
+def capture_runtime(
+    executable: Path, blocks_count: int = 4, repetitions: int = 7
+) -> tuple[dict, dict]:
     def load_average() -> list[float] | None:
         try:
             return list(os.getloadavg())
@@ -90,26 +107,28 @@ def capture_runtime(executable: Path, blocks_count: int = 4, repetitions: int = 
             raise ValueError("timed native call did not enumerate the complete catalogue")
         return elapsed, observed
 
-    blocks = []
+    blocks: list[_CaptureBlock] = []
     for _ in range(blocks_count):
         capture_started = time.time_ns()
         before = load_average()
         invoke()
         samples = [invoke()[0] for _ in range(repetitions)]
         after = load_average()
-        blocks.append({
-            "started_unix_ns": capture_started,
-            "warmups": 1,
-            "measured_calls": repetitions,
-            "successful_calls": repetitions,
-            "failed_calls": 0,
-            "durations_ns": samples,
-            "median_ns": statistics.median(samples),
-            "minimum_ns": min(samples),
-            "maximum_ns": max(samples),
-            "load_average_before": before,
-            "load_average_after": after,
-        })
+        blocks.append(
+            {
+                "started_unix_ns": capture_started,
+                "warmups": 1,
+                "measured_calls": repetitions,
+                "successful_calls": repetitions,
+                "failed_calls": 0,
+                "durations_ns": samples,
+                "median_ns": statistics.median(samples),
+                "minimum_ns": min(samples),
+                "maximum_ns": max(samples),
+                "load_average_before": before,
+                "load_average_after": after,
+            }
+        )
     capture_started = blocks[0]["started_unix_ns"]
     before = blocks[0]["load_average_before"]
     after = blocks[-1]["load_average_after"]
@@ -136,11 +155,14 @@ def capture_runtime(executable: Path, blocks_count: int = 4, repetitions: int = 
         "load_average_before": before,
         "load_average_after": after,
         "capture_started_unix_ns": capture_started,
-        "capture_blocks": [{
-            "started_unix_ns": block["started_unix_ns"],
-            "load_average_before": block["load_average_before"],
-            "load_average_after": block["load_average_after"],
-        } for block in blocks],
+        "capture_blocks": [
+            {
+                "started_unix_ns": block["started_unix_ns"],
+                "load_average_before": block["load_average_before"],
+                "load_average_after": block["load_average_after"],
+            }
+            for block in blocks
+        ],
     }
     return measurement, environment
 
@@ -184,20 +206,30 @@ def verify(record: dict, *, require_saved_oracle: bool = False) -> dict:
             close(actual[0], expected[0], f"plan {indices} stage {stage} theta")
             close(actual[1], expected[1], f"plan {indices} stage {stage} theta_dot")
         expected_objective = state[0] ** 2 + 0.1 * state[1] ** 2
-        close(plan["linearized_terminal_objective"], expected_objective,
-              f"plan {indices} terminal objective")
+        close(
+            plan["linearized_terminal_objective"],
+            expected_objective,
+            f"plan {indices} terminal objective",
+        )
 
     if set(by_sequence) != expected_sequences:
         raise ValueError("solver output does not cover every catalogue-index history")
     best_linear = min(plan["linearized_terminal_objective"] for plan in plans)
     close(record["linearized_objective_value"], best_linear, "linearized optimum")
-    winners = {tuple(by_sequence_index["action_indices"])
-               for index in record["linearized_minimizing_plan_indices"]
-               for by_sequence_index in [plans[index]]}
-    expected_winners = {sequence for sequence, plan in by_sequence.items()
-                        if plan["linearized_terminal_objective"] == best_linear}
+    winners = {
+        tuple(by_sequence_index["action_indices"])
+        for index in record["linearized_minimizing_plan_indices"]
+        for by_sequence_index in [plans[index]]
+    }
+    expected_winners = {
+        sequence
+        for sequence, plan in by_sequence.items()
+        if plan["linearized_terminal_objective"] == best_linear
+    }
     if winners != expected_winners:
-        raise ValueError("solver minimizers disagree with independent exhaustive linear enumeration")
+        raise ValueError(
+            "solver minimizers disagree with independent exhaustive linear enumeration"
+        )
 
     source_rows = []
     for index_sequence in sorted(expected_sequences):
@@ -205,8 +237,11 @@ def verify(record: dict, *, require_saved_oracle: bool = False) -> dict:
         trajectory, cost = replay_source(controls)
         source_rows.append((cost, index_sequence, controls, trajectory))
     source_optimum = min(row[0] for row in source_rows)
-    source_winners = [row for row in source_rows
-                      if math.isclose(row[0], source_optimum, rel_tol=0.0, abs_tol=1e-14)]
+    source_winners = [
+        row
+        for row in source_rows
+        if math.isclose(row[0], source_optimum, rel_tol=0.0, abs_tol=1e-14)
+    ]
     if len(source_winners) != 1:
         raise ValueError(f"expected one source-catalogue minimizer, found {len(source_winners)}")
 
@@ -244,7 +279,9 @@ def verify(record: dict, *, require_saved_oracle: bool = False) -> dict:
         }
         for field, expected in expected_fields.items():
             if record.get(field) != expected:
-                raise ValueError(f"saved report evidence disagrees with independent replay: {field}")
+                raise ValueError(
+                    f"saved report evidence disagrees with independent replay: {field}"
+                )
     record["independent_source_catalogue_oracle"] = expected_oracle
     record["linearized_plan_source_replay"] = expected_replay
     record["linearized_reachable_layers_theta_theta_dot"] = expected_layers
@@ -255,13 +292,16 @@ def verify(record: dict, *, require_saved_oracle: bool = False) -> dict:
         samples = timing.get("durations_ns")
         if not isinstance(samples, list) or not samples:
             raise ValueError("runtime measurement must contain at least one sample")
-        if (timing.get("schema") != "csl.env717-runtime-measurement/1" or
-                len(samples) != timing.get("measured_calls") or
-                timing.get("successful_calls") != len(samples) or timing.get("failed_calls") != 0 or
-                any(not isinstance(value, int) or value <= 0 for value in samples) or
-                timing.get("minimum_ns") != min(samples) or
-                timing.get("maximum_ns") != max(samples) or
-                timing.get("median_ns") != statistics.median(samples)):
+        if (
+            timing.get("schema") != "csl.env717-runtime-measurement/1"
+            or len(samples) != timing.get("measured_calls")
+            or timing.get("successful_calls") != len(samples)
+            or timing.get("failed_calls") != 0
+            or any(not isinstance(value, int) or value <= 0 for value in samples)
+            or timing.get("minimum_ns") != min(samples)
+            or timing.get("maximum_ns") != max(samples)
+            or timing.get("median_ns") != statistics.median(samples)
+        ):
             raise ValueError("runtime measurement summary does not match its raw observations")
         blocks = timing.get("capture_blocks")
         if not isinstance(blocks, list) or not blocks:
@@ -269,16 +309,21 @@ def verify(record: dict, *, require_saved_oracle: bool = False) -> dict:
         block_samples = []
         for block in blocks:
             values = block.get("durations_ns") if isinstance(block, dict) else None
-            if (not isinstance(values, list) or not values or
-                    block.get("warmups") != 1 or
-                    block.get("measured_calls") != len(values) or
-                    block.get("successful_calls") != len(values) or
-                    block.get("failed_calls") != 0 or
-                    block.get("minimum_ns") != min(values) or
-                    block.get("maximum_ns") != max(values) or
-                    block.get("median_ns") != statistics.median(values) or
-                    any(not isinstance(value, int) or value <= 0 for value in values)):
-                raise ValueError("runtime capture block summary does not match its raw observations")
+            if (
+                not isinstance(values, list)
+                or not values
+                or block.get("warmups") != 1
+                or block.get("measured_calls") != len(values)
+                or block.get("successful_calls") != len(values)
+                or block.get("failed_calls") != 0
+                or block.get("minimum_ns") != min(values)
+                or block.get("maximum_ns") != max(values)
+                or block.get("median_ns") != statistics.median(values)
+                or any(not isinstance(value, int) or value <= 0 for value in values)
+            ):
+                raise ValueError(
+                    "runtime capture block summary does not match its raw observations"
+                )
             block_samples.extend(values)
         if block_samples != samples:
             raise ValueError("runtime capture blocks do not match the accepted raw observations")
@@ -291,8 +336,10 @@ def svg_plot(record: dict) -> str:
     width, height = 1080, 760
     left, right, top, bottom = 110, 1020, 86, 620
     layers = record["linearized_reachable_layers_theta_theta_dot"]
-    trajectories = [record["linearized_plan_source_replay"]["trajectory_time_theta_theta_dot"],
-                    record["independent_source_catalogue_oracle"]["minimizing_trajectory_time_theta_theta_dot"]]
+    trajectories = [
+        record["linearized_plan_source_replay"]["trajectory_time_theta_theta_dot"],
+        record["independent_source_catalogue_oracle"]["minimizing_trajectory_time_theta_theta_dot"],
+    ]
     all_points = [(point[0], point[1]) for layer in layers for point in layer]
     all_points += [(point[1], point[2]) for trajectory in trajectories for point in trajectory]
     all_points += [(0.0, 0.0)]
@@ -308,66 +355,102 @@ def svg_plot(record: dict) -> str:
         return x, y
 
     colors = ("#80a7bd", "#86b8c7", "#9ec9c6", "#dfb86b", "#f4a261")
-    pieces = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc">',
-              '<title id="title">PendulumTerminal affine reachability and nonlinear replay</title>',
-              '<desc id="desc">Four-stage finite-action reachability in angle and angular velocity, with the local affine plan and the independently enumerated nonlinear source-map plan.</desc>',
-              '<rect width="100%" height="100%" fill="#111820"/>',
-              '<text x="110" y="38" fill="#f4f1e8" font-size="25" font-family="sans-serif">PendulumTerminal · four-step finite-action pilot</text>',
-              '<text x="110" y="62" fill="#aab7c2" font-size="14" font-family="sans-serif">Projection: θ (rad) × θ̇ (rad/s) · source-map replay uses the declared semi-implicit Euler step</text>']
+    pieces = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc">',
+        '<title id="title">PendulumTerminal affine reachability and nonlinear replay</title>',
+        '<desc id="desc">Four-stage finite-action reachability in angle and angular velocity, with the local affine plan and the independently enumerated nonlinear source-map plan.</desc>',
+        '<rect width="100%" height="100%" fill="#111820"/>',
+        '<text x="110" y="38" fill="#f4f1e8" font-size="25" font-family="sans-serif">PendulumTerminal · four-step finite-action pilot</text>',
+        '<text x="110" y="62" fill="#aab7c2" font-size="14" font-family="sans-serif">Projection: θ (rad) × θ̇ (rad/s) · source-map replay uses the declared semi-implicit Euler step</text>',
+    ]
     for tick in range(6):
         x = left + tick * (right - left) / 5
         y = top + tick * (bottom - top) / 5
         xvalue = xmin + tick * (xmax - xmin) / 5
         yvalue = ymax - tick * (ymax - ymin) / 5
-        pieces.append(f'<line x1="{x:.2f}" y1="{top}" x2="{x:.2f}" y2="{bottom}" stroke="#293844"/>')
-        pieces.append(f'<line x1="{left}" y1="{y:.2f}" x2="{right}" y2="{y:.2f}" stroke="#293844"/>')
-        pieces.append(f'<text x="{x:.2f}" y="{bottom + 24}" text-anchor="middle" fill="#c5d0d8" font-size="12" font-family="sans-serif">{xvalue:.3f}</text>')
-        pieces.append(f'<text x="{left - 12}" y="{y + 4:.2f}" text-anchor="end" fill="#c5d0d8" font-size="12" font-family="sans-serif">{yvalue:.3f}</text>')
+        pieces.append(
+            f'<line x1="{x:.2f}" y1="{top}" x2="{x:.2f}" y2="{bottom}" stroke="#293844"/>'
+        )
+        pieces.append(
+            f'<line x1="{left}" y1="{y:.2f}" x2="{right}" y2="{y:.2f}" stroke="#293844"/>'
+        )
+        pieces.append(
+            f'<text x="{x:.2f}" y="{bottom + 24}" text-anchor="middle" fill="#c5d0d8" font-size="12" font-family="sans-serif">{xvalue:.3f}</text>'
+        )
+        pieces.append(
+            f'<text x="{left - 12}" y="{y + 4:.2f}" text-anchor="end" fill="#c5d0d8" font-size="12" font-family="sans-serif">{yvalue:.3f}</text>'
+        )
     pieces.append(f'<line x1="{left}" y1="{bottom}" x2="{right}" y2="{bottom}" stroke="#d8e1e8"/>')
     pieces.append(f'<line x1="{left}" y1="{top}" x2="{left}" y2="{bottom}" stroke="#d8e1e8"/>')
-    pieces.append(f'<text x="{(left + right) / 2}" y="{bottom + 52}" text-anchor="middle" fill="#f4f1e8" font-size="16" font-family="sans-serif">θ (rad)</text>')
-    pieces.append(f'<text x="28" y="{(top + bottom) / 2}" transform="rotate(-90 28 {(top + bottom) / 2})" text-anchor="middle" fill="#f4f1e8" font-size="16" font-family="sans-serif">θ̇ (rad/s)</text>')
+    pieces.append(
+        f'<text x="{(left + right) / 2}" y="{bottom + 52}" text-anchor="middle" fill="#f4f1e8" font-size="16" font-family="sans-serif">θ (rad)</text>'
+    )
+    pieces.append(
+        f'<text x="28" y="{(top + bottom) / 2}" transform="rotate(-90 28 {(top + bottom) / 2})" text-anchor="middle" fill="#f4f1e8" font-size="16" font-family="sans-serif">θ̇ (rad/s)</text>'
+    )
 
     for stage, layer in enumerate(layers):
         color = colors[min(stage, len(colors) - 1)]
         radius = 3.8 if stage == HORIZON else 3.1
         for theta, velocity in layer:
             x, y = xy(theta, velocity)
-            pieces.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="{radius}" fill="{color}" opacity="0.44"/>')
+            pieces.append(
+                f'<circle cx="{x:.2f}" cy="{y:.2f}" r="{radius}" fill="{color}" opacity="0.44"/>'
+            )
 
     def polyline(trajectory: list[list[float]], color: str, dash: str, width_value: float) -> None:
-        coords = " ".join(f"{xy(point[1], point[2])[0]:.2f},{xy(point[1], point[2])[1]:.2f}" for point in trajectory)
+        coords = " ".join(
+            f"{xy(point[1], point[2])[0]:.2f},{xy(point[1], point[2])[1]:.2f}"
+            for point in trajectory
+        )
         dash_attr = f' stroke-dasharray="{dash}"' if dash else ""
-        pieces.append(f'<polyline points="{coords}" fill="none" stroke="{color}" stroke-width="{width_value}"{dash_attr}/>')
+        pieces.append(
+            f'<polyline points="{coords}" fill="none" stroke="{color}" stroke-width="{width_value}"{dash_attr}/>'
+        )
         for point in trajectory:
             x, y = xy(point[1], point[2])
             pieces.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="4.5" fill="{color}"/>')
 
     selected = record["linearized_plan_source_replay"]
     source_best = record["independent_source_catalogue_oracle"]
-    predicted = next(plan["predicted_states"] for plan in record["plans"]
-                     if plan["action_indices"] == selected["action_indices"])
+    predicted = next(
+        plan["predicted_states"]
+        for plan in record["plans"]
+        if plan["action_indices"] == selected["action_indices"]
+    )
     polyline([[i * STEP, *state] for i, state in enumerate(predicted)], "#f4a261", "4 4", 2.3)
     polyline(selected["trajectory_time_theta_theta_dot"], "#69b7e3", "", 3.2)
     polyline(source_best["minimizing_trajectory_time_theta_theta_dot"], "#84d69b", "8 4", 3.0)
     tx, ty = xy(0.0, 0.0)
-    pieces.append(f'<path d="M {tx - 7:.2f} {ty - 7:.2f} L {tx + 7:.2f} {ty + 7:.2f} M {tx - 7:.2f} {ty + 7:.2f} L {tx + 7:.2f} {ty - 7:.2f}" stroke="#fa6e59" stroke-width="3"/>')
+    pieces.append(
+        f'<path d="M {tx - 7:.2f} {ty - 7:.2f} L {tx + 7:.2f} {ty + 7:.2f} M {tx - 7:.2f} {ty + 7:.2f} L {tx + 7:.2f} {ty - 7:.2f}" stroke="#fa6e59" stroke-width="3"/>'
+    )
 
-    legend = [("#80a7bd", "Affine-model forward reachable states"),
-              ("#f4a261", "Surrogate prediction for selected plan"),
-              ("#69b7e3", "Selected plan replayed on nonlinear source map"),
-              ("#84d69b", "Best source-map plan in the same finite catalogue"),
-              ("#fa6e59", "Target origin (visual reference only)")]
+    legend = [
+        ("#80a7bd", "Affine-model forward reachable states"),
+        ("#f4a261", "Surrogate prediction for selected plan"),
+        ("#69b7e3", "Selected plan replayed on nonlinear source map"),
+        ("#84d69b", "Best source-map plan in the same finite catalogue"),
+        ("#fa6e59", "Target origin (visual reference only)"),
+    ]
     for index, (color, label) in enumerate(legend):
         y = 680 + (index % 2) * 28
         x = 110 + (index // 2) * 320
         if color == "#fa6e59":
-            pieces.append(f'<path d="M{x} {y - 6} l12 12 M{x} {y + 6} l12 -12" stroke="{color}" stroke-width="3"/>')
+            pieces.append(
+                f'<path d="M{x} {y - 6} l12 12 M{x} {y + 6} l12 -12" stroke="{color}" stroke-width="3"/>'
+            )
         else:
-            pieces.append(f'<line x1="{x}" y1="{y}" x2="{x + 16}" y2="{y}" stroke="{color}" stroke-width="3"/>')
-        pieces.append(f'<text x="{x + 23}" y="{y + 4}" fill="#d2dce1" font-size="13" font-family="sans-serif">{label}</text>')
-    pieces.append('<text x="110" y="746" fill="#93a4ae" font-size="12" font-family="sans-serif">Local affine reachability is exhaustive for the finite action catalogue; nonlinear curves are source-map replays.</text>')
-    pieces.append('</svg>')
+            pieces.append(
+                f'<line x1="{x}" y1="{y}" x2="{x + 16}" y2="{y}" stroke="{color}" stroke-width="3"/>'
+            )
+        pieces.append(
+            f'<text x="{x + 23}" y="{y + 4}" fill="#d2dce1" font-size="13" font-family="sans-serif">{label}</text>'
+        )
+    pieces.append(
+        '<text x="110" y="746" fill="#93a4ae" font-size="12" font-family="sans-serif">Local affine reachability is exhaustive for the finite action catalogue; nonlinear curves are source-map replays.</text>'
+    )
+    pieces.append("</svg>")
     return "\n".join(pieces)
 
 
@@ -378,10 +461,11 @@ def readme(record: dict) -> str:
     block_summaries = "; ".join(
         f"block {index}: median {block['median_ns'] / 1e6:.3f} ms, "
         f"range {block['minimum_ns'] / 1e6:.3f}–{block['maximum_ns'] / 1e6:.3f} ms"
-        for index, block in enumerate(blocks, 1))
-    return f'''# PendulumTerminal local-linear finite-action pilot
+        for index, block in enumerate(blocks, 1)
+    )
+    return f"""# PendulumTerminal local-linear finite-action pilot
 
-The source is pinned to [{SOURCE_COMMIT}]({record['source_url']}) and blob
+The source is pinned to [{SOURCE_COMMIT}]({record["source_url"]}) and blob
 `{SOURCE_BLOB}`. Its dynamics and parameters are re-expressed here; upstream
 source code is not copied. The repository metadata declares no license.
 
@@ -390,33 +474,33 @@ the initial state to `(theta, theta_dot) = (0.25 rad, 0 rad/s)`, uses four
 0.05-second steps and the action catalogue `[-1, 0, 1]`, and plans on a local
 affine model linearized at the upright equilibrium. The planner minimizes the
 terminal surrogate `theta_T^2 + 0.1 theta_dot_T^2`, not the source running cost.
-Its unique finite-catalogue minimizer is `{selected['actions']}` with surrogate
-value `{record['linearized_objective_value']:.12g}`.
+Its unique finite-catalogue minimizer is `{selected["actions"]}` with surrogate
+value `{record["linearized_objective_value"]:.12g}`.
 
 The selected plan is replayed on the source nonlinear semi-implicit Euler map.
 An independent exhaustive oracle checks all 81 source-map action sequences
 using the source running cost. The selected plan costs
-`{selected['source_accumulated_cost']:.12g}`; the best sequence in that same
-finite catalogue is `{reference['minimizing_actions']}` at
-`{reference['minimum_cost']:.12g}`. This gap describes the surrogate on this
+`{selected["source_accumulated_cost"]:.12g}`; the best sequence in that same
+finite catalogue is `{reference["minimizing_actions"]}` at
+`{reference["minimum_cost"]:.12g}`. This gap describes the surrogate on this
 pilot only. It is not a continuous-action or full-horizon optimality result.
 
 The phase-plane plot shows every affine forward-reachable point for the finite
 catalogue, the selected affine prediction, its nonlinear replay and the best
 source-map finite-catalogue replay.
 
-The Release CLI call took a median `{record['runtime_measurement']['median_ns']}` ns
-({record['runtime_measurement']['minimum_ns']}–{record['runtime_measurement']['maximum_ns']} ns)
-over {record['runtime_measurement']['measured_calls']} calls in
+The Release CLI call took a median `{record["runtime_measurement"]["median_ns"]}` ns
+({record["runtime_measurement"]["minimum_ns"]}–{record["runtime_measurement"]["maximum_ns"]} ns)
+over {record["runtime_measurement"]["measured_calls"]} calls in
 {len(blocks)} capture block(s), with one excluded warmup per block. Block summaries:
 {block_summaries}. Each interval includes process launch, affine-plan
 enumeration and JSON serialization/capture; it excludes the Python oracle and
 report rendering. These observations are descriptive for this fixture and make
 no performance conclusion or speedup claim. The CPU limiter is unestablished
 because `perf` and `strace` were unavailable. The capture used
-{record['capture_environment']['processor']} on
-{record['capture_environment']['os']} with
-{record['compiler']['id']} {record['compiler']['version']} in Release mode.
+{record["capture_environment"]["processor"]} on
+{record["capture_environment"]["os"]} with
+{record["compiler"]["id"]} {record["compiler"]["version"]} in Release mode.
 
 Reproduce from a clean checkout:
 
@@ -430,8 +514,8 @@ python3 scripts/reports/env717/check_pendulum_terminal.py \\
 ```
 
 The raw record binds the upstream source, driver and algorithm source hashes.
-The current source commit is `{record['source_commit']}`.
-'''
+The current source commit is `{record["source_commit"]}`.
+"""
 
 
 def html_page(record: dict, include_png: bool = True) -> str:
@@ -445,9 +529,9 @@ def html_page(record: dict, include_png: bool = True) -> str:
 <main><h1>PendulumTerminal: local-linear finite-action pilot</h1>
 <p>The current finite-action solver exhausts all 81 four-step plans on a two-state affine model linearized at the upright equilibrium. An independent exhaustive enumeration then evaluates every plan using the pinned source environment's nonlinear semi-implicit Euler map and source running cost.</p>
 <figure><img class="plot" src="projection.svg" alt="Angle and angular velocity projection showing affine forward reachable states, the selected plan's prediction and nonlinear replay, the source-map best finite-catalog plan, and the origin reference"><figcaption>Forward reachable points are exact for the declared affine pilot and finite action catalogue. Replay curves use the source nonlinear update.</figcaption></figure>
-<table><tr><th>Result</th><th>Value</th></tr><tr><td>Linearized terminal objective</td><td>{record['linearized_objective_value']:.12g}</td></tr><tr><td>Selected action sequence</td><td>{selected['actions']}</td></tr><tr><td>Source running cost of selected sequence</td><td>{selected['source_accumulated_cost']:.12g}</td></tr><tr><td>Best source running cost in the same finite catalogue</td><td>{reference['minimum_cost']:.12g}</td></tr><tr><td>Cost gap from source finite-catalog optimum</td><td>{selected['source_cost_gap_from_finite_catalogue_optimum']:.12g} ({100*selected['relative_gap']:.4g}%)</td></tr><tr><td>Source-map catalogue minimizers</td><td>{reference['minimizing_actions']}</td></tr><tr><td>Release CLI duration ({record['runtime_measurement']['measured_calls']} calls)</td><td>{record['runtime_measurement']['median_ns'] / 1e6:.3f} ms median ({record['runtime_measurement']['minimum_ns'] / 1e6:.3f}–{record['runtime_measurement']['maximum_ns'] / 1e6:.3f} ms)</td></tr></table>
+<table><tr><th>Result</th><th>Value</th></tr><tr><td>Linearized terminal objective</td><td>{record["linearized_objective_value"]:.12g}</td></tr><tr><td>Selected action sequence</td><td>{selected["actions"]}</td></tr><tr><td>Source running cost of selected sequence</td><td>{selected["source_accumulated_cost"]:.12g}</td></tr><tr><td>Best source running cost in the same finite catalogue</td><td>{reference["minimum_cost"]:.12g}</td></tr><tr><td>Cost gap from source finite-catalog optimum</td><td>{selected["source_cost_gap_from_finite_catalogue_optimum"]:.12g} ({100 * selected["relative_gap"]:.4g}%)</td></tr><tr><td>Source-map catalogue minimizers</td><td>{reference["minimizing_actions"]}</td></tr><tr><td>Release CLI duration ({record["runtime_measurement"]["measured_calls"]} calls)</td><td>{record["runtime_measurement"]["median_ns"] / 1e6:.3f} ms median ({record["runtime_measurement"]["minimum_ns"] / 1e6:.3f}–{record["runtime_measurement"]["maximum_ns"] / 1e6:.3f} ms)</td></tr></table>
 <p class="note"><strong>Scope:</strong> the upstream environment randomizes its reset state and runs for 5 seconds. This pilot fixes the initial state to (θ, θ̇) = (0.25 rad, 0 rad/s) and uses four 0.05-second steps. The planner minimizes a terminal quadratic on the local affine model; the source objective is a running cost. The selected action is replayed and compared with an independent exhaustive source-map oracle over the same 81 finite action sequences. These values do not establish continuous-action or full-horizon optimality.</p>
-<p>Source: <a href="{record['source_url']}">PendulumTerminal.py</a>, commit <code>{record['source_repository_commit']}</code>, blob <code>{record['source_file_blob']}</code>. CSL source commit: <code>{record['source_commit']}</code>. Method: <code>{record['algorithm']}</code>; assurance is exhaustive only for the declared affine surrogate catalogue.</p>
+<p>Source: <a href="{record["source_url"]}">PendulumTerminal.py</a>, commit <code>{record["source_repository_commit"]}</code>, blob <code>{record["source_file_blob"]}</code>. CSL source commit: <code>{record["source_commit"]}</code>. Method: <code>{record["algorithm"]}</code>; assurance is exhaustive only for the declared affine surrogate catalogue.</p>
 <p><a href="result.json">Raw result and oracle record</a> · <a href="environment.json">Capture environment</a> · <a href="README.md">Reproduction steps and timing notes</a> · <a href="projection.svg">Standalone SVG</a>{png_link}</p>
 <p>Timing covers process launch, affine-plan enumeration and JSON serialization/capture; it excludes the Python oracle and rendering. It is descriptive for this single fixture and has no comparator or speedup claim. The CPU limiter is unestablished.</p>
 <p>Reproduction commands and raw timing observations are in <a href="README.md">README.md</a>.</p></main></html>'''
@@ -477,11 +561,17 @@ def render(executable: Path, output: Path | None) -> None:
     (output / "projection.svg").write_text(svg + "\n", encoding="utf-8")
     converter = shutil.which("rsvg-convert")
     if converter:
-        subprocess.run([converter, "--output", str(output / "projection.png"),
-                        str(output / "projection.svg")], check=True)
+        subprocess.run(
+            [converter, "--output", str(output / "projection.png"), str(output / "projection.svg")],
+            check=True,
+        )
     (output / "index.html").write_text(html_page(record, converter is not None), encoding="utf-8")
-    files = sorted(path for path in output.iterdir() if path.is_file() and path.name != "SHA256SUMS")
-    sums = "".join(f"{hashlib.sha256(path.read_bytes()).hexdigest()}  {path.name}\n" for path in files)
+    files = sorted(
+        path for path in output.iterdir() if path.is_file() and path.name != "SHA256SUMS"
+    )
+    sums = "".join(
+        f"{hashlib.sha256(path.read_bytes()).hexdigest()}  {path.name}\n" for path in files
+    )
     (output / "SHA256SUMS").write_text(sums, encoding="utf-8")
 
 
