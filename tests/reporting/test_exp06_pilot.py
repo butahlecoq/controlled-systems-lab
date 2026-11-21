@@ -5,10 +5,10 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
-from pathlib import Path
 import subprocess
 import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -18,8 +18,8 @@ PAPER_BUNDLE = ROOT / "reports/algorithm-results/exp06-it17-paper-reducers-20261
 
 def load(name: str, path: Path):
     spec = importlib.util.spec_from_file_location(name, path)
+    assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None
     spec.loader.exec_module(module)
     return module
 
@@ -81,6 +81,18 @@ class Exp06PilotTest(unittest.TestCase):
             index = (site_dir / "index.html").read_text()
             self.assertIn("2D hull illustration", index)
             self.assertIn("paired record", index)
+
+    def test_malformed_landing_does_not_leave_a_partial_publication(self) -> None:
+        for bundle, renderer in ((BUNDLE, render), (PAPER_BUNDLE, paper_render)):
+            with self.subTest(bundle=bundle.name), tempfile.TemporaryDirectory() as temporary:
+                site_dir = Path(temporary)
+                landing = site_dir / "index.html"
+                original_html = "<html><body>Reports</body></html>"
+                landing.write_text(original_html, encoding="utf-8")
+                with self.assertRaisesRegex(ValueError, "index insertion point differs"):
+                    stage.stage(bundle, site_dir, renderer)
+                self.assertEqual(list(site_dir.iterdir()), [landing])
+                self.assertEqual(landing.read_text(encoding="utf-8"), original_html)
 
     def test_paper_followup_record_keeps_distinct_rows_and_tie_evidence(self) -> None:
         capture, wire, _spec, _manifest, methods, rows = paper_render.read_saved(PAPER_BUNDLE)
