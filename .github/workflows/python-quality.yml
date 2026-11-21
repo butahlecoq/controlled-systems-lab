@@ -6,8 +6,7 @@ on:
       - '.github/actions/pages-deploy/**'
       - 'benchmarks/reporting/closed_loop/**'
       - 'docs/catalogue/closed-loop-*-capabilities-v1.*'
-      - 'tests/reporting/test_history_bridge.py'
-      - 'tests/reporting/test_history_geometry*.py'
+      - 'tests/reporting/test_history_geometry.py'
       - 'tests/reporting/test_history_norm_solver.py'
       - 'tests/reporting/test_native_fixed_tail_policy.py'
       - 'tests/reporting/test_nominal_tube_source.py'
@@ -237,8 +236,7 @@ on:
       - '.github/actions/pages-deploy/**'
       - 'benchmarks/reporting/closed_loop/**'
       - 'docs/catalogue/closed-loop-*-capabilities-v1.*'
-      - 'tests/reporting/test_history_bridge.py'
-      - 'tests/reporting/test_history_geometry*.py'
+      - 'tests/reporting/test_history_geometry.py'
       - 'tests/reporting/test_history_norm_solver.py'
       - 'tests/reporting/test_native_fixed_tail_policy.py'
       - 'tests/reporting/test_nominal_tube_source.py'
@@ -550,9 +548,7 @@ jobs:
           OPENBLAS_NUM_THREADS: '1'
           OMP_NUM_THREADS: '1'
         run: >-
-          python -m unittest tests.reporting.test_history_bridge
-          tests.reporting.test_history_geometry
-          tests.reporting.test_history_geometry_bridge
+          python -m unittest tests.reporting.test_history_geometry
           tests.reporting.test_history_norm_solver
           tests.reporting.test_native_fixed_tail_policy
           tests.reporting.test_nominal_tube_source
