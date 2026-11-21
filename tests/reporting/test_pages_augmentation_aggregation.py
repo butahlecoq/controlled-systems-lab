@@ -1,36 +1,61 @@
 """Combined main-only Pages deployment retains all standalone report routes."""
+
 from __future__ import annotations
 
 import hashlib
-import json
 import importlib.util
-from pathlib import Path
-import tempfile
+import json
 import tarfile
+import tempfile
 import unittest
 import zipfile
 from io import BytesIO
+from pathlib import Path
 from unittest import mock
 
-from scripts.reports import (augment_pages_bundle, await_pages_augmentation_runs,
-                             pages_route_retirement, replay_mpc11_published_variants)
+from scripts.reports import (
+    augment_pages_bundle,
+    await_pages_augmentation_runs,
+    pages_route_retirement,
+    replay_mpc11_published_variants,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def run(run_id: int, created: str, updated: str, *, head: str,
-        branch: str = "main", event: str = "workflow_run", status: str = "completed",
-        conclusion: str = "success"):
-    return {"id": run_id, "created_at": created, "updated_at": updated,
-            "head_sha": head, "head_branch": branch, "event": event,
-            "status": status, "conclusion": conclusion}
+def run(
+    run_id: int,
+    created: str,
+    updated: str,
+    *,
+    head: str,
+    branch: str = "main",
+    event: str = "workflow_run",
+    status: str = "completed",
+    conclusion: str = "success",
+):
+    return {
+        "id": run_id,
+        "created_at": created,
+        "updated_at": updated,
+        "head_sha": head,
+        "head_branch": branch,
+        "event": event,
+        "status": status,
+        "conclusion": conclusion,
+    }
 
 
-HAS_MPC11 = all(importlib.util.find_spec(name) is not None for name in ('numpy','scipy','casadi','do_mpc'))
+HAS_MPC11 = all(
+    importlib.util.find_spec(name) is not None for name in ("numpy", "scipy", "casadi", "do_mpc")
+)
 
 
 class PagesAugmentationAggregation(unittest.TestCase):
-    @unittest.skipUnless(HAS_MPC11,'full cumulative staging is checked in the hash-locked optional controller CI profile')
+    @unittest.skipUnless(
+        HAS_MPC11,
+        "full cumulative staging is checked in the hash-locked optional controller CI profile",
+    )
     def test_combines_mpc01_b04_and_mpc06_routes_into_one_site(self):
         with tempfile.TemporaryDirectory(prefix="pages-augmentation-aggregation-") as temporary:
             site = Path(temporary) / "site"
@@ -38,9 +63,11 @@ class PagesAugmentationAggregation(unittest.TestCase):
             legacy_root = b'<!doctype html><html><body><p id="base">Base reports</p></body></html>'
             (site / "index.html").write_bytes(legacy_root)
             (site / "existing-route").mkdir()
-            existing_page = (b'<!doctype html><html><body><h1>Existing report</h1>'
-                             b'<a href="records.json">Raw records</a> '
-                             b'<a href="../existing-route.zip">Offline bundle</a></body></html>')
+            existing_page = (
+                b"<!doctype html><html><body><h1>Existing report</h1>"
+                b'<a href="records.json">Raw records</a> '
+                b'<a href="../existing-route.zip">Offline bundle</a></body></html>'
+            )
             (site / "existing-route/index.html").write_bytes(existing_page)
             records = b'{"schema":"csl.fixture-record/1","value":7}\n'
             (site / "existing-route/records.json").write_bytes(records)
@@ -56,68 +83,126 @@ class PagesAugmentationAggregation(unittest.TestCase):
             with zipfile.ZipFile(site / "existing-route.zip", "w") as archive:
                 archive.writestr("existing-route/records.json", records)
                 archive.writestr("existing-route/report-envelope.json", envelope_bytes)
-            existing_zip_hash = hashlib.sha256((site / "existing-route.zip").read_bytes()).hexdigest()
-            (site / "catalog.json").write_text(json.dumps({
-                "schema": "csl.algorithm-report-catalog/3",
-                "reports": [{
-                    "report_id": "existing-route",
-                    "report_kind": "finite-feedback",
-                    "source_commit": "a" * 40,
-                    "payload_sha256": hashlib.sha256(records).hexdigest(),
-                    "zip_sha256": existing_zip_hash,
-                }],
-            }, sort_keys=True) + "\n", encoding="utf-8")
+            existing_zip_hash = hashlib.sha256(
+                (site / "existing-route.zip").read_bytes()
+            ).hexdigest()
+            (site / "catalog.json").write_text(
+                json.dumps(
+                    {
+                        "schema": "csl.algorithm-report-catalog/3",
+                        "reports": [
+                            {
+                                "report_id": "existing-route",
+                                "report_kind": "finite-feedback",
+                                "source_commit": "a" * 40,
+                                "payload_sha256": hashlib.sha256(records).hexdigest(),
+                                "zip_sha256": existing_zip_hash,
+                            }
+                        ],
+                    },
+                    sort_keys=True,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
             (site / "examples").mkdir()
             (site / "examples/index.html").write_text(
                 '<!doctype html><html><body><h1 id="algorithm-coverage">Examples</h1></body></html>',
-                encoding="utf-8")
+                encoding="utf-8",
+            )
             (site / "examples/examples.css").write_text("body{color:inherit}\n", encoding="utf-8")
 
             routes = augment_pages_bundle.stage_all(site)
 
             landing = (site / "index.html").read_text(encoding="utf-8")
             archive_page = (site / "archive.html").read_text(encoding="utf-8")
-            inventory = json.loads((site / "pages-route-inventory.json").read_text(encoding="utf-8"))
+            inventory = json.loads(
+                (site / "pages-route-inventory.json").read_text(encoding="utf-8")
+            )
             self.assertIn('data-csl-pages-learning-root="1"', landing)
             self.assertIn('href="examples/index.html"', landing)
             self.assertIn('href="archive.html"', landing)
             preserved_legacy = (site / "legacy-index.html").read_bytes()
             self.assertEqual(preserved_legacy, pages_route_retirement.legacy_root_snapshot())
             self.assertNotEqual(preserved_legacy, legacy_root)
-            self.assertEqual(hashlib.sha256(preserved_legacy).hexdigest(),
-                             "29376974f806ad83816be9b42bda19fbeccaebc9a7ca79c291ed3d9ea3d522d2")
+            self.assertEqual(
+                hashlib.sha256(preserved_legacy).hexdigest(),
+                "29376974f806ad83816be9b42bda19fbeccaebc9a7ca79c291ed3d9ea3d522d2",
+            )
             self.assertNotIn('id="base"', landing)
             strategy_summary = "docs/research/evidence/mpc01-strategy-ab-ts03-20261103-r1/strategy-ab-ts03-summary.html"
             self.assertIn(f'href="{strategy_summary}"', archive_page)
-            for name in ("mpc01", "b04_c", "mpc06", "mpc06_complete", "mpc06_offline",
-                         "review05", "mpc11", "mpc08", "mpc07", "mpc10", "mpc11_studies",
-                         "b04_source"):
+            for name in (
+                "mpc01",
+                "b04_c",
+                "mpc06",
+                "mpc06_complete",
+                "mpc06_offline",
+                "review05",
+                "mpc11",
+                "mpc08",
+                "mpc07",
+                "mpc10",
+                "mpc11_studies",
+                "b04_source",
+            ):
                 self.assertIn(f'href="{routes[name]}/index.html"', archive_page)
-            self.assertIn(routes["mpc06_offline"]+"/index.html#offline-example", (site/"examples/index.html").read_text())
-            self.assertIn(routes["mpc06_complete"]+"/index.html", (site/routes["mpc06_offline"]/"index.html").read_text())
+            self.assertIn(
+                routes["mpc06_offline"] + "/index.html#offline-example",
+                (site / "examples/index.html").read_text(),
+            )
+            self.assertIn(
+                routes["mpc06_complete"] + "/index.html",
+                (site / routes["mpc06_offline"] / "index.html").read_text(),
+            )
             self.assertEqual((site / "existing-route/index.html").read_bytes(), existing_page)
             self.assertEqual((site / "existing-route/records.json").read_bytes(), records)
-            self.assertEqual(hashlib.sha256((site / "existing-route.zip").read_bytes()).hexdigest(), existing_zip_hash)
+            self.assertEqual(
+                hashlib.sha256((site / "existing-route.zip").read_bytes()).hexdigest(),
+                existing_zip_hash,
+            )
             self.assertIn("existing-route/index.html", archive_page)
             gallery = (site / "examples/index.html").read_text()
             self.assertIn('href="../index.html">Learn</a>', gallery)
             self.assertIn('href="../archive.html">Evidence archive</a>', gallery)
-            self.assertIn(routes["review05"]+"/index.html#scalar-2d", (site/"examples/index.html").read_text())
-            self.assertIn(routes["review05"]+"/index.html", archive_page)
-            self.assertIn(routes["mpc11"]+"/index.html", archive_page)
-            self.assertIn(routes["mpc11"]+"/index.html", (site/"examples/index.html").read_text())
-            self.assertTrue((site / "docs/research/evidence/mpc01-strategy-ab-ts03-20261103-r1/strategy-ab-ts03-summary.html").is_file())
-            self.assertIn(routes["mpc08"]+"/index.html#minimal-example", (site/"examples/index.html").read_text())
-            self.assertIn(routes["mpc08"]+"/index.html", archive_page)
-            for name in ('mpc07','mpc10','b04_source'):
-                self.assertIn(routes[name]+'/index.html#minimal-example',(site/'examples/index.html').read_text())
-                self.assertIn(routes[name]+'/index.html',archive_page)
-            online = json.loads((site/routes["mpc07"]/"online-verification.json").read_text())
+            self.assertIn(
+                routes["review05"] + "/index.html#scalar-2d",
+                (site / "examples/index.html").read_text(),
+            )
+            self.assertIn(routes["review05"] + "/index.html", archive_page)
+            self.assertIn(routes["mpc11"] + "/index.html", archive_page)
+            self.assertIn(
+                routes["mpc11"] + "/index.html", (site / "examples/index.html").read_text()
+            )
+            self.assertTrue(
+                (
+                    site
+                    / "docs/research/evidence/mpc01-strategy-ab-ts03-20261103-r1/strategy-ab-ts03-summary.html"
+                ).is_file()
+            )
+            self.assertIn(
+                routes["mpc08"] + "/index.html#minimal-example",
+                (site / "examples/index.html").read_text(),
+            )
+            self.assertIn(routes["mpc08"] + "/index.html", archive_page)
+            for name in ("mpc07", "mpc10", "b04_source"):
+                self.assertIn(
+                    routes[name] + "/index.html#minimal-example",
+                    (site / "examples/index.html").read_text(),
+                )
+                self.assertIn(routes[name] + "/index.html", archive_page)
+            online = json.loads((site / routes["mpc07"] / "online-verification.json").read_text())
             self.assertEqual(sum(row["episodes"] for row in online["reports"]), 864)
             self.assertEqual(sum(row["stages"] for row in online["reports"]), 4032)
-            self.assertIn("figures/online-policy-traces.svg", (site/routes["mpc07"]/"index.html").read_text())
-            self.assertIn(routes["mpc11_studies"]+"/index.html#mesh-example",(site/"examples/index.html").read_text())
-            self.assertIn(routes["mpc11_studies"]+"/index.html",archive_page)
+            self.assertIn(
+                "figures/online-policy-traces.svg",
+                (site / routes["mpc07"] / "index.html").read_text(),
+            )
+            self.assertIn(
+                routes["mpc11_studies"] + "/index.html#mesh-example",
+                (site / "examples/index.html").read_text(),
+            )
+            self.assertIn(routes["mpc11_studies"] + "/index.html", archive_page)
             retained_mpc11 = {
                 "mpc11-controller-comparison-5d94c9106e1cf07e4a2e": "dd270a903dff87a24385e205aaa705efb98f7a86019bdce024824d6fba1bc363",
                 "mpc11-mesh-timing-dcb9e6e302ed2fabeb71": "f886dce8913fd833929ecc18ab6d9b2a1c087b4992b77505fb41377494d0070a",
@@ -125,90 +210,164 @@ class PagesAugmentationAggregation(unittest.TestCase):
                 "mpc11-mesh-timing-e1d5ebe497051adfdfad": "c8a84931f056a25c0cfb88b7ec8a24b16be4c119794d6e3964247d3af4374854",
             }
             self.assertRegex(routes["mpc11"], r"^mpc11-controller-comparison-[0-9a-f]{20}$")
-            mpc11_route=site/routes["mpc11"]
-            mpc11_index=(mpc11_route/"index.html").read_bytes()
-            mpc11_manifest=json.loads((mpc11_route/"publication-manifest.json").read_text())
+            mpc11_route = site / routes["mpc11"]
+            mpc11_index = (mpc11_route / "index.html").read_bytes()
+            mpc11_manifest = json.loads((mpc11_route / "publication-manifest.json").read_text())
             self.assertEqual(
                 routes["mpc11"],
-                "mpc11-controller-comparison-"+
-                hashlib.sha256(json.dumps(mpc11_manifest["identity"],sort_keys=True).encode()).hexdigest()[:20])
-            self.assertIn(f'href="../{routes["mpc11"]}.zip"',mpc11_index.decode())
-            mpc11_files=mpc11_manifest["published_files"]
+                "mpc11-controller-comparison-"
+                + hashlib.sha256(
+                    json.dumps(mpc11_manifest["identity"], sort_keys=True).encode()
+                ).hexdigest()[:20],
+            )
+            self.assertIn(f'href="../{routes["mpc11"]}.zip"', mpc11_index.decode())
+            mpc11_files = mpc11_manifest["published_files"]
             self.assertTrue(mpc11_files)
-            for name,expected_hash in mpc11_files.items():
-                self.assertEqual(hashlib.sha256((mpc11_route/name).read_bytes()).hexdigest(),expected_hash)
-            mpc11_sums={**mpc11_files,"publication-manifest.json":hashlib.sha256(
-                (mpc11_route/"publication-manifest.json").read_bytes()).hexdigest()}
-            self.assertEqual((mpc11_route/"SHA256SUMS").read_text(),"".join(
-                f"{mpc11_sums[name]}  {name}\n" for name in sorted(mpc11_sums)))
-            with zipfile.ZipFile(site/(routes["mpc11"]+".zip")) as current_bundle:
-                expected_members=[f"{routes['mpc11']}/{name}" for name in sorted(set(mpc11_sums)|{"SHA256SUMS"})]
-                self.assertEqual(current_bundle.namelist(),expected_members)
+            for name, expected_hash in mpc11_files.items():
+                self.assertEqual(
+                    hashlib.sha256((mpc11_route / name).read_bytes()).hexdigest(), expected_hash
+                )
+            mpc11_sums = {
+                **mpc11_files,
+                "publication-manifest.json": hashlib.sha256(
+                    (mpc11_route / "publication-manifest.json").read_bytes()
+                ).hexdigest(),
+            }
+            self.assertEqual(
+                (mpc11_route / "SHA256SUMS").read_text(),
+                "".join(f"{mpc11_sums[name]}  {name}\n" for name in sorted(mpc11_sums)),
+            )
+            with zipfile.ZipFile(site / (routes["mpc11"] + ".zip")) as current_bundle:
+                expected_members = [
+                    f"{routes['mpc11']}/{name}" for name in sorted(set(mpc11_sums) | {"SHA256SUMS"})
+                ]
+                self.assertEqual(current_bundle.namelist(), expected_members)
                 for name in mpc11_sums:
-                    self.assertEqual(current_bundle.read(f"{routes['mpc11']}/{name}"),(mpc11_route/name).read_bytes())
-                self.assertEqual(current_bundle.read(f"{routes['mpc11']}/SHA256SUMS"),(mpc11_route/"SHA256SUMS").read_bytes())
-                self.assertEqual(current_bundle.read(routes["mpc11"]+"/index.html"),mpc11_index)
-                self.assertEqual(current_bundle.read(routes["mpc11"]+"/publication-manifest.json"),
-                                 (mpc11_route/"publication-manifest.json").read_bytes())
+                    self.assertEqual(
+                        current_bundle.read(f"{routes['mpc11']}/{name}"),
+                        (mpc11_route / name).read_bytes(),
+                    )
+                self.assertEqual(
+                    current_bundle.read(f"{routes['mpc11']}/SHA256SUMS"),
+                    (mpc11_route / "SHA256SUMS").read_bytes(),
+                )
+                self.assertEqual(current_bundle.read(routes["mpc11"] + "/index.html"), mpc11_index)
+                self.assertEqual(
+                    current_bundle.read(routes["mpc11"] + "/publication-manifest.json"),
+                    (mpc11_route / "publication-manifest.json").read_bytes(),
+                )
             self.assertRegex(routes["mpc11_studies"], r"^mpc11-mesh-timing-[0-9a-f]{20}$")
             studies_route = routes["mpc11_studies"]
-            studies_path = site/studies_route
-            studies_index = (studies_path/"index.html").read_bytes()
-            studies_manifest_bytes = (studies_path/"publication-manifest.json").read_bytes()
+            studies_path = site / studies_route
+            studies_index = (studies_path / "index.html").read_bytes()
+            studies_manifest_bytes = (studies_path / "publication-manifest.json").read_bytes()
             studies_manifest = json.loads(studies_manifest_bytes)
             studies_identity = studies_manifest["identity"]
             self.assertEqual(studies_manifest["report_id"], studies_route)
-            self.assertEqual(studies_route,
-                "mpc11-mesh-timing-"+
-                hashlib.sha256((json.dumps(studies_identity, indent=2, sort_keys=True)+"\n").encode()).hexdigest()[:20])
+            self.assertEqual(
+                studies_route,
+                "mpc11-mesh-timing-"
+                + hashlib.sha256(
+                    (json.dumps(studies_identity, indent=2, sort_keys=True) + "\n").encode()
+                ).hexdigest()[:20],
+            )
             self.assertIn(f'href="../{studies_route}.zip"', studies_index.decode())
             studies_files = studies_manifest["published_files"]
             self.assertTrue(studies_files)
             for name, expected_hash in studies_files.items():
-                self.assertEqual(hashlib.sha256((studies_path/name).read_bytes()).hexdigest(), expected_hash)
-            studies_sums = {**studies_files, "publication-manifest.json": hashlib.sha256(studies_manifest_bytes).hexdigest()}
-            self.assertEqual((studies_path/"SHA256SUMS").read_text(), "".join(
-                f"{studies_sums[name]}  {name}\n" for name in sorted(studies_sums)))
-            with zipfile.ZipFile(site/(studies_route+".zip")) as current_bundle:
-                expected_members = [f"{studies_route}/{name}" for name in sorted(set(studies_sums) | {"SHA256SUMS"})]
+                self.assertEqual(
+                    hashlib.sha256((studies_path / name).read_bytes()).hexdigest(), expected_hash
+                )
+            studies_sums = {
+                **studies_files,
+                "publication-manifest.json": hashlib.sha256(studies_manifest_bytes).hexdigest(),
+            }
+            self.assertEqual(
+                (studies_path / "SHA256SUMS").read_text(),
+                "".join(f"{studies_sums[name]}  {name}\n" for name in sorted(studies_sums)),
+            )
+            with zipfile.ZipFile(site / (studies_route + ".zip")) as current_bundle:
+                expected_members = [
+                    f"{studies_route}/{name}" for name in sorted(set(studies_sums) | {"SHA256SUMS"})
+                ]
                 self.assertEqual(current_bundle.namelist(), expected_members)
                 for name in studies_sums:
-                    self.assertEqual(current_bundle.read(f"{studies_route}/{name}"), (studies_path/name).read_bytes())
-                self.assertEqual(current_bundle.read(f"{studies_route}/SHA256SUMS"), (studies_path/"SHA256SUMS").read_bytes())
+                    self.assertEqual(
+                        current_bundle.read(f"{studies_route}/{name}"),
+                        (studies_path / name).read_bytes(),
+                    )
+                self.assertEqual(
+                    current_bundle.read(f"{studies_route}/SHA256SUMS"),
+                    (studies_path / "SHA256SUMS").read_bytes(),
+                )
             self.assertEqual(routes["retained_mpc11_variants"], retained_mpc11)
             for route, expected_zip_hash in retained_mpc11.items():
                 self.assertTrue((site / route / "index.html").is_file())
-                self.assertEqual(hashlib.sha256((site / (route + ".zip")).read_bytes()).hexdigest(),
-                                 expected_zip_hash)
+                self.assertEqual(
+                    hashlib.sha256((site / (route + ".zip")).read_bytes()).hexdigest(),
+                    expected_zip_hash,
+                )
                 self.assertIn(f'href="{route}/index.html"', archive_page)
-                self.assertIn("archive.html", inventory["html_routes"][route + "/index.html"]["inbound_html_references"])
+                self.assertIn(
+                    "archive.html",
+                    inventory["html_routes"][route + "/index.html"]["inbound_html_references"],
+                )
             with zipfile.ZipFile(site / "mpc11-mesh-timing-e1d5ebe497051adfdfad.zip") as bundle:
                 affine_note = "mpc11-mesh-timing-e1d5ebe497051adfdfad/source/benchmarks/reporting/mpc11/AFFINE.md"
-                self.assertEqual(hashlib.sha256(bundle.read(affine_note)).hexdigest(),
-                                 "b164db27d765b009e8e2a050733cdf0c432ed9a8b65146a1ca4c172ccd6ab50c")
+                self.assertEqual(
+                    hashlib.sha256(bundle.read(affine_note)).hexdigest(),
+                    "b164db27d765b009e8e2a050733cdf0c432ed9a8b65146a1ca4c172ccd6ab50c",
+                )
             first_variant_hashes = {
                 route: hashlib.sha256((site / route / "index.html").read_bytes()).hexdigest()
                 for route in retained_mpc11
             }
             self.assertEqual(replay_mpc11_published_variants.preserve(site), retained_mpc11)
-            self.assertEqual({
-                route: hashlib.sha256((site / route / "index.html").read_bytes()).hexdigest()
-                for route in retained_mpc11
-            }, first_variant_hashes)
+            self.assertEqual(
+                {
+                    route: hashlib.sha256((site / route / "index.html").read_bytes()).hexdigest()
+                    for route in retained_mpc11
+                },
+                first_variant_hashes,
+            )
             self.assertEqual(inventory["html_route_count"], len(inventory["html_routes"]))
-            expected_indexes = sum(route.endswith("/index.html") and route != "index.html"
-                                   for route in inventory["html_routes"])
-            self.assertEqual(inventory["navigation_transition"]["archive_index_route_count"], expected_indexes)
+            expected_indexes = sum(
+                route.endswith("/index.html") and route != "index.html"
+                for route in inventory["html_routes"]
+            )
+            self.assertEqual(
+                inventory["navigation_transition"]["archive_index_route_count"], expected_indexes
+            )
             self.assertEqual(inventory["navigation_transition"]["new_root_report_link_count"], 0)
-            self.assertEqual(inventory["html_routes"]["existing-route/index.html"]["visibility"], "archive")
-            self.assertIn("archive.html", inventory["html_routes"][strategy_summary]["inbound_html_references"])
-            for report_id in (routes["b04_c"], routes["mpc06"], routes["mpc06_complete"], routes["mpc06_offline"], routes["review05"], routes["mpc11"], routes["mpc08"], routes["mpc07"], routes["mpc10"], routes["mpc11_studies"], routes["b04_source"]):
+            self.assertEqual(
+                inventory["html_routes"]["existing-route/index.html"]["visibility"], "archive"
+            )
+            self.assertIn(
+                "archive.html",
+                inventory["html_routes"][strategy_summary]["inbound_html_references"],
+            )
+            for report_id in (
+                routes["b04_c"],
+                routes["mpc06"],
+                routes["mpc06_complete"],
+                routes["mpc06_offline"],
+                routes["review05"],
+                routes["mpc11"],
+                routes["mpc08"],
+                routes["mpc07"],
+                routes["mpc10"],
+                routes["mpc11_studies"],
+                routes["b04_source"],
+            ):
                 with zipfile.ZipFile(site / f"{report_id}.zip") as archive:
                     self.assertIn(f"{report_id}/publication-manifest.json", archive.namelist())
 
     def test_marker_is_bound_to_the_exact_report_run(self):
-        source = {"schema": "csl.pages-augmentation-source/1",
-                  "report_run_id": 42, "head_sha": "a" * 40}
+        source = {
+            "schema": "csl.pages-augmentation-source/1",
+            "report_run_id": 42,
+            "head_sha": "a" * 40,
+        }
         tar_bytes = BytesIO()
         with tarfile.open(fileobj=tar_bytes, mode="w") as archive:
             encoded = (json.dumps(source, sort_keys=True, separators=(",", ":")) + "\n").encode()
@@ -225,92 +384,159 @@ class PagesAugmentationAggregation(unittest.TestCase):
         sha = "a" * 40
         runs = [
             run(10, "2026-11-03T03:00:00Z", "2026-11-03T03:08:00Z", head=sha, event="push"),
-            run(11, "2026-11-03T03:02:00Z", "2026-11-03T03:05:00Z", head=sha, event="workflow_dispatch"),
-            run(12, "2026-11-03T03:03:00Z", "2026-11-03T03:09:00Z", head=sha,
-                event="push", conclusion="failure"),
+            run(
+                11,
+                "2026-11-03T03:02:00Z",
+                "2026-11-03T03:05:00Z",
+                head=sha,
+                event="workflow_dispatch",
+            ),
+            run(
+                12,
+                "2026-11-03T03:03:00Z",
+                "2026-11-03T03:09:00Z",
+                head=sha,
+                event="push",
+                conclusion="failure",
+            ),
             run(13, "2026-11-03T03:04:00Z", "2026-11-03T03:10:00Z", head="b" * 40, event="push"),
         ]
         latest = await_pages_augmentation_runs.latest_report_run(runs, head_sha=sha)
+        assert latest is not None
         self.assertEqual(latest["id"], 10)
 
     def test_await_handoff_requires_parent_and_all_other_route_artifacts(self):
         sha = "a" * 40
-        child = {"head_branch": "main", "event": "workflow_run",
-                 "conclusion": "success", "head_sha": "b" * 40}
-        parent = {"id": 42, "head_sha": sha, "head_branch": "main",
-                  "name": "Algorithm report records and site", "event": "push",
-                  "status": "completed", "conclusion": "success",
-                  "created_at": "2026-11-11T09:00:00Z",
-                  "updated_at": "2026-11-11T09:10:00Z"}
-        marker = {"schema": "csl.pages-augmentation-source/1",
-                  "report_run_id": 42, "head_sha": sha}
-        with (mock.patch.object(await_pages_augmentation_runs, "get_json",
-                                side_effect=[child, parent]) as get_json,
-              mock.patch.object(await_pages_augmentation_runs, "run_marker",
-                                return_value=marker),
-              mock.patch.object(await_pages_augmentation_runs, "workflow_runs",
-                                return_value=[parent]),
-              mock.patch.object(await_pages_augmentation_runs, "matching_augmentation",
-                                return_value={"conclusion": "success"}) as matching):
+        child = {
+            "head_branch": "main",
+            "event": "workflow_run",
+            "conclusion": "success",
+            "head_sha": "b" * 40,
+        }
+        parent = {
+            "id": 42,
+            "head_sha": sha,
+            "head_branch": "main",
+            "name": "Algorithm report records and site",
+            "event": "push",
+            "status": "completed",
+            "conclusion": "success",
+            "created_at": "2026-11-11T09:00:00Z",
+            "updated_at": "2026-11-11T09:10:00Z",
+        }
+        marker = {"schema": "csl.pages-augmentation-source/1", "report_run_id": 42, "head_sha": sha}
+        with (
+            mock.patch.object(
+                await_pages_augmentation_runs, "get_json", side_effect=[child, parent]
+            ) as get_json,
+            mock.patch.object(await_pages_augmentation_runs, "run_marker", return_value=marker),
+            mock.patch.object(
+                await_pages_augmentation_runs, "workflow_runs", return_value=[parent]
+            ),
+            mock.patch.object(
+                await_pages_augmentation_runs,
+                "matching_augmentation",
+                return_value={"conclusion": "success"},
+            ) as matching,
+        ):
             result = await_pages_augmentation_runs.await_augmentations(
-                "https://api.example", "owner/repository", "token", 99, 30, 1)
+                "https://api.example", "owner/repository", "token", 99, 30, 1
+            )
         self.assertEqual(result, (42, sha))
-        self.assertEqual(get_json.call_args_list, [
-            mock.call("https://api.example", "owner/repository", "token", "actions/runs/99"),
-            mock.call("https://api.example", "owner/repository", "token", "actions/runs/42"),
-        ])
-        self.assertEqual([call.args[3] for call in matching.call_args_list], [
-            "mpc01-per-attempt-pages-augmentation.yml",
-            "b04-c-pages-augmentation.yml",
-        ])
+        self.assertEqual(
+            get_json.call_args_list,
+            [
+                mock.call("https://api.example", "owner/repository", "token", "actions/runs/99"),
+                mock.call("https://api.example", "owner/repository", "token", "actions/runs/42"),
+            ],
+        )
+        self.assertEqual(
+            [call.args[3] for call in matching.call_args_list],
+            [
+                "mpc01-per-attempt-pages-augmentation.yml",
+                "b04-c-pages-augmentation.yml",
+            ],
+        )
         self.assertTrue(all(call.args[4] is parent for call in matching.call_args_list))
 
     def test_sibling_report_identity_comes_from_its_artifact(self):
         sha = "a" * 40
         parent = {"id": 42, "head_sha": sha, "created_at": "2026-11-11T09:00:00Z"}
-        sibling = {"id": 43, "head_sha": "b" * 40, "head_branch": "main",
-                   "event": "workflow_run", "status": "completed", "conclusion": "success",
-                   "created_at": "2026-11-11T09:01:00Z"}
+        sibling = {
+            "id": 43,
+            "head_sha": "b" * 40,
+            "head_branch": "main",
+            "event": "workflow_run",
+            "status": "completed",
+            "conclusion": "success",
+            "created_at": "2026-11-11T09:01:00Z",
+        }
         matching = {"report_run_id": 42, "head_sha": sha}
-        with (mock.patch.object(await_pages_augmentation_runs, "workflow_runs",
-                                return_value=[sibling]) as runs,
-              mock.patch.object(await_pages_augmentation_runs, "pages_artifact",
-                                return_value={"id": 44}),
-              mock.patch.object(await_pages_augmentation_runs, "get_artifact_zip",
-                                return_value=b"artifact"),
-              mock.patch.object(await_pages_augmentation_runs, "source_marker",
-                                return_value=matching)):
+        with (
+            mock.patch.object(
+                await_pages_augmentation_runs, "workflow_runs", return_value=[sibling]
+            ) as runs,
+            mock.patch.object(
+                await_pages_augmentation_runs, "pages_artifact", return_value={"id": 44}
+            ),
+            mock.patch.object(
+                await_pages_augmentation_runs, "get_artifact_zip", return_value=b"artifact"
+            ),
+            mock.patch.object(
+                await_pages_augmentation_runs, "source_marker", return_value=matching
+            ),
+        ):
             result = await_pages_augmentation_runs.matching_augmentation(
-                "https://api.example", "owner/repository", "token", "sibling.yml", parent, 30, 1)
+                "https://api.example", "owner/repository", "token", "sibling.yml", parent, 30, 1
+            )
         self.assertEqual(result, sibling)
         self.assertIsNone(runs.call_args.args[-1])
 
     def test_await_skips_artifacts_for_a_superseded_report_run(self):
         sha = "a" * 40
-        child = {"head_branch": "main", "event": "workflow_run",
-                 "conclusion": "success", "head_sha": sha}
-        parent = {"id": 42, "head_sha": sha, "head_branch": "main",
-                  "name": "Algorithm report records and site", "event": "push",
-                  "status": "completed", "conclusion": "success"}
-        newer = {"id": 43, "head_sha": sha, "head_branch": "main",
-                 "event": "push", "status": "completed", "conclusion": "success",
-                 "updated_at": "2026-11-11T09:12:00Z"}
-        marker = {"schema": "csl.pages-augmentation-source/1",
-                  "report_run_id": 42, "head_sha": sha}
-        with (mock.patch.object(await_pages_augmentation_runs, "get_json",
-                                side_effect=[child, parent]),
-              mock.patch.object(await_pages_augmentation_runs, "run_marker",
-                                return_value=marker),
-              mock.patch.object(await_pages_augmentation_runs, "workflow_runs",
-                                return_value=[newer]),
-              mock.patch.object(await_pages_augmentation_runs, "matching_augmentation") as matching):
+        child = {
+            "head_branch": "main",
+            "event": "workflow_run",
+            "conclusion": "success",
+            "head_sha": sha,
+        }
+        parent = {
+            "id": 42,
+            "head_sha": sha,
+            "head_branch": "main",
+            "name": "Algorithm report records and site",
+            "event": "push",
+            "status": "completed",
+            "conclusion": "success",
+        }
+        newer = {
+            "id": 43,
+            "head_sha": sha,
+            "head_branch": "main",
+            "event": "push",
+            "status": "completed",
+            "conclusion": "success",
+            "updated_at": "2026-11-11T09:12:00Z",
+        }
+        marker = {"schema": "csl.pages-augmentation-source/1", "report_run_id": 42, "head_sha": sha}
+        with (
+            mock.patch.object(
+                await_pages_augmentation_runs, "get_json", side_effect=[child, parent]
+            ),
+            mock.patch.object(await_pages_augmentation_runs, "run_marker", return_value=marker),
+            mock.patch.object(await_pages_augmentation_runs, "workflow_runs", return_value=[newer]),
+            mock.patch.object(await_pages_augmentation_runs, "matching_augmentation") as matching,
+        ):
             result = await_pages_augmentation_runs.await_augmentations(
-                "https://api.example", "owner/repository", "token", 99, 30, 1)
+                "https://api.example", "owner/repository", "token", 99, 30, 1
+            )
         self.assertIsNone(result)
         matching.assert_not_called()
 
     def test_aggregation_wait_job_precedes_single_cumulative_deployment(self):
-        workflow = (ROOT / ".github/workflows/pages-augmentation-aggregation.yml").read_text(encoding="utf-8")
+        workflow = (ROOT / ".github/workflows/pages-augmentation-aggregation.yml").read_text(
+            encoding="utf-8"
+        )
         self.assertIn("MPC-06 tube objective Pages augmentation", workflow)
         self.assertIn("await_pages_augmentation_runs.py", workflow)
         self.assertIn("needs: await", workflow)
@@ -321,7 +547,10 @@ class PagesAugmentationAggregation(unittest.TestCase):
         self.assertIn("ref: ${{ github.workflow_sha }}", await_job)
         self.assertIn("ref: ${{ needs.await.outputs.upstream_sha }}", deploy_job)
         self.assertIn("needs.await.outputs.upstream_sha != ''", deploy_job)
-        self.assertLess(workflow.index("pip install"), workflow.index("name: Stage and verify all Pages augmentations together"))
+        self.assertLess(
+            workflow.index("pip install"),
+            workflow.index("name: Stage and verify all Pages augmentations together"),
+        )
 
     def test_only_cumulative_workflow_can_publish_pages(self):
         workflows = ROOT / ".github/workflows"
@@ -337,9 +566,7 @@ class PagesAugmentationAggregation(unittest.TestCase):
         self.assertIn("repository: actions/deploy-pages", aggregation_text)
         self.assertIn("ref: 368f82528645a54fb793d4d04e342629a3f51346", aggregation_text)
         self.assertIn("uses: ./.github/actions/pages-deploy", aggregation_text)
-        local_action = (ROOT / ".github/actions/pages-deploy/index.js").read_text(
-            encoding="utf-8"
-        )
+        local_action = (ROOT / ".github/actions/pages-deploy/index.js").read_text(encoding="utf-8")
         self.assertIn("scripts/ci/deploy_pages_metadata_retry.py", local_action)
         publishers = [
             path.name
@@ -364,12 +591,18 @@ class PagesAugmentationAggregation(unittest.TestCase):
                 self.assertIn("workflow_run:", source)
                 self.assertIn("workflows: [Algorithm report records and site]", source)
                 self.assertIn("branches: [main]", source)
-        self.assertIn("Wait for every single-route artifact for this source revision", aggregation_text)
+        self.assertIn(
+            "Wait for every single-route artifact for this source revision", aggregation_text
+        )
         self.assertIn("await_pages_augmentation_runs.py", aggregation_text)
-        waiter = (ROOT / "scripts/reports/await_pages_augmentation_runs.py").read_text(encoding="utf-8")
-        for name in ("mpc01-per-attempt-pages-augmentation.yml",
-                     "b04-c-pages-augmentation.yml",
-                     "mpc06-tube-objective-pages-augmentation.yml"):
+        waiter = (ROOT / "scripts/reports/await_pages_augmentation_runs.py").read_text(
+            encoding="utf-8"
+        )
+        for name in (
+            "mpc01-per-attempt-pages-augmentation.yml",
+            "b04-c-pages-augmentation.yml",
+            "mpc06-tube-objective-pages-augmentation.yml",
+        ):
             self.assertIn(name, waiter)
 
     def test_metadata_retry_stays_inside_current_main_gated_deployment(self):
@@ -389,9 +622,7 @@ class PagesAugmentationAggregation(unittest.TestCase):
         self.assertLess(upload, configure)
         self.assertLess(configure, deploy)
         self.assertEqual(workflow.count("name: Upload the complete augmented Pages site"), 1)
-        self.assertIn(
-            "if: steps.head.outputs.current == 'true'\n        id: deployment", workflow
-        )
+        self.assertIn("if: steps.head.outputs.current == 'true'\n        id: deployment", workflow)
         self.assertIn("uses: ./.github/actions/pages-deploy", workflow)
         self.assertIn("token: ${{ github.token }}", workflow)
         self.assertIn("timeout: '600000'", workflow)
