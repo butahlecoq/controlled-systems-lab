@@ -8,6 +8,7 @@ on:
       - scripts/reports/exp824/check_nominal.py
       - include/csl/**
       - src/**
+      - tools/closed_loop_native_policy.cpp
       - .github/workflows/research-sdk.yml
   push:
     branches: [main]
@@ -18,6 +19,7 @@ on:
       - scripts/reports/exp824/check_nominal.py
       - include/csl/**
       - src/**
+      - tools/closed_loop_native_policy.cpp
       - .github/workflows/research-sdk.yml
   workflow_dispatch:
 
@@ -46,8 +48,8 @@ jobs:
           persist-credentials: false
       - name: Check native sources and public headers against the SDK
         run: |
-          git ls-tree -r HEAD -- include/csl src | awk '!/\.cmake$/' > "$RUNNER_TEMP/research-tree"
-          git -C build/upstream ls-tree -r HEAD -- include/csl src | awk '!/\.cmake$/' > "$RUNNER_TEMP/sdk-tree"
+          git ls-tree -r HEAD -- include/csl src tools/closed_loop_native_policy.cpp | awk '!/\.cmake$/' > "$RUNNER_TEMP/research-tree"
+          git -C build/upstream ls-tree -r HEAD -- include/csl src tools/closed_loop_native_policy.cpp | awk '!/\.cmake$/' > "$RUNNER_TEMP/sdk-tree"
           diff -u "$RUNNER_TEMP/sdk-tree" "$RUNNER_TEMP/research-tree"
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:

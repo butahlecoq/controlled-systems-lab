@@ -16,6 +16,13 @@
 namespace csl::synthesis::strategy_a {
 CandidateHistory::CandidateHistory(PreimageTarget scope,JointHistoryRelation h,reachability::ForwardTube f,
     std::optional<TerminalMinimizers> t):target(scope),history(std::move(h)),forward(std::move(f)),terminal(std::move(t)){}
+LiftedCandidateHistory::LiftedCandidateHistory(LiftedHistoryProjections value)
+    : projections(std::move(value)) {}
+
+const sets::SetData* LiftedCandidateHistory::h_relation_for_recording() const noexcept {
+    return &projections.history.relation;
+}
+
 namespace {
 const ModuleId strategy{"csl.synthesis.reach-back"};
 const std::string version="1";
@@ -31,7 +38,12 @@ Diagnostics capabilities(const problem::ResolvedProblem& problem,const FamilyReq
         problem,family,family.representation);
     const bool exact_b04=registry::detail::strategy_a_b04_c_exact_profile_valid(
         problem,family,family.representation);
-    if(!exact_ts01&&!exact_ts02&&!exact_ts03&&!exact_nominal&&!exact_b04&&family.profile!="nominal_open_loop")return unsupported("strategy_a.profile","Only nominal_open_loop candidates and reviewed exact profiles are supported.");
+    const bool nominal_candidate = family.profile == "nominal_open_loop" ||
+                                   family.profile == projected_nominal_profile ||
+                                   family.profile == lifted_nominal_profile;
+    if (!nominal_candidate && !exact_ts01 && !exact_ts02 && !exact_ts03 && !exact_nominal && !exact_b04)
+        return unsupported("strategy_a.profile",
+                           "Select a nominal candidate profile or a reviewed exact profile.");
     if(!exact_ts01&&!exact_ts02&&!exact_ts03&&!exact_nominal&&!exact_b04&&family.target!=FamilyTarget::candidate_relaxation)
         return unsupported("strategy_a.coverage","No reviewed coverage procedure or optimal-subset verifier; request a candidate relation.");
     if(family.assurance!=Assurance::numerical)
@@ -196,6 +208,172 @@ class StrategyAExecutionRunner final : public SynthesisWorkspace, public registr
     registry::StrategyRegistration::CompleteFamilyVerifierKey verifier_binding_;
     std::optional<registry::PreparedProvider<registry::HistoryOptimizerPort>> history_optimizer_;
     std::optional<registry::detail::StrategyARuntimeLineageReceipt> receipt_;
+
+    void optimize_source_history(
+        SynthesisResult &result, const problem::ResolvedProblem &problem, const FamilyRequest &request,
+        const JointHistoryRelation &feasible_history,
+        const std::vector<TransformStepIdentity> &feasible_lineage,
+        const ExecutionContext &context) {
+        if (!history_optimizer_) {
+            reject(
+                result, local({"strategy-a/history-optimizer"}),
+                unsupported(
+                    "strategy_a.history_optimizer",
+                    "A source-cost profile requires a prepared history-optimizer provider."),
+                feasible_lineage);
+            return;
+        }
+        auto optimized = optimization::run_strategy_history_optimization(
+            *history_optimizer_, prepared_request_.configuration.history_optimizer, problem,
+            feasible_history, *prepared_request_.history_optimization, context);
+        if (const auto *rejection = std::get_if<registry::Rejection>(&optimized)) {
+            reject(result,
+                   provenance({"strategy-a/history-optimizer"}, rejection->provenance),
+                   rejection->diagnostics, feasible_lineage);
+            return;
+        }
+        if (const auto *errors = std::get_if<Diagnostics>(&optimized)) {
+            contract_failure(result, *errors);
+            return;
+        }
+        if (const auto *diagnostic = std::get_if<Diagnostic>(&optimized)) {
+            contract_failure(result, {*diagnostic});
+            return;
+        }
+        if (const auto *stopped = std::get_if<OperationStopped>(&optimized)) {
+            stop(result,
+                 provenance({"strategy-a/history-optimizer"},
+                            history_optimizer_->provenance()),
+                 *stopped);
+            return;
+        }
+        auto call = std::get<optimization::HistoryOptimizationCall>(std::move(optimized));
+        auto optimized_result =
+            std::make_shared<const optimization::HistoryOptimizationResult>(
+                std::move(call.result));
+        result.history_optimization = HistoryOptimizationExecution{
+            provenance({"strategy-a/history-optimizer"}, call.provider),
+            optimized_result->identity.problem, optimized_result->identity.program,
+            optimized_result};
+        const auto coordinates = feasible_history.coordinates;
+        const auto n = coordinates.dimensions.state;
+        const auto m = coordinates.dimensions.control;
+        const auto horizon = coordinates.horizon;
+        const auto expected = (horizon + 1) * n + horizon * m;
+        if (optimized_result->history.size() != expected) {
+            contract_failure(
+                result,
+                {{DiagnosticCode::evidence_mismatch, "strategy_a.history_optimizer.history",
+                  "Checked optimizer result does not match Strategy A canonical history coordinates."}});
+            return;
+        }
+        Witness witness{problem.identity(), {}, {}, 0};
+        for (std::size_t stage = 0; stage <= horizon; ++stage)
+            witness.states.emplace_back(optimized_result->history.begin() +
+                                            static_cast<std::ptrdiff_t>(stage * n),
+                                        optimized_result->history.begin() +
+                                            static_cast<std::ptrdiff_t>((stage + 1) * n));
+        for (std::size_t stage = 0; stage < horizon; ++stage) {
+            const auto offset = (horizon + 1) * n + stage * m;
+            witness.controls.emplace_back(optimized_result->history.begin() +
+                                              static_cast<std::ptrdiff_t>(offset),
+                                          optimized_result->history.begin() +
+                                              static_cast<std::ptrdiff_t>(offset + m));
+        }
+        const auto objective =
+            optimization::evaluate(problem.objective(), witness.states.back());
+        if (const auto *value = std::get_if<double>(&objective)) {
+            witness.original_objective = *value;
+            verification::TrajectoryRequest query;
+            query.witness = witness;
+            const auto checked = verification::verify_trajectory(problem, query, context);
+            if (checked.termination != Termination::completed) {
+                const StopReason reason =
+                    checked.termination == Termination::cancelled
+                        ? StopReason::cancelled
+                    : checked.termination == Termination::deadline_expired
+                        ? StopReason::deadline_expired
+                    : checked.termination == Termination::resource_limit
+                        ? StopReason::resource_limit
+                        : StopReason::numerical_failure;
+                const auto &verifier = checked.verifier;
+                stop(result,
+                     {{"strategy-a/history-trajectory-verification"}, "verification",
+                      verifier.id, verifier.version, verifier.id, verifier.version},
+                     {reason, "Independent source trajectory verification stopped."});
+                return;
+            }
+            if (checked.bindings != verification::CheckStatus::numerical_pass ||
+                checked.feasibility != verification::CheckStatus::numerical_pass ||
+                checked.objective != verification::CheckStatus::numerical_pass) {
+                auto errors = checked.diagnostics;
+                if (errors.empty())
+                    errors.push_back(
+                        {DiagnosticCode::evidence_mismatch,
+                         "strategy_a.history_optimizer.trajectory",
+                         "Independent source trajectory verification rejected the optimizer history."});
+                contract_failure(result, std::move(errors));
+                return;
+            }
+            double residual = 0;
+            for (const auto &item : checked.residuals)
+                residual = std::max(residual, item.measure.violation);
+            const ClaimEvidence feasibility{
+                problem.identity(), NumericalCheck{request.numerical.absolute_tolerance,
+                                                   request.numerical.relative_tolerance,
+                                                   residual, checked.verifier.id}};
+            result.incumbents.push_back({std::move(witness), feasibility});
+        } else if (const auto *diagnostic = std::get_if<Diagnostic>(&objective)) {
+            contract_failure(result, {*diagnostic});
+            return;
+        } else {
+            stop(result, provenance({"strategy-a/history-optimizer"}, call.provider),
+                 std::get<OperationStopped>(objective));
+            return;
+        }
+    }
+
+    void solve_lifted_source_history(
+        SynthesisResult &result, const problem::ResolvedProblem &problem, const FamilyRequest &request,
+        const ExecutionContext &context) {
+        const RequestId request_id{"strategy-a/lifted-history"};
+        if (auto interrupted = interruption(context)) {
+            stop(result, local(request_id), *interrupted);
+            return;
+        }
+        const auto terminal = sets::make_universal(
+            {{request_id.value + "/terminal-domain"}, problem.model().dimensions().state, {}});
+        if (const auto *error = std::get_if<Diagnostic>(&terminal)) {
+            contract_failure(result, {*error});
+            return;
+        }
+        auto recovery_timing = timing_scope(context, timing::feasible_preimage);
+        auto recovered = recover_lifted_history_projections(problem, std::get<sets::SetData>(terminal));
+        if (const auto *errors = std::get_if<Diagnostics>(&recovered)) {
+            close_timing(recovery_timing, Termination::operation_rejected);
+            reject(result, local(request_id), *errors, {});
+            return;
+        }
+        close_timing(recovery_timing, Termination::completed);
+        auto payload = std::make_shared<const LiftedCandidateHistory>(
+            std::get<LiftedHistoryProjections>(std::move(recovered)));
+        const auto &history = payload->projections.history;
+        const std::vector<TransformStepIdentity> lineage{
+            {request_id, {problem.identity().value}, history.relation.metadata()->id,
+             {"csl.synthesis.lifted-history-projection"}, "1"}};
+        auto published = FamilyPublisher::publish(
+            {problem.identity(), request, history.coordinates, strategy, version, lineage},
+            CandidateFamily{{history.coordinates, request.representation, payload},
+                HeuristicRelationEvidence{"shared lifted stage projections of the stored affine history"},
+                Unestablished{}});
+        if (const auto *errors = std::get_if<Diagnostics>(&published)) {
+            contract_failure(result, *errors);
+            return;
+        }
+        result.family = std::get<OptimalFamily>(std::move(published));
+        optimize_source_history(result, problem, request, history, lineage, context);
+    }
+
 public:
   StrategyAExecutionRunner(
       reachability::ForwardDependencies forward, registry::PreparedProvider<registry::LPPort> lp,
@@ -248,8 +426,15 @@ public:
                 result.complete_proposal=CompleteFamilyProposal{identity,std::move(family)};
                 return result;
             }
+            if (request.profile == lifted_nominal_profile) {
+                solve_lifted_source_history(result, problem, request, context);
+                return result;
+            }
             auto forward_timing=timing_scope(context,timing::forward);
-            auto forwarded=reachability::nominal_forward(problem,{"strategy-a/forward"},forward_,context);
+            auto forwarded = request.profile == projected_nominal_profile
+                ? reachability::nominal_forward_projected(problem, {"strategy-a/forward"},
+                                                         forward_.projection, context)
+                : reachability::nominal_forward(problem, {"strategy-a/forward"}, forward_, context);
             if(const auto* failure=std::get_if<reachability::ForwardFailure>(&forwarded)) {
                 close_timing(forward_timing,forward_termination(*failure));
                 lineage=forward_lineage(failure->prefix);
@@ -281,120 +466,9 @@ public:
                 feasible_history.relation.metadata()->id,{"csl.synthesis.control-recovery"},"1"});
             if(!publish(result,problem,request,feasible_history,tube,{},feasible_lineage))return result;
             if (prepared_request_.history_optimization) {
-                if (!history_optimizer_) {
-                    reject(
-                        result, local({"strategy-a/history-optimizer"}),
-                        unsupported(
-                            "strategy_a.history_optimizer",
-                            "A source-cost profile requires a prepared history-optimizer provider."),
-                        feasible_lineage);
-                    return result;
-                }
-                auto optimized = optimization::run_strategy_history_optimization(
-                    *history_optimizer_, prepared_request_.configuration.history_optimizer, problem,
-                    feasible_history, *prepared_request_.history_optimization, context);
-                if (const auto *rejection = std::get_if<registry::Rejection>(&optimized)) {
-                    reject(result,
-                           provenance({"strategy-a/history-optimizer"}, rejection->provenance),
-                           rejection->diagnostics, feasible_lineage);
-                    return result;
-                }
-                if (const auto *errors = std::get_if<Diagnostics>(&optimized)) {
-                    contract_failure(result, *errors);
-                    return result;
-                }
-                if (const auto *diagnostic = std::get_if<Diagnostic>(&optimized)) {
-                    contract_failure(result, {*diagnostic});
-                    return result;
-                }
-                if (const auto *stopped = std::get_if<OperationStopped>(&optimized)) {
-                    stop(result,
-                         provenance({"strategy-a/history-optimizer"},
-                                    history_optimizer_->provenance()),
-                         *stopped);
-                    return result;
-                }
-                auto call = std::get<optimization::HistoryOptimizationCall>(std::move(optimized));
-                auto optimized_result =
-                    std::make_shared<const optimization::HistoryOptimizationResult>(
-                        std::move(call.result));
-                result.history_optimization = HistoryOptimizationExecution{
-                    provenance({"strategy-a/history-optimizer"}, call.provider),
-                    optimized_result->identity.problem, optimized_result->identity.program,
-                    optimized_result};
-                const auto coordinates = feasible_history.coordinates;
-                const auto n = coordinates.dimensions.state;
-                const auto m = coordinates.dimensions.control;
-                const auto horizon = coordinates.horizon;
-                const auto expected = (horizon + 1) * n + horizon * m;
-                if (optimized_result->history.size() != expected) {
-                    contract_failure(
-                        result,
-                        {{DiagnosticCode::evidence_mismatch, "strategy_a.history_optimizer.history",
-                          "Checked optimizer result does not match Strategy A canonical history coordinates."}});
-                    return result;
-                }
-                Witness witness{problem.identity(), {}, {}, 0};
-                for (std::size_t stage = 0; stage <= horizon; ++stage)
-                    witness.states.emplace_back(optimized_result->history.begin() +
-                                                    static_cast<std::ptrdiff_t>(stage * n),
-                                                optimized_result->history.begin() +
-                                                    static_cast<std::ptrdiff_t>((stage + 1) * n));
-                for (std::size_t stage = 0; stage < horizon; ++stage) {
-                    const auto offset = (horizon + 1) * n + stage * m;
-                    witness.controls.emplace_back(optimized_result->history.begin() +
-                                                      static_cast<std::ptrdiff_t>(offset),
-                                                  optimized_result->history.begin() +
-                                                      static_cast<std::ptrdiff_t>(offset + m));
-                }
-                const auto objective =
-                    optimization::evaluate(problem.objective(), witness.states.back());
-                if (const auto *value = std::get_if<double>(&objective)) {
-                    witness.original_objective = *value;
-                    verification::TrajectoryRequest query;
-                    query.witness = witness;
-                    const auto checked = verification::verify_trajectory(problem, query, context);
-                    if (checked.termination != Termination::completed) {
-                        const StopReason reason =
-                            checked.termination == Termination::deadline_expired
-                                ? StopReason::deadline_expired
-                            : checked.termination == Termination::resource_limit
-                                ? StopReason::resource_limit
-                                : StopReason::numerical_failure;
-                        stop(
-                            result, provenance({"strategy-a/history-optimizer"}, call.provider),
-                            {reason,
-                             "Independent source trajectory check of whole-history optimizer output stopped."});
-                        return result;
-                    }
-                    if (checked.bindings != verification::CheckStatus::numerical_pass ||
-                        checked.feasibility != verification::CheckStatus::numerical_pass ||
-                        checked.objective != verification::CheckStatus::numerical_pass) {
-                        auto errors = checked.diagnostics;
-                        if (errors.empty())
-                            errors.push_back(
-                                {DiagnosticCode::evidence_mismatch,
-                                 "strategy_a.history_optimizer.trajectory",
-                                 "Independent source trajectory verification rejected the optimizer history."});
-                        contract_failure(result, std::move(errors));
-                        return result;
-                    }
-                    double residual = 0;
-                    for (const auto &item : checked.residuals)
-                        residual = std::max(residual, item.measure.violation);
-                    const ClaimEvidence feasibility{
-                        problem.identity(), NumericalCheck{request.numerical.absolute_tolerance,
-                                                           request.numerical.relative_tolerance,
-                                                           residual, checked.verifier.id}};
-                    result.incumbents.push_back({std::move(witness), feasibility});
-                } else if (const auto *diagnostic = std::get_if<Diagnostic>(&objective)) {
-                    contract_failure(result, {*diagnostic});
-                    return result;
-                } else {
-                    stop(result, provenance({"strategy-a/history-optimizer"}, call.provider),
-                         std::get<OperationStopped>(objective));
-                    return result;
-                }
+                optimize_source_history(result, problem, request, feasible_history,
+                                        feasible_lineage, context);
+                return result;
             }
             if(auto interrupted=interruption(context)) {
                 stop(result,local({"strategy-a/terminal"}),*interrupted);return result;
@@ -577,6 +651,9 @@ registry::StrategyRegistration make_registration(
         [history_optimizer](const registry::StrategyRequest &request,
                             const registry::Requirements &) -> registry::Capability {
             auto errors = capabilities(request.problem, request.family);
+            if (request.family.profile == lifted_nominal_profile && !request.history_optimization)
+                errors.push_back({DiagnosticCode::unsupported, "strategy_a.history_optimizer",
+                                  "Lifted Strategy A requires a source-cost profile."});
             if (request.history_optimization) {
                 if (request.family.target != FamilyTarget::candidate_relaxation)
                     errors.push_back(
