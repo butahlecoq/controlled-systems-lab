@@ -1,13 +1,12 @@
 import hashlib
 import json
-from pathlib import Path
 import shutil
 import tempfile
 import unittest
 import zipfile
+from pathlib import Path
 
 from scripts.reports import stage_env717_pendulum_terminal as publication
-
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/env717-pendulum-terminal-pilot-v1"
@@ -15,28 +14,40 @@ SOURCE = ROOT / "reports/algorithm-results/env717-pendulum-terminal-pilot-v1"
 
 class PendulumTerminalPublicationTests(unittest.TestCase):
     def refresh_checksums(self, source: Path) -> None:
-        names = sorted(path.name for path in source.iterdir()
-                       if path.is_file() and path.name != "SHA256SUMS")
+        names = sorted(
+            path.name for path in source.iterdir() if path.is_file() and path.name != "SHA256SUMS"
+        )
         (source / "SHA256SUMS").write_text(
-            "".join(f"{hashlib.sha256((source / name).read_bytes()).hexdigest()}  {name}\n"
-                    for name in names), encoding="ascii")
+            "".join(
+                f"{hashlib.sha256((source / name).read_bytes()).hexdigest()}  {name}\n"
+                for name in names
+            ),
+            encoding="ascii",
+        )
 
     def test_stages_checksummed_report_and_offline_archive(self):
         with tempfile.TemporaryDirectory() as temporary:
             temporary_path = Path(temporary)
-            source = temporary_path / "source"
+            source = temporary_path / SOURCE.name
             shutil.copytree(SOURCE, source)
             site = temporary_path / "site"
             site.mkdir()
             (site / "index.html").write_text("<!doctype html><ul></ul>", encoding="utf-8")
 
             report_id = publication.stage(source, site)
+            self.assertEqual(report_id, "env717-pendulum-terminal-18c1b2ac58bdc43be172")
+            self.assertEqual(
+                hashlib.sha256((site / f"{report_id}.zip").read_bytes()).hexdigest(),
+                "618b8e349ce96988e101d64428a20ad5326a07778297b14c7556de120d56d92d",
+            )
 
             route = site / report_id
             manifest = json.loads((route / "publication-manifest.json").read_text())
             self.assertEqual(manifest["report_id"], report_id)
-            self.assertEqual(manifest["source_commit"],
-                             json.loads((source / "result.json").read_text())["source_commit"])
+            self.assertEqual(
+                manifest["source_commit"],
+                json.loads((source / "result.json").read_text())["source_commit"],
+            )
             index = (site / "index.html").read_text(encoding="utf-8")
             self.assertIn(f"{report_id}/index.html", index)
             with zipfile.ZipFile(site / f"{report_id}.zip") as archive:

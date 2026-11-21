@@ -31,12 +31,25 @@ on:
       - 'benchmarks/reporting/closed_loop/contracts.py'
       - 'tests/reporting/test_closed_loop_tasks.py'
       - 'scripts/ci/**'
+      - 'scripts/reports/await_pages_augmentation_runs.py'
+      - 'tests/reporting/test_pages_augmentation_waiter.py'
       - 'tests/ci/**'
       - 'scripts/catalogue/**'
       - 'reports/algorithm-results/tooling/**'
       - 'scripts/reports/report_data.py'
+      - 'tests/reporting/test_report_data.py'
+      - 'tests/reporting/test_render.py'
+      - 'tests/reporting/test_publication_policy.py'
+      - 'tests/reporting/test_report_source_identity.py'
+      - 'tests/reporting/test_registered_kinds.py'
+      - 'tests/reporting/test_landing.py'
+      - 'tests/reporting/test_plot.py'
       - 'scripts/reports/report_source_identity.py'
       - 'scripts/reports/publication_policy.py'
+      - 'scripts/reports/*_publication_policy.py'
+      - 'scripts/reports/registered_report_policies.py'
+      - 'docs/research/evidence/b04-c-publication-registration-source-v1/**'
+      - 'reports/algorithm-results/b04-c-exact-dyadic-v1/**'
       - 'scripts/reports/schema3_publication_policies.py'
       - 'scripts/reports/registered_reports.py'
       - 'scripts/reports/collector_common.py'
@@ -46,9 +59,12 @@ on:
       - 'scripts/reports/stage_catalogue_disturbance_control.py'
       - 'reports/algorithm-results/catalogue-disturbance-control-v1/**'
       - 'tests/reporting/test_catalogue_disturbance_publication.py'
-      - 'scripts/reports/audit_published_route_preservation.py'
       - 'scripts/reports/stage_catalogue_external_fixed_plan.py'
       - 'reports/algorithm-results/catalogue-external-fixed-plan-v1/**'
+      - 'scripts/reports/preserve_published_routes.py'
+      - 'scripts/reports/audit_published_route_preservation.py'
+      - 'tests/reporting/test_preserve_published_routes.py'
+      - 'tests/reporting/test_published_route_audit_policy.py'
       - 'scripts/reports/landing.py'
       - 'scripts/reports/visual_examples.py'
       - 'scripts/reports/learning_book.py'
@@ -72,15 +88,66 @@ on:
       - 'scripts/reports/render_full_profile_campaign.py'
       - 'docs/examples/closed-loop/campaign-2026-11-18/**'
       - 'scripts/reports/figure_style.py'
+      - 'scripts/reports/control_figure_data.py'
+      - 'scripts/reports/control_figures.py'
+      - 'scripts/reports/recorded_closed_loop_figures.py'
+      - 'tests/reporting/test_recorded_closed_loop_figures.py'
+      - 'tests/reporting/test_viz03_control_figures.py'
+      - 'scripts/reports/adapt_fuel_record.py'
+      - 'scripts/reports/styles/control-v1.json'
+      - 'reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/scenario.json'
+      - 'reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/geometry.json'
+      - 'reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/raw-runs.jsonl'
+      - 'tests/fixtures/reports/b06-measured-source/b06_finite_minimax.cpp'
       - 'scripts/reports/plot.py'
       - 'scripts/reports/b04_c_exact_registered_reports.py'
       - 'tests/reporting/test_b04_publication_source_snapshot.py'
       - 'tests/reporting/test_publication_spine_boundaries.py'
       - 'scripts/reports/stage_ext04.py'
+      - 'scripts/reports/stage_issue944_each_choice.py'
+      - 'scripts/reports/stage_issue944_postfix.py'
+      - 'tests/reporting/test_issue944_each_choice_publication.py'
+      - 'tests/reporting/test_issue944_postfix_publication.py'
+      - 'reports/algorithm-results/issue944-strategy-a-each-choice-v1/**'
+      - 'reports/algorithm-results/issue944-strategy-a-each-choice-postfix-v1/**'
+      - 'scripts/reports/qhull_highs_strategy_a_example.py'
+      - 'docs/examples/qhull-highs-strategy-a-2d-record.json'
+      - 'docs/examples/examples.css'
+      - 'scripts/reports/mathematical_notation.py'
       - 'scripts/reports/stage_finite_feedback.py'
       - 'scripts/reports/stage_geo07.py'
+      - 'scripts/reports/environment_report_publication.py'
+      - 'scripts/reports/stage_env717_dubins_car.py'
+      - 'scripts/reports/stage_env717_vanderpol.py'
+      - 'scripts/reports/stage_env717_pendulum_terminal.py'
+      - 'scripts/reports/stage_env717_earth_orbit.py'
+      - 'tests/reporting/test_env717_dubins_car_publication.py'
+      - 'tests/reporting/test_env717_vanderpol_publication.py'
+      - 'tests/reporting/test_env717_earth_orbit_publication.py'
+      - 'tests/reporting/test_stage_env717_pendulum_terminal.py'
+      - 'scripts/reports/env717/check_dubins_car.py'
+      - 'scripts/reports/env717/check_vanderpol.py'
+      - 'scripts/reports/env717/check_pendulum_terminal.py'
+      - 'scripts/reports/env717/check_earth_orbit.py'
+      - 'reports/algorithm-results/env717-dubins-car-pilot-v1/**'
+      - 'reports/algorithm-results/env717-vanderpol-pilot-v1/**'
+      - 'reports/algorithm-results/env717-pendulum-terminal-pilot-v1/**'
+      - 'reports/algorithm-results/env717-earth-orbit-pilot-v1/**'
+      - 'benchmarks/reporting/env717/earth_orbit.cpp'
       - 'scripts/reports/stage_geo07_port.py'
+      - 'scripts/reports/stage_env717_broken_triangle.py'
+      - 'scripts/reports/stage_env717_multipoint_cost_game.py'
+      - 'tests/reporting/test_env717_stager_publication.py'
+      - 'scripts/reports/env717/check_broken_triangle.py'
+      - 'scripts/reports/env717/check_multipoint_cost_game.py'
+      - 'reports/algorithm-results/env717-broken-triangle-pilot-v1/**'
+      - 'reports/algorithm-results/env717-multipoint-cost-game-pilot-v1/**'
       - 'scripts/reports/stage_geo07_dependent.py'
+      - 'scripts/reports/stage_env717_cartpole.py'
+      - 'tests/reporting/test_env717_cartpole_publication.py'
+      - 'scripts/reports/env717/check_cartpole.py'
+      - 'scripts/reports/env717/capture_cartpole_report_generation.py'
+      - 'reports/algorithm-results/env717-cartpole-pilot-v1/**'
       - 'tests/reporting/test_convex_report.py'
       - 'tests/reporting/test_opt07_collector.py'
       - 'tests/reporting/test_opt12_collector.py'
@@ -96,6 +163,8 @@ on:
       - 'scripts/reports/stage_native_model_catalogue.py'
       - 'scripts/reports/stage_native_extended_models.py'
       - 'scripts/reports/site_additions.py'
+      - 'scripts/reports/*published_route*.py'
+      - 'reports/published-route-preservation/**'
       - 'scripts/reports/stage_app02.py'
       - 'tests/reporting/test_site_additions.py'
       - 'tests/reporting/test_app02_saved.py'
@@ -109,8 +178,11 @@ on:
       - 'reports/algorithm-results/history-membership-zonotope-2d-v1/**'
       - 'scripts/reports/visual_examples.py'
       - 'scripts/reports/pages_route_retirement.py'
+      - 'tests/reporting/test_pages_route_retirement.py'
       - 'scripts/reports/audit_visual_routes.py'
       - 'scripts/reports/audit_mathematical_presentation.py'
+      - 'scripts/reports/augment_pages_bundle.py'
+      - 'tests/reporting/test_pages_augmentation_aggregation.py'
       - 'tests/reporting/test_mathematical_presentation.py'
       - 'scripts/reports/check_deploy_head.py'
       - 'tests/reporting/test_deploy_head.py'
@@ -119,6 +191,21 @@ on:
       - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
       - 'scripts/reports/stage_closed_loop_initial_baselines.py'
+      - 'scripts/reports/fixed_tail_example.py'
+      - 'scripts/reports/native_fixed_tail_episode_report.py'
+      - 'scripts/reports/native_fixed_tail_geometry.py'
+      - 'tests/reporting/test_fixed_tail_example.py'
+      - 'tests/reporting/test_native_fixed_tail_episode_report.py'
+      - 'tests/reporting/test_native_fixed_tail_geometry.py'
+      - 'examples/fixed-tail-tiny-a6/**'
+      - 'reports/closed-loop-native-fixed-tail/a6-v1/**'
+      - 'scripts/reports/assets/native-fixed-tail-geometry/**'
+      - 'docs/contracts/closed-loop/syn-nl-lv-01.json'
+      - 'docs/contracts/closed-loop/syn-nl-lv-01.sha256'
+      - 'docs/contracts/closed-loop/syn-nl-fuel-01.json'
+      - 'docs/contracts/closed-loop/syn-nl-fuel-01.sha256'
+      - 'docs/contracts/closed-loop/earth-orbit.json'
+      - 'docs/contracts/closed-loop/earth-orbit.sha256'
       - 'tests/reporting/test_closed_loop_initial_baselines_publication.py'
       - 'scripts/reports/stage_discrete_mpc_2d.py'
       - 'scripts/reports/stage_catalogue_forward_reachability.py'
@@ -186,12 +273,25 @@ on:
       - 'benchmarks/reporting/closed_loop/contracts.py'
       - 'tests/reporting/test_closed_loop_tasks.py'
       - 'scripts/ci/**'
+      - 'scripts/reports/await_pages_augmentation_runs.py'
+      - 'tests/reporting/test_pages_augmentation_waiter.py'
       - 'tests/ci/**'
       - 'scripts/catalogue/**'
       - 'reports/algorithm-results/tooling/**'
       - 'scripts/reports/report_data.py'
+      - 'tests/reporting/test_report_data.py'
+      - 'tests/reporting/test_render.py'
+      - 'tests/reporting/test_publication_policy.py'
+      - 'tests/reporting/test_report_source_identity.py'
+      - 'tests/reporting/test_registered_kinds.py'
+      - 'tests/reporting/test_landing.py'
+      - 'tests/reporting/test_plot.py'
       - 'scripts/reports/report_source_identity.py'
       - 'scripts/reports/publication_policy.py'
+      - 'scripts/reports/*_publication_policy.py'
+      - 'scripts/reports/registered_report_policies.py'
+      - 'docs/research/evidence/b04-c-publication-registration-source-v1/**'
+      - 'reports/algorithm-results/b04-c-exact-dyadic-v1/**'
       - 'scripts/reports/schema3_publication_policies.py'
       - 'scripts/reports/registered_reports.py'
       - 'scripts/reports/collector_common.py'
@@ -201,9 +301,12 @@ on:
       - 'scripts/reports/stage_catalogue_disturbance_control.py'
       - 'reports/algorithm-results/catalogue-disturbance-control-v1/**'
       - 'tests/reporting/test_catalogue_disturbance_publication.py'
-      - 'scripts/reports/audit_published_route_preservation.py'
       - 'scripts/reports/stage_catalogue_external_fixed_plan.py'
       - 'reports/algorithm-results/catalogue-external-fixed-plan-v1/**'
+      - 'scripts/reports/preserve_published_routes.py'
+      - 'scripts/reports/audit_published_route_preservation.py'
+      - 'tests/reporting/test_preserve_published_routes.py'
+      - 'tests/reporting/test_published_route_audit_policy.py'
       - 'scripts/reports/landing.py'
       - 'scripts/reports/visual_examples.py'
       - 'scripts/reports/learning_book.py'
@@ -227,15 +330,66 @@ on:
       - 'scripts/reports/render_full_profile_campaign.py'
       - 'docs/examples/closed-loop/campaign-2026-11-18/**'
       - 'scripts/reports/figure_style.py'
+      - 'scripts/reports/control_figure_data.py'
+      - 'scripts/reports/control_figures.py'
+      - 'scripts/reports/recorded_closed_loop_figures.py'
+      - 'tests/reporting/test_recorded_closed_loop_figures.py'
+      - 'tests/reporting/test_viz03_control_figures.py'
+      - 'scripts/reports/adapt_fuel_record.py'
+      - 'scripts/reports/styles/control-v1.json'
+      - 'reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/scenario.json'
+      - 'reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/geometry.json'
+      - 'reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/raw-runs.jsonl'
+      - 'tests/fixtures/reports/b06-measured-source/b06_finite_minimax.cpp'
       - 'scripts/reports/plot.py'
       - 'scripts/reports/b04_c_exact_registered_reports.py'
       - 'tests/reporting/test_b04_publication_source_snapshot.py'
       - 'tests/reporting/test_publication_spine_boundaries.py'
       - 'scripts/reports/stage_ext04.py'
+      - 'scripts/reports/stage_issue944_each_choice.py'
+      - 'scripts/reports/stage_issue944_postfix.py'
+      - 'tests/reporting/test_issue944_each_choice_publication.py'
+      - 'tests/reporting/test_issue944_postfix_publication.py'
+      - 'reports/algorithm-results/issue944-strategy-a-each-choice-v1/**'
+      - 'reports/algorithm-results/issue944-strategy-a-each-choice-postfix-v1/**'
+      - 'scripts/reports/qhull_highs_strategy_a_example.py'
+      - 'docs/examples/qhull-highs-strategy-a-2d-record.json'
+      - 'docs/examples/examples.css'
+      - 'scripts/reports/mathematical_notation.py'
       - 'scripts/reports/stage_finite_feedback.py'
       - 'scripts/reports/stage_geo07.py'
+      - 'scripts/reports/environment_report_publication.py'
+      - 'scripts/reports/stage_env717_dubins_car.py'
+      - 'scripts/reports/stage_env717_vanderpol.py'
+      - 'scripts/reports/stage_env717_pendulum_terminal.py'
+      - 'scripts/reports/stage_env717_earth_orbit.py'
+      - 'tests/reporting/test_env717_dubins_car_publication.py'
+      - 'tests/reporting/test_env717_vanderpol_publication.py'
+      - 'tests/reporting/test_env717_earth_orbit_publication.py'
+      - 'tests/reporting/test_stage_env717_pendulum_terminal.py'
+      - 'scripts/reports/env717/check_dubins_car.py'
+      - 'scripts/reports/env717/check_vanderpol.py'
+      - 'scripts/reports/env717/check_pendulum_terminal.py'
+      - 'scripts/reports/env717/check_earth_orbit.py'
+      - 'reports/algorithm-results/env717-dubins-car-pilot-v1/**'
+      - 'reports/algorithm-results/env717-vanderpol-pilot-v1/**'
+      - 'reports/algorithm-results/env717-pendulum-terminal-pilot-v1/**'
+      - 'reports/algorithm-results/env717-earth-orbit-pilot-v1/**'
+      - 'benchmarks/reporting/env717/earth_orbit.cpp'
       - 'scripts/reports/stage_geo07_port.py'
+      - 'scripts/reports/stage_env717_broken_triangle.py'
+      - 'scripts/reports/stage_env717_multipoint_cost_game.py'
+      - 'tests/reporting/test_env717_stager_publication.py'
+      - 'scripts/reports/env717/check_broken_triangle.py'
+      - 'scripts/reports/env717/check_multipoint_cost_game.py'
+      - 'reports/algorithm-results/env717-broken-triangle-pilot-v1/**'
+      - 'reports/algorithm-results/env717-multipoint-cost-game-pilot-v1/**'
       - 'scripts/reports/stage_geo07_dependent.py'
+      - 'scripts/reports/stage_env717_cartpole.py'
+      - 'tests/reporting/test_env717_cartpole_publication.py'
+      - 'scripts/reports/env717/check_cartpole.py'
+      - 'scripts/reports/env717/capture_cartpole_report_generation.py'
+      - 'reports/algorithm-results/env717-cartpole-pilot-v1/**'
       - 'tests/reporting/test_convex_report.py'
       - 'tests/reporting/test_opt07_collector.py'
       - 'tests/reporting/test_opt12_collector.py'
@@ -251,6 +405,8 @@ on:
       - 'scripts/reports/stage_native_model_catalogue.py'
       - 'scripts/reports/stage_native_extended_models.py'
       - 'scripts/reports/site_additions.py'
+      - 'scripts/reports/*published_route*.py'
+      - 'reports/published-route-preservation/**'
       - 'scripts/reports/stage_app02.py'
       - 'tests/reporting/test_site_additions.py'
       - 'tests/reporting/test_app02_saved.py'
@@ -264,8 +420,11 @@ on:
       - 'reports/algorithm-results/history-membership-zonotope-2d-v1/**'
       - 'scripts/reports/visual_examples.py'
       - 'scripts/reports/pages_route_retirement.py'
+      - 'tests/reporting/test_pages_route_retirement.py'
       - 'scripts/reports/audit_visual_routes.py'
       - 'scripts/reports/audit_mathematical_presentation.py'
+      - 'scripts/reports/augment_pages_bundle.py'
+      - 'tests/reporting/test_pages_augmentation_aggregation.py'
       - 'tests/reporting/test_mathematical_presentation.py'
       - 'scripts/reports/check_deploy_head.py'
       - 'tests/reporting/test_deploy_head.py'
@@ -274,6 +433,21 @@ on:
       - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
       - 'scripts/reports/stage_closed_loop_initial_baselines.py'
+      - 'scripts/reports/fixed_tail_example.py'
+      - 'scripts/reports/native_fixed_tail_episode_report.py'
+      - 'scripts/reports/native_fixed_tail_geometry.py'
+      - 'tests/reporting/test_fixed_tail_example.py'
+      - 'tests/reporting/test_native_fixed_tail_episode_report.py'
+      - 'tests/reporting/test_native_fixed_tail_geometry.py'
+      - 'examples/fixed-tail-tiny-a6/**'
+      - 'reports/closed-loop-native-fixed-tail/a6-v1/**'
+      - 'scripts/reports/assets/native-fixed-tail-geometry/**'
+      - 'docs/contracts/closed-loop/syn-nl-lv-01.json'
+      - 'docs/contracts/closed-loop/syn-nl-lv-01.sha256'
+      - 'docs/contracts/closed-loop/syn-nl-fuel-01.json'
+      - 'docs/contracts/closed-loop/syn-nl-fuel-01.sha256'
+      - 'docs/contracts/closed-loop/earth-orbit.json'
+      - 'docs/contracts/closed-loop/earth-orbit.sha256'
       - 'tests/reporting/test_closed_loop_initial_baselines_publication.py'
       - 'scripts/reports/stage_discrete_mpc_2d.py'
       - 'scripts/reports/stage_catalogue_forward_reachability.py'
@@ -343,17 +517,34 @@ jobs:
           python -m unittest discover -s tests/reporting -p 'test_site_additions.py'
           python -m unittest discover -s tests/reporting -p 'test_app02_saved.py'
           python -m unittest discover -s tests/reporting -p 'test_closed_loop_initial_baselines_publication.py'
+      - name: Check saved five-family fixed-tail geometry and episodes
+        env:
+          MPLBACKEND: Agg
+        run: |
+          python -m unittest tests.reporting.test_fixed_tail_example tests.reporting.test_native_fixed_tail_episode_report tests.reporting.test_native_fixed_tail_geometry
+          python scripts/reports/native_fixed_tail_episode_report.py --out "$RUNNER_TEMP/fixed-tail-episode-site"
+          python scripts/reports/native_fixed_tail_geometry.py --output "$RUNNER_TEMP/fixed-tail-geometry-site"
+          cmp docs/examples/examples.css "$RUNNER_TEMP/fixed-tail-episode-site/examples/examples.css"
+          cmp docs/examples/examples.css "$RUNNER_TEMP/fixed-tail-geometry-site/examples.css"
+      - name: Exercise the composed Pages route finalizer
+        run: python -m unittest tests.reporting.test_pages_route_retirement
       - name: Exercise maintained compatibility entry points
         run: |
           python -m unittest discover -s tests/reporting -p 'test_syn03_strategy_a_report.py'
           python -m unittest discover -s tests/reporting -p 'test_syn03_ts02_report.py'
+      - name: Check frozen Pages route preservation
+        run: python -m unittest tests.reporting.test_preserve_published_routes tests.reporting.test_published_route_audit_policy
       - name: Exercise shared publication owners and malformed-input boundaries
         env:
           MPLBACKEND: Agg
         run: |
           python -m unittest tests.reporting.test_report_data tests.reporting.test_render tests.reporting.test_publication_policy tests.reporting.test_report_source_identity tests.reporting.test_registered_kinds tests.reporting.test_landing tests.reporting.test_learning_book tests.reporting.test_plot tests.reporting.test_b04_publication_source_snapshot tests.reporting.test_publication_spine_boundaries
+      - name: Check cumulative Pages artifact identity and output
+        run: python -m unittest tests.reporting.test_pages_augmentation_waiter
       - name: Check mathematical presentation and frozen HTML
         run: python -m unittest tests.reporting.test_mathematical_presentation
+      - name: Validate recorded control figures
+        run: python -m unittest tests.reporting.test_recorded_closed_loop_figures tests.reporting.test_viz03_control_figures
       - name: Exercise Pages deployment freshness and source identity
         run: python -m unittest tests.reporting.test_deploy_head
       - name: Exercise saved publication and collector consumer families
@@ -363,8 +554,14 @@ jobs:
           python -m unittest tests.reporting.test_convex_report tests.reporting.test_opt07_collector tests.reporting.test_opt12_collector tests.reporting.test_visual_examples tests.reporting.test_geo07_publication tests.reporting.test_geo07_port_publication tests.reporting.test_geo07_dependent_publication tests.reporting.test_finite_feedback_publication tests.reporting.test_ext04_publication tests.reporting.test_report_lifecycle
 
 
+      - name: Check both saved Strategy A choice-pipeline publications
+        env:
+          MPLBACKEND: Agg
+        run: python -m unittest tests.reporting.test_issue944_each_choice_publication tests.reporting.test_issue944_postfix_publication
       - name: Check the locked source-only native row-scaling publication
         run: python -m unittest discover -s tests/reporting -p 'test_stage_native_row_scaling_diagnostic.py'
+      - name: Check the frozen environment report routes and ZIPs
+        run: python -m unittest tests.reporting.test_env717_stager_publication
       - name: Check native strategy starts, actuation and retry checkpoints
         env:
           OPENBLAS_NUM_THREADS: '1'
@@ -372,6 +569,8 @@ jobs:
         run: python -m unittest tests.reporting.test_native_strategy_history tests.reporting.test_closed_loop_attempt_records
       - name: Check the saved native whole-history optimizer route
         run: python -m unittest discover -s tests/reporting -p 'test_history_optimizer_native.py'
+      - name: Check the frozen CartPole route and offline ZIP
+        run: python -m unittest tests.reporting.test_env717_cartpole_publication
       - name: Check the saved typed-membership 2D example
         run: python -m unittest discover -s tests/reporting -p 'test_history_membership_2d.py'
       - name: Check the four-state projection approximation report
@@ -390,6 +589,12 @@ jobs:
 
       - name: Check closed-loop catalogues, campaign resume and common runner failure paths
         run: python -m unittest tests.reporting.test_native_compositions tests.reporting.test_closed_loop_campaign tests.reporting.test_closed_loop_native_capabilities tests.reporting.test_closed_loop_runner_failures tests.reporting.test_closed_loop_tracing tests.reporting.test_native_vertex_lp_priority_policy
+      - name: Check four frozen environment report routes and offline ZIPs
+        run: >-
+          python -m unittest tests.reporting.test_env717_dubins_car_publication
+          tests.reporting.test_env717_vanderpol_publication
+          tests.reporting.test_env717_earth_orbit_publication
+          tests.reporting.test_stage_env717_pendulum_terminal
       - name: Check architecture boundaries and decoded perf sample parsing
         run: |
           python tests/architecture/check_numeric_dependencies.py
