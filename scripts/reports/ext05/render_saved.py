@@ -4,18 +4,19 @@ from __future__ import annotations
 
 import argparse
 import csv
-from html import escape
 import importlib.util
 import io
 import json
-from pathlib import Path
 import zipfile
+from html import escape
+from pathlib import Path
 
 spec = importlib.util.spec_from_file_location(
     "ext05_collect", Path(__file__).with_name("collect.py")
 )
+if spec is None or spec.loader is None:
+    raise ImportError("Cannot load the EXT05 saved report collector")
 collect = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(collect)
 
 RENDERED = ("index.html", "example-2d.html", "trajectory-2d.svg", "summary.csv")

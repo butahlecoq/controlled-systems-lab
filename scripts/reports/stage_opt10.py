@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 HISTORICAL_REPORT_ID = "opt10-smooth-188130d94d7bf2de"
 HISTORICAL_MANIFEST_SHA256 = "a055711b30a6823cc01a7ee1b3571d644dca79344408c2141c2c51c800b66851"
 HISTORICAL_ZIP_SHA256 = "7ae9ea3675e9fc52aedcc4d4f6ce710f871fff07ea5bb073896dfc9f9641daeb"
+HISTORICAL_RENDERER_SHA256 = "8c42e70b58aeb7c5921629d7d658d860bfe90375f349b597f69914ad75b2bcb8"
 HISTORICAL_STAGER_SHA256 = "b34daa0c11454d725f393ee6ea6ac87fc176d9977bf9b77dc3351d07556e8b9a"
 spec = importlib.util.spec_from_file_location(
     "opt10_saved_renderer", ROOT / "scripts/reports/opt10/render_saved.py"
@@ -59,6 +60,7 @@ def catalog_entry(bundle: Path) -> dict:
             and entry["zip_sha256"] == HISTORICAL_ZIP_SHA256,
             "Historical saved report manifest or ZIP checksum differs",
         )
+        entry["renderer_sha256"] = HISTORICAL_RENDERER_SHA256
         entry["stager_sha256"] = HISTORICAL_STAGER_SHA256
     return entry
 

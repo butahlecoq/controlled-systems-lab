@@ -7,10 +7,10 @@ import csv
 import hashlib
 import io
 import json
-from pathlib import Path
 import re
 import statistics
 import subprocess
+from pathlib import Path
 
 SCHEMA = "csl.geo08-lazy-geometry/1"
 FIELDS = [
@@ -89,7 +89,7 @@ def rows(path: Path, phase: str) -> list[dict]:
         else [("warmup", 0, 100)] + [("trial", rep, 100) for rep in range(7)]
     )
     require(len(result) == len(expected), "Raw GEO-08 row count differs")
-    for row, (kind, repetition, calls) in zip(result, expected):
+    for row, (kind, repetition, calls) in zip(result, expected, strict=True):
         require(
             None not in row
             and (
@@ -147,6 +147,13 @@ def collect(capture: Path, source: Path, destination: Path) -> Path:
     pre, post, host = (
         read_json(capture / name) for name in ("prebuild.json", "postrun.json", "host.json")
     )
+    pre_time = pre.get("observed_utc")
+    post_time = post.get("observed_utc")
+    host_time = host.get("collected_utc")
+    if not (
+        isinstance(pre_time, str) and isinstance(post_time, str) and isinstance(host_time, str)
+    ):
+        raise ValueError("GEO-08 capture receipt timestamps must be strings")
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=source, text=True).strip()
     tree = subprocess.check_output(
         ["git", "rev-parse", "HEAD^{tree}"], cwd=source, text=True
@@ -163,7 +170,7 @@ def collect(capture: Path, source: Path, destination: Path) -> Path:
         and pre.get("phase") == "prebuild"
         and post.get("phase") == "postrun"
         and pre.get("tracked_count") == post.get("tracked_count")
-        and pre.get("observed_utc") < post.get("observed_utc") <= host.get("collected_utc"),
+        and pre_time < post_time <= host_time,
         "Capture does not match a clean frozen source checkout",
     )
     driver = source / "benchmarks/reporting/geo08/driver.cpp"

@@ -7,11 +7,10 @@ import csv
 import hashlib
 import io
 import json
-from pathlib import Path
 import shutil
 import statistics
 import subprocess
-
+from pathlib import Path
 
 SOURCE_FILES = (
     "driver.cpp",
@@ -86,7 +85,7 @@ def rows(path: Path, purpose: str) -> list[dict[str, str]]:
         else [("warmup", 0, 100)] + [("trial", i, 100) for i in range(7)]
     )
     require(len(result) == len(expected), "EXT-05 raw row count differs")
-    for row, (phase, repetition, calls) in zip(result, expected):
+    for row, (phase, repetition, calls) in zip(result, expected, strict=True):
         require(
             None not in row
             and (

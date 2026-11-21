@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import shutil
 import subprocess
 import sys
@@ -24,6 +25,19 @@ CATALOG = ROOT / "reports/algorithm-results/geo08-publications.json"
 
 
 class SavedGeo08Test(unittest.TestCase):
+    def test_missing_capture_timestamp_fails_before_using_the_source(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            capture = Path(temporary) / "capture"
+            capture.mkdir()
+            for name, receipt in {
+                "prebuild.json": {"observed_utc": "2026-01-01T00:00:00Z"},
+                "postrun.json": {},
+                "host.json": {"collected_utc": "2026-01-01T00:00:02Z"},
+            }.items():
+                (capture / name).write_text(json.dumps(receipt), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "capture receipt timestamps must be strings"):
+                render.collect.collect(capture, Path(temporary), Path(temporary))
+
     def test_verified_calls_regenerate_report(self) -> None:
         render.render(BUNDLE, check=True)
         record = render.validate(BUNDLE)
