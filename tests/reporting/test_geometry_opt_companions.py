@@ -29,3 +29,56 @@ class GeometryOptimizationTimingTests(unittest.TestCase):
         self.assertEqual(row, {"label": "fixture", "series": "total trial", **values})
         self.assertIs(type(row["min"]), int)
         self.assertIs(type(row["median"]), float)
+
+    def test_rejects_invalid_samples_before_computing_statistics(self):
+        for invalid in (float("nan"), float("inf"), True, "12"):
+            samples = [1, 2, 3, 4, invalid]
+            records = {
+                "geo05": {
+                    "catalog": {"scenarios": ["fixture"]},
+                    "trials": [
+                        {
+                            "scenario": "fixture",
+                            "status": "passed",
+                            "durations_ns": {"end_to_end_ns": value},
+                        }
+                        for value in samples
+                    ],
+                },
+                "opt12": {
+                    "trials": [
+                        {
+                            "scenario": "fixture",
+                            "status": "verified",
+                            "mode": "cold",
+                            "wall_ns": value,
+                        }
+                        for value in samples
+                    ],
+                },
+            }
+            for slug, record in records.items():
+                with (
+                    self.subTest(report=slug, value=invalid),
+                    self.assertRaisesRegex(ValueError, "timing row needs finite"),
+                ):
+                    geometry_opt_companions.timing_rows(slug, record)
+
+    def test_keeps_existing_sample_admission_rules(self):
+        geo05 = {
+            "catalog": {"scenarios": ["fixture"]},
+            "trials": [
+                {"scenario": "fixture", "status": status, "durations_ns": {"end_to_end_ns": value}}
+                for status, value in (("passed", 8), ("passed", None), ("failed", float("nan")))
+            ],
+        }
+        opt12 = {
+            "trials": [
+                {"scenario": "fixture", "status": status, "mode": "cold", "wall_ns": value}
+                for status, value in (("verified", 8), ("failed", float("nan")))
+            ],
+        }
+        for slug, record in (("geo05", geo05), ("opt12", opt12)):
+            with self.subTest(report=slug):
+                [row] = geometry_opt_companions.timing_rows(slug, record)
+                self.assertEqual((row["min"], row["median"], row["max"]), (8, 8, 8))

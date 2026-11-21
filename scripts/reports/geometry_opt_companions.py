@@ -175,7 +175,7 @@ def timing_rows(slug: str, record: dict) -> list[TimingRow]:
         rows = []
         for name in names:
             values = [
-                trial["durations_ns"]["end_to_end_ns"]
+                _duration(trial["durations_ns"]["end_to_end_ns"])
                 for trial in record["trials"]
                 if trial["scenario"] == name
                 and trial["status"] == "passed"
@@ -217,11 +217,13 @@ def timing_rows(slug: str, record: dict) -> list[TimingRow]:
             if row["phase"] in {"public_run", "end_to_end"}
         ]
     if slug == "opt12":
-        groups = {}
+        groups: dict[tuple[str, str], list[int | float]] = {}
         for trial in record["trials"]:
             if trial.get("status") != "verified":
                 continue
-            groups.setdefault((trial["scenario"], trial["mode"]), []).append(trial["wall_ns"])
+            groups.setdefault((trial["scenario"], trial["mode"]), []).append(
+                _duration(trial["wall_ns"])
+            )
         return [
             _phase_row(
                 f"{scenario} / {mode}",
