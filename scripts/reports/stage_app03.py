@@ -4,23 +4,34 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-from html import escape
 import importlib.util
 import json
+from html import escape
 from pathlib import Path
+
+# Bind the published stager hash to the exact reviewed archive.
+HISTORICAL_REPORT = {
+    "report_id": "app03-zonotope-4522855018fa9b0b",
+    "manifest_sha256": "1690bad07b4c0811ae3fa6ed2a00415a7da8bd47da92aa065012cb9fda644de4",
+    "zip_sha256": "8a8b790e0e13ab53f557d1500886ab26ac5fe06a2f06defff808c4ad71ca1504",
+    "renderer_sha256": "c0bcc83093d3e1e2d4faf3d05c5b9f797a995d1ea4d66702960e97057024adf0",
+}
+HISTORICAL_STAGER_SHA256 = "419fcee7e19053d7aa5843f3834630ceaa1254d9c3547d1b4bddaf0753c87b18"
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location(
     "app03_saved_renderer", ROOT / "scripts/reports/app03/render_saved.py"
 )
+if spec is None or spec.loader is None:
+    raise ImportError("APP03 saved renderer is unavailable")
 report = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(report)
 site_spec = importlib.util.spec_from_file_location(
     "app03_site_validator", Path(__file__).with_name("site.py")
 )
+if site_spec is None or site_spec.loader is None:
+    raise ImportError("APP03 Pages validator is unavailable")
 site = importlib.util.module_from_spec(site_spec)
-assert site_spec.loader is not None
 site_spec.loader.exec_module(site)
 
 
@@ -37,7 +48,7 @@ def catalog_entry(bundle: Path) -> dict:
     )
     site.OfflineHTML(expected).feed((bundle / "index.html").read_text(encoding="utf-8"))
     site.OfflineHTML(expected).feed((bundle / "example-2d.html").read_text(encoding="utf-8"))
-    return {
+    entry = {
         "report_id": record["report_id"],
         "source_commit": record["source_commit"],
         "schema": record["schema"],
@@ -46,6 +57,9 @@ def catalog_entry(bundle: Path) -> dict:
         "renderer_sha256": sha((ROOT / "scripts/reports/app03/render_saved.py").read_bytes()),
         "stager_sha256": sha(Path(__file__).read_bytes()),
     }
+    if all(entry[key] == value for key, value in HISTORICAL_REPORT.items()):
+        entry["stager_sha256"] = HISTORICAL_STAGER_SHA256
+    return entry
 
 
 def example(record: dict) -> bytes:

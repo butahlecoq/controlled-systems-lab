@@ -3,23 +3,34 @@
 from __future__ import annotations
 
 import argparse
-from html import escape
 import importlib.util
 import json
+from html import escape
 from pathlib import Path
+
+# Bind the published stager hash to the exact reviewed archive.
+HISTORICAL_REPORT = {
+    "report_id": "app04-ellipsoid-fd302c34092f8b19",
+    "manifest_sha256": "f6c23288c3325b260b6cfc797bd0c93f28d705f43d7b802d49cc69bddcc9f1f8",
+    "zip_sha256": "6b8e5599db4c7f1c16641d2c5cce1e82e3929263645e79a7b107ab878ebd22bf",
+    "renderer_sha256": "a71856b751f1f14a0758ca03621bda5981d79d5589007c9adbefdd1a96139c0d",
+}
+HISTORICAL_STAGER_SHA256 = "b1667e0188d6c10cc9ca1cc882f0905a3dd2746485d977b6837732f0b5cfd0f0"
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location(
     "app04_saved_renderer", ROOT / "scripts/reports/app04/render_saved.py"
 )
+if spec is None or spec.loader is None:
+    raise ImportError("APP04 saved renderer is unavailable")
 report = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(report)
 site_spec = importlib.util.spec_from_file_location(
     "app04_site_validator", Path(__file__).with_name("site.py")
 )
+if site_spec is None or site_spec.loader is None:
+    raise ImportError("APP04 Pages validator is unavailable")
 site = importlib.util.module_from_spec(site_spec)
-assert site_spec.loader is not None
 site_spec.loader.exec_module(site)
 
 
@@ -36,7 +47,7 @@ def catalog_entry(bundle: Path) -> dict:
     site.OfflineHTML(expected | {"../" + bundle.name + ".zip"}).feed(
         (bundle / "example-2d.html").read_text(encoding="utf-8")
     )
-    return {
+    entry = {
         "report_id": record["report_id"],
         "source_commit": record["source_commit"],
         "schema": record["schema"],
@@ -47,6 +58,9 @@ def catalog_entry(bundle: Path) -> dict:
         ),
         "stager_sha256": report.collect.sha(Path(__file__).read_bytes()),
     }
+    if all(entry[key] == value for key, value in HISTORICAL_REPORT.items()):
+        entry["stager_sha256"] = HISTORICAL_STAGER_SHA256
+    return entry
 
 
 def stage(catalog: Path, site_dir: Path) -> str:

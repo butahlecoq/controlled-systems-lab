@@ -3,17 +3,18 @@
 from __future__ import annotations
 
 import importlib.util
-from pathlib import Path
 import shutil
 import tempfile
 import unittest
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location(
     "app03_render_test", ROOT / "scripts/reports/app03/render_saved.py"
 )
+if spec is None or spec.loader is None:
+    raise ImportError("APP-03 saved renderer is unavailable")
 render = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(render)
 BUNDLE = ROOT / "reports/algorithm-results/app03-zonotope-4522855018fa9b0b"
 
