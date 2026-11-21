@@ -45,6 +45,10 @@ on:
       - 'scripts/reports/render.py'
       - 'scripts/reports/site.py'
       - 'scripts/reports/site_design.py'
+      - 'scripts/reports/preserve_published_routes.py'
+      - 'scripts/reports/audit_published_route_preservation.py'
+      - 'tests/reporting/test_preserve_published_routes.py'
+      - 'tests/reporting/test_published_route_audit_policy.py'
       - 'scripts/reports/landing.py'
       - 'scripts/reports/visual_examples.py'
       - 'scripts/reports/learning_book.py'
@@ -198,6 +202,10 @@ on:
       - 'scripts/reports/render.py'
       - 'scripts/reports/site.py'
       - 'scripts/reports/site_design.py'
+      - 'scripts/reports/preserve_published_routes.py'
+      - 'scripts/reports/audit_published_route_preservation.py'
+      - 'tests/reporting/test_preserve_published_routes.py'
+      - 'tests/reporting/test_published_route_audit_policy.py'
       - 'scripts/reports/landing.py'
       - 'scripts/reports/visual_examples.py'
       - 'scripts/reports/learning_book.py'
@@ -343,6 +351,8 @@ jobs:
         run: |
           python -m unittest discover -s tests/reporting -p 'test_syn03_strategy_a_report.py'
           python -m unittest discover -s tests/reporting -p 'test_syn03_ts02_report.py'
+      - name: Check frozen Pages route preservation
+        run: python -m unittest tests.reporting.test_preserve_published_routes tests.reporting.test_published_route_audit_policy
       - name: Exercise shared publication owners and malformed-input boundaries
         env:
           MPLBACKEND: Agg
