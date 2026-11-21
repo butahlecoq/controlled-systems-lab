@@ -32,6 +32,7 @@ from smoke import validate_smoke
 
 sys.path.append(str(Path(__file__).resolve().parents[3] / "scripts" / "reports"))
 import collector_common
+from geo05.render import render_html
 
 
 def _git(*args: str) -> str:
@@ -172,7 +173,7 @@ def _matrix_error(rows: list[dict], repetitions: int) -> None:
     )
     emitted = [(row["purpose"], row["scenario"], row["repetition"]) for row in rows]
     positions = [required.index(item) for item in emitted]
-    if any(left >= right for left, right in zip(positions, positions[1:])):
+    if any(left >= right for left, right in zip(positions, positions[1:], strict=False)):
         raise ValueError("attempts are duplicated or out of fixed alternating order")
 
 
@@ -275,8 +276,6 @@ def _finish_collection(
                     else "",
                 }
             )
-    from render import render_html
-
     (out / "index.html").write_text(render_html(record), encoding="utf-8")
     # The validated record now carries process outcome metadata. Keep the
     # historical successful bundle inventory; rejected captures retain the snapshot.

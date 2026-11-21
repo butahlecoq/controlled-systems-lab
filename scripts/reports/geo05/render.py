@@ -33,7 +33,7 @@ def render_svg(record: dict) -> str:
     ]
     maximum = max((value for value in values if value is not None), default=1)
     bars = []
-    for index, (scenario, value) in enumerate(zip(SCENARIOS, values)):
+    for index, (scenario, value) in enumerate(zip(SCENARIOS, values, strict=True)):
         y = 24 + index * 30
         width = 0 if value is None else max(1, round(500 * value / maximum))
         label = "unavailable" if value is None else f"{value:g} ns"

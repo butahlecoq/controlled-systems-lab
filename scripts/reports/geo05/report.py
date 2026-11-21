@@ -427,8 +427,10 @@ def validate_predecessor_failure(value: object, status: str) -> None:
         if not condition:
             raise ValueError("invalid predecessor failure context")
 
-    def fields(item: object, names: str) -> None:
-        require(isinstance(item, dict) and set(item) == set(names.split()))
+    def fields(item: object, names: str) -> dict[str, object]:
+        if not isinstance(item, dict) or set(item) != set(names.split()):
+            raise ValueError("invalid predecessor failure context")
+        return item
 
     def texts(items: object) -> None:
         require(isinstance(items, list) and all(isinstance(item, str) for item in items))
@@ -441,13 +443,14 @@ def validate_predecessor_failure(value: object, status: str) -> None:
         )
 
     def reference(item: object) -> None:
-        fields(item, "identity inputs")
-        fields(item["identity"], "problem request ideal_output")
-        require(all(isinstance(field, str) for field in item["identity"].values()))
+        item = fields(item, "identity inputs")
+        identity = fields(item["identity"], "problem request ideal_output")
+        require(all(isinstance(field, str) for field in identity.values()))
         texts(item["inputs"])
 
     def support(item: object) -> None:
-        require(isinstance(item, dict))
+        if not isinstance(item, dict):
+            raise ValueError("invalid predecessor failure context")
         kind = item.get("kind")
         if kind == "unestablished":
             fields(item, "kind")
@@ -465,11 +468,13 @@ def validate_predecessor_failure(value: object, status: str) -> None:
         else:
             require(False)
 
-    fields(value, "predecessor projection projection_provider completed_lineage cause")
+    value = fields(value, "predecessor projection projection_provider completed_lineage cause")
     reference(value["predecessor"])
     reference(value["projection"])
-    provider = value["projection_provider"]
-    fields(provider, "request port requested_module requested_version actual_module actual_version")
+    provider = fields(
+        value["projection_provider"],
+        "request port requested_module requested_version actual_module actual_version",
+    )
     require(
         all(isinstance(provider[name], str) for name in ("request", "port", "requested_module"))
     )
@@ -479,20 +484,22 @@ def validate_predecessor_failure(value: object, status: str) -> None:
             for name in ("requested_version", "actual_module", "actual_version")
         )
     )
-    require(isinstance(value["completed_lineage"], list))
-    for evidence in value["completed_lineage"]:
-        fields(evidence, "reference scope support assumptions error_bound")
+    lineage = value["completed_lineage"]
+    if not isinstance(lineage, list):
+        raise ValueError("invalid predecessor failure context")
+    for item in lineage:
+        evidence = fields(item, "reference scope support assumptions error_bound")
         reference(evidence["reference"])
         require(evidence["scope"] in ("set_relation", "support_value", "containment"))
         support(evidence["support"])
         texts(evidence["assumptions"])
         if evidence["error_bound"] is not None:
-            bound = evidence["error_bound"]
-            fields(bound, "metric bound units")
+            bound = fields(evidence["error_bound"], "metric bound units")
             require(isinstance(bound["metric"], str) and isinstance(bound["units"], str))
             number(bound["bound"])
     cause = value["cause"]
-    require(isinstance(cause, dict))
+    if not isinstance(cause, dict):
+        raise ValueError("invalid predecessor failure context")
     if cause.get("kind") == "unsupported":
         fields(cause, "kind diagnostics")
         require(status == "unsupported" and isinstance(cause["diagnostics"], list))

@@ -14,22 +14,23 @@ from pathlib import Path
 from unittest.mock import patch
 
 HERE = Path(__file__).resolve().parent
-SPEC = importlib.util.spec_from_file_location("geo05_report", HERE / "report.py")
-report = importlib.util.module_from_spec(SPEC)
-sys.modules[SPEC.name] = report
-SPEC.loader.exec_module(report)
-SPEC = importlib.util.spec_from_file_location("geo05_smoke", HERE / "smoke.py")
-smoke = importlib.util.module_from_spec(SPEC)
-sys.modules[SPEC.name] = smoke
-SPEC.loader.exec_module(smoke)
-SPEC = importlib.util.spec_from_file_location("geo05_render", HERE / "render.py")
-render = importlib.util.module_from_spec(SPEC)
-sys.modules[SPEC.name] = render
-SPEC.loader.exec_module(render)
-SPEC = importlib.util.spec_from_file_location("geo05_collect", HERE / "collect.py")
-collect = importlib.util.module_from_spec(SPEC)
-sys.modules[SPEC.name] = collect
-SPEC.loader.exec_module(collect)
+
+
+def load_local_module(name: str):
+    path = HERE / f"{name}.py"
+    spec = importlib.util.spec_from_file_location(f"geo05_{name}", path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Cannot load GEO-05 test module at {path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+report = load_local_module("report")
+smoke = load_local_module("smoke")
+render = load_local_module("render")
+collect = load_local_module("collect")
 
 
 def predecessor_failure_fixture():
