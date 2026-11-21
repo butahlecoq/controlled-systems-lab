@@ -1,4 +1,5 @@
 """Verify and stage the frozen Buryatia Dim4 lesson for the Pages gallery."""
+
 from __future__ import annotations
 
 import hashlib
@@ -56,16 +57,21 @@ def _ellipse_points(shape: dict, count: int = 240) -> list[list[float]]:
     for index in range(count):
         angle = 2.0 * 3.141592653589793 * index / count
         direction = (math.cos(angle), math.sin(angle))
-        projected = [sum(factor[row * columns + j] * direction[row] for row in range(2))
-                     for j in range(columns)]
+        projected = [
+            sum(factor[row * columns + j] * direction[row] for row in range(2))
+            for j in range(columns)
+        ]
         norm = sum(value * value for value in projected) ** 0.5
         if norm == 0.0:
             points.append(list(center))
         else:
-            points.append([
-                center[row] + sum(factor[row * columns + j] * projected[j] for j in range(columns)) / norm
-                for row in range(2)
-            ])
+            points.append(
+                [
+                    center[row]
+                    + sum(factor[row * columns + j] * projected[j] for j in range(columns)) / norm
+                    for row in range(2)
+                ]
+            )
     return points
 
 
@@ -78,7 +84,9 @@ def _svg_thumbnail(record: dict) -> bytes:
     }
     for name in ("reduced_zonotope", "box", "parallelotope"):
         points[name] = families[name]["coordinate_projections_2d"]["x1_x2"]
-    points["ellipsoid"] = _ellipse_points(families["ellipsoid"]["coordinate_projections_2d"]["x1_x2"])
+    points["ellipsoid"] = _ellipse_points(
+        families["ellipsoid"]["coordinate_projections_2d"]["x1_x2"]
+    )
     cloud = [point for series in points.values() for point in series]
     min_x, max_x = min(p[0] for p in cloud), max(p[0] for p in cloud)
     min_y, max_y = min(p[1] for p in cloud), max(p[1] for p in cloud)
@@ -101,14 +109,18 @@ def _svg_thumbnail(record: dict) -> bytes:
     for name, series in points.items():
         subset = series if len(series) <= 1200 else series[:: max(1, len(series) // 1200)]
         fragments.append(f'<g fill="{COLOR[name]}" fill-opacity=".55" data-family="{name}">')
-        fragments.extend(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="1.4"/>' for x, y in map(screen, subset))
+        fragments.extend(
+            f'<circle cx="{x:.2f}" cy="{y:.2f}" r="1.4"/>' for x, y in map(screen, subset)
+        )
         fragments.append("</g>")
     for index, name in enumerate(points):
         x = 95 + (index % 3) * 230
         y = 28 + (index // 3) * 22
         fragments.append(f'<circle cx="{x}" cy="{y}" r="4" fill="{COLOR[name]}"/>')
-        fragments.append(f'<text x="{x + 8}" y="{y + 4}" fill="#f8f8f2" font-size="12">{escape(LABEL[name])}</text>')
-    fragments.append('</svg>')
+        fragments.append(
+            f'<text x="{x + 8}" y="{y + 4}" fill="#f8f8f2" font-size="12">{escape(LABEL[name])}</text>'
+        )
+    fragments.append("</svg>")
     return ("\n".join(fragments) + "\n").encode()
 
 
@@ -141,29 +153,44 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
     scenario = _safe_file(benchmark, scenario_name).read_bytes()
     sums = _safe_file(docs, sums_name).read_text(encoding="ascii")
     require(hashlib.sha256(raw).hexdigest() == RAW_SHA256, "Buryatia raw capture hash differs")
-    require(hashlib.sha256(capture_bytes).hexdigest() == CAPTURE_SHA256,
-            "Buryatia capture receipt hash differs")
-    require(hashlib.sha256(box_trace_proof).hexdigest() == BOX_TRACE_PROOF_SHA256,
-            "Buryatia box-trace correction proof hash differs")
-    require(hashlib.sha256(scenario).hexdigest() == SCENARIO_SHA256,
-            "Buryatia source scenario hash differs")
+    require(
+        hashlib.sha256(capture_bytes).hexdigest() == CAPTURE_SHA256,
+        "Buryatia capture receipt hash differs",
+    )
+    require(
+        hashlib.sha256(box_trace_proof).hexdigest() == BOX_TRACE_PROOF_SHA256,
+        "Buryatia box-trace correction proof hash differs",
+    )
+    require(
+        hashlib.sha256(scenario).hexdigest() == SCENARIO_SHA256,
+        "Buryatia source scenario hash differs",
+    )
     receipt = json.loads(capture_bytes)
     trace_proof = json.loads(box_trace_proof)
     record = _saved_record()
     scenario_data = json.loads(scenario)
-    require(receipt["source_commit"] == SOURCE and receipt["stdout_sha256"] == RAW_SHA256,
-            "Buryatia capture receipt source or raw stream differs")
-    require(record["schema"] == "csl.buryatia.recursive-approximation-4d/1" and
-            record["source_sha256"] == SOURCE_VARIANT_SHA256,
-            "Buryatia raw record source identity differs")
-    require(scenario_data["case_id"] == record["case_id"],
-            "Buryatia scenario and saved record IDs differ")
-    require(trace_proof["schema"] == "csl.buryatia.dim4-box-trace-erratum/1" and
-            trace_proof["historical_record"]["sha256"] == RAW_SHA256 and
-            trace_proof["corrected_native_capture"]["source_commit"] == "00a9e3da45ded30906ca7d79d4d1fff4a63fa347" and
-            trace_proof["comparison"]["all_other_json_values_equal"] is True and
-            trace_proof["comparison"]["changed_json_values"] == 7,
-            "Buryatia box-trace correction proof does not match the immutable source record")
+    require(
+        receipt["source_commit"] == SOURCE and receipt["stdout_sha256"] == RAW_SHA256,
+        "Buryatia capture receipt source or raw stream differs",
+    )
+    require(
+        record["schema"] == "csl.buryatia.recursive-approximation-4d/1"
+        and record["source_sha256"] == SOURCE_VARIANT_SHA256,
+        "Buryatia raw record source identity differs",
+    )
+    require(
+        scenario_data["case_id"] == record["case_id"],
+        "Buryatia scenario and saved record IDs differ",
+    )
+    require(
+        trace_proof["schema"] == "csl.buryatia.dim4-box-trace-erratum/1"
+        and trace_proof["historical_record"]["sha256"] == RAW_SHA256
+        and trace_proof["corrected_native_capture"]["source_commit"]
+        == "00a9e3da45ded30906ca7d79d4d1fff4a63fa347"
+        and trace_proof["comparison"]["all_other_json_values_equal"] is True
+        and trace_proof["comparison"]["changed_json_values"] == 7,
+        "Buryatia box-trace correction proof does not match the immutable source record",
+    )
     expected = {
         raw_name: RAW_SHA256,
         capture_name: CAPTURE_SHA256,
@@ -186,8 +213,10 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
     )
     # The source page links the manifest by its published filename; the staged
     # route keeps that same filename next to the page and raw record.
-    require('href="../examples.css"' in page and scenario_name in page,
-            "Buryatia page links do not resolve in its staged route")
+    require(
+        'href="../examples.css"' in page and scenario_name in page,
+        "Buryatia page links do not resolve in its staged route",
+    )
     files = {
         ROUTE + "/index.html": page.encode("utf-8"),
         ROUTE + "/" + raw_name: raw,
@@ -199,7 +228,8 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
     files[ROUTE + "/terminal-x1-x2.svg"] = thumbnail
     stage_sums = "".join(
         f"{hashlib.sha256(content).hexdigest()}  {name.rsplit('/', 1)[-1]}\n"
-        for name, content in sorted(files.items()) if name != ROUTE + "/index.html"
+        for name, content in sorted(files.items())
+        if name != ROUTE + "/index.html"
     ).encode("ascii")
     files[ROUTE + "/" + sums_name] = stage_sums
 
@@ -209,8 +239,10 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
         if link.startswith(("https://", "http://", "#")):
             continue
         target = ROUTE + "/" + link
-        require(target in files or link == "../examples.css",
-                "Buryatia staged page link is missing: " + link)
+        require(
+            target in files or link == "../examples.css",
+            "Buryatia staged page link is missing: " + link,
+        )
     entry = {
         "family": "Buryatia affine reachability",
         "title": "Buryatia Dim4: six approximations through seven updates",
@@ -225,11 +257,11 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
         '<article class="saved-figure" id="buryatia-dim4-literal-affine-v1">'
         '<p class="eyebrow">Buryatia · source-qualified affine reachability</p>'
         '<h3><a href="buryatia-dim4-literal-affine-v1/index.html">'
-        'Buryatia Dim4: six approximations through seven updates</a></h3>'
+        "Buryatia Dim4: six approximations through seven updates</a></h3>"
         '<a href="buryatia-dim4-literal-affine-v1/index.html">'
         '<img src="buryatia-dim4-literal-affine-v1/terminal-x1-x2.svg" '
         'alt="Terminal x1-x2 projection of six set families from the full four-state model"></a>'
-        '<p>Inspect all eight stages of the literal seven-update affine variant. The plot is a two-coordinate view; all propagation is in four state coordinates.</p>'
+        "<p>Inspect all eight stages of the literal seven-update affine variant. The plot is a two-coordinate view; all propagation is in four state coordinates.</p>"
         '<p><a href="buryatia-dim4-literal-affine-v1/index.html">Open the interactive lesson and saved record →</a></p></article>'
     )
     return files, [entry], card
