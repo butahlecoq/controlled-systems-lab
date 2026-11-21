@@ -10,14 +10,14 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
-from html import escape
 import importlib.util
 import io
 import json
 import math
-from pathlib import Path
 import re
 import statistics
+from html import escape
+from pathlib import Path
 
 import registered_reports as registered
 import report_data
@@ -25,6 +25,8 @@ import report_data
 _site_spec = importlib.util.spec_from_file_location(
     "csl_report_site_v1", Path(__file__).with_name("site.py")
 )
+if _site_spec is None or _site_spec.loader is None:
+    raise ImportError("Cannot load the saved report dependency")
 site = importlib.util.module_from_spec(_site_spec)
 _site_spec.loader.exec_module(site)
 
@@ -176,11 +178,9 @@ def expected_residuals(fixture: str) -> list[dict]:
 
 def check_residuals(actual: object, fixture: str) -> None:
     expected = expected_residuals(fixture)
-    require(
-        isinstance(actual, list) and len(actual) == len(expected),
-        "SYN-06 named residual count differs",
-    )
-    for row, literal in zip(actual, expected):
+    if not isinstance(actual, list) or len(actual) != len(expected):
+        raise ValueError("SYN-06 named residual count differs")
+    for row, literal in zip(actual, expected, strict=True):
         require(
             isinstance(row, dict)
             and set(row) == set(literal)
@@ -426,9 +426,10 @@ def validate(bundle: Path) -> registered.PublicationRecord:
     require(local(bundle, "bundle.zip").read_bytes() == native, "SYN-06 native ZIP differs")
     record = read_json(local(bundle, "records.json"))
     payload = record.get("payload")
+    if not isinstance(payload, dict):
+        raise ValueError("SYN-06 record envelope differs")
     require(
-        isinstance(payload, dict)
-        and record.get("schema") == "csl.syn06-verifier-report/2"
+        record.get("schema") == "csl.syn06-verifier-report/2"
         and record.get("report_id") == bundle.name
         and payload.get("schema") == record["schema"]
         and record.get("payload_sha256") == digest(payload),
@@ -437,7 +438,7 @@ def validate(bundle: Path) -> registered.PublicationRecord:
     source = payload.get("source_commit")
     require(
         isinstance(source, str)
-        and re.fullmatch(r"[0-9a-f]{40}", source)
+        and re.fullmatch(r"[0-9a-f]{40}", source) is not None
         and bundle.name.endswith(source[:8])
         and payload.get("fixture") == expected_fixture()
         and payload.get("module") == {"id": "csl.trajectory.original", "version": "1"}
@@ -536,8 +537,8 @@ def validate(bundle: Path) -> registered.PublicationRecord:
             flags = group.get("flags", "")
             require(
                 group.get("language_standard") == "c++20"
-                and re.search(r"(?:/D|-D)NDEBUG\b", flags)
-                and re.search(r"(?:-std:c\+\+20|-std=c\+\+20|/std:c\+\+20)", flags),
+                and re.search(r"(?:/D|-D)NDEBUG\b", flags) is not None
+                and re.search(r"(?:-std:c\+\+20|-std=c\+\+20|/std:c\+\+20)", flags) is not None,
                 "SYN-06 Release/NDEBUG/C++20 graph differs: " + name,
             )
     for name in ("build-provenance.json", "build-graph.json", "configure-log.txt", "build-log.txt"):
@@ -561,7 +562,7 @@ def validate(bundle: Path) -> registered.PublicationRecord:
             and group[0].get("trials_per_fixture") == 1,
             "SYN-06 pilot header differs",
         )
-        for fixture, measured in zip(FIXTURES, (group[2], group[4])):
+        for fixture, measured in zip(FIXTURES, (group[2], group[4]), strict=True):
             require(
                 measured.get("event") == "trial"
                 and measured.get("fixture") == fixture
@@ -679,7 +680,8 @@ def stage(catalogue_path: Path, site_dir: Path) -> str:
     )
     source_id = catalogue["reports"][0].get("source_report_id")
     require(
-        isinstance(source_id, str) and re.fullmatch(r"syn06-verifier-\d{8}-[0-9a-f]{8}", source_id),
+        isinstance(source_id, str)
+        and re.fullmatch(r"syn06-verifier-\d{8}-[0-9a-f]{8}", source_id) is not None,
         "unsafe SYN-06 catalogue source",
     )
     bundle = catalogue_path.parent / source_id
@@ -696,11 +698,6 @@ def stage(catalogue_path: Path, site_dir: Path) -> str:
         site_dir.is_dir() and not site_dir.is_symlink() and not destination.exists(),
         "SYN-06 destination must be a fresh route in a staged site",
     )
-    destination.mkdir()
-    for name, content in artifacts.items():
-        (destination / name).write_bytes(content)
-    registered.validate_publication_manifest(destination, expected)
-    (site_dir / (item.report_id + ".zip")).write_bytes(archive)
     original = (site_dir / "index.html").read_text(encoding="utf-8")
     require(
         original.count("</ul>") == 1 and item.report_id not in original,
@@ -719,12 +716,17 @@ def stage(catalogue_path: Path, site_dir: Path) -> str:
         + escape(item.report_id)
         + '.zip">offline ZIP</a></li>'
     )
-    (site_dir / "index.html").write_text(
-        original.replace("</ul>", link + "</ul>"), encoding="utf-8"
-    )
     site.OfflineHTML(
         {item.report_id + "/index.html", item.report_id + "/records.json", item.report_id + ".zip"}
     ).feed(link)
+    destination.mkdir()
+    for name, content in artifacts.items():
+        (destination / name).write_bytes(content)
+    registered.validate_publication_manifest(destination, expected)
+    (site_dir / (item.report_id + ".zip")).write_bytes(archive)
+    (site_dir / "index.html").write_text(
+        original.replace("</ul>", link + "</ul>"), encoding="utf-8"
+    )
     return item.report_id
 
 

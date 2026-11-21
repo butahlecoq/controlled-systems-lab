@@ -4,29 +4,37 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-from html import escape
 import importlib.util
 import json
-from pathlib import Path
 import re
+from dataclasses import replace
+from html import escape
+from pathlib import Path
 
 import registered_reports as common
 import report_data
-
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location(
     "csl_ext01_saved_renderer", ROOT / "scripts/reports/ext01/render_saved.py"
 )
+if spec is None or spec.loader is None:
+    raise ImportError("Cannot load the saved report dependency")
 report = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(report)
 site_spec = importlib.util.spec_from_file_location(
     "csl_ext01_site_validator", Path(__file__).with_name("site.py")
 )
+if site_spec is None or site_spec.loader is None:
+    raise ImportError("Cannot load the saved report dependency")
 site = importlib.util.module_from_spec(site_spec)
-assert site_spec.loader is not None
 site_spec.loader.exec_module(site)
+
+HISTORICAL_REPORT_ID = (
+    "ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54"
+)
+HISTORICAL_INVENTORY_SHA256 = "8b69dd7cec7525b3e809f4a35cbc2678fe0a60f461384e3059609d6349bd6631"
+HISTORICAL_ZIP_SHA256 = "dbdb977b50c9e0f18bebdfe50e8ea6b01cb8c9373389a4e9f575f268058864e1"
 
 KIND = "ext01-fixed-plan"
 SCOPE = "Four native fixed-plan and convex worst-case numerical fixtures; seven Release batch observations each"
@@ -97,7 +105,7 @@ def validate(bundle: Path) -> common.PublicationRecord:
     }
     public_id = "ext01-fixed-plan-" + common._digest(identity)
     payload_hash = common._digest(record)
-    return common.PublicationRecord(
+    publication = common.PublicationRecord(
         KIND,
         public_id,
         payload_hash,
@@ -109,6 +117,13 @@ def validate(bundle: Path) -> common.PublicationRecord:
         payload_hash,
         bundle.name,
     )
+    # Reuse the route only when the original source inventory and regenerated ZIP both match.
+    if common._digest(identity["source_files"]) == HISTORICAL_INVENTORY_SHA256:
+        historical = replace(publication, report_id=HISTORICAL_REPORT_ID)
+        archive = common.publication_zip(historical.report_id, public_artifacts(bundle, historical))
+        if digest_bytes(archive) == HISTORICAL_ZIP_SHA256:
+            return historical
+    return publication
 
 
 def public_artifacts(bundle: Path, item: common.PublicationRecord) -> dict[str, bytes]:
@@ -194,14 +209,6 @@ def stage(catalogue_path: Path, site_dir: Path) -> str:
         and not (site_dir / (item.report_id + ".zip")).exists(),
         "EXT-01 public route must be a fresh staged destination",
     )
-    destination.mkdir()
-    for name, content in files.items():
-        (destination / name).write_bytes(content)
-    require(
-        common.validate_publication_manifest(destination, expected),
-        "EXT-01 public manifest validation failed",
-    )
-    (site_dir / (item.report_id + ".zip")).write_bytes(archive)
     index = (site_dir / "index.html").read_text(encoding="utf-8")
     require(
         index.count("</ul>") == 1 and item.report_id not in index,
@@ -224,7 +231,6 @@ def stage(catalogue_path: Path, site_dir: Path) -> str:
         + escape(item.report_id)
         + '.zip">offline ZIP</a></li>'
     )
-    (site_dir / "index.html").write_text(index.replace("</ul>", link + "</ul>"), encoding="utf-8")
     site.OfflineHTML(
         {
             item.report_id + "/index.html",
@@ -233,6 +239,15 @@ def stage(catalogue_path: Path, site_dir: Path) -> str:
             item.report_id + ".zip",
         }
     ).feed(link)
+    destination.mkdir()
+    for name, content in files.items():
+        (destination / name).write_bytes(content)
+    require(
+        common.validate_publication_manifest(destination, expected),
+        "EXT-01 public manifest validation failed",
+    )
+    (site_dir / (item.report_id + ".zip")).write_bytes(archive)
+    (site_dir / "index.html").write_text(index.replace("</ul>", link + "</ul>"), encoding="utf-8")
     return item.report_id
 
 

@@ -3,25 +3,26 @@
 import copy
 import importlib.util
 import json
-from pathlib import Path
 import shutil
 import sys
 import tempfile
 import unittest
 import zipfile
-
+from importlib import import_module
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORT = ROOT / "reports/algorithm-results/ext01-fixed-plan-20261016-11b7bc74"
 (ROOT / "build").mkdir(exist_ok=True)
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import stage_ext01 as stage
+stage = import_module("stage_ext01")
 
 spec = importlib.util.spec_from_file_location(
     "ext01_render_for_test", ROOT / "scripts/reports/ext01/render_saved.py"
 )
+if spec is None or spec.loader is None:
+    raise ImportError("Cannot load the saved report dependency")
 render = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(render)
 
 
@@ -81,6 +82,17 @@ class Ext01SavedReportTest(unittest.TestCase):
             self.assertTrue((site / item.report_id / "publication-manifest.json").is_file())
             self.assertTrue((site / (item.report_id + ".zip")).is_file())
             self.assertIn(item.report_id, (site / "index.html").read_text(encoding="utf-8"))
+
+    def test_malformed_landing_leaves_no_partial_publication(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary)
+            landing = site / "index.html"
+            original = b"<html><body>No report list</body></html>"
+            landing.write_bytes(original)
+            with self.assertRaisesRegex(ValueError, "site index insertion point differs"):
+                stage.stage(REPORT.parent / "ext01-publications.json", site)
+            self.assertEqual(list(site.iterdir()), [landing])
+            self.assertEqual(landing.read_bytes(), original)
 
 
 if __name__ == "__main__":

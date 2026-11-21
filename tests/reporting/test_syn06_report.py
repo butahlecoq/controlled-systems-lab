@@ -7,21 +7,24 @@ import hashlib
 import importlib.util
 import json
 import os
-from pathlib import Path
 import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
 import zipfile
+from importlib import import_module
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts" / "reports"))
-import stage_syn06 as syn06
+syn06 = import_module("stage_syn06")
 
 _collector_spec = importlib.util.spec_from_file_location(
     "syn06_collector", ROOT / "reports/algorithm-results/tooling/syn06/collect.py"
 )
+if _collector_spec is None or _collector_spec.loader is None:
+    raise ImportError("Cannot load the saved report dependency")
 collector = importlib.util.module_from_spec(_collector_spec)
 _collector_spec.loader.exec_module(collector)
 
@@ -138,6 +141,7 @@ class Syn06ReportTests(unittest.TestCase):
                 reader = csv.DictReader(stream)
                 rows = list(reader)
                 fields = reader.fieldnames
+            assert fields is not None
             rows[0]["checked_calls"] = str(int(rows[0]["checked_calls"]) - 1)
             path.write_bytes(syn06.csv_bytes(tuple(fields), rows))
             rehash_native(bundle)
@@ -214,6 +218,17 @@ class Syn06ReportTests(unittest.TestCase):
             self.assertEqual(status["status"], "failed")
             self.assertEqual(status["phases"][0]["return_code"], 7)
             self.assertEqual(status["phases"][0]["partial_output_lines"], 1)
+
+    def test_malformed_landing_leaves_no_partial_publication(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary)
+            landing = site / "index.html"
+            original = b"<html><body>No report list</body></html>"
+            landing.write_bytes(original)
+            with self.assertRaisesRegex(ValueError, "catalogue index insertion point differs"):
+                syn06.stage(CATALOG, site)
+            self.assertEqual(list(site.iterdir()), [landing])
+            self.assertEqual(landing.read_bytes(), original)
 
 
 if __name__ == "__main__":
