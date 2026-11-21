@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import hashlib
 import html
 import importlib.util
 import io
@@ -16,8 +15,9 @@ from pathlib import Path
 _spec = importlib.util.spec_from_file_location(
     "csl_ext07_two_parameter_collect", Path(__file__).with_name("two_parameter_collect.py")
 )
+if _spec is None or _spec.loader is None:
+    raise ImportError("Cannot load the EXT-07 collector")
 collect = importlib.util.module_from_spec(_spec)
-assert _spec.loader is not None
 _spec.loader.exec_module(collect)
 
 RENDERED = ("index.html", "two-control-example.html", "feasible-polygons.svg", "summary.csv")

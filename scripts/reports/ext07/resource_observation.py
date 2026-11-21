@@ -104,6 +104,8 @@ def collect_profile(capture: Path, source: Path, layout: dict) -> dict:
     resource = read_json(capture / "resource-observation.json")
     commit = pre.get("commit")
     tree = pre.get("tree")
+    if not isinstance(commit, str):
+        raise ValueError("Source receipts disagree")
     require(
         pre.get("phase") == "prebuild"
         and post.get("phase") == "postrun"
@@ -214,7 +216,7 @@ def collect_profile(capture: Path, source: Path, layout: dict) -> dict:
     observed = resource.get("observed", {})
     require(
         resource.get("phase") == "measure"
-        and resource.get("scope")
+        and bool(resource.get("scope"))
         and resource_limits_match(resource)
         and enforced.get("result") == "success"
         and enforced.get("exit_status") == 0

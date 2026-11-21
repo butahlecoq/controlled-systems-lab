@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import importlib.util
-import json
 import shutil
 import statistics
 import subprocess
@@ -14,8 +12,9 @@ from pathlib import Path
 _common_spec = importlib.util.spec_from_file_location(
     "csl_ext07_common_collect", Path(__file__).with_name("ext07_collect.py")
 )
+if _common_spec is None or _common_spec.loader is None:
+    raise ImportError("Cannot load the EXT-07 collector")
 common = importlib.util.module_from_spec(_common_spec)
-assert _common_spec.loader is not None
 _common_spec.loader.exec_module(common)
 encoded = common.encoded
 jsonl = common.jsonl
@@ -52,20 +51,17 @@ CAPACITY_SOURCE_FILES = (*SOURCE_FILES, "capacity.jsonl", "capacity.stderr.txt")
 
 
 def source_files_for_record(record: dict) -> tuple[str, ...]:
-    if record.get("schema") == "csl.ext07-hybrid-two-parameter-report/1":
-        return LEGACY_SOURCE_FILES
-    if record.get("schema") == "csl.ext07-hybrid-two-parameter-report/2":
-        return PROCESS_CPU_SOURCE_FILES
-    require(
-        record.get("schema")
-        in {
-            "csl.ext07-hybrid-two-parameter-report/3",
-            "csl.ext07-hybrid-two-parameter-report/4",
-            "csl.ext07-hybrid-two-parameter-report/5",
-        },
-        "Unsupported EXT-07 two-parameter report schema",
-    )
-    return CAPACITY_SOURCE_FILES if record.get("schema").endswith("/5") else SOURCE_FILES
+    match record.get("schema"):
+        case "csl.ext07-hybrid-two-parameter-report/1":
+            return LEGACY_SOURCE_FILES
+        case "csl.ext07-hybrid-two-parameter-report/2":
+            return PROCESS_CPU_SOURCE_FILES
+        case "csl.ext07-hybrid-two-parameter-report/3" | "csl.ext07-hybrid-two-parameter-report/4":
+            return SOURCE_FILES
+        case "csl.ext07-hybrid-two-parameter-report/5":
+            return CAPACITY_SOURCE_FILES
+        case _:
+            raise ValueError("Unsupported EXT-07 two-parameter report schema")
 
 
 EXPECTED_PROVIDER = "csl.lp.highs@1.1.0+highs.1.11.0"

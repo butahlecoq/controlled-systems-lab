@@ -6,7 +6,6 @@ import argparse
 import hashlib
 import json
 import os
-import shutil
 import statistics
 import subprocess
 from pathlib import Path
@@ -152,10 +151,8 @@ def validate_run(
 
 def validate_process_cpu_observations(row: dict, calls: int, branches: int) -> None:
     observations = row.get("process_cpu_observations")
-    require(
-        isinstance(observations, list) and len(observations) == calls,
-        "EXT-07 process CPU observation count differs from calls",
-    )
+    if not isinstance(observations, list) or len(observations) != calls:
+        raise ValueError("EXT-07 process CPU observation count differs from calls")
     allowed_reasons = {"unsupported_platform", "clock_read_failed", "clock_regressed"}
     for call in observations:
         require(
@@ -215,10 +212,8 @@ def process_cpu_summary(rows: list[dict], branch_labels: list[str]) -> dict:
 
 def validate_provider_invocation_observations(row: dict, calls: int, branches: int) -> None:
     observations = row.get("provider_invocation_observations")
-    require(
-        isinstance(observations, list) and len(observations) == calls,
-        "EXT-07 provider invocation observation count differs from calls",
-    )
+    if not isinstance(observations, list) or len(observations) != calls:
+        raise ValueError("EXT-07 provider invocation observation count differs from calls")
     for call in observations:
         require(
             isinstance(call, list) and len(call) == branches,
@@ -295,10 +290,8 @@ def operation_signature(operation: dict) -> tuple:
 
 def validate_operation_observations(row: dict, calls: int, operations_per_path: list[int]) -> None:
     observations = row.get("operation_observations")
-    require(
-        isinstance(observations, list) and len(observations) == calls,
-        "EXT-07 operation observation count differs from calls",
-    )
+    if not isinstance(observations, list) or len(observations) != calls:
+        raise ValueError("EXT-07 operation observation count differs from calls")
     reference = None
     expected_keys = {
         "kind",
@@ -434,6 +427,7 @@ def operation_cpu_summary(rows: list[dict]) -> dict:
                             "joint_variables",
                         ),
                         summary["identity"],
+                        strict=True,
                     )
                 },
                 "observed_calls": len(summary["observed"]),
@@ -457,13 +451,19 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
         read_json(capture / name) for name in ("prebuild.json", "postrun.json", "host.json")
     )
     commit = pre["commit"]
+    pre_utc = pre.get("observed_utc")
+    post_utc = post.get("observed_utc")
+    collected_utc = host.get("collected_utc")
     require(
         pre.get("phase") == "prebuild"
         and post.get("phase") == "postrun"
         and pre.get("status") == post.get("status") == []
         and pre.get("commit") == post.get("commit") == host.get("source_commit") == commit
         and pre.get("tree") == post.get("tree") == host.get("source_tree")
-        and pre.get("observed_utc") < post.get("observed_utc") <= host.get("collected_utc"),
+        and isinstance(pre_utc, str)
+        and isinstance(post_utc, str)
+        and isinstance(collected_utc, str)
+        and pre_utc < post_utc <= collected_utc,
         "EXT-07 frozen source receipts differ",
     )
     driver = source / "benchmarks/reporting/ext07/driver.cpp"

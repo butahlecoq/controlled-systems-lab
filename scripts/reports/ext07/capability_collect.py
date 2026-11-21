@@ -57,7 +57,7 @@ def collect(raw: Path, output: Path) -> list[dict]:
     for key in sorted(groups):
         group = groups[key]
         durations = [row["batch_ns"] for row in group]
-        profile = dict(zip(PROFILE, key))
+        profile = dict(zip(PROFILE, key, strict=True))
         median_ns = statistics.median(durations)
         summary.append(
             {

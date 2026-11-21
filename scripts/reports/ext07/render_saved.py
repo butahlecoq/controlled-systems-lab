@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import hashlib
 import importlib.util
 import io
 import json
@@ -15,8 +14,9 @@ from pathlib import Path
 _collect_spec = importlib.util.spec_from_file_location(
     "csl_ext07_report_collect", Path(__file__).with_name("ext07_collect.py")
 )
+if _collect_spec is None or _collect_spec.loader is None:
+    raise ImportError("Cannot load the EXT-07 collector")
 collect = importlib.util.module_from_spec(_collect_spec)
-assert _collect_spec.loader is not None
 _collect_spec.loader.exec_module(collect)
 
 RENDERED = ("index.html", "example-2d.html", "joint-relation-2d.svg", "summary.csv")
