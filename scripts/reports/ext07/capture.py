@@ -1,15 +1,16 @@
 """Run the public EXT-07 path/optimization/family-verification route in Release."""
+
 from __future__ import annotations
 
 import argparse
-from datetime import datetime, timezone
 import hashlib
 import json
 import os
-from pathlib import Path
 import platform
 import re
 import subprocess
+from datetime import datetime, timezone
+from pathlib import Path
 
 
 def git(source: Path, *args: str) -> str:
@@ -22,16 +23,25 @@ def save(path: Path, value: dict) -> None:
 
 def receipt(source: Path, commit: str, phase: str) -> dict:
     status = git(source, "status", "--porcelain=v1", "--untracked-files=all").splitlines()
-    value = {"phase": phase, "commit": git(source, "rev-parse", "HEAD"),
-             "tree": git(source, "rev-parse", "HEAD^{tree}"), "status": status,
-             "observed_utc": datetime.now(timezone.utc).isoformat()}
+    value = {
+        "phase": phase,
+        "commit": git(source, "rev-parse", "HEAD"),
+        "tree": git(source, "rev-parse", "HEAD^{tree}"),
+        "status": status,
+        "observed_utc": datetime.now(timezone.utc).isoformat(),
+    }
     if value["commit"] != commit or status:
         raise ValueError("Capture requires a clean checkout at the frozen source commit")
     return value
 
 
-def run(command: list[str], source: Path, output: Path, env: dict[str, str],
-        private_paths: tuple[tuple[Path, str], ...] = ()) -> None:
+def run(
+    command: list[str],
+    source: Path,
+    output: Path,
+    env: dict[str, str],
+    private_paths: tuple[tuple[Path, str], ...] = (),
+) -> None:
     result = subprocess.run(command, cwd=source, env=env, capture_output=True)
     # Keep diagnostics when a build or run fails so the failed attempt is not lost.
     raw = result.stdout + result.stderr
@@ -39,9 +49,7 @@ def run(command: list[str], source: Path, output: Path, env: dict[str, str],
     raw_path.write_bytes(raw)
     redacted = raw
     redactions = ((path, label.encode()) for path, label in private_paths)
-    for private_path, label in (*redactions,
-                                (source, b"<SOURCE>"),
-                                (output.parent, b"<CAPTURE>")):
+    for private_path, label in (*redactions, (source, b"<SOURCE>"), (output.parent, b"<CAPTURE>")):
         text = str(private_path).encode()
         redacted = redacted.replace(text, label).replace(text.replace(b"\\", b"/"), label)
     output.write_bytes(redacted)
@@ -54,19 +62,32 @@ def validate_jobs(jobs: int) -> None:
         raise ValueError("Build parallelism must be positive")
 
 
-def cmake_build_command(cmake: str, build: Path, target: str, jobs: int,
-                        generator: str,
-                        msbuild_args: tuple[str, ...] = ()) -> list[str]:
+def cmake_build_command(
+    cmake: str,
+    build: Path,
+    target: str,
+    jobs: int,
+    generator: str,
+    msbuild_args: tuple[str, ...] = (),
+) -> list[str]:
     validate_jobs(jobs)
-    command = [cmake, "--build", str(build), "--config", "Release", "--target",
-               target, "--parallel", str(jobs)]
+    command = [
+        cmake,
+        "--build",
+        str(build),
+        "--config",
+        "Release",
+        "--target",
+        target,
+        "--parallel",
+        str(jobs),
+    ]
     if generator.startswith("Visual Studio"):
         command.extend(["--", *msbuild_args])
     return command
 
 
-def capture(source: Path, destination: Path, commit: str, cmake: str,
-            jobs: int = 4) -> None:
+def capture(source: Path, destination: Path, commit: str, cmake: str, jobs: int = 4) -> None:
     validate_jobs(jobs)
     source = source.resolve(strict=True)
     destination = destination.resolve()
@@ -77,26 +98,44 @@ def capture(source: Path, destination: Path, commit: str, cmake: str,
     save(destination / "prebuild.json", before)
     build = destination / "build"
     env = dict(os.environ, VSLANG="1033", PreferredUILang="en-US")
-    run([cmake, "-S", str(source), "-B", str(build), "-DBUILD_TESTING=OFF",
-         "-DCMAKE_BUILD_TYPE=Release", "-DCSL_ENABLE_HIGHS=ON",
-         "-DCSL_ENABLE_QHULL=OFF", "-DCSL_BUILD_EXT07_REPORT=ON"],
-        source, destination / "configure.log", env)
+    run(
+        [
+            cmake,
+            "-S",
+            str(source),
+            "-B",
+            str(build),
+            "-DBUILD_TESTING=OFF",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DCSL_ENABLE_HIGHS=ON",
+            "-DCSL_ENABLE_QHULL=OFF",
+            "-DCSL_BUILD_EXT07_REPORT=ON",
+        ],
+        source,
+        destination / "configure.log",
+        env,
+    )
     cache = (build / "CMakeCache.txt").read_text(encoding="utf-8", errors="replace")
     generator_match = re.search(r"^CMAKE_GENERATOR:INTERNAL=(.*)$", cache, re.MULTILINE)
     if not generator_match:
         raise ValueError("CMake cache is missing its generator")
-    run(cmake_build_command(cmake, build, "csl_ext07_hybrid_report", jobs,
-                            generator_match.group(1).strip()),
-        source, destination / "build.log", env)
+    run(
+        cmake_build_command(
+            cmake, build, "csl_ext07_hybrid_report", jobs, generator_match.group(1).strip()
+        ),
+        source,
+        destination / "build.log",
+        env,
+    )
     if not (destination / "build.log").read_bytes().strip():
         raise ValueError("Release build produced no retained build output")
-    executable = build / ("Release/csl_ext07_hybrid_report.exe" if os.name == "nt"
-                          else "csl_ext07_hybrid_report")
+    executable = build / (
+        "Release/csl_ext07_hybrid_report.exe" if os.name == "nt" else "csl_ext07_hybrid_report"
+    )
     if not executable.is_file():
         raise FileNotFoundError(executable)
     for phase in ("smoke", "measure"):
-        result = subprocess.run([str(executable), phase], cwd=source, env=env,
-                                capture_output=True)
+        result = subprocess.run([str(executable), phase], cwd=source, env=env, capture_output=True)
         (destination / f"{phase}.jsonl").write_bytes(result.stdout)
         (destination / f"{phase}.stderr.txt").write_bytes(result.stderr)
         if result.returncode:
@@ -112,38 +151,58 @@ def capture(source: Path, destination: Path, commit: str, cmake: str,
     compiler_receipt = compiler_files[0].read_bytes()
     (destination / "CMakeCXXCompiler.raw.cmake").write_bytes(compiler_receipt)
     cache_text = cache.decode("utf-8", errors="replace")
+
     def cache_value(key: str) -> str | None:
         match = re.search(r"^" + re.escape(key) + r"(?::[^=]+)?=(.*)$", cache_text, re.MULTILINE)
         return match.group(1).strip() if match else None
+
     cmake_version = subprocess.check_output([cmake, "--version"], text=True).splitlines()[0]
     compiler_text = compiler_receipt.decode("utf-8", errors="replace")
     compiler_id = re.search(r'set\(CMAKE_CXX_COMPILER_ID "([^"]+)"\)', compiler_text)
     compiler_version = re.search(r'set\(CMAKE_CXX_COMPILER_VERSION "([^"]+)"\)', compiler_text)
-    save(destination / "host.json", {
-        "source_commit": commit, "source_tree": before["tree"],
-        "collected_utc": datetime.now(timezone.utc).isoformat(),
-        "host": f"{platform.system()} measurement workstation",
-        "host_name_sha256": hashlib.sha256(platform.node().encode()).hexdigest(),
-        "os": platform.platform(),
-        "processor": platform.processor(), "architecture": platform.machine(),
-        "python": platform.python_version(), "logical_processors": os.cpu_count(),
-        "compiler_receipt": "CMakeCXXCompiler.raw.cmake",
-        "compiler_id": compiler_id.group(1) if compiler_id else cache_value("CMAKE_CXX_COMPILER_ID"),
-        "compiler_version": compiler_version.group(1) if compiler_version else cache_value("CMAKE_CXX_COMPILER_VERSION"),
-        "cmake": cmake_version,
-        "configuration": "Release", "cxx_standard": 20,
-        "native_threads_requested": 1, "native_threads_configured": 1,
-        "native_threads_observed": None,
-        "outer_workers_requested": 1, "outer_workers_observed": 1,
-        "seed": 0, "workspace_reuse": "none; fresh registered provider/workspace per call",
-        "absolute_tolerance": 1e-8, "relative_tolerance": 1e-8,
-        "relation_limits": {"max_variables": 16, "max_rows": 128,
-                             "max_matrix_elements": 2048},
-        "timing_scope": "Setup constructs the fixture and registered providers; assembly builds the complete path portfolio and H relation; solve executes the registered branch optimizer; verify rebuilds the candidate face and checks the complete path family; end-to-end begins before fixture construction and ends after verification. CSV/JSONL output, rendering and build are excluded.",
-        "warmup_policy": "One excluded 10-call batch followed by seven measured 20-call batches",
-        "raw_configure_log_sha256": hashlib.sha256((destination / "configure.log.raw").read_bytes()).hexdigest(),
-        "raw_build_log_sha256": hashlib.sha256((destination / "build.log.raw").read_bytes()).hexdigest(),
-    })
+    save(
+        destination / "host.json",
+        {
+            "source_commit": commit,
+            "source_tree": before["tree"],
+            "collected_utc": datetime.now(timezone.utc).isoformat(),
+            "host": f"{platform.system()} measurement workstation",
+            "host_name_sha256": hashlib.sha256(platform.node().encode()).hexdigest(),
+            "os": platform.platform(),
+            "processor": platform.processor(),
+            "architecture": platform.machine(),
+            "python": platform.python_version(),
+            "logical_processors": os.cpu_count(),
+            "compiler_receipt": "CMakeCXXCompiler.raw.cmake",
+            "compiler_id": compiler_id.group(1)
+            if compiler_id
+            else cache_value("CMAKE_CXX_COMPILER_ID"),
+            "compiler_version": compiler_version.group(1)
+            if compiler_version
+            else cache_value("CMAKE_CXX_COMPILER_VERSION"),
+            "cmake": cmake_version,
+            "configuration": "Release",
+            "cxx_standard": 20,
+            "native_threads_requested": 1,
+            "native_threads_configured": 1,
+            "native_threads_observed": None,
+            "outer_workers_requested": 1,
+            "outer_workers_observed": 1,
+            "seed": 0,
+            "workspace_reuse": "none; fresh registered provider/workspace per call",
+            "absolute_tolerance": 1e-8,
+            "relative_tolerance": 1e-8,
+            "relation_limits": {"max_variables": 16, "max_rows": 128, "max_matrix_elements": 2048},
+            "timing_scope": "Setup constructs the fixture and registered providers; assembly builds the complete path portfolio and H relation; solve executes the registered branch optimizer; verify rebuilds the candidate face and checks the complete path family; end-to-end begins before fixture construction and ends after verification. CSV/JSONL output, rendering and build are excluded.",
+            "warmup_policy": "One excluded 10-call batch followed by seven measured 20-call batches",
+            "raw_configure_log_sha256": hashlib.sha256(
+                (destination / "configure.log.raw").read_bytes()
+            ).hexdigest(),
+            "raw_build_log_sha256": hashlib.sha256(
+                (destination / "build.log.raw").read_bytes()
+            ).hexdigest(),
+        },
+    )
 
 
 if __name__ == "__main__":
