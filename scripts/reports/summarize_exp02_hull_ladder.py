@@ -8,7 +8,6 @@ import statistics
 from collections import defaultdict
 from pathlib import Path
 
-
 METHODS = (
     "geometric-quickhull",
     "lp-membership-baseline",

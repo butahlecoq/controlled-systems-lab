@@ -5,9 +5,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import importlib.util
-from pathlib import Path, PurePosixPath
 import shutil
 import zipfile
+from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[2]
 PRIMARY_ID = "exp02-it17-hull-3d-simplex-20261028-r1"
@@ -16,8 +16,9 @@ REPORTS = ROOT / "reports/algorithm-results"
 site_spec = importlib.util.spec_from_file_location(
     "exp02_report_site", Path(__file__).with_name("site.py")
 )
+if site_spec is None or site_spec.loader is None:
+    raise ImportError("Cannot load the report site module")
 site = importlib.util.module_from_spec(site_spec)
-assert site_spec.loader is not None
 site_spec.loader.exec_module(site)
 
 

@@ -3,12 +3,12 @@
 import csv
 import importlib.util
 import json
-from pathlib import Path
 import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 from zipfile import ZipFile
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -16,8 +16,8 @@ sys.path.insert(0, str(ROOT / "scripts/reports"))
 spec = importlib.util.spec_from_file_location(
     "exp02_it17_dyadic_stage", ROOT / "scripts/reports/stage_exp02_it17_dyadic.py"
 )
+assert spec is not None and spec.loader is not None
 stage_report = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(stage_report)
 
 

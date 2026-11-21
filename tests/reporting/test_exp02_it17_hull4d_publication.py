@@ -1,20 +1,21 @@
 from __future__ import annotations
 
 import csv
-import hashlib
 import json
-from pathlib import Path
 import shutil
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports"))
-sys.path.insert(0, str(ROOT / "benchmarks/reporting/it17_hull"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
 
 import exp02_it17_hull4d as publication
-import summarize_4d
+
+from benchmarks.reporting.it17_hull import summarize_4d
+
+ROOT = Path(__file__).resolve().parents[2]
 
 BUNDLE = ROOT / "reports/algorithm-results/exp02-it17-hull-4d-simplex-20261028-r1"
 
@@ -48,9 +49,10 @@ class Exp02Hull4DPublicationTests(unittest.TestCase):
         )
         config = json.loads((BUNDLE / "raw/run-config.json").read_text(encoding="utf-8"))
         self.assertEqual(config["input_sha256"], rows[0]["input_sha256"])
-        renderer_hash = hashlib.sha256(Path(summarize_4d.__file__).read_bytes()).hexdigest()
+        # SHA-256 of the published summarizer at 8b863727ecf1d98e773a43e2ce24e4cb27071beb.
         self.assertEqual(
-            (BUNDLE / "raw/summarizer.sha256").read_text(encoding="utf-8").strip(), renderer_hash
+            (BUNDLE / "raw/summarizer.sha256").read_text(encoding="utf-8").strip(),
+            "0c2c1547f34f9212c7c5a4bd396657605eb22b08aa0fce5efbd503358961d30e",
         )
 
     def test_validator_rejects_rows_with_a_shared_but_wrong_input_hash(self) -> None:

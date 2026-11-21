@@ -47,7 +47,8 @@ def fixture_points() -> list[tuple[float, float, float]]:
         weights = [1 + math.floor(5 * halton(index, base)) for base in (2, 3, 5)]
         index += 1
         if sum(weights) <= 7:
-            points.append(tuple(weight / 8.0 for weight in weights))
+            x, y, z = weights
+            points.append((x / 8.0, y / 8.0, z / 8.0))
     return points
 
 

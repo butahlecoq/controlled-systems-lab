@@ -2,18 +2,20 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 import shutil
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports"))
-sys.path.insert(0, str(ROOT / "benchmarks/reporting/it17_hull"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
 
 import exp02_it17_hull3d as publication
-import summarize_3d
+
+from benchmarks.reporting.it17_hull import summarize_3d
+
+ROOT = Path(__file__).resolve().parents[2]
 
 PRIMARY = ROOT / "reports/algorithm-results/exp02-it17-hull-3d-simplex-20261028-r1"
 INITIAL = ROOT / "reports/algorithm-results/exp02-it17-hull-3d-halton-cloud-20261028-r1"

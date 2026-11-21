@@ -5,8 +5,8 @@ import csv
 import json
 import statistics
 import sys
-from html import escape
 from collections import defaultdict
+from html import escape
 from pathlib import Path
 
 
@@ -80,7 +80,7 @@ METHODS = (
 
 
 def render_geometry(path: Path) -> None:
-    width, height, panel_width, panel_height = 780, 310, 240, 260
+    width, height, panel_width = 780, 310, 240
     panels = []
     for index, (fixture, points) in enumerate(FIXTURES.items()):
         left = 20 + index * panel_width

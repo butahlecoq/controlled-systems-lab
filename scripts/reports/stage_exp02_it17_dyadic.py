@@ -6,16 +6,17 @@ import argparse
 import hashlib
 import importlib.util
 import json
-from pathlib import Path, PurePosixPath
 import re
 import shutil
 import zipfile
+from pathlib import Path, PurePosixPath
 
 site_spec = importlib.util.spec_from_file_location(
     "algorithm_report_site", Path(__file__).with_name("site.py")
 )
+if site_spec is None or site_spec.loader is None:
+    raise ImportError("Cannot load the report site module")
 site_module = importlib.util.module_from_spec(site_spec)
-assert site_spec.loader is not None
 site_spec.loader.exec_module(site_module)
 
 REPORT_ID = "exp02-it17-dyadic-interior-20261027-r1"
