@@ -1,4 +1,5 @@
 """Frozen native flexible-pitch publication rejects altered and unsafe inputs."""
+
 import hashlib
 from html.parser import HTMLParser
 from pathlib import Path
@@ -17,7 +18,8 @@ import stage_nominal_quadratic_history as history
 
 class Links(HTMLParser):
     def __init__(self):
-        super().__init__(); self.links = []
+        super().__init__()
+        self.links = []
 
     def handle_starttag(self, tag, attrs):
         self.links.extend(value for name, value in attrs if name in {"href", "src"})
@@ -31,10 +33,13 @@ class FlexiblePitchPublicationTests(unittest.TestCase):
         self.bundle = self.root / "reports/algorithm-results" / native.ROUTE
         shutil.copytree(ROOT / "reports/algorithm-results" / native.ROUTE, self.bundle)
         (self.root / "docs/examples").mkdir(parents=True)
-        shutil.copyfile(ROOT / "docs/examples/native-flexible-pitch.html",
-                        self.root / "docs/examples/native-flexible-pitch.html")
-        common = subprocess.check_output(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
-                                         cwd=ROOT, text=True).strip()
+        shutil.copyfile(
+            ROOT / "docs/examples/native-flexible-pitch.html",
+            self.root / "docs/examples/native-flexible-pitch.html",
+        )
+        common = subprocess.check_output(
+            ["git", "rev-parse", "--path-format=absolute", "--git-common-dir"], cwd=ROOT, text=True
+        ).strip()
         # Read-only git-show validation in a copied fixture. No mutation uses it.
         (self.root / ".git").write_text("gitdir: " + common + "\n")
 
@@ -44,14 +49,23 @@ class FlexiblePitchPublicationTests(unittest.TestCase):
         self.assertIn('id="native-flexible-pitch"', card)
         for path in self.bundle.rglob("*"):
             if path.is_file():
-                self.assertTrue(files[native.ROUTE + "/" + path.relative_to(self.bundle).as_posix()] == path.read_bytes(),
-                                "staged payload bytes differ: " + path.relative_to(self.bundle).as_posix())
-        links = Links(); links.feed(files["native-flexible-pitch.html"].decode())
+                self.assertTrue(
+                    files[native.ROUTE + "/" + path.relative_to(self.bundle).as_posix()]
+                    == path.read_bytes(),
+                    "staged payload bytes differ: " + path.relative_to(self.bundle).as_posix(),
+                )
+        links = Links()
+        links.feed(files["native-flexible-pitch.html"].decode())
         history_files, _, _ = history.build(ROOT)
         for link in links.links:
-            if ":" not in link and not link.startswith("#") and link not in {"index.html", "examples.css", "native-model-catalogue.html"}:
-                self.assertTrue(link in files or link in history_files,
-                                "missing staged lesson link: " + link)
+            if (
+                ":" not in link
+                and not link.startswith("#")
+                and link not in {"index.html", "examples.css", "native-model-catalogue.html"}
+            ):
+                self.assertTrue(
+                    link in files or link in history_files, "missing staged lesson link: " + link
+                )
         self.assertEqual(native.build(self.root), (files, entries, card))
 
     def test_changed_physical_generator_is_rejected(self):
@@ -61,7 +75,8 @@ class FlexiblePitchPublicationTests(unittest.TestCase):
             native.build(self.root)
 
     def test_rewritten_manifest_is_rejected(self):
-        path = self.bundle / "manifest.json"; path.write_bytes(path.read_bytes() + b" ")
+        path = self.bundle / "manifest.json"
+        path.write_bytes(path.read_bytes() + b" ")
         with self.assertRaisesRegex(ValueError, "frozen publication identity"):
             native.build(self.root)
 
@@ -69,7 +84,9 @@ class FlexiblePitchPublicationTests(unittest.TestCase):
         path = self.bundle / (native.ROUTE + ".zip")
         with zipfile.ZipFile(path, "a") as archive:
             archive.writestr("unexpected.txt", "not native output")
-        path.with_suffix(".zip.sha256").write_text(hashlib.sha256(path.read_bytes()).hexdigest() + "  " + path.name + "\n")
+        path.with_suffix(".zip.sha256").write_text(
+            hashlib.sha256(path.read_bytes()).hexdigest() + "  " + path.name + "\n"
+        )
         with self.assertRaisesRegex(ValueError, "frozen archive identity"):
             native.build(self.root)
 
@@ -88,12 +105,15 @@ class FlexiblePitchPublicationTests(unittest.TestCase):
             native.build(self.root)
 
     def test_unlisted_and_symlinked_inputs_are_rejected(self):
-        extra = self.bundle / "unexpected.txt"; extra.write_text("not native output")
+        extra = self.bundle / "unexpected.txt"
+        extra.write_text("not native output")
         with self.assertRaisesRegex(ValueError, "unlisted files"):
             native.build(self.root)
         extra.unlink()
-        path = self.bundle / "8-state-generators.csv"; moved = self.root / "external.csv"
-        path.rename(moved); path.symlink_to(moved)
+        path = self.bundle / "8-state-generators.csv"
+        moved = self.root / "external.csv"
+        path.rename(moved)
+        path.symlink_to(moved)
         with self.assertRaisesRegex(ValueError, "symlinked"):
             native.build(self.root)
 
