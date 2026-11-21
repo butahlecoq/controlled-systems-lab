@@ -72,7 +72,7 @@ class ContractTests(unittest.TestCase):
                 self.assertEqual(collect.main(), 0)
             replay = json.loads((output / "records.json").read_bytes())
             self.assertEqual(replay["collection"]["state"], "complete")
-            self.assertEqual(replay["trials"], records["trials"])
+            self.assertEqual(json.dumps(replay["trials"]), json.dumps(records["trials"]))
             self.assertEqual(replay["summary"], records["summary"])
             render.validate(replay)
 
