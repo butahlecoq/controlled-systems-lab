@@ -8,5 +8,5 @@ struct ProcessCounters {
     std::string source, unavailable_reason;
 };
 ProcessCounters process_counters();
-std::string counters_json(const ProcessCounters&);
+std::string counters_json(const ProcessCounters &);
 }

@@ -137,8 +137,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "2bf617a536444eb7420d56f8a853a413727d0cc9176af74755a0798df1c6118b",
-      "graph_id": "closed-loop/earth-orbit/nmpc-csl-adaptive/1/cfg-2bf617a536444eb7",
+      "graph_fingerprint": "3a886342931239aedad67f934df2dde661320283862617854ac07ae1c27ff449",
+      "graph_id": "closed-loop/earth-orbit/nmpc-csl-adaptive/1/cfg-3a886342931239ae",
       "inactive_roles": {
         "converter": "not_used",
         "representation": "not_used",
@@ -150,7 +150,7 @@
       "source_files": [
         {
           "path": "benchmarks/reporting/closed_loop/orbit_nmpc.py",
-          "sha256": "3c69e7e891b30d01e05998aeb7664f3a103a6461f82b2e4c14743207e37fb3e3"
+          "sha256": "a299966c096d89eca7cc8f570e29af985ab3832d1bc12c1caee4540362def628"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
