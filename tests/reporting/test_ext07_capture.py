@@ -2,6 +2,7 @@ import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+from scripts.reports.ext07.capability_capture import capture as capture_capability
 from scripts.reports.ext07.capture import capture, cmake_build_command
 from scripts.reports.ext07.two_parameter_capture import capture as capture_two_parameter
 
@@ -43,9 +44,9 @@ class CMakeBuildCommandTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             cmake_build_command("cmake", Path("build"), "target", 0, "Unix Makefiles")
 
-    def test_both_capture_commands_reject_invalid_jobs_before_creating_output(self):
+    def test_capture_commands_reject_invalid_jobs_before_creating_output(self):
         with TemporaryDirectory() as temporary:
-            for capture_command in (capture, capture_two_parameter):
+            for capture_command in (capture, capture_capability, capture_two_parameter):
                 destination = Path(temporary) / capture_command.__module__.rsplit(".", 1)[-1]
                 with self.subTest(capture_command=capture_command.__module__):
                     with self.assertRaisesRegex(ValueError, "parallelism"):
