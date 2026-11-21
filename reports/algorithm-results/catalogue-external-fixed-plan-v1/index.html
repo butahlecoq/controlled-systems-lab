@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fixed-plan reachability with external disturbances</title>
+<link rel="stylesheet" href="examples.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to report</a>
+<main id="main" class="page-content">
+<h1>Fixed-plan reachability with external disturbances</h1>
+<p>Compare five set representations for the same two-transition plan on 35 discrete models. All 175 native runs completed. The plans use fixed zero control and an authored external set at each step.</p>
+<figure>
+<img src="queue-outer-projections.svg" alt="A point at stage zero becomes a diamond inside the box, zonotope, sheared parallelotope and ellipse at stages one and two.">
+<figcaption>The first two coordinates of the three-state IP/SDN queue model. Each panel subtracts that stage’s nominal state and scales the two axes by the authored disturbance half-widths 1 and 0.1. Box and zonotope outlines coincide in this projection. <a href="queue-outer-projections.svg">Open the full-size figure</a>.</figcaption>
+</figure>
+<h2>Reproduce the queue example</h2>
+<p>The update is x<sub>k+1</sub> = Ax<sub>k</sub> + Bu<sub>k</sub> + Ew<sub>k</sub>. Both A and E are the 3 × 3 identity, the affine offset is zero, and there are two transitions. Controls are the two-vector (0, 0) at both stages.</p>
+<pre aria-label="Control matrix B">     ⎡ −1   0 ⎤
+ B = ⎢  1  −1 ⎥
+     ⎣  0   1 ⎦</pre>
+<p>x₀ = (35, 20, 10)ᵀ and w₀ = (10, 0, −8)ᵀ.</p>
+<p>At each step w ranges independently over the convex hull of w₀ and its four perturbations (±1, 0, 0)ᵀ and (0, ±0.1, 0)ᵀ added to w₀. Thus the normalized projected hull at stage 1 is |y₁| + |y₂| ≤ 1, and at stage 2 it is |y₁| + |y₂| ≤ 2. Full state sets are propagated before projection. Universal admissible state sets isolate geometry, so the third nominal coordinate can reach −6.</p>
+<h2>Check the results</h2>
+<ul>
+<li>The independent rational replay enumerates every disturbance word. Native polytope points differ by at most 7.91 × 10<sup>−16</sup> after scaling each coordinate error by the larger of one and the exact coordinate magnitude.</li>
+<li>All 1,013 generated points per family passed exact membership against the stored binary64 box, parallelotope and ellipsoid data.</li>
+<li>All 3,774 sampled directions passed the zonotope support comparison. These checks cover the sampled directions.</li>
+<li>The two zero external-map models, 5 and 13, have singleton physical trajectories despite their perturbed inputs.</li>
+</ul>
+<p><a href="RUN.txt">Reproduction commands</a> · <a href="catalogue_external.cpp">C++ producer</a> · <a href="records.jsonl">Raw records</a> · <a href="verify.py">Independent checker</a> · <a href="audit.json">Audit</a> · <a href="manifest.json">Source and checksums</a></p>
+</main>
+</body>
+</html>
