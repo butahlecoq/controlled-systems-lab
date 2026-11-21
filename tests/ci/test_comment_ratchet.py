@@ -50,10 +50,21 @@ class CommentRatchetTests(unittest.TestCase):
         self.file.write_text(
             "#!/usr/bin/env python3\n# coding: utf-8\n# SPDX-License-Identifier: MIT\n"
             'x = "# prose in a string"  # noqa: F841\n'
+            "ignored = x  # type: ignore[assignment]\n"
+            "# ruff: isort: skip_file\n"
+            "# isort: split\n"
             'text = """# text in a multiline string\n"""\n'
         )
         result = self.checker("check", "--base", "HEAD")
         self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_type_prefix_cannot_disguise_new_prose(self):
+        for prefix in ("type", "TYPE"):
+            with self.subTest(prefix=prefix):
+                self.file.write_text(f"# {prefix}: This is prose with no typing action\nx = 1\n")
+                result = self.checker("check", "--base", "HEAD")
+                self.assertEqual(result.returncode, 1, result.stderr)
+                self.assertIn(f"scripts/ci/tool.py:1: # {prefix}: This is prose", result.stderr)
 
     def test_rejects_a_cookie_like_comment_after_the_encoding_header(self):
         self.file.write_text("x = 1\n# coding: utf-8\n")

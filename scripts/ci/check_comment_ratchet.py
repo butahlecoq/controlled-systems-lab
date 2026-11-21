@@ -20,13 +20,12 @@ CommentKind = Literal["comment_only", "inline", "directive"]
 ENCODING_COOKIE = re.compile(r"^#.*?coding[:=][ \t]*[-\w.]+")
 DIRECTIVE = re.compile(
     r"#\s*(?:"
-    r"(?:ruff:\s*)?noqa(?:\s*:\s*[A-Z][A-Z0-9]+(?:[ ,]+[A-Z][A-Z0-9]+)*)?"
-    r"|(?:fmt|isort):\s*(?:on|off|skip|skip_file)"
-    r"|(?:ty|pyright):\s*ignore(?:\[[\w, -]+\])?"
-    r"|type:\s*\S.*"
+    r"(?i:(?:ruff:\s*)?noqa)(?:\s*:\s*[A-Z][A-Z0-9]+(?:[ ,]+[A-Z][A-Z0-9]+)*)?"
+    r"|fmt:\s*(?:on|off|skip)"
+    r"|(?:ruff:\s*)?isort:\s*(?:on|off|skip|skip_file|split)"
+    r"|(?:type|ty|pyright):\s*ignore(?:\[[\w, -]+\])?"
     r"|SPDX-(?:FileCopyrightText|License-Identifier):\s*\S.*"
-    r")",
-    re.IGNORECASE,
+    r")"
 )
 
 
