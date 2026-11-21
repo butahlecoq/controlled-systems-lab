@@ -7,9 +7,6 @@ import os
 import subprocess
 from pathlib import Path
 
-# Ownership map: mutable Pages shells, report companions and their presentation
-# tests. These Python renderers read saved inputs but never define native targets.
-# Keep numerical collectors, validators and test drivers outside this list.
 PRESENTATION_FILES = {
     "docs/examples/examples.css",
     "docs/examples/continuous-policy-2d.html",
@@ -44,8 +41,6 @@ PRESENTATION_FILES = {
     "tests/reporting/test_viz10_plot_companions.py",
     "tests/reporting/test_landing.py",
 }
-# Pages publication owns composition, archived routes, navigation inventories
-# and byte/hash audits. These files have no native smoke consumer.
 PAGES_PUBLICATION_FILES = {
     "docs/catalogue/learning-book-v1.json",
     "docs/examples/learning/chapters/native-substitution-matrix.html",
@@ -62,11 +57,7 @@ PAGES_PUBLICATION_FILES = {
     "tests/reporting/test_pages_route_retirement.py",
     "tests/reporting/test_pages_augmentation_aggregation.py",
 }
-# The root TOML configures Ruff and ty. Both paths trigger Python tooling
-# quality directly and have no native build or test consumer.
 PYTHON_QUALITY_FILES = {".github/workflows/python-quality.yml", "pyproject.toml"}
-# Saved-episode publication reads contracts/captures and renders/checks records.
-# Shared controller/record-protocol implementations in benchmarks/ remain native.
 SAVED_EPISODE_PUBLICATION_FILES = {
     "scripts/reports/history_warm_gap_report.py",
     "scripts/reports/stage_history_functional.py",
@@ -79,9 +70,6 @@ SAVED_EPISODE_PUBLICATION_FILES = {
     "tests/reporting/test_recorded_closed_loop_figures.py",
     "tests/reporting/test_native_parallelotope_functional.py",
 }
-# These owners carry saved evidence, including inert source/build snapshots.
-# They are not compiler inputs; adding a live driver/build owner elsewhere still
-# requires native validation. Do not generalize to reports/ or scripts/reports/.
 SAVED_PUBLICATION_ROOTS = (
     "reports/published-route-preservation/",
     "reports/closed-loop-history-functional/",
@@ -125,8 +113,6 @@ def changed_paths(event_name, event):
         comparison = f"{base}..{head}"
     else:
         raise ValueError("manual or unknown event requires both gates")
-    # Only object IDs from the event enter the revision expression, never refs
-    # or shell text. Both sides of a rename count as changed paths.
     if any(
         len(sha) != 40 or any(c not in "0123456789abcdef" for c in sha) or sha == "0" * 40
         for sha in (base, head)
