@@ -14,14 +14,16 @@ from pathlib import Path
 from unittest.mock import patch
 from urllib.parse import urlsplit
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
 import control_witness_companions
 import stage_app01 as app01_reports
 import stage_mpc06_tube
 import stage_nominal_quadratic_history
 import stage_positive_part_budget_2d
 import visual_examples as gallery
+
+ROOT = Path(__file__).resolve().parents[2]
+SVG_DESCRIPTION = "{http://www.w3.org/2000/svg}desc"
 
 
 class Links(HTMLParser):
@@ -138,7 +140,9 @@ class GalleryTests(unittest.TestCase):
         for case in gallery.visual_illustrations.CASES:
             if "report_kind" not in case:
                 continue
-            target = self.site / by_kind[case["report_kind"]]
+            report_id = by_kind[case["report_kind"]]
+            assert isinstance(report_id, str), f"missing report ID for {case['report_kind']}"
+            target = self.site / report_id
             target.mkdir(exist_ok=True)
             if not (target / "records.json").exists():
                 (target / "records.json").write_text("{}", encoding="utf-8")
@@ -327,7 +331,7 @@ class GalleryTests(unittest.TestCase):
             intersection_page,
             re.DOTALL,
         )
-        self.assertIsNotNone(output_matrix)
+        assert output_matrix is not None, "the intersection page must expose its output matrix"
         self.assertIn("<var>W</var> ≈", intersection_page)
         self.assertIn(
             "Displayed matrix values are rounded to 6 significant digits (≈);", intersection_page
@@ -769,11 +773,14 @@ class GalleryTests(unittest.TestCase):
         b04_svg = ET.fromstring(result.files["control-witness/b04-native-smoke-projections.svg"])
         self.assertEqual(b04_svg.attrib["role"], "img")
         self.assertTrue(
-            any(node.tag.endswith("title") and "oxidizer and fuel" in node.text for node in b04_svg)
+            any(
+                node.tag.endswith("title") and "oxidizer and fuel" in (node.text or "")
+                for node in b04_svg
+            )
         )
         self.assertTrue(
             any(
-                node.tag.endswith("desc") and "independent data scaling" in node.text
+                node.tag.endswith("desc") and "independent data scaling" in (node.text or "")
                 for node in b04_svg
             )
         )
@@ -934,7 +941,7 @@ class GalleryTests(unittest.TestCase):
         self.assertEqual(entries[0]["status"], "analytic-illustration")
         self.assertIn(stage_nominal_quadratic_history.PAGE, card)
         self.assertEqual(figure.tag, "{http://www.w3.org/2000/svg}svg")
-        self.assertTrue(figure.find("{http://www.w3.org/2000/svg}desc").text)
+        self.assertTrue(figure.findtext(SVG_DESCRIPTION))
         self.assertEqual(
             files[stage_nominal_quadratic_history.CSV],
             (ROOT / "examples/nominal_quadratic_history_2d.csv").read_bytes(),
@@ -980,7 +987,7 @@ class GalleryTests(unittest.TestCase):
         self.assertEqual(entries[0]["status"], "saved-data-illustration")
         self.assertIn(stage_positive_part_budget_2d.PAGE, card)
         self.assertEqual(figure.tag, "{http://www.w3.org/2000/svg}svg")
-        self.assertTrue(figure.find("{http://www.w3.org/2000/svg}desc").text)
+        self.assertTrue(figure.findtext(SVG_DESCRIPTION))
         self.assertEqual(
             files[stage_positive_part_budget_2d.VERTICES],
             (ROOT / "examples/positive_part_budget_2d/vertices.csv").read_bytes(),
@@ -1476,8 +1483,8 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("frozen record directly; it does not re-run the recurrence", lotka_page)
         self.assertIn("not an exact reachability set", lotka_page)
         lotka_svg = ET.parse(self.site / "examples/lotka-volterra-sampled-v1.svg").getroot()
-        lotka_description = lotka_svg.find("{http://www.w3.org/2000/svg}desc")
-        self.assertIn("csl-report-quantitative-v1", lotka_description.text)
+        lotka_description = lotka_svg.findtext(SVG_DESCRIPTION, default="")
+        self.assertIn("csl-report-quantitative-v1", lotka_description)
         visual_inventory = json.loads((self.site / "examples/visual-coverage.json").read_text())
         lotka_entry = next(
             entry
@@ -1523,8 +1530,8 @@ class GalleryTests(unittest.TestCase):
             self.assertIn("csl-report-quantitative-v1", companion_page)
             self.assertIn("Frozen values", companion_page)
             companion_svg = ET.parse(self.site / "examples" / (stem + ".svg")).getroot()
-            description = companion_svg.find("{http://www.w3.org/2000/svg}desc")
-            self.assertIn("csl-report-quantitative-v1", description.text)
+            description = companion_svg.findtext(SVG_DESCRIPTION, default="")
+            self.assertIn("csl-report-quantitative-v1", description)
             self.assertIn(expected_text, " ".join(companion_svg.itertext()))
             entry = next(entry for entry in visual_inventory["entries"] if entry["anchor"] == stem)
             self.assertEqual(entry["figure"], stem + ".svg")
@@ -1541,11 +1548,11 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("microseconds per checked call", finite_feedback_page)
         self.assertIn("Scenario ordinal", finite_feedback_page)
         ext01_svg = ET.parse(self.site / "examples/ext01-b08-timing-v1.svg").getroot()
-        ext01_description = ext01_svg.find("{http://www.w3.org/2000/svg}desc")
+        ext01_description = ext01_svg.findtext(SVG_DESCRIPTION, default="")
         self.assertIn(
-            "Seven markers show saved full-catalogue timing observations", ext01_description.text
+            "Seven markers show saved full-catalogue timing observations", ext01_description
         )
-        self.assertIn("elapsed time (ms per call)", ext01_description.text)
+        self.assertIn("elapsed time (ms per call)", ext01_description)
         self.assertIn(
             "ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54/records.json",
             ext01_page,
@@ -1561,9 +1568,9 @@ class GalleryTests(unittest.TestCase):
         )
         self.assertIn("Source commit 22d406fd9ea92315ef2a4f6b5703eec74e710d47", app01_page)
         app01_svg = ET.parse(self.site / "examples/app01-plan-timing-v1.svg").getroot()
-        app01_description = app01_svg.find("{http://www.w3.org/2000/svg}desc")
-        self.assertIn("median elapsed time per 40,000-call batch (ms)", app01_description.text)
-        self.assertIn("not a speed comparison", app01_description.text)
+        app01_description = app01_svg.findtext(SVG_DESCRIPTION, default="")
+        self.assertIn("median elapsed time per 40,000-call batch (ms)", app01_description)
+        self.assertIn("not a speed comparison", app01_description)
         app03_page = (self.site / "examples/app03-zonotope-v1.html").read_text()
         self.assertIn("method tag generator-axis-cover", app03_page)
         self.assertIn("Input generators are (1,0), (0,1), (0.5,0.5)", app03_page)
@@ -1571,12 +1578,13 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("support 2 for the input and 3 for its axis cover", app03_page)
         self.assertIn("Source commit e105a86b8e2ab7d09b1e7042fc5f0d5bc0ce5c40", app03_page)
         app03_svg = ET.parse(self.site / "examples/app03-zonotope-v1.svg").getroot()
-        app03_description = app03_svg.find("{http://www.w3.org/2000/svg}desc")
-        self.assertIn("convex hull of the eight signed sums", app03_description.text)
-        self.assertIn("Dark points show those saved-coefficient sums", app03_description.text)
-        self.assertIn("outer-cover generators", app03_description.text)
+        app03_description = app03_svg.findtext(SVG_DESCRIPTION, default="")
+        self.assertIn("convex hull of the eight signed sums", app03_description)
+        self.assertIn("Dark points show those saved-coefficient sums", app03_description)
+        self.assertIn("outer-cover generators", app03_description)
         square = ET.parse(self.site / "examples/square_duplicates.svg")
         boundary = square.find(".//{http://www.w3.org/2000/svg}polygon")
+        assert boundary is not None, "the square hull SVG must contain a boundary polygon"
         self.assertEqual(
             boundary.attrib["points"],
             "146.666667,373.333333 413.333333,373.333333 413.333333,106.666667 146.666667,106.666667",
@@ -1757,7 +1765,7 @@ class GalleryTests(unittest.TestCase):
         for name in ("geo08/geometry.svg", "opt10/geometry.svg", "geo04/figure.svg"):
             svg = ET.parse(self.site / "examples/geometry-opt" / name).getroot()
             self.assertEqual(svg.get("role"), "img")
-            self.assertTrue(svg.find("{http://www.w3.org/2000/svg}desc").text)
+            self.assertTrue(svg.findtext(SVG_DESCRIPTION))
         raw = json.loads(
             (self.site / "examples/geometry-opt/data/geo08-lazy-6dbdd6b2f9235837.json").read_text()
         )
