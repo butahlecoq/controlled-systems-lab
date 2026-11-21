@@ -198,6 +198,14 @@ on:
       - 'scripts/reports/pages_route_retirement.py'
       - 'tests/reporting/test_pages_route_retirement.py'
       - 'scripts/reports/audit_visual_routes.py'
+      - 'tests/reporting/test_visual_route_inventory.py'
+      - 'scripts/reports/visual-route-inventory.json'
+      # The auditor inventories producer source and the payloads of frozen routes.
+      - 'scripts/reports/**/*.py'
+      - 'benchmarks/reporting/**/*.py'
+      - 'reports/algorithm-results/**'
+      - 'docs/examples/viz10/**'
+      - 'docs/examples/fuel-b06-viz06*'
       - 'scripts/reports/audit_mathematical_presentation.py'
       - 'scripts/reports/augment_pages_bundle.py'
       - 'tests/reporting/test_pages_augmentation_aggregation.py'
@@ -481,6 +489,14 @@ on:
       - 'scripts/reports/pages_route_retirement.py'
       - 'tests/reporting/test_pages_route_retirement.py'
       - 'scripts/reports/audit_visual_routes.py'
+      - 'tests/reporting/test_visual_route_inventory.py'
+      - 'scripts/reports/visual-route-inventory.json'
+      # The auditor inventories producer source and the payloads of frozen routes.
+      - 'scripts/reports/**/*.py'
+      - 'benchmarks/reporting/**/*.py'
+      - 'reports/algorithm-results/**'
+      - 'docs/examples/viz10/**'
+      - 'docs/examples/fuel-b06-viz06*'
       - 'scripts/reports/audit_mathematical_presentation.py'
       - 'scripts/reports/augment_pages_bundle.py'
       - 'tests/reporting/test_pages_augmentation_aggregation.py'
@@ -678,6 +694,12 @@ jobs:
         run: python -m unittest tests.reporting.test_env717_cartpole_publication
       - name: Check the saved typed-membership 2D example
         run: python -m unittest discover -s tests/reporting -p 'test_history_membership_2d.py'
+      - name: Verify the visual route inventory
+        run: |
+          python -m unittest tests.reporting.test_visual_route_inventory
+          inventory=$(mktemp "$RUNNER_TEMP/visual-route-inventory.XXXXXXXX")
+          python scripts/reports/audit_visual_routes.py --out "$inventory"
+          cmp scripts/reports/visual-route-inventory.json "$inventory"
       - name: Check the four-state projection approximation report
         run: python -m unittest discover -s tests/reporting -p 'test_four_state_projection_approximations.py'
       - name: Check the matched discrete MPC example and visual gallery
