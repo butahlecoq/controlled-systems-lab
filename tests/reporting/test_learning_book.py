@@ -116,9 +116,7 @@ class LearningBookTests(unittest.TestCase):
         tasks = {
             "lotka-capstone": ("syn-nl-lv-01", {"lotka-populations": [0, 1]}),
             "orbit-capstone": ("earth-orbit", {"earth-orbit": [0, 3]}),
-            "fuel-capstone": (
-                "syn-nl-fuel-01", {"fuel-state": [2, 0], "fuel-fuel-flow": [3, 1]}
-            ),
+            "fuel-capstone": ("syn-nl-fuel-01", {"fuel-state": [2, 0], "fuel-fuel-flow": [3, 1]}),
         }
         chapters = {chapter["id"]: chapter for chapter in self.manifest["chapters"]}
         index = json.loads((ROOT / "docs/examples/closed-loop/figure-index.json").read_bytes())
@@ -158,8 +156,10 @@ class LearningBookTests(unittest.TestCase):
         manifest = json.loads(preservation.read_bytes())
         pins = manifest["mutable_routes_reviewed_sha256"]
         routes = (
-            "learn/index.html", "learn/lotka-capstone.html",
-            "learn/orbit-capstone.html", "learn/fuel-capstone.html",
+            "learn/index.html",
+            "learn/lotka-capstone.html",
+            "learn/orbit-capstone.html",
+            "learn/fuel-capstone.html",
         )
         with tempfile.TemporaryDirectory() as directory:
             site = Path(directory)
@@ -169,7 +169,9 @@ class LearningBookTests(unittest.TestCase):
             for route in routes:
                 with self.subTest(route=route):
                     self.assertIn(route, manifest["mutable_routes_reviewed_separately"])
-                    self.assertEqual(hashlib.sha256((site / route).read_bytes()).hexdigest(), pins[route])
+                    self.assertEqual(
+                        hashlib.sha256((site / route).read_bytes()).hexdigest(), pins[route]
+                    )
 
     def test_campaign_tables_match_frozen_full_profile_coverage(self):
         chapter = next(

@@ -278,7 +278,9 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
         )
         chapters = json.loads(baseline_audit.BOOK_MANIFEST.read_text())["chapters"]
         adjacent = next(chapter for chapter in chapters if chapter["id"] == "closed-loop-semantics")
-        adjacent_identity = json.dumps(adjacent, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+        adjacent_identity = json.dumps(
+            adjacent, sort_keys=True, ensure_ascii=False, separators=(",", ":")
+        )
         manifest["learning_navigation_insertions_reviewed_separately"] = [
             forward,
             {
