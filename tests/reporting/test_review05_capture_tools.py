@@ -1,6 +1,7 @@
 """Exercise REVIEW-05 capture admission and package a previously saved archive."""
 
 import hashlib
+import io
 import subprocess
 import sys
 import tempfile
@@ -69,9 +70,12 @@ class Review05CaptureToolTests(unittest.TestCase):
             root = Path(temporary)
             original = root / "original"
             result = root / "repacked"
-            with zipfile.ZipFile(capture / "offline.zip") as archive:
+            with zipfile.ZipFile(io.BytesIO(archive_bytes)) as archive:
                 archive.extractall(original)
-                expected_names = sorted(archive.namelist())
+                expected_digests = {
+                    name: hashlib.sha256(archive.read(name)).hexdigest()
+                    for name in archive.namelist()
+                }
             packaged = subprocess.run(
                 [
                     sys.executable,
@@ -86,16 +90,16 @@ class Review05CaptureToolTests(unittest.TestCase):
             self.assertEqual(packaged.returncode, 0, packaged.stderr)
             with zipfile.ZipFile(result / "offline.zip") as repacked:
                 self.assertIsNone(repacked.testzip())
-                self.assertEqual(sorted(repacked.namelist()), expected_names)
-                for name in expected_names:
-                    self.assertEqual(repacked.read(name), (original / name).read_bytes(), name)
+                self.assertCountEqual(repacked.namelist(), expected_digests.keys())
+                for name, expected in expected_digests.items():
+                    self.assertEqual(
+                        hashlib.sha256(repacked.read(name)).hexdigest(), expected, name
+                    )
 
             self.assertEqual((result / "archive-members.sha256").read_bytes(), member_manifest)
             self.assertEqual(
                 (result / "summary.json").read_bytes(), (original / "summary.json").read_bytes()
             )
-            self.assertTrue(any(name.startswith("attempts/") for name in expected_names))
-            self.assertFalse((result / "attempts").exists())
             self.assertIn('href="offline.zip"', (result / "index.html").read_text())
             output_manifest = {
                 name: digest
@@ -109,3 +113,9 @@ class Review05CaptureToolTests(unittest.TestCase):
                 if path.is_file() and path != result / "SHA256SUMS"
             }
             self.assertEqual(output_manifest, actual)
+            published = {
+                path.relative_to(capture).as_posix()
+                for path in capture.rglob("*")
+                if path.is_file() and path != capture / "SHA256SUMS"
+            }
+            self.assertEqual(set(actual), published)

@@ -58,17 +58,25 @@ class BuildPhaseChecks(unittest.TestCase):
         self.assertEqual(result["build_residual_ticks"], 4)
 
     def test_declared_but_uncalled_or_overlapping_phases_are_not_measurements(self):
-        for kind in ("uncalled", "overlap", "wrong_size", "wrong_parent"):
+        expected = {
+            "uncalled": "declared but uncalled build phases",
+            "overlap": "build phases must be nested, ordered and nonoverlapping",
+            "wrong_size": "phase sizes differ",
+            "wrong_parent": "build phases must be nested, ordered and nonoverlapping",
+        }
+        for kind, message in expected.items():
             record = self.record()
+            spans = record["synthesis_timing"]["spans"]
             if kind == "uncalled":
-                record["synthesis_timing"]["spans"][1]["completed"] = False
+                spans[1]["completed"] = False
             elif kind == "overlap":
-                record["synthesis_timing"]["spans"][2]["start_tick"] = 2
+                spans[2]["start_tick"] = 2
+                spans[2]["ticks"] = spans[2]["end_tick"] - spans[2]["start_tick"]
             elif kind == "wrong_size":
-                record["synthesis_timing"]["spans"][1]["output_size"] = 1
+                spans[1]["output_size"] = 1
             else:
-                record["synthesis_timing"]["spans"][3]["parent"] = 0
-            with self.assertRaises(ValueError):
+                spans[3]["parent"] = 0
+            with self.subTest(kind=kind), self.assertRaisesRegex(ValueError, message):
                 MODULE.check_phases(record)
 
     def test_disabled_collection_and_resource_stops_remain_explicit(self):
