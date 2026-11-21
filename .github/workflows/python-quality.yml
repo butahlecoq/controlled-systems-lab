@@ -83,6 +83,9 @@ on:
       - 'scripts/reports/render_full_profile_campaign.py'
       - 'docs/examples/closed-loop/campaign-2026-11-18/**'
       - 'scripts/reports/figure_style.py'
+      - 'docs/research/tools/render_mpc02_figures.py'
+      - 'scripts/reports/geometry_figures.py'
+      - 'docs/examples/mpc02-slew-*'
       - 'scripts/reports/control_figure_data.py'
       - 'scripts/reports/control_figures.py'
       - 'scripts/reports/recorded_closed_loop_figures.py'
@@ -373,6 +376,9 @@ on:
       - 'scripts/reports/render_full_profile_campaign.py'
       - 'docs/examples/closed-loop/campaign-2026-11-18/**'
       - 'scripts/reports/figure_style.py'
+      - 'docs/research/tools/render_mpc02_figures.py'
+      - 'scripts/reports/geometry_figures.py'
+      - 'docs/examples/mpc02-slew-*'
       - 'scripts/reports/control_figure_data.py'
       - 'scripts/reports/control_figures.py'
       - 'scripts/reports/recorded_closed_loop_figures.py'
@@ -714,6 +720,21 @@ jobs:
         run: python -m unittest tests.reporting.test_lotka_volterra_sampled
       - name: Check the saved typed-membership 2D example
         run: python -m unittest discover -s tests/reporting -p 'test_history_membership_2d.py'
+      - name: Replay the saved MPC-02 analytic figures
+        env:
+          MPLBACKEND: Agg
+        run: |
+          scratch=$(mktemp -d "$RUNNER_TEMP/mpc02-figures.XXXXXXXX")
+          cd "$scratch"
+          export TMPDIR="$scratch" MPLCONFIGDIR="$scratch/mpl" PYTHONDONTWRITEBYTECODE=1
+          env -u PYTHONPATH python "$GITHUB_WORKSPACE/docs/research/tools/render_mpc02_figures.py" --out "$scratch/output"
+          test "$(find "$scratch/output" -type f | wc -l)" -eq 6
+          for projection in memory terminal-state; do
+            stem="mpc02-slew-${projection}-projection"
+            for suffix in .svg .png -export.json; do
+              cmp "$GITHUB_WORKSPACE/docs/examples/$stem$suffix" "$scratch/output/$stem$suffix"
+            done
+          done
       - name: Check the four-state projection approximation report
         run: python -m unittest discover -s tests/reporting -p 'test_four_state_projection_approximations.py'
       - name: Check the matched discrete MPC example and visual gallery

@@ -3,21 +3,23 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
-import os
 import shutil
+import sys
 import tempfile
 from fractions import Fraction
 from pathlib import Path
 
-import geometry_figures
-
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "scripts/reports"))
+
+import geometry_figures  # noqa: E402
+
 SOURCE = ROOT / "docs/examples/mpc02-slew-analytic-source.json"
 STYLE = ROOT / "scripts/reports/styles/control-v1.json"
 OUTPUT = ROOT / "docs/examples"
-TEMP_ROOT = ROOT / "build/mpc02-tests"
 
 
 def point(values: list[str]) -> list[float]:
@@ -25,7 +27,13 @@ def point(values: list[str]) -> list[float]:
 
 
 def render(
-    name: str, title: str, description: str, axes: dict, series: list[dict], source_hash: str
+    name: str,
+    title: str,
+    description: str,
+    axes: dict[str, dict[str, str]],
+    series: list[dict[str, object]],
+    source_hash: str,
+    output: Path,
 ) -> None:
     document = {
         "schema": "csl.saved-geometric-plot/1",
@@ -35,12 +43,11 @@ def render(
         "aspect": "equal",
         "series": series,
     }
-    TEMP_ROOT.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="mpc02-figure-", dir=TEMP_ROOT) as temp:
+    with tempfile.TemporaryDirectory(prefix="mpc02-figure-") as temp:
         generated = Path(temp)
         receipt = geometry_figures.render(document, STYLE, generated)
         for suffix in ("svg", "png"):
-            shutil.copyfile(generated / f"geometry.{suffix}", OUTPUT / f"{name}.{suffix}")
+            shutil.copyfile(generated / f"geometry.{suffix}", output / f"{name}.{suffix}")
         provenance = {
             "schema": "csl.mpc02-analytic-figure-export/1",
             "scenario_id": "mpc02-slew-2d-v1",
@@ -49,17 +56,16 @@ def render(
             "plot": document,
             "renderer_receipt": receipt,
         }
-        (OUTPUT / f"{name}-export.json").write_text(
+        (output / f"{name}-export.json").write_text(
             json.dumps(provenance, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
         )
 
 
-def main() -> None:
+def build(output: Path) -> None:
     source_bytes = SOURCE.read_bytes()
     source = json.loads(source_bytes)
     if source.get("schema") != "csl.mpc02-analytic-projection-source/1":
         raise ValueError("unexpected MPC-02 analytic source schema")
-    os.environ.setdefault("MPLCONFIGDIR", str(TEMP_ROOT / "mpl-config"))
     projection = source["projection"]
     controls = [point(vertex) for vertex in projection["control_vertices_rational"]]
     states = [point(vertex) for vertex in projection["terminal_state_vertices_rational"]]
@@ -68,6 +74,7 @@ def main() -> None:
     slew_optimum = point(projection["slew_optimum_control_rational"])
     terminal_optimum = point(projection["slew_optimum_terminal_state_rational"])
     source_hash = hashlib.sha256(source_bytes).hexdigest()
+    output.mkdir(parents=True, exist_ok=True)
 
     render(
         "mpc02-slew-terminal-state-projection",
@@ -104,6 +111,7 @@ def main() -> None:
             },
         ],
         source_hash,
+        output,
     )
 
     render(
@@ -141,7 +149,16 @@ def main() -> None:
             },
         ],
         source_hash,
+        output,
     )
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--out", type=Path, default=OUTPUT, help="directory for the six generated files"
+    )
+    build(parser.parse_args().out)
 
 
 if __name__ == "__main__":
