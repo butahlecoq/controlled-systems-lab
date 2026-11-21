@@ -612,8 +612,13 @@ def _producer_record(
         schema = source_identity.get("schema")
     stage = _stage_owner(route, schema if isinstance(schema, str) else None)
     if stage:
+        caller = (
+            ".github/workflows/algorithm-reports.yml"
+            if isinstance(schema, str) and schema.startswith("csl.env717-publication/")
+            else "scripts/reports/augment_pages_bundle.py"
+        )
         return {
-            "files": [stage, "scripts/reports/augment_pages_bundle.py"],
+            "files": [stage, caller],
             "owner_status": "exact",
         }
     if (repo / "reports/algorithm-results" / top).is_dir():
@@ -662,8 +667,13 @@ def _stage_owner(route: str, schema: str | None) -> str | None:
             else None
         )
     if schema.startswith("csl.env717-publication/"):
+        if not root.startswith("env717-"):
+            return None
         suffix = root.removeprefix("env717-").rsplit("-", 1)[0]
-        stem = "env717_" + suffix.replace("-", "_")
+        stem = {
+            "env717-simple-control-65a4341b28e95682f6de": "env717",
+            "env717-multipoint-96e7f4fa2a0f7bc543a5": "env717_multipoint_cost_game",
+        }.get(root, "env717_" + suffix.replace("-", "_"))
     else:
         stem = schema.removeprefix("csl.").split("/", 1)[0].removesuffix("-publication")
         stem = stem.replace(".", "_").replace("-", "_")
