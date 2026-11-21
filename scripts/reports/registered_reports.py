@@ -1076,11 +1076,17 @@ _HISTORICAL_PUBLICATIONS: dict[str, _HistoricalPublicationPin] = {
         "zip_sha256": "c75227f9fcdb0bb90b724d698a170306662562e79ef4835589be26b0b0c5da11",
     },
     "syn01-nominal-20261013-f7ba310d-48a679cfc0d4": {
+        "identity_files_sha256": {
+            "syn01-nominal-20261013-f7ba310d-48a679cfc0d4.zip": "95be8cdf2d2b805cc1076536dae0e21b0abd3b096c6e48e5b3e5f736ec675c85",
+        },
         "inventory_sha256": "f977f289ac3942098140373435e7322dae5f43eb030239952c25a3ac29c47aa3",
         "report_id": "syn01-6e207b2ee1f300929f054e679c8cd5707f979c02b173292660520e403ebf2852",
         "zip_sha256": "84de33d3a3f6500a9e8aea07fe8297a71cdbd44b269f94aa4358bc332b28ec65",
     },
     "syn02-terminal-20261013-c234a1a0-35de886a7fb4": {
+        "identity_files_sha256": {
+            "syn02-terminal-20261013-c234a1a0-35de886a7fb4.zip": "32bbc42048fc555097c06a9fd2e565303cb554655a1cba9c02daff636c55d407",
+        },
         "inventory_sha256": "0212ce9d7f65bf66de374895853c5119214e27c531e578a7751ddb3c1843e843",
         "report_id": "syn02-1b07970d73d90c79c4bba2c65d429ba05bd798751d885146cb21d8a876a067c3",
         "zip_sha256": "8acb23c42447455385e63aefccbf25a680384d39de5f50339838e98af7f10bf8",
