@@ -7,12 +7,12 @@ from __future__ import annotations
 
 import argparse
 import csv
-from html import escape
 import hashlib
 import io
 import json
-from pathlib import Path
 import statistics
+from html import escape
+from pathlib import Path
 
 SOURCE = "994f3ee4310b4087d289e2eb02adbdb9dfd97827"
 HARNESS = "2f915110ba42515fdc448a0c226dc1290b80f82d"
@@ -218,9 +218,9 @@ def check_inputs(row: dict) -> None:
             and request["model"]["horizon"] == 4
             and len(vertices) == 4
             and all(len(stage) == 4 for stage in vertices)
-            and vertices[2][0][0] == float.hex(-(0.1 + 0.1 * 2))
-            and vertices[2][0][0] != float.hex(-0.3)
-            and vertices[3][0][1] == float.hex(-(0.1 + 0.3 * 3))
+            and vertices[2][0][0] == float(-(0.1 + 0.1 * 2)).hex()
+            and vertices[2][0][0] != float(-0.3).hex()
+            and vertices[3][0][1] == float(-(0.1 + 0.3 * 3)).hex()
             and row["limits"]
             == {"max_plans": 625, "max_points_per_stage": 256, "near_optimal_tolerance": 1e-8}
             and row["objective_convention"] == "Euclidean terminal residual norm",
@@ -589,14 +589,20 @@ def render(bundle: Path, *, check: bool) -> dict:
         bundle.name == REPORT_ID and bundle.is_dir() and not bundle.is_symlink(),
         "unsafe report source identity",
     )
+    if not check:
+        require(
+            not any((bundle / name).exists() for name in DERIVED | {"manifest.json"}),
+            "render target already exists",
+        )
+    paths = list(bundle.rglob("*"))
+    actual = {p.relative_to(bundle).as_posix() for p in paths if p.is_file()}
+    inventory = SOURCE_FILES | {"manifest.json"} if check else SOURCE_FILES - DERIVED
+    require(
+        actual == inventory and not any(p.is_symlink() for p in paths),
+        "source bundle inventory differs",
+    )
     expected = projections(bundle)
     if check:
-        actual = {p.relative_to(bundle).as_posix() for p in bundle.rglob("*") if p.is_file()}
-        require(
-            actual == SOURCE_FILES | {"manifest.json"}
-            and not any(p.is_symlink() for p in bundle.rglob("*")),
-            "source bundle inventory differs",
-        )
         for name, content in expected.items():
             require((bundle / name).read_bytes() == content, "saved projection differs: " + name)
         manifest = strict_json((bundle / "manifest.json").read_bytes())
@@ -610,10 +616,6 @@ def render(bundle: Path, *, check: bool) -> dict:
             "source manifest inventory/hash differs",
         )
     else:
-        require(
-            not any((bundle / name).exists() for name in DERIVED | {"manifest.json"}),
-            "render target already exists",
-        )
         for name, content in expected.items():
             (bundle / name).write_bytes(content)
         (bundle / "manifest.json").write_bytes(

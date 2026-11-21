@@ -3,20 +3,20 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import json
-from pathlib import Path
 import shutil
 import sys
 import tempfile
 import unittest
-from unittest.mock import patch
 import zipfile
-import io
+from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts" / "reports"))
-from issue3 import render_saved as native
-import issue3_registered_reports as publication
+import issue3_registered_reports as publication  # noqa: E402
+from issue3 import render_saved as native  # noqa: E402
 
 BUNDLE = ROOT / "reports" / "algorithm-results" / native.REPORT_ID
 
@@ -39,6 +39,19 @@ class Issue3SavedReportTests(unittest.TestCase):
         )
         self.assertIn("contention", record["concurrent_work_note"])
         self.assertIn("Inconclusive", record["performance_conclusion"])
+
+    def test_render_rejects_an_unlisted_file_before_writing_projections(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            target = Path(temporary) / native.REPORT_ID
+            shutil.copytree(BUNDLE / "evidence", target / "evidence")
+            extra = target / "notes.txt"
+            extra.write_text("Local notes", encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "source bundle inventory differs"):
+                native.render(target, check=False)
+
+            self.assertEqual({path.name for path in target.iterdir()}, {"evidence", "notes.txt"})
+            self.assertEqual(extra.read_text(encoding="utf-8"), "Local notes")
 
     def test_tampered_raw_and_binary_are_rejected(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -65,7 +78,7 @@ class Issue3SavedReportTests(unittest.TestCase):
             native.check_result("l19", row)
         b08 = native.parse_rows(native.evidence(BUNDLE, "smoke.stdout"))[-1]
         request = json.loads(b08["input_canonical"])
-        request["disturbance_vertices_binary64_hex"][2][0][0] = float.hex(-0.3)
+        request["disturbance_vertices_binary64_hex"][2][0][0] = float(-0.3).hex()
         b08["input_canonical"] = json.dumps(request, separators=(",", ":"))
         b08["input_sha256"] = hashlib.sha256(b08["input_canonical"].encode()).hexdigest()
         with self.assertRaisesRegex(ValueError, "exact binary64"):
