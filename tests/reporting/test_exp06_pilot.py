@@ -1,4 +1,5 @@
 """Verify the bounded EXP-06 paired artifact and saved visual output."""
+
 from __future__ import annotations
 
 import importlib.util
@@ -24,20 +25,27 @@ def load(name: str, path: Path):
 
 
 render = load("exp06_saved_renderer_test", ROOT / "scripts/reports/exp06/render_saved.py")
-paper_render = load("exp06_paper_saved_renderer_test", ROOT / "scripts/reports/exp06/render_paper_saved.py")
+paper_render = load(
+    "exp06_paper_saved_renderer_test", ROOT / "scripts/reports/exp06/render_paper_saved.py"
+)
 stage = load("exp06_stage_test", ROOT / "scripts/reports/stage_exp06.py")
-source_indices = load("exp06_source_indices_test", ROOT / "scripts/reports/exp06/check_source_indices.py")
+source_indices = load(
+    "exp06_source_indices_test", ROOT / "scripts/reports/exp06/check_source_indices.py"
+)
 
 
 class Exp06PilotTest(unittest.TestCase):
     def test_source_index_checker_rejects_an_out_of_range_quickhull_index(self) -> None:
-        self.assertEqual(source_indices.check([0, 1, 9], 9), {
-            "schema": "csl.exp06-source-index-check/1",
-            "status": "incorrect",
-            "point_count": 9,
-            "reported_count": 3,
-            "invalid_positions": [2],
-        })
+        self.assertEqual(
+            source_indices.check([0, 1, 9], 9),
+            {
+                "schema": "csl.exp06-source-index-check/1",
+                "status": "incorrect",
+                "point_count": 9,
+                "reported_count": 3,
+                "invalid_positions": [2],
+            },
+        )
 
     def test_saved_record_has_two_checked_methods_and_all_attempts(self) -> None:
         capture, wire, _spec, manifest, methods, rows = render.read_saved(BUNDLE)
@@ -50,7 +58,9 @@ class Exp06PilotTest(unittest.TestCase):
             self.assertEqual(run["result"]["checker"]["budget"], {"max_points": 64})
             self.assertEqual(run["result"]["checker"]["source_index_check"]["status"], "verified")
         self.assertEqual(capture["checker_controls"]["omitted_corner"]["status"], "incorrect")
-        self.assertEqual(capture["checker_controls"]["all_redundant_points_retained"]["status"], "verified")
+        self.assertEqual(
+            capture["checker_controls"]["all_redundant_points_retained"]["status"], "verified"
+        )
         self.assertIn("inconclusive", capture["timing_comparison"])
         self.assertEqual(wire["schema"], "csl.comparison-record/1")
 
@@ -63,7 +73,9 @@ class Exp06PilotTest(unittest.TestCase):
     def test_site_stager_copies_verified_report_and_links_svg(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             site_dir = Path(temporary)
-            (site_dir / "index.html").write_text("<!doctype html><html><body><ul></ul></body></html>")
+            (site_dir / "index.html").write_text(
+                "<!doctype html><html><body><ul></ul></body></html>"
+            )
             report_id = stage.stage(BUNDLE, site_dir)
             self.assertTrue((site_dir / report_id / "hulls.svg").is_file())
             index = (site_dir / "index.html").read_text()
@@ -78,10 +90,14 @@ class Exp06PilotTest(unittest.TestCase):
         self.assertIn("csl.hull.itis17.a43-largest-norm-tie", methods)
         self.assertIn("csl.hull.itis17.a44-paper-farthest-incremental-lp", methods)
         self.assertEqual(len(rows), 36)
-        self.assertTrue(all(row["status"] == "completed" and row["checker"] == "verified" for row in rows))
-        tie_attempts = [json.loads(item["run"])["result"]["algorithm"]["reduction"]["a43_paper_metrics"]
+        self.assertTrue(
+            all(row["status"] == "completed" and row["checker"] == "verified" for row in rows)
+        )
+        tie_attempts = [
+            json.loads(item["run"])["result"]["algorithm"]["reduction"]["a43_paper_metrics"]
             for item in wire["attempts"]
-            if json.loads(item["run"])["method"]["id"] == "csl.hull.itis17.a43-largest-norm-tie"]
+            if json.loads(item["run"])["method"]["id"] == "csl.hull.itis17.a43-largest-norm-tie"
+        ]
         self.assertEqual(len(tie_attempts), 6)
         self.assertTrue(all(metric["largest_norm_tie_breaks"] > 0 for metric in tie_attempts))
         self.assertFalse(capture["harness_dirty"])
@@ -94,35 +110,45 @@ class Exp06PilotTest(unittest.TestCase):
             self.assertEqual((PAPER_BUNDLE / name).read_bytes(), data)
         with tempfile.TemporaryDirectory() as temporary:
             site_dir = Path(temporary)
-            (site_dir / "index.html").write_text("<!doctype html><html><body><ul></ul></body></html>")
+            (site_dir / "index.html").write_text(
+                "<!doctype html><html><body><ul></ul></body></html>"
+            )
             staged_id = stage.stage(PAPER_BUNDLE, site_dir, paper_render)
             self.assertEqual(staged_id, report_id)
             self.assertTrue((site_dir / report_id / "hulls.svg").is_file())
             self.assertIn("paper-derived", (site_dir / report_id / "index.html").read_text())
         future_capture = dict(capture, source_commit="d54621def6c8d62bbfe8c3a8b7c54365211f093e")
         future_page = paper_render.render_html(
-            future_capture, wire, manifest, methods, rows, report_id)
+            future_capture, wire, manifest, methods, rows, report_id
+        )
         self.assertIn(
             "blob/d71402ba339043226cedb452efb74a0e2c50dabd/"
-            "docs/research/itis17-paper-reducers-cpp-adaptation.md", future_page)
+            "docs/research/itis17-paper-reducers-cpp-adaptation.md",
+            future_page,
+        )
 
     def test_historical_paper_stage_is_independent_of_git_object_availability(self) -> None:
         rendered, report_id = paper_render.render(PAPER_BUNDLE)
         with tempfile.TemporaryDirectory() as temporary:
             site_dir = Path(temporary)
             (site_dir / "index.html").write_text(
-                "<!doctype html><html><body><ul></ul></body></html>")
+                "<!doctype html><html><body><ul></ul></body></html>"
+            )
             empty_objects = site_dir / "empty-git-objects"
             empty_objects.mkdir()
             with patch.dict(os.environ, {"GIT_OBJECT_DIRECTORY": str(empty_objects)}):
                 unavailable = subprocess.run(
                     ["git", "cat-file", "-e", "1f34503eb3f5d4c3e239076a8d48b2af2e6bf06c"],
-                    cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    cwd=ROOT,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
                 self.assertNotEqual(unavailable.returncode, 0)
                 staged_id = stage.stage(PAPER_BUNDLE, site_dir, paper_render)
             self.assertEqual(staged_id, report_id)
-            self.assertEqual({name: (site_dir / report_id / name).read_bytes()
-                              for name in rendered}, rendered)
+            self.assertEqual(
+                {name: (site_dir / report_id / name).read_bytes() for name in rendered}, rendered
+            )
 
 
 if __name__ == "__main__":
