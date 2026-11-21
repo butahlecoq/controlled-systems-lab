@@ -1,4 +1,5 @@
 """Stage the frozen MPC-01 per-attempt capture as an offline Pages report."""
+
 from __future__ import annotations
 
 import argparse
@@ -20,31 +21,50 @@ STRATEGY_AB_ID = "mpc01-strategy-ab-ts03-20261103-r1"
 STRATEGY_AB_SOURCE = ROOT / "docs/research/evidence" / STRATEGY_AB_ID
 STRATEGY_AB_ROUTE = Path("docs/research/evidence") / STRATEGY_AB_ID
 STRATEGY_AB_FILES = (
-    "strategy-ab-ts03-summary.html", "strategy-ab-ts03-summary.txt",
-    "strategy-ab-ts03-control-plane.svg", "strategy-ab-ts03-events.jsonl",
-    "strategy-ab-ts03-stdout.jsonl", "comparison-record.json", "scenario.json",
-    "capture-environment.json", "codec-environment.json", "resource-profile.json",
-    "capture-supervisor.py", "build-note.txt",
+    "strategy-ab-ts03-summary.html",
+    "strategy-ab-ts03-summary.txt",
+    "strategy-ab-ts03-control-plane.svg",
+    "strategy-ab-ts03-events.jsonl",
+    "strategy-ab-ts03-stdout.jsonl",
+    "comparison-record.json",
+    "scenario.json",
+    "capture-environment.json",
+    "codec-environment.json",
+    "resource-profile.json",
+    "capture-supervisor.py",
+    "build-note.txt",
 )
 STRATEGY_AB_ROUTE_ASSETS = {
     "strategy-ab-ts03-summary.txt": "strategy-ab-ts03-summary.md",
     "build-note.txt": "build-note.md",
-    "setup-attempts/supervisor-row-count-mismatch/README.txt":
-        "setup-attempts/supervisor-row-count-mismatch/README.md",
+    "setup-attempts/supervisor-row-count-mismatch/README.txt": "setup-attempts/supervisor-row-count-mismatch/README.md",
 }
 STRATEGY_AB_TS02_ID = "mpc01-strategy-ab-ts02-per-attempt-20261103"
 STRATEGY_AB_TS02_SOURCE = ROOT / "docs/research/evidence" / STRATEGY_AB_TS02_ID
 STRATEGY_AB_TS02_ROUTE = Path("docs/research/evidence") / STRATEGY_AB_TS02_ID
 STRATEGY_AB_TS02_FILES = (
-    "strategy-ab-ts02-summary.html", "strategy-ab-ts02-summary.txt",
-    "strategy-ab-ts02-control-plane.svg", "strategy-ab-ts02-events.jsonl",
-    "strategy-ab-ts02-stdout.jsonl", "strategy-ab-ts02-comparison-record.json",
-    "scenario.json", "strategy-ab-ts02-environment.json",
-    "strategy-ab-ts02-csl-environment.json", "resource-profile.json",
-    "capture-supervisor.py", "run-capture.py", "binary-dynamic-dependencies.txt",
-    "systemd-scope-processes.jsonl", "build-note.json",
-    "cmake-compiler-metadata.cmake", "target-flags.make", "target-link.txt",
-    "build-record.py", "render-report.py", "write-build-note.py", "sanitize-bundle.py",
+    "strategy-ab-ts02-summary.html",
+    "strategy-ab-ts02-summary.txt",
+    "strategy-ab-ts02-control-plane.svg",
+    "strategy-ab-ts02-events.jsonl",
+    "strategy-ab-ts02-stdout.jsonl",
+    "strategy-ab-ts02-comparison-record.json",
+    "scenario.json",
+    "strategy-ab-ts02-environment.json",
+    "strategy-ab-ts02-csl-environment.json",
+    "resource-profile.json",
+    "capture-supervisor.py",
+    "run-capture.py",
+    "binary-dynamic-dependencies.txt",
+    "systemd-scope-processes.jsonl",
+    "build-note.json",
+    "cmake-compiler-metadata.cmake",
+    "target-flags.make",
+    "target-link.txt",
+    "build-record.py",
+    "render-report.py",
+    "write-build-note.py",
+    "sanitize-bundle.py",
 )
 STRATEGY_AB_TS02_ROUTE_ASSETS = {
     "strategy-ab-ts02-summary.txt": "strategy-ab-ts02-summary.md",
@@ -53,12 +73,21 @@ STRATEGY_AB_TS01_ID = "mpc01-strategy-ab-ts01-per-attempt-20261103"
 STRATEGY_AB_TS01_SOURCE = ROOT / "docs/research/evidence" / STRATEGY_AB_TS01_ID
 STRATEGY_AB_TS01_ROUTE = Path("docs/research/evidence") / STRATEGY_AB_TS01_ID
 STRATEGY_AB_TS01_FILES = (
-    "strategy-ab-ts01-summary.html", "strategy-ab-ts01-summary.txt",
-    "strategy-ab-ts01-control-plane.svg", "strategy-ab-ts01-events.jsonl",
-    "strategy-ab-ts01-stdout.jsonl", "comparison-record.json", "scenario.json",
-    "strategy-ab-ts01-environment.json", "codec-environment.json",
-    "resource-profile.json", "systemd-scope-processes.jsonl", "build-note.json",
-    "cmake-compiler-metadata.cmake", "target-flags.make", "target-link.txt",
+    "strategy-ab-ts01-summary.html",
+    "strategy-ab-ts01-summary.txt",
+    "strategy-ab-ts01-control-plane.svg",
+    "strategy-ab-ts01-events.jsonl",
+    "strategy-ab-ts01-stdout.jsonl",
+    "comparison-record.json",
+    "scenario.json",
+    "strategy-ab-ts01-environment.json",
+    "codec-environment.json",
+    "resource-profile.json",
+    "systemd-scope-processes.jsonl",
+    "build-note.json",
+    "cmake-compiler-metadata.cmake",
+    "target-flags.make",
+    "target-link.txt",
 )
 STRATEGY_AB_TS01_ROUTE_ASSETS = {
     "strategy-ab-ts01-summary.txt": "strategy-ab-ts01-summary.md",
@@ -76,8 +105,13 @@ def _insert_landing_link(site: Path, marker: str, href: str, label: str) -> None
         if source_page.count(marker_attr) == 1 and source_page.count(link) == 1:
             return
         raise ValueError("Pages landing link conflicts with the expected route: " + marker)
-    updated, count = re.subn(r"(<body\b[^>]*>)", lambda match: match.group(1) + link,
-                             source_page, count=1, flags=re.IGNORECASE)
+    updated, count = re.subn(
+        r"(<body\b[^>]*>)",
+        lambda match: match.group(1) + link,
+        source_page,
+        count=1,
+        flags=re.IGNORECASE,
+    )
     if count != 1:
         raise ValueError("built Pages root index.html has no body element")
     landing.write_text(updated, encoding="utf-8")
@@ -90,7 +124,9 @@ def _profile_readme_aliases(site: Path) -> None:
     content = source.read_bytes()
     if hashlib.sha256(content).hexdigest() != PROFILE_README_SHA256:
         raise ValueError("source-mapped profile guide differs from its captured bytes")
-    profile_manifest = json.loads((PROFILE_SOURCE / "profile-manifest.json").read_text(encoding="utf-8"))
+    profile_manifest = json.loads(
+        (PROFILE_SOURCE / "profile-manifest.json").read_text(encoding="utf-8")
+    )
     if profile_manifest["artifacts"].get("README.txt") != PROFILE_README_SHA256:
         raise ValueError("source-mapped profile manifest does not bind its guide")
     destination = site / "mpc01-source-mapped-profile-20261102"
@@ -130,11 +166,13 @@ def page() -> str:
         if in_table and line.startswith("|"):
             cells = [cell.strip().strip("`") for cell in line.strip("|").split("|")]
             if len(cells) == 7:
-                rows.append("<tr>" + "".join("<td>" + html.escape(c) + "</td>" for c in cells) + "</tr>")
+                rows.append(
+                    "<tr>" + "".join("<td>" + html.escape(c) + "</td>" for c in cells) + "</tr>"
+                )
         elif in_table:
             break
     table = "\n".join(rows)
-    return f'''<!doctype html>
+    return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>MPC-01 per-attempt solver capture</title><style>
 :root{{color-scheme:light dark}}body{{margin:0;background:#101827;color:#e5edf7;font:16px/1.6 system-ui,sans-serif}}
@@ -155,11 +193,15 @@ th,td{{border-bottom:1px solid #526174;padding:.45rem .6rem;text-align:left}}img
 <h2>Strategy A/B analytic comparison</h2><p><a href="../{STRATEGY_AB_TS02_ROUTE.as_posix()}/strategy-ab-ts02-summary.html">T-S02: five alternating Strategy A/B pairs, each with its own process-tree limit, plus a separate limiter profile.</a> This constant-objective fixture checks family plumbing and replay, not optimization difficulty or general performance.</p>
 <p><a href="../{STRATEGY_AB_TS01_ROUTE.as_posix()}/strategy-ab-ts01-summary.html">T-S01: five alternating per-attempt-limited Strategy A/B pairs on the exact two-stage integrator.</a></p>
 <p>Capture date: 2026-11-02. Source revision: <code>452db1ceb0312607fe7791b5ff4d84a2730df6ff</code>. No package or release change.</p>
-</main></body></html>'''
+</main></body></html>"""
 
 
-def _copy_bundle_for_route(source: Path, destination: Path, markdown_routes: dict[str, str],
-                           required_files: tuple[str, ...]) -> None:
+def _copy_bundle_for_route(
+    source: Path,
+    destination: Path,
+    markdown_routes: dict[str, str],
+    required_files: tuple[str, ...],
+) -> None:
     names = _check_manifest(source, required_files)
     contents = (source / "SHA256SUMS").read_bytes()
     expected = {}
@@ -176,7 +218,9 @@ def _copy_bundle_for_route(source: Path, destination: Path, markdown_routes: dic
         source_entry = b"  " + source_name.encode("ascii") + b"\n"
         route_entry = b"  " + route_name.encode("ascii") + b"\n"
         if contents.count(source_entry) != 1:
-            raise ValueError("checksum manifest must contain exactly one source asset: " + source_name)
+            raise ValueError(
+                "checksum manifest must contain exactly one source asset: " + source_name
+            )
         contents = contents.replace(source_entry, route_entry)
     expected["SHA256SUMS"] = contents
     if destination.is_symlink() or (destination.exists() and not destination.is_dir()):
@@ -184,8 +228,18 @@ def _copy_bundle_for_route(source: Path, destination: Path, markdown_routes: dic
     if destination.exists():
         for path in destination.rglob("*"):
             name = path.relative_to(destination).as_posix()
-            if path.is_symlink() or (path.is_dir() and name in expected) or (not path.is_dir() and
-                    (not path.is_file() or name not in expected or path.read_bytes() != expected[name])):
+            if (
+                path.is_symlink()
+                or (path.is_dir() and name in expected)
+                or (
+                    not path.is_dir()
+                    and (
+                        not path.is_file()
+                        or name not in expected
+                        or path.read_bytes() != expected[name]
+                    )
+                )
+            ):
                 raise ValueError("published report route conflicts with source bytes: " + name)
     destination.mkdir(parents=True, exist_ok=True)
     for name, content in expected.items():
@@ -199,8 +253,9 @@ def _copy_bundle_for_route(source: Path, destination: Path, markdown_routes: dic
             shutil.copy2(origins[name], target)
 
 
-def _validate_routed_bundle(source: Path, route: Path, source_names: set[str],
-                            markdown_routes: dict[str, str], label: str) -> None:
+def _validate_routed_bundle(
+    source: Path, route: Path, source_names: set[str], markdown_routes: dict[str, str], label: str
+) -> None:
     route_names = {markdown_routes.get(name, name) for name in source_names}
     if _check_manifest(route, ()) != route_names:
         raise ValueError(label + " inventory differs from source")
@@ -219,12 +274,16 @@ def stage(site: Path) -> Path:
     dest = site / REPORT_ID
     if dest.exists() or dest.is_symlink():
         raise ValueError("report route must be fresh")
-    _copy_bundle_for_route(SOURCE, dest,
-                           {"benchmark-summary.txt": "benchmark-summary.md"},
-                           ("benchmark-summary.txt",))
+    _copy_bundle_for_route(
+        SOURCE, dest, {"benchmark-summary.txt": "benchmark-summary.md"}, ("benchmark-summary.txt",)
+    )
     (dest / "index.html").write_text(page(), encoding="utf-8")
-    _insert_landing_link(site, "mpc01-per-attempt-link", f"{REPORT_ID}/index.html",
-                         "MPC-01 per-attempt OSQP and HPIPM capture →")
+    _insert_landing_link(
+        site,
+        "mpc01-per-attempt-link",
+        f"{REPORT_ID}/index.html",
+        "MPC-01 per-attempt OSQP and HPIPM capture →",
+    )
     stage_strategy_ab(site)
     stage_strategy_ab_ts02(site)
     stage_strategy_ab_ts01(site)
@@ -243,29 +302,40 @@ def _check_manifest(bundle: Path, required_files: tuple[str, ...] = STRATEGY_AB_
         if relative.is_absolute() or ".." in relative.parts or not relative.parts:
             raise ValueError("unsafe Strategy A/B manifest path: " + name)
         path = bundle / name
-        if (name in names or path.is_symlink() or not path.is_file() or
-                not path.resolve().is_relative_to(bundle.resolve()) or
-                hashlib.sha256(path.read_bytes()).hexdigest() != digest):
+        if (
+            name in names
+            or path.is_symlink()
+            or not path.is_file()
+            or not path.resolve().is_relative_to(bundle.resolve())
+            or hashlib.sha256(path.read_bytes()).hexdigest() != digest
+        ):
             raise ValueError("Strategy A/B source-bundle checksum mismatch: " + name)
         names.add(name)
     if not set(required_files).issubset(names):
         raise ValueError("Strategy A/B source-bundle inventory is incomplete")
-    actual = {path.relative_to(bundle).as_posix() for path in bundle.rglob("*")
-              if path.is_file() and path.name != "SHA256SUMS"}
+    actual = {
+        path.relative_to(bundle).as_posix()
+        for path in bundle.rglob("*")
+        if path.is_file() and path.name != "SHA256SUMS"
+    }
     if actual != names or any(path.is_symlink() for path in bundle.rglob("*")):
         raise ValueError("Strategy A/B source-bundle contents differ from its checksum manifest")
     return names
 
 
 def stage_strategy_ab(site: Path) -> Path:
-    if (STRATEGY_AB_SOURCE.is_symlink() or not STRATEGY_AB_SOURCE.is_dir() or
-            site.is_symlink() or not site.is_dir()):
+    if (
+        STRATEGY_AB_SOURCE.is_symlink()
+        or not STRATEGY_AB_SOURCE.is_dir()
+        or site.is_symlink()
+        or not site.is_dir()
+    ):
         raise ValueError("Strategy A/B evidence source and built site directory are required")
     destination = site / STRATEGY_AB_ROUTE
     destination.parent.mkdir(parents=True, exist_ok=True)
     _copy_bundle_for_route(
-        STRATEGY_AB_SOURCE, destination,
-        STRATEGY_AB_ROUTE_ASSETS, STRATEGY_AB_FILES)
+        STRATEGY_AB_SOURCE, destination, STRATEGY_AB_ROUTE_ASSETS, STRATEGY_AB_FILES
+    )
 
     # Keep the immutable report's source link working at its documented relative path.
     source_dir = site / "scripts/reports/mpc01"
@@ -279,61 +349,77 @@ def stage_strategy_ab(site: Path) -> Path:
             shutil.copy2(source, target)
 
     _insert_landing_link(
-        site, "mpc01-strategy-ab-ts03-link",
+        site,
+        "mpc01-strategy-ab-ts03-link",
         f"{STRATEGY_AB_ROUTE.as_posix()}/strategy-ab-ts03-summary.html",
-        "MPC-01 Strategy A/B T-S03 report →")
+        "MPC-01 Strategy A/B T-S03 report →",
+    )
     return destination
 
 
 def stage_strategy_ab_ts02(site: Path) -> Path:
-    if (STRATEGY_AB_TS02_SOURCE.is_symlink() or not STRATEGY_AB_TS02_SOURCE.is_dir() or
-            site.is_symlink() or not site.is_dir()):
+    if (
+        STRATEGY_AB_TS02_SOURCE.is_symlink()
+        or not STRATEGY_AB_TS02_SOURCE.is_dir()
+        or site.is_symlink()
+        or not site.is_dir()
+    ):
         raise ValueError("Strategy A/B T-S02 evidence source and built site directory are required")
     destination = site / STRATEGY_AB_TS02_ROUTE
     destination.parent.mkdir(parents=True, exist_ok=True)
     _copy_bundle_for_route(
-        STRATEGY_AB_TS02_SOURCE, destination,
-        STRATEGY_AB_TS02_ROUTE_ASSETS,
-        STRATEGY_AB_TS02_FILES)
+        STRATEGY_AB_TS02_SOURCE, destination, STRATEGY_AB_TS02_ROUTE_ASSETS, STRATEGY_AB_TS02_FILES
+    )
     source_dir = site / "scripts/reports/mpc01"
     source_dir.mkdir(parents=True, exist_ok=True)
     for filename in ("summarize_strategy_ab_ts02.py", "build_strategy_ab_records.py"):
         source = ROOT / "scripts/reports/mpc01" / filename
         target = source_dir / filename
         if target.exists() and target.read_bytes() != source.read_bytes():
-            raise ValueError("T-S02 Strategy A/B renderer route conflicts with an existing site file")
+            raise ValueError(
+                "T-S02 Strategy A/B renderer route conflicts with an existing site file"
+            )
         if not target.exists():
             shutil.copy2(source, target)
     _insert_landing_link(
-        site, "mpc01-strategy-ab-ts02-link",
+        site,
+        "mpc01-strategy-ab-ts02-link",
         f"{STRATEGY_AB_TS02_ROUTE.as_posix()}/strategy-ab-ts02-summary.html",
-        "MPC-01 Strategy A/B T-S02 per-attempt report →")
+        "MPC-01 Strategy A/B T-S02 per-attempt report →",
+    )
     return destination
 
 
 def stage_strategy_ab_ts01(site: Path) -> Path:
-    if (STRATEGY_AB_TS01_SOURCE.is_symlink() or not STRATEGY_AB_TS01_SOURCE.is_dir() or
-            site.is_symlink() or not site.is_dir()):
+    if (
+        STRATEGY_AB_TS01_SOURCE.is_symlink()
+        or not STRATEGY_AB_TS01_SOURCE.is_dir()
+        or site.is_symlink()
+        or not site.is_dir()
+    ):
         raise ValueError("Strategy A/B T-S01 evidence source and built site directory are required")
     destination = site / STRATEGY_AB_TS01_ROUTE
     destination.parent.mkdir(parents=True, exist_ok=True)
     _copy_bundle_for_route(
-        STRATEGY_AB_TS01_SOURCE, destination,
-        STRATEGY_AB_TS01_ROUTE_ASSETS,
-        STRATEGY_AB_TS01_FILES)
+        STRATEGY_AB_TS01_SOURCE, destination, STRATEGY_AB_TS01_ROUTE_ASSETS, STRATEGY_AB_TS01_FILES
+    )
     source_dir = site / "scripts/reports/mpc01"
     source_dir.mkdir(parents=True, exist_ok=True)
     for filename in ("summarize_strategy_ab.py", "build_strategy_ab_records.py"):
         source = ROOT / "scripts/reports/mpc01" / filename
         target = source_dir / filename
         if target.exists() and target.read_bytes() != source.read_bytes():
-            raise ValueError("Strategy A/B T-S01 renderer route conflicts with an existing site file")
+            raise ValueError(
+                "Strategy A/B T-S01 renderer route conflicts with an existing site file"
+            )
         if not target.exists():
             shutil.copy2(source, target)
     _insert_landing_link(
-        site, "mpc01-strategy-ab-ts01-link",
+        site,
+        "mpc01-strategy-ab-ts01-link",
         f"{STRATEGY_AB_TS01_ROUTE.as_posix()}/strategy-ab-ts01-summary.html",
-        "MPC-01 Strategy A/B T-S01 per-attempt report →")
+        "MPC-01 Strategy A/B T-S01 per-attempt report →",
+    )
     return destination
 
 
@@ -350,7 +436,11 @@ def validate(site: Path) -> None:
     for line in (route / "SHA256SUMS").read_text(encoding="utf-8").splitlines():
         digest, name = line.split("  ", 1)
         path = route / name
-        if path.is_symlink() or not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+        if (
+            path.is_symlink()
+            or not path.is_file()
+            or hashlib.sha256(path.read_bytes()).hexdigest() != digest
+        ):
             raise ValueError("MPC-01 source-bundle checksum mismatch: " + name)
     _validate_profile_readme_aliases(site)
     summary = route / "benchmark-summary.md"
@@ -363,7 +453,10 @@ def validate(site: Path) -> None:
         if not target.is_relative_to(site.resolve()) or not target.is_file():
             raise ValueError("MPC-01 summary links to a missing or escaping file: " + reference)
     report_html = (route / "index.html").read_text(encoding="utf-8")
-    if "not a closed-loop MPC run" not in report_html or "TwoPoints environment report" not in report_html:
+    if (
+        "not a closed-loop MPC run" not in report_html
+        or "TwoPoints environment report" not in report_html
+    ):
         raise ValueError("MPC-01 report scope statement differs")
     for reference in re.findall(r'(?:href|src)="([^"]+)"', report_html):
         parsed = urlparse(reference)
@@ -376,20 +469,32 @@ def validate(site: Path) -> None:
     strategy_landing = site / STRATEGY_AB_ROUTE / "strategy-ab-ts03-summary.html"
     strategy_source = STRATEGY_AB_SOURCE
     strategy_route = site / STRATEGY_AB_ROUTE
-    if (strategy_source.is_symlink() or not strategy_source.is_dir() or
-            strategy_route.is_symlink() or not strategy_route.is_dir() or
-            strategy_landing.is_symlink() or not strategy_landing.is_file()):
+    if (
+        strategy_source.is_symlink()
+        or not strategy_source.is_dir()
+        or strategy_route.is_symlink()
+        or not strategy_route.is_dir()
+        or strategy_landing.is_symlink()
+        or not strategy_landing.is_file()
+    ):
         raise ValueError("staged Strategy A/B T-S03 report route is missing")
     expected_names = _check_manifest(strategy_source)
-    _validate_routed_bundle(strategy_source, strategy_route, expected_names,
-                            STRATEGY_AB_ROUTE_ASSETS,
-                            "staged Strategy A/B report")
+    _validate_routed_bundle(
+        strategy_source,
+        strategy_route,
+        expected_names,
+        STRATEGY_AB_ROUTE_ASSETS,
+        "staged Strategy A/B report",
+    )
     renderer_dir = site / "scripts/reports/mpc01"
     for filename in ("summarize_strategy_ab_ts03.py", "build_strategy_ab_records.py"):
         renderer = renderer_dir / filename
         source = ROOT / "scripts/reports/mpc01" / filename
-        if (renderer.is_symlink() or not renderer.is_file() or
-                renderer.read_bytes() != source.read_bytes()):
+        if (
+            renderer.is_symlink()
+            or not renderer.is_file()
+            or renderer.read_bytes() != source.read_bytes()
+        ):
             raise ValueError("staged Strategy A/B renderer differs from source: " + filename)
     page = strategy_landing.read_text(encoding="utf-8")
     for reference in re.findall(r'(?:href|src)="([^"]+)"', page):
@@ -398,7 +503,9 @@ def validate(site: Path) -> None:
             continue
         target = (strategy_landing.parent / urldefrag(parsed.path)[0]).resolve()
         if not target.is_relative_to(site.resolve()) or not target.is_file():
-            raise ValueError("Strategy A/B report links to a missing or escaping file: " + reference)
+            raise ValueError(
+                "Strategy A/B report links to a missing or escaping file: " + reference
+            )
     landing_html = landing.read_text(encoding="utf-8")
     if f'href="{STRATEGY_AB_ROUTE.as_posix()}/strategy-ab-ts03-summary.html"' not in landing_html:
         raise ValueError("Strategy A/B T-S03 link is missing from the Pages landing page")
@@ -406,17 +513,31 @@ def validate(site: Path) -> None:
     ts02_source = STRATEGY_AB_TS02_SOURCE
     ts02_route = site / STRATEGY_AB_TS02_ROUTE
     ts02_landing = ts02_route / "strategy-ab-ts02-summary.html"
-    if (ts02_source.is_symlink() or not ts02_source.is_dir() or ts02_route.is_symlink() or
-            not ts02_route.is_dir() or ts02_landing.is_symlink() or not ts02_landing.is_file()):
+    if (
+        ts02_source.is_symlink()
+        or not ts02_source.is_dir()
+        or ts02_route.is_symlink()
+        or not ts02_route.is_dir()
+        or ts02_landing.is_symlink()
+        or not ts02_landing.is_file()
+    ):
         raise ValueError("staged Strategy A/B T-S02 report route is missing")
     ts02_names = _check_manifest(ts02_source, STRATEGY_AB_TS02_FILES)
-    _validate_routed_bundle(ts02_source, ts02_route, ts02_names,
-                            STRATEGY_AB_TS02_ROUTE_ASSETS,
-                            "staged Strategy A/B T-S02 report")
+    _validate_routed_bundle(
+        ts02_source,
+        ts02_route,
+        ts02_names,
+        STRATEGY_AB_TS02_ROUTE_ASSETS,
+        "staged Strategy A/B T-S02 report",
+    )
     for filename in ("summarize_strategy_ab_ts02.py", "build_strategy_ab_records.py"):
         renderer = renderer_dir / filename
         source = ROOT / "scripts/reports/mpc01" / filename
-        if renderer.is_symlink() or not renderer.is_file() or renderer.read_bytes() != source.read_bytes():
+        if (
+            renderer.is_symlink()
+            or not renderer.is_file()
+            or renderer.read_bytes() != source.read_bytes()
+        ):
             raise ValueError("staged Strategy A/B T-S02 renderer differs from source: " + filename)
     page = ts02_landing.read_text(encoding="utf-8")
     for reference in re.findall(r'(?:href|src)="([^"]+)"', page):
@@ -425,25 +546,44 @@ def validate(site: Path) -> None:
             continue
         target = (ts02_landing.parent / urldefrag(parsed.path)[0]).resolve()
         if not target.is_relative_to(site.resolve()) or not target.is_file():
-            raise ValueError("Strategy A/B T-S02 report links to a missing or escaping file: " + reference)
-    if f'href="{STRATEGY_AB_TS02_ROUTE.as_posix()}/strategy-ab-ts02-summary.html"' not in landing_html:
+            raise ValueError(
+                "Strategy A/B T-S02 report links to a missing or escaping file: " + reference
+            )
+    if (
+        f'href="{STRATEGY_AB_TS02_ROUTE.as_posix()}/strategy-ab-ts02-summary.html"'
+        not in landing_html
+    ):
         raise ValueError("Strategy A/B T-S02 link is missing from the Pages landing page")
 
     ts01_source = STRATEGY_AB_TS01_SOURCE
     ts01_route = site / STRATEGY_AB_TS01_ROUTE
     ts01_landing = ts01_route / "strategy-ab-ts01-summary.html"
-    if (ts01_source.is_symlink() or not ts01_source.is_dir() or ts01_route.is_symlink() or
-            not ts01_route.is_dir() or ts01_landing.is_symlink() or not ts01_landing.is_file()):
+    if (
+        ts01_source.is_symlink()
+        or not ts01_source.is_dir()
+        or ts01_route.is_symlink()
+        or not ts01_route.is_dir()
+        or ts01_landing.is_symlink()
+        or not ts01_landing.is_file()
+    ):
         raise ValueError("staged Strategy A/B T-S01 report route is missing")
     ts01_names = _check_manifest(ts01_source, STRATEGY_AB_TS01_FILES)
-    _validate_routed_bundle(ts01_source, ts01_route, ts01_names,
-                            STRATEGY_AB_TS01_ROUTE_ASSETS,
-                            "staged Strategy A/B T-S01 report")
+    _validate_routed_bundle(
+        ts01_source,
+        ts01_route,
+        ts01_names,
+        STRATEGY_AB_TS01_ROUTE_ASSETS,
+        "staged Strategy A/B T-S01 report",
+    )
     renderer_dir = site / "scripts/reports/mpc01"
     for filename in ("summarize_strategy_ab.py", "build_strategy_ab_records.py"):
         renderer = renderer_dir / filename
         source = ROOT / "scripts/reports/mpc01" / filename
-        if renderer.is_symlink() or not renderer.is_file() or renderer.read_bytes() != source.read_bytes():
+        if (
+            renderer.is_symlink()
+            or not renderer.is_file()
+            or renderer.read_bytes() != source.read_bytes()
+        ):
             raise ValueError("staged Strategy A/B T-S01 renderer differs from source: " + filename)
     page = ts01_landing.read_text(encoding="utf-8")
     for reference in re.findall(r'(?:href|src)="([^"]+)"', page):
@@ -452,15 +592,22 @@ def validate(site: Path) -> None:
             continue
         target = (ts01_landing.parent / urldefrag(parsed.path)[0]).resolve()
         if not target.is_relative_to(site.resolve()) or not target.is_file():
-            raise ValueError("Strategy A/B T-S01 report links to a missing or escaping file: " + reference)
-    if f'href="{STRATEGY_AB_TS01_ROUTE.as_posix()}/strategy-ab-ts01-summary.html"' not in landing_html:
+            raise ValueError(
+                "Strategy A/B T-S01 report links to a missing or escaping file: " + reference
+            )
+    if (
+        f'href="{STRATEGY_AB_TS01_ROUTE.as_posix()}/strategy-ab-ts01-summary.html"'
+        not in landing_html
+    ):
         raise ValueError("Strategy A/B T-S01 link is missing from the Pages landing page")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--site", type=Path, required=True)
-    parser.add_argument("--check", action="store_true", help="validate an already augmented Pages site")
+    parser.add_argument(
+        "--check", action="store_true", help="validate an already augmented Pages site"
+    )
     args = parser.parse_args()
     if args.check:
         validate(args.site)

@@ -1,4 +1,5 @@
 """Validate and stage the registered B04-C Strategy A verification report."""
+
 from __future__ import annotations
 
 import argparse
@@ -36,12 +37,24 @@ CI_SOURCE_FILES = (
     "docs/contracts/b04-c-exact-family.md",
 )
 FILES = (
-    "README.md", "index.html", "record.json", "verification.json",
-    "strategy-a-ci.json", "trajectory.svg", "SHA256SUMS", "manifest.json",
+    "README.md",
+    "index.html",
+    "record.json",
+    "verification.json",
+    "strategy-a-ci.json",
+    "trajectory.svg",
+    "SHA256SUMS",
+    "manifest.json",
 )
 PUBLISHED_FILES = (
-    "README.md", "index.html", "record.json", "verification.json",
-    "strategy-a-ci.json", "trajectory.svg", "SHA256SUMS", "manifest.json",
+    "README.md",
+    "index.html",
+    "record.json",
+    "verification.json",
+    "strategy-a-ci.json",
+    "trajectory.svg",
+    "SHA256SUMS",
+    "manifest.json",
 )
 
 
@@ -72,8 +85,12 @@ def expected_ci_source_hashes() -> dict[str, str]:
     result = {}
     for name in CI_SOURCE_FILES:
         completed = subprocess.run(
-            ["git", "show", f"{TEST_COMMIT}:{name}"], cwd=ROOT,
-            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            ["git", "show", f"{TEST_COMMIT}:{name}"],
+            cwd=ROOT,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
         result[name] = digest(completed.stdout)
     return result
 
@@ -84,44 +101,73 @@ def validate_ci_record(ci: dict) -> None:
     require(ci.get("source_commit") == TEST_COMMIT, "CI source commit differs")
     run = ci.get("run")
     require(isinstance(run, dict), "CI run identity is missing")
-    require(run == {
-        "run_id": CI_RUN_ID,
-        "url": CI_RUN_URL,
-        "workflow": "Native C++20",
-        "head_sha": TEST_COMMIT,
-        "status": "completed",
-        "conclusion": "success",
-    }, "CI run is not the accepted exact-head native matrix")
-    require(ci.get("claim_type") == "functional_test_not_benchmark", "CI scope must remain functional only")
+    require(
+        run
+        == {
+            "run_id": CI_RUN_ID,
+            "url": CI_RUN_URL,
+            "workflow": "Native C++20",
+            "head_sha": TEST_COMMIT,
+            "status": "completed",
+            "conclusion": "success",
+        },
+        "CI run is not the accepted exact-head native matrix",
+    )
+    require(
+        ci.get("claim_type") == "functional_test_not_benchmark",
+        "CI scope must remain functional only",
+    )
     test = ci.get("test")
     require(isinstance(test, dict), "Strategy A functional-test details are missing")
-    require(test.get("target") == "strategy_a_tests" and test.get("name") == TEST_NAME,
-            "Strategy A test identity differs")
+    require(
+        test.get("target") == "strategy_a_tests" and test.get("name") == TEST_NAME,
+        "Strategy A test identity differs",
+    )
     required_assertions = {
-        "termination_completed", "complete_optimal_family", "exact_relation_coordinates",
-        "requested_representation", "objective_interval_inside_confirmation_band",
-        "registered_b04_c_verifier", "full_history_membership_boundary_query",
+        "termination_completed",
+        "complete_optimal_family",
+        "exact_relation_coordinates",
+        "requested_representation",
+        "objective_interval_inside_confirmation_band",
+        "registered_b04_c_verifier",
+        "full_history_membership_boundary_query",
     }
-    require(set(test.get("assertions", [])) == required_assertions, "Strategy A acceptance assertions differ")
-    require(ci.get("source_files") == expected_ci_source_hashes(), "CI test-source hashes differ from the exact tested commit")
+    require(
+        set(test.get("assertions", [])) == required_assertions,
+        "Strategy A acceptance assertions differ",
+    )
+    require(
+        ci.get("source_files") == expected_ci_source_hashes(),
+        "CI test-source hashes differ from the exact tested commit",
+    )
     jobs = ci.get("successful_jobs")
     expected_jobs = {
-        "route / route", "Linux GCC 13 / highs installed package",
+        "route / route",
+        "Linux GCC 13 / highs installed package",
         "Linux GCC 13 / core installed package",
         "Linux GCC 13 / ASan and UBSan (public modules and consumers)",
-        "Release / Linux GCC 13 x64", "Release / Windows MSVC x64",
-        "Release / Linux Clang 18 x64", "Native validation",
+        "Release / Linux GCC 13 x64",
+        "Release / Windows MSVC x64",
+        "Release / Linux Clang 18 x64",
+        "Native validation",
     }
-    require(isinstance(jobs, list) and set(jobs) == expected_jobs,
-            "exact-head native CI job inventory differs")
+    require(
+        isinstance(jobs, list) and set(jobs) == expected_jobs,
+        "exact-head native CI job inventory differs",
+    )
 
 
 def validate_bundle(source: Path = SOURCE) -> dict[str, bytes]:
-    require(not source.is_symlink() and source.is_dir(), "B04-C Strategy A bundle is missing or unsafe")
+    require(
+        not source.is_symlink() and source.is_dir(), "B04-C Strategy A bundle is missing or unsafe"
+    )
     actual = {path.name for path in source.iterdir() if path.is_file()}
     require(actual == set(FILES), "B04-C Strategy A bundle inventory differs")
     files = {name: (source / name).read_bytes() for name in FILES}
-    require(not any(path.is_symlink() for path in source.iterdir()), "B04-C Strategy A bundle contains symlinks")
+    require(
+        not any(path.is_symlink() for path in source.iterdir()),
+        "B04-C Strategy A bundle contains symlinks",
+    )
 
     checksums = {}
     for line in files["SHA256SUMS"].decode("ascii").splitlines():
@@ -129,51 +175,82 @@ def validate_bundle(source: Path = SOURCE) -> dict[str, bytes]:
         require(match is not None, "invalid B04-C Strategy A checksum line")
         require(match.group(2) not in checksums, "duplicate B04-C Strategy A checksum")
         checksums[match.group(2)] = match.group(1)
-    expected_checksums = {name: digest(value) for name, value in files.items()
-                          if name not in {"SHA256SUMS", "manifest.json"}}
+    expected_checksums = {
+        name: digest(value)
+        for name, value in files.items()
+        if name not in {"SHA256SUMS", "manifest.json"}
+    }
     require(checksums == expected_checksums, "B04-C Strategy A SHA256SUMS mismatch")
 
     manifest = json.loads(files["manifest.json"])
-    require(manifest.get("schema") == "csl.b04-c-strategy-a-publication-input/1",
-            "B04-C Strategy A manifest schema differs")
-    require(manifest.get("scenario_id") == SCENARIO_ID, "B04-C Strategy A manifest scenario differs")
+    require(
+        manifest.get("schema") == "csl.b04-c-strategy-a-publication-input/1",
+        "B04-C Strategy A manifest schema differs",
+    )
+    require(
+        manifest.get("scenario_id") == SCENARIO_ID, "B04-C Strategy A manifest scenario differs"
+    )
     require(manifest.get("source_commit") == TEST_COMMIT, "B04-C Strategy A source commit differs")
-    expected_files = {name: digest(value) for name, value in files.items()
-                      if name != "manifest.json"}
+    expected_files = {
+        name: digest(value) for name, value in files.items() if name != "manifest.json"
+    }
     require(manifest.get("files") == expected_files, "B04-C Strategy A manifest file hashes differ")
-    require(manifest.get("exact_record_sha256") == sha_file(EXACT_RECORD),
-            "B04-C exact record binding differs")
-    require(manifest.get("exact_check_sha256") == sha_file(EXACT_CHECK),
-            "B04-C exact check binding differs")
+    require(
+        manifest.get("exact_record_sha256") == sha_file(EXACT_RECORD),
+        "B04-C exact record binding differs",
+    )
+    require(
+        manifest.get("exact_check_sha256") == sha_file(EXACT_CHECK),
+        "B04-C exact check binding differs",
+    )
 
     record = json.loads(files["record.json"])
     verify_result = check(EXACT_RECORD)
-    require(record == read_json(EXACT_RECORD), "B04-C Strategy A report record differs from exact record")
-    require(json.loads(files["verification.json"]) == verify_result == read_json(EXACT_CHECK),
-            "independent B04-C exact check differs")
+    require(
+        record == read_json(EXACT_RECORD),
+        "B04-C Strategy A report record differs from exact record",
+    )
+    require(
+        json.loads(files["verification.json"]) == verify_result == read_json(EXACT_CHECK),
+        "independent B04-C exact check differs",
+    )
     require(record.get("scenario_id") == SCENARIO_ID, "B04-C report scenario differs")
-    require(record["optimality"]["pre_registered_bands_unchanged"] == [
-        "|J* - 30.899| <= 0.0005", "J* < 30.8985", "J* > 30.8995"],
-        "pre-registered B04-C acceptance bands changed")
-    require(record["optimality"]["band_verdict"] == "within pre-registered confirmation band",
-            "B04-C acceptance-band verdict differs")
-    require(record["optimal_family"]["representation"] ==
-            "bounded 16-control H-polytope with an exact affine lift to the 84 state/control coordinates",
-            "B04-C optimal-family representation differs")
+    require(
+        record["optimality"]["pre_registered_bands_unchanged"]
+        == ["|J* - 30.899| <= 0.0005", "J* < 30.8985", "J* > 30.8995"],
+        "pre-registered B04-C acceptance bands changed",
+    )
+    require(
+        record["optimality"]["band_verdict"] == "within pre-registered confirmation band",
+        "B04-C acceptance-band verdict differs",
+    )
+    require(
+        record["optimal_family"]["representation"]
+        == "bounded 16-control H-polytope with an exact affine lift to the 84 state/control coordinates",
+        "B04-C optimal-family representation differs",
+    )
     ci = json.loads(files["strategy-a-ci.json"])
     validate_ci_record(ci)
-    require(files["index.html"].decode("utf-8") == render_report(record, ci),
-            "B04-C Strategy A HTML differs from the saved result and CI evidence")
+    require(
+        files["index.html"].decode("utf-8") == render_report(record, ci),
+        "B04-C Strategy A HTML differs from the saved result and CI evidence",
+    )
     svg = files["trajectory.svg"].decode("utf-8")
-    require("Oxidizer phase plane" in svg and "x1 — oxidizer flow" in svg and
-            "x2 — oxidizer stock balance" in svg and "Fuel phase plane" in svg and
-            "x3 — fuel flow" in svg and "x4 — fuel stock balance" in svg,
-            "B04-C trajectory figure omits a labelled phase-plane projection")
+    require(
+        "Oxidizer phase plane" in svg
+        and "x1 — oxidizer flow" in svg
+        and "x2 — oxidizer stock balance" in svg
+        and "Fuel phase plane" in svg
+        and "x3 — fuel flow" in svg
+        and "x4 — fuel stock balance" in svg,
+        "B04-C trajectory figure omits a labelled phase-plane projection",
+    )
     return files
 
 
 def render_report(record: dict, ci: dict) -> str:
     import html
+
     objective = html.escape(record["optimality"]["objective_approximation"])
     band = html.escape(record["optimality"]["band_verdict"])
     residuals = record["reachability"]["plane_residuals"]
@@ -185,15 +262,26 @@ def render_report(record: dict, ci: dict) -> str:
     run_url = html.escape(ci["run"]["url"], quote=True)
     band_rows = "".join(
         f"<tr><td><code>{html.escape(name)}</code></td><td>{html.escape(verdict)}</td></tr>"
-        for name, verdict in zip(record["optimality"]["pre_registered_bands_unchanged"],
-                                 [band, "not applicable", "not applicable"], strict=True))
+        for name, verdict in zip(
+            record["optimality"]["pre_registered_bands_unchanged"],
+            [band, "not applicable", "not applicable"],
+            strict=True,
+        )
+    )
     nonlinear_rows = "".join(
-        "<tr><td>" + html.escape(row["model"]) + "</td><td><code>" +
-        html.escape(row["reported_objective"]) + "</code></td><td><code>(" +
-        ", ".join(html.escape(value) for value in row["terminal"]) + ")</code></td></tr>"
-        for row in record["published_context"]["nonlinear_rows"])
-    source_url = ("https://github.com/butahlecoq/controlled-systems-lab/blob/"
-                  f"{TEST_COMMIT}/tests/synthesis/strategy_a/strategy_tests.cpp#L1869-L1893")
+        "<tr><td>"
+        + html.escape(row["model"])
+        + "</td><td><code>"
+        + html.escape(row["reported_objective"])
+        + "</code></td><td><code>("
+        + ", ".join(html.escape(value) for value in row["terminal"])
+        + ")</code></td></tr>"
+        for row in record["published_context"]["nonlinear_rows"]
+    )
+    source_url = (
+        "https://github.com/butahlecoq/controlled-systems-lab/blob/"
+        f"{TEST_COMMIT}/tests/synthesis/strategy_a/strategy_tests.cpp#L1869-L1893"
+    )
     code_url = f"https://github.com/butahlecoq/controlled-systems-lab/commit/{TEST_COMMIT}"
     return f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -249,20 +337,26 @@ def stage(source: Path, site: Path) -> str:
         "exact_record_sha256": manifest["exact_record_sha256"],
         "exact_check_sha256": manifest["exact_check_sha256"],
     }
-    route = "b04-c-strategy-a-" + digest(json.dumps(
-        route_identity, sort_keys=True, separators=(",", ":")).encode())[:20]
+    route = (
+        "b04-c-strategy-a-"
+        + digest(json.dumps(route_identity, sort_keys=True, separators=(",", ":")).encode())[:20]
+    )
     destination, archive_path = site / route, site / f"{route}.zip"
-    require(not destination.exists() and not archive_path.exists(), "B04-C Pages route already exists")
+    require(
+        not destination.exists() and not archive_path.exists(), "B04-C Pages route already exists"
+    )
     require(page.count("</body>") == 1, "report landing page insertion point differs")
 
     generated = {name: files[name] for name in PUBLISHED_FILES}
     local_page = generated["index.html"].decode("utf-8")
-    footer = (f'<p>Immutable report <code>{route}</code> · '
-              '<a href="publication-manifest.json">Publication manifest</a>.</p>')
+    footer = (
+        f"<p>Immutable report <code>{route}</code> · "
+        '<a href="publication-manifest.json">Publication manifest</a>.</p>'
+    )
     generated["index.html"] = local_page.replace("</main>", footer + "</main>").encode("utf-8")
     generated["SHA256SUMS"] = "".join(
-        f"{digest(generated[name])}  {name}\n" for name in sorted(generated)
-        if name != "SHA256SUMS").encode("ascii")
+        f"{digest(generated[name])}  {name}\n" for name in sorted(generated) if name != "SHA256SUMS"
+    ).encode("ascii")
     publication_manifest = {
         "schema": "csl.b04-c-strategy-a-publication/1",
         "report_id": route,
@@ -278,11 +372,13 @@ def stage(source: Path, site: Path) -> str:
     destination.mkdir()
     for name, value in generated.items():
         (destination / name).write_bytes(value)
-    section = (f'<section><h2>B04-C registered Strategy A verification</h2>'
-               f'<p>The corrected-track exact record is paired with the registered Strategy A functional test. '
-               f'This is not a benchmark or historical reproduction. '
-               f'<a href="{route}/index.html">Open the versioned report</a> · '
-               f'<a href="{route}.zip">Download the offline report bundle</a>.</p></section>')
+    section = (
+        f"<section><h2>B04-C registered Strategy A verification</h2>"
+        f"<p>The corrected-track exact record is paired with the registered Strategy A functional test. "
+        f"This is not a benchmark or historical reproduction. "
+        f'<a href="{route}/index.html">Open the versioned report</a> · '
+        f'<a href="{route}.zip">Download the offline report bundle</a>.</p></section>'
+    )
     index.write_text(page.replace("</body>", section + "</body>"), encoding="utf-8")
     with zipfile.ZipFile(archive_path, "w", zipfile.ZIP_DEFLATED) as archive:
         for name, value in sorted(generated.items()):
