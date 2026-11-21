@@ -433,7 +433,6 @@ def _validate_summary_csv(bundle, summary):
 
 
 @common.preserve_publication
-@common.preserve_publication
 def adapt(bundle):
     bundle = Path(bundle)
     if bundle.is_symlink():
