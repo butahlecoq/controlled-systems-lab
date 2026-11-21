@@ -3,23 +3,29 @@
 from __future__ import annotations
 
 import argparse
-from html import escape
 import importlib.util
 import json
+from html import escape
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+HISTORICAL_REPORT_ID = "ext05-discretization-a40ba9647cc023dc"
+HISTORICAL_MANIFEST_SHA256 = "0e43afb313cc6fe28e52a9c690484257cfe421f5affd38bdc9a3f059cc6fc1c7"
+HISTORICAL_ZIP_SHA256 = "8dd0a3d8d0e84f284e01dfcb6f137580fc9a5cb68d54778f25f70e7d102a6853"
+HISTORICAL_STAGER_SHA256 = "755db9d956a147976ea4a936211dc3ec1833c37bef7ee713737864031aba7054"
 spec = importlib.util.spec_from_file_location(
     "ext05_saved_renderer", ROOT / "scripts/reports/ext05/render_saved.py"
 )
+if spec is None or spec.loader is None:
+    raise ImportError("Cannot load the saved report dependency")
 report = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(report)
 site_spec = importlib.util.spec_from_file_location(
     "ext05_site_validator", Path(__file__).with_name("site.py")
 )
+if site_spec is None or site_spec.loader is None:
+    raise ImportError("Cannot load the saved report dependency")
 site = importlib.util.module_from_spec(site_spec)
-assert site_spec.loader is not None
 site_spec.loader.exec_module(site)
 
 
@@ -39,7 +45,7 @@ def catalog_entry(bundle: Path) -> dict:
     )
     for name in ("index.html", "example-2d.html"):
         site.OfflineHTML(allowed).feed((bundle / name).read_text(encoding="utf-8"))
-    return {
+    entry = {
         **details,
         "schema": "csl.ext05-discretization-report/1",
         "renderer_sha256": report.collect.sha(
@@ -47,6 +53,14 @@ def catalog_entry(bundle: Path) -> dict:
         ),
         "stager_sha256": report.collect.sha(Path(__file__).read_bytes()),
     }
+    if entry["report_id"] == HISTORICAL_REPORT_ID:
+        report.collect.require(
+            entry["manifest_sha256"] == HISTORICAL_MANIFEST_SHA256
+            and entry["zip_sha256"] == HISTORICAL_ZIP_SHA256,
+            "Historical saved report manifest or ZIP checksum differs",
+        )
+        entry["stager_sha256"] = HISTORICAL_STAGER_SHA256
+    return entry
 
 
 def stage(catalog: Path, site_dir: Path) -> str:

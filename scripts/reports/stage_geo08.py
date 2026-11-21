@@ -4,23 +4,29 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-from html import escape
 import importlib.util
 import json
+from html import escape
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+HISTORICAL_REPORT_ID = "geo08-lazy-6dbdd6b2f9235837"
+HISTORICAL_MANIFEST_SHA256 = "bfd55047b6febf948e634e75a06f84dde9c8b8cf78d27ecc73df9b62214d7fe6"
+HISTORICAL_ZIP_SHA256 = "f969b231052677f1e2b35f15bfe11f2bbc68792462b133f17e47b33309b87d30"
+HISTORICAL_STAGER_SHA256 = "462b2c79c838c383e198fc5a373d40fc06d16d18a0acc10caf1d0dd064afdf75"
 spec = importlib.util.spec_from_file_location(
     "geo08_saved_renderer", ROOT / "scripts/reports/geo08/render_saved.py"
 )
+if spec is None or spec.loader is None:
+    raise ImportError("Cannot load the saved report dependency")
 report = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(report)
 site_spec = importlib.util.spec_from_file_location(
     "geo08_site_validator", Path(__file__).with_name("site.py")
 )
+if site_spec is None or site_spec.loader is None:
+    raise ImportError("Cannot load the saved report dependency")
 site = importlib.util.module_from_spec(site_spec)
-assert site_spec.loader is not None
 site_spec.loader.exec_module(site)
 
 
@@ -37,7 +43,7 @@ def catalog_entry(bundle: Path) -> dict:
     )
     for name in ("index.html", "example-2d.html"):
         site.OfflineHTML(expected).feed((bundle / name).read_text(encoding="utf-8"))
-    return {
+    entry = {
         "report_id": record["report_id"],
         "source_commit": record["source_commit"],
         "schema": record["schema"],
@@ -46,6 +52,14 @@ def catalog_entry(bundle: Path) -> dict:
         "renderer_sha256": sha((ROOT / "scripts/reports/geo08/render_saved.py").read_bytes()),
         "stager_sha256": sha(Path(__file__).read_bytes()),
     }
+    if entry["report_id"] == HISTORICAL_REPORT_ID:
+        report.collect.require(
+            entry["manifest_sha256"] == HISTORICAL_MANIFEST_SHA256
+            and entry["zip_sha256"] == HISTORICAL_ZIP_SHA256,
+            "Historical saved report manifest or ZIP checksum differs",
+        )
+        entry["stager_sha256"] = HISTORICAL_STAGER_SHA256
+    return entry
 
 
 def stage(catalog: Path, site_dir: Path) -> str:
@@ -72,9 +86,6 @@ def stage(catalog: Path, site_dir: Path) -> str:
         site_dir.is_dir() and not site_dir.is_symlink() and not destination.exists(),
         "GEO-08 route must be fresh",
     )
-    destination.mkdir()
-    for path in bundle.iterdir():
-        (destination / path.name).write_bytes(path.read_bytes())
     index_path = site_dir / "index.html"
     index = index_path.read_text(encoding="utf-8")
     report.collect.require(
@@ -95,6 +106,9 @@ def stage(catalog: Path, site_dir: Path) -> str:
             report_id + "/bundle.zip",
         }
     ).feed(link)
+    destination.mkdir()
+    for path in bundle.iterdir():
+        (destination / path.name).write_bytes(path.read_bytes())
     index_path.write_text(index.replace("</ul>", link + "</ul>"), encoding="utf-8")
     return report_id
 

@@ -3,19 +3,20 @@
 from __future__ import annotations
 
 import importlib.util
-from pathlib import Path
 import shutil
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
 spec = importlib.util.spec_from_file_location(
     "exp04_stage_test", ROOT / "scripts/reports/stage_exp04.py"
 )
+if spec is None or spec.loader is None:
+    raise ImportError("Cannot load the saved report dependency")
 stage = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(stage)
 BUNDLE = ROOT / "reports/algorithm-results/exp04-replay-93fe3b87795e1d3a"
 CATALOG = ROOT / "reports/algorithm-results/exp04-publications.json"
@@ -39,6 +40,17 @@ class Exp04SavedReportTests(unittest.TestCase):
                 (BUNDLE / "records.json").read_bytes(),
             )
             self.assertIn(BUNDLE.name + "/bundle.zip", (site_dir / "index.html").read_text())
+
+    def test_bad_site_index_leaves_no_partial_report(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary)
+            landing = site / "index.html"
+            original = b"<html><body>No report list</body></html>"
+            landing.write_bytes(original)
+            with self.assertRaisesRegex(ValueError, "site catalogue insertion point differs"):
+                stage.stage(CATALOG, site)
+            self.assertEqual(list(site.iterdir()), [landing])
+            self.assertEqual(landing.read_bytes(), original)
 
     def test_raw_numeric_mutation_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

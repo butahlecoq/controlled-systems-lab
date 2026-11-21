@@ -3,17 +3,17 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 import shutil
 import sys
 import tempfile
 import unittest
 import zipfile
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-from ext05 import render_saved  # noqa: E402
 import stage_ext05  # noqa: E402
+from ext05 import render_saved  # noqa: E402
 
 
 class SavedContinuousReport(unittest.TestCase):

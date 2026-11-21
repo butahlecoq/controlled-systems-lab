@@ -3,23 +3,29 @@
 from __future__ import annotations
 
 import argparse
-from html import escape
 import importlib.util
 import json
+from html import escape
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+HISTORICAL_REPORT_ID = "opt10-smooth-188130d94d7bf2de"
+HISTORICAL_MANIFEST_SHA256 = "a055711b30a6823cc01a7ee1b3571d644dca79344408c2141c2c51c800b66851"
+HISTORICAL_ZIP_SHA256 = "7ae9ea3675e9fc52aedcc4d4f6ce710f871fff07ea5bb073896dfc9f9641daeb"
+HISTORICAL_STAGER_SHA256 = "b34daa0c11454d725f393ee6ea6ac87fc176d9977bf9b77dc3351d07556e8b9a"
 spec = importlib.util.spec_from_file_location(
     "opt10_saved_renderer", ROOT / "scripts/reports/opt10/render_saved.py"
 )
+if spec is None or spec.loader is None:
+    raise ImportError("Cannot load the saved report dependency")
 report = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(report)
 site_spec = importlib.util.spec_from_file_location(
     "opt10_site_validator", Path(__file__).with_name("site.py")
 )
+if site_spec is None or site_spec.loader is None:
+    raise ImportError("Cannot load the saved report dependency")
 site = importlib.util.module_from_spec(site_spec)
-assert site_spec.loader is not None
 site_spec.loader.exec_module(site)
 
 
@@ -39,7 +45,7 @@ def catalog_entry(bundle: Path) -> dict:
     )
     for name in ("index.html", "example-2d.html"):
         site.OfflineHTML(allowed).feed((bundle / name).read_text(encoding="utf-8"))
-    return {
+    entry = {
         **details,
         "schema": "csl.opt10-smooth-convex-report/1",
         "renderer_sha256": report.collect.sha(
@@ -47,6 +53,14 @@ def catalog_entry(bundle: Path) -> dict:
         ),
         "stager_sha256": report.collect.sha(Path(__file__).read_bytes()),
     }
+    if entry["report_id"] == HISTORICAL_REPORT_ID:
+        report.collect.require(
+            entry["manifest_sha256"] == HISTORICAL_MANIFEST_SHA256
+            and entry["zip_sha256"] == HISTORICAL_ZIP_SHA256,
+            "Historical saved report manifest or ZIP checksum differs",
+        )
+        entry["stager_sha256"] = HISTORICAL_STAGER_SHA256
+    return entry
 
 
 def stage(catalog: Path, site_dir: Path) -> str:

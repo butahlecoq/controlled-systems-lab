@@ -4,23 +4,29 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-from html import escape
 import importlib.util
 import json
+from html import escape
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+HISTORICAL_REPORT_ID = "exp04-replay-93fe3b87795e1d3a"
+HISTORICAL_MANIFEST_SHA256 = "b62c04246047f4c4aa9fb257c83eb1e5e0827170d35ccb51efea57f40b630e71"
+HISTORICAL_ZIP_SHA256 = "f9994f627b8928fb7ec8ac286ae90db6c0f9fc8b3ff749454f1e4b80b2af0d66"
+HISTORICAL_STAGER_SHA256 = "546ad0a0a8e54a55c8b8374be20fd90d8c3edf63eee21048505e349edc694fcf"
 spec = importlib.util.spec_from_file_location(
     "exp04_saved_renderer", ROOT / "scripts/reports/exp04/render_saved.py"
 )
+if spec is None or spec.loader is None:
+    raise ImportError("Cannot load the saved report dependency")
 report = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(report)
 site_spec = importlib.util.spec_from_file_location(
     "exp04_site_validator", Path(__file__).with_name("site.py")
 )
+if site_spec is None or site_spec.loader is None:
+    raise ImportError("Cannot load the saved report dependency")
 site = importlib.util.module_from_spec(site_spec)
-assert site_spec.loader is not None
 site_spec.loader.exec_module(site)
 
 
@@ -36,7 +42,7 @@ def catalog_entry(bundle: Path) -> dict:
         {path.name for path in bundle.iterdir()} == expected, "EXP-04 source inventory differs"
     )
     site.OfflineHTML(expected).feed((bundle / "index.html").read_text(encoding="utf-8"))
-    return {
+    entry = {
         "report_id": record["report_id"],
         "source_commit": record["source_commit"],
         "schema": record["schema"],
@@ -45,6 +51,14 @@ def catalog_entry(bundle: Path) -> dict:
         "renderer_sha256": sha((ROOT / "scripts/reports/exp04/render_saved.py").read_bytes()),
         "stager_sha256": sha(Path(__file__).read_bytes()),
     }
+    if entry["report_id"] == HISTORICAL_REPORT_ID:
+        report.collect.require(
+            entry["manifest_sha256"] == HISTORICAL_MANIFEST_SHA256
+            and entry["zip_sha256"] == HISTORICAL_ZIP_SHA256,
+            "Historical saved report manifest or ZIP checksum differs",
+        )
+        entry["stager_sha256"] = HISTORICAL_STAGER_SHA256
+    return entry
 
 
 def stage(catalog: Path, site_dir: Path) -> str:
@@ -70,9 +84,6 @@ def stage(catalog: Path, site_dir: Path) -> str:
         site_dir.is_dir() and not site_dir.is_symlink() and not destination.exists(),
         "EXP-04 public route must be fresh",
     )
-    destination.mkdir()
-    for path in bundle.iterdir():
-        (destination / path.name).write_bytes(path.read_bytes())
     index_path = site_dir / "index.html"
     index = index_path.read_text(encoding="utf-8")
     report.collect.require(
@@ -94,6 +105,9 @@ def stage(catalog: Path, site_dir: Path) -> str:
             report_id + "/bundle.zip",
         }
     ).feed(link)
+    destination.mkdir()
+    for path in bundle.iterdir():
+        (destination / path.name).write_bytes(path.read_bytes())
     index_path.write_text(index.replace("</ul>", link + "</ul>"), encoding="utf-8")
     return report_id
 

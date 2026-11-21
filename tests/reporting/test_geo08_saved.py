@@ -3,20 +3,21 @@
 from __future__ import annotations
 
 import importlib.util
-from pathlib import Path
 import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
 import zipfile
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location(
     "geo08_render_test", ROOT / "scripts/reports/geo08/render_saved.py"
 )
+if spec is None or spec.loader is None:
+    raise ImportError("Cannot load the saved report dependency")
 render = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(render)
 BUNDLE = ROOT / "reports/algorithm-results/geo08-lazy-6dbdd6b2f9235837"
 CATALOG = ROOT / "reports/algorithm-results/geo08-publications.json"
@@ -63,6 +64,30 @@ class SavedGeo08Test(unittest.TestCase):
             self.assertTrue(
                 all(b".worktrees" not in archive.read(name) for name in archive.namelist())
             )
+
+    def test_bad_site_index_leaves_no_partial_report(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary)
+            landing = site / "index.html"
+            original = b"<html><body>No report list</body></html>"
+            landing.write_bytes(original)
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts/reports/stage_geo08.py"),
+                    "--catalog",
+                    str(CATALOG),
+                    "--site",
+                    str(site),
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("site insertion point differs", result.stderr)
+            self.assertEqual(list(site.iterdir()), [landing])
+            self.assertEqual(landing.read_bytes(), original)
 
     def test_catalog_stages_exact_report_and_example(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
