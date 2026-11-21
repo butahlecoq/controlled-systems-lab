@@ -535,10 +535,6 @@ jobs:
           python -m unittest discover -s tests/reporting -p 'test_site_additions.py'
           python -m unittest discover -s tests/reporting -p 'test_app02_saved.py'
           python -m unittest discover -s tests/reporting -p 'test_closed_loop_initial_baselines_publication.py'
-      - name: Verify saved native model bundles and lesson links
-        env:
-          MPLBACKEND: Agg
-        run: python -m unittest tests.reporting.test_native_discrete_models tests.reporting.test_stage_native_flexible_pitch
       - name: Check saved five-family fixed-tail geometry and episodes
         env:
           MPLBACKEND: Agg
@@ -580,6 +576,10 @@ jobs:
         env:
           MPLBACKEND: Agg
         run: python -m unittest tests.reporting.test_issue944_each_choice_publication tests.reporting.test_issue944_postfix_publication
+      - name: Verify saved native model bundles and lesson links
+        env:
+          MPLBACKEND: Agg
+        run: python -m unittest tests.reporting.test_native_discrete_models tests.reporting.test_stage_native_flexible_pitch
       - name: Check the locked source-only native row-scaling publication
         run: python -m unittest discover -s tests/reporting -p 'test_stage_native_row_scaling_diagnostic.py'
       - name: Check the frozen environment report routes and ZIPs
