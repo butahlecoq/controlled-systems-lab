@@ -1,5 +1,6 @@
 import hashlib
 import json
+import re
 import sys
 import tempfile
 import unittest
@@ -9,6 +10,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
 import geometry_figures  # noqa: E402
+
+SVG = "{http://www.w3.org/2000/svg}"
 
 
 class GeometryFigureTests(unittest.TestCase):
@@ -40,6 +43,12 @@ class GeometryFigureTests(unittest.TestCase):
                     "color": "#009E73",
                     "points": [[-1, -1], [1, -1], [1, 1], [-1, 1]],
                 },
+                {
+                    "kind": "path",
+                    "label": "saved path",
+                    "color": "#CC79A7",
+                    "points": [[-1, 0], [0, 1], [3, 1]],
+                },
             ],
         }
         with tempfile.TemporaryDirectory() as directory:
@@ -51,11 +60,48 @@ class GeometryFigureTests(unittest.TestCase):
             self.assertTrue((out / "geometry.png").is_file())
             svg = ET.parse(out / "geometry.svg").getroot()
             self.assertEqual(svg.attrib["role"], "img")
-            text = " ".join(svg.itertext())
-            self.assertIn("Saved square and enclosing circle", text)
-            self.assertIn("x (unitless); y (unitless)", text)
-            self.assertIn("major gridlines", text)
-            self.assertIn("outer enclosure", text)
+            title_id, description_id = svg.attrib["aria-labelledby"].split()
+            self.assertEqual(
+                svg.findtext(f"{SVG}title[@id='{title_id}']"), "Saved square and enclosing circle"
+            )
+            description = svg.findtext(f"{SVG}desc[@id='{description_id}']", default="")
+            self.assertIn("x (unitless); y (unitless)", description)
+            self.assertIn("major gridlines", description)
+            self.assertIn("outer enclosure", description)
+            for axis_id, label in (
+                ("matplotlib.axis_1", "x (unitless)"),
+                ("matplotlib.axis_2", "y (unitless)"),
+            ):
+                [axis] = svg.findall(f".//{SVG}g[@id='{axis_id}']")
+                visible_text = [element.text for element in axis.iter(f"{SVG}text")]
+                self.assertIn(label, visible_text)
+                self.assertGreaterEqual(
+                    sum(
+                        bool(re.fullmatch(r"[-+]?\d+(?:\.\d+)?", text or ""))
+                        for text in visible_text
+                    ),
+                    3,
+                )
+                self.assertGreaterEqual(
+                    sum(
+                        "#8290a3" in element.get("style", "") for element in axis.iter(f"{SVG}path")
+                    ),
+                    2,
+                )
+            [plane] = svg.findall(f".//{SVG}g[@id='axes_1']")
+            [trajectory] = [
+                element
+                for element in plane.iter(f"{SVG}path")
+                if "clip-path" in element.attrib and "#cc79a7" in element.get("style", "")
+            ]
+            x0, y0, x1, y1, x2, y2 = [
+                float(value) for value in re.findall(r"-?\d+(?:\.\d+)?", trajectory.attrib["d"])
+            ]
+            # The first saved step travels one unit along each axis. The second is horizontal.
+            self.assertGreater(x1, x0)
+            self.assertAlmostEqual(x1 - x0, y0 - y1, places=5)
+            self.assertAlmostEqual(x2 - x1, 3 * (x1 - x0), places=5)
+            self.assertEqual(y2, y1)
             self.assertEqual(
                 receipt["files"],
                 {
