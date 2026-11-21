@@ -74,7 +74,6 @@ FUNCTIONAL_DOC_EXACT_ASSETS = {
     "docs/research/ext07-hybrid-2d.svg",
     "docs/research/inventory.json",
     "docs/research/legacy-characterization.json",
-    "docs/research/proof-audit-provenance.json",
     "docs/research/reference-b08.json",
     "docs/research/syn04-strategy-b-ts03-control-projection.svg",
     "docs/research/verification.json",
