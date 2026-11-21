@@ -401,29 +401,35 @@ def main():
             raise ValueError("unexpected driver CSV header")
         trials: list[Trial] = []
         for row in reader:
+            repetition = int(row["repetition"])
             durations = {phase: int(row[phase]) for phase in PHASES}
             if any(duration < 0 for duration in durations.values()) or durations["total_ns"] < sum(
                 durations[phase] for phase in PHASES[:-1]
             ):
                 raise ValueError("invalid or non-covering phase durations")
+            candidate_count = int(row["generated_candidate_count"])
+            materialized_count = int(row["materialized_output_point_count"])
+            output_points = json.loads(row["output_points"])
+            support_values = json.loads(row["support_values"])
+            support_checks = int(row["support_checks"])
             if row["oracle_passed"] not in ("true", "false"):
                 raise ValueError("invalid boolean")
             scenario = row["scenario"]
             trial: Trial = {
                 "scenario": scenario,
-                "repetition": int(row["repetition"]),
+                "repetition": repetition,
                 "status": row["status"],
                 "detail": row["detail"],
                 "setup_ns": durations["setup_ns"],
                 "operation_ns": durations["operation_ns"],
                 "oracle_ns": durations["oracle_ns"],
                 "total_ns": durations["total_ns"],
+                "generated_candidate_count": candidate_count,
+                "materialized_output_point_count": materialized_count,
                 "reduction_status": row["reduction_status"],
-                "generated_candidate_count": int(row["generated_candidate_count"]),
-                "materialized_output_point_count": int(row["materialized_output_point_count"]),
-                "output_points": json.loads(row["output_points"]),
-                "support_values": json.loads(row["support_values"]),
-                "support_checks": int(row["support_checks"]),
+                "output_points": output_points,
+                "support_checks": support_checks,
+                "support_values": support_values,
                 "oracle_passed": row["oracle_passed"] == "true",
                 "input_sha256": sha(canonical(SCENARIOS[scenario]["inputs"])),
             }
