@@ -1,26 +1,33 @@
 """Typed saved-data contract for the separately measured SYN-03 T-S02 profile."""
 
 from __future__ import annotations
-import hashlib, html, json, statistics, re
+
+import hashlib
+import html
+import json
+import re
+import statistics
 
 SCHEMA = "csl.syn03-strategy-a-ts02-report/1"
 EVENT_SCHEMA = "csl.syn03-strategy-a-ts02-measurement-event/1"
 SOURCE_COMMIT = "272fb9a51c40dedeb20dfcb1ea11dfc6b694edd7"
 REPORT_ID = "syn03-strategy-a-ts02-20261014-272fb9a5"
+STRATEGY_ID = "csl.synthesis.reach-back"
+REGISTERED_PROVIDERS = [
+    "csl.conversion.qhull@1.0.0+qhull.8.0.2",
+    "csl.convex.highs@1.0.0+highs.1.11.0",
+    "csl.geometry.affine-sum@1.0.0",
+    "csl.geometry.polyhedral-projection@1.0.0",
+    "csl.hull.lp-membership@1.0.0",
+    "csl.lp.highs@1.0.0+highs.1.11.0",
+]
 ALGORITHM = {
-    "strategy_id": "csl.synthesis.reach-back",
+    "strategy_id": STRATEGY_ID,
     "strategy_version": "1",
     "profile_id": "ts02_constant_integrator",
     "lp_provider": "csl.lp.highs@1.0.0+highs.1.11.0",
     "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
-    "registered_providers": [
-        "csl.conversion.qhull@1.0.0+qhull.8.0.2",
-        "csl.convex.highs@1.0.0+highs.1.11.0",
-        "csl.geometry.affine-sum@1.0.0",
-        "csl.geometry.polyhedral-projection@1.0.0",
-        "csl.hull.lp-membership@1.0.0",
-        "csl.lp.highs@1.0.0+highs.1.11.0",
-    ],
+    "registered_providers": REGISTERED_PROVIDERS,
 }
 EXPECTED_SCENARIO = {
     "profile": "ts02_constant_integrator",
@@ -172,7 +179,7 @@ def validate(record):
         "relative_tolerance",
         "residual_verifier",
     }
-    providers = set(ALGORITHM["registered_providers"] + [ALGORITHM["strategy_id"] + "@1"])
+    providers = set(REGISTERED_PROVIDERS) | {f"{STRATEGY_ID}@1"}
     if any(
         any(e.get(k) != v for k, v in expected.items())
         or unreported_checks.intersection(e)
@@ -288,7 +295,10 @@ def render_html(record):
     errors = validate(record)
     if errors:
         raise ValueError("invalid SYN-03 T-S02 report: " + ", ".join(errors))
-    esc = lambda v: html.escape(str(v))
+
+    def esc(value: object) -> str:
+        return html.escape(str(value))
+
     m = record["measurement"]
     timing = m["timing_ns"]
     rows = "".join(

@@ -642,6 +642,19 @@ on:
       - 'reports/algorithm-results/exp03-two-points-approx-pilot-*/**'
       - 'reports/algorithm-results/syn03-nominal-exact-2d-8b94095/**'
       - 'reports/algorithm-results/perf03-ts01-single-process-correlation-20261014/**'
+      - 'scripts/reports/syn03/strategy_a_report.py'
+      - 'scripts/reports/syn03_ts02/report.py'
+      - 'scripts/reports/syn03_ts02/provenance.py'
+      - 'scripts/reports/syn03_strategy_a_*_reports.py'
+      - 'scripts/reports/syn03_strategy_a_*publication_policy.py'
+      - 'reports/algorithm-results/catalog.json'
+      - 'reports/algorithm-results/index.html'
+      - 'reports/algorithm-results/legacy-publications.json'
+      - 'reports/algorithm-results/syn03-strategy-a-ts0[12]-*/**'
+      - 'reports/algorithm-results/syn03-strategy-a-ts0[12]-*.zip'
+      - 'reports/algorithm-results/tooling/syn03/strategy_a_report.py'
+      - 'reports/algorithm-results/tooling/syn03/strategy_a_collect.py'
+      - 'reports/algorithm-results/tooling/syn03_ts02/report.py'
       - 'tests/reporting/test_opt07_*.py'
       - 'reports/algorithm-results/catalog.json'
       - 'reports/algorithm-results/convex-*.zip'
@@ -819,6 +832,15 @@ jobs:
           python -m unittest discover -s tests/reporting -p 'test_syn03_strategy_a_report.py'
           python -m unittest tests.reporting.test_review05_build_phases tests.reporting.test_review05_capture_tools tests.reporting.test_review05_family_query tests.reporting.test_review05_publication tests.reporting.test_review05_resource_receipt tests.reporting.test_scalar_query_oracle
           python -m unittest discover -s tests/reporting -p 'test_syn03_ts02_report.py'
+      - name: Verify both saved Strategy A offline ZIPs
+        run: |
+          reports=reports/algorithm-results
+          python scripts/reports/site.py --catalog "$reports/catalog.json" --check --out "$RUNNER_TEMP/strategy-a-site"
+          for profile in ts01 ts02; do
+            for archive in "$reports"/syn03-strategy-a-"$profile"-*.zip; do
+              cmp "$archive" "$RUNNER_TEMP/strategy-a-site/${archive##*/}"
+            done
+          done
       - name: Check six saved environment routes and offline ZIPs
         run: >-
           python -m unittest
