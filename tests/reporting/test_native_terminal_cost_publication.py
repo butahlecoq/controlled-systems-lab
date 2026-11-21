@@ -1,22 +1,22 @@
 from __future__ import annotations
 
 import hashlib
-import json
-from pathlib import Path
 import shutil
 import sys
 import tempfile
 import unittest
-from unittest import mock
 import zipfile
 from html.parser import HTMLParser
+from pathlib import Path
+from unittest import mock
 from urllib.parse import urljoin, urlsplit
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
 import native_terminal_cost_example as example
+
+ROOT = Path(__file__).resolve().parents[2]
 
 
 class NativeTerminalCostPublicationTests(unittest.TestCase):
@@ -25,7 +25,7 @@ class NativeTerminalCostPublicationTests(unittest.TestCase):
         target = next(
             row["observed_state"] for row in after["rows"] if row["task"] == "syn-nl-lv-01"
         )
-        for spec, expected in zip(specs, [2 * np.asarray(target), target]):
+        for spec, expected in zip(specs, [2 * np.asarray(target), target], strict=False):
             actual = np.linalg.solve(np.asarray(spec["Q"]), -np.asarray(spec["linear"]))
             np.testing.assert_allclose(actual, expected, rtol=0, atol=1e-12)
         self.assertAlmostEqual(example.quadratic(specs[0], target), -1.0)

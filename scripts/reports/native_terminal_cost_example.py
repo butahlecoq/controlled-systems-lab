@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-from html import escape
 import json
 import math
-from pathlib import Path
 import re
 import shutil
 import zipfile
+from html import escape
+from pathlib import Path
 
 import numpy as np
 import site_design
@@ -65,6 +65,7 @@ def load_records(bundle: Path):
                 point,
                 definition["terminal_target"],
                 definition["terminal_scale"],
+                strict=False,
             )
         )
         if not math.isclose(
@@ -113,15 +114,16 @@ def plot(path: Path, specs: list[dict], printed: bool) -> None:
         fig, ax = plt.subplots(figsize=(6, 5), facecolor=colors["--page"])
         ax.set_facecolor(colors["--surface"])
         for spec, color, style, letter in zip(
-            specs, [colors["--warm"], colors["--accent"]], ["--", "-"], ["B", "A"]
+            specs, [colors["--warm"], colors["--accent"]], ["--", "-"], ["B", "A"], strict=False
         ):
             q = np.asarray(spec["Q"])
             center = np.linalg.solve(q, -np.asarray(spec["linear"]))
+            center_xy = (float(center[0]), float(center[1]))
             for delta in (0.25, 1.0):
                 radii = np.sqrt(2 * delta / np.diag(q))
                 ax.add_patch(
                     Ellipse(
-                        center,
+                        center_xy,
                         2 * radii[0],
                         2 * radii[1],
                         fill=False,
@@ -133,7 +135,7 @@ def plot(path: Path, specs: list[dict], printed: bool) -> None:
             ax.scatter(*center, color=color, s=55, zorder=5)
             ax.annotate(
                 letter,
-                center,
+                center_xy,
                 xytext=(8, 8),
                 textcoords="offset points",
                 color=color,

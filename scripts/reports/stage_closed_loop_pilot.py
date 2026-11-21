@@ -6,14 +6,14 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from pathlib import Path
-import re
 import shutil
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
+import site_design
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports"))
-import site_design
 
 REPORT_ID = "closed-loop-pilot-v1"
 CARD = (
