@@ -88,34 +88,13 @@ class Ts03ReportTests(unittest.TestCase):
         spec.loader.exec_module(site)
         bundle = ROOT / "reports/algorithm-results" / report.REPORT_ID
         item = publisher.adapt(bundle)
-        archive = publisher.offline_zip(bundle, item)
-        catalogue_path = ROOT / "reports/algorithm-results/catalog.json"
-        catalogue = json.loads(catalogue_path.read_text(encoding="utf-8"))
-        catalogue["reports"] = [
-            entry for entry in catalogue["reports"] if entry.get("report_id") != item.report_id
-        ]
-        catalogue["reports"].append(
-            {
-                "report_id": item.report_id,
-                "payload_sha256": item.payload_sha256,
-                "source_commit": item.source_commit,
-                "zip_sha256": hashlib.sha256(archive).hexdigest(),
-                "report_kind": item.kind,
-                "measured_scope": item.measured_scope,
-                "evidence_limits": item.evidence_limits,
-                "payload_schema": item.payload_schema,
-                "native_payload_sha256": item.native_payload_sha256,
-                "source_report_id": item.source_report_id,
-            }
-        )
+        catalogue = ROOT / "reports/algorithm-results/catalog.json"
         with tempfile.TemporaryDirectory() as temporary:
-            test_catalogue = ROOT / "reports/algorithm-results" / ".test-syn04-ts03-catalog.json"
-            try:
-                test_catalogue.write_text(json.dumps(catalogue), encoding="utf-8")
-                output = site.stage(test_catalogue, Path(temporary) / "site", check=False)
-            finally:
-                test_catalogue.unlink(missing_ok=True)
-            self.assertEqual((output / (item.report_id + ".zip")).read_bytes(), archive)
+            output = site.stage(catalogue, Path(temporary) / "site", check=True)
+            self.assertEqual(
+                (output / (item.report_id + ".zip")).read_bytes(),
+                (catalogue.parent / (item.report_id + ".zip")).read_bytes(),
+            )
             self.assertIn(
                 "objective bounds [0,0]",
                 (output / item.report_id / "index.html").read_text(encoding="utf-8"),
