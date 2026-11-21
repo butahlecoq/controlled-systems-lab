@@ -265,6 +265,10 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertEqual(
             backward["companion_route"], "examples/catalogue-backward-reachability-v1/index.html"
         )
+        backends = routes["native-catalogue-convex-backends-v1"]
+        self.assertEqual(backends["assets"], ["bicycle-row-scaling.svg", "twenty-zone-ipopt.svg"])
+        self.assertTrue(backends["disposition"].startswith("reviewed:"))
+        self.assertNotIn("follow_up_issue", backends)
         finite_action = routes["catalogue-finite-action-v1"]
         self.assertEqual(finite_action["assets"],
                          ["hospital-finite-actions.svg", "pair-shear-projection.svg",
@@ -276,7 +280,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         reviewed_routes = {
             paired["route"], query["route"], crossover["route"], forward["route"],
             history["route"], exact["route"], backward["route"],
-            finite_action["route"], ring["route"], constrained["route"],
+            finite_action["route"], backends["route"], ring["route"], constrained["route"],
         }
         self.assertTrue(all(entry["disposition"].startswith("deferred: original frozen route-level readability")
                             for entry in routes.values() if entry["route"] not in reviewed_routes))
@@ -355,6 +359,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
                 "catalogue-finite-action-v1/pair-shear-projection.svg",
             "mpc-crossover-6b7308c4/index.html", "mpc-crossover-6b7308c4/feedback-geometry.svg",
             "native-source-constrained-mpc-v1/index.html", "native-source-constrained-mpc-v1/platoon.svg",
+            "native-catalogue-convex-backends-v1/index.html",
+            "native-catalogue-convex-backends-v1/bicycle-row-scaling.svg", "native-catalogue-convex-backends-v1/twenty-zone-ipopt.svg",
             "native-history-strategies-d57739b3/index.html",
             "native-history-strategies-d57739b3/figures/lotka-polytope.svg",
             "mpc-crossover-6b7308c4/deployment-time.svg",

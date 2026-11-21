@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Convex solvers for the same catalogue control tasks</title>
+<link rel="stylesheet" href="offline-examples.css">
+<style>
+figure img { display: block; width: 100%; background: #fff; border-radius: .4rem; }
+thead th:nth-child(n+2), td { text-align: right; white-space: nowrap; }
+@media (max-width: 480px) {
+  th, td { padding: .4rem; }
+}
+</style>
+</head>
+<body>
+<main class="page-content">
+<h1>Convex solvers for the same catalogue control tasks</h1>
+<p>Changing the convex solver recovered seven of the nine routes that the released HiGHS configuration could not complete. The same 35 catalogue models, three control transitions, state and control constraints, and weighted tracking objective were used throughout. Open loop plans once. Observed-state MPC replans from each measured state to the same terminal stage. Forecasts match the deterministic replay.</p>
+<div class="scroll">
+<table>
+<caption>Completed episodes out of 35 per policy. A pair requires both policies to complete.</caption>
+<thead><tr><th scope="col">Provider</th><th scope="col">Open loop</th><th scope="col">MPC</th><th scope="col">Pairs</th></tr></thead>
+<tbody>
+<tr><th scope="row">Released HiGHS 1.11.0</th><td>31</td><td>30</td><td>30</td></tr>
+<tr><th scope="row">HiGHS with bounded row scaling</th><td>32</td><td>31</td><td>31</td></tr>
+<tr><th scope="row">Installed Ipopt 3.14.19</th><td>34</td><td>34</td><td>34</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>Rescaling a constraint without changing its feasible points</h2>
+<p>Multiplying a constraint row and its bounds by the same positive power of two leaves the constraint equivalent in exact arithmetic. The opt-in HiGHS provider checks that the transformation reverses exactly in binary64 and converts row multipliers back to the original units before validation. It permits up to 20 powers of two of row scaling and bounds the magnitudes of scaled row data by 2<sup>20</sup>.</p>
+<p>The initial bicycle QP (model 23) needs at most 14 powers of two. Both policies complete after rescaling, and the other 68 saved physical outcomes keep their status and values. Models 27 and 28 need up to 49 and 80 powers of two in their initial QPs and exceed this provider’s admission limits.</p>
+<figure>
+<a href="bicycle-row-scaling.svg"><img src="bicycle-row-scaling.svg" alt="Four stages of the bicycle trajectory in scaled state coordinates and the second control at each transition. The two policies overlap."></a>
+<figcaption>The bicycle example after bounded row scaling. The left projection magnifies both state coordinates by 10<sup>6</sup>. The right plot magnifies the second applied control by 10<sup>3</sup>.</figcaption>
+</figure>
+
+<h2>Solving with the original sparse rows</h2>
+<p>The Ipopt provider receives the original sparse QP rows, with bound relaxation and NLP scaling disabled. CSL validates primal feasibility, stationarity, multiplier signs, complementarity, and objective agreement in the original coordinates. Both policies complete on models 23, 27, and 28, and MPC completes the previously interrupted model-30 episode. Across the 61 completed routes shared with released HiGHS, the largest absolute total-cost difference is below 2.07 × 10<sup>−9</sup>.</p>
+<figure>
+<a href="twenty-zone-ipopt.svg"><img src="twenty-zone-ipopt.svg" alt="The four stages of the twenty-zone model in state planes x1–x2 and x3–x4. The open-loop and MPC trajectories overlap in both planes."></a>
+<figcaption>The 40-state, twenty-zone thermal model (model 28). The direct Ipopt probe supplies these projections, and the separately installed SDK client reproduces the plotted states and all 70 saved physical policy records.</figcaption>
+</figure>
+<p>The independent source audit checked 25,380 saved matrix entries against the frozen catalogue. A separate rational checker evaluated 136 accepted QP witnesses from the direct probe using their exact stored binary64 values. Over those solves, the largest original-coordinate residuals for primal feasibility, stationarity, and complementarity were 2.22 × 10<sup>−13</sup>, 1.71 × 10<sup>−15</sup>, and 9.08 × 10<sup>−11</sup>, respectively.</p>
+
+<h2>The remaining infeasible task</h2>
+<p>For model 9’s declared continuous relaxation, the first inventory starts at 12 and loses at least 5 per transition. All remaining terms in that inventory update are nonpositive under the saved bounds. Therefore <math><mrow><msub><mi>x</mi><mn>1</mn></msub><mo>(</mo><mn>3</mn><mo>)</mo><mo>≤</mo><mn>12</mn><mo>−</mo><mn>3</mn><mo>×</mo><mn>5</mn><mo>=</mo><mo>−</mo><mn>3</mn></mrow></math> contradicts the terminal lower bound of zero. Both native attempts retain their recorded solver failure. The inventory inequality proves infeasibility directly from the source dynamics and constraints.</p>
+
+<h2>Inspect and reproduce the runs</h2>
+<p>These are numerical coverage results for the saved deterministic tracking tasks. A speed comparison would need separately collected timings. The tested source is recorded in the manifest and available in the <a href="https://github.com/butahlecoq/csl-sdk/tree/389a93a78cd62ec81c6b99a1c2aa58a656d658bf">row-scaled HiGHS revision</a> and <a href="https://github.com/butahlecoq/csl-sdk/tree/f53e770462e323f9e0ff3c844e6fa3882fd82966">optional Ipopt revision</a>. Each evidence ZIP includes source, raw attempts, a checksum inventory, and the commands in <code>RUN.txt</code>. For comparative replays, extract the included baseline study into <code>prior/</code> as directed by the run notes.</p>
+<ul>
+<li><a href="native-source-constrained-mpc-v1.zip">Released HiGHS baseline</a></li>
+<li><a href="catalogue-row-scaled-highs-evidence.zip">Bounded row-scaled HiGHS evidence</a></li>
+<li><a href="catalogue-installed-ipopt-evidence.zip">Installed SDK Ipopt evidence</a> · <a href="installed-ipopt-audit.json">Independent source audit</a></li>
+<li><a href="catalogue-ipopt-source-qp-evidence.zip">Direct Ipopt probe and rational QP checker</a></li>
+<li><a href="manifest.json">Manifest</a> · <a href="https://butahlecoq.github.io/controlled-systems-lab/examples/native-catalogue-convex-backends-v1/native-catalogue-convex-backends-v1.zip">Download from Pages</a> · <a href="https://butahlecoq.github.io/controlled-systems-lab/examples/native-catalogue-convex-backends-v1/native-catalogue-convex-backends-v1.zip.sha256">Pages checksum</a></li>
+</ul>
+</main>
+</body>
+</html>

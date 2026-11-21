@@ -323,6 +323,8 @@ FROZEN_REVIEWED_ROUTES = {
         "reviewed: sampled building projections and positive support deficits from exact certificates",
     "catalogue-feasible-history-v1":
         "reviewed: paired battery projections display full constraints and control intervals at each stage",
+    "native-catalogue-convex-backends-v1":
+        "reviewed: recovered episode figures show all four labelled states and both replay policies",
     "catalogue-finite-action-v1":
         "reviewed: finite action alternatives, executed path, box and zonotope scoring, and paired shear projections across three stages",
     "catalogue-forward-reachability-v1":
@@ -568,6 +570,9 @@ def build(root: Path = ROOT) -> dict:
                     "mpc-crossover-6b7308c4/index.html",
                     "native-source-constrained-mpc-v1/index.html",
                     "native-source-constrained-mpc-v1/platoon.svg",
+                    "native-catalogue-convex-backends-v1/index.html",
+                    "native-catalogue-convex-backends-v1/bicycle-row-scaling.svg",
+                    "native-catalogue-convex-backends-v1/twenty-zone-ipopt.svg",
                     "native-history-strategies-d57739b3/index.html",
                     "native-history-strategies-d57739b3/figures/lotka-polytope.svg",
                     "mpc-crossover-6b7308c4/feedback-geometry.svg",
