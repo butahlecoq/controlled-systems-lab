@@ -2,11 +2,11 @@
 """Validate and summarize an MPC-01 per-attempt resource capture."""
 
 import argparse
-from collections import Counter, defaultdict
 import hashlib
 import json
-from pathlib import Path
 import statistics
+from collections import Counter, defaultdict
+from pathlib import Path
 
 
 def read_jsonl(path: Path) -> list[dict]:

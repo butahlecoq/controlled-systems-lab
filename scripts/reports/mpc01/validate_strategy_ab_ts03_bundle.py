@@ -5,12 +5,11 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-from pathlib import Path, PurePosixPath
 import shutil
 import subprocess
 import sys
 import tempfile
-
+from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[3]
 BUNDLE = ROOT / "docs/research/evidence/mpc01-strategy-ab-ts03-20261103-r1"
