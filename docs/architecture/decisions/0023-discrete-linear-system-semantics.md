@@ -20,8 +20,8 @@ separately from the system dynamics.
   coefficient record per transition. Validate each stage's matrix and offset
   dimensions against the system's declared dimensions.
 - Preserve declared control and external-input ports even when their maps are
-  zero. A zero map changes the transition result, not the dimension of the
-  physical input port.
+  zero. A zero map makes the next state independent of that input; it does not
+  erase the declared physical input-port dimension.
 - Require `step` inputs to have the declared finite vector dimensions. The
   system model validates dimensions and finiteness; membership in a control or
   external-input set belongs to the separate domain object.
