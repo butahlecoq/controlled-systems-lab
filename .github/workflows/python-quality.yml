@@ -54,6 +54,8 @@ on:
       - 'scripts/reports/publication_policy.py'
       - 'scripts/reports/*_publication_policy.py'
       - 'scripts/reports/registered_report_policies.py'
+      - 'scripts/reports/mpc01/augment_pages.py'
+      - 'tests/reporting/test_mpc01_pages_augmentation.py'
       - 'docs/research/evidence/b04-c-publication-registration-source-v1/**'
       - 'reports/algorithm-results/b04-c-exact-dyadic-v1/**'
       - 'reports/algorithm-results/b04-c-strategy-a-verification-v1/**'
@@ -504,6 +506,8 @@ on:
       - 'scripts/reports/publication_policy.py'
       - 'scripts/reports/*_publication_policy.py'
       - 'scripts/reports/registered_report_policies.py'
+      - 'scripts/reports/mpc01/augment_pages.py'
+      - 'tests/reporting/test_mpc01_pages_augmentation.py'
       - 'docs/research/evidence/b04-c-publication-registration-source-v1/**'
       - 'reports/algorithm-results/b04-c-exact-dyadic-v1/**'
       - 'reports/algorithm-results/b04-c-strategy-a-verification-v1/**'
@@ -922,6 +926,8 @@ jobs:
         run: ruff check
       - name: Check formatting
         run: ruff format --check
+      - name: Check the upstream Pages archive extractor
+        run: python -m unittest tests.reporting.test_mpc01_pages_augmentation
       - name: Check types
         run: ty check
       - name: Reject new prose comments in maintained tooling and CI tests
