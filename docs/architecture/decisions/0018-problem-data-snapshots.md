@@ -44,3 +44,8 @@ set, preserve time-stage ordering, and evaluate temporal rows against the
 correct state/control coordinates. Numerical or serialization layers must not
 infer correlation, convexification, or known state from object identity,
 vertices, or observation data alone.
+
+Round-trip tests for singleton, universal, and empty sets must cross the public
+factory and handle boundary, then inspect both metadata and the concrete
+representation. An authored variant tag alone does not establish that the
+public set object retained the intended dimension or set semantics.
