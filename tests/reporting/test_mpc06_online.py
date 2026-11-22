@@ -47,6 +47,66 @@ class OnlineTubeTests(unittest.TestCase):
         self.assertEqual(receipt["verification"]["status"], "verified")
         self.assertNotEqual(receipt["checked_sources"], ONLINE_EVIDENCE.tool_bindings())
 
+    def test_live_renderer_authenticates_receipt_snapshot_before_writing(self):
+        bundle = P.parents[3] / "reports/algorithm-results/mpc06-online-anchor-v1"
+        with tempfile.TemporaryDirectory() as folder:
+            receipt = Path(folder) / "verification-v2.json"
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(P.with_name("check.py")),
+                    str(bundle),
+                    "--receipt-output",
+                    str(receipt),
+                ],
+                check=True,
+                capture_output=True,
+            )
+            original_read = Path.read_bytes
+            stale = json.loads(original_read(receipt))
+            stale["verification"]["completed_native_qps"] = float(
+                stale["verification"]["completed_native_qps"]
+            )
+            stale_snapshot = iter([json.dumps(stale).encode()])
+
+            def read_with_replacement(path):
+                if path == receipt:
+                    replacement = next(stale_snapshot, None)
+                    if replacement is not None:
+                        return replacement
+                return original_read(path)
+
+            output = Path(folder) / "rendered"
+            with (
+                mock.patch.object(Path, "read_bytes", read_with_replacement),
+                self.assertRaisesRegex(ValueError, "verification receipt changed"),
+            ):
+                ONLINE_RENDER.render(bundle, receipt, output)
+            self.assertFalse(output.exists())
+
+    def test_live_renderer_refuses_archived_receipt_before_creating_output(self):
+        report = P.parents[3] / "reports/algorithm-results/mpc06-online-anchor-portable-v3"
+        bundle = report / "checked-inputs/mpc06-online-anchor-v1"
+        receipt = report / "verification-v2.json"
+        with tempfile.TemporaryDirectory() as folder:
+            output = Path(folder) / "rendered"
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(P.with_name("render.py")),
+                    str(bundle),
+                    "--receipt",
+                    str(receipt),
+                    "--output",
+                    str(output),
+                ],
+                capture_output=True,
+                text=True,
+            )
+            self.assertNotEqual(result.returncode, 0, "mixed tools should fail before writing")
+            self.assertIn("use the receipt's matching review-tools/render.py", result.stderr)
+            self.assertFalse(output.exists())
+
     def test_saved_anchor_rejects_coordinated_checker_receipt_and_manifest_rewrite(self):
         root = P.parents[3] / "reports/algorithm-results/mpc06-online-anchor-portable-v3"
         with tempfile.TemporaryDirectory() as folder:
@@ -91,8 +151,40 @@ class OnlineTubeTests(unittest.TestCase):
             saved = json.loads(receipt.read_text())
             self.assertEqual(saved["checked_sources"], ONLINE_EVIDENCE.tool_bindings())
             output = Path(folder) / "rendered"
-            ONLINE_RENDER.render(bundle, receipt, output)
+            renderer_source = P.with_name("render.py")
+            original_read = Path.read_bytes
+            expected = original_read(renderer_source)
+            copied_tool = output / "review-tools/render.py"
+            expected_receipt = original_read(receipt)
+            load_sources = ONLINE_RENDER.load_sources
+            copied_inputs_checked = False
+
+            def load_during_render(source):
+                nonlocal copied_inputs_checked
+                result = load_sources(source)
+                if source != bundle:
+                    copied_inputs_checked = True
+                return result
+
+            def read_during_render(path):
+                if path == receipt and copied_inputs_checked:
+                    return b'{"edited": true}\n'
+                if path == renderer_source and copied_tool.exists():
+                    return expected + b"\n# edited during rendering\n"
+                return original_read(path)
+
+            with (
+                mock.patch.object(ONLINE_RENDER, "load_sources", load_during_render),
+                mock.patch.object(Path, "read_bytes", read_during_render),
+            ):
+                ONLINE_RENDER.render(bundle, receipt, output)
+            self.assertTrue(copied_inputs_checked)
             self.assertTrue((output / "index.html").is_file())
+            self.assertEqual((output / "verification-v2.json").read_bytes(), expected_receipt)
+            self.assertEqual(copied_tool.read_bytes(), expected)
+            self.assertEqual((output / "render-source/render.py").read_bytes(), expected)
+            summary = json.loads((output / "summary.json").read_text())
+            self.assertEqual(summary["renderer_sha256"], hashlib.sha256(expected).hexdigest())
 
     def test_terminal_elimination_and_unique_nominal_optimum(self):
         for p, q in [(Q(1, 8), Q(0)), (Q(-1, 4), Q(1, 8)), (Q(0), Q(0))]:

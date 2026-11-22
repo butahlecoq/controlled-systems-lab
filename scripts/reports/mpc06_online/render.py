@@ -13,13 +13,17 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING or __package__:
-    from .evidence import checked_sources
+    from .evidence import TOOLS, checked_sources, digest, json_value, load_sources, receipt_id
 else:
-    from evidence import checked_sources
+    from evidence import TOOLS, checked_sources, digest, json_value, load_sources, receipt_id
 
 
 def render(bundle, receipt_path, output):
+    receipt_bytes = receipt_path.read_bytes()
     record, receipt = checked_sources(bundle, receipt_path)
+    snapshot = json_value(receipt_bytes)
+    if snapshot != receipt or receipt_id(snapshot) != receipt["receipt_sha256"]:
+        raise ValueError("verification receipt changed during validation")
     has_source_guide = (Path(bundle) / "source/README.md").is_file()
     verified = receipt["verification"]
     if output.resolve().is_relative_to(bundle.resolve()) or bundle.resolve().is_relative_to(
@@ -28,15 +32,23 @@ def render(bundle, receipt_path, output):
         raise ValueError("render output must be separate from immutable source bundle")
     if output.exists():
         raise ValueError("render output must be new")
+    tool_sources = {name: Path(__file__).with_name(name).read_bytes() for name in TOOLS}
+    if {name: digest(data) for name, data in tool_sources.items()} != receipt["checked_sources"]:
+        raise ValueError(
+            "renderer tools do not match the verification receipt; "
+            "use the receipt's matching review-tools/render.py or create a fresh receipt"
+        )
     source_prefix = "checked-inputs/" + bundle.name
     output.mkdir(parents=True)
     shutil.copytree(bundle, output / source_prefix)
-    checked_sources(output / source_prefix, receipt_path)
-    (output / "verification-v2.json").write_bytes(receipt_path.read_bytes())
+    _, copied_inputs = load_sources(output / source_prefix)
+    if copied_inputs != receipt["inputs"]:
+        raise ValueError("copied inputs do not match the verification receipt")
+    (output / "verification-v2.json").write_bytes(receipt_bytes)
     tools = output / "review-tools"
     tools.mkdir()
-    for name in ("check.py", "evidence.py", "model.py", "study.py", "render.py"):
-        (tools / name).write_bytes(Path(__file__).with_name(name).read_bytes())
+    for name, data in tool_sources.items():
+        (tools / name).write_bytes(data)
     bundle = output
     grid = record["grid"]["rows"]
     counts = Counter(row["method"] for row in grid if row["qp"]["feasible"])
@@ -96,7 +108,7 @@ def render(bundle, receipt_path, output):
         schema="csl.mpc06-online-summary/1",
         rows=rows,
         verification=verified,
-        renderer_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        renderer_sha256=digest(tool_sources["render.py"]),
         offline_grid_construction_and_check_ns=record["grid"]["elapsed_ns"],
         offline_native_approximation_ns=[
             p["approximation"]["construction_ns"]
@@ -111,7 +123,7 @@ def render(bundle, receipt_path, output):
         verdict="descriptive restricted-policy study; no universal winner or real-time claim",
     )
     (bundle / "render-source").mkdir(exist_ok=True)
-    (bundle / "render-source/render.py").write_bytes(Path(__file__).read_bytes())
+    (bundle / "render-source/render.py").write_bytes(tool_sources["render.py"])
     (bundle / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     # A genuine two-state phase plot from saved actual disturbance histories.
     colors = {
