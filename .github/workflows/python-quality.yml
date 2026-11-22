@@ -239,6 +239,23 @@ on:
       - 'scripts/reports/stage_env717_pendulum_terminal.py'
       - 'scripts/reports/stage_env717_earth_orbit.py'
       - 'tests/reporting/test_env717_dubins_car_publication.py'
+      - 'scripts/reports/stage_env717_air_to_air.py'
+      - 'scripts/reports/stage_env717_homicidal_chauffeur.py'
+      - 'tests/reporting/test_env717_air_to_air_publication.py'
+      - 'tests/reporting/test_env717_homicidal_chauffeur_publication.py'
+      - 'scripts/reports/stage_env717_broken_triangle.py'
+      - 'scripts/reports/stage_env717_cartpole.py'
+      - 'scripts/reports/stage_env717_multipoint_cost_game.py'
+      - 'scripts/reports/env717/check_broken_triangle.py'
+      - 'scripts/reports/env717/check_cartpole.py'
+      - 'scripts/reports/env717/check_multipoint_cost_game.py'
+      - 'scripts/reports/env717/check_air_to_air.py'
+      - 'scripts/reports/env717/check_homicidal_chauffeur.py'
+      - 'scripts/reports/env717/capture_homicidal_chauffeur.py'
+      - 'benchmarks/reporting/env717/homicidal_chauffeur.cpp'
+      - 'benchmarks/scenarios/env717-homicidal-chauffeur-pilot-v1.json'
+      - 'reports/algorithm-results/env717-air-to-air-pilot-v1/**'
+      - 'reports/algorithm-results/env717-homicidal-chauffeur-v1/**'
       - 'tests/reporting/test_env717_vanderpol_publication.py'
       - 'tests/reporting/test_env717_earth_orbit_publication.py'
       - 'tests/reporting/test_stage_env717_pendulum_terminal.py'
@@ -819,6 +836,23 @@ on:
       - 'scripts/reports/stage_env717_pendulum_terminal.py'
       - 'scripts/reports/stage_env717_earth_orbit.py'
       - 'tests/reporting/test_env717_dubins_car_publication.py'
+      - 'scripts/reports/stage_env717_air_to_air.py'
+      - 'scripts/reports/stage_env717_homicidal_chauffeur.py'
+      - 'tests/reporting/test_env717_air_to_air_publication.py'
+      - 'tests/reporting/test_env717_homicidal_chauffeur_publication.py'
+      - 'scripts/reports/stage_env717_broken_triangle.py'
+      - 'scripts/reports/stage_env717_cartpole.py'
+      - 'scripts/reports/stage_env717_multipoint_cost_game.py'
+      - 'scripts/reports/env717/check_broken_triangle.py'
+      - 'scripts/reports/env717/check_cartpole.py'
+      - 'scripts/reports/env717/check_multipoint_cost_game.py'
+      - 'scripts/reports/env717/check_air_to_air.py'
+      - 'scripts/reports/env717/check_homicidal_chauffeur.py'
+      - 'scripts/reports/env717/capture_homicidal_chauffeur.py'
+      - 'benchmarks/reporting/env717/homicidal_chauffeur.cpp'
+      - 'benchmarks/scenarios/env717-homicidal-chauffeur-pilot-v1.json'
+      - 'reports/algorithm-results/env717-air-to-air-pilot-v1/**'
+      - 'reports/algorithm-results/env717-homicidal-chauffeur-v1/**'
       - 'tests/reporting/test_env717_vanderpol_publication.py'
       - 'tests/reporting/test_env717_earth_orbit_publication.py'
       - 'tests/reporting/test_stage_env717_pendulum_terminal.py'
@@ -1691,6 +1725,11 @@ jobs:
           tests.reporting.test_env717_vanderpol_publication
           tests.reporting.test_env717_earth_orbit_publication
           tests.reporting.test_stage_env717_pendulum_terminal
+      - name: Check the remaining archived environment report routes
+        run: >-
+          python -m unittest
+          tests.reporting.test_env717_air_to_air_publication
+          tests.reporting.test_env717_homicidal_chauffeur_publication
       - name: Check architecture boundaries and decoded perf sample parsing
         run: |
           python tests/architecture/check_numeric_dependencies.py
