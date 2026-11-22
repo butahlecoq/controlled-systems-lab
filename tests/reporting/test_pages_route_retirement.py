@@ -452,7 +452,8 @@ class PagesRouteRetirementTests(unittest.TestCase):
             (repo / "reports/algorithm-results/catalog.json").read_text(encoding="utf-8")
         )
         row = next(
-            item for item in catalogue["reports"]
+            item
+            for item in catalogue["reports"]
             if isinstance(item, dict) and isinstance(item.get("report_id"), str)
         )
         with tempfile.TemporaryDirectory() as temporary:
