@@ -60,8 +60,6 @@ TEST_CASE("continuous affine forcing and singular generator stay explicit") {
 }
 
 TEST_CASE("scalar growth with held control matches its independent exact ZOH solution") {
-    // For xdot = 2x + u and constant u over h, x(h) = exp(2h)x(0)
-    // + ((exp(2h)-1)/2)u. The command is held over the full interval.
     constexpr double h=0.3;
     ContinuousAffineModel input{{1,1,0},{0,h},HoldConvention::zero_order_hold,
         LinearStage{{1,1,{2}},{1,1,{1}},{1,0,{}},{0}}};
