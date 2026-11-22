@@ -12,7 +12,7 @@ class Review05ResourceReceiptTests(unittest.TestCase):
     def test_default_environment_is_inherited_and_explicit_override_is_used(self):
         directory = Path(__file__).resolve().parents[2] / "benchmarks/reporting/review05"
         with patch.object(sys, "path", [str(directory), *sys.path]):
-            from run_horizon_ladder import run_with_resource_receipt
+            from benchmarks.reporting.review05.run_horizon_ladder import run_with_resource_receipt
 
         command = [
             sys.executable,

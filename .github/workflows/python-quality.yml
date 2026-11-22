@@ -98,6 +98,16 @@ on:
       - 'scripts/reports/geo05/**'
       - 'reports/algorithm-results/geo05-*/records.json'
       - 'tests/reporting/test_preserve_published_routes.py'
+      - 'scripts/reports/stage_review05_family_query.py'
+      - 'tests/reporting/test_review05_family_query.py'
+      - 'tests/reporting/test_review05_publication.py'
+      - 'tests/reporting/test_review05_resource_receipt.py'
+      - 'tests/reporting/test_scalar_query_oracle.py'
+      - 'benchmarks/reporting/review05/**'
+      - 'reports/algorithm-results/review05-family-query-20261110-3b98f5b0/**'
+      - 'reports/algorithm-results/review05-build-phases-20261110-468cc0eb/**'
+      - 'reports/algorithm-results/review05-highs-clocks-8abaf50b-20261109/**'
+      - 'reports/algorithm-results/review05-guide-route-retirement-20261112.json'
       - 'tests/reporting/test_published_route_audit_policy.py'
       - 'tests/fixtures/published-route-baseline/**'
       - 'scripts/reports/landing.py'
@@ -603,6 +613,16 @@ on:
       - 'scripts/reports/geo05/**'
       - 'reports/algorithm-results/geo05-*/records.json'
       - 'tests/reporting/test_preserve_published_routes.py'
+      - 'scripts/reports/stage_review05_family_query.py'
+      - 'tests/reporting/test_review05_family_query.py'
+      - 'tests/reporting/test_review05_publication.py'
+      - 'tests/reporting/test_review05_resource_receipt.py'
+      - 'tests/reporting/test_scalar_query_oracle.py'
+      - 'benchmarks/reporting/review05/**'
+      - 'reports/algorithm-results/review05-family-query-20261110-3b98f5b0/**'
+      - 'reports/algorithm-results/review05-build-phases-20261110-468cc0eb/**'
+      - 'reports/algorithm-results/review05-highs-clocks-8abaf50b-20261109/**'
+      - 'reports/algorithm-results/review05-guide-route-retirement-20261112.json'
       - 'tests/reporting/test_published_route_audit_policy.py'
       - 'tests/fixtures/published-route-baseline/**'
       - 'scripts/reports/landing.py'
@@ -1142,6 +1162,7 @@ jobs:
             cmp "$output/index.html" "$output-compat/index.html"
           done
           python -m unittest discover -s tests/reporting -p 'test_syn03_strategy_a_report.py'
+          python -m unittest tests.reporting.test_review05_family_query tests.reporting.test_review05_publication tests.reporting.test_review05_resource_receipt tests.reporting.test_scalar_query_oracle
           python -m unittest discover -s tests/reporting -p 'test_syn03_ts02_report.py'
       - name: Check six saved environment routes and offline ZIPs
         run: >-

@@ -2094,6 +2094,25 @@
       "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
     },
     {
+      "route": "review05-family-query-757edceb23bc6e767d93/index.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_review05_family_query.py"
+    },
+    {
+      "route": "review05-family-query-757edceb23bc6e767d93/review05-build-phases-20261110-468cc0eb/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "c4d7c5391a79e9bb6a9fb9751207d82c836596c35778d9df2281e003faf2bf38",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "review05-family-query-757edceb23bc6e767d93/review05-family-query-20261110-3b98f5b0/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "49902c79e0b9e39cb5f9b383649fe095b9206776293a89bbfdb019fdd80b5e06",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
       "route": "review05-family-query-9bae24f102e3bdf5e56a/index.html",
       "disposition": "frozen",
       "owner": "reports/published-route-preservation/manifest.json",
