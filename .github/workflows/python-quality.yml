@@ -268,6 +268,13 @@ on:
       - 'tests/reporting/test_native_fixed_tail_geometry.py'
       - 'examples/fixed-tail-tiny-a6/**'
       - 'reports/closed-loop-native-fixed-tail/a6-v1/**'
+      - 'scripts/reports/stage_closed_loop_pilot.py'
+      - 'scripts/reports/native_terminal_cost_example.py'
+      - 'tests/reporting/test_native_terminal_cost_publication.py'
+      - 'reports/closed-loop-pilot/**'
+      - 'reports/algorithm-results/native-terminal-cost-33f907a0/**'
+      - 'reports/algorithm-results/native-terminal-cost-33f907a0.zip*'
+      - 'reports/algorithm-results/catalog.json'
       - 'scripts/reports/assets/native-fixed-tail-geometry/**'
       - 'docs/contracts/closed-loop/syn-nl-lv-01.json'
       - 'docs/contracts/closed-loop/syn-nl-lv-01.sha256'
@@ -580,6 +587,13 @@ on:
       - 'tests/reporting/test_native_fixed_tail_geometry.py'
       - 'examples/fixed-tail-tiny-a6/**'
       - 'reports/closed-loop-native-fixed-tail/a6-v1/**'
+      - 'scripts/reports/stage_closed_loop_pilot.py'
+      - 'scripts/reports/native_terminal_cost_example.py'
+      - 'tests/reporting/test_native_terminal_cost_publication.py'
+      - 'reports/closed-loop-pilot/**'
+      - 'reports/algorithm-results/native-terminal-cost-33f907a0/**'
+      - 'reports/algorithm-results/native-terminal-cost-33f907a0.zip*'
+      - 'reports/algorithm-results/catalog.json'
       - 'scripts/reports/assets/native-fixed-tail-geometry/**'
       - 'docs/contracts/closed-loop/syn-nl-lv-01.json'
       - 'docs/contracts/closed-loop/syn-nl-lv-01.sha256'
@@ -759,6 +773,32 @@ jobs:
           python -m unittest tests.reporting.test_convex_report tests.reporting.test_opt07_collector tests.reporting.test_opt12_collector tests.reporting.test_visual_examples tests.reporting.test_geo07_publication tests.reporting.test_geo07_port_publication tests.reporting.test_geo07_dependent_publication tests.reporting.test_finite_feedback_publication tests.reporting.test_ext04_publication tests.reporting.test_report_lifecycle
 
 
+      - name: Replay the saved closed-loop pilot and terminal-cost routes
+        env:
+          MPLBACKEND: Agg
+        run: |
+          python -m unittest tests.reporting.test_native_terminal_cost_publication
+          site=$(mktemp -d "$RUNNER_TEMP/native-diagnostics.XXXXXXXX")
+          mkdir "$site/examples"
+          printf '<section id="analytic-illustrations"></section>\n' > "$site/examples/index.html"
+          pilot=reports/closed-loop-pilot/closed-loop-pilot-v1
+          cost=reports/algorithm-results/native-terminal-cost-33f907a0
+          python - "$pilot.zip" <<'PY'
+          import sys
+          from zipfile import ZipFile
+
+          with ZipFile(sys.argv[1]) as archive:
+              damaged = archive.testzip()
+              if damaged is not None:
+                  raise ValueError(f"Damaged closed-loop archive member: {damaged}")
+          PY
+          python scripts/reports/native_terminal_cost_example.py --site "$site"
+          python scripts/reports/stage_closed_loop_pilot.py --source "$pilot" --site "$site"
+          for bundle in "$pilot" "$cost"; do
+            route=${bundle##*/}
+            diff -r "$bundle" "$site/$route"
+            cmp "$bundle.zip" "$site/$route.zip"
+          done
       - name: Check both saved Strategy A choice-pipeline publications
         env:
           MPLBACKEND: Agg
