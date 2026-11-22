@@ -13,9 +13,11 @@ from the represented set's semantics.
 
 ## Decision
 
-- Treat absent affine-dimension metadata as unknown. Tests must derive the
-  affine rank from returned points when they need that value; they must not
-  infer it from the ambient dimension or from a missing claim.
+- Treat absent affine-dimension metadata as unknown. In the bounded, ray-free
+  V-representation fixture, derive affine rank from returned points rather
+  than inferring it from ambient dimension or missing metadata. Other
+  representations require evidence that accounts for their geometry, such as
+  ray directions or H constraints.
 - An affine-sum V representation may retain non-extreme candidates. The
   mathematical result is the represented set; a provider is not required to
   materialize only extreme points. Exact support checks remain the semantic
