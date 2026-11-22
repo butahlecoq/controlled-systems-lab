@@ -136,6 +136,11 @@ on:
       - 'reports/algorithm-results/exp02-it17-*.zip*'
       - 'reports/algorithm-results/quickhull-it17-paper-adaptations-*/**'
       - 'scripts/reports/b04_c_exact_registered_reports.py'
+      - 'scripts/reports/issue3/render_saved.py'
+      - 'scripts/reports/issue3_registered_reports.py'
+      - 'tests/reporting/test_issue3_saved_report.py'
+      - 'reports/algorithm-results/issue3-finite-catalogue-b4632ce76510aa4f/**'
+      - 'reports/algorithm-results/catalog.json'
       - 'tests/reporting/test_b04_publication_source_snapshot.py'
       - 'tests/reporting/test_publication_spine_boundaries.py'
       - 'scripts/reports/stage_ext04.py'
@@ -600,6 +605,11 @@ on:
       - 'reports/algorithm-results/exp02-it17-*.zip*'
       - 'reports/algorithm-results/quickhull-it17-paper-adaptations-*/**'
       - 'scripts/reports/b04_c_exact_registered_reports.py'
+      - 'scripts/reports/issue3/render_saved.py'
+      - 'scripts/reports/issue3_registered_reports.py'
+      - 'tests/reporting/test_issue3_saved_report.py'
+      - 'reports/algorithm-results/issue3-finite-catalogue-b4632ce76510aa4f/**'
+      - 'reports/algorithm-results/catalog.json'
       - 'tests/reporting/test_b04_publication_source_snapshot.py'
       - 'tests/reporting/test_publication_spine_boundaries.py'
       - 'scripts/reports/stage_ext04.py'
@@ -948,6 +958,29 @@ jobs:
         run: python -m pip install --disable-pip-version-check -r requirements-quality.txt -r scripts/reports/requirements.txt -r benchmarks/reporting/closed_loop/requirements.txt
       - name: Lint selected maintained Python tooling
         run: ruff check
+      - name: Regenerate and verify the saved issue 3 finite catalogue
+        run: |
+          python -m unittest tests.reporting.test_issue3_saved_report
+          name=issue3-finite-catalogue-b4632ce76510aa4f
+          bundle="reports/algorithm-results/$name"
+          target="$RUNNER_TEMP/$name"
+          mkdir "$target"
+          cp -r "$bundle/evidence" "$target/evidence"
+          python scripts/reports/issue3/render_saved.py --bundle "$target"
+          python scripts/reports/issue3/render_saved.py --bundle "$target" --check
+          diff -r "$bundle" "$target"
+          PYTHONPATH=scripts/reports python - "$target" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          import issue3_registered_reports as publication
+
+          catalogue = json.loads(Path("reports/algorithm-results/catalog.json").read_bytes())
+          expected = next(item for item in catalogue["reports"] if item.get("report_kind") == publication.KIND)
+          if publication.catalogue_entry(Path(sys.argv[1])) != expected:
+              raise ValueError("saved issue 3 public catalogue entry or archive hash differs")
+          PY
       - name: Check formatting
         run: ruff format --check
       - name: Check the upstream Pages archive extractor
