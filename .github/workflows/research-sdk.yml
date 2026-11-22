@@ -1,15 +1,6 @@
 name: Pinned SDK and research consumer
 on:
   pull_request:
-    paths:
-      - benchmarks/sdk-revision
-      - benchmarks/CMakeLists.txt
-      - benchmarks/reporting/exp824/**
-      - scripts/reports/exp824/check_nominal.py
-      - include/csl/**
-      - src/**
-      - tools/closed_loop_native_policy.cpp
-      - .github/workflows/research-sdk.yml
   push:
     branches: [main]
     paths:
@@ -27,7 +18,12 @@ permissions:
   contents: read
 
 jobs:
+  route:
+    uses: ./.github/workflows/validation-routing.yml
+
   research:
+    needs: route
+    if: needs.route.outputs.research_sdk == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
@@ -65,3 +61,22 @@ jobs:
           cmake -S benchmarks -B build/research -G Ninja -DCMAKE_BUILD_TYPE=Release "-DCMAKE_PREFIX_PATH=$RUNNER_TEMP/csl-sdk"
           cmake --build build/research --parallel 2
           ctest --test-dir build/research --output-on-failure --no-tests=error
+
+  research-status:
+    name: Research SDK validation
+    if: always()
+    needs: [route, research]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require SDK parity and consumer validation when its path scope changed
+        env:
+          ROUTE_RESULT: ${{ needs.route.result }}
+          REQUIRED: ${{ needs.route.outputs.research_sdk }}
+          RESEARCH_RESULT: ${{ needs.research.result }}
+        run: |
+          test "$ROUTE_RESULT" = success
+          if [ "$REQUIRED" = true ]; then
+            test "$RESEARCH_RESULT" = success
+          else
+            test "$RESEARCH_RESULT" = skipped
+          fi
