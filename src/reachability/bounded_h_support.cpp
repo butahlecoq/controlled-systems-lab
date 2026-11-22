@@ -148,6 +148,11 @@ bounded_h_support(const BoundedHSupportInput &in, ProgramIdentity id,
         registry::RegisteredLPQueryRunner runner(provider);
         auto answer = runner.solve(program, context);
         auto records = runner.records();
+        const auto carrier_only_bound = [&] {
+            auto fallback = std::get<SupportUpperBound>(validation);
+            fallback.method = SupportBoundMethod::carrier_only;
+            return fallback;
+        };
         if (auto *unsupported = std::get_if<Unsupported>(&answer)) {
             const bool coefficient_threshold =
                 std::any_of(unsupported->diagnostics.begin(), unsupported->diagnostics.end(),
@@ -159,17 +164,13 @@ bounded_h_support(const BoundedHSupportInput &in, ProgramIdentity id,
                 return BoundedHSupportFailure{*unsupported, std::move(records)};
             // The untouched H object is bounded with the exact zero multipliers.
             // The rejected LP remains in lp_calls; no source coefficient is dropped.
-            auto fallback = std::get<SupportUpperBound>(validation);
-            fallback.method = SupportBoundMethod::carrier_only;
-            return BoundedHSupportResult{fallback, std::move(records)};
+            return BoundedHSupportResult{carrier_only_bound(), std::move(records)};
         }
         const auto &result = std::get<ProgramResult>(answer);
         if (result.termination == Termination::numerical_failure ||
             (result.termination == Termination::completed &&
              result.outcome.value != MathematicalOutcome::optimal)) {
-            auto fallback = std::get<SupportUpperBound>(validation);
-            fallback.method = SupportBoundMethod::carrier_only;
-            return BoundedHSupportResult{fallback, std::move(records)};
+            return BoundedHSupportResult{carrier_only_bound(), std::move(records)};
         }
         if (result.termination != Termination::completed ||
             result.outcome.subject != program.identity() || !result.primal ||
