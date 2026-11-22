@@ -184,7 +184,6 @@ TEST_CASE("later outer dependency rejection snapshots neither fixed data nor gen
     const auto rejected=strategies.prepare(strategy_request());
     REQUIRE(std::holds_alternative<Rejection>(rejected));CHECK(std::get<Rejection>(rejected).provenance.requested.id.value=="absent");
     CHECK(*copies==0);CHECK(*snapshots==0);
-    // The accepted case above also exercises the actual mixed composition overload.
 }
 TEST_CASE("frozen output requirements and basis cannot be lowered by generated requests") {
     Registry<LPPort> lp;auto entry=endpoint_registration();int basis_calls=0;
