@@ -24,6 +24,8 @@ int main() try {
     const Dynamics constant{{2,1,0}, TimeDomain::discrete, stage};
     const Dynamics stagewise{{2,1,0}, TimeDomain::discrete,
         std::vector<LinearStage>{stage,stage}};
+    require(check_model_shape(constant, 2).empty(), "Constant model shape must be valid");
+    require(check_model_shape(stagewise, 2).empty(), "Stagewise model shape must be valid");
     auto malformed = constant;
     malformed.dimensions.control = 2;
     require_shape_rejection(malformed, 2);
