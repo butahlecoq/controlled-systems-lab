@@ -1,0 +1,20 @@
+{
+  "external_input_commit": "aa43ccdbc318d7703dbc78fd0ea9fe17c17bf5a3",
+  "feasible_history_input_commit": "242b11e90fb451312cc70cba228355288ec948f1",
+  "files_sha256": {
+    "catalogue-constrained-minimax-evidence.zip": "2e41a19ea6e34bb0273eb8ef5cc3df513d237a4aa6920ed22162bddab472ccda",
+    "catalogue-disturbance-evidence.zip": "9f8bfc3f4617a015ee3a1764f7dd4bc1c2411b512e2c2a63a7c72f68ae23d07e",
+    "ev-causal-minimax.svg": "6a4b1eb89e4cd46d748d6f61913c7ec3aec0dd3b000b798fb7c8b17f6b0eef11",
+    "examples.css": "11ded2b69cec694ff61ecad0493f175becbfc47bce3d641f2ee512543bb82cf4",
+    "index.html": "1a195f706cf3ec6d03dba67acd0c6246c620a5ae043bde2a6b3fe1c6e99c842b",
+    "minimax-audit.json": "fe1e3a5eac732b597e16649e92fe2753be1fc1c1f5b08edca1fd36e5166c1e02",
+    "puffer-robust-predecessor.svg": "b7f12b67749535f32eeae6924a0a99dfcc583b3145c257219c6031f7369d81b8",
+    "queue-safety-obstruction.svg": "ccde3d62ad05bd5409941790741e486a24a9b031d6f1ea2a28d7f99a769c2653"
+  },
+  "finite_action_input_commit": "48583948d283594079903c83ee403e76d125489d",
+  "schema": "csl.catalogue-disturbance-control-capture/1",
+  "scope": "35 discrete models, two transitions, authored disturbances and finite controls, with universal-state and saved-domain profiles",
+  "source_commit": "806738c9d1c8f1d9ebd8885b7bb605b5a698b1af",
+  "source_repository": "https://github.com/butahlecoq/csl-sdk",
+  "source_tree": "12eec6a91e401d5dc06237de6ef4d8890d019806"
+}

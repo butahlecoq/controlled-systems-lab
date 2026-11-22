@@ -118,6 +118,12 @@ FAMILIES = {
         "aggregate branch limits, and stop-status propagation. Its saved measurements describe this "
         "single case and do not establish a general performance comparison.",
     ),
+    "catalogue-disturbance-control-v1": Family(
+        r"examples/catalogue-disturbance-control-v1",
+        "geometry",
+        "Disturbance guarantees and feedback",
+        "Compares robust terminal predecessors and finite minimax policies with and without the saved constraints.",
+    ),
     "catalogue-external-fixed-plan-v1": Family(
         r"examples/catalogue-external-fixed-plan-v1",
         "geometry",
@@ -1327,6 +1333,26 @@ def build(site: Path) -> None:
                 links=(
                     ("Independent audit", external + "/audit.json"),
                     ("Offline evidence", external + "/catalogue-external-fixed-plan-v1.zip"),
+                ),
+            )
+        )
+    disturbance = "examples/catalogue-disturbance-control-v1"
+    if (site / disturbance / "index.html").is_file():
+        manifest = json.loads((site / disturbance / "manifest.json").read_text(encoding="utf-8"))
+        detailed = [entry for entry in detailed if entry.report_id != disturbance]
+        detailed.append(
+            Entry(
+                report_id=disturbance,
+                scope="Exact predecessor checks and numerical finite minimax replay on 35 models.",
+                limits="Two transitions with authored disturbances. The constrained replay retains its domain labels.",
+                commit=manifest["source_commit"],
+                links=(
+                    ("Independent minimax audit", disturbance + "/minimax-audit.json"),
+                    (
+                        "Constrained replay",
+                        disturbance + "/catalogue-constrained-minimax-evidence.zip",
+                    ),
+                    ("Offline evidence", disturbance + "/catalogue-disturbance-control-v1.zip"),
                 ),
             )
         )

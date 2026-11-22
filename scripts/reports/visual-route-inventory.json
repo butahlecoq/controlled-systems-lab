@@ -1479,6 +1479,14 @@
       "role_and_disposition_reason": "Authenticates the frozen v2 manifest and native 35a708df producer identity, then copies all current and superseded two-state affine lesson assets byte exactly into the Pages gallery; no numerical execution or historical relabelling."
     },
     {
+      "source": "scripts/reports/stage_catalogue_disturbance_control.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "ev-causal-minimax.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_catalogue_external_fixed_plan.py",
       "signal_count": 1,
       "asset_name_literals": [
@@ -2852,6 +2860,18 @@
       "index_sha256": "299825bb789b9cc1bf27a775b9fb51da3593e345bfe0c0b70f3299f189cfc26e",
       "disposition": "reviewed: four battery panels compare exact predecessor rectangles under the same controls",
       "companion_route": "examples/catalogue-constrained-predecessors-v1/index.html"
+    },
+    {
+      "route": "catalogue-disturbance-control-v1",
+      "source_bundle": "catalogue-disturbance-control-v1",
+      "assets": [
+        "ev-causal-minimax.svg",
+        "puffer-robust-predecessor.svg",
+        "queue-safety-obstruction.svg"
+      ],
+      "index_sha256": "1a195f706cf3ec6d03dba67acd0c6246c620a5ae043bde2a6b3fe1c6e99c842b",
+      "disposition": "reviewed: overlays robust predecessor geometry, finite policy paths and the constrained queue safety obstruction",
+      "companion_route": "examples/catalogue-disturbance-control-v1/index.html"
     },
     {
       "route": "catalogue-exact-support-v1",
@@ -4473,6 +4493,10 @@
         "positive_part_budget_2d_native-solution.csv",
         "positive_part_budget_2d_run.txt",
         "positive_part_budget_2d_native-example.stdout",
+        "catalogue-disturbance-control-v1/index.html",
+        "catalogue-disturbance-control-v1/ev-causal-minimax.svg",
+        "catalogue-disturbance-control-v1/puffer-robust-predecessor.svg",
+        "catalogue-disturbance-control-v1/queue-safety-obstruction.svg",
         "catalogue-external-fixed-plan-v1/index.html",
         "catalogue-external-fixed-plan-v1/queue-outer-projections.svg",
         "catalogue-forward-reachability-v1/index.html",

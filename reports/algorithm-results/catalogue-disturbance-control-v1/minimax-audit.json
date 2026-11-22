@@ -1,0 +1,293 @@
+{
+  "source_input_sha256": "c8b3df57fa3f1f4f6dde4c13f5cd3c8d75ab673d68e9cad49e8eb2e6a4f41212",
+  "largest_absolute_error": 2.5767088717154608e-14,
+  "models": 35,
+  "checked_fixed_plans": 315,
+  "checked_second_decision_states": 485,
+  "strict_advantage": [
+    "catalogue-2026/model-6/1",
+    "catalogue-2026/model-30/1"
+  ],
+  "rows": [
+    {
+      "model_id": "catalogue-2026/model-1/1",
+      "fixed": 2.948051020408163,
+      "causal": 2.9480510204081627,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 65
+    },
+    {
+      "model_id": "catalogue-2026/model-2/1",
+      "fixed": 0.26660500249999997,
+      "causal": 0.26660500249999997,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 110
+    },
+    {
+      "model_id": "catalogue-2026/model-3/1",
+      "fixed": 4.822273777777777,
+      "causal": 4.822273777777777,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 65
+    },
+    {
+      "model_id": "catalogue-2026/model-4/1",
+      "fixed": 1.1039596100000004,
+      "causal": 1.1039596099999995,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 65
+    },
+    {
+      "model_id": "catalogue-2026/model-5/1",
+      "fixed": 0.0,
+      "causal": 0.0,
+      "exact_advantage": "0",
+      "observed_states": 3,
+      "terminal_states": 5
+    },
+    {
+      "model_id": "catalogue-2026/model-6/1",
+      "fixed": 0.0002777777777778212,
+      "causal": 0.00021879340277797255,
+      "exact_advantage": "28646777609969249296731962258792197270699251666278150268086570990939588029488201/485667223056432267729865476705879726660601709763034880312953102434726071301302124544",
+      "observed_states": 15,
+      "terminal_states": 65
+    },
+    {
+      "model_id": "catalogue-2026/model-7/1",
+      "fixed": 0.3848784049489997,
+      "causal": 0.3848784049489997,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 225
+    },
+    {
+      "model_id": "catalogue-2026/model-8/1",
+      "fixed": 0.5632397986000002,
+      "causal": 0.5632397986000002,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 225
+    },
+    {
+      "model_id": "catalogue-2026/model-9/1",
+      "fixed": 2.7337345679012346,
+      "causal": 2.7337345679012337,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 70
+    },
+    {
+      "model_id": "catalogue-2026/model-10/1",
+      "fixed": 0.29284236111111106,
+      "causal": 0.29284236111111106,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 65
+    },
+    {
+      "model_id": "catalogue-2026/model-11/1",
+      "fixed": 1.3256823933517992,
+      "causal": 1.3256823933517996,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 65
+    },
+    {
+      "model_id": "catalogue-2026/model-12/1",
+      "fixed": 1.1151360000000001,
+      "causal": 1.1151360000000001,
+      "exact_advantage": "0",
+      "observed_states": 9,
+      "terminal_states": 25
+    },
+    {
+      "model_id": "catalogue-2026/model-13/1",
+      "fixed": 0.0004035895250000046,
+      "causal": 0.0004035895250000046,
+      "exact_advantage": "0",
+      "observed_states": 3,
+      "terminal_states": 9
+    },
+    {
+      "model_id": "catalogue-2026/model-14/1",
+      "fixed": 0.19316424600099968,
+      "causal": 0.19316424600099946,
+      "exact_advantage": "0",
+      "observed_states": 9,
+      "terminal_states": 25
+    },
+    {
+      "model_id": "catalogue-2026/model-15/1",
+      "fixed": 0.024444534800110995,
+      "causal": 0.024444534800110995,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 225
+    },
+    {
+      "model_id": "catalogue-2026/model-16/1",
+      "fixed": 0.020541608100000053,
+      "causal": 0.020541608100000053,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 225
+    },
+    {
+      "model_id": "catalogue-2026/model-17/1",
+      "fixed": 0.1738581056000001,
+      "causal": 0.1738581056000001,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 225
+    },
+    {
+      "model_id": "catalogue-2026/model-18/1",
+      "fixed": 0.7527636254014851,
+      "causal": 0.7527636254014856,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 65
+    },
+    {
+      "model_id": "catalogue-2026/model-19/1",
+      "fixed": 0.000414265625000354,
+      "causal": 0.000414265625000354,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 65
+    },
+    {
+      "model_id": "catalogue-2026/model-20/1",
+      "fixed": 0.01844068836565116,
+      "causal": 0.018440688365650715,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 225
+    },
+    {
+      "model_id": "catalogue-2026/model-21/1",
+      "fixed": 0.04949889000000001,
+      "causal": 0.04949889000000001,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 225
+    },
+    {
+      "model_id": "catalogue-2026/model-22/1",
+      "fixed": 0.04000000000000001,
+      "causal": 0.04000000000000001,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 117
+    },
+    {
+      "model_id": "catalogue-2026/model-23/1",
+      "fixed": 0.04000000000000001,
+      "causal": 0.04000000000000001,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 117
+    },
+    {
+      "model_id": "catalogue-2026/model-24/1",
+      "fixed": 0.04000000000000001,
+      "causal": 0.04000000000000001,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 117
+    },
+    {
+      "model_id": "catalogue-2026/model-25/1",
+      "fixed": 0.04000000000000001,
+      "causal": 0.04000000000000001,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 117
+    },
+    {
+      "model_id": "catalogue-2026/model-26/1",
+      "fixed": 9.02423793672883,
+      "causal": 9.024237936728829,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 189
+    },
+    {
+      "model_id": "catalogue-2026/model-27/1",
+      "fixed": 0.040002460516138746,
+      "causal": 0.04000246051613873,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 225
+    },
+    {
+      "model_id": "catalogue-2026/model-28/1",
+      "fixed": 0.14964605286052857,
+      "causal": 0.1496460528605299,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 225
+    },
+    {
+      "model_id": "catalogue-2026/model-29/1",
+      "fixed": 0.10566485208084098,
+      "causal": 0.10566485208084053,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 70
+    },
+    {
+      "model_id": "catalogue-2026/model-30/1",
+      "fixed": 0.03988894635315099,
+      "causal": 0.039861160146254446,
+      "exact_advantage": "26989699885439329551119268282450199486755571522091238290403705549088451262560263/971334446112864535459730953411759453321203419526069760625906204869452142602604249088",
+      "observed_states": 15,
+      "terminal_states": 225
+    },
+    {
+      "model_id": "catalogue-2026/model-31/1",
+      "fixed": 0.43288155111111215,
+      "causal": 0.43288155111111415,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 117
+    },
+    {
+      "model_id": "catalogue-2026/model-32/1",
+      "fixed": 0.32527504000002416,
+      "causal": 0.32527504000002394,
+      "exact_advantage": "0",
+      "observed_states": 11,
+      "terminal_states": 33
+    },
+    {
+      "model_id": "catalogue-2026/model-33/1",
+      "fixed": 16.1704,
+      "causal": 16.1704,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 75
+    },
+    {
+      "model_id": "catalogue-2026/model-34/1",
+      "fixed": 0.1459073188999982,
+      "causal": 0.1459073189000013,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 185
+    },
+    {
+      "model_id": "catalogue-2026/model-35/1",
+      "fixed": 0.7555844800000029,
+      "causal": 0.755584480000002,
+      "exact_advantage": "0",
+      "observed_states": 15,
+      "terminal_states": 225
+    }
+  ]
+}

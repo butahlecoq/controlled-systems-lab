@@ -120,6 +120,9 @@ on:
       - 'scripts/reports/site.py'
       - 'scripts/reports/report_site.py'
       - 'scripts/reports/site_design.py'
+      - 'scripts/reports/stage_catalogue_disturbance_control.py'
+      - 'reports/algorithm-results/catalogue-disturbance-control-v1/**'
+      - 'tests/reporting/test_catalogue_disturbance_publication.py'
       - 'scripts/reports/stage_catalogue_external_fixed_plan.py'
       - 'reports/algorithm-results/catalogue-external-fixed-plan-v1/**'
       - 'scripts/reports/preserve_published_routes.py'
@@ -717,6 +720,9 @@ on:
       - 'scripts/reports/site.py'
       - 'scripts/reports/report_site.py'
       - 'scripts/reports/site_design.py'
+      - 'scripts/reports/stage_catalogue_disturbance_control.py'
+      - 'reports/algorithm-results/catalogue-disturbance-control-v1/**'
+      - 'tests/reporting/test_catalogue_disturbance_publication.py'
       - 'scripts/reports/stage_catalogue_external_fixed_plan.py'
       - 'reports/algorithm-results/catalogue-external-fixed-plan-v1/**'
       - 'scripts/reports/preserve_published_routes.py'
@@ -1698,7 +1704,7 @@ jobs:
       - name: Check the matched discrete MPC example and visual gallery
         run: |
           python -m unittest discover -s tests/reporting -p 'test_discrete_mpc_2d.py'
-          python -m unittest tests.reporting.test_catalogue_forward_publication
+          python -m unittest tests.reporting.test_catalogue_forward_publication tests.reporting.test_catalogue_disturbance_publication
           python -m unittest tests.reporting.test_mpc_crossover_publication tests.reporting.test_native_source_constrained_mpc_publication tests.reporting.test_native_history_strategy_publication
       - name: Exercise OPT07 and OPT11 collectors, oracles and saved reports
         run: |
