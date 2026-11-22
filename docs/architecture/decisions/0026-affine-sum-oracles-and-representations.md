@@ -13,6 +13,10 @@ from the represented set's semantics.
 
 ## Decision
 
+- For seeded integer affine images of rational rectangles, construct the
+  expected image by enumerating the rectangle corners and applying the
+  integer map directly. Do not use production geometry helpers to compute the
+  oracle, so a production error cannot be repeated in the expected result.
 - Treat absent affine-dimension metadata as unknown. In the bounded, ray-free
   V-representation fixture, derive affine rank from returned points rather
   than inferring it from ambient dimension or missing metadata. Other
