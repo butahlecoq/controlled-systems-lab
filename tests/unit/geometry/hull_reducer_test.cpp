@@ -12,7 +12,7 @@
 using namespace csl;
 
 namespace {
-TEST_CASE("exact convex combination verifier uses exact binary64 arithmetic") {
+TEST_CASE("exact convex combination rejects certificates inexact in binary64") {
     using geometry::ConvexCombination;
     using geometry::PointCloud;
     using geometry::detail::exact_convex_combination;
@@ -20,8 +20,6 @@ TEST_CASE("exact convex combination verifier uses exact binary64 arithmetic") {
     const PointCloud midpoint{{"exact-midpoint"}, {{0.0}, {1.0}, {0.5}}};
     CHECK(exact_convex_combination(midpoint, 2, std::array<ConvexCombination, 2>{{{0, 0.5}, {1, 0.5}}}));
 
-    // The exact average rounds to 0.5 in binary64, but this certificate is
-    // wrong by one representable step and must not pass a tolerance check.
     const PointCloud rounded{{"rounded-away-error"}, {{0.0}, {1.0}, {std::nextafter(0.5, 1.0)}}};
     CHECK_FALSE(exact_convex_combination(rounded, 2, std::array<ConvexCombination, 2>{{{0, 0.5}, {1, 0.5}}}));
 
@@ -154,7 +152,7 @@ private:
     std::shared_ptr<std::vector<WorkspaceIdentity>> identities_;
     std::shared_ptr<std::size_t> solves_;
 };
-} // namespace
+}
 
 TEST_CASE("registered hull queries preflight each LP and retain provider identity after registry exit") {
     auto capability_calls = std::make_shared<std::size_t>(0);
@@ -453,9 +451,6 @@ TEST_CASE("LP hull reduction removes a point only with a barycentric certificate
         CHECK(reconstructed[1] == doctest::Approx(cloud.points[certificate.removed][1]).epsilon(1e-10));
     }
 
-    // Independent LP construction/membership queries establish conv(original)
-    // is contained in conv(retained); the reverse inclusion follows because
-    // every retained point is an original point.
     auto oracle = highs_workspace();
     for (std::size_t point = 0; point < cloud.points.size(); ++point)
         CHECK(independent_membership(*oracle, cloud, reduction.retained, point));
@@ -544,12 +539,12 @@ TEST_CASE("basis reuse bulk removes only exactly certified nonbasis points and p
 
     auto generic_provider_result = adapters::lp::make_highs_registration();
     REQUIRE(std::holds_alternative<registry::Registration<registry::LPPort>>(generic_provider_result));
-    auto generic_provider = std::get<registry::Registration<registry::LPPort>>(
+    auto provider_without_basis_diagnostics = std::get<registry::Registration<registry::LPPort>>(
         std::move(generic_provider_result));
-    generic_provider.basis_factory = {}; // simulate a valid solver without optional basis diagnostics
+    provider_without_basis_diagnostics.basis_factory = {};
     registry::Registry<Port> fallback_reducers;
     REQUIRE_FALSE(fallback_reducers.add(geometry::make_basis_reuse_hull_reducer_registration(
-        std::move(generic_provider))));
+        std::move(provider_without_basis_diagnostics))));
     const auto fallback_prepared = registry::prepare_pipeline(registry::select(fallback_reducers,
         registry::Method{{"csl.hull.phase-one-basis-bulk"}, std::nullopt}, cloud));
     REQUIRE(std::holds_alternative<registry::PreparedPipeline<Port>>(fallback_prepared));
@@ -568,8 +563,6 @@ TEST_CASE("basis reuse verifies hull when a structural interior point is in the 
     using Port = registry::HullReducerPort;
     registry::Registry<Port> reducers;
     REQUIRE_FALSE(reducers.add(geometry::make_basis_reuse_hull_reducer_registration()));
-    // The center is deliberately the first structural column. The fixed Bland
-    // phase-I provider deterministically returns it as a basic structural point.
     const geometry::PointCloud cloud{{"basis-interior-point"}, {
         {1,1}, {0,0}, {2,0}, {2,2}, {0,2}
     }};
