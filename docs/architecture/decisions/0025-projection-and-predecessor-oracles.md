@@ -24,9 +24,12 @@ witnesses to check membership and boundary behavior.
   maps with a free coordinate, zero-control systems, and impossible targets.
 - For H projection, retain requested coordinate order and verify surviving
   equalities as well as projected inequalities. Use rational fixtures with
-  known intervals, slices, triangles, and unbounded outputs. Duplicate rows
-  may be redundant, but every output row must still be valid for the expected
-  set. A zero-row inequality `0 <= b` with `b < 0` witnesses an empty set.
+  known intervals, slices, triangles, and unbounded outputs. For the slice of
+  the unit square, each output inequality must be exactly one of the normalized
+  endpoints `-x <= 0` or `x <= 1`; duplicates are allowed. For the triangle,
+  those endpoints are also required, while zero-row tautologies `0 <= b` with
+  `b >= 0` are allowed. A zero-row inequality with `b < 0` witnesses an empty
+  set.
 - Do not infer a finite V representation for an unbounded affine preimage. A
   V result without rays cannot represent a line unbounded in both directions.
 
@@ -47,15 +50,18 @@ For H projection, `z=2x`, `x+y=3`, and `0<=y<=1` imply
 `0<=t<=1`; its x projection is `[0,1]`. The triangle with vertices `(0,0)`,
 `(1,0)`, and `(0,1)` has the same x projection.
 
-For the triangle predecessor fixture, `x+y<=5`, `y>=2`, and `x>=-1` eliminate
-to `-1<=x<=3`; repeated slack rows must not change those endpoints. If only
-`x+y<=1` is constrained and `y` is existentially unrestricted below, every
-real x is feasible by choosing y low enough.
+For the duplicate-row H projection fixture, `x+y<=5`, `y>=2`, and `x>=-1`
+eliminate to `-1<=x<=3`; repeated slack rows must not change those endpoints.
+If only `x+y<=1` is constrained and `y` is existentially unrestricted below,
+every real x is feasible by choosing y low enough.
 
 Finally, for `f(x,y)=y` and target `{0}`, the affine preimage is the entire
-line `{(x,0): x in R}`. Points `(-2,0)`, `(0,0)`, and `(3,0)` are membership
-checks; the line's two-sided unboundedness is why a finite vertex list without
-rays is not an equivalent output.
+line `{(x,0): x in R}`. Points `(-2,0)`, `(0,0)`, and `(3,0)` illustrate
+membership in that line; the test does not evaluate those points or request a
+V result. It requests H output and verifies that admission rejects the
+unsupported operation before creating a workspace. The line's two-sided
+unboundedness explains why a finite vertex list without rays would not be an
+equivalent output.
 
 ## Consequences
 
