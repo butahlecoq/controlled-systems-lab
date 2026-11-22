@@ -96,8 +96,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "e49f7269010862bcb97ebb1c2df4ebe167c4df1114d7a4ce84b04f417fa6afd2",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-exact-polytope-backward-graph/1/cfg-e49f7269010862bc",
+      "graph_fingerprint": "32eaeae36f738efe63c88f40b362709d6b66331ee9425ef95d311f950b741099",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-exact-polytope-backward-graph/1/cfg-32eaeae36f738efe",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -144,7 +144,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -168,15 +168,15 @@
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
-          "sha256": "0f36c0c9a42dbdb2e5d230a646260aa2499e9cf57525af0e94c5adb08189a77f"
+          "sha256": "271028bcac16cc24ed61e6eee0dfccd18d8305c65b49bfb9c71ccaef69282c25"
         },
         {
           "path": "include/csl/geometry/polyhedral_projection.hpp",
-          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+          "sha256": "c100490f75d316428e373339221e673c723ba8ee9ee1dae9be5e5496e676ef21"
         },
         {
           "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "eb04f6b56896f5ed6d7d82dfaa56d5d3a054ccc7f261019a2f4da23b0e74291c"
+          "sha256": "f3feff742226e4c6689c9ab83e5fc4684dc38e70297acda1faab94b57bad62ab"
         },
         {
           "path": "include/csl/reachability/nominal_predecessor.hpp",
@@ -184,31 +184,31 @@
         },
         {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
+          "sha256": "839921fb1f512bbfacea9b59f57298da30ccbb4b747b12f201e11c0abe051ec5"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
-          "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+          "sha256": "7b45428b5e17ad3e92a0709e62ba160823b68fcad9ff534dc7d01e87eb189e44"
         },
         {
           "path": "src/geometry/polyhedral/intersection.cpp",
-          "sha256": "5a583fb352729d2d019dfead7733247fec4b0ca8651519a130b5095c5478821a"
+          "sha256": "b50fd689fbc2fcb788d3f926c2a71f38d3d4c1645901033434227b859f841bf6"
         },
         {
           "path": "src/geometry/polyhedral/projection.cpp",
-          "sha256": "9ddf45ee4b1687dd0d1fb6e4bf26ed3a68c5a28aaad265e33d2595f6b22a282f"
+          "sha256": "9966654eefa3469219626931ed068b3866844d158d2c2c129f1679d9bd92ba86"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "beb790b30558d5d6e669cf32a3a16c82a1b3a102c7737f2c5229d1633e02486c"
+          "sha256": "ed14641d9496e693f4c62ab3e76f48ae12ec45d8dc3ef1a554475b342913f2ab"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
-          "sha256": "fbddf69763541a9dcef2c89f1b362c28e0804680b9fb42e58e944818a93c36e5"
+          "sha256": "5c453fb37e0b62b67ef91c199aa814d8b19edb863f6ec1a640f6a5b4f5c579ec"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/nominal_predecessor.cpp",
@@ -216,7 +216,7 @@
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -325,8 +325,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "0ebae7a8b50ea870d6635d49f3a146cd80aa49b2861369bb706c76cca9f46eed",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-box-mpc/1/cfg-0ebae7a8b50ea870",
+      "graph_fingerprint": "5d77fedeacb6b5a1324cf1671c8a98ea83c068c6cc35165ce9794dd3ed33b809",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-box-mpc/1/cfg-5d77fedeacb6b5a1",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -374,7 +374,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -398,27 +398,27 @@
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
-          "sha256": "0f36c0c9a42dbdb2e5d230a646260aa2499e9cf57525af0e94c5adb08189a77f"
+          "sha256": "271028bcac16cc24ed61e6eee0dfccd18d8305c65b49bfb9c71ccaef69282c25"
         },
         {
           "path": "include/csl/geometry/polyhedral_projection.hpp",
-          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+          "sha256": "c100490f75d316428e373339221e673c723ba8ee9ee1dae9be5e5496e676ef21"
         },
         {
           "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "eb04f6b56896f5ed6d7d82dfaa56d5d3a054ccc7f261019a2f4da23b0e74291c"
+          "sha256": "f3feff742226e4c6689c9ab83e5fc4684dc38e70297acda1faab94b57bad62ab"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_box.hpp",
-          "sha256": "021297907da53db57d51071c9b68709a8a1a50cb41e26290062aa99d0fa3a111"
+          "sha256": "70eb4b1d0cfd6b375d2103ffe4b1d9cb168b9f4942fe560196ae3c26ede214a9"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "include/csl/reachability/nominal_predecessor.hpp",
@@ -426,39 +426,39 @@
         },
         {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
+          "sha256": "839921fb1f512bbfacea9b59f57298da30ccbb4b747b12f201e11c0abe051ec5"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
-          "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+          "sha256": "7b45428b5e17ad3e92a0709e62ba160823b68fcad9ff534dc7d01e87eb189e44"
         },
         {
           "path": "src/geometry/polyhedral/intersection.cpp",
-          "sha256": "5a583fb352729d2d019dfead7733247fec4b0ca8651519a130b5095c5478821a"
+          "sha256": "b50fd689fbc2fcb788d3f926c2a71f38d3d4c1645901033434227b859f841bf6"
         },
         {
           "path": "src/geometry/polyhedral/projection.cpp",
-          "sha256": "9ddf45ee4b1687dd0d1fb6e4bf26ed3a68c5a28aaad265e33d2595f6b22a282f"
+          "sha256": "9966654eefa3469219626931ed068b3866844d158d2c2c129f1679d9bd92ba86"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "beb790b30558d5d6e669cf32a3a16c82a1b3a102c7737f2c5229d1633e02486c"
+          "sha256": "ed14641d9496e693f4c62ab3e76f48ae12ec45d8dc3ef1a554475b342913f2ab"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
-          "sha256": "fbddf69763541a9dcef2c89f1b362c28e0804680b9fb42e58e944818a93c36e5"
+          "sha256": "5c453fb37e0b62b67ef91c199aa814d8b19edb863f6ec1a640f6a5b4f5c579ec"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_box.cpp",
-          "sha256": "c47ab2fbc17fe789298b6453a51de22dca279146cd464c84ee52070b5c4f2164"
+          "sha256": "d624d95d0be132d8c9881a75338c5ae82e3b0cf375a48f38405aea21caeb1d25"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/reachability/nominal_predecessor.cpp",
@@ -466,7 +466,7 @@
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -575,8 +575,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "051963200df51830e480260ba9d500d4d9fe6fc5a0d0c195ccbbef78d28511a3",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-zonotope-mpc/1/cfg-051963200df51830",
+      "graph_fingerprint": "5160d4f88bd19d89e3527a53e7aa01e2c7031c50e0687a10a9eba076c2f0310b",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-zonotope-mpc/1/cfg-5160d4f88bd19d89",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -624,7 +624,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -648,27 +648,27 @@
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
-          "sha256": "0f36c0c9a42dbdb2e5d230a646260aa2499e9cf57525af0e94c5adb08189a77f"
+          "sha256": "271028bcac16cc24ed61e6eee0dfccd18d8305c65b49bfb9c71ccaef69282c25"
         },
         {
           "path": "include/csl/geometry/polyhedral_projection.hpp",
-          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+          "sha256": "c100490f75d316428e373339221e673c723ba8ee9ee1dae9be5e5496e676ef21"
         },
         {
           "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "eb04f6b56896f5ed6d7d82dfaa56d5d3a054ccc7f261019a2f4da23b0e74291c"
+          "sha256": "f3feff742226e4c6689c9ab83e5fc4684dc38e70297acda1faab94b57bad62ab"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_zonotope.hpp",
-          "sha256": "16212a60e3db9800ead9723cec4eed384571ccefe3b97b5b5d62b9d583821813"
+          "sha256": "bdf9495770d84552785c1d8f7954ed0dcbe15f2fb14d379173d8b611a4347ddb"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "include/csl/reachability/nominal_predecessor.hpp",
@@ -676,39 +676,39 @@
         },
         {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
+          "sha256": "839921fb1f512bbfacea9b59f57298da30ccbb4b747b12f201e11c0abe051ec5"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
-          "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+          "sha256": "7b45428b5e17ad3e92a0709e62ba160823b68fcad9ff534dc7d01e87eb189e44"
         },
         {
           "path": "src/geometry/polyhedral/intersection.cpp",
-          "sha256": "5a583fb352729d2d019dfead7733247fec4b0ca8651519a130b5095c5478821a"
+          "sha256": "b50fd689fbc2fcb788d3f926c2a71f38d3d4c1645901033434227b859f841bf6"
         },
         {
           "path": "src/geometry/polyhedral/projection.cpp",
-          "sha256": "9ddf45ee4b1687dd0d1fb6e4bf26ed3a68c5a28aaad265e33d2595f6b22a282f"
+          "sha256": "9966654eefa3469219626931ed068b3866844d158d2c2c129f1679d9bd92ba86"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "beb790b30558d5d6e669cf32a3a16c82a1b3a102c7737f2c5229d1633e02486c"
+          "sha256": "ed14641d9496e693f4c62ab3e76f48ae12ec45d8dc3ef1a554475b342913f2ab"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
-          "sha256": "fbddf69763541a9dcef2c89f1b362c28e0804680b9fb42e58e944818a93c36e5"
+          "sha256": "5c453fb37e0b62b67ef91c199aa814d8b19edb863f6ec1a640f6a5b4f5c579ec"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_zonotope.cpp",
-          "sha256": "99042907401ed408a9674ff0399832a5c511f4efb6202d04da8445de6eeebe44"
+          "sha256": "4c866643a70d5564932c89e72ac5b55e3a016adc3d5c50954d9d95049a5b3d04"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/reachability/nominal_predecessor.cpp",
@@ -716,7 +716,7 @@
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -825,8 +825,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "e0374e0e74f5fdf3eeec9d219b0ffcbe790c1d3285243b261f5f7e001b507b9a",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-mpc/1/cfg-e0374e0e74f5fdf3",
+      "graph_fingerprint": "7d77fc44465642fba2ae22d78bb524e5e485d0c9ad0513db869fc2e84c4a83e2",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-mpc/1/cfg-7d77fc44465642fb",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -874,7 +874,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -898,27 +898,27 @@
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
-          "sha256": "0f36c0c9a42dbdb2e5d230a646260aa2499e9cf57525af0e94c5adb08189a77f"
+          "sha256": "271028bcac16cc24ed61e6eee0dfccd18d8305c65b49bfb9c71ccaef69282c25"
         },
         {
           "path": "include/csl/geometry/polyhedral_projection.hpp",
-          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+          "sha256": "c100490f75d316428e373339221e673c723ba8ee9ee1dae9be5e5496e676ef21"
         },
         {
           "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "eb04f6b56896f5ed6d7d82dfaa56d5d3a054ccc7f261019a2f4da23b0e74291c"
+          "sha256": "f3feff742226e4c6689c9ab83e5fc4684dc38e70297acda1faab94b57bad62ab"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_parallelotope.hpp",
-          "sha256": "2900e340c04c47f80d2032d09f74655ed331843e47de2d0624d30c36acfb0a95"
+          "sha256": "d873ce90a02bc70ba1f9f6dcc217f3a5164dd02a594c21539b94dfa3bc54d704"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "include/csl/reachability/nominal_predecessor.hpp",
@@ -926,39 +926,39 @@
         },
         {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
+          "sha256": "839921fb1f512bbfacea9b59f57298da30ccbb4b747b12f201e11c0abe051ec5"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
-          "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+          "sha256": "7b45428b5e17ad3e92a0709e62ba160823b68fcad9ff534dc7d01e87eb189e44"
         },
         {
           "path": "src/geometry/polyhedral/intersection.cpp",
-          "sha256": "5a583fb352729d2d019dfead7733247fec4b0ca8651519a130b5095c5478821a"
+          "sha256": "b50fd689fbc2fcb788d3f926c2a71f38d3d4c1645901033434227b859f841bf6"
         },
         {
           "path": "src/geometry/polyhedral/projection.cpp",
-          "sha256": "9ddf45ee4b1687dd0d1fb6e4bf26ed3a68c5a28aaad265e33d2595f6b22a282f"
+          "sha256": "9966654eefa3469219626931ed068b3866844d158d2c2c129f1679d9bd92ba86"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "beb790b30558d5d6e669cf32a3a16c82a1b3a102c7737f2c5229d1633e02486c"
+          "sha256": "ed14641d9496e693f4c62ab3e76f48ae12ec45d8dc3ef1a554475b342913f2ab"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
-          "sha256": "fbddf69763541a9dcef2c89f1b362c28e0804680b9fb42e58e944818a93c36e5"
+          "sha256": "5c453fb37e0b62b67ef91c199aa814d8b19edb863f6ec1a640f6a5b4f5c579ec"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_parallelotope.cpp",
-          "sha256": "503bac686cf35038e6fd3d15be76438ed80ecd301fec5b894466a34d6ea8acba"
+          "sha256": "44bab26cdaef36de50d1c5f0d590b8a2e398113440bdd26401609068921bb9aa"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/reachability/nominal_predecessor.cpp",
@@ -966,7 +966,7 @@
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -1075,8 +1075,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "d67957d4d7d0f05af1a250df3c7fe734c46e7374f3ac663ad09c4c5538ef11e9",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-ellipsoid-mpc/1/cfg-d67957d4d7d0f05a",
+      "graph_fingerprint": "9b348707bee75519468ba6b98c1241f7ea8b25c835341a985d0d4eabb0598d05",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-ellipsoid-mpc/1/cfg-9b348707bee75519",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1124,7 +1124,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -1148,27 +1148,27 @@
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
-          "sha256": "0f36c0c9a42dbdb2e5d230a646260aa2499e9cf57525af0e94c5adb08189a77f"
+          "sha256": "271028bcac16cc24ed61e6eee0dfccd18d8305c65b49bfb9c71ccaef69282c25"
         },
         {
           "path": "include/csl/geometry/polyhedral_projection.hpp",
-          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+          "sha256": "c100490f75d316428e373339221e673c723ba8ee9ee1dae9be5e5496e676ef21"
         },
         {
           "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "eb04f6b56896f5ed6d7d82dfaa56d5d3a054ccc7f261019a2f4da23b0e74291c"
+          "sha256": "f3feff742226e4c6689c9ab83e5fc4684dc38e70297acda1faab94b57bad62ab"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_ellipsoid.hpp",
-          "sha256": "7b57410198e703943b8b2561bc43f54c74ba9e8f50ec744ca840549e96486ed0"
+          "sha256": "5fe7bef1c83a2217c385c029332ae306a487d092895b3851c83d87d909d89088"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "include/csl/reachability/nominal_predecessor.hpp",
@@ -1176,39 +1176,39 @@
         },
         {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
+          "sha256": "839921fb1f512bbfacea9b59f57298da30ccbb4b747b12f201e11c0abe051ec5"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
-          "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+          "sha256": "7b45428b5e17ad3e92a0709e62ba160823b68fcad9ff534dc7d01e87eb189e44"
         },
         {
           "path": "src/geometry/polyhedral/intersection.cpp",
-          "sha256": "5a583fb352729d2d019dfead7733247fec4b0ca8651519a130b5095c5478821a"
+          "sha256": "b50fd689fbc2fcb788d3f926c2a71f38d3d4c1645901033434227b859f841bf6"
         },
         {
           "path": "src/geometry/polyhedral/projection.cpp",
-          "sha256": "9ddf45ee4b1687dd0d1fb6e4bf26ed3a68c5a28aaad265e33d2595f6b22a282f"
+          "sha256": "9966654eefa3469219626931ed068b3866844d158d2c2c129f1679d9bd92ba86"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "beb790b30558d5d6e669cf32a3a16c82a1b3a102c7737f2c5229d1633e02486c"
+          "sha256": "ed14641d9496e693f4c62ab3e76f48ae12ec45d8dc3ef1a554475b342913f2ab"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
-          "sha256": "fbddf69763541a9dcef2c89f1b362c28e0804680b9fb42e58e944818a93c36e5"
+          "sha256": "5c453fb37e0b62b67ef91c199aa814d8b19edb863f6ec1a640f6a5b4f5c579ec"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_ellipsoid.cpp",
-          "sha256": "9f4f40bf55a7e647b8b7724d677662153b8a6fb96ad7970928f326ec5fe78449"
+          "sha256": "e5cb4685554494e16e1547b3be9e9471c73e37ad525b91745e1529c326d46508"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/reachability/nominal_predecessor.cpp",
@@ -1216,7 +1216,7 @@
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -1297,8 +1297,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "faf173b94b4b5e7c210795e1bdf2839aa3bf99bf637fa43291a371a9a8206623",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-exact-polytope-fixed-plan-mpc/1/cfg-faf173b94b4b5e7c",
+      "graph_fingerprint": "6a1d24b526f4bea6a86ea52276baf70ba6aad221da6ccc969c64d172e3254b96",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-exact-polytope-fixed-plan-mpc/1/cfg-6a1d24b526f4bea6",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1329,7 +1329,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -1353,47 +1353,47 @@
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
-          "sha256": "18bd6bf94324859d586a932c72a56349a5c75d03de9420d3150e073a519ab86d"
+          "sha256": "5f20135a07b7dc17816e35588d34e31c6f46b49ba9937db18e8efe5b38914cd9"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "4b26514f962db92f24b8b5db0824432b4d2cd6ff2c087cad41d6eec65fd50a4d"
+          "sha256": "19b0817e4f6e1d09a10382f2eb0494d0ace05689da1d7ceb6eccc06099351331"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "src/optimization/finite_action_minimax.cpp",
-          "sha256": "b4596f11fab960cdee1392c10f02edf1e47913975787b91e2d8a1a7b92c22ebd"
+          "sha256": "f24348de13a6d11109052b56fcb14e636272c84b6be93e4c24ed4655eec51c6a"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "26192d7e06d857ae2d2d7efdcef1d667ea8f42bfaec0cd04d60c84ff0e514767"
+          "sha256": "9e37be0635f4a5f3072118c9465941461793c532ceb7ff824d1e914aff675b8b"
         },
         {
           "path": "src/optimization/finite_action_plans.hpp",
-          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+          "sha256": "b2ffc07a7a075fa05ff00d9ace77c22e0b454f062154031dc13075fa0d0e44ee"
         },
         {
           "path": "src/optimization/finite_action_replay.cpp",
-          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+          "sha256": "1bb3f5df7b72595c40ceefab130f751b2ffe6a084a53527e779043012eb863a9"
         },
         {
           "path": "src/optimization/finite_action_replay.hpp",
-          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
+          "sha256": "1cb2bb61408abcf1b98eb718853b57f6ad89c01539d868b78546ec34052509fe"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/fixed_plan_disturbance.cpp",
-          "sha256": "10cfe6d39f1ca49c888a225aa0608a4f064cb163b6e9324ee7a3127660076cf3"
+          "sha256": "e5e33f01037c7aae169be617f7d0bd5d9308afb48d1ebad4caa417e4367e297d"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -1477,8 +1477,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "8a48f233598b2d169e0715f4a0443fceffc136bd3183d5cdacf3e597ad855e0c",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-box-fixed-plan-mpc/1/cfg-8a48f233598b2d16",
+      "graph_fingerprint": "f7a2da50400584c46dc43e4c6abdcab35b5c5d9ef0e228affa05d79939b46a89",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-box-fixed-plan-mpc/1/cfg-f7a2da50400584c4",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1509,7 +1509,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -1533,63 +1533,63 @@
         },
         {
           "path": "include/csl/optimization/finite_action_box_minimax.hpp",
-          "sha256": "15e569c195f3f916366c7934e6a152a8ec92195d2ef7cd2537201a794ffe96c4"
+          "sha256": "f77c1b8633618e562482770b302ed00b347693a2e91e18848b6df828d0bf2df2"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
-          "sha256": "18bd6bf94324859d586a932c72a56349a5c75d03de9420d3150e073a519ab86d"
+          "sha256": "5f20135a07b7dc17816e35588d34e31c6f46b49ba9937db18e8efe5b38914cd9"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "4b26514f962db92f24b8b5db0824432b4d2cd6ff2c087cad41d6eec65fd50a4d"
+          "sha256": "19b0817e4f6e1d09a10382f2eb0494d0ace05689da1d7ceb6eccc06099351331"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_box.hpp",
-          "sha256": "021297907da53db57d51071c9b68709a8a1a50cb41e26290062aa99d0fa3a111"
+          "sha256": "70eb4b1d0cfd6b375d2103ffe4b1d9cb168b9f4942fe560196ae3c26ede214a9"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "src/optimization/finite_action_box_minimax.cpp",
-          "sha256": "b26de16f255116382cf1d43ea2ec8d51a488a7ab90f86c7a68df957cbd32b5cf"
+          "sha256": "6a1b796f94b67c1e74a3e58d7883ba7c20050e2a448a5023c495e39a8acf73e2"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "26192d7e06d857ae2d2d7efdcef1d667ea8f42bfaec0cd04d60c84ff0e514767"
+          "sha256": "9e37be0635f4a5f3072118c9465941461793c532ceb7ff824d1e914aff675b8b"
         },
         {
           "path": "src/optimization/finite_action_plans.hpp",
-          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+          "sha256": "b2ffc07a7a075fa05ff00d9ace77c22e0b454f062154031dc13075fa0d0e44ee"
         },
         {
           "path": "src/optimization/finite_action_replay.cpp",
-          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+          "sha256": "1bb3f5df7b72595c40ceefab130f751b2ffe6a084a53527e779043012eb863a9"
         },
         {
           "path": "src/optimization/finite_action_replay.hpp",
-          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
+          "sha256": "1cb2bb61408abcf1b98eb718853b57f6ad89c01539d868b78546ec34052509fe"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_box.cpp",
-          "sha256": "c47ab2fbc17fe789298b6453a51de22dca279146cd464c84ee52070b5c4f2164"
+          "sha256": "d624d95d0be132d8c9881a75338c5ae82e3b0cf375a48f38405aea21caeb1d25"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -1673,8 +1673,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "9f93f59f6ff8d9727cc2ca48e3b890c4c9d599b3fe7aa8fa16becf11ecca1d8c",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-zonotope-fixed-plan-mpc/1/cfg-9f93f59f6ff8d972",
+      "graph_fingerprint": "e75d9f39f84523e05e4f2a8a12c4da8142e1edd6201cd86a8dd0581f4b6ee9dc",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-zonotope-fixed-plan-mpc/1/cfg-e75d9f39f84523e0",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1705,7 +1705,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -1729,63 +1729,63 @@
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
-          "sha256": "18bd6bf94324859d586a932c72a56349a5c75d03de9420d3150e073a519ab86d"
+          "sha256": "5f20135a07b7dc17816e35588d34e31c6f46b49ba9937db18e8efe5b38914cd9"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "4b26514f962db92f24b8b5db0824432b4d2cd6ff2c087cad41d6eec65fd50a4d"
+          "sha256": "19b0817e4f6e1d09a10382f2eb0494d0ace05689da1d7ceb6eccc06099351331"
         },
         {
           "path": "include/csl/optimization/finite_action_zonotope_minimax.hpp",
-          "sha256": "f541ddbfbe4469589efb4a6996dc4ea4f174f7477d53b6e1cd60dd838ed51302"
+          "sha256": "f75885afa1b267f8ae388c98e0f7bd9cd8653d659c84894cae05a262e0f6b845"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_zonotope.hpp",
-          "sha256": "16212a60e3db9800ead9723cec4eed384571ccefe3b97b5b5d62b9d583821813"
+          "sha256": "bdf9495770d84552785c1d8f7954ed0dcbe15f2fb14d379173d8b611a4347ddb"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "26192d7e06d857ae2d2d7efdcef1d667ea8f42bfaec0cd04d60c84ff0e514767"
+          "sha256": "9e37be0635f4a5f3072118c9465941461793c532ceb7ff824d1e914aff675b8b"
         },
         {
           "path": "src/optimization/finite_action_plans.hpp",
-          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+          "sha256": "b2ffc07a7a075fa05ff00d9ace77c22e0b454f062154031dc13075fa0d0e44ee"
         },
         {
           "path": "src/optimization/finite_action_replay.cpp",
-          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+          "sha256": "1bb3f5df7b72595c40ceefab130f751b2ffe6a084a53527e779043012eb863a9"
         },
         {
           "path": "src/optimization/finite_action_replay.hpp",
-          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
+          "sha256": "1cb2bb61408abcf1b98eb718853b57f6ad89c01539d868b78546ec34052509fe"
         },
         {
           "path": "src/optimization/finite_action_zonotope_minimax.cpp",
-          "sha256": "dbeb25c975904905ea08ba5e99f3cd13ddf40469dfa9a9f1cec5ed87fc9c786f"
+          "sha256": "54ef7a4a157901c8f5da0c4030c5bb43f7cd60c8de813195a8f815f47444fb37"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_zonotope.cpp",
-          "sha256": "99042907401ed408a9674ff0399832a5c511f4efb6202d04da8445de6eeebe44"
+          "sha256": "4c866643a70d5564932c89e72ac5b55e3a016adc3d5c50954d9d95049a5b3d04"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -1869,8 +1869,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "cd8cf2a0df8a06a46bea32e840e9ac496d310fe676b2b5003bce7a027fca3cdb",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-fixed-plan-mpc/1/cfg-cd8cf2a0df8a06a4",
+      "graph_fingerprint": "7a5968ce18a00bf057ba14161aee0e9e9b616a6d3f717d52f85d2c0adae94d57",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-fixed-plan-mpc/1/cfg-7a5968ce18a00bf0",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1901,7 +1901,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -1925,63 +1925,63 @@
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
-          "sha256": "18bd6bf94324859d586a932c72a56349a5c75d03de9420d3150e073a519ab86d"
+          "sha256": "5f20135a07b7dc17816e35588d34e31c6f46b49ba9937db18e8efe5b38914cd9"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "4b26514f962db92f24b8b5db0824432b4d2cd6ff2c087cad41d6eec65fd50a4d"
+          "sha256": "19b0817e4f6e1d09a10382f2eb0494d0ace05689da1d7ceb6eccc06099351331"
         },
         {
           "path": "include/csl/optimization/finite_action_parallelotope_minimax.hpp",
-          "sha256": "e3002536cab1c3216293f7f70fd08bcb308addde53b58029b57898edb8296b3f"
+          "sha256": "67d3d6b0449087838ebd6680943840c4361f13ea3541799b52ef97168916623c"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_parallelotope.hpp",
-          "sha256": "2900e340c04c47f80d2032d09f74655ed331843e47de2d0624d30c36acfb0a95"
+          "sha256": "d873ce90a02bc70ba1f9f6dcc217f3a5164dd02a594c21539b94dfa3bc54d704"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "26192d7e06d857ae2d2d7efdcef1d667ea8f42bfaec0cd04d60c84ff0e514767"
+          "sha256": "9e37be0635f4a5f3072118c9465941461793c532ceb7ff824d1e914aff675b8b"
         },
         {
           "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "6d889401d15c66437c1cbd5e839e0b0fd7f1f8623afff86f7cf2411a60c8bf76"
+          "sha256": "be7018cb2156f15a0bce5fb54ee8bbcb18ab52118327057efaf7fa5c26443a97"
         },
         {
           "path": "src/optimization/finite_action_plans.hpp",
-          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+          "sha256": "b2ffc07a7a075fa05ff00d9ace77c22e0b454f062154031dc13075fa0d0e44ee"
         },
         {
           "path": "src/optimization/finite_action_replay.cpp",
-          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+          "sha256": "1bb3f5df7b72595c40ceefab130f751b2ffe6a084a53527e779043012eb863a9"
         },
         {
           "path": "src/optimization/finite_action_replay.hpp",
-          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
+          "sha256": "1cb2bb61408abcf1b98eb718853b57f6ad89c01539d868b78546ec34052509fe"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_parallelotope.cpp",
-          "sha256": "503bac686cf35038e6fd3d15be76438ed80ecd301fec5b894466a34d6ea8acba"
+          "sha256": "44bab26cdaef36de50d1c5f0d590b8a2e398113440bdd26401609068921bb9aa"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -2065,8 +2065,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "7e28266e48ee192cdb78e9336bcfe042562b9b5a76d03d428c0b45739644c504",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-ellipsoid-fixed-plan-mpc/1/cfg-7e28266e48ee192c",
+      "graph_fingerprint": "29d0d1fe1b240db0af6f9ea1f8a90710e705164c6d53c8ac9e39f2f4b224b1e7",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-ellipsoid-fixed-plan-mpc/1/cfg-29d0d1fe1b240db0",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -2097,7 +2097,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -2121,63 +2121,63 @@
         },
         {
           "path": "include/csl/optimization/finite_action_ellipsoid_minimax.hpp",
-          "sha256": "78a5974e5dd4dffed486bf26bebebf6376fa6a525e8fbca1aa35010bc2123f5e"
+          "sha256": "212da90ea4a6f08d7ff89f17e6f69868b4e427efd736d54de7f0e7e7cc447568"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
-          "sha256": "18bd6bf94324859d586a932c72a56349a5c75d03de9420d3150e073a519ab86d"
+          "sha256": "5f20135a07b7dc17816e35588d34e31c6f46b49ba9937db18e8efe5b38914cd9"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "4b26514f962db92f24b8b5db0824432b4d2cd6ff2c087cad41d6eec65fd50a4d"
+          "sha256": "19b0817e4f6e1d09a10382f2eb0494d0ace05689da1d7ceb6eccc06099351331"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_ellipsoid.hpp",
-          "sha256": "7b57410198e703943b8b2561bc43f54c74ba9e8f50ec744ca840549e96486ed0"
+          "sha256": "5fe7bef1c83a2217c385c029332ae306a487d092895b3851c83d87d909d89088"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "src/optimization/finite_action_ellipsoid_minimax.cpp",
-          "sha256": "958cb41245718c51121566929917a9e81b895fa15b16efcbf467ae0e0e951bb2"
+          "sha256": "6bc025b9501d640d903ac64967951d8954e1b16efee1bd0efbe02682f8fbfc3d"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "26192d7e06d857ae2d2d7efdcef1d667ea8f42bfaec0cd04d60c84ff0e514767"
+          "sha256": "9e37be0635f4a5f3072118c9465941461793c532ceb7ff824d1e914aff675b8b"
         },
         {
           "path": "src/optimization/finite_action_plans.hpp",
-          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+          "sha256": "b2ffc07a7a075fa05ff00d9ace77c22e0b454f062154031dc13075fa0d0e44ee"
         },
         {
           "path": "src/optimization/finite_action_replay.cpp",
-          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+          "sha256": "1bb3f5df7b72595c40ceefab130f751b2ffe6a084a53527e779043012eb863a9"
         },
         {
           "path": "src/optimization/finite_action_replay.hpp",
-          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
+          "sha256": "1cb2bb61408abcf1b98eb718853b57f6ad89c01539d868b78546ec34052509fe"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_ellipsoid.cpp",
-          "sha256": "9f4f40bf55a7e647b8b7724d677662153b8a6fb96ad7970928f326ec5fe78449"
+          "sha256": "e5cb4685554494e16e1547b3be9e9471c73e37ad525b91745e1529c326d46508"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -2281,8 +2281,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "a61a4f0485f32ac4940a77f156d94387e56dca7cf2d9a291ad0c07895ce46b07",
-      "graph_id": "closed-loop/earth-orbit/native-exact-polytope-backward-graph/1/cfg-a61a4f0485f32ac4",
+      "graph_fingerprint": "ab1662f53c95ad264a22f550ef999a4e2fdd346c212d7ab3c4ab3d679ca2fdfc",
+      "graph_id": "closed-loop/earth-orbit/native-exact-polytope-backward-graph/1/cfg-ab1662f53c95ad26",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2329,7 +2329,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -2353,15 +2353,15 @@
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
-          "sha256": "0f36c0c9a42dbdb2e5d230a646260aa2499e9cf57525af0e94c5adb08189a77f"
+          "sha256": "271028bcac16cc24ed61e6eee0dfccd18d8305c65b49bfb9c71ccaef69282c25"
         },
         {
           "path": "include/csl/geometry/polyhedral_projection.hpp",
-          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+          "sha256": "c100490f75d316428e373339221e673c723ba8ee9ee1dae9be5e5496e676ef21"
         },
         {
           "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "eb04f6b56896f5ed6d7d82dfaa56d5d3a054ccc7f261019a2f4da23b0e74291c"
+          "sha256": "f3feff742226e4c6689c9ab83e5fc4684dc38e70297acda1faab94b57bad62ab"
         },
         {
           "path": "include/csl/reachability/nominal_predecessor.hpp",
@@ -2369,31 +2369,31 @@
         },
         {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
+          "sha256": "839921fb1f512bbfacea9b59f57298da30ccbb4b747b12f201e11c0abe051ec5"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
-          "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+          "sha256": "7b45428b5e17ad3e92a0709e62ba160823b68fcad9ff534dc7d01e87eb189e44"
         },
         {
           "path": "src/geometry/polyhedral/intersection.cpp",
-          "sha256": "5a583fb352729d2d019dfead7733247fec4b0ca8651519a130b5095c5478821a"
+          "sha256": "b50fd689fbc2fcb788d3f926c2a71f38d3d4c1645901033434227b859f841bf6"
         },
         {
           "path": "src/geometry/polyhedral/projection.cpp",
-          "sha256": "9ddf45ee4b1687dd0d1fb6e4bf26ed3a68c5a28aaad265e33d2595f6b22a282f"
+          "sha256": "9966654eefa3469219626931ed068b3866844d158d2c2c129f1679d9bd92ba86"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "beb790b30558d5d6e669cf32a3a16c82a1b3a102c7737f2c5229d1633e02486c"
+          "sha256": "ed14641d9496e693f4c62ab3e76f48ae12ec45d8dc3ef1a554475b342913f2ab"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
-          "sha256": "fbddf69763541a9dcef2c89f1b362c28e0804680b9fb42e58e944818a93c36e5"
+          "sha256": "5c453fb37e0b62b67ef91c199aa814d8b19edb863f6ec1a640f6a5b4f5c579ec"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/nominal_predecessor.cpp",
@@ -2401,7 +2401,7 @@
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -2510,8 +2510,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "0452184d41a2bb861fb6964d0918578a1e66c2a7c1b3cbde76f4476dad80efe5",
-      "graph_id": "closed-loop/earth-orbit/native-box-mpc/1/cfg-0452184d41a2bb86",
+      "graph_fingerprint": "b26945cfbc515c8749e74bebdddccd0aa6de0eea88d2945053e81face79a0044",
+      "graph_id": "closed-loop/earth-orbit/native-box-mpc/1/cfg-b26945cfbc515c87",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2559,7 +2559,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -2583,27 +2583,27 @@
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
-          "sha256": "0f36c0c9a42dbdb2e5d230a646260aa2499e9cf57525af0e94c5adb08189a77f"
+          "sha256": "271028bcac16cc24ed61e6eee0dfccd18d8305c65b49bfb9c71ccaef69282c25"
         },
         {
           "path": "include/csl/geometry/polyhedral_projection.hpp",
-          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+          "sha256": "c100490f75d316428e373339221e673c723ba8ee9ee1dae9be5e5496e676ef21"
         },
         {
           "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "eb04f6b56896f5ed6d7d82dfaa56d5d3a054ccc7f261019a2f4da23b0e74291c"
+          "sha256": "f3feff742226e4c6689c9ab83e5fc4684dc38e70297acda1faab94b57bad62ab"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_box.hpp",
-          "sha256": "021297907da53db57d51071c9b68709a8a1a50cb41e26290062aa99d0fa3a111"
+          "sha256": "70eb4b1d0cfd6b375d2103ffe4b1d9cb168b9f4942fe560196ae3c26ede214a9"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "include/csl/reachability/nominal_predecessor.hpp",
@@ -2611,39 +2611,39 @@
         },
         {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
+          "sha256": "839921fb1f512bbfacea9b59f57298da30ccbb4b747b12f201e11c0abe051ec5"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
-          "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+          "sha256": "7b45428b5e17ad3e92a0709e62ba160823b68fcad9ff534dc7d01e87eb189e44"
         },
         {
           "path": "src/geometry/polyhedral/intersection.cpp",
-          "sha256": "5a583fb352729d2d019dfead7733247fec4b0ca8651519a130b5095c5478821a"
+          "sha256": "b50fd689fbc2fcb788d3f926c2a71f38d3d4c1645901033434227b859f841bf6"
         },
         {
           "path": "src/geometry/polyhedral/projection.cpp",
-          "sha256": "9ddf45ee4b1687dd0d1fb6e4bf26ed3a68c5a28aaad265e33d2595f6b22a282f"
+          "sha256": "9966654eefa3469219626931ed068b3866844d158d2c2c129f1679d9bd92ba86"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "beb790b30558d5d6e669cf32a3a16c82a1b3a102c7737f2c5229d1633e02486c"
+          "sha256": "ed14641d9496e693f4c62ab3e76f48ae12ec45d8dc3ef1a554475b342913f2ab"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
-          "sha256": "fbddf69763541a9dcef2c89f1b362c28e0804680b9fb42e58e944818a93c36e5"
+          "sha256": "5c453fb37e0b62b67ef91c199aa814d8b19edb863f6ec1a640f6a5b4f5c579ec"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_box.cpp",
-          "sha256": "c47ab2fbc17fe789298b6453a51de22dca279146cd464c84ee52070b5c4f2164"
+          "sha256": "d624d95d0be132d8c9881a75338c5ae82e3b0cf375a48f38405aea21caeb1d25"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/reachability/nominal_predecessor.cpp",
@@ -2651,7 +2651,7 @@
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -2760,8 +2760,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "ec3877f1181d56e889813fd790adfec995095556807f57fbfd2350c8891f049c",
-      "graph_id": "closed-loop/earth-orbit/native-zonotope-mpc/1/cfg-ec3877f1181d56e8",
+      "graph_fingerprint": "d4096336c05d0bbe92b16dd26280b9985b9e094d4fada24985af796fa07dae1e",
+      "graph_id": "closed-loop/earth-orbit/native-zonotope-mpc/1/cfg-d4096336c05d0bbe",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2809,7 +2809,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -2833,27 +2833,27 @@
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
-          "sha256": "0f36c0c9a42dbdb2e5d230a646260aa2499e9cf57525af0e94c5adb08189a77f"
+          "sha256": "271028bcac16cc24ed61e6eee0dfccd18d8305c65b49bfb9c71ccaef69282c25"
         },
         {
           "path": "include/csl/geometry/polyhedral_projection.hpp",
-          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+          "sha256": "c100490f75d316428e373339221e673c723ba8ee9ee1dae9be5e5496e676ef21"
         },
         {
           "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "eb04f6b56896f5ed6d7d82dfaa56d5d3a054ccc7f261019a2f4da23b0e74291c"
+          "sha256": "f3feff742226e4c6689c9ab83e5fc4684dc38e70297acda1faab94b57bad62ab"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_zonotope.hpp",
-          "sha256": "16212a60e3db9800ead9723cec4eed384571ccefe3b97b5b5d62b9d583821813"
+          "sha256": "bdf9495770d84552785c1d8f7954ed0dcbe15f2fb14d379173d8b611a4347ddb"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "include/csl/reachability/nominal_predecessor.hpp",
@@ -2861,39 +2861,39 @@
         },
         {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
+          "sha256": "839921fb1f512bbfacea9b59f57298da30ccbb4b747b12f201e11c0abe051ec5"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
-          "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+          "sha256": "7b45428b5e17ad3e92a0709e62ba160823b68fcad9ff534dc7d01e87eb189e44"
         },
         {
           "path": "src/geometry/polyhedral/intersection.cpp",
-          "sha256": "5a583fb352729d2d019dfead7733247fec4b0ca8651519a130b5095c5478821a"
+          "sha256": "b50fd689fbc2fcb788d3f926c2a71f38d3d4c1645901033434227b859f841bf6"
         },
         {
           "path": "src/geometry/polyhedral/projection.cpp",
-          "sha256": "9ddf45ee4b1687dd0d1fb6e4bf26ed3a68c5a28aaad265e33d2595f6b22a282f"
+          "sha256": "9966654eefa3469219626931ed068b3866844d158d2c2c129f1679d9bd92ba86"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "beb790b30558d5d6e669cf32a3a16c82a1b3a102c7737f2c5229d1633e02486c"
+          "sha256": "ed14641d9496e693f4c62ab3e76f48ae12ec45d8dc3ef1a554475b342913f2ab"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
-          "sha256": "fbddf69763541a9dcef2c89f1b362c28e0804680b9fb42e58e944818a93c36e5"
+          "sha256": "5c453fb37e0b62b67ef91c199aa814d8b19edb863f6ec1a640f6a5b4f5c579ec"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_zonotope.cpp",
-          "sha256": "99042907401ed408a9674ff0399832a5c511f4efb6202d04da8445de6eeebe44"
+          "sha256": "4c866643a70d5564932c89e72ac5b55e3a016adc3d5c50954d9d95049a5b3d04"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/reachability/nominal_predecessor.cpp",
@@ -2901,7 +2901,7 @@
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -3010,8 +3010,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "7d35117c5dec624c853de23bfdd80d91eda742646abf8b48e079d252fecd0d19",
-      "graph_id": "closed-loop/earth-orbit/native-parallelotope-mpc/1/cfg-7d35117c5dec624c",
+      "graph_fingerprint": "e2365a6c48bccc6fc34ad65484876422d49272400a57b3fd9171c8cb856fe5f2",
+      "graph_id": "closed-loop/earth-orbit/native-parallelotope-mpc/1/cfg-e2365a6c48bccc6f",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3059,7 +3059,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -3083,27 +3083,27 @@
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
-          "sha256": "0f36c0c9a42dbdb2e5d230a646260aa2499e9cf57525af0e94c5adb08189a77f"
+          "sha256": "271028bcac16cc24ed61e6eee0dfccd18d8305c65b49bfb9c71ccaef69282c25"
         },
         {
           "path": "include/csl/geometry/polyhedral_projection.hpp",
-          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+          "sha256": "c100490f75d316428e373339221e673c723ba8ee9ee1dae9be5e5496e676ef21"
         },
         {
           "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "eb04f6b56896f5ed6d7d82dfaa56d5d3a054ccc7f261019a2f4da23b0e74291c"
+          "sha256": "f3feff742226e4c6689c9ab83e5fc4684dc38e70297acda1faab94b57bad62ab"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_parallelotope.hpp",
-          "sha256": "2900e340c04c47f80d2032d09f74655ed331843e47de2d0624d30c36acfb0a95"
+          "sha256": "d873ce90a02bc70ba1f9f6dcc217f3a5164dd02a594c21539b94dfa3bc54d704"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "include/csl/reachability/nominal_predecessor.hpp",
@@ -3111,39 +3111,39 @@
         },
         {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
+          "sha256": "839921fb1f512bbfacea9b59f57298da30ccbb4b747b12f201e11c0abe051ec5"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
-          "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+          "sha256": "7b45428b5e17ad3e92a0709e62ba160823b68fcad9ff534dc7d01e87eb189e44"
         },
         {
           "path": "src/geometry/polyhedral/intersection.cpp",
-          "sha256": "5a583fb352729d2d019dfead7733247fec4b0ca8651519a130b5095c5478821a"
+          "sha256": "b50fd689fbc2fcb788d3f926c2a71f38d3d4c1645901033434227b859f841bf6"
         },
         {
           "path": "src/geometry/polyhedral/projection.cpp",
-          "sha256": "9ddf45ee4b1687dd0d1fb6e4bf26ed3a68c5a28aaad265e33d2595f6b22a282f"
+          "sha256": "9966654eefa3469219626931ed068b3866844d158d2c2c129f1679d9bd92ba86"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "beb790b30558d5d6e669cf32a3a16c82a1b3a102c7737f2c5229d1633e02486c"
+          "sha256": "ed14641d9496e693f4c62ab3e76f48ae12ec45d8dc3ef1a554475b342913f2ab"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
-          "sha256": "fbddf69763541a9dcef2c89f1b362c28e0804680b9fb42e58e944818a93c36e5"
+          "sha256": "5c453fb37e0b62b67ef91c199aa814d8b19edb863f6ec1a640f6a5b4f5c579ec"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_parallelotope.cpp",
-          "sha256": "503bac686cf35038e6fd3d15be76438ed80ecd301fec5b894466a34d6ea8acba"
+          "sha256": "44bab26cdaef36de50d1c5f0d590b8a2e398113440bdd26401609068921bb9aa"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/reachability/nominal_predecessor.cpp",
@@ -3151,7 +3151,7 @@
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -3260,8 +3260,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "cd0c251ae8380ac9dc672282ae89223f431cd3052b260c6c8ac69a4e2fca3893",
-      "graph_id": "closed-loop/earth-orbit/native-ellipsoid-mpc/1/cfg-cd0c251ae8380ac9",
+      "graph_fingerprint": "dc0919087aea9f0991721d4f950398a49762321390a9293b1109f1c60f9f2029",
+      "graph_id": "closed-loop/earth-orbit/native-ellipsoid-mpc/1/cfg-dc0919087aea9f09",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3309,7 +3309,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -3333,27 +3333,27 @@
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
-          "sha256": "0f36c0c9a42dbdb2e5d230a646260aa2499e9cf57525af0e94c5adb08189a77f"
+          "sha256": "271028bcac16cc24ed61e6eee0dfccd18d8305c65b49bfb9c71ccaef69282c25"
         },
         {
           "path": "include/csl/geometry/polyhedral_projection.hpp",
-          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+          "sha256": "c100490f75d316428e373339221e673c723ba8ee9ee1dae9be5e5496e676ef21"
         },
         {
           "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "eb04f6b56896f5ed6d7d82dfaa56d5d3a054ccc7f261019a2f4da23b0e74291c"
+          "sha256": "f3feff742226e4c6689c9ab83e5fc4684dc38e70297acda1faab94b57bad62ab"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_ellipsoid.hpp",
-          "sha256": "7b57410198e703943b8b2561bc43f54c74ba9e8f50ec744ca840549e96486ed0"
+          "sha256": "5fe7bef1c83a2217c385c029332ae306a487d092895b3851c83d87d909d89088"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "include/csl/reachability/nominal_predecessor.hpp",
@@ -3361,39 +3361,39 @@
         },
         {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
+          "sha256": "839921fb1f512bbfacea9b59f57298da30ccbb4b747b12f201e11c0abe051ec5"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
-          "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+          "sha256": "7b45428b5e17ad3e92a0709e62ba160823b68fcad9ff534dc7d01e87eb189e44"
         },
         {
           "path": "src/geometry/polyhedral/intersection.cpp",
-          "sha256": "5a583fb352729d2d019dfead7733247fec4b0ca8651519a130b5095c5478821a"
+          "sha256": "b50fd689fbc2fcb788d3f926c2a71f38d3d4c1645901033434227b859f841bf6"
         },
         {
           "path": "src/geometry/polyhedral/projection.cpp",
-          "sha256": "9ddf45ee4b1687dd0d1fb6e4bf26ed3a68c5a28aaad265e33d2595f6b22a282f"
+          "sha256": "9966654eefa3469219626931ed068b3866844d158d2c2c129f1679d9bd92ba86"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "beb790b30558d5d6e669cf32a3a16c82a1b3a102c7737f2c5229d1633e02486c"
+          "sha256": "ed14641d9496e693f4c62ab3e76f48ae12ec45d8dc3ef1a554475b342913f2ab"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
-          "sha256": "fbddf69763541a9dcef2c89f1b362c28e0804680b9fb42e58e944818a93c36e5"
+          "sha256": "5c453fb37e0b62b67ef91c199aa814d8b19edb863f6ec1a640f6a5b4f5c579ec"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_ellipsoid.cpp",
-          "sha256": "9f4f40bf55a7e647b8b7724d677662153b8a6fb96ad7970928f326ec5fe78449"
+          "sha256": "e5cb4685554494e16e1547b3be9e9471c73e37ad525b91745e1529c326d46508"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/reachability/nominal_predecessor.cpp",
@@ -3401,7 +3401,7 @@
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -3482,8 +3482,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "40d6a334ecaca785adac8b30f1c6d2ca650e4da652576660abeed047af69142f",
-      "graph_id": "closed-loop/earth-orbit/native-exact-polytope-fixed-plan-mpc/1/cfg-40d6a334ecaca785",
+      "graph_fingerprint": "a7aa8c13e8d4639da39c420187cb6a6d0b204ffc59ea3115b77b3692e62e11ab",
+      "graph_id": "closed-loop/earth-orbit/native-exact-polytope-fixed-plan-mpc/1/cfg-a7aa8c13e8d4639d",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3514,7 +3514,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -3538,47 +3538,47 @@
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
-          "sha256": "18bd6bf94324859d586a932c72a56349a5c75d03de9420d3150e073a519ab86d"
+          "sha256": "5f20135a07b7dc17816e35588d34e31c6f46b49ba9937db18e8efe5b38914cd9"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "4b26514f962db92f24b8b5db0824432b4d2cd6ff2c087cad41d6eec65fd50a4d"
+          "sha256": "19b0817e4f6e1d09a10382f2eb0494d0ace05689da1d7ceb6eccc06099351331"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "src/optimization/finite_action_minimax.cpp",
-          "sha256": "b4596f11fab960cdee1392c10f02edf1e47913975787b91e2d8a1a7b92c22ebd"
+          "sha256": "f24348de13a6d11109052b56fcb14e636272c84b6be93e4c24ed4655eec51c6a"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "26192d7e06d857ae2d2d7efdcef1d667ea8f42bfaec0cd04d60c84ff0e514767"
+          "sha256": "9e37be0635f4a5f3072118c9465941461793c532ceb7ff824d1e914aff675b8b"
         },
         {
           "path": "src/optimization/finite_action_plans.hpp",
-          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+          "sha256": "b2ffc07a7a075fa05ff00d9ace77c22e0b454f062154031dc13075fa0d0e44ee"
         },
         {
           "path": "src/optimization/finite_action_replay.cpp",
-          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+          "sha256": "1bb3f5df7b72595c40ceefab130f751b2ffe6a084a53527e779043012eb863a9"
         },
         {
           "path": "src/optimization/finite_action_replay.hpp",
-          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
+          "sha256": "1cb2bb61408abcf1b98eb718853b57f6ad89c01539d868b78546ec34052509fe"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/fixed_plan_disturbance.cpp",
-          "sha256": "10cfe6d39f1ca49c888a225aa0608a4f064cb163b6e9324ee7a3127660076cf3"
+          "sha256": "e5e33f01037c7aae169be617f7d0bd5d9308afb48d1ebad4caa417e4367e297d"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -3662,8 +3662,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "219156f63edc52c15103c497d66a51aef3c98608ce79f953a8a5649790567c1b",
-      "graph_id": "closed-loop/earth-orbit/native-box-fixed-plan-mpc/1/cfg-219156f63edc52c1",
+      "graph_fingerprint": "a6d582542047f6e0db27cc67ada52fd2e2834d8578c85f9bc1c7cc038a5654d8",
+      "graph_id": "closed-loop/earth-orbit/native-box-fixed-plan-mpc/1/cfg-a6d582542047f6e0",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3694,7 +3694,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -3718,63 +3718,63 @@
         },
         {
           "path": "include/csl/optimization/finite_action_box_minimax.hpp",
-          "sha256": "15e569c195f3f916366c7934e6a152a8ec92195d2ef7cd2537201a794ffe96c4"
+          "sha256": "f77c1b8633618e562482770b302ed00b347693a2e91e18848b6df828d0bf2df2"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
-          "sha256": "18bd6bf94324859d586a932c72a56349a5c75d03de9420d3150e073a519ab86d"
+          "sha256": "5f20135a07b7dc17816e35588d34e31c6f46b49ba9937db18e8efe5b38914cd9"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "4b26514f962db92f24b8b5db0824432b4d2cd6ff2c087cad41d6eec65fd50a4d"
+          "sha256": "19b0817e4f6e1d09a10382f2eb0494d0ace05689da1d7ceb6eccc06099351331"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_box.hpp",
-          "sha256": "021297907da53db57d51071c9b68709a8a1a50cb41e26290062aa99d0fa3a111"
+          "sha256": "70eb4b1d0cfd6b375d2103ffe4b1d9cb168b9f4942fe560196ae3c26ede214a9"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "src/optimization/finite_action_box_minimax.cpp",
-          "sha256": "b26de16f255116382cf1d43ea2ec8d51a488a7ab90f86c7a68df957cbd32b5cf"
+          "sha256": "6a1b796f94b67c1e74a3e58d7883ba7c20050e2a448a5023c495e39a8acf73e2"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "26192d7e06d857ae2d2d7efdcef1d667ea8f42bfaec0cd04d60c84ff0e514767"
+          "sha256": "9e37be0635f4a5f3072118c9465941461793c532ceb7ff824d1e914aff675b8b"
         },
         {
           "path": "src/optimization/finite_action_plans.hpp",
-          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+          "sha256": "b2ffc07a7a075fa05ff00d9ace77c22e0b454f062154031dc13075fa0d0e44ee"
         },
         {
           "path": "src/optimization/finite_action_replay.cpp",
-          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+          "sha256": "1bb3f5df7b72595c40ceefab130f751b2ffe6a084a53527e779043012eb863a9"
         },
         {
           "path": "src/optimization/finite_action_replay.hpp",
-          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
+          "sha256": "1cb2bb61408abcf1b98eb718853b57f6ad89c01539d868b78546ec34052509fe"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_box.cpp",
-          "sha256": "c47ab2fbc17fe789298b6453a51de22dca279146cd464c84ee52070b5c4f2164"
+          "sha256": "d624d95d0be132d8c9881a75338c5ae82e3b0cf375a48f38405aea21caeb1d25"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -3858,8 +3858,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "c15704be5351d107d8ac57d1d91f36a11d839fbce541a240c369ad22d19e1998",
-      "graph_id": "closed-loop/earth-orbit/native-zonotope-fixed-plan-mpc/1/cfg-c15704be5351d107",
+      "graph_fingerprint": "783d032fde86403c474aceee699f5ec9c6dc1e74be6169955f3e9760ce75516c",
+      "graph_id": "closed-loop/earth-orbit/native-zonotope-fixed-plan-mpc/1/cfg-783d032fde86403c",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3890,7 +3890,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -3914,63 +3914,63 @@
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
-          "sha256": "18bd6bf94324859d586a932c72a56349a5c75d03de9420d3150e073a519ab86d"
+          "sha256": "5f20135a07b7dc17816e35588d34e31c6f46b49ba9937db18e8efe5b38914cd9"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "4b26514f962db92f24b8b5db0824432b4d2cd6ff2c087cad41d6eec65fd50a4d"
+          "sha256": "19b0817e4f6e1d09a10382f2eb0494d0ace05689da1d7ceb6eccc06099351331"
         },
         {
           "path": "include/csl/optimization/finite_action_zonotope_minimax.hpp",
-          "sha256": "f541ddbfbe4469589efb4a6996dc4ea4f174f7477d53b6e1cd60dd838ed51302"
+          "sha256": "f75885afa1b267f8ae388c98e0f7bd9cd8653d659c84894cae05a262e0f6b845"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_zonotope.hpp",
-          "sha256": "16212a60e3db9800ead9723cec4eed384571ccefe3b97b5b5d62b9d583821813"
+          "sha256": "bdf9495770d84552785c1d8f7954ed0dcbe15f2fb14d379173d8b611a4347ddb"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "26192d7e06d857ae2d2d7efdcef1d667ea8f42bfaec0cd04d60c84ff0e514767"
+          "sha256": "9e37be0635f4a5f3072118c9465941461793c532ceb7ff824d1e914aff675b8b"
         },
         {
           "path": "src/optimization/finite_action_plans.hpp",
-          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+          "sha256": "b2ffc07a7a075fa05ff00d9ace77c22e0b454f062154031dc13075fa0d0e44ee"
         },
         {
           "path": "src/optimization/finite_action_replay.cpp",
-          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+          "sha256": "1bb3f5df7b72595c40ceefab130f751b2ffe6a084a53527e779043012eb863a9"
         },
         {
           "path": "src/optimization/finite_action_replay.hpp",
-          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
+          "sha256": "1cb2bb61408abcf1b98eb718853b57f6ad89c01539d868b78546ec34052509fe"
         },
         {
           "path": "src/optimization/finite_action_zonotope_minimax.cpp",
-          "sha256": "dbeb25c975904905ea08ba5e99f3cd13ddf40469dfa9a9f1cec5ed87fc9c786f"
+          "sha256": "54ef7a4a157901c8f5da0c4030c5bb43f7cd60c8de813195a8f815f47444fb37"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_zonotope.cpp",
-          "sha256": "99042907401ed408a9674ff0399832a5c511f4efb6202d04da8445de6eeebe44"
+          "sha256": "4c866643a70d5564932c89e72ac5b55e3a016adc3d5c50954d9d95049a5b3d04"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -4054,8 +4054,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "2c6d545370a6004790f2db20e9b1b58c9e0ee2fa8fb89ccebd7048ceb99c14ec",
-      "graph_id": "closed-loop/earth-orbit/native-parallelotope-fixed-plan-mpc/1/cfg-2c6d545370a60047",
+      "graph_fingerprint": "0ceda54c44f0e8e46bd9e1dc729cfb1dd5f007343033f56712a6336a1fe81d97",
+      "graph_id": "closed-loop/earth-orbit/native-parallelotope-fixed-plan-mpc/1/cfg-0ceda54c44f0e8e4",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -4086,7 +4086,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -4110,63 +4110,63 @@
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
-          "sha256": "18bd6bf94324859d586a932c72a56349a5c75d03de9420d3150e073a519ab86d"
+          "sha256": "5f20135a07b7dc17816e35588d34e31c6f46b49ba9937db18e8efe5b38914cd9"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "4b26514f962db92f24b8b5db0824432b4d2cd6ff2c087cad41d6eec65fd50a4d"
+          "sha256": "19b0817e4f6e1d09a10382f2eb0494d0ace05689da1d7ceb6eccc06099351331"
         },
         {
           "path": "include/csl/optimization/finite_action_parallelotope_minimax.hpp",
-          "sha256": "e3002536cab1c3216293f7f70fd08bcb308addde53b58029b57898edb8296b3f"
+          "sha256": "67d3d6b0449087838ebd6680943840c4361f13ea3541799b52ef97168916623c"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_parallelotope.hpp",
-          "sha256": "2900e340c04c47f80d2032d09f74655ed331843e47de2d0624d30c36acfb0a95"
+          "sha256": "d873ce90a02bc70ba1f9f6dcc217f3a5164dd02a594c21539b94dfa3bc54d704"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "26192d7e06d857ae2d2d7efdcef1d667ea8f42bfaec0cd04d60c84ff0e514767"
+          "sha256": "9e37be0635f4a5f3072118c9465941461793c532ceb7ff824d1e914aff675b8b"
         },
         {
           "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "6d889401d15c66437c1cbd5e839e0b0fd7f1f8623afff86f7cf2411a60c8bf76"
+          "sha256": "be7018cb2156f15a0bce5fb54ee8bbcb18ab52118327057efaf7fa5c26443a97"
         },
         {
           "path": "src/optimization/finite_action_plans.hpp",
-          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+          "sha256": "b2ffc07a7a075fa05ff00d9ace77c22e0b454f062154031dc13075fa0d0e44ee"
         },
         {
           "path": "src/optimization/finite_action_replay.cpp",
-          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+          "sha256": "1bb3f5df7b72595c40ceefab130f751b2ffe6a084a53527e779043012eb863a9"
         },
         {
           "path": "src/optimization/finite_action_replay.hpp",
-          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
+          "sha256": "1cb2bb61408abcf1b98eb718853b57f6ad89c01539d868b78546ec34052509fe"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_parallelotope.cpp",
-          "sha256": "503bac686cf35038e6fd3d15be76438ed80ecd301fec5b894466a34d6ea8acba"
+          "sha256": "44bab26cdaef36de50d1c5f0d590b8a2e398113440bdd26401609068921bb9aa"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -4250,8 +4250,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "38903e8b4a1142c2cfc910a6c11282159cb794a9937fac2f87af3b76c9809941",
-      "graph_id": "closed-loop/earth-orbit/native-ellipsoid-fixed-plan-mpc/1/cfg-38903e8b4a1142c2",
+      "graph_fingerprint": "4286d08585ed20324f41cf7a5ce2d02a7ddd18eb030740e3e6ae6ea1d0e18b22",
+      "graph_id": "closed-loop/earth-orbit/native-ellipsoid-fixed-plan-mpc/1/cfg-4286d08585ed2032",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -4282,7 +4282,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -4306,63 +4306,63 @@
         },
         {
           "path": "include/csl/optimization/finite_action_ellipsoid_minimax.hpp",
-          "sha256": "78a5974e5dd4dffed486bf26bebebf6376fa6a525e8fbca1aa35010bc2123f5e"
+          "sha256": "212da90ea4a6f08d7ff89f17e6f69868b4e427efd736d54de7f0e7e7cc447568"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
-          "sha256": "18bd6bf94324859d586a932c72a56349a5c75d03de9420d3150e073a519ab86d"
+          "sha256": "5f20135a07b7dc17816e35588d34e31c6f46b49ba9937db18e8efe5b38914cd9"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "4b26514f962db92f24b8b5db0824432b4d2cd6ff2c087cad41d6eec65fd50a4d"
+          "sha256": "19b0817e4f6e1d09a10382f2eb0494d0ace05689da1d7ceb6eccc06099351331"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_ellipsoid.hpp",
-          "sha256": "7b57410198e703943b8b2561bc43f54c74ba9e8f50ec744ca840549e96486ed0"
+          "sha256": "5fe7bef1c83a2217c385c029332ae306a487d092895b3851c83d87d909d89088"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "src/optimization/finite_action_ellipsoid_minimax.cpp",
-          "sha256": "958cb41245718c51121566929917a9e81b895fa15b16efcbf467ae0e0e951bb2"
+          "sha256": "6bc025b9501d640d903ac64967951d8954e1b16efee1bd0efbe02682f8fbfc3d"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "26192d7e06d857ae2d2d7efdcef1d667ea8f42bfaec0cd04d60c84ff0e514767"
+          "sha256": "9e37be0635f4a5f3072118c9465941461793c532ceb7ff824d1e914aff675b8b"
         },
         {
           "path": "src/optimization/finite_action_plans.hpp",
-          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+          "sha256": "b2ffc07a7a075fa05ff00d9ace77c22e0b454f062154031dc13075fa0d0e44ee"
         },
         {
           "path": "src/optimization/finite_action_replay.cpp",
-          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+          "sha256": "1bb3f5df7b72595c40ceefab130f751b2ffe6a084a53527e779043012eb863a9"
         },
         {
           "path": "src/optimization/finite_action_replay.hpp",
-          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
+          "sha256": "1cb2bb61408abcf1b98eb718853b57f6ad89c01539d868b78546ec34052509fe"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_ellipsoid.cpp",
-          "sha256": "9f4f40bf55a7e647b8b7724d677662153b8a6fb96ad7970928f326ec5fe78449"
+          "sha256": "e5cb4685554494e16e1547b3be9e9471c73e37ad525b91745e1529c326d46508"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -4466,8 +4466,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "87606becf24e2397b91adacc52404eae009fcbb302e023711768a31b66299825",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-exact-polytope-backward-graph/1/cfg-87606becf24e2397",
+      "graph_fingerprint": "850b552af397ce0ad7ccd0960f6e3f4c5f8874d7672f6d7a6707f9eb0f633b5b",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-exact-polytope-backward-graph/1/cfg-850b552af397ce0a",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4514,7 +4514,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -4538,15 +4538,15 @@
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
-          "sha256": "0f36c0c9a42dbdb2e5d230a646260aa2499e9cf57525af0e94c5adb08189a77f"
+          "sha256": "271028bcac16cc24ed61e6eee0dfccd18d8305c65b49bfb9c71ccaef69282c25"
         },
         {
           "path": "include/csl/geometry/polyhedral_projection.hpp",
-          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+          "sha256": "c100490f75d316428e373339221e673c723ba8ee9ee1dae9be5e5496e676ef21"
         },
         {
           "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "eb04f6b56896f5ed6d7d82dfaa56d5d3a054ccc7f261019a2f4da23b0e74291c"
+          "sha256": "f3feff742226e4c6689c9ab83e5fc4684dc38e70297acda1faab94b57bad62ab"
         },
         {
           "path": "include/csl/reachability/nominal_predecessor.hpp",
@@ -4554,31 +4554,31 @@
         },
         {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
+          "sha256": "839921fb1f512bbfacea9b59f57298da30ccbb4b747b12f201e11c0abe051ec5"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
-          "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+          "sha256": "7b45428b5e17ad3e92a0709e62ba160823b68fcad9ff534dc7d01e87eb189e44"
         },
         {
           "path": "src/geometry/polyhedral/intersection.cpp",
-          "sha256": "5a583fb352729d2d019dfead7733247fec4b0ca8651519a130b5095c5478821a"
+          "sha256": "b50fd689fbc2fcb788d3f926c2a71f38d3d4c1645901033434227b859f841bf6"
         },
         {
           "path": "src/geometry/polyhedral/projection.cpp",
-          "sha256": "9ddf45ee4b1687dd0d1fb6e4bf26ed3a68c5a28aaad265e33d2595f6b22a282f"
+          "sha256": "9966654eefa3469219626931ed068b3866844d158d2c2c129f1679d9bd92ba86"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "beb790b30558d5d6e669cf32a3a16c82a1b3a102c7737f2c5229d1633e02486c"
+          "sha256": "ed14641d9496e693f4c62ab3e76f48ae12ec45d8dc3ef1a554475b342913f2ab"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
-          "sha256": "fbddf69763541a9dcef2c89f1b362c28e0804680b9fb42e58e944818a93c36e5"
+          "sha256": "5c453fb37e0b62b67ef91c199aa814d8b19edb863f6ec1a640f6a5b4f5c579ec"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/nominal_predecessor.cpp",
@@ -4586,7 +4586,7 @@
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -4695,8 +4695,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "68b289d804ce8bafc5bcb23c2566c3af7006f999a30fadd60bce2036d3d3dcdf",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-box-mpc/1/cfg-68b289d804ce8baf",
+      "graph_fingerprint": "5c51dad130bb9b3a0dae007c9c444d0fe96eb0a16a17a733d3ba152ce5d628ae",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-box-mpc/1/cfg-5c51dad130bb9b3a",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4744,7 +4744,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -4768,27 +4768,27 @@
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
-          "sha256": "0f36c0c9a42dbdb2e5d230a646260aa2499e9cf57525af0e94c5adb08189a77f"
+          "sha256": "271028bcac16cc24ed61e6eee0dfccd18d8305c65b49bfb9c71ccaef69282c25"
         },
         {
           "path": "include/csl/geometry/polyhedral_projection.hpp",
-          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+          "sha256": "c100490f75d316428e373339221e673c723ba8ee9ee1dae9be5e5496e676ef21"
         },
         {
           "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "eb04f6b56896f5ed6d7d82dfaa56d5d3a054ccc7f261019a2f4da23b0e74291c"
+          "sha256": "f3feff742226e4c6689c9ab83e5fc4684dc38e70297acda1faab94b57bad62ab"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_box.hpp",
-          "sha256": "021297907da53db57d51071c9b68709a8a1a50cb41e26290062aa99d0fa3a111"
+          "sha256": "70eb4b1d0cfd6b375d2103ffe4b1d9cb168b9f4942fe560196ae3c26ede214a9"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "include/csl/reachability/nominal_predecessor.hpp",
@@ -4796,39 +4796,39 @@
         },
         {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
+          "sha256": "839921fb1f512bbfacea9b59f57298da30ccbb4b747b12f201e11c0abe051ec5"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
-          "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+          "sha256": "7b45428b5e17ad3e92a0709e62ba160823b68fcad9ff534dc7d01e87eb189e44"
         },
         {
           "path": "src/geometry/polyhedral/intersection.cpp",
-          "sha256": "5a583fb352729d2d019dfead7733247fec4b0ca8651519a130b5095c5478821a"
+          "sha256": "b50fd689fbc2fcb788d3f926c2a71f38d3d4c1645901033434227b859f841bf6"
         },
         {
           "path": "src/geometry/polyhedral/projection.cpp",
-          "sha256": "9ddf45ee4b1687dd0d1fb6e4bf26ed3a68c5a28aaad265e33d2595f6b22a282f"
+          "sha256": "9966654eefa3469219626931ed068b3866844d158d2c2c129f1679d9bd92ba86"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "beb790b30558d5d6e669cf32a3a16c82a1b3a102c7737f2c5229d1633e02486c"
+          "sha256": "ed14641d9496e693f4c62ab3e76f48ae12ec45d8dc3ef1a554475b342913f2ab"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
-          "sha256": "fbddf69763541a9dcef2c89f1b362c28e0804680b9fb42e58e944818a93c36e5"
+          "sha256": "5c453fb37e0b62b67ef91c199aa814d8b19edb863f6ec1a640f6a5b4f5c579ec"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_box.cpp",
-          "sha256": "c47ab2fbc17fe789298b6453a51de22dca279146cd464c84ee52070b5c4f2164"
+          "sha256": "d624d95d0be132d8c9881a75338c5ae82e3b0cf375a48f38405aea21caeb1d25"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/reachability/nominal_predecessor.cpp",
@@ -4836,7 +4836,7 @@
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -4945,8 +4945,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "59fdde5b1bf3f0ee14e2648c49546d81150d5da6f21124c6ef4c7b23cf6cff5e",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-zonotope-mpc/1/cfg-59fdde5b1bf3f0ee",
+      "graph_fingerprint": "39c94ff0a0a172254b6521c205adab4457cdc75003009303121f356fdc94f10e",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-zonotope-mpc/1/cfg-39c94ff0a0a17225",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4994,7 +4994,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -5018,27 +5018,27 @@
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
-          "sha256": "0f36c0c9a42dbdb2e5d230a646260aa2499e9cf57525af0e94c5adb08189a77f"
+          "sha256": "271028bcac16cc24ed61e6eee0dfccd18d8305c65b49bfb9c71ccaef69282c25"
         },
         {
           "path": "include/csl/geometry/polyhedral_projection.hpp",
-          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+          "sha256": "c100490f75d316428e373339221e673c723ba8ee9ee1dae9be5e5496e676ef21"
         },
         {
           "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "eb04f6b56896f5ed6d7d82dfaa56d5d3a054ccc7f261019a2f4da23b0e74291c"
+          "sha256": "f3feff742226e4c6689c9ab83e5fc4684dc38e70297acda1faab94b57bad62ab"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_zonotope.hpp",
-          "sha256": "16212a60e3db9800ead9723cec4eed384571ccefe3b97b5b5d62b9d583821813"
+          "sha256": "bdf9495770d84552785c1d8f7954ed0dcbe15f2fb14d379173d8b611a4347ddb"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "include/csl/reachability/nominal_predecessor.hpp",
@@ -5046,39 +5046,39 @@
         },
         {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
+          "sha256": "839921fb1f512bbfacea9b59f57298da30ccbb4b747b12f201e11c0abe051ec5"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
-          "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+          "sha256": "7b45428b5e17ad3e92a0709e62ba160823b68fcad9ff534dc7d01e87eb189e44"
         },
         {
           "path": "src/geometry/polyhedral/intersection.cpp",
-          "sha256": "5a583fb352729d2d019dfead7733247fec4b0ca8651519a130b5095c5478821a"
+          "sha256": "b50fd689fbc2fcb788d3f926c2a71f38d3d4c1645901033434227b859f841bf6"
         },
         {
           "path": "src/geometry/polyhedral/projection.cpp",
-          "sha256": "9ddf45ee4b1687dd0d1fb6e4bf26ed3a68c5a28aaad265e33d2595f6b22a282f"
+          "sha256": "9966654eefa3469219626931ed068b3866844d158d2c2c129f1679d9bd92ba86"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "beb790b30558d5d6e669cf32a3a16c82a1b3a102c7737f2c5229d1633e02486c"
+          "sha256": "ed14641d9496e693f4c62ab3e76f48ae12ec45d8dc3ef1a554475b342913f2ab"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
-          "sha256": "fbddf69763541a9dcef2c89f1b362c28e0804680b9fb42e58e944818a93c36e5"
+          "sha256": "5c453fb37e0b62b67ef91c199aa814d8b19edb863f6ec1a640f6a5b4f5c579ec"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_zonotope.cpp",
-          "sha256": "99042907401ed408a9674ff0399832a5c511f4efb6202d04da8445de6eeebe44"
+          "sha256": "4c866643a70d5564932c89e72ac5b55e3a016adc3d5c50954d9d95049a5b3d04"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/reachability/nominal_predecessor.cpp",
@@ -5086,7 +5086,7 @@
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -5195,8 +5195,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "d52e3147ac8e743614c83382dda1463ecd28ed5c6cf2ae2033c97f770fe25e7a",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-mpc/1/cfg-d52e3147ac8e7436",
+      "graph_fingerprint": "a3beede9e023a7b21d80547c0b2cdb39969bbd1552b6fb53c8e11e957f321e27",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-mpc/1/cfg-a3beede9e023a7b2",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -5244,7 +5244,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -5268,27 +5268,27 @@
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
-          "sha256": "0f36c0c9a42dbdb2e5d230a646260aa2499e9cf57525af0e94c5adb08189a77f"
+          "sha256": "271028bcac16cc24ed61e6eee0dfccd18d8305c65b49bfb9c71ccaef69282c25"
         },
         {
           "path": "include/csl/geometry/polyhedral_projection.hpp",
-          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+          "sha256": "c100490f75d316428e373339221e673c723ba8ee9ee1dae9be5e5496e676ef21"
         },
         {
           "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "eb04f6b56896f5ed6d7d82dfaa56d5d3a054ccc7f261019a2f4da23b0e74291c"
+          "sha256": "f3feff742226e4c6689c9ab83e5fc4684dc38e70297acda1faab94b57bad62ab"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_parallelotope.hpp",
-          "sha256": "2900e340c04c47f80d2032d09f74655ed331843e47de2d0624d30c36acfb0a95"
+          "sha256": "d873ce90a02bc70ba1f9f6dcc217f3a5164dd02a594c21539b94dfa3bc54d704"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "include/csl/reachability/nominal_predecessor.hpp",
@@ -5296,39 +5296,39 @@
         },
         {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
+          "sha256": "839921fb1f512bbfacea9b59f57298da30ccbb4b747b12f201e11c0abe051ec5"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
-          "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+          "sha256": "7b45428b5e17ad3e92a0709e62ba160823b68fcad9ff534dc7d01e87eb189e44"
         },
         {
           "path": "src/geometry/polyhedral/intersection.cpp",
-          "sha256": "5a583fb352729d2d019dfead7733247fec4b0ca8651519a130b5095c5478821a"
+          "sha256": "b50fd689fbc2fcb788d3f926c2a71f38d3d4c1645901033434227b859f841bf6"
         },
         {
           "path": "src/geometry/polyhedral/projection.cpp",
-          "sha256": "9ddf45ee4b1687dd0d1fb6e4bf26ed3a68c5a28aaad265e33d2595f6b22a282f"
+          "sha256": "9966654eefa3469219626931ed068b3866844d158d2c2c129f1679d9bd92ba86"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "beb790b30558d5d6e669cf32a3a16c82a1b3a102c7737f2c5229d1633e02486c"
+          "sha256": "ed14641d9496e693f4c62ab3e76f48ae12ec45d8dc3ef1a554475b342913f2ab"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
-          "sha256": "fbddf69763541a9dcef2c89f1b362c28e0804680b9fb42e58e944818a93c36e5"
+          "sha256": "5c453fb37e0b62b67ef91c199aa814d8b19edb863f6ec1a640f6a5b4f5c579ec"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_parallelotope.cpp",
-          "sha256": "503bac686cf35038e6fd3d15be76438ed80ecd301fec5b894466a34d6ea8acba"
+          "sha256": "44bab26cdaef36de50d1c5f0d590b8a2e398113440bdd26401609068921bb9aa"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/reachability/nominal_predecessor.cpp",
@@ -5336,7 +5336,7 @@
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -5445,8 +5445,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "d24bd7a60fef0f8555ffaaae5534a09b3e5b22eaeedcd61771bacda4bea15078",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-ellipsoid-mpc/1/cfg-d24bd7a60fef0f85",
+      "graph_fingerprint": "f9ca7d6bb9ab48f328f84af8e7f9cd48a6feb3f75a2b03d0c40c3e18fbb12a98",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-ellipsoid-mpc/1/cfg-f9ca7d6bb9ab48f3",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -5494,7 +5494,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -5518,27 +5518,27 @@
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
-          "sha256": "0f36c0c9a42dbdb2e5d230a646260aa2499e9cf57525af0e94c5adb08189a77f"
+          "sha256": "271028bcac16cc24ed61e6eee0dfccd18d8305c65b49bfb9c71ccaef69282c25"
         },
         {
           "path": "include/csl/geometry/polyhedral_projection.hpp",
-          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+          "sha256": "c100490f75d316428e373339221e673c723ba8ee9ee1dae9be5e5496e676ef21"
         },
         {
           "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "eb04f6b56896f5ed6d7d82dfaa56d5d3a054ccc7f261019a2f4da23b0e74291c"
+          "sha256": "f3feff742226e4c6689c9ab83e5fc4684dc38e70297acda1faab94b57bad62ab"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_ellipsoid.hpp",
-          "sha256": "7b57410198e703943b8b2561bc43f54c74ba9e8f50ec744ca840549e96486ed0"
+          "sha256": "5fe7bef1c83a2217c385c029332ae306a487d092895b3851c83d87d909d89088"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "include/csl/reachability/nominal_predecessor.hpp",
@@ -5546,39 +5546,39 @@
         },
         {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
+          "sha256": "839921fb1f512bbfacea9b59f57298da30ccbb4b747b12f201e11c0abe051ec5"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
-          "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+          "sha256": "7b45428b5e17ad3e92a0709e62ba160823b68fcad9ff534dc7d01e87eb189e44"
         },
         {
           "path": "src/geometry/polyhedral/intersection.cpp",
-          "sha256": "5a583fb352729d2d019dfead7733247fec4b0ca8651519a130b5095c5478821a"
+          "sha256": "b50fd689fbc2fcb788d3f926c2a71f38d3d4c1645901033434227b859f841bf6"
         },
         {
           "path": "src/geometry/polyhedral/projection.cpp",
-          "sha256": "9ddf45ee4b1687dd0d1fb6e4bf26ed3a68c5a28aaad265e33d2595f6b22a282f"
+          "sha256": "9966654eefa3469219626931ed068b3866844d158d2c2c129f1679d9bd92ba86"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "beb790b30558d5d6e669cf32a3a16c82a1b3a102c7737f2c5229d1633e02486c"
+          "sha256": "ed14641d9496e693f4c62ab3e76f48ae12ec45d8dc3ef1a554475b342913f2ab"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
-          "sha256": "fbddf69763541a9dcef2c89f1b362c28e0804680b9fb42e58e944818a93c36e5"
+          "sha256": "5c453fb37e0b62b67ef91c199aa814d8b19edb863f6ec1a640f6a5b4f5c579ec"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_ellipsoid.cpp",
-          "sha256": "9f4f40bf55a7e647b8b7724d677662153b8a6fb96ad7970928f326ec5fe78449"
+          "sha256": "e5cb4685554494e16e1547b3be9e9471c73e37ad525b91745e1529c326d46508"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/reachability/nominal_predecessor.cpp",
@@ -5586,7 +5586,7 @@
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -5667,8 +5667,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "6c0102dcc3505cd7bd646810343e1e85cd16a908862fc6a7f6726f34b28b77a3",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-exact-polytope-fixed-plan-mpc/1/cfg-6c0102dcc3505cd7",
+      "graph_fingerprint": "b669e3531609ac8600643781e6db4895a549883eb0251413ee9b70b6adf9a2a7",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-exact-polytope-fixed-plan-mpc/1/cfg-b669e3531609ac86",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -5699,7 +5699,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -5723,47 +5723,47 @@
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
-          "sha256": "18bd6bf94324859d586a932c72a56349a5c75d03de9420d3150e073a519ab86d"
+          "sha256": "5f20135a07b7dc17816e35588d34e31c6f46b49ba9937db18e8efe5b38914cd9"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "4b26514f962db92f24b8b5db0824432b4d2cd6ff2c087cad41d6eec65fd50a4d"
+          "sha256": "19b0817e4f6e1d09a10382f2eb0494d0ace05689da1d7ceb6eccc06099351331"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "src/optimization/finite_action_minimax.cpp",
-          "sha256": "b4596f11fab960cdee1392c10f02edf1e47913975787b91e2d8a1a7b92c22ebd"
+          "sha256": "f24348de13a6d11109052b56fcb14e636272c84b6be93e4c24ed4655eec51c6a"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "26192d7e06d857ae2d2d7efdcef1d667ea8f42bfaec0cd04d60c84ff0e514767"
+          "sha256": "9e37be0635f4a5f3072118c9465941461793c532ceb7ff824d1e914aff675b8b"
         },
         {
           "path": "src/optimization/finite_action_plans.hpp",
-          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+          "sha256": "b2ffc07a7a075fa05ff00d9ace77c22e0b454f062154031dc13075fa0d0e44ee"
         },
         {
           "path": "src/optimization/finite_action_replay.cpp",
-          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+          "sha256": "1bb3f5df7b72595c40ceefab130f751b2ffe6a084a53527e779043012eb863a9"
         },
         {
           "path": "src/optimization/finite_action_replay.hpp",
-          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
+          "sha256": "1cb2bb61408abcf1b98eb718853b57f6ad89c01539d868b78546ec34052509fe"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/fixed_plan_disturbance.cpp",
-          "sha256": "10cfe6d39f1ca49c888a225aa0608a4f064cb163b6e9324ee7a3127660076cf3"
+          "sha256": "e5e33f01037c7aae169be617f7d0bd5d9308afb48d1ebad4caa417e4367e297d"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -5847,8 +5847,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "4871758d42f61dc575230f26b5e47cf8b652ed088040d8b741492f4edaa9cab7",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-box-fixed-plan-mpc/1/cfg-4871758d42f61dc5",
+      "graph_fingerprint": "50aa769bc99c89e17bdb292c579a8c64db444725f2e0782717b81afc81787e4d",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-box-fixed-plan-mpc/1/cfg-50aa769bc99c89e1",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -5879,7 +5879,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -5903,63 +5903,63 @@
         },
         {
           "path": "include/csl/optimization/finite_action_box_minimax.hpp",
-          "sha256": "15e569c195f3f916366c7934e6a152a8ec92195d2ef7cd2537201a794ffe96c4"
+          "sha256": "f77c1b8633618e562482770b302ed00b347693a2e91e18848b6df828d0bf2df2"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
-          "sha256": "18bd6bf94324859d586a932c72a56349a5c75d03de9420d3150e073a519ab86d"
+          "sha256": "5f20135a07b7dc17816e35588d34e31c6f46b49ba9937db18e8efe5b38914cd9"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "4b26514f962db92f24b8b5db0824432b4d2cd6ff2c087cad41d6eec65fd50a4d"
+          "sha256": "19b0817e4f6e1d09a10382f2eb0494d0ace05689da1d7ceb6eccc06099351331"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_box.hpp",
-          "sha256": "021297907da53db57d51071c9b68709a8a1a50cb41e26290062aa99d0fa3a111"
+          "sha256": "70eb4b1d0cfd6b375d2103ffe4b1d9cb168b9f4942fe560196ae3c26ede214a9"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "src/optimization/finite_action_box_minimax.cpp",
-          "sha256": "b26de16f255116382cf1d43ea2ec8d51a488a7ab90f86c7a68df957cbd32b5cf"
+          "sha256": "6a1b796f94b67c1e74a3e58d7883ba7c20050e2a448a5023c495e39a8acf73e2"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "26192d7e06d857ae2d2d7efdcef1d667ea8f42bfaec0cd04d60c84ff0e514767"
+          "sha256": "9e37be0635f4a5f3072118c9465941461793c532ceb7ff824d1e914aff675b8b"
         },
         {
           "path": "src/optimization/finite_action_plans.hpp",
-          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+          "sha256": "b2ffc07a7a075fa05ff00d9ace77c22e0b454f062154031dc13075fa0d0e44ee"
         },
         {
           "path": "src/optimization/finite_action_replay.cpp",
-          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+          "sha256": "1bb3f5df7b72595c40ceefab130f751b2ffe6a084a53527e779043012eb863a9"
         },
         {
           "path": "src/optimization/finite_action_replay.hpp",
-          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
+          "sha256": "1cb2bb61408abcf1b98eb718853b57f6ad89c01539d868b78546ec34052509fe"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_box.cpp",
-          "sha256": "c47ab2fbc17fe789298b6453a51de22dca279146cd464c84ee52070b5c4f2164"
+          "sha256": "d624d95d0be132d8c9881a75338c5ae82e3b0cf375a48f38405aea21caeb1d25"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -6043,8 +6043,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "cf9605e3538beddc6ff10c4d70654716dd8f1b20817e0b999456f2bf4792209e",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-zonotope-fixed-plan-mpc/1/cfg-cf9605e3538beddc",
+      "graph_fingerprint": "3e8950ce7c0032d881a37fb34c3e800668aec46ed1617ba5099dc8a41e621410",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-zonotope-fixed-plan-mpc/1/cfg-3e8950ce7c0032d8",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -6075,7 +6075,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -6099,63 +6099,63 @@
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
-          "sha256": "18bd6bf94324859d586a932c72a56349a5c75d03de9420d3150e073a519ab86d"
+          "sha256": "5f20135a07b7dc17816e35588d34e31c6f46b49ba9937db18e8efe5b38914cd9"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "4b26514f962db92f24b8b5db0824432b4d2cd6ff2c087cad41d6eec65fd50a4d"
+          "sha256": "19b0817e4f6e1d09a10382f2eb0494d0ace05689da1d7ceb6eccc06099351331"
         },
         {
           "path": "include/csl/optimization/finite_action_zonotope_minimax.hpp",
-          "sha256": "f541ddbfbe4469589efb4a6996dc4ea4f174f7477d53b6e1cd60dd838ed51302"
+          "sha256": "f75885afa1b267f8ae388c98e0f7bd9cd8653d659c84894cae05a262e0f6b845"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_zonotope.hpp",
-          "sha256": "16212a60e3db9800ead9723cec4eed384571ccefe3b97b5b5d62b9d583821813"
+          "sha256": "bdf9495770d84552785c1d8f7954ed0dcbe15f2fb14d379173d8b611a4347ddb"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "26192d7e06d857ae2d2d7efdcef1d667ea8f42bfaec0cd04d60c84ff0e514767"
+          "sha256": "9e37be0635f4a5f3072118c9465941461793c532ceb7ff824d1e914aff675b8b"
         },
         {
           "path": "src/optimization/finite_action_plans.hpp",
-          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+          "sha256": "b2ffc07a7a075fa05ff00d9ace77c22e0b454f062154031dc13075fa0d0e44ee"
         },
         {
           "path": "src/optimization/finite_action_replay.cpp",
-          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+          "sha256": "1bb3f5df7b72595c40ceefab130f751b2ffe6a084a53527e779043012eb863a9"
         },
         {
           "path": "src/optimization/finite_action_replay.hpp",
-          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
+          "sha256": "1cb2bb61408abcf1b98eb718853b57f6ad89c01539d868b78546ec34052509fe"
         },
         {
           "path": "src/optimization/finite_action_zonotope_minimax.cpp",
-          "sha256": "dbeb25c975904905ea08ba5e99f3cd13ddf40469dfa9a9f1cec5ed87fc9c786f"
+          "sha256": "54ef7a4a157901c8f5da0c4030c5bb43f7cd60c8de813195a8f815f47444fb37"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_zonotope.cpp",
-          "sha256": "99042907401ed408a9674ff0399832a5c511f4efb6202d04da8445de6eeebe44"
+          "sha256": "4c866643a70d5564932c89e72ac5b55e3a016adc3d5c50954d9d95049a5b3d04"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -6239,8 +6239,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "5919fd5f590abcfd6008225dbe27a13f86b823d3a7086d1b6a380b5b546eb5d7",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-fixed-plan-mpc/1/cfg-5919fd5f590abcfd",
+      "graph_fingerprint": "3f969cefc7ccc4296579adf393dca922a6ef34f042e8a6fe0b12bae8a0809fe0",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-fixed-plan-mpc/1/cfg-3f969cefc7ccc429",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -6271,7 +6271,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -6295,63 +6295,63 @@
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
-          "sha256": "18bd6bf94324859d586a932c72a56349a5c75d03de9420d3150e073a519ab86d"
+          "sha256": "5f20135a07b7dc17816e35588d34e31c6f46b49ba9937db18e8efe5b38914cd9"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "4b26514f962db92f24b8b5db0824432b4d2cd6ff2c087cad41d6eec65fd50a4d"
+          "sha256": "19b0817e4f6e1d09a10382f2eb0494d0ace05689da1d7ceb6eccc06099351331"
         },
         {
           "path": "include/csl/optimization/finite_action_parallelotope_minimax.hpp",
-          "sha256": "e3002536cab1c3216293f7f70fd08bcb308addde53b58029b57898edb8296b3f"
+          "sha256": "67d3d6b0449087838ebd6680943840c4361f13ea3541799b52ef97168916623c"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_parallelotope.hpp",
-          "sha256": "2900e340c04c47f80d2032d09f74655ed331843e47de2d0624d30c36acfb0a95"
+          "sha256": "d873ce90a02bc70ba1f9f6dcc217f3a5164dd02a594c21539b94dfa3bc54d704"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "26192d7e06d857ae2d2d7efdcef1d667ea8f42bfaec0cd04d60c84ff0e514767"
+          "sha256": "9e37be0635f4a5f3072118c9465941461793c532ceb7ff824d1e914aff675b8b"
         },
         {
           "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "6d889401d15c66437c1cbd5e839e0b0fd7f1f8623afff86f7cf2411a60c8bf76"
+          "sha256": "be7018cb2156f15a0bce5fb54ee8bbcb18ab52118327057efaf7fa5c26443a97"
         },
         {
           "path": "src/optimization/finite_action_plans.hpp",
-          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+          "sha256": "b2ffc07a7a075fa05ff00d9ace77c22e0b454f062154031dc13075fa0d0e44ee"
         },
         {
           "path": "src/optimization/finite_action_replay.cpp",
-          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+          "sha256": "1bb3f5df7b72595c40ceefab130f751b2ffe6a084a53527e779043012eb863a9"
         },
         {
           "path": "src/optimization/finite_action_replay.hpp",
-          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
+          "sha256": "1cb2bb61408abcf1b98eb718853b57f6ad89c01539d868b78546ec34052509fe"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_parallelotope.cpp",
-          "sha256": "503bac686cf35038e6fd3d15be76438ed80ecd301fec5b894466a34d6ea8acba"
+          "sha256": "44bab26cdaef36de50d1c5f0d590b8a2e398113440bdd26401609068921bb9aa"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
@@ -6435,8 +6435,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "d79dbcb5c277fe5a47e094d0bb317f0f60b4bc85979ed8e1646efdbfee8bc2e1",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-ellipsoid-fixed-plan-mpc/1/cfg-d79dbcb5c277fe5a",
+      "graph_fingerprint": "3f95ff753429da4c8c8582c5927f758d9f764c8872ce5d43dcb98cb17383d7ea",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-ellipsoid-fixed-plan-mpc/1/cfg-3f95ff753429da4c",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -6467,7 +6467,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "71b52ce978bbca74a3c8999852d643ef78dd05ca128c8f6fce73e2914c9f4dd4"
+          "sha256": "79c4dd4b988f0dd1f0215eda5e24fc723a777bc367c3abe749c35bf867acbe99"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -6491,63 +6491,63 @@
         },
         {
           "path": "include/csl/optimization/finite_action_ellipsoid_minimax.hpp",
-          "sha256": "78a5974e5dd4dffed486bf26bebebf6376fa6a525e8fbca1aa35010bc2123f5e"
+          "sha256": "212da90ea4a6f08d7ff89f17e6f69868b4e427efd736d54de7f0e7e7cc447568"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
-          "sha256": "18bd6bf94324859d586a932c72a56349a5c75d03de9420d3150e073a519ab86d"
+          "sha256": "5f20135a07b7dc17816e35588d34e31c6f46b49ba9937db18e8efe5b38914cd9"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "4b26514f962db92f24b8b5db0824432b4d2cd6ff2c087cad41d6eec65fd50a4d"
+          "sha256": "19b0817e4f6e1d09a10382f2eb0494d0ace05689da1d7ceb6eccc06099351331"
         },
         {
           "path": "include/csl/reachability/detail/outer_safety.hpp",
-          "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+          "sha256": "4c781033709bd3d8effbfdc5e39587af4496bff517a7ba7c1a12fc6eebc4b01e"
         },
         {
           "path": "include/csl/reachability/finite_plan_ellipsoid.hpp",
-          "sha256": "7b57410198e703943b8b2561bc43f54c74ba9e8f50ec744ca840549e96486ed0"
+          "sha256": "5fe7bef1c83a2217c385c029332ae306a487d092895b3851c83d87d909d89088"
         },
         {
           "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
-          "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+          "sha256": "b57a462f07d85506dd65e4eb518074a90e4548f8eded4b8973e9740424fa13e8"
         },
         {
           "path": "src/optimization/finite_action_ellipsoid_minimax.cpp",
-          "sha256": "958cb41245718c51121566929917a9e81b895fa15b16efcbf467ae0e0e951bb2"
+          "sha256": "6bc025b9501d640d903ac64967951d8954e1b16efee1bd0efbe02682f8fbfc3d"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "26192d7e06d857ae2d2d7efdcef1d667ea8f42bfaec0cd04d60c84ff0e514767"
+          "sha256": "9e37be0635f4a5f3072118c9465941461793c532ceb7ff824d1e914aff675b8b"
         },
         {
           "path": "src/optimization/finite_action_plans.hpp",
-          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+          "sha256": "b2ffc07a7a075fa05ff00d9ace77c22e0b454f062154031dc13075fa0d0e44ee"
         },
         {
           "path": "src/optimization/finite_action_replay.cpp",
-          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+          "sha256": "1bb3f5df7b72595c40ceefab130f751b2ffe6a084a53527e779043012eb863a9"
         },
         {
           "path": "src/optimization/finite_action_replay.hpp",
-          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
+          "sha256": "1cb2bb61408abcf1b98eb718853b57f6ad89c01539d868b78546ec34052509fe"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
-          "sha256": "bc23e7b9406814ed6bd5d49a3e27c9ba2e38063f3f518f453242ca4f4a6e3266"
+          "sha256": "8b547312e3c1e6989b6302caaa57bef267581358726f7992d0c7a6abf1bd6189"
         },
         {
           "path": "src/reachability/finite_plan_ellipsoid.cpp",
-          "sha256": "9f4f40bf55a7e647b8b7724d677662153b8a6fb96ad7970928f326ec5fe78449"
+          "sha256": "e5cb4685554494e16e1547b3be9e9471c73e37ad525b91745e1529c326d46508"
         },
         {
           "path": "src/reachability/fixed_plan_admission.hpp",
-          "sha256": "be0c5a047e415279213964d422f689186202319e8a509a5914186be7fd040d76"
+          "sha256": "9ee372e7ce2ba44868ea35833c79287d8c9e283796b64c86d0afe732acb4f730"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
-          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+          "sha256": "6c5c3217c087fc7adffccfbc4e51d5e2c655ddbebf09bd41d2d4040233dc75f8"
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
