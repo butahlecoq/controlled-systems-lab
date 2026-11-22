@@ -84,7 +84,7 @@ struct Strategies {
             [count=factories](const LinearProgram&) {++*count;return std::make_unique<FixedControl>();}});
         lp.add({{{"endpoint-b"},"1"},[](const LinearProgram&,const Requirements&) -> Capability {return Offer{};},
             [count=factories](const LinearProgram&) {++*count;return std::make_unique<BoundControl>();}});
-        for(const std::string profile:{"forward","inverse","compact","full-dimensional","nominal","stagewise","square-safe"}) strategies.add({{{profile},"1"},
+        for(const std::string profile:{"forward","inverse","compact","full-dimensional","nominal","stagewise","scalar-residual-upper-screen"}) strategies.add({{{profile},"1"},
             [profile](const StrategyRequest& request,const Requirements& requirements) -> Capability {
                 const auto& p=*request.problem.description();
                 if(profile=="inverse" && std::get<LinearStage>(p.model->dynamics.stages).A.values[0]==0)
@@ -95,7 +95,7 @@ struct Strategies {
                 }
                 if(profile=="stagewise" && p.temporal && p.temporal->joint_map.rows)
                     return Diagnostics{{DiagnosticCode::unsupported,"strategy.history","requires stagewise constraints"}};
-                if(profile=="square-safe") {
+                if(profile=="scalar-residual-upper-screen") {
                     const auto* residual=std::get_if<ResidualNormTerminal>(&p.objective);
                     if(!residual || residual->map.rows!=1 || residual->map.cols!=1 || residual->target!=Vector{0} ||
                         std::abs(residual->map.values[0])>std::sqrt(std::numeric_limits<double>::max()/2))
@@ -475,9 +475,9 @@ TEST_CASE("objective authority separates PSD rejection numerical stop and explic
     p.objective=ResidualNormTerminal{{1,1,{1e200}},{0}};const auto large=published(p);CHECK(accepted(optimization::evaluate(large.objective(),Vector{1}))==1e200);
     const auto transform=optimization::square_residual_norm(large.objective());REQUIRE(std::holds_alternative<OperationStopped>(transform));
     CHECK(std::get<OperationStopped>(transform).reason==StopReason::numerical_failure);
-    Strategies registry;CHECK(std::holds_alternative<Rejection>(prepare_strategy(large,registry.strategies,configuration("square-safe"))));CHECK(*registry.factories==0);
+    Strategies registry;CHECK(std::holds_alternative<Rejection>(prepare_strategy(large,registry.strategies,configuration("scalar-residual-upper-screen"))));CHECK(*registry.factories==0);
     auto small=scalar();small.objective=ResidualNormTerminal{{1,1,{2}},{0}};
-    CHECK(std::holds_alternative<PreparedResolvedStrategy>(prepare_strategy(published(small),registry.strategies,configuration("square-safe"))));CHECK(*registry.factories==0);
+    CHECK(std::holds_alternative<PreparedResolvedStrategy>(prepare_strategy(published(small),registry.strategies,configuration("scalar-residual-upper-screen"))));CHECK(*registry.factories==0);
     c=context();c.objective_policy.numerical={1e-6,1e-6};CHECK(accepted(resolve(p,c)).identity()==large.identity());
 }
 TEST_CASE("prepared actual dependency graph survives registries and rejected late dependencies create nothing") {

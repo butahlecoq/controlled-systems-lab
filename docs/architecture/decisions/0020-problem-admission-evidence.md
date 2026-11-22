@@ -13,12 +13,14 @@ the expected digest is derived from the same serialization code under test.
 
 ## Decision
 
-- Keep the test's `square-safe` strategy fixture deliberately narrow: its
-  capability probe admits only a scalar zero-target residual whose squared
-  coefficient fits the checked binary64 bound. The probe performs arithmetic
-  admission only; it does not allocate a reformulated objective or invoke an
-  eigensolver. This describes the fixture contract, not a universal production
-  strategy profile.
+- Keep the test's `scalar-residual-upper-screen` strategy fixture deliberately
+  narrow: its capability probe requires a 1-by-1 zero-target residual and
+  screens `abs(map[0])` against `sqrt(max_double/2)`. It does not inspect
+  residual weights or detect underflow, so it does not guarantee that the
+  squared coefficient is representable. The probe performs this arithmetic
+  screen without allocating a reformulated objective or invoking an
+  eigensolver. This describes the fixture contract, not a production strategy
+  profile.
 - For the fixture's full-dimensional profile, accept affine dimension only
   when the set representation establishes it by definition and its value
   matches the ambient dimension. A supplied or unverified dimension claim is
