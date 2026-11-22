@@ -2,6 +2,9 @@
 
 import report_site as _report_site
 
+catalogue_index = _report_site.catalogue_index
+register_publication_policies = _report_site.register_publication_policies
+
 globals().update(
     {name: value for name, value in vars(_report_site).items() if not name.startswith("__")}
 )
