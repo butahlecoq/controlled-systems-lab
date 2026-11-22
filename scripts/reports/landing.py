@@ -118,6 +118,13 @@ FAMILIES = {
         "aggregate branch limits, and stop-status propagation. Its saved measurements describe this "
         "single case and do not establish a general performance comparison.",
     ),
+    "catalogue-external-fixed-plan-v1": Family(
+        r"examples/catalogue-external-fixed-plan-v1",
+        "geometry",
+        "Fixed-plan reachability with external disturbances",
+        "Compares five representations under the same fixed controls and authored external sets. "
+        "The queue figure shows full-state propagation projected onto two coordinates.",
+    ),
     "catalogue-forward-reachability-v1": Family(
         r"examples/catalogue-forward-reachability-v1",
         "geometry",
@@ -1304,6 +1311,22 @@ def build(site: Path) -> None:
                     ("Sampled supports", forward + "/support.csv"),
                     ("Independent audit", forward + "/support-audit.json"),
                     ("Offline example", forward + "/catalogue-forward-reachability-v1.zip"),
+                ),
+            )
+        )
+    external = "examples/catalogue-external-fixed-plan-v1"
+    if (site / external / "index.html").is_file():
+        manifest = json.loads((site / external / "manifest.json").read_text(encoding="utf-8"))
+        detailed = [entry for entry in detailed if entry.report_id != external]
+        detailed.append(
+            Entry(
+                report_id=external,
+                scope="175 native fixed-plan results from 35 models and five set representations.",
+                limits="Two transitions with authored disturbances. Zonotope checks sample directions.",
+                commit=manifest["source_commit"],
+                links=(
+                    ("Independent audit", external + "/audit.json"),
+                    ("Offline evidence", external + "/catalogue-external-fixed-plan-v1.zip"),
                 ),
             )
         )

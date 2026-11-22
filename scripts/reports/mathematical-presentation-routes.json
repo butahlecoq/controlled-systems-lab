@@ -772,6 +772,13 @@
       "witness": "Frozen matched feasible-history sweep from CSL SDK v0.1.1"
     },
     {
+      "route": "examples/catalogue-external-fixed-plan-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/catalogue-external-fixed-plan-v1/index.html",
+      "sha256": "a44cdeebcd26cc80548820b7af50f034815e5c27b7e39ac6a90e3facc9aad5c2",
+      "witness": "Source-qualified two-transition comparison of five fixed-plan set representations"
+    },
+    {
       "route": "examples/catalogue-forward-reachability-v1/index.html",
       "disposition": "frozen",
       "owner": "reports/algorithm-results/catalogue-forward-reachability-v1/index.html",

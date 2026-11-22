@@ -1220,6 +1220,10 @@
           "href": "../examples/native-extended-models-v1/manifest.json"
         },
         {
+          "label": "Five fixed-plan enclosures under external disturbances",
+          "href": "../examples/catalogue-external-fixed-plan-v1/index.html"
+        },
+        {
           "label": "Three-step forward reachability on all 35 catalogue models",
           "href": "../examples/catalogue-forward-reachability-v1/index.html"
         },

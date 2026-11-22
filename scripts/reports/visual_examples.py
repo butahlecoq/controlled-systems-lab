@@ -28,6 +28,7 @@ import site_additions
 import site_design
 import stage_buryatia_dim4
 import stage_buryatia_volterra
+import stage_catalogue_external_fixed_plan
 import stage_catalogue_forward_reachability
 import stage_discrete_mpc_2d
 import stage_ext07
@@ -1413,6 +1414,10 @@ def build(catalog, site):
         Path(__file__).resolve().parents[2]
     )
     saved_figures += crossover_card
+    external_files, external_inventory, external_card = stage_catalogue_external_fixed_plan.build(
+        Path(__file__).resolve().parents[2]
+    )
+    saved_figures += external_card
     buryatia_files, buryatia_inventory, buryatia_card = stage_buryatia_dim4.build(
         Path(__file__).resolve().parents[2]
     )
@@ -1527,6 +1532,7 @@ def build(catalog, site):
     outputs.update(approximation_files)
     outputs.update(forward_files)
     outputs.update(catalogue_history_files)
+    outputs.update(external_files)
     outputs.update(catalogue_exact_files)
     outputs.update(catalogue_backward_files)
     outputs.update(catalogue_finite_files)
@@ -1750,6 +1756,7 @@ def build(catalog, site):
     gallery_inventory.extend(approximation_inventory)
     gallery_inventory.extend(forward_inventory)
     gallery_inventory.extend(catalogue_history_inventory)
+    gallery_inventory.extend(external_inventory)
     gallery_inventory.extend(catalogue_exact_inventory)
     gallery_inventory.extend(catalogue_backward_inventory)
     gallery_inventory.extend(catalogue_finite_inventory)
