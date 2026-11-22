@@ -232,6 +232,37 @@ TEST_CASE("erased c product is declined while the original constant norm remains
 
 }
 
+TEST_CASE("weighted map underflow is declined while the original norm remains usable") {
+    const double weight = std::numeric_limits<double>::denorm_min();
+    auto original = accepted(snapshot(ResidualNormTerminal{{1, 1, {0.5}}, {0}, {weight}}));
+    CHECK(accepted(evaluate(original, Vector{1})) > 0);
+    auto result = square_residual_norm(original);
+    expect_numerical_failure(result);
+    CHECK(std::get<OperationStopped>(result).diagnostics.find("objective.reformulation.Q") !=
+          std::string::npos);
+}
+
+TEST_CASE(
+    "weighted target underflow is declined while the original constant norm remains usable") {
+    const double weight = std::numeric_limits<double>::denorm_min();
+    auto original = accepted(snapshot(ResidualNormTerminal{{1, 0, {}}, {0.5}, {weight}}));
+    CHECK(accepted(evaluate(original, {})) > 0);
+    auto result = square_residual_norm(original);
+    expect_numerical_failure(result);
+    CHECK(std::get<OperationStopped>(result).diagnostics.find("objective.reformulation.c") !=
+          std::string::npos);
+}
+
+TEST_CASE(
+    "weighted subnormal intermediates remain usable when the square is representable") {
+    const double weight = std::numeric_limits<double>::denorm_min();
+    auto record = accepted(square_residual_norm(
+        accepted(snapshot(ResidualNormTerminal{{1, 1, {0x1p40}}, {0}, {weight}}))));
+    CHECK(std::get<QuadraticCoefficients>(record.squared().coefficients()).Q(0, 0) == 0x1p-993);
+    CHECK(accepted(evaluate(record.original(), Vector{0x1p-40})) == std::sqrt(weight));
+    CHECK(accepted(evaluate(record.squared(), Vector{0x1p-40})) == weight);
+}
+
 TEST_CASE("norm expansion retains representable subnormal products") {
     auto record = accepted(square_residual_norm(accepted(snapshot(ResidualNormTerminal{{1, 1, {0x1p-520}}, {0}}))));
     CHECK(std::get<QuadraticCoefficients>(record.squared().coefficients()).Q(0, 0) == 0x1p-1039);
