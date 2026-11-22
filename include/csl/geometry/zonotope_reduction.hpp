@@ -5,7 +5,8 @@
 namespace csl::geometry::approximation {
 
 // Remove physically zero unconstrained generator columns through ConversionPort.
-registry::Registration<registry::ConversionPort> make_zero_generator_removal_registration(SetId output_id);
+registry::Registration<registry::ConversionPort>
+make_zero_generator_removal_registration(SetId output_id);
 
 // Replace omitted factors by independent coordinate-axis intervals. The
 // registered result requires independent outer inclusion admission.

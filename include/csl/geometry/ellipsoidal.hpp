@@ -13,25 +13,25 @@ struct FactorEllipsoid {
     Matrix factor;
 };
 
-using FactorEllipsoidResult = std::variant<FactorEllipsoid,Diagnostics>;
+using FactorEllipsoidResult = std::variant<FactorEllipsoid, Diagnostics>;
 
-FactorEllipsoidResult make_factor_ellipsoid(Vector center,Matrix factor);
+FactorEllipsoidResult make_factor_ellipsoid(Vector center, Matrix factor);
 
 // Exact affine image of the represented factor set, evaluated in binary64.
-FactorEllipsoidResult affine_image(const FactorEllipsoid& input,
-                                   const Matrix& map,const Vector& offset);
+FactorEllipsoidResult affine_image(const FactorEllipsoid &input, const Matrix &map,
+                                   const Vector &offset);
 
 // Outer ellipsoid for E1 (+) E2. In real arithmetic the block factor
 // [sqrt(1+beta) F1, sqrt(1+1/beta) F2] encloses the Minkowski sum: for
 // ||u||,||v|| <= 1, the concatenated witness has squared norm at most
 // 1/(1+beta) + 1/(1+1/beta) = 1. This operation does not claim validated
 // floating-point rounding.
-FactorEllipsoidResult outer_minkowski_sum(const FactorEllipsoid& left,
-    const FactorEllipsoid& right,double beta);
+FactorEllipsoidResult outer_minkowski_sum(const FactorEllipsoid &left, const FactorEllipsoid &right,
+                                          double beta);
 
 // The box center + G[-1,1]^m is contained by the factor ellipsoid
 // E(center,sqrt(m) G), since ||u||_2 <= sqrt(m) for every box vertex.
-FactorEllipsoidResult outer_box(Vector center,const Matrix& generators);
+FactorEllipsoidResult outer_box(Vector center, const Matrix &generators);
 
 // E = {x: sum_i (B_i(x-c)/r_i)^2 <= 1}; r_i=0 requires B_i(x-c)=0.
 // Its real-arithmetic shape B^-1 diag(r_i^2) B^-T is PSD by construction.
@@ -44,60 +44,63 @@ struct EllipsoidInput {
     std::vector<std::string> coordinate_labels;
 };
 
-namespace detail { struct EllipsoidStorage; }
+namespace detail {
+struct EllipsoidStorage;
+}
 
 class EllipsoidSet {
-public:
-    EllipsoidSet(const EllipsoidSet&) = default;
-    EllipsoidSet& operator=(const EllipsoidSet&) = default;
-    const SetId& id() const noexcept;
-    const Vector& center() const noexcept;
-    const Matrix& orientation() const noexcept;
-    const Vector& projected_bounds() const noexcept;
-    const Vector& radii() const noexcept;
-    const std::vector<std::string>& coordinate_labels() const noexcept;
+  public:
+    EllipsoidSet(const EllipsoidSet &) = default;
+    EllipsoidSet &operator=(const EllipsoidSet &) = default;
+    const SetId &id() const noexcept;
+    const Vector &center() const noexcept;
+    const Matrix &orientation() const noexcept;
+    const Vector &projected_bounds() const noexcept;
+    const Vector &radii() const noexcept;
+    const std::vector<std::string> &coordinate_labels() const noexcept;
     SetHandle as_handle() const;
     // Numerical support value of the exact set defined by stored coefficients.
-    std::variant<double,Diagnostics> support(const Vector& direction) const;
-private:
+    std::variant<double, Diagnostics> support(const Vector &direction) const;
+
+  private:
     explicit EllipsoidSet(std::shared_ptr<const detail::EllipsoidStorage> storage);
     std::shared_ptr<const detail::EllipsoidStorage> storage_;
-    friend std::variant<EllipsoidSet,Diagnostics> make_ellipsoid(EllipsoidInput);
-    friend std::variant<EllipsoidSet,Diagnostics> from_ellipsoid_handle(const SetHandle&);
+    friend std::variant<EllipsoidSet, Diagnostics> make_ellipsoid(EllipsoidInput);
+    friend std::variant<EllipsoidSet, Diagnostics> from_ellipsoid_handle(const SetHandle &);
 };
 
-using EllipsoidResult = std::variant<EllipsoidSet,Diagnostics>;
+using EllipsoidResult = std::variant<EllipsoidSet, Diagnostics>;
 EllipsoidResult make_ellipsoid(EllipsoidInput input);
-EllipsoidResult from_ellipsoid_handle(const SetHandle& handle);
+EllipsoidResult from_ellipsoid_handle(const SetHandle &handle);
 
 enum class FamilyComposition { intersection, union_of_members };
 class EllipsoidFamily {
-public:
-    const SetId& reference_id() const noexcept { return reference_id_; }
+  public:
+    const SetId &reference_id() const noexcept { return reference_id_; }
     SetRelation relation() const noexcept { return relation_; }
     FamilyComposition composition() const noexcept { return composition_; }
-    const std::vector<approximation::EnclosedApproximation>& members() const noexcept {
+    const std::vector<approximation::EnclosedApproximation> &members() const noexcept {
         return members_;
     }
-private:
-    EllipsoidFamily(SetId reference_id,SetRelation relation,FamilyComposition composition,
-        std::vector<approximation::EnclosedApproximation> members)
-        :reference_id_(std::move(reference_id)),relation_(relation),composition_(composition),
-         members_(std::move(members)){}
+
+  private:
+    EllipsoidFamily(SetId reference_id, SetRelation relation, FamilyComposition composition,
+                    std::vector<approximation::EnclosedApproximation> members)
+        : reference_id_(std::move(reference_id)), relation_(relation), composition_(composition),
+          members_(std::move(members)) {}
     SetId reference_id_;
     SetRelation relation_;
     FamilyComposition composition_;
     std::vector<approximation::EnclosedApproximation> members_;
-    friend std::variant<EllipsoidFamily,registry::Rejection,OperationStopped,Unsupported>
-        run_ellipsoid_family(const registry::Registry<registry::ApproximationPort>&,
-            const std::vector<registry::Method>&,const ApproximationRequest&,
-            const ExecutionContext&);
+    friend std::variant<EllipsoidFamily, registry::Rejection, OperationStopped, Unsupported>
+    run_ellipsoid_family(const registry::Registry<registry::ApproximationPort> &,
+                         const std::vector<registry::Method> &, const ApproximationRequest &,
+                         const ExecutionContext &);
 };
-using EllipsoidFamilyOutcome=std::variant<EllipsoidFamily,registry::Rejection,
-    OperationStopped,Unsupported>;
-EllipsoidFamilyOutcome run_ellipsoid_family(
-    const registry::Registry<registry::ApproximationPort>&,
-    const std::vector<registry::Method>&,const ApproximationRequest&,
-    const ExecutionContext&);
+using EllipsoidFamilyOutcome =
+    std::variant<EllipsoidFamily, registry::Rejection, OperationStopped, Unsupported>;
+EllipsoidFamilyOutcome run_ellipsoid_family(const registry::Registry<registry::ApproximationPort> &,
+                                            const std::vector<registry::Method> &,
+                                            const ApproximationRequest &, const ExecutionContext &);
 
 } // namespace csl::geometry::ellipsoidal

@@ -13,19 +13,18 @@ constexpr std::size_t consecutive_redundant_trigger = 10;
 constexpr double group_radius_factor = 0.05;
 
 class GroupedHullReducerWorkspace final : public HullReducerWorkspace {
-public:
-    HullReductionResult reduce(const PointCloud& cloud, LPWorkspace& lp,
-            const ExecutionContext& context) override {
+  public:
+    HullReductionResult reduce(const PointCloud &cloud, LPWorkspace &lp,
+                               const ExecutionContext &context) override {
         return reduce_grouped_hull(cloud, lp, context);
     }
 };
 
-GroupedReductionMetrics ordered_candidates(const PointCloud& cloud,
-        std::vector<double>& widths) {
+GroupedReductionMetrics ordered_candidates(const PointCloud &cloud, std::vector<double> &widths) {
     GroupedReductionMetrics metrics;
     const auto count = cloud.points.size();
     metrics.ordered_candidates = count;
-    auto& order = metrics.processing_order;
+    auto &order = metrics.processing_order;
     order.resize(count);
     std::iota(order.begin(), order.end(), std::size_t{0});
     const auto dimension = count == 0 ? 0 : cloud.points.front().size();
@@ -33,7 +32,7 @@ GroupedReductionMetrics ordered_candidates(const PointCloud& cloud,
         metrics.used_identity_fallback = count > 0 && dimension == 0;
         return metrics;
     }
-    for (const auto& point : cloud.points)
+    for (const auto &point : cloud.points)
         if (point.size() != dimension ||
             std::any_of(point.begin(), point.end(), [](double x) { return !std::isfinite(x); })) {
             metrics.used_identity_fallback = true;
@@ -43,8 +42,9 @@ GroupedReductionMetrics ordered_candidates(const PointCloud& cloud,
     std::vector<double> midpoints(dimension, 0.0);
     widths.assign(dimension, 0.0);
     for (std::size_t axis = 0; axis < dimension; ++axis) {
-        const auto bounds = std::minmax_element(cloud.points.begin(), cloud.points.end(),
-            [axis](const Vector& a, const Vector& b) { return a[axis] < b[axis]; });
+        const auto bounds = std::minmax_element(
+            cloud.points.begin(), cloud.points.end(),
+            [axis](const Vector &a, const Vector &b) { return a[axis] < b[axis]; });
         const double low = (*bounds.first)[axis];
         const double high = (*bounds.second)[axis];
         widths[axis] = high - low;
@@ -56,13 +56,13 @@ GroupedReductionMetrics ordered_candidates(const PointCloud& cloud,
         }
         midpoints[axis] = std::midpoint(low, high);
     }
-    if (metrics.used_identity_fallback) return metrics;
+    if (metrics.used_identity_fallback)
+        return metrics;
 
     std::vector<double> scores(count, -std::numeric_limits<double>::infinity());
     for (std::size_t axis = 0; axis < dimension; ++axis) {
         for (std::size_t point = 0; point < count; ++point) {
-            const double normalized =
-                (cloud.points[point][axis] - midpoints[axis]) / widths[axis];
+            const double normalized = (cloud.points[point][axis] - midpoints[axis]) / widths[axis];
             if (!std::isfinite(normalized)) {
                 metrics.used_identity_fallback = true;
                 return metrics;
@@ -70,14 +70,13 @@ GroupedReductionMetrics ordered_candidates(const PointCloud& cloud,
             scores[point] = std::max(scores[point], std::abs(normalized));
         }
     }
-    std::stable_sort(order.begin(), order.end(), [&](std::size_t a, std::size_t b) {
-        return scores[a] > scores[b];
-    });
+    std::stable_sort(order.begin(), order.end(),
+                     [&](std::size_t a, std::size_t b) { return scores[a] > scores[b]; });
     return metrics;
 }
 
-bool close_to_group(const PointCloud& cloud, std::size_t left, std::size_t right,
-        const std::vector<double>& widths, double radius) {
+bool close_to_group(const PointCloud &cloud, std::size_t left, std::size_t right,
+                    const std::vector<double> &widths, double radius) {
     double distance = 0.0;
     for (std::size_t axis = 0; axis < widths.size(); ++axis)
         distance = std::hypot(distance, cloud.points[left][axis] - cloud.points[right][axis]);
@@ -90,22 +89,24 @@ bool stop_outcome(MembershipOutcome outcome) {
 
 } // namespace
 
-HullReductionResult reduce_grouped_hull(const PointCloud& cloud, LPWorkspace& lp,
-        const ExecutionContext& context) {
+HullReductionResult reduce_grouped_hull(const PointCloud &cloud, LPWorkspace &lp,
+                                        const ExecutionContext &context) {
     std::vector<double> widths;
     auto metrics = ordered_candidates(cloud, widths);
-    const auto& order = metrics.processing_order;
+    const auto &order = metrics.processing_order;
     // Reuse the shared input/context validator without issuing an LP query.
     auto validation = detail::reduce_hull_in_order(cloud, lp, context, {});
-    if (std::holds_alternative<Diagnostics>(validation)) return validation;
+    if (std::holds_alternative<Diagnostics>(validation))
+        return validation;
     if (order.size() < 2) {
         auto result = detail::reduce_hull_in_order(cloud, lp, context, order);
-        if (auto* reduction = std::get_if<HullReduction>(&result)) reduction->grouped = std::move(metrics);
+        if (auto *reduction = std::get_if<HullReduction>(&result))
+            reduction->grouped = std::move(metrics);
         return result;
     }
 
-    const bool grouping_supported = !metrics.used_identity_fallback &&
-        !widths.empty() && *std::min_element(widths.begin(), widths.end()) > 0.0;
+    const bool grouping_supported = !metrics.used_identity_fallback && !widths.empty() &&
+                                    *std::min_element(widths.begin(), widths.end()) > 0.0;
     std::vector<std::size_t> retained{order[0], order[1]};
     std::vector<RemovalCertificate> prior_certificates;
     std::vector<MembershipAttempt> stage_attempts;
@@ -170,8 +171,10 @@ HullReductionResult reduce_grouped_hull(const PointCloud& cloud, LPWorkspace& lp
             if (classified.attempt.outcome != MembershipOutcome::feasible &&
                 classified.attempt.outcome != MembershipOutcome::infeasible)
                 staged_incomplete = true;
-            if (classified.certificate) prior_certificates.push_back(std::move(*classified.certificate));
-            else outside_group.push_back(candidate);
+            if (classified.certificate)
+                prior_certificates.push_back(std::move(*classified.certificate));
+            else
+                outside_group.push_back(candidate);
             if (stop_outcome(classified.attempt.outcome)) {
                 stop_after_staging = true;
                 ++position;
@@ -179,19 +182,22 @@ HullReductionResult reduce_grouped_hull(const PointCloud& cloud, LPWorkspace& lp
             }
         }
         if (position < order.size())
-            outside_group.insert(outside_group.end(), order.begin() + static_cast<std::ptrdiff_t>(position), order.end());
+            outside_group.insert(outside_group.end(),
+                                 order.begin() + static_cast<std::ptrdiff_t>(position),
+                                 order.end());
         retained = fixed;
         retained.insert(retained.end(), outside_group.begin(), outside_group.end());
     } else if (position < order.size()) {
         // A stopped stream leaves the unclassified suffix untouched for the
         // final shared pass; no candidate is discarded on an uncertain result.
-        retained.insert(retained.end(), order.begin() + static_cast<std::ptrdiff_t>(position), order.end());
+        retained.insert(retained.end(), order.begin() + static_cast<std::ptrdiff_t>(position),
+                        order.end());
     }
 
-    auto result = detail::finish_grouped_hull(cloud, lp, context, retained,
-        std::move(prior_certificates), std::move(stage_attempts), stage_lp_calls,
-        staged_incomplete, stop_after_staging);
-    if (auto* reduction = std::get_if<HullReduction>(&result)) {
+    auto result = detail::finish_grouped_hull(
+        cloud, lp, context, retained, std::move(prior_certificates), std::move(stage_attempts),
+        stage_lp_calls, staged_incomplete, stop_after_staging);
+    if (auto *reduction = std::get_if<HullReduction>(&result)) {
         reduction->grouped = std::move(metrics);
     }
     return result;
@@ -199,10 +205,10 @@ HullReductionResult reduce_grouped_hull(const PointCloud& cloud, LPWorkspace& lp
 
 registry::Registration<registry::HullReducerPort> make_grouped_hull_reducer_registration() {
     return {{{"csl.hull.grouped-membership"}, "1.0.0"},
-        [](const PointCloud&, const registry::Requirements&) -> registry::Capability {
-            return registry::Offer{};
-        },
-        [](const PointCloud&) { return std::make_unique<GroupedHullReducerWorkspace>(); }};
+            [](const PointCloud &, const registry::Requirements &) -> registry::Capability {
+                return registry::Offer{};
+            },
+            [](const PointCloud &) { return std::make_unique<GroupedHullReducerWorkspace>(); }};
 }
 
 } // namespace csl::geometry

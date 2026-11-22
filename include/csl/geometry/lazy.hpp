@@ -13,18 +13,21 @@ struct ExpressionDescription {
     std::vector<std::string> coordinate_labels;
 };
 
-std::variant<ExpressionDescription, Diagnostics> inspect_expression(const SetHandle&);
+std::variant<ExpressionDescription, Diagnostics> inspect_expression(const SetHandle &);
 
 registry::Registration<registry::GeometryPort> make_expression_registration();
 
 // The selected leaf support provider is copied into the registration. Its
 // registry may be destroyed after preparation; each leaf query is admitted
 // against that immutable provider before execution.
-registry::Registration<registry::GeometryPort> make_support_registration(
-    registry::PreparedProvider<registry::GeometryPort> leaf_support);
+registry::Registration<registry::GeometryPort>
+make_support_registration(registry::PreparedProvider<registry::GeometryPort> leaf_support);
 
 enum class SampleCoverage { directions_only };
-struct SupportSample { Vector direction; SupportResult answer; };
+struct SupportSample {
+    Vector direction;
+    SupportResult answer;
+};
 struct SupportSamples {
     GeometryReference reference;
     SampleCoverage coverage{SampleCoverage::directions_only};
@@ -34,11 +37,14 @@ using SampleOutcome = std::variant<SupportSamples, Unsupported, OperationStopped
 
 // Finite directions are diagnostics, not a materialized set or a global
 // inclusion certificate. No partial batch is published on a stop or refusal.
-SampleOutcome sample_support(const registry::PreparedProvider<registry::GeometryPort>& provider,
-    const SetHandle& input, const std::vector<Vector>& directions,
-    const GeometryRequestIdentity& identity, const ExecutionContext& context);
+SampleOutcome sample_support(const registry::PreparedProvider<registry::GeometryPort> &provider,
+                             const SetHandle &input, const std::vector<Vector> &directions,
+                             const GeometryRequestIdentity &identity,
+                             const ExecutionContext &context);
 
-struct MaterializationBudget { std::size_t max_vertices, max_rays; };
+struct MaterializationBudget {
+    std::size_t max_vertices, max_rays;
+};
 struct RepresentationGrowth {
     std::size_t source_vertices{}, source_rays{};
     std::size_t estimated_vertices{}, estimated_rays{};
@@ -63,8 +69,9 @@ struct MaterializationFailure {
 using MaterializationOutcome = std::variant<MaterializationResult, MaterializationFailure>;
 
 registry::Registration<registry::ConversionPort> make_materializer(MaterializationBudget);
-MaterializationOutcome materialize_expression(const ConversionRequest&,
-    MaterializationBudget, const registry::PreparedProvider<registry::ConversionPort>&,
-    const ExecutionContext&);
+MaterializationOutcome
+materialize_expression(const ConversionRequest &, MaterializationBudget,
+                       const registry::PreparedProvider<registry::ConversionPort> &,
+                       const ExecutionContext &);
 
 } // namespace csl::geometry::lazy

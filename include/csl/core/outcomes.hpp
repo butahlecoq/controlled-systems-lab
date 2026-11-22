@@ -58,7 +58,6 @@ struct Verifier {
 struct ResidualMeasure {
     double violation, scale;
 };
-// All checks use binary64 and violation <= absolute + relative * scale.
 struct ResidualContext {
     ProgramIdentity subject;
     Verifier verifier;
@@ -81,10 +80,10 @@ enum class StopReason { cancelled, deadline_expired, resource_limit, numerical_f
 struct OperationStopped {
     StopReason reason;
     std::string diagnostics;
-}; // no successful set/guarantee
+};
 struct Unsupported {
     Diagnostics diagnostics;
 };
 Diagnostics check_outcome_evidence(const ProgramOutcomeClaim &, const ProgramIdentity &, Assurance);
 Diagnostics check_outcome_evidence(const SynthesisOutcomeClaim &, const ProblemId &, Assurance);
-} // namespace csl
+}

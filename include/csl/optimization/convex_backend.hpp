@@ -12,15 +12,19 @@ struct ConvexProgramInput {
     std::vector<Interval> variables, rows;
     std::optional<ProgramId> squared_program;
 };
-template<class T> using ConvexDataResult = std::variant<T, Diagnostics, OperationStopped>;
-ConvexDataResult<ConvexProgram> make_convex_program(const ConvexProgramInput&, ObjectivePolicy = {});
+template <class T> using ConvexDataResult = std::variant<T, Diagnostics, OperationStopped>;
+ConvexDataResult<ConvexProgram> make_convex_program(const ConvexProgramInput &,
+                                                    ObjectivePolicy = {});
 // Snapshot a finite, dimension-matched primal hint without changing the problem identity.
-ConvexDataResult<ConvexProgram> with_primal_start(const ConvexProgram&, std::span<const double>);
+ConvexDataResult<ConvexProgram> with_primal_start(const ConvexProgram &, std::span<const double>);
 struct ConvexPrimalEvaluation {
     double original_objective, solver_objective;
     PrimalResiduals residuals;
 };
-ConvexDataResult<ConvexPrimalEvaluation> evaluate_primal(const ConvexProgram&, std::span<const double>, NumericalPolicy, const Verifier&);
-ConvexDataResult<DualResiduals> evaluate_dual(const ConvexProgram&, std::span<const double>, const DualMultipliers&, NumericalPolicy, const Verifier&);
-Diagnostics check_program_result(const ProgramResult&, const ConvexProgram&, Assurance);
+ConvexDataResult<ConvexPrimalEvaluation>
+evaluate_primal(const ConvexProgram &, std::span<const double>, NumericalPolicy, const Verifier &);
+ConvexDataResult<DualResiduals> evaluate_dual(const ConvexProgram &, std::span<const double>,
+                                              const DualMultipliers &, NumericalPolicy,
+                                              const Verifier &);
+Diagnostics check_program_result(const ProgramResult &, const ConvexProgram &, Assurance);
 } // namespace csl::optimization

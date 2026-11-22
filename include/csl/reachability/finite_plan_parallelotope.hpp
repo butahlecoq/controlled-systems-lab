@@ -6,28 +6,28 @@
 namespace csl::reachability {
 
 struct ParallelotopeStage {
-  Vector lower;
-  Vector upper;
+    Vector lower;
+    Vector upper;
 };
 
 struct FinitePlanParallelotopeTrace {
-  static constexpr SetRelation relation = SetRelation::outer;
-  // x = frame * y; each coordinate box in y is one physical parallelotope.
-  Matrix frame;
-  std::vector<ParallelotopeStage> stages;
-  Assurance assurance{Assurance::numerical};
+    static constexpr SetRelation relation = SetRelation::outer;
+    // x = frame * y; each coordinate box in y is one physical parallelotope.
+    Matrix frame;
+    std::vector<ParallelotopeStage> stages;
+    Assurance assurance{Assurance::numerical};
 };
 
 using FinitePlanParallelotopeOutcome =
     std::variant<FinitePlanParallelotopeTrace, Unsupported, OperationStopped>;
 
-// Stagewise outer propagation in a fixed, non-axis-aligned four-state frame.
+// Stagewise outer propagation for 2 to 64 states. The 2D frame is identity
+// and the 4D frame is a single shear block. Other dimensions use successive
+// two-coordinate shear blocks and an identity coordinate if the count is odd.
 // Universal, singleton and H state constraints are supported when every full
 // outer parallelotope is contained; failed containment is inconclusive.
-// The frame and its integer inverse are fixed by this first TwoPoints profile;
-// singular dynamics are supported because the frame is not derived from A.
-FinitePlanParallelotopeOutcome
-finite_plan_parallelotope(const FixedPlanRequest &request,
-                          const ExecutionContext &context = {});
+// Singular dynamics are supported because the frame is independent of A.
+FinitePlanParallelotopeOutcome finite_plan_parallelotope(const FixedPlanRequest &request,
+                                                         const ExecutionContext &context = {});
 
 } // namespace csl::reachability

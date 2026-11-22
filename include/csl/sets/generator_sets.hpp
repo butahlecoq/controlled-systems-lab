@@ -7,7 +7,7 @@ namespace csl::sets {
 // A factor ID denotes the same scalar in every generator set that carries it.
 struct FactorId {
     std::string value;
-    bool operator==(const FactorId&) const = default;
+    bool operator==(const FactorId &) const = default;
 };
 
 // {center + generators * xi : -1 <= xi <= 1, equalities * xi = equality_values}.
@@ -22,30 +22,33 @@ struct GeneratorInput {
     std::vector<std::string> coordinate_labels;
 };
 
-namespace detail { struct GeneratorStorage; }
+namespace detail {
+struct GeneratorStorage;
+}
 
 class GeneratorSet {
-public:
-    GeneratorSet(const GeneratorSet&) = default;
-    GeneratorSet& operator=(const GeneratorSet&) = default;
-    const SetId& id() const noexcept;
-    const Vector& center() const noexcept;
-    const Matrix& generators() const noexcept;
-    const std::vector<FactorId>& factor_ids() const noexcept;
-    const Matrix& equalities() const noexcept;
-    const Vector& equality_values() const noexcept;
-    const std::vector<std::string>& coordinate_labels() const noexcept;
+  public:
+    GeneratorSet(const GeneratorSet &) = default;
+    GeneratorSet &operator=(const GeneratorSet &) = default;
+    const SetId &id() const noexcept;
+    const Vector &center() const noexcept;
+    const Matrix &generators() const noexcept;
+    const std::vector<FactorId> &factor_ids() const noexcept;
+    const Matrix &equalities() const noexcept;
+    const Vector &equality_values() const noexcept;
+    const std::vector<std::string> &coordinate_labels() const noexcept;
     SetHandle as_handle() const;
-private:
+
+  private:
     explicit GeneratorSet(std::shared_ptr<const detail::GeneratorStorage> storage);
     std::shared_ptr<const detail::GeneratorStorage> storage_;
     friend std::variant<GeneratorSet, Diagnostics> make_generator_set(GeneratorInput);
-    friend std::variant<GeneratorSet, Diagnostics> from_generator_handle(const SetHandle&);
+    friend std::variant<GeneratorSet, Diagnostics> from_generator_handle(const SetHandle &);
 };
 
 using GeneratorResult = std::variant<GeneratorSet, Diagnostics>;
 GeneratorResult make_generator_set(GeneratorInput);
-GeneratorResult from_generator_handle(const SetHandle&);
+GeneratorResult from_generator_handle(const SetHandle &);
 
 struct FactorPolyhedron {
     SetData factors; // exact H form in the factor coordinates, modulo binary64 coefficients
@@ -53,6 +56,6 @@ struct FactorPolyhedron {
     Vector offset;
     std::vector<FactorId> factor_ids; // ordered H axes and map columns
 };
-std::variant<FactorPolyhedron, Diagnostics> factor_polyhedron(const GeneratorSet&);
+std::variant<FactorPolyhedron, Diagnostics> factor_polyhedron(const GeneratorSet &);
 
 } // namespace csl::sets

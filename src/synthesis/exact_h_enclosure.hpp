@@ -18,11 +18,11 @@ struct Interval {
     Rational lower, upper;
 };
 
-inline bool accumulate_scaled_interval(Interval& sum, double coefficient,
-                                       const Interval& argument, Budget& budget) {
+inline bool accumulate_scaled_interval(Interval &sum, double coefficient, const Interval &argument,
+                                       Budget &budget) {
     Rational scale, lower, upper;
-    const auto& first = coefficient < 0 ? argument.upper : argument.lower;
-    const auto& last = coefficient < 0 ? argument.lower : argument.upper;
+    const auto &first = coefficient < 0 ? argument.upper : argument.lower;
+    const auto &last = coefficient < 0 ? argument.lower : argument.upper;
     if (!exact_rational::from_binary64(coefficient, scale, budget) ||
         !exact_rational::multiply(scale, first, lower, budget) ||
         !exact_rational::multiply(scale, last, upper, budget) ||
@@ -41,12 +41,12 @@ struct Binary64UpperRow {
 // Enclose the exact half-space inside the supplied coordinate box. For every
 // x in the box, the new normal's rounding error is at most the sum of its
 // coordinatewise maxima. Add that exact allowance before rounding the RHS up.
-inline std::optional<Binary64UpperRow> enclose_upper_row(
-    const exact_h::Row& row, std::span<const Interval> box, Budget& budget) {
+inline std::optional<Binary64UpperRow>
+enclose_upper_row(const exact_h::Row &row, std::span<const Interval> box, Budget &budget) {
     if (box.size() != row.coefficients.size())
         return std::nullopt;
     auto bits = exact_h::exact_detail::bit_length(row.bound);
-    for (const auto& coefficient : row.coefficients)
+    for (const auto &coefficient : row.coefficients)
         bits = std::max(bits, exact_h::exact_detail::bit_length(coefficient));
     if (bits > budget.max_integer_bits ||
         bits > static_cast<std::size_t>(std::numeric_limits<int>::max()))
@@ -57,14 +57,14 @@ inline std::optional<Binary64UpperRow> enclose_upper_row(
     Binary64UpperRow result;
     result.coefficients.reserve(box.size());
     for (std::size_t coordinate = 0; coordinate < box.size(); ++coordinate) {
-        const auto& interval = box[coordinate];
+        const auto &interval = box[coordinate];
         int order{};
         if (!exact_rational::compare(interval.lower, interval.upper, order, budget) || order > 0)
             return std::nullopt;
-        const auto& coefficient = row.coefficients[coordinate];
+        const auto &coefficient = row.coefficients[coordinate];
         const Rational exact{coefficient, one, exponent};
-        const auto bracket = exact_h::bracket_binary64(
-            {coefficient, one, exponent}, budget.max_integer_bits);
+        const auto bracket =
+            exact_h::bracket_binary64({coefficient, one, exponent}, budget.max_integer_bits);
         if (bracket.status != exact_h::Binary64BracketStatus::finite)
             return std::nullopt;
         result.coefficients.push_back(bracket.lower);
@@ -73,8 +73,8 @@ inline std::optional<Binary64UpperRow> enclose_upper_row(
         Rational rounded, error, allowance;
         if (!exact_rational::from_binary64(bracket.lower, rounded, budget) ||
             !exact_rational::subtract(rounded, exact, error, budget) ||
-            !exact_rational::multiply(error, error.numerator.negative ? interval.lower
-                                                                      : interval.upper,
+            !exact_rational::multiply(error,
+                                      error.numerator.negative ? interval.lower : interval.upper,
                                       allowance, budget) ||
             !exact_rational::add(corrected, allowance, corrected, budget))
             return std::nullopt;

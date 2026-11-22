@@ -11,7 +11,11 @@
 
 namespace csl::experiments {
 
-enum class ReplayPolicyClass { nominal_reference, frozen_coefficient_regulator, selected_linear_witness };
+enum class ReplayPolicyClass {
+    nominal_reference,
+    frozen_coefficient_regulator,
+    selected_linear_witness
+};
 
 struct ReplayClaimScope {
     verification::CheckStatus nonlinear_feasibility{verification::CheckStatus::not_checked};
@@ -38,10 +42,10 @@ struct ReplayComparison {
 
 // Associates one ordered replay record with each selected linear path. Replays
 // are separate evidence and never change the linear objective or its claims.
-artifacts::ArtifactResult<ReplayComparison> associate_replays(
-    const Problem&, const artifacts::PlotData&, artifacts::RunRecordRef,
-    std::span<const simulation::ReplayRecord>,
-    std::optional<std::string> linear_objective_unit = {});
+artifacts::ArtifactResult<ReplayComparison>
+associate_replays(const Problem &, const artifacts::PlotData &, artifacts::RunRecordRef,
+                  std::span<const simulation::ReplayRecord>,
+                  std::optional<std::string> linear_objective_unit = {});
 
 struct ReplayTrajectoryPath {
     std::size_t source_ordinal{};
@@ -66,13 +70,13 @@ struct ReplayTrajectoryPair {
 
 // Projects selected coordinates from full replay states. These are trajectories,
 // not reachable-set boundaries. The renderer performs no simulation or geometry.
-artifacts::ArtifactResult<ReplayTrajectoryPair> project_replay_trajectories(
-    const ReplayComparison&, artifacts::CoordinatePair,
-    std::array<artifacts::CoordinateAnnotation, 2> coordinate_labels);
+artifacts::ArtifactResult<ReplayTrajectoryPair>
+project_replay_trajectories(const ReplayComparison &, artifacts::CoordinatePair,
+                            std::array<artifacts::CoordinateAnnotation, 2> coordinate_labels);
 
-artifacts::ArtifactResult<problem::ResolvedContent> encode_replay_comparison(
-    const ReplayComparison&, artifacts::EncodeLimits = {});
-artifacts::ArtifactResult<problem::ResolvedContent> decode_replay_comparison(
-    std::string_view, artifacts::DecodeLimits = {});
+artifacts::ArtifactResult<problem::ResolvedContent>
+encode_replay_comparison(const ReplayComparison &, artifacts::EncodeLimits = {});
+artifacts::ArtifactResult<problem::ResolvedContent>
+    decode_replay_comparison(std::string_view, artifacts::DecodeLimits = {});
 
 } // namespace csl::experiments

@@ -54,13 +54,13 @@ using HistoryMapResult = std::variant<ControlHistory, LiftedControlHistory, Diag
 // Rewrites a nominal full-history control problem with one-step slew limits as
 // z[t+1] = [A[t] B[t]; 0 I] z[t] + [B[t]; I] v[t] + [a[t]; 0],
 // where z[t]=(x[t],u[t-1]) and v[t]=u[t]-u[t-1].
-SlewLiftResult lift_one_step_slew(const Problem&, const SlewMemoryRequest&);
+SlewLiftResult lift_one_step_slew(const Problem &, const SlewMemoryRequest &);
 
 // These maps are inverse on histories related by the memory equations.
-HistoryMapResult lift_history(const SlewCoordinateMap&, const ControlHistory&);
+HistoryMapResult lift_history(const SlewCoordinateMap &, const ControlHistory &);
 // Recovery checks, but does not certify, histories against the initial-memory
 // and p[t+1]=p[t]+v[t] equations using the caller's numerical policy.
-HistoryMapResult recover_history(const SlewCoordinateMap&, const LiftedControlHistory&,
-    double absolute_tolerance, double relative_tolerance);
+HistoryMapResult recover_history(const SlewCoordinateMap &, const LiftedControlHistory &,
+                                 double absolute_tolerance, double relative_tolerance);
 
 } // namespace csl::problem

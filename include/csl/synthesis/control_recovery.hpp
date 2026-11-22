@@ -20,12 +20,12 @@ using ControlRecoveryOutcome = std::variant<JointHistoryRelation, Diagnostics>;
 // a known initial point, continuous controls, no external input, and native
 // H/singleton/empty/universal polyhedral sets. No variables are projected out.
 // Binary64 row assembly is not a numerical or validated completeness proof.
-ControlRecoveryOutcome recover_joint_history(const problem::ResolvedProblem&,
-    const sets::SetData& terminal_relation);
+ControlRecoveryOutcome recover_joint_history(const problem::ResolvedProblem &,
+                                             const sets::SetData &terminal_relation);
 
 struct HistoryIndexRange {
     std::size_t begin, end; // Half-open range in the canonical H relation.
-    bool operator==(const HistoryIndexRange&) const = default;
+    bool operator==(const HistoryIndexRange &) const = default;
 };
 
 struct HistoryPrefixProjection {
@@ -47,7 +47,8 @@ using LiftedHistoryProjectionOutcome = std::variant<LiftedHistoryProjections, Di
 
 // Construct shared lifted descriptions of the stage marginals of the stored
 // affine problem. The views need no variable elimination or copied H matrices.
-LiftedHistoryProjectionOutcome recover_lifted_history_projections(
-    const problem::ResolvedProblem&, const sets::SetData& terminal_relation);
+LiftedHistoryProjectionOutcome
+recover_lifted_history_projections(const problem::ResolvedProblem &,
+                                   const sets::SetData &terminal_relation);
 
 } // namespace csl::synthesis
