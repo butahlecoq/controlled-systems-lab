@@ -99,6 +99,22 @@ class CommentRatchetTests(unittest.TestCase):
         self.assertIn("scripts/ci/new.py:1: # Forbidden in new file", result.stderr)
         self.assertNotIn("outside.py", result.stderr)
 
+    def test_checks_catalogue_ci_test_and_cmake_test_scopes(self):
+        paths = (
+            "scripts/catalogue/qualify.py",
+            "tests/ci/test_guard.py",
+            "tests/cmake/test_archive.py",
+        )
+        for path in paths:
+            source = self.root / path
+            source.parent.mkdir(parents=True, exist_ok=True)
+            source.write_text("# New prose\n")
+        self.git("add", ".")
+        result = self.checker("check", "--base", "HEAD")
+        self.assertEqual(result.returncode, 1, result.stderr)
+        for path in paths:
+            self.assertIn(f"{path}:1: # New prose", result.stderr)
+
     def test_inventory_reads_the_requested_commit_and_counts_physically_removable_lines(self):
         self.file.write_text('# comment only\nx = "#"  # inline\n')
         self.git("commit", "-qam", "Change comment inventory")

@@ -946,7 +946,6 @@ class RegisteredKindTests(unittest.TestCase):
             self.assertIn("<td>2,135,700</td>", opt_page)
             self.assertIn("<td>1,029,100</td>", geo_page)
             self.assertIn("Checked latency SVG", geo_page)
-            # Every kind in the current mixed catalogue uses the same outer publication contract.
             self.assertEqual(
                 {row["report_kind"]: row["payload_schema"] for row in catalogue["reports"]},
                 {
@@ -1173,8 +1172,6 @@ class RegisteredKindTests(unittest.TestCase):
                 "b04-c-research-dossier",
             ):
                 self.assertTrue({"measured_scope", "evidence_limits"} <= set(report))
-                # Per-kind saved schemas/manifests are validated at the boundary,
-                # then projected into the same catalogue identity contract.
                 self.assertIn("source_report_id", report)
                 self.assertNotEqual(report["report_id"], report["source_report_id"])
                 publisher = (
@@ -1645,7 +1642,6 @@ class RegisteredKindTests(unittest.TestCase):
             envelope_path.write_text(json.dumps(envelope), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "manifest file hash mismatch"):
                 site.validate_publication_manifest(report_dir, report)
-            # Recompute the outer file hash to prove the payload digest is also enforced.
             manifest_path = report_dir / "publication-manifest.json"
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
             manifest["files"]["report-envelope.json"] = hashlib.sha256(

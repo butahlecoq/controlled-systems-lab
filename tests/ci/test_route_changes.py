@@ -96,7 +96,6 @@ class RoutingTests(unittest.TestCase):
         self.assertEqual(self.route(), ("true", "true"))
 
     def test_pages_composer_and_python_quality_pr_runs_reporting_only(self):
-        # Complete PR #1111 diff at 224cad7804bfdaa162ebfb1f2affae8aafea476f.
         for path in (
             ".github/workflows/python-quality.yml",
             "pyproject.toml",

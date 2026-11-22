@@ -22,7 +22,7 @@ on:
       - 'docs/catalogue/closed-loop-native-compositions-v1.*'
       - 'tests/architecture/check_numeric_dependencies.py'
       - 'tests/architecture/check_stage_projection_boundaries.py'
-      - 'tests/cmake/test_dependency_archive.py'
+      - 'tests/cmake/**'
       - 'tests/obs04/perf_control_mock.py'
       - 'tests/obs04/perf_probe_tests.py'
       - 'scripts/obs04_perf_probe.py'
@@ -312,7 +312,7 @@ on:
       - 'docs/catalogue/closed-loop-native-compositions-v1.*'
       - 'tests/architecture/check_numeric_dependencies.py'
       - 'tests/architecture/check_stage_projection_boundaries.py'
-      - 'tests/cmake/test_dependency_archive.py'
+      - 'tests/cmake/**'
       - 'tests/obs04/perf_control_mock.py'
       - 'tests/obs04/perf_probe_tests.py'
       - 'scripts/obs04_perf_probe.py'
@@ -604,7 +604,7 @@ jobs:
         run: ruff format --check
       - name: Check types
         run: ty check
-      - name: Reject new prose comments in CI Python tools
+      - name: Reject new prose comments in maintained tooling and CI tests
         env:
           COMMENT_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: python scripts/ci/check_comment_ratchet.py check --base "$COMMENT_BASE"

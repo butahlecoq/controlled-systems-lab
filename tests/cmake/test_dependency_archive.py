@@ -44,8 +44,6 @@ FetchContent_MakeAvailable(fixture)
 file(READ "${fixture_SOURCE_DIR}/value.txt" value)
 file(WRITE "${CMAKE_BINARY_DIR}/answer.txt" "${value}")
 """
-        # FetchContent's Windows local-file handling expects a plain path;
-        # file(DOWNLOAD), exercised by the cache, expects the file URI.
         remote = self.archive.as_uri() if cache else self.archive.as_posix()
         cmake = (
             template.replace("@HELPER@", HELPER.as_posix())

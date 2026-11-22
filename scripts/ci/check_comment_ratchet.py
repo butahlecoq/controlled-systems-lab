@@ -1,4 +1,4 @@
-"""Inventory tracked Python comments and prevent new prose in scripts/ci."""
+"""Inventory tracked Python comments and prevent new prose in maintained tooling."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Literal
 
-SCOPE = "scripts/ci"
+SCOPES = ("scripts/ci", "scripts/catalogue", "tests/ci", "tests/cmake")
 CommentKind = Literal["comment_only", "inline", "directive"]
 ENCODING_COOKIE = re.compile(r"^#.*?coding[:=][ \t]*[-\w.]+")
 TYPE_COMMENT = re.compile(r"#\s*type:\s*(\S.*)")
@@ -116,9 +116,9 @@ def snapshot(root: Path, commit: str, *paths: str) -> dict[str, list[Comment]]:
 
 
 def newly_added(root: Path, base: str) -> list[Comment]:
-    previous = snapshot(root, base, SCOPE)
+    previous = snapshot(root, base, *SCOPES)
     violations = []
-    for path in python_paths(git(root, "ls-files", "-z", "--", SCOPE)):
+    for path in python_paths(git(root, "ls-files", "-z", "--", *SCOPES)):
         file = root / path
         if file.is_symlink():
             raise ValueError(f"{path}: expected a regular Python file")
@@ -146,7 +146,7 @@ def main() -> int:
     check.add_argument("--base", required=True)
     inventory = modes.add_parser("inventory", help="list Python comments at a Git revision")
     inventory.add_argument("--ref", default="HEAD")
-    inventory.add_argument("paths", nargs="*", default=[SCOPE])
+    inventory.add_argument("paths", nargs="*", default=list(SCOPES))
     args = parser.parse_args()
     try:
         root = Path(os.fsdecode(git(Path.cwd(), "rev-parse", "--show-toplevel")).rstrip("\n"))

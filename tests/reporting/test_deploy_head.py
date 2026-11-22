@@ -150,9 +150,6 @@ class DeploymentHeadTest(unittest.TestCase):
     def test_cumulative_deployer_keeps_newer_pending_when_older_validation_finishes_late(
         self,
     ) -> None:
-        # Model GitHub's documented pending-slot semantics from the sole publisher.
-        # A running old deployment holds the group while the newer, then older,
-        # validated jobs arrive. Preserve the queued, newest-source publication.
         workflow = (
             ROOT / ".github" / "workflows" / "pages-augmentation-aggregation.yml"
         ).read_text()
@@ -169,7 +166,7 @@ class DeploymentHeadTest(unittest.TestCase):
         else:
             self.fail("Unsupported deploy queue policy")
 
-        published = "0" * 40  # Already-running deployment finished first.
+        published = "0" * 40
         for commit in pending:
             result, output, _ = self.run_gate(commit)
             self.assertEqual(result.returncode, 0, result.stderr)

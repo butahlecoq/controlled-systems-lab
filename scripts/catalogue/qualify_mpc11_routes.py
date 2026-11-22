@@ -43,8 +43,6 @@ def main() -> int:
         task_contract_path = repo_root / "docs/contracts/closed-loop" / f"{name}.json"
         task_id = task_contract["task_id"]
         scenario_hash = validate(scenario)
-        # Validate task identity and source binding before consulting optional
-        # external solver packages. A bad contract must remain a hard failure.
         try:
             for module in ("numpy", "scipy", "casadi", "do_mpc"):
                 importlib.import_module(module)
