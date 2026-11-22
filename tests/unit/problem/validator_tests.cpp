@@ -99,7 +99,7 @@ struct Strategies {
                     const auto* residual=std::get_if<ResidualNormTerminal>(&p.objective);
                     if(!residual || residual->map.rows!=1 || residual->map.cols!=1 || residual->target!=Vector{0} ||
                         std::abs(residual->map.values[0])>std::sqrt(std::numeric_limits<double>::max()/2))
-                        return Diagnostics{{DiagnosticCode::unsupported,"strategy.objective","requires a scalar zero-target residual with representable squared coefficient"}};
+                        return Diagnostics{{DiagnosticCode::unsupported,"strategy.objective","requires a scalar zero-target residual within the map-magnitude screen"}};
                 }
                 if(profile=="compact" || profile=="full-dimensional") {
                     const auto& set=std::get<ContinuousDomain>(p.controls).stages.at(0);
