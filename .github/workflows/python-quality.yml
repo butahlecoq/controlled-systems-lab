@@ -100,6 +100,8 @@ on:
       - 'tests/reporting/test_preserve_published_routes.py'
       - 'scripts/reports/stage_review05_family_query.py'
       - 'tests/reporting/test_review05_family_query.py'
+      - 'tests/reporting/test_review05_build_phases.py'
+      - 'tests/reporting/test_review05_capture_tools.py'
       - 'tests/reporting/test_review05_publication.py'
       - 'tests/reporting/test_review05_resource_receipt.py'
       - 'tests/reporting/test_scalar_query_oracle.py'
@@ -615,6 +617,8 @@ on:
       - 'tests/reporting/test_preserve_published_routes.py'
       - 'scripts/reports/stage_review05_family_query.py'
       - 'tests/reporting/test_review05_family_query.py'
+      - 'tests/reporting/test_review05_build_phases.py'
+      - 'tests/reporting/test_review05_capture_tools.py'
       - 'tests/reporting/test_review05_publication.py'
       - 'tests/reporting/test_review05_resource_receipt.py'
       - 'tests/reporting/test_scalar_query_oracle.py'
@@ -1162,7 +1166,7 @@ jobs:
             cmp "$output/index.html" "$output-compat/index.html"
           done
           python -m unittest discover -s tests/reporting -p 'test_syn03_strategy_a_report.py'
-          python -m unittest tests.reporting.test_review05_family_query tests.reporting.test_review05_publication tests.reporting.test_review05_resource_receipt tests.reporting.test_scalar_query_oracle
+          python -m unittest tests.reporting.test_review05_build_phases tests.reporting.test_review05_capture_tools tests.reporting.test_review05_family_query tests.reporting.test_review05_publication tests.reporting.test_review05_resource_receipt tests.reporting.test_scalar_query_oracle
           python -m unittest discover -s tests/reporting -p 'test_syn03_ts02_report.py'
       - name: Check six saved environment routes and offline ZIPs
         run: >-
