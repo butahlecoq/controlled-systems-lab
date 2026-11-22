@@ -34,6 +34,27 @@ and non-unique optima.
   nonzero multiplier on a free variable is invalid input because that bound
   does not exist.
 
+## Literal fixture derivations
+
+For `x, y >= 0` and `x + y <= 1`, `x + 2y <= 2(x + y) <= 2`; equality in
+both inequalities requires `(x, y) = (0, 1)`. Thus minimizing `-x - 2y`
+gives `-2` at that point. With authored objective `x + 2y + 7`, canonical
+negation must also negate the offset: the minimized value is `-9`, while the
+authored maximum is `9`.
+
+The fixed/equality case has `y = -2` and `2x - y = 6`, hence `x = 2` and
+`x + 3y + 11 = 7`. Scaling the equality row by 1024 gives
+`2048x - 1024y = 6144`, preserving the point and cost. Replacing offset 11 by
+`-2` shifts the same objective value by `-13`, from `7` to `-6`.
+
+The contradictory case requires both `x <= 0` and `x >= 1`; the additional
+`2x <= 0` row is redundant and does not remove the contradiction. In the
+unbounded case, `x = t >= 0` is feasible for every `t` and objective `-x`
+tends to `-infinity`. For the degenerate face, feasible `x, y >= 0` satisfy
+`x + y <= 1`, so `5 - x - y >= 4`; every point on the segment `x + y = 1`
+attains 4. The oracle therefore checks the optimal face without selecting one
+endpoint or claiming it enumerates the family.
+
 ## Consequences
 
 The contract can verify each selected registration against the same literal
