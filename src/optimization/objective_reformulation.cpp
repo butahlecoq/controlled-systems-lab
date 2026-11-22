@@ -15,9 +15,12 @@ OperationStopped arithmetic_failure() {
     return {StopReason::numerical_failure,
             "Nonrepresentable objective arithmetic or eigensolver failure."};
 }
+bool product_erased(double product, double left, double right) {
+    return product == 0 && left != 0 && right != 0;
+}
 bool accumulate_product(double &total, double left, double right) {
     const double product = left * right;
-    if (product == 0 && left != 0 && right != 0)
+    if (product_erased(product, left, right))
         return false;
     total += product;
     return true;
@@ -263,12 +266,19 @@ Result<NormSquareReformulation> square_residual_norm(const Objective &original) 
     for (std::size_t i = 0; i < n; ++i) {
         for (std::size_t j = i; j < n; ++j) {
             double value = 0;
-            for (std::size_t row = 0; row < residual->map.rows(); ++row)
+            for (std::size_t row = 0; row < residual->map.rows(); ++row) {
+                const double weight = residual->weights ? (*residual->weights)[row] : 1.0;
+                const double map_value = residual->map(row, i);
+                const double weighted_map = weight * map_value;
+                if (!std::isfinite(weighted_map))
+                    return arithmetic_failure();
+                if (product_erased(weighted_map, weight, map_value))
+                    return erased_product("Q");
                 if (!accumulate_product(value,
-                                        (residual->weights ? (*residual->weights)[row] : 1.0) *
-                                            residual->map(row, i),
+                                        weighted_map,
                                         residual->map(row, j)))
                     return erased_product("Q");
+            }
             value *= 2;
             if (!std::isfinite(value))
                 return arithmetic_failure();
@@ -276,22 +286,34 @@ Result<NormSquareReformulation> square_residual_norm(const Objective &original) 
             authored.Q.values[j * n + i] = value;
         }
         double value = 0;
-        for (std::size_t row = 0; row < residual->map.rows(); ++row)
+        for (std::size_t row = 0; row < residual->map.rows(); ++row) {
+            const double weight = residual->weights ? (*residual->weights)[row] : 1.0;
+            const double map_value = residual->map(row, i);
+            const double weighted_map = weight * map_value;
+            if (!std::isfinite(weighted_map))
+                return arithmetic_failure();
+            if (product_erased(weighted_map, weight, map_value))
+                return erased_product("q");
             if (!accumulate_product(value,
-                                    (residual->weights ? (*residual->weights)[row] : 1.0) *
-                                        residual->map(row, i),
+                                    weighted_map,
                                     residual->target[row]))
                 return erased_product("q");
+        }
         authored.linear[i] = -2 * value;
         if (!std::isfinite(authored.linear[i]))
             return arithmetic_failure();
     }
-    for (std::size_t row = 0; row < residual->target.size(); ++row)
-        if (!accumulate_product(authored.offset,
-                                (residual->weights ? (*residual->weights)[row] : 1.0) *
-                                    residual->target[row],
-                                residual->target[row]))
+    for (std::size_t row = 0; row < residual->target.size(); ++row) {
+        const double weight = residual->weights ? (*residual->weights)[row] : 1.0;
+        const double target = residual->target[row];
+        const double weighted_target = weight * target;
+        if (!std::isfinite(weighted_target))
+            return arithmetic_failure();
+        if (product_erased(weighted_target, weight, target))
             return erased_product("c");
+        if (!accumulate_product(authored.offset, weighted_target, target))
+            return erased_product("c");
+    }
     if (!std::isfinite(authored.offset))
         return arithmetic_failure();
     auto squared = snapshot(authored, original.policy());

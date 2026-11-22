@@ -212,6 +212,15 @@ TEST_CASE("erased Q product is declined while the original nonconstant norm rema
     CHECK(std::get<OperationStopped>(result).diagnostics.find("objective.reformulation.Q") != std::string::npos);
     CHECK(accepted(evaluate(original, Vector{1e200})) == 1);
     CHECK(accepted(evaluate(original, Vector{0})) == 0);
+
+    auto weighted = accepted(snapshot(ResidualNormTerminal{
+        {1, 1, {0.5}}, {0}, {std::numeric_limits<double>::denorm_min()}}));
+    CHECK(accepted(evaluate(weighted, Vector{1})) > 0);
+    auto weighted_result = square_residual_norm(weighted);
+    expect_numerical_failure(weighted_result);
+    CHECK(std::get<OperationStopped>(weighted_result).diagnostics.find(
+        "objective.reformulation.Q") != std::string::npos);
+    CHECK(accepted(evaluate(weighted, Vector{1})) > 0);
 }
 
 TEST_CASE("erased q product is declined even when the Q product is representable") {
@@ -228,6 +237,15 @@ TEST_CASE("erased c product is declined while the original constant norm remains
     expect_numerical_failure(result);
     CHECK(std::get<OperationStopped>(result).diagnostics.find("objective.reformulation.c") != std::string::npos);
     CHECK(accepted(evaluate(original, {})) == 1e-200);
+
+    auto weighted = accepted(snapshot(ResidualNormTerminal{
+        {1, 0, {}}, {0.5}, {std::numeric_limits<double>::denorm_min()}}));
+    CHECK(accepted(evaluate(weighted, {})) > 0);
+    auto weighted_result = square_residual_norm(weighted);
+    expect_numerical_failure(weighted_result);
+    CHECK(std::get<OperationStopped>(weighted_result).diagnostics.find(
+        "objective.reformulation.c") != std::string::npos);
+    CHECK(accepted(evaluate(weighted, {})) > 0);
 }
 
 TEST_CASE("norm expansion retains representable subnormal products") {
