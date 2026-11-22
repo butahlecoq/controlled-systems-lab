@@ -1,11 +1,12 @@
 """Verify and stage the issue #824 ellipsoid minimax bundle."""
+
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import report_source_identity
@@ -14,9 +15,20 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/issue824-two-points-ellipsoid-minimax-v1"
 ROUTE = "issue824-two-points-ellipsoid-minimax-v1"
 ROUTES = {ROUTE, "issue824-two-points-ellipsoid-minimax-v2"}
-FILES = ("README.md", "capture.json", "check.json", "figure-data.json", "index.html",
-         "ellipsoid-planar-example.html", "ellipsoid-planar-example.svg",
-         "planar-example.html", "planar-example.svg", "projections.svg", "result.json", "SHA256SUMS")
+FILES = (
+    "README.md",
+    "capture.json",
+    "check.json",
+    "figure-data.json",
+    "index.html",
+    "ellipsoid-planar-example.html",
+    "ellipsoid-planar-example.svg",
+    "planar-example.html",
+    "planar-example.svg",
+    "projections.svg",
+    "result.json",
+    "SHA256SUMS",
+)
 
 
 def digest(data: bytes) -> str:
@@ -24,7 +36,11 @@ def digest(data: bytes) -> str:
 
 
 def verified_bundle(source: Path) -> dict[str, bytes]:
-    if source.is_symlink() or not source.is_dir() or {item.name for item in source.iterdir()} != set(FILES):
+    if (
+        source.is_symlink()
+        or not source.is_dir()
+        or {item.name for item in source.iterdir()} != set(FILES)
+    ):
         raise ValueError("issue #824 ellipsoid minimax report inventory differs")
     files = {name: (source / name).read_bytes() for name in FILES}
     sums = {}
@@ -38,15 +54,21 @@ def verified_bundle(source: Path) -> dict[str, bytes]:
     capture = json.loads(files["capture.json"])
     check = json.loads(files["check.json"])
     result = json.loads(files["result.json"])
-    if (capture.get("source_tree_clean_before_report_generation") is not True or
-            result.get("schema") != "csl.issue824-two-points-ellipsoid-minimax/1" or
-            check.get("status") != "verified" or
-            not check.get("stage_ellipsoid_relation")):
-        raise ValueError("issue #824 ellipsoid report lacks clean capture or independent inclusion evidence")
+    if (
+        capture.get("source_tree_clean_before_report_generation") is not True
+        or result.get("schema") != "csl.issue824-two-points-ellipsoid-minimax/1"
+        or check.get("status") != "verified"
+        or not check.get("stage_ellipsoid_relation")
+    ):
+        raise ValueError(
+            "issue #824 ellipsoid report lacks clean capture or independent inclusion evidence"
+        )
     if not report_source_identity.source_hashes_match_commit(
-            ROOT, capture.get("source_commit", ""), capture.get("source_files_sha256", {})):
+        ROOT, capture.get("source_commit", ""), capture.get("source_files_sha256", {})
+    ):
         raise ValueError("issue #824 ellipsoid source files differ from the captured commit")
-    planar = files["planar-example.html"].decode("utf-8")
+    # The companion page must also be valid UTF-8.
+    files["planar-example.html"].decode("utf-8")
     planar_ellipse = files["ellipsoid-planar-example.html"].decode("utf-8")
     if "all four exact vertices" not in planar_ellipse or "A=[[2,0],[0,1]]" not in planar_ellipse:
         raise ValueError("issue #824 planar ellipsoid example omits its input or inclusion claim")
@@ -60,7 +82,8 @@ def stage(source: Path, site: Path) -> str:
         raise ValueError("unknown issue #824 ellipsoid minimax report version")
     check = json.loads(files["check.json"])
     if route.endswith("-v2") and "every exact facet inequality" not in check.get(
-            "stage_zonotope_relation", ""):
+        "stage_zonotope_relation", ""
+    ):
         raise ValueError("issue #824 ellipsoid v2 lacks exact zonotope inclusion evidence")
     site = site.resolve(strict=True)
     destination = site / route

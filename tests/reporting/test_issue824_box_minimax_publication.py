@@ -1,13 +1,14 @@
-from pathlib import Path
 import shutil
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
 import stage_issue824_box_minimax as publisher
 import visual_examples
+
+ROOT = Path(__file__).resolve().parents[2]
 
 
 class Issue824BoxMinimaxPublicationTests(unittest.TestCase):
@@ -34,13 +35,19 @@ class Issue824BoxMinimaxPublicationTests(unittest.TestCase):
 
     def test_bundle_contains_both_player_projections_and_replay(self):
         figure = publisher.verified_bundle(publisher.SOURCE)["projections.svg"].decode()
-        for label in ("x1 position", "x2 velocity", "x3 position", "x4 velocity",
-                      "Box-selected plan replay"):
+        for label in (
+            "x1 position",
+            "x2 velocity",
+            "x3 position",
+            "x4 velocity",
+            "Box-selected plan replay",
+        ):
             self.assertIn(label, figure)
 
     def test_gallery_card_links_the_box_report(self):
-        entry = next(row for row in visual_examples.SAVED_FIGURES
-                     if row.get("route") == publisher.ROUTE)
+        entry = next(
+            row for row in visual_examples.SAVED_FIGURES if row.get("route") == publisher.ROUTE
+        )
         self.assertEqual(entry["records"], "result.json")
         self.assertEqual(entry["page"], "index.html")
         self.assertEqual(entry["image"], "projections.svg")

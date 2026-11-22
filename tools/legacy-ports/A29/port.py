@@ -60,8 +60,9 @@ def modified_sm(points: np.ndarray, candidate: np.ndarray) -> MembershipResult:
     pivots = 0
     while True:
         if np.max(tableau[-1, 1:]) <= EPS:
-            return MembershipResult(bool(tableau[-1, 0] > EPS), pivots,
-                                    tuple(int(x) for x in basis_columns))
+            return MembershipResult(
+                bool(tableau[-1, 0] > EPS), pivots, tuple(int(x) for x in basis_columns)
+            )
         if pivots >= MAX_HELPER_PIVOTS:
             raise PortStop(STATUS_INCONCLUSIVE, "A30", "pivot capacity exceeded")
         entering = int(np.argmax(tableau[-1, 1:])) + 1
@@ -88,8 +89,11 @@ def preprocess(cloud: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """A29's unique rows and descending abs(max(signed normalized offset))."""
     unique = np.unique(cloud, axis=0)
     if len(unique) < 2:
-        raise PortStop(STATUS_FAILED, "A29 preprocessing",
-                       "source selects columns 1:2 but fewer than two unique points exist")
+        raise PortStop(
+            STATUS_FAILED,
+            "A29 preprocessing",
+            "source selects columns 1:2 but fewer than two unique points exist",
+        )
     matrix = unique.T
     maximum, minimum = np.max(matrix, axis=1), np.min(matrix, axis=1)
     midpoint = 0.5 * (maximum + minimum)
@@ -97,8 +101,9 @@ def preprocess(cloud: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     if not np.all(np.isfinite(midpoint)) or not np.all(np.isfinite(widths)):
         raise PortStop(STATUS_INCONCLUSIVE, "A29 sorting", "nonfinite box arithmetic")
     if np.any(widths == 0):
-        raise PortStop(STATUS_INCONCLUSIVE, "A29 sorting",
-                       "zero-range axis makes source normalized score NaN")
+        raise PortStop(
+            STATUS_INCONCLUSIVE, "A29 sorting", "zero-range axis makes source normalized score NaN"
+        )
     with np.errstate(all="raise"):
         scores = np.abs(np.max((matrix - midpoint[:, None]) / widths[:, None], axis=0))
     # sortrows on the appended score descending. Equal-score ties keep the
@@ -108,12 +113,21 @@ def preprocess(cloud: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
 
 
 def _record(status: str, reason: str = "", stage: str = "") -> dict:
-    return {"algorithm": "A29 Python 3 transcription", "source_sha256": SOURCE_SHA256,
-            "algorithm_status": status, "reason": reason, "stage": stage,
-            "output": None, "itrt": 0, "helper_calls": 0,
-            "stage2_scanned": 0, "final_scanned": 0,
-            "stage2_pivots": 0, "final_pivots": 0,
-            "grouping_executed": False}
+    return {
+        "algorithm": "A29 Python 3 transcription",
+        "source_sha256": SOURCE_SHA256,
+        "algorithm_status": status,
+        "reason": reason,
+        "stage": stage,
+        "output": None,
+        "itrt": 0,
+        "helper_calls": 0,
+        "stage2_scanned": 0,
+        "final_scanned": 0,
+        "stage2_pivots": 0,
+        "final_pivots": 0,
+        "grouping_executed": False,
+    }
 
 
 def run(points: list[list[float]]) -> dict:
@@ -152,8 +166,14 @@ def run(points: list[list[float]]) -> dict:
         result["algorithm_status"] = stop.status
         result["reason"] = stop.reason
         result["stage"] = stop.stage
-    except (FloatingPointError, OverflowError, ValueError, TypeError, IndexError,
-            np.linalg.LinAlgError) as error:
+    except (
+        FloatingPointError,
+        OverflowError,
+        ValueError,
+        TypeError,
+        IndexError,
+        np.linalg.LinAlgError,
+    ) as error:
         result["algorithm_status"] = STATUS_INCONCLUSIVE
         result["reason"] = f"numerical or shape failure: {error}"
         result["stage"] = "runtime"

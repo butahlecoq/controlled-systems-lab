@@ -1,19 +1,22 @@
 """Validate and stage the repeated EXP-02 dyadic ITIS17 pilot."""
+
 from __future__ import annotations
 
 import argparse
 import hashlib
 import importlib.util
 import json
-from pathlib import Path, PurePosixPath
 import re
 import shutil
 import zipfile
+from pathlib import Path, PurePosixPath
 
 site_spec = importlib.util.spec_from_file_location(
-    "algorithm_report_site", Path(__file__).with_name("site.py"))
+    "algorithm_report_site", Path(__file__).with_name("site.py")
+)
+if site_spec is None or site_spec.loader is None:
+    raise ImportError("Cannot load the report site module")
 site_module = importlib.util.module_from_spec(site_spec)
-assert site_spec.loader is not None
 site_spec.loader.exec_module(site_module)
 
 REPORT_ID = "exp02-it17-dyadic-interior-20261027-r1"
@@ -85,7 +88,7 @@ def stage(source: Path, site_root: Path) -> str:
 
     offline_index = (
         '<!doctype html><html lang="en"><meta charset="utf-8">'
-        '<title>Offline EXP-02 pilot</title><h1>Offline report</h1>'
+        "<title>Offline EXP-02 pilot</title><h1>Offline report</h1>"
         f'<a href="{report_id}/index.html">{report_id}</a></html>'
     ).encode("utf-8")
     with zipfile.ZipFile(archive_path, "x", compression=zipfile.ZIP_DEFLATED) as archive:
@@ -114,17 +117,17 @@ def stage(source: Path, site_root: Path) -> str:
         title = "QuickHull and ITIS17 dyadic hull pilot"
     description = (
         " — exploratory comparison on one 250-point interior-heavy square cloud"
-        if report_id == "exp02-it17-dyadic-250-20261029-r1" else
-        " — repeated exploratory 2D comparison on two interior-heavy square clouds"
+        if report_id == "exp02-it17-dyadic-250-20261029-r1"
+        else " — repeated exploratory 2D comparison on two interior-heavy square clouds"
     )
     link = (
         f'<li><a href="{report_id}/index.html">{title}</a>{description}'
         f' · <a href="{report_id}/summary.csv">measured table</a>'
         f' · <a href="{report_id}.zip">offline bundle</a></li>'
     )
-    site_module.OfflineHTML({
-        f"{report_id}/index.html", f"{report_id}/summary.csv", report_id + ".zip"
-    }).feed(link)
+    site_module.OfflineHTML(
+        {f"{report_id}/index.html", f"{report_id}/summary.csv", report_id + ".zip"}
+    ).feed(link)
     index.write_text(text.replace("</ul>", link + "</ul>"), encoding="utf-8")
     return report_id
 
