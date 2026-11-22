@@ -115,8 +115,6 @@ TEST_CASE("backward viability changes the selected discrete first action") {
     CHECK(result.total_objective == doctest::Approx(1.5));
     CHECK(result.predecessor_calls > 0);
 
-    // Independent literal enumeration: without the stage-1 set [1,1], [0,0]
-    // has cost zero; with it, the only best feasible history is [1,0], cost 1.5.
     double best = std::numeric_limits<double>::infinity();
     std::vector<std::size_t> best_actions;
     for(std::size_t first = 0; first < 2; ++first) for(std::size_t second = 0; second < 2; ++second) {
@@ -187,7 +185,7 @@ TEST_CASE("continuous predecessor membership cannot invent a finite action") {
     CHECK_FALSE(result.has_viable_path);
     CHECK(result.selected_nodes.empty());
     const Vector parent{0,0}, target{0.5,0};
-    CHECK(parent[0] + 0.5 == target[0]); // A continuous control inside conv({0,1}) exists.
+    CHECK(parent[0] + 0.5 == target[0]);
     CHECK(std::ranges::none_of(request.actions.catalogue,
         [&](const Vector& action) { return parent[0] + action[0] == target[0]; }));
 }
@@ -225,7 +223,7 @@ TEST_CASE("registered affine-sum reachable envelopes guard every discrete child"
     REQUIRE(std::holds_alternative<FiniteActionGraphResult>(outcome));
     const auto& result = std::get<FiniteActionGraphResult>(outcome);
     REQUIRE(result.has_viable_path);
-    CHECK(result.reachable_envelope_calls == 6); // affine image + Minkowski sum per expanded parent
+    CHECK(result.reachable_envelope_calls == 6);
     CHECK(result.nodes[result.selected_nodes[1]].reachable_envelope_contains == true);
     CHECK(result.nodes[result.selected_nodes[2]].reachable_envelope_contains == true);
     CHECK(result.nodes[result.selected_nodes[1]].action_index == 1);
@@ -522,7 +520,6 @@ TEST_CASE("graph ranking preserves a positive quadratic cost when coefficient di
         return node.stage == 1 && node.action_index == 0;
     });
     REQUIRE(costly != graph.nodes.end());
-    // Independent binary-input evaluation: denorm_min * (1 / 1e-150)^2 / 2.
     CHECK(costly->edge_running_cost > 0.0);
     CHECK(costly->edge_running_cost == doctest::Approx(2.4703282292062326e-24).epsilon(1e-15));
     CHECK(costly->edge_running_cost / 2.4703282292062326e-24 ==
