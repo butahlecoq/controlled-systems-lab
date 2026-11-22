@@ -119,9 +119,7 @@ def classify(paths):
 def workflow_path_patterns(workflow_name):
     """Use the main-branch push filter as the canonical path scope."""
     text = (ROOT / ".github/workflows" / workflow_name).read_text(encoding="utf-8")
-    event_match = re.search(
-        r"(?ms)^  push:\n(?P<section>.*?)(?=^  [A-Za-z_][^:\n]*:|\Z)", text
-    )
+    event_match = re.search(r"(?ms)^  push:\n(?P<section>.*?)(?=^  [A-Za-z_][^:\n]*:|\Z)", text)
     if not event_match:
         raise ValueError(f"{workflow_name} has no push filter")
     paths_match = re.search(
@@ -199,9 +197,7 @@ def main():
         f"{workflow_name.removesuffix('.yml').replace('-', '_')}={str(required).lower()}\n"
         for workflow_name, required in scoped.items()
     )
-    output = (
-        f"native={str(native).lower()}\nreports={str(reports).lower()}\n" + scoped_outputs
-    )
+    output = f"native={str(native).lower()}\nreports={str(reports).lower()}\n" + scoped_outputs
     print(output + reason)
     if os.environ.get("GITHUB_OUTPUT"):
         with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as stream:
@@ -210,9 +206,7 @@ def main():
         with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as stream:
             stream.write(
                 f"Native matrix: **{native}**; reporting: **{reports}**; "
-                + "; ".join(
-                    f"{name}: **{required}**" for name, required in scoped.items()
-                )
+                + "; ".join(f"{name}: **{required}**" for name, required in scoped.items())
                 + f". {reason}.\n"
             )
 
