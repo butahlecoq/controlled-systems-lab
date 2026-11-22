@@ -1,4 +1,3 @@
-# Optional standalone example-layer consumer of the existing CSL replay module.
 add_executable(csl_mpc11_nonlinear_replay nonlinear_replay_bridge.cpp)
 target_link_libraries(csl_mpc11_nonlinear_replay PRIVATE CSL::simulation)
 target_include_directories(csl_mpc11_nonlinear_replay SYSTEM PRIVATE ${csl_mpc11_json_source}/single_include)

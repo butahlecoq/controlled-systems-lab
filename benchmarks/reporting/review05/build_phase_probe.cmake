@@ -1,5 +1,3 @@
-# Private benchmark build hook: use with CMAKE_PROJECT_CSL_INCLUDE when
-# configuring the repository itself, so tests and the probe reuse one build.
 function(_csl_review05_add_phase_probe)
   add_executable(csl_review05_family_query
     "${PROJECT_SOURCE_DIR}/benchmarks/reporting/review05/family_query_ladder.cpp")

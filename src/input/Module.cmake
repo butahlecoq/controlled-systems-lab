@@ -1,5 +1,3 @@
-# Target and installation ownership for input. Included from the project root.
-
 include(cmake/JsonDependencies.cmake)
 
 csl_add_library(csl_input STATIC src/input/scenario_loader.cpp src/input/scenario_json.cpp

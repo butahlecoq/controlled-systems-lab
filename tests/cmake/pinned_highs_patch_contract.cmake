@@ -23,9 +23,6 @@ if(NOT logical_sha STREQUAL "8ee92e023806826fded545e38d0598adacc7b08f07c395c557a
   message(FATAL_ERROR "Patched HiGHS logical content mismatch: ${logical_sha}")
 endif()
 
-# Reconstruct the pinned archive header and verify it before testing the patch
-# applicator. Keeping this as a derived fixture avoids shipping a second copy
-# of the upstream header.
 string(REPLACE "  HighsInt size = 0;       //!< Dimension of the vector"
   "  HighsInt size;           //!< Dimension of the vector" original_source "${patched_source}")
 string(REPLACE "  HighsInt count = 0;      //!< Number of nonzeros"
@@ -47,8 +44,6 @@ file(REMOVE_RECURSE "${WORK_DIR}")
 file(MAKE_DIRECTORY "${WORK_DIR}")
 set(test_header "${WORK_DIR}/HVectorBase.h")
 if(WIN32)
-  # The real configure path already exercises pristine-source application.
-  # Copying preserves its CRLF bytes so this branch checks Windows reconfigure.
   file(COPY_FILE "${UPSTREAM_HEADER}" "${test_header}")
   set(first_result 0)
 else()

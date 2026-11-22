@@ -159,3 +159,9 @@ Adapters use the pinned native integrations privately. Eigen and nlohmann JSON a
 HiGHS keeps the original upstream archive pin, and the adapter function scopes its upstream options away from CSL tests and toolchain settings. The verified downstream initialization patch applies after extraction. The clock snapshot postimage carries the scheduler observation accessor, so the thread observation patch accepts that postimage without applying the accessor twice. Static installed consumers need the private archive at final link. The exported archive provides that link dependency while its native headers stay in the producer build.
 
 When the CasADi adapter is enabled, its imported dependency and the core must agree on the libstdc++ string ABI. The adapter passes CSL values containing strings across that boundary. Compile probes check the core and the imported target because an imported compile definition can change the adapter without changing the core.
+
+The pinned HiGHS patch contract reconstructs the upstream header fixture from
+the expected patched postimage instead of shipping a duplicate upstream
+header. Its Windows reconfigure branch copies the already-patched header to
+preserve CRLF bytes; the normal configure path separately exercises patching
+pristine dependency source.
