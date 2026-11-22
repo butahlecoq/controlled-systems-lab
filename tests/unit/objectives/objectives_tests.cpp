@@ -19,13 +19,12 @@ template<class T> void rejected(const Result<T>& result, DiagnosticCode code, co
     CHECK(std::get<Diagnostic>(result).code == code);
     CHECK(std::get<Diagnostic>(result).field == field);
 }
-template<class T> void stopped(const Result<T>& result) {
+template<class T> void expect_numerical_failure(const Result<T>& result) {
     REQUIRE(std::holds_alternative<OperationStopped>(result));
     CHECK(std::get<OperationStopped>(result).reason == StopReason::numerical_failure);
     CHECK_FALSE(std::get<OperationStopped>(result).diagnostics.empty());
 }
 
-// Square-only maps or reporting a squared cost would fail this rectangular fixture.
 TEST_CASE("rectangular residual objective reports original norm including zero") {
     auto objective = accepted(snapshot(ResidualNormTerminal{{3, 2, {1, 0, 0, 2, 1, -1}}, {1, 2, 0}}));
     CHECK(accepted(evaluate(objective, Vector{3, 1})) == doctest::Approx(2.8284271247461903));
@@ -47,7 +46,6 @@ TEST_CASE("weighted residual objective and squared reformulation use diagonal sq
 }
 }
 
-// Dropping the offset, swapping coefficients, or retaining the producer breaks this oracle.
 TEST_CASE("linear objective retains coefficients and evaluates the original cost") {
     TerminalObjective authored = LinearTerminal{{2, -1}, 3};
     auto objective = accepted(snapshot(authored));
@@ -56,7 +54,6 @@ TEST_CASE("linear objective retains coefficients and evaluates the original cost
     CHECK(accepted(evaluate(objective, Vector{4, 5})) == 6);
 }
 
-// A missing half factor, treating PSD as PD, or silently clipping eigenvalues breaks these cases.
 TEST_CASE("quadratic convention supports singular objectives with numerical checks") {
     auto objective = accepted(snapshot(QuadraticTerminal{{2, 2, {2, 0, 0, 0}}, {-2, 0}, 1}));
     CHECK(accepted(evaluate(objective, Vector{3, 8})) == 4);
@@ -100,7 +97,6 @@ TEST_CASE("relative tolerances use coefficient and eigenvalue scales independent
              DiagnosticCode::invalid_input, "objective.psd");
 }
 
-// Wrong Gram factor/sign/offset or reporting the solver cost as the original norm must fail.
 TEST_CASE("recorded norm square preserves original and literal rectangular coefficients") {
     auto reformulation = accepted(square_residual_norm(accepted(snapshot(
         ResidualNormTerminal{{3, 2, {1, 0, 0, 2, 1, -1}}, {1, 2, 0}}))));
@@ -127,7 +123,6 @@ TEST_CASE("rank deficient residual retains distinct minimizing points") {
     CHECK(accepted(evaluate(reformulation.squared(), Vector{1, 7})) == 0);
 }
 
-// Unsupported requested evidence and malformed tolerance policy must never be silently accepted.
 TEST_CASE("assurance and policy validation applies to every objective form") {
     for (const auto& authored : std::vector<TerminalObjective>{
              LinearTerminal{{1}, 0}, QuadraticTerminal{{1, 1, {1}}, {0}, 0}, ResidualNormTerminal{{1, 1, {1}}, {0}}}) {
@@ -159,7 +154,6 @@ TEST_CASE("coefficient shapes offsets and finite values are validated at publica
     rejected(snapshot(ResidualNormTerminal{{1, 1, {1}}, {0}, {1, 2}}), DiagnosticCode::invalid_input, "objective.shape");
 }
 
-// This catches treating empty maps as invalid or collapsing a constant objective to one point.
 TEST_CASE("constant and zero dimensional objectives retain their actual costs") {
     auto linear = accepted(snapshot(LinearTerminal{{0, 0}, 3}));
     CHECK(accepted(evaluate(linear, Vector{2, -4})) == 3);
@@ -183,51 +177,48 @@ TEST_CASE("constant and zero dimensional objectives retain their actual costs") 
     CHECK(accepted(evaluate(accepted(snapshot(ResidualNormTerminal{{0, 0, {}}, {}})), {})) == 0);
 }
 
-// An overflow result must not be exposed as a usable objective value or cause loss of the original norm.
 TEST_CASE("finite arithmetic failures are separate from malformed requests") {
     const double max = std::numeric_limits<double>::max();
     auto linear = accepted(snapshot(LinearTerminal{{max}, 0}));
-    stopped(evaluate(linear, Vector{2}));
+    expect_numerical_failure(evaluate(linear, Vector{2}));
     rejected(evaluate(linear, {}), DiagnosticCode::invalid_input, "objective.point");
     rejected(evaluate(linear, Vector{std::numeric_limits<double>::quiet_NaN()}), DiagnosticCode::invalid_input, "objective.point");
     rejected(square_residual_norm(linear), DiagnosticCode::unsupported, "objective.reformulation");
     auto quadratic = accepted(snapshot(QuadraticTerminal{{1, 1, {2}}, {0}, 0}));
-    stopped(evaluate(quadratic, Vector{max}));
+    expect_numerical_failure(evaluate(quadratic, Vector{max}));
     auto large_norm = accepted(snapshot(ResidualNormTerminal{{1, 1, {0}}, {1e200}}));
     CHECK(accepted(evaluate(large_norm, Vector{3})) == 1e200);
-    stopped(square_residual_norm(large_norm));
+    expect_numerical_failure(square_residual_norm(large_norm));
     CHECK(accepted(evaluate(large_norm, Vector{7})) == 1e200);
     auto large_map = accepted(snapshot(ResidualNormTerminal{{1, 1, {max}}, {0}}));
-    stopped(evaluate(large_map, Vector{2}));
-    stopped(square_residual_norm(large_map));
+    expect_numerical_failure(evaluate(large_map, Vector{2}));
+    expect_numerical_failure(square_residual_norm(large_map));
     auto hypot = accepted(snapshot(ResidualNormTerminal{{2, 0, {}}, {3e200, 4e200}}));
     CHECK(accepted(evaluate(hypot, {})) == doctest::Approx(5e200));
     auto overflow_tolerance = snapshot(QuadraticTerminal{{1, 1, {max}}, {0}, 0}, {Assurance::numerical, {max, 1}});
-    stopped(overflow_tolerance);
+    expect_numerical_failure(overflow_tolerance);
 }
 
-// Scaling must not erase the tiny negative entry and admit an indefinite diagonal matrix.
 TEST_CASE("PSD scaling cannot silently erase nonzero coefficients") {
-    stopped(snapshot(QuadraticTerminal{{2, 2, {-std::numeric_limits<double>::denorm_min(), 0,
+    expect_numerical_failure(snapshot(QuadraticTerminal{{2, 2, {-std::numeric_limits<double>::denorm_min(), 0,
                                                0, std::numeric_limits<double>::max()}}, {0, 0}, 0}));
 }
 
-// Nonzero products rounded to zero can flatten a criterion or erase its target.
-// Assert the failing coefficient group so a later c guard cannot hide a missing q guard.
 TEST_CASE("erased Q product is declined while the original nonconstant norm remains usable") {
     auto original = accepted(snapshot(ResidualNormTerminal{{1, 1, {1e-200}}, {0}}));
     CHECK(accepted(evaluate(original, Vector{1e200})) == 1);
     auto result = square_residual_norm(original);
-    stopped(result);
+    expect_numerical_failure(result);
     CHECK(std::get<OperationStopped>(result).diagnostics.find("objective.reformulation.Q") != std::string::npos);
     CHECK(accepted(evaluate(original, Vector{1e200})) == 1);
     CHECK(accepted(evaluate(original, Vector{0})) == 0);
+
 }
 
 TEST_CASE("erased q product is declined even when the Q product is representable") {
     auto original = accepted(snapshot(ResidualNormTerminal{{2, 1, {0x1p-520, 0}}, {0x1p-560, 1}}));
     auto result = square_residual_norm(original);
-    stopped(result);
+    expect_numerical_failure(result);
     CHECK(std::get<OperationStopped>(result).diagnostics.find("objective.reformulation.q") != std::string::npos);
     CHECK(accepted(evaluate(original, Vector{0})) == 1);
 }
@@ -235,12 +226,12 @@ TEST_CASE("erased q product is declined even when the Q product is representable
 TEST_CASE("erased c product is declined while the original constant norm remains usable") {
     auto original = accepted(snapshot(ResidualNormTerminal{{1, 0, {}}, {1e-200}}));
     auto result = square_residual_norm(original);
-    stopped(result);
+    expect_numerical_failure(result);
     CHECK(std::get<OperationStopped>(result).diagnostics.find("objective.reformulation.c") != std::string::npos);
     CHECK(accepted(evaluate(original, {})) == 1e-200);
+
 }
 
-// Rejecting all small coefficients would discard this exactly representable subnormal square.
 TEST_CASE("norm expansion retains representable subnormal products") {
     auto record = accepted(square_residual_norm(accepted(snapshot(ResidualNormTerminal{{1, 1, {0x1p-520}}, {0}}))));
     CHECK(std::get<QuadraticCoefficients>(record.squared().coefficients()).Q(0, 0) == 0x1p-1039);
