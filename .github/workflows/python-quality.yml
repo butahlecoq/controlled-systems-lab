@@ -176,6 +176,30 @@ on:
       - 'tests/reporting/test_geo07_publication.py'
       - 'tests/reporting/test_geo07_port_publication.py'
       - 'tests/reporting/test_geo07_dependent_publication.py'
+      - 'scripts/reports/stage_exp04.py'
+      - 'scripts/reports/stage_ext05.py'
+      - 'scripts/reports/stage_geo08.py'
+      - 'scripts/reports/stage_opt10.py'
+      - 'tests/reporting/test_exp04.py'
+      - 'tests/reporting/test_ext05_saved.py'
+      - 'tests/reporting/test_geo08_saved.py'
+      - 'tests/reporting/test_opt10_saved.py'
+      - 'scripts/reports/exp04/render_saved.py'
+      - 'scripts/reports/exp04/collect.py'
+      - 'reports/algorithm-results/exp04-publications.json'
+      - 'reports/algorithm-results/exp04-replay-93fe3b87795e1d3a/**'
+      - 'scripts/reports/ext05/render_saved.py'
+      - 'scripts/reports/ext05/collect.py'
+      - 'reports/algorithm-results/ext05-publications.json'
+      - 'reports/algorithm-results/ext05-discretization-a40ba9647cc023dc/**'
+      - 'scripts/reports/geo08/render_saved.py'
+      - 'scripts/reports/geo08/collect.py'
+      - 'reports/algorithm-results/geo08-publications.json'
+      - 'reports/algorithm-results/geo08-lazy-6dbdd6b2f9235837/**'
+      - 'scripts/reports/opt10/render_saved.py'
+      - 'scripts/reports/opt10/collect.py'
+      - 'reports/algorithm-results/opt10-publications.json'
+      - 'reports/algorithm-results/opt10-smooth-188130d94d7bf2de/**'
       - 'tests/reporting/test_finite_feedback_publication.py'
       - 'tests/reporting/test_ext04_publication.py'
       - 'scripts/reports/stage_ext04_continuous.py'
@@ -595,6 +619,30 @@ on:
       - 'tests/reporting/test_geo07_publication.py'
       - 'tests/reporting/test_geo07_port_publication.py'
       - 'tests/reporting/test_geo07_dependent_publication.py'
+      - 'scripts/reports/stage_exp04.py'
+      - 'scripts/reports/stage_ext05.py'
+      - 'scripts/reports/stage_geo08.py'
+      - 'scripts/reports/stage_opt10.py'
+      - 'tests/reporting/test_exp04.py'
+      - 'tests/reporting/test_ext05_saved.py'
+      - 'tests/reporting/test_geo08_saved.py'
+      - 'tests/reporting/test_opt10_saved.py'
+      - 'scripts/reports/exp04/render_saved.py'
+      - 'scripts/reports/exp04/collect.py'
+      - 'reports/algorithm-results/exp04-publications.json'
+      - 'reports/algorithm-results/exp04-replay-93fe3b87795e1d3a/**'
+      - 'scripts/reports/ext05/render_saved.py'
+      - 'scripts/reports/ext05/collect.py'
+      - 'reports/algorithm-results/ext05-publications.json'
+      - 'reports/algorithm-results/ext05-discretization-a40ba9647cc023dc/**'
+      - 'scripts/reports/geo08/render_saved.py'
+      - 'scripts/reports/geo08/collect.py'
+      - 'reports/algorithm-results/geo08-publications.json'
+      - 'reports/algorithm-results/geo08-lazy-6dbdd6b2f9235837/**'
+      - 'scripts/reports/opt10/render_saved.py'
+      - 'scripts/reports/opt10/collect.py'
+      - 'reports/algorithm-results/opt10-publications.json'
+      - 'reports/algorithm-results/opt10-smooth-188130d94d7bf2de/**'
       - 'tests/reporting/test_finite_feedback_publication.py'
       - 'tests/reporting/test_ext04_publication.py'
       - 'scripts/reports/stage_ext04_continuous.py'
@@ -1220,6 +1268,27 @@ jobs:
           diff -r "$source" "$site/$route"
       - name: Check the four-state projection approximation report
         run: python -m unittest discover -s tests/reporting -p 'test_four_state_projection_approximations.py'
+      - name: Replay saved EXP-04, EXT-05, GEO-08 and OPT-10 catalogues
+        env:
+          MPLBACKEND: Agg
+        run: |
+          python -m unittest tests.reporting.test_exp04 tests.reporting.test_ext05_saved tests.reporting.test_geo08_saved tests.reporting.test_opt10_saved
+          reports=reports/algorithm-results
+          site=$(mktemp -d "$RUNNER_TEMP/saved-catalogues.XXXXXXXX")
+          printf '<html><body><ul></ul></body></html>\n' > "$site/index.html"
+          for topic in exp04 ext05 geo08 opt10; do
+            catalogue="$reports/$topic-publications.json"
+            id=$(jq -er '.reports[0].report_id' "$catalogue")
+            checksum=$(jq -er '.reports[0].zip_sha256' "$catalogue")
+            stager="scripts/reports/stage_$topic.py"
+            python "$stager" --source "$reports/$id" > "$site/$topic.catalogue.json"
+            jq --sort-keys . "$catalogue" > "$site/$topic.expected.json"
+            jq --sort-keys . "$site/$topic.catalogue.json" | cmp "$site/$topic.expected.json" -
+            python "$stager" --catalog "$catalogue" --site "$site"
+            leaf=bundle.zip
+            if [[ "$topic" == ext05 || "$topic" == opt10 ]]; then leaf="$id.zip"; fi
+            printf '%s  %s\n' "$checksum" "$site/$id/$leaf" | sha256sum --check
+          done
       - name: Check the matched discrete MPC example and visual gallery
         run: |
           python -m unittest discover -s tests/reporting -p 'test_discrete_mpc_2d.py'
