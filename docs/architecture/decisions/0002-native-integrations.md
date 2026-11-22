@@ -186,6 +186,39 @@ objective evaluation using a scaled `1e-12` tolerance to allow for arithmetic
 rounding. This tolerance is a fixture-level comparison policy, not a certified
 error bound for arbitrary QPs.
 
+The convex adapter contract retains several independent test oracles. The
+five-variable lifted integrator uses coordinates `(x0,x1,x2,u0,u1)` with
+`x0=0`, `x1=x0+u0`, `x2=x1+u1`, and `u0,u1 in [0,1]`. Its terminal cost
+`(x2-1)^2` has minimum zero, attained by the continuum `u0+u1=1`; tests check
+the equations and one optimal point without claiming to enumerate controls.
+
+The rectangular residual fixture uses
+`L=[[1,2],[2,4],[-1,-2]]` and `r=[3,6,-3]`. The map has rank one, the target is
+in its image, and zero residual occurs on `x0+2*x1=3`, a segment in
+`[0,3]^2`. The Euclidean norm is nondifferentiable at zero residual. Tests
+check the zero minor, all three residual coordinates, and the authored norm
+separately from the squared quadratic objective.
+
+When a convex quadratic has at least one nonzero translated Hessian
+coefficient but every authored constraint coefficient is zero, the adapter
+adds a private row with a unit entry in the first variable column and unbounded
+row limits. This row does not restrict the feasible variable set or alter the
+objective; it avoids the pinned HiGHS basis empty-transpose invariant. The
+zero-quadratic route does not use this row, though admission conservatively
+includes its possible storage.
+Tests retain positive authored row counts, explicit and implicit zero
+coefficients, and a variable interval `[1,5]` so the private row's activity is
+not assumed zero. They check preservation of authored rows and numerical
+residuals. An authored zero row with equality bound `1` is `0=1`: model
+admission accepts it, then the feasibility solve returns an infeasible result
+before the native QP call.
+
+Capacity boundary arithmetic is checked independently with `c=2(n+1)`. At
+`n=4096`, `c=8194`, `c^2=67,141,636`, `8c^2=537,133,088`, and
+`16c^2=1,074,266,176`. At `n=23169`, `c^2=2,147,395,600`; at `n=23170`,
+`c^2=2,147,580,964`, crossing the signed 32-bit maximum. These calculations
+check derived arithmetic, not a returned or advertised production capacity.
+
 The HiGHS LP contract tests preserve three additional ownership and recovery
 oracles. A prepared plan must remain usable after its temporary provider
 registry and source program have left scope. Cross-query warm-start tests
