@@ -1,4 +1,3 @@
-# Target and installation ownership for synthesis. Included from the project root.
 
 csl_add_library(csl_terminal_minimizers STATIC src/synthesis/terminal_minimizers.cpp)
 

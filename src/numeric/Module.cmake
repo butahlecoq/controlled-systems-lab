@@ -1,4 +1,3 @@
-# Target and installation ownership for numeric. Included from the project root.
 
 csl_add_library(csl_numeric STATIC src/numeric/data.cpp)
 

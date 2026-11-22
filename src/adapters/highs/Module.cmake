@@ -1,4 +1,3 @@
-# Target and installation ownership for adapters/highs. Included from the project root.
 
 if(CSL_ENABLE_HIGHS)
   csl_add_library(csl_highs_lp STATIC src/adapters/lp/highs.cpp)

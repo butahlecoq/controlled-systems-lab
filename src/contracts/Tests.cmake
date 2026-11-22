@@ -11,7 +11,6 @@ set_tests_properties(public_client PROPERTIES
     PASS_REGULAR_EXPRESSION "Public contract client: shape guards and literal affine fixture passed")
 csl_test_target(public_client contracts)
 
-# A separate translation unit per contract prevents umbrella/include-order masking.
 set(csl_contract_headers
   core/values.hpp
   core/diagnostics.hpp

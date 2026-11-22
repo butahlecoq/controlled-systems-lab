@@ -1,4 +1,3 @@
-# Target and installation ownership for adapters/polyhedral. Included from the project root.
 
 if(CSL_ENABLE_QHULL)
   include(cmake/QhullDependencies.cmake)

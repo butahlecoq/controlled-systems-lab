@@ -1,4 +1,3 @@
-# Target and installation ownership for input. Included from the project root.
 
 include(cmake/JsonDependencies.cmake)
 

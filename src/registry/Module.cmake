@@ -1,4 +1,3 @@
-# Target and installation ownership for registry. Included from the project root.
 
 csl_add_library(csl_registry STATIC src/registry/registry.cpp src/registry/strategy_catalogue.cpp)
 

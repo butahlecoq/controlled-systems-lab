@@ -1,4 +1,3 @@
-# Target and installation ownership for application composition.
 
 csl_add_library(csl_application STATIC src/application/comparison.cpp)
 

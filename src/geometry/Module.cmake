@@ -1,4 +1,3 @@
-# Target and installation ownership for geometry. Included from the project root.
 
 csl_add_library(csl_hull STATIC
   src/geometry/composition_catalogue.cpp

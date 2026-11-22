@@ -1,4 +1,3 @@
-# Target and installation ownership for verification. Included from the project root.
 
 csl_add_library(csl_verification STATIC src/verification/trajectory.cpp)
 
