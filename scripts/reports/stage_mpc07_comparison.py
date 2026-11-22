@@ -215,7 +215,6 @@ def source_export(captures,online=None):
     sources.append((revision,{name:digest(files[name]) for name in HELPERS}))
     for raw in captures.values():
         env=json.loads(raw['environment.json']);native=env['native_source_commit']
-        # Import-free closed maps mirror the reviewed strict current checkers.
         maps={'PLAN.md':'benchmarks/reporting/mpc07/evidence/bounded-policy-0e821c2a/PLAN.md','README.md':'benchmarks/reporting/mpc07/evidence/bounded-policy-0e821c2a/README.md','capture.py':'benchmarks/reporting/mpc07/capture.py','policy.py':'benchmarks/reporting/mpc07/policy.py','report.py':'benchmarks/reporting/mpc07/report.py','native-build-receipt.json':'benchmarks/reporting/mpc07/native-build-receipt.json','test_mpc07_policy.py':'tests/reporting/test_mpc07_policy.py','native-affine_bridge.cpp':'benchmarks/reporting/mpc11/affine_bridge.cpp','native-CMakeLists.txt':'benchmarks/reporting/mpc11/CMakeLists.txt'}
         if env['schema']=='csl.mpc07.joint-filter.capture/1':
             maps.update({'JOINT-FILTER.md':'benchmarks/reporting/mpc07/evidence/joint-filter-04369201-recheck-v2/JOINT-FILTER.md','joint_filter.py':'benchmarks/reporting/mpc07/joint_filter.py','joint_capture.py':'benchmarks/reporting/mpc07/joint_capture.py','test_mpc07_joint_filter.py':'tests/reporting/test_mpc07_joint_filter.py','joint-gain-fixture.json':'tests/reporting/fixtures/mpc07-joint-gain-t08.json','figure_style.py':'scripts/reports/figure_style.py'})

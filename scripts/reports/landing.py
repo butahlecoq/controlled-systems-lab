@@ -36,9 +36,6 @@ try:
 except ModuleNotFoundError as error:
     if error.name != "site_design":
         raise
-    # A few publication validators load this file by path, outside the
-    # scripts/reports import context. Resolve the helper beside this file so
-    # those standalone imports use the same canonical page framing.
     design_path = Path(__file__).with_name("site_design.py")
     design_spec = importlib.util.spec_from_file_location("site_design", design_path)
     if design_spec is None or design_spec.loader is None:
