@@ -108,6 +108,13 @@ EXAMPLE_ROUTE_PRODUCERS = {
         "scripts/reports/stage_native_row_scaling_diagnostic.py",
         "reports/algorithm-results/native-row-scaling-diagnostic-v1/guide.html",
     ],
+    "examples/native-catalogue-convex-backends-v1/index.html": [
+        "scripts/reports/stage_native_source_constrained_mpc.py",
+        "scripts/reports/frozen_native_bundle.py",
+        "reports/algorithm-results/native-catalogue-convex-backends-v1/index.html",
+        "reports/algorithm-results/native-catalogue-convex-backends-v1/manifest.json",
+        "reports/algorithm-results/native-catalogue-convex-backends-v1/native-catalogue-convex-backends-v1.zip",
+    ],
     "examples/native-model-tracking-first-pass-v1/index.html": [
         "scripts/reports/stage_native_model_tracking_first_pass.py",
         "scripts/reports/visual_examples.py",
