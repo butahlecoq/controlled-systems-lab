@@ -42,6 +42,10 @@ The [probe executable](../../../probes/core-01/dependency_probes.cpp) checks:
 
 For ||Lx−r||₂, squaring preserves minimizers because the norm is nonnegative. Use Q=2LᵀL, q=−2Lᵀr, c=rᵀr in the ½xᵀQx convention, and independently report the original norm. Squaring can worsen conditioning and does not preserve objective gaps in the original units. This is a reformulation decision for a later adapter, not a conic capability or completeness proof. PSD/ill-conditioned/degenerate QP needs proper scaling, validation and failure translation; a successful small probe does not establish general robustness or validated bounds.
 
+The mixed-objective unit fixture adds separately evaluated criteria to show that
+squaring only the norm can reverse pointwise cost ordering. It does not exercise
+or claim a product composite sum-objective API.
+
 ## Platforms actually exercised
 
 Windows x64, MSVC compiler 19.44.35215.0 from VS 2022 Community toolset directory 14.44.35207, Windows SDK 10.0.26100.0, CMake 3.31.6-msvc6, Release. The declared future portability target is Linux x64 with GCC ≥12 or Clang ≥16 and CMake ≥3.31; **Linux is not run in CORE-01**. Upstream support plus standard C++20 gives a reasonable integration target, not a tested portability claim. Cross-platform CI, sanitizer/race coverage and installed consumer targets belong to CORE-02 and test expansions.
