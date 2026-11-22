@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts" / "reports"))
-import report_site
+report_site = importlib.import_module("report_site")
 
 
 class Opt11PublicationTests(unittest.TestCase):

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import importlib
 import json
 import sys
 import tempfile
@@ -12,7 +13,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
 import opt07_registered_reports as publisher  # noqa: E402
-import report_site
+report_site = importlib.import_module("report_site")
 report = publisher.source
 SOURCE_PATHS = report.SOURCE_PATHS
 fixture_sha256 = report.fixture_sha256
