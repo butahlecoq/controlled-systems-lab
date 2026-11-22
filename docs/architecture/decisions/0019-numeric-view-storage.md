@@ -38,15 +38,18 @@ empty shapes retain their dimensions, and asynchronous readers remain valid
 after producer handles leave scope. These checks protect storage and lifetime
 semantics without asserting that adapters can outlive their view owners.
 
-The buffer-view tests also exercise copy and move construction and assignment
+The buffer-view tests also exercise copy and rvalue construction and assignment
 across each dense layout, then replace the original handles while retained
-copies and descriptor spans remain live. A signed rectangular oracle is shared
+copies and descriptor spans remain live. The source views remain readable
+after those rvalue operations. A signed rectangular oracle is shared
 across row-major, column-major, interleaved, and CSR representations so that
 axis swaps, sign loss, or omitted columns cannot be hidden by a layout-specific
 expected value. CSR lifetime coverage preserves empty rows and explicit stored
-zeros across move and replacement. The joined-worker fixture reserves its
-future slots before launching gated asynchronous tasks: if vector growth threw
-after launch, destruction of a still-gated `std::async` temporary could wait
-forever before the gate is opened. Declaring the gate after the future vector
-ensures its destructor opens the gate before the future vector waits for
+zeros across move and replacement. The joined-worker fixture captures owning
+views, destroys the producer buffers and main-thread views, then opens the gate
+so workers obtain descriptor borrows only after those source owners have left
+scope. It reserves future slots before launching gated tasks: if vector growth
+threw after launch, destruction of a still-gated `std::async` temporary could
+wait forever before the gate is opened. Declaring the gate after the future
+vector ensures its destructor opens the gate before the future vector waits for
 workers during stack unwinding.
