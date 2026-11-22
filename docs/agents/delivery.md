@@ -115,6 +115,31 @@ Pages deployment and stale-head checks. Check registry visibility and
 [package access permissions](https://docs.github.com/en/packages/learn-github-packages/about-permissions-for-github-packages)
 before describing an image as publicly usable.
 
+## Main branch merge gates
+
+Both repositories protect `main` with pull-request-only updates, administrator
+enforcement, no force pushes or branch deletion, and required validation checks.
+The active settings and their verification evidence are tracked in
+[#1263](https://github.com/butahlecoq/controlled-systems-lab/issues/1263).
+
+| Repository | Required status contexts |
+| --- | --- |
+| `controlled-systems-lab` | `Native validation`, `Reporting validation`, `Python quality validation`, `Research SDK validation`, `C++ core quality validation` |
+| `csl-sdk` | `SDK validation`, `Native quality / complete retained scope` |
+
+Each context is a stable aggregate. A path-scoped check publishes a successful
+skip only after the shared router confirms its inputs are unchanged; a routing
+failure or a failed required check fails the aggregate. Thus unrelated changes
+retain the report-only and local development paths without leaving a required
+status absent. The SDK aggregate covers the install/research consumer, every
+compiler profile, and both real-IPOPT strategy runs.
+
+Emergency recovery requires a temporary, narrowly scoped change to the affected
+repository's protection settings by its owner. Record the reason, repository,
+affected commit, and validation evidence in #1263 (or a linked incident issue),
+then restore and verify the original required contexts immediately after the
+recovery merge. Do not force-push or delete `main`.
+
 ## Visual examples accompany numerical algorithms
 
 When an implemented algorithm has a supported small 2D case, add or extend a
