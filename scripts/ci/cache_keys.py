@@ -52,8 +52,6 @@ def cache_keys(root, context, event, ref, revision):
         raise ValueError("GITHUB_SHA must identify the exact source revision")
     inputs = {name: hashlib.sha256((root / name).read_bytes()).hexdigest() for name in INPUTS}
     inputs_sha256 = digest(inputs)
-    # PRs may read trusted main snapshots but never save. Manual development
-    # runs may save only in a branch-specific namespace, also scoped by GitHub.
     scope = "main"
     save = event in {"push", "workflow_dispatch"} and ref == "refs/heads/main"
     if event == "workflow_dispatch" and ref.startswith("refs/heads/") and ref != "refs/heads/main":
@@ -61,8 +59,6 @@ def cache_keys(root, context, event, ref, revision):
         save = True
     elif event != "pull_request" and ref != "refs/heads/main":
         scope = "readonly-" + hashlib.sha256(ref.encode()).hexdigest()[:16]
-    # Each lane owns its immutable snapshots. A faster core lane must not save
-    # a partial archive set under the full/probe lane's key.
     compatibility_id = digest({"context": context, "inputs": inputs_sha256})
     compiler_prefix = f"csl-objects-v1-{scope}-{compatibility_id}-"
     return {

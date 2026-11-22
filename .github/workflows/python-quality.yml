@@ -604,6 +604,10 @@ jobs:
         run: ruff format --check
       - name: Check types
         run: ty check
+      - name: Reject new prose comments in CI Python tools
+        env:
+          COMMENT_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: python scripts/ci/check_comment_ratchet.py check --base "$COMMENT_BASE"
       - name: Check closed-loop task and replay input shapes
         run: python -m unittest tests.reporting.test_closed_loop_tasks
       - name: Exercise real Git and process behavior

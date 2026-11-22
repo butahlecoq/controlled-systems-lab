@@ -42,6 +42,21 @@ class LocalOnlyDocsTests(unittest.TestCase):
             check=False,
         )
 
+    def test_retains_only_the_repository_comment_review_skill(self) -> None:
+        temporary, root, base = self.repository()
+        with temporary:
+            skill = root / ".agents/skills/delete-comment/SKILL.md"
+            skill.parent.mkdir(parents=True)
+            skill.write_text("# Comment review skill\n", encoding="utf-8")
+            subprocess.run(["git", "-C", str(root), "add", "."], check=True)
+            result = self.run_checker(root, base)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            (skill.parent / "extra.md").write_text("Extra working prose\n", encoding="utf-8")
+            subprocess.run(["git", "-C", str(root), "add", "."], check=True)
+            result = self.run_checker(root, base)
+            self.assertEqual(result.returncode, 1, result.stderr)
+            self.assertIn(".agents/skills/delete-comment/extra.md", result.stderr)
+
     def test_forces_a_tracked_working_document_to_remain_local(self) -> None:
         temporary, root, base = self.repository()
         with temporary:
