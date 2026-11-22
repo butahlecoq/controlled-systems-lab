@@ -1753,6 +1753,8 @@ jobs:
           python -m pip install --disable-pip-version-check --only-binary=:all:
           -r tools/legacy-ports/A29/requirements.txt -r tools/legacy-ports/A33/requirements.txt
       - name: Exercise the legacy hull ports and their exact oracles
+        env:
+          OPENBLAS_CORETYPE: Haswell
         run: |
           python -m unittest discover -s tools/legacy-ports/A29 -p test_port.py
           python -m unittest discover -s tools/legacy-ports/A33 -p test_port.py
