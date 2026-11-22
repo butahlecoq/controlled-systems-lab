@@ -425,7 +425,7 @@ def main() -> int:
         if source.is_file():
             shutil.copyfile(source, args.out / name)
     payload["_files"] = list(FILES)
-    (args.out / "index.html").write_text(render_html(payload), encoding="utf-8")
+    (args.out / "index.html").write_text(render_html(payload), encoding="utf-8", newline="\r\n")
     (args.out / "latency.svg").write_text(render_svg(payload), encoding="utf-8")
     summary = payload["summary"]
     with (args.out / "summary.csv").open("w", encoding="utf-8", newline="") as stream:
@@ -469,7 +469,9 @@ def main() -> int:
         },
     }
     (args.out / "manifest.json").write_text(
-        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+        newline="\r\n",
     )
     zip_path = args.out.parent / (payload["report_id"] + ".zip")
     if zip_path.exists():
@@ -479,6 +481,7 @@ def main() -> int:
     ) as archive:
         for path in sorted(args.out.iterdir()):
             info = zipfile.ZipInfo(path.name, date_time=(1980, 1, 1, 0, 0, 0))
+            info.create_system = 0
             info.compress_type = zipfile.ZIP_DEFLATED
             info.external_attr = 0o100644 << 16
             archive.writestr(

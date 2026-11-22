@@ -736,13 +736,8 @@ jobs:
 
       - name: Check closed-loop catalogues, campaign resume and common runner failure paths
         run: python -m unittest tests.reporting.test_native_compositions tests.reporting.test_closed_loop_campaign tests.reporting.test_closed_loop_native_capabilities tests.reporting.test_closed_loop_runner_failures tests.reporting.test_closed_loop_tracing tests.reporting.test_native_vertex_lp_priority_policy
-      - name: Verify the saved GEO-04 report export
-        run: |
-          python -m unittest discover -s scripts/reports/geo04 -p test_report_tools.py
-          geo04_output="$(mktemp -d)"
-          python reports/algorithm-results/tooling/geo04/render.py \
-            --collection reports/algorithm-results/geo04-20261012T224946Z-c37852bcc80d \
-            --out "$geo04_output/bundle"
+      - name: Verify the saved GEO-04 report export matches its committed bytes
+        run: python -m unittest discover -s scripts/reports/geo04 -p test_report_tools.py
       - name: Check four frozen environment report routes and offline ZIPs
         run: >-
           python -m unittest tests.reporting.test_env717_dubins_car_publication

@@ -461,6 +461,35 @@ class ReportToolTests(unittest.TestCase):
             self.assertTrue((bundle / "latency.svg").is_file())
             self.assertTrue((root / "geo04-offline-test.zip").is_file())
 
+    def test_saved_report_reproduces_committed_directory_and_zip_byte_for_byte(self):
+        repository = HERE.parents[2]
+        collection = repository / "reports/algorithm-results/geo04-20261012T224946Z-c37852bcc80d"
+        committed_zip = collection.with_suffix(".zip")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            bundle = root / "bundle"
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(repository / "reports/algorithm-results/tooling/geo04/render.py"),
+                    "--collection",
+                    str(collection),
+                    "--out",
+                    str(bundle),
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            expected_files = {path.name for path in collection.iterdir() if path.is_file()}
+            actual_files = {path.name for path in bundle.iterdir() if path.is_file()}
+            self.assertEqual(actual_files, expected_files)
+            for name in sorted(expected_files):
+                with self.subTest(file=name):
+                    self.assertEqual((bundle / name).read_bytes(), (collection / name).read_bytes())
+            generated_zip = root / committed_zip.name
+            self.assertEqual(generated_zip.read_bytes(), committed_zip.read_bytes())
+
     def test_renderer_rejects_failed_group_with_success_only_summary(self):
         rows = [trial(scenario) for scenario in collect.SCENARIOS]
         summary = collect.summarize(rows, complete_group=False)
