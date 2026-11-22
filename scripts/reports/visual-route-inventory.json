@@ -1393,7 +1393,7 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
-      "source": "scripts/reports/site.py",
+      "source": "scripts/reports/report_site.py",
       "signal_count": 7,
       "asset_name_literals": [
         "latency.png",

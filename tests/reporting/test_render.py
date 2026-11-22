@@ -15,6 +15,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
 data = importlib.import_module("report_data")
+site = importlib.import_module("report_site")
 
 
 class RenderTests(unittest.TestCase):
@@ -25,10 +26,12 @@ from pathlib import Path
 import sys
 assert importlib.util.find_spec("jsonschema") is None
 sys.path.insert(0, str(Path(sys.argv[1]) / "scripts/reports"))
-spec = importlib.util.spec_from_file_location("csl_site_without_report_deps", Path(sys.argv[1]) / "scripts/reports/site.py")
-publisher = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(publisher)
-print(publisher.catalogue_index({"reports": []}))
+import publication_policy
+assert not publication_policy.registered_kinds()
+import report_site
+assert not publication_policy.registered_kinds()
+report_site.register_publication_policies()
+print(report_site.catalogue_index({"reports": []}))
 assert "jsonschema" not in sys.modules
 """
         result = subprocess.run(
@@ -198,12 +201,6 @@ assert "jsonschema" not in sys.modules
                     self._create_symlink_or_skip(Path(temp) / "link", Path(temp) / "target")
 
     def test_site_rejects_unbound_raw_sidecar_and_external_inline_style(self):
-        spec = importlib.util.spec_from_file_location(
-            "report_site", ROOT / "scripts/reports/site.py"
-        )
-        assert spec is not None and spec.loader is not None
-        site = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(site)
         with self.assertRaises(ValueError):
             site.OfflineHTML(set()).feed('<p style="background:url(https://bad)">x</p>')
         with tempfile.TemporaryDirectory() as temp:
@@ -234,12 +231,6 @@ assert "jsonschema" not in sys.modules
                 site.validate_sidecar_hashes(root, p)
 
     def test_offline_generated_vocabulary_rejects_resource_attributes(self):
-        spec = importlib.util.spec_from_file_location(
-            "report_site", ROOT / "scripts/reports/site.py"
-        )
-        assert spec is not None and spec.loader is not None
-        site = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(site)
         for page in (
             '<meta http-equiv="refresh" content="0; URL=https://example.invalid/">',
             '<img srcset="https://example.invalid/image.png 1x">',
@@ -253,12 +244,6 @@ assert "jsonschema" not in sys.modules
                 site.OfflineHTML(set()).feed(page)
 
     def test_repository_fallback_ref_is_distinct_from_measured_source(self):
-        spec = importlib.util.spec_from_file_location(
-            "report_site", ROOT / "scripts/reports/site.py"
-        )
-        assert spec is not None and spec.loader is not None
-        site = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(site)
         view = data.load_view(ROOT / "tests/reporting/fixtures/view-v1.json")
         catalog = {"reports": [{"report_id": view["report_id"], "source_commit": "a" * 40}]}
         page = site.catalogue_index(catalog)

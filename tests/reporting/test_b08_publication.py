@@ -13,7 +13,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
 import b08_exact_registered_reports as b08
-from scripts.reports import site
+import report_site as site
 import stage_ext01
 
 REPORTS = ROOT / "reports/algorithm-results"

@@ -12,10 +12,7 @@ import zipfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "reports"))
 import geo02_registered_reports as geo02
-SITE_PATH = Path(__file__).resolve().parents[2] / "scripts" / "reports" / "site.py"
-SITE_SPEC = importlib.util.spec_from_file_location("csl_geo02_test_site", SITE_PATH)
-report_site = importlib.util.module_from_spec(SITE_SPEC)
-SITE_SPEC.loader.exec_module(report_site)
+import report_site
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "reports" / "algorithm-results" / "tooling" / "geo02"))
 import collect
 RENDER_PATH = Path(__file__).resolve().parents[2] / "reports" / "algorithm-results" / "tooling" / "geo02" / "render.py"

@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[2]
 REPORT_PATH=ROOT/"reports/algorithm-results/tooling/syn03_ts02/report.py"
+sys.path.insert(0, str(ROOT/"scripts/reports"))
 
 class StrategyATs02ReportTests(unittest.TestCase):
     def test_exact_profile_and_all_required_trial_checks(self):
@@ -62,9 +63,7 @@ class StrategyATs02ReportTests(unittest.TestCase):
             rows=list(csv.DictReader(stream))
         self.assertTrue(rows)
         self.assertFalse(set(key.encode() for key in rows[0]) & set(forbidden))
-        sys.path.insert(0,str(ROOT/"scripts/reports"))
-        site_spec=importlib.util.spec_from_file_location("csl_syn03_ts02_test_site",ROOT/"scripts/reports/site.py")
-        site=importlib.util.module_from_spec(site_spec);site_spec.loader.exec_module(site)
+        import report_site as site
         with tempfile.TemporaryDirectory() as temporary:
             stage_root=Path(temporary)
             catalogue=json.loads((ROOT/"reports/algorithm-results/catalog.json").read_text(encoding="utf-8"))
