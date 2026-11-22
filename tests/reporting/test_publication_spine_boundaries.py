@@ -34,6 +34,12 @@ HISTORICAL_OWNERS = (
 
 
 class PublicationSpineBoundaryTests(unittest.TestCase):
+    def test_site_compatibility_module_reexports_report_site_api(self) -> None:
+        from scripts.reports import site
+
+        self.assertIs(site.catalogue_index, report_site.catalogue_index)
+        self.assertIs(site.register_publication_policies, report_site.register_publication_policies)
+
     def test_breadcrumbs_accept_one_shot_iterators_and_omit_empty_navigation(self) -> None:
         self.assertEqual(
             site_design.page_start("Title", crumbs=iter(())), site_design.page_start("Title")
