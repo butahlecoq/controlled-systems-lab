@@ -26,8 +26,7 @@ struct BoxPlanStopped {
     std::vector<std::size_t> action_indices;
     OperationStopped reason;
 };
-using FiniteActionBoxPlanAttempt =
-    std::variant<BoxPlanScored, BoxPlanUnscored, BoxPlanStopped>;
+using FiniteActionBoxPlanAttempt = std::variant<BoxPlanScored, BoxPlanUnscored, BoxPlanStopped>;
 
 struct FiniteActionBoxReplay {
     double worst_value;
@@ -50,8 +49,8 @@ struct BoxPlanReplayStopped {
     OperationStopped reason;
 };
 struct BoxNoScoredCandidate {};
-using FiniteActionBoxSelectionOutcome = std::variant<BoxPlanSelected,
-    BoxPlanReplayRefused, BoxPlanReplayStopped, BoxNoScoredCandidate>;
+using FiniteActionBoxSelectionOutcome =
+    std::variant<BoxPlanSelected, BoxPlanReplayRefused, BoxPlanReplayStopped, BoxNoScoredCandidate>;
 
 struct FiniteActionBoxMinimaxResult {
     ProblemId problem;
@@ -62,8 +61,8 @@ struct FiniteActionBoxMinimaxResult {
     Assurance assurance{Assurance::numerical};
 };
 
-using FiniteActionBoxMinimaxOutcome = std::variant<FiniteActionBoxMinimaxResult,
-    Unsupported, OperationStopped>;
+using FiniteActionBoxMinimaxOutcome =
+    std::variant<FiniteActionBoxMinimaxResult, Unsupported, OperationStopped>;
 
 // Scores every fixed open-loop plan against its terminal outer box and retains
 // scored, unsupported, and stopped attempts. It replays the best scored plan
@@ -71,6 +70,10 @@ using FiniteActionBoxMinimaxOutcome = std::variant<FiniteActionBoxMinimaxResult,
 // complete only when every declared plan received a score. The box score is
 // numerical enclosure evidence, not a validated optimality bound or a
 // complete-family claim when coverage is incomplete.
+// For a convex diagonal quadratic, a single maximizing corner is found by
+// independent endpoint comparisons and consumes one corner evaluation. The
+// dense coefficient check is O(n^2) once per request. Choosing the corner is
+// O(n) per plan, followed by one numerical objective evaluation.
 // For horizon H, state/control/external dimensions n/m/q, A actions per stage,
 // P=A^H plans, C=2^n terminal corners, and R initial-disturbance histories
 // for the selected plan, work is O(P[Hn(n+m+q)+C C_obj]+RHn(n+m+q)); C_obj
@@ -82,8 +85,8 @@ using FiniteActionBoxMinimaxOutcome = std::variant<FiniteActionBoxMinimaxResult,
 // limits bound P, C, replay histories R, and exact points per replay stage.
 // Bounded V/singleton catalogues and
 // universal safe sets are supported; other set forms are not.
-FiniteActionBoxMinimaxOutcome finite_action_box_minimax(
-    const FiniteActionMinimaxRequest& request, FiniteActionBoxMinimaxLimits limits,
-    const ExecutionContext& context = {});
+FiniteActionBoxMinimaxOutcome finite_action_box_minimax(const FiniteActionMinimaxRequest &request,
+                                                        FiniteActionBoxMinimaxLimits limits,
+                                                        const ExecutionContext &context = {});
 
 } // namespace csl::optimization

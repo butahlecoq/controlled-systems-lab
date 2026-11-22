@@ -47,17 +47,16 @@ struct Dimensions {
     bool operator==(const Dimensions &) const = default;
 };
 using Vector = std::vector<double>;
-// Owning row-major buffer. Empty rows/columns are legal; shape validated at entry.
 struct Matrix {
     std::size_t rows, cols;
     Vector values;
 };
 struct SparseMatrix {
     std::size_t rows, cols;
-    std::vector<std::size_t> row_offsets, column_indices; // CSR, sorted columns
+    std::vector<std::size_t> row_offsets, column_indices;
     Vector values;
 };
 struct Interval {
     std::optional<double> lower, upper;
-}; // null means infinite
-} // namespace csl
+};
+}

@@ -25,7 +25,7 @@ struct StageProjectionBatchIdentity {
     std::vector<StageProjectionTrajectorySeries> trajectory_series;
 };
 
-ArtifactResult<std::string> encode_stage_projection_batch_json(
-    const StageProjectionBatchIdentity&, const StageProjectionBatchCapture&);
+ArtifactResult<std::string> encode_stage_projection_batch_json(const StageProjectionBatchIdentity &,
+                                                               const StageProjectionBatchCapture &);
 
 } // namespace csl::artifacts

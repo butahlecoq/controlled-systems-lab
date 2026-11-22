@@ -51,4 +51,4 @@ Diagnostics check_outcome_evidence(const SynthesisOutcomeClaim &claim, const Pro
                                    Assurance assurance) {
     return check_outcome(claim, expected, assurance);
 }
-} // namespace csl
+}

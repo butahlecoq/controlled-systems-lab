@@ -11,9 +11,14 @@ enum class SweepNotRunReason {
     family_unavailable
 };
 
-struct SweepQueryNotRun { SweepNotRunReason reason; };
-struct SweepQueryRejected { Diagnostics diagnostics; };
-using SweepQueryDisposition = std::variant<SweepQueryNotRun, SweepQueryRejected, RecordedRunArtifact>;
+struct SweepQueryNotRun {
+    SweepNotRunReason reason;
+};
+struct SweepQueryRejected {
+    Diagnostics diagnostics;
+};
+using SweepQueryDisposition =
+    std::variant<SweepQueryNotRun, SweepQueryRejected, RecordedRunArtifact>;
 
 struct SweepSelectionInput {
     std::uint64_t requested_count{};
@@ -56,26 +61,29 @@ struct SweepPhaseResources {
 // source of truth for mathematical outcomes; this manifest binds them to
 // scenario identity, deterministic selection input, and phase resource facts.
 class RecordedSweepArtifact {
-public:
-    RecordedSweepArtifact(const RecordedSweepArtifact&) = default;
-    RecordedSweepArtifact& operator=(const RecordedSweepArtifact&) = default;
-    const problem::ResolvedContent& content() const noexcept { return content_; }
+  public:
+    RecordedSweepArtifact(const RecordedSweepArtifact &) = default;
+    RecordedSweepArtifact &operator=(const RecordedSweepArtifact &) = default;
+    const problem::ResolvedContent &content() const noexcept { return content_; }
     problem::ContentDigest identity() const noexcept { return content_.digest(); }
-private:
-    explicit RecordedSweepArtifact(problem::ResolvedContent content) : content_(std::move(content)) {}
+
+  private:
+    explicit RecordedSweepArtifact(problem::ResolvedContent content)
+        : content_(std::move(content)) {}
     problem::ResolvedContent content_;
-    friend ArtifactResult<RecordedSweepArtifact> encode_recorded_sweep(
-        const problem::ResolvedContent&, std::string, const std::vector<SweepCaseInput>&,
-        const SweepPhaseResources&, const SweepPhaseResources&, EncodeLimits);
-    friend ArtifactResult<RecordedSweepArtifact> decode_recorded_sweep(std::string_view, DecodeLimits);
+    friend ArtifactResult<RecordedSweepArtifact>
+    encode_recorded_sweep(const problem::ResolvedContent &, std::string,
+                          const std::vector<SweepCaseInput> &, const SweepPhaseResources &,
+                          const SweepPhaseResources &, EncodeLimits);
+    friend ArtifactResult<RecordedSweepArtifact> decode_recorded_sweep(std::string_view,
+                                                                       DecodeLimits);
 };
 
-ArtifactResult<RecordedSweepArtifact> encode_recorded_sweep(
-    const problem::ResolvedContent& canonical_spec, std::string run_id,
-    const std::vector<SweepCaseInput>& cases,
-    const SweepPhaseResources& coarse_resources,
-    const SweepPhaseResources& query_resources,
-    EncodeLimits limits = {});
+ArtifactResult<RecordedSweepArtifact>
+encode_recorded_sweep(const problem::ResolvedContent &canonical_spec, std::string run_id,
+                      const std::vector<SweepCaseInput> &cases,
+                      const SweepPhaseResources &coarse_resources,
+                      const SweepPhaseResources &query_resources, EncodeLimits limits = {});
 ArtifactResult<RecordedSweepArtifact> decode_recorded_sweep(std::string_view, DecodeLimits = {});
 
 } // namespace csl::artifacts

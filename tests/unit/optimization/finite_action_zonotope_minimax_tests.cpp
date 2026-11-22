@@ -63,7 +63,7 @@ TEST_CASE("analytic scalar selector scores every fixed plan and replays the mini
 }
 
 TEST_CASE("factor corner refusal remains in every candidate row and marks search incomplete") {
-    const auto answer = finite_action_zonotope_minimax(analytic_request(), {3,2,2,4,1});
+    const auto answer = finite_action_zonotope_minimax(analytic_request(), {3,2,2,4,0});
     REQUIRE(std::holds_alternative<FiniteActionZonotopeMinimaxResult>(answer));
     const auto& result = std::get<FiniteActionZonotopeMinimaxResult>(answer);
     CHECK(result.candidate_search == CandidateSearchCoverage::incomplete);

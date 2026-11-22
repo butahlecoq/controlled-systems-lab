@@ -144,7 +144,7 @@ TEST_CASE("box minimax preserves scored plans when a later plan stops") {
 
 TEST_CASE("box minimax preserves every plan refused by the corner budget") {
     const auto request = analytic_box_request();
-    const auto outcome = finite_action_box_minimax(request, {3, 2, 2, 1});
+    const auto outcome = finite_action_box_minimax(request, {3, 2, 2, 0});
     REQUIRE(std::holds_alternative<FiniteActionBoxMinimaxResult>(outcome));
     const auto& result = std::get<FiniteActionBoxMinimaxResult>(outcome);
     CHECK(result.candidate_search == CandidateSearchCoverage::incomplete);

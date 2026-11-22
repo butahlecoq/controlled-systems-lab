@@ -19,8 +19,7 @@ bool finite(std::span<const double> values) {
 }
 
 bool same_matrix(const Matrix &left, const Matrix &right) {
-    return left.rows == right.rows && left.cols == right.cols &&
-           left.values == right.values;
+    return left.rows == right.rows && left.cols == right.cols && left.values == right.values;
 }
 
 bool same_matrix(const numeric::MatrixView &left, const numeric::MatrixView &right) {
@@ -193,10 +192,10 @@ bool h_rows_contain(const numeric::MatrixView &matrix, const numeric::VectorView
 
 bool h_contains(const sets::HRepresentation &h, std::span<const double> state,
                 NumericalPolicy policy) {
-    return h_rows_contain(h.inequalities, h.upper_bounds, false,
-                          {0, h.inequalities.rows()}, state, policy) &&
-           h_rows_contain(h.equalities, h.equality_values, true, {0, h.equalities.rows()},
-                          state, policy);
+    return h_rows_contain(h.inequalities, h.upper_bounds, false, {0, h.inequalities.rows()}, state,
+                          policy) &&
+           h_rows_contain(h.equalities, h.equality_values, true, {0, h.equalities.rows()}, state,
+                          policy);
 }
 } // namespace
 
@@ -384,17 +383,19 @@ Diagnostics check_history_membership_witnesses(const HistoryDomain &domain,
                 } else if constexpr (std::is_same_v<T, HistoryLiftedHMembership>) {
                     if (!std::holds_alternative<HistoryHWitness>(witnesses[i]))
                         return false;
-                    const auto h = std::get<sets::HRepresentation>(domain.original.relation.representation());
-                    return std::all_of(selected.inequality_rows.begin(), selected.inequality_rows.end(),
-                               [&](auto range) {
-                                   return h_rows_contain(h.inequalities, h.upper_bounds, false,
-                                                         range, history, policy);
-                               }) &&
+                    const auto h =
+                        std::get<sets::HRepresentation>(domain.original.relation.representation());
+                    return std::all_of(selected.inequality_rows.begin(),
+                                       selected.inequality_rows.end(),
+                                       [&](auto range) {
+                                           return h_rows_contain(h.inequalities, h.upper_bounds,
+                                                                 false, range, history, policy);
+                                       }) &&
                            std::all_of(selected.equality_rows.begin(), selected.equality_rows.end(),
-                               [&](auto range) {
-                                   return h_rows_contain(h.equalities, h.equality_values, true,
-                                                         range, history, policy);
-                               });
+                                       [&](auto range) {
+                                           return h_rows_contain(h.equalities, h.equality_values,
+                                                                 true, range, history, policy);
+                                       });
                 } else if constexpr (std::is_same_v<T, HistoryAxisBoxMembership>) {
                     const auto *witness = std::get_if<HistoryAxisBoxWitness>(&witnesses[i]);
                     if (!witness || witness->coefficients.size() != n ||

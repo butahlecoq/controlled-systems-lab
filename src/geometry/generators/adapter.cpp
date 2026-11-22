@@ -12,316 +12,416 @@
 
 namespace csl::geometry::generators {
 namespace {
-namespace ar=csl::artifacts;
-namespace ob=csl::execution::observability;
-template<class Outcome> Termination operation_termination(const Outcome& outcome) noexcept {
-    if(std::holds_alternative<Unsupported>(outcome))return Termination::operation_rejected;
-    if(const auto* stop=std::get_if<OperationStopped>(&outcome)) {
-        switch(stop->reason) {
-        case StopReason::cancelled:case StopReason::deadline_expired:return Termination::cancelled;
-        case StopReason::resource_limit:return Termination::resource_limit;
-        case StopReason::numerical_failure:return Termination::numerical_failure;
+namespace ar = csl::artifacts;
+namespace ob = csl::execution::observability;
+template <class Outcome> Termination operation_termination(const Outcome &outcome) noexcept {
+    if (std::holds_alternative<Unsupported>(outcome))
+        return Termination::operation_rejected;
+    if (const auto *stop = std::get_if<OperationStopped>(&outcome)) {
+        switch (stop->reason) {
+        case StopReason::cancelled:
+        case StopReason::deadline_expired:
+            return Termination::cancelled;
+        case StopReason::resource_limit:
+            return Termination::resource_limit;
+        case StopReason::numerical_failure:
+            return Termination::numerical_failure;
         }
         return Termination::numerical_failure;
     }
     return Termination::completed;
 }
-ar::ModuleIdentity module_identity(ModuleId id,std::string version) {
-    return {std::move(id),std::move(version),ar::Unavailable{ar::MissingReason::not_instrumented,{}}};
+ar::ModuleIdentity module_identity(ModuleId id, std::string version) {
+    return {std::move(id), std::move(version),
+            ar::Unavailable{ar::MissingReason::not_instrumented, {}}};
 }
-std::string_view operation_name(const GeometryOperation& operation) noexcept {
-    if(std::holds_alternative<AffineImage>(operation))return "geometry.generators.affine-image";
-    if(std::holds_alternative<MinkowskiSum>(operation))return "geometry.generators.minkowski-sum";
-    if(std::holds_alternative<DependentSum>(operation))return "geometry.generators.dependent-sum";
+std::string_view operation_name(const GeometryOperation &operation) noexcept {
+    if (std::holds_alternative<AffineImage>(operation))
+        return "geometry.generators.affine-image";
+    if (std::holds_alternative<MinkowskiSum>(operation))
+        return "geometry.generators.minkowski-sum";
+    if (std::holds_alternative<DependentSum>(operation))
+        return "geometry.generators.dependent-sum";
     return "geometry.generators.unsupported";
 }
-ob::OperationSpanIdentity operation_identity(const OperationRequest& request) {
-    return {request.identity.request.value,operation_name(request.operation),
-        module_identity({"csl.geometry.generators.operations"},"1.1.0"),{},{},{},{}};
+ob::OperationSpanIdentity operation_identity(const OperationRequest &request) {
+    return {request.identity.request.value,
+            operation_name(request.operation),
+            module_identity({"csl.geometry.generators.operations"}, "1.1.0"),
+            {},
+            {},
+            {},
+            {}};
 }
-ob::OperationSpanIdentity conversion_identity(const ConversionRequest& request) {
-    return {request.identity.request.value,"geometry.generators.v-conversion",
-        module_identity({"csl.geometry.generators.v-conversion"},"1.0.0"),{},{},{},{}};
+ob::OperationSpanIdentity conversion_identity(const ConversionRequest &request) {
+    return {request.identity.request.value,
+            "geometry.generators.v-conversion",
+            module_identity({"csl.geometry.generators.v-conversion"}, "1.0.0"),
+            {},
+            {},
+            {},
+            {}};
 }
-Diagnostics unsupported(std::string field,std::string reason,
-        DiagnosticCode code=DiagnosticCode::unsupported) {
-    return {{code,std::move(field),std::move(reason)}};
+Diagnostics unsupported(std::string field, std::string reason,
+                        DiagnosticCode code = DiagnosticCode::unsupported) {
+    return {{code, std::move(field), std::move(reason)}};
 }
-bool stopped(const ExecutionContext& context) {
+bool stopped(const ExecutionContext &context) {
     return context.cancellation.stop_requested() ||
-        (context.deadline && std::chrono::steady_clock::now()>=*context.deadline);
+           (context.deadline && std::chrono::steady_clock::now() >= *context.deadline);
 }
-OperationStopped stop(const ExecutionContext& context) {
-    const auto reason=context.cancellation.stop_requested() ? StopReason::cancelled :
-        (context.deadline && std::chrono::steady_clock::now()>=*context.deadline
-            ? StopReason::deadline_expired : StopReason::resource_limit);
-    return {reason,"Generator operation stopped before or during binary64 materialization."};
+OperationStopped stop(const ExecutionContext &context) {
+    const auto reason =
+        context.cancellation.stop_requested()
+            ? StopReason::cancelled
+            : (context.deadline && std::chrono::steady_clock::now() >= *context.deadline
+                   ? StopReason::deadline_expired
+                   : StopReason::resource_limit);
+    return {reason, "Generator operation stopped before or during binary64 materialization."};
 }
-std::variant<sets::GeneratorSet,Diagnostics> imported(const SetHandle& handle) {
+std::variant<sets::GeneratorSet, Diagnostics> imported(const SetHandle &handle) {
     return sets::from_generator_handle(handle);
 }
-std::optional<std::uint64_t> factor_count(const SetHandle& handle) noexcept {
+std::optional<std::uint64_t> factor_count(const SetHandle &handle) noexcept {
     try {
-        auto set=imported(handle);
-        if(const auto* value=std::get_if<sets::GeneratorSet>(&set)) {
-            if(value->factor_ids().size()<=std::numeric_limits<std::uint64_t>::max())
+        auto set = imported(handle);
+        if (const auto *value = std::get_if<sets::GeneratorSet>(&set)) {
+            if (value->factor_ids().size() <= std::numeric_limits<std::uint64_t>::max())
                 return static_cast<std::uint64_t>(value->factor_ids().size());
         }
-    } catch(...) {}
+    } catch (...) {
+    }
     return std::nullopt;
 }
-std::optional<std::uint64_t> operation_input_size(const OperationRequest& request) noexcept {
-    const auto count=[](const SetHandle& handle) {return factor_count(handle);};
-    if(const auto* image=std::get_if<AffineImage>(&request.operation)) return count(image->input);
-    const SetHandle* left=nullptr;
-    const SetHandle* right=nullptr;
-    if(const auto* sum=std::get_if<MinkowskiSum>(&request.operation)) {
-        left=&sum->left;right=&sum->right;
-    } else if(const auto* dependent=std::get_if<DependentSum>(&request.operation)) {
-        left=&dependent->left;right=&dependent->right;
-    } else return std::nullopt;
-    const auto a=count(*left),b=count(*right);
-    if(!a||!b||*b>std::numeric_limits<std::uint64_t>::max()-*a)return std::nullopt;
-    return *a+*b;
+std::optional<std::uint64_t> operation_input_size(const OperationRequest &request) noexcept {
+    const auto count = [](const SetHandle &handle) { return factor_count(handle); };
+    if (const auto *image = std::get_if<AffineImage>(&request.operation))
+        return count(image->input);
+    const SetHandle *left = nullptr;
+    const SetHandle *right = nullptr;
+    if (const auto *sum = std::get_if<MinkowskiSum>(&request.operation)) {
+        left = &sum->left;
+        right = &sum->right;
+    } else if (const auto *dependent = std::get_if<DependentSum>(&request.operation)) {
+        left = &dependent->left;
+        right = &dependent->right;
+    } else
+        return std::nullopt;
+    const auto a = count(*left), b = count(*right);
+    if (!a || !b || *b > std::numeric_limits<std::uint64_t>::max() - *a)
+        return std::nullopt;
+    return *a + *b;
 }
-std::optional<std::uint64_t> operation_output_size(const OperationOutcome& outcome) noexcept {
-    const auto* result=std::get_if<OperationResult>(&outcome);
+std::optional<std::uint64_t> operation_output_size(const OperationOutcome &outcome) noexcept {
+    const auto *result = std::get_if<OperationResult>(&outcome);
     return result ? factor_count(result->output) : std::nullopt;
 }
-std::optional<std::uint64_t> conversion_output_size(const SetTransformOutcome& outcome) noexcept {
-    const auto* result=std::get_if<OperationResult>(&outcome);
-    if(!result)return std::nullopt;
+std::optional<std::uint64_t> conversion_output_size(const SetTransformOutcome &outcome) noexcept {
+    const auto *result = std::get_if<OperationResult>(&outcome);
+    if (!result)
+        return std::nullopt;
     try {
-        auto set=sets::from_handle(result->output);
-        if(const auto* value=std::get_if<sets::SetData>(&set)) {
-            const auto representation=value->representation();
-            if(const auto* v=std::get_if<sets::VRepresentation>(&representation)) {
-                if(v->vertices.rows()<=std::numeric_limits<std::uint64_t>::max())
+        auto set = sets::from_handle(result->output);
+        if (const auto *value = std::get_if<sets::SetData>(&set)) {
+            const auto representation = value->representation();
+            if (const auto *v = std::get_if<sets::VRepresentation>(&representation)) {
+                if (v->vertices.rows() <= std::numeric_limits<std::uint64_t>::max())
                     return static_cast<std::uint64_t>(v->vertices.rows());
             }
         }
-    } catch(...) {}
+    } catch (...) {
+    }
     return std::nullopt;
 }
-bool independent(const sets::GeneratorSet& left,const sets::GeneratorSet& right) {
+bool independent(const sets::GeneratorSet &left, const sets::GeneratorSet &right) {
     std::unordered_set<std::string> ids;
-    for(const auto& id:left.factor_ids()) ids.insert(id.value);
-    return std::none_of(right.factor_ids().begin(),right.factor_ids().end(),
-        [&](const auto& id) {return ids.contains(id.value);});
+    for (const auto &id : left.factor_ids())
+        ids.insert(id.value);
+    return std::none_of(right.factor_ids().begin(), right.factor_ids().end(),
+                        [&](const auto &id) { return ids.contains(id.value); });
 }
-Diagnostics common_admission(Assurance assurance,const registry::Requirements& requirements) {
-    if(assurance!=Assurance::numerical || requirements.output.assurance!=Assurance::numerical)
-        return unsupported("generators.assurance","Only binary64 numerical assurance is available.");
-    if(requirements.scalar!=registry::Scalar::binary64)
-        return unsupported("generators.scalar","Only binary64 scalar data are implemented.");
-    if(requirements.output.relation && *requirements.output.relation!=SetRelation::equivalent)
-        return unsupported("generators.relation","Only a numerical equivalent relation is offered.");
+Diagnostics common_admission(Assurance assurance, const registry::Requirements &requirements) {
+    if (assurance != Assurance::numerical || requirements.output.assurance != Assurance::numerical)
+        return unsupported("generators.assurance",
+                           "Only binary64 numerical assurance is available.");
+    if (requirements.scalar != registry::Scalar::binary64)
+        return unsupported("generators.scalar", "Only binary64 scalar data are implemented.");
+    if (requirements.output.relation && *requirements.output.relation != SetRelation::equivalent)
+        return unsupported("generators.relation",
+                           "Only a numerical equivalent relation is offered.");
     return {};
 }
-GeometryEvidence evidence(const GeometryRequestIdentity& identity,std::vector<SetId> inputs,
-        std::string argument) {
-    return {{identity,std::move(inputs)},GeometryClaimScope::set_relation,
-        SymbolicArgument{"generator representation identity",std::move(argument)},
+GeometryEvidence evidence(const GeometryRequestIdentity &identity, std::vector<SetId> inputs,
+                          std::string argument) {
+    return {
+        {identity, std::move(inputs)},
+        GeometryClaimScope::set_relation,
+        SymbolicArgument{"generator representation identity", std::move(argument)},
         {"Real-set generator algebra defines the relation; binary64 coefficient evaluation may round.",
          "No validated rounding enclosure, physical-set equality certificate or global error bound is supplied."},
         {}};
 }
 
-registry::Capability operation_capability(const OperationRequest& request,
-        const registry::Requirements& requirements) {
-    if(auto errors=common_admission(request.assurance,requirements);!errors.empty()) return errors;
-    if(request.required_relation!=SetRelation::equivalent)
-        return unsupported("generators.relation","Only equivalent generator algebra is offered.");
-    if(request.identity.ideal_output.value.empty())
-        return unsupported("generators.output","Output set identity must be nonempty.",DiagnosticCode::invalid_input);
-    if(auto errors=check_operation_shape(request);!errors.empty()) return errors;
-    bool constrained=false;
-    if(const auto* image=std::get_if<AffineImage>(&request.operation)) {
-        const auto input=imported(image->input);
-        if(const auto* errors=std::get_if<Diagnostics>(&input)) return *errors;
-        constrained=std::get<sets::GeneratorSet>(input).equalities().rows!=0;
-        if(!std::all_of(image->map.values.begin(),image->map.values.end(),
-                [](double value){return std::isfinite(value);}) ||
-           !std::all_of(image->offset.begin(),image->offset.end(),
-                [](double value){return std::isfinite(value);}))
-            return unsupported("generators.image","Affine map and offset must be finite.",DiagnosticCode::invalid_input);
-    } else if(const auto* sum=std::get_if<MinkowskiSum>(&request.operation)) {
-        const auto left=imported(sum->left),right=imported(sum->right);
-        if(const auto* errors=std::get_if<Diagnostics>(&left)) return *errors;
-        if(const auto* errors=std::get_if<Diagnostics>(&right)) return *errors;
-        const auto& a=std::get<sets::GeneratorSet>(left);
-        const auto& b=std::get<sets::GeneratorSet>(right);
-        if(!independent(a,b))
-            return unsupported("generators.minkowski.factor_ids",
+registry::Capability operation_capability(const OperationRequest &request,
+                                          const registry::Requirements &requirements) {
+    if (auto errors = common_admission(request.assurance, requirements); !errors.empty())
+        return errors;
+    if (request.required_relation != SetRelation::equivalent)
+        return unsupported("generators.relation", "Only equivalent generator algebra is offered.");
+    if (request.identity.ideal_output.value.empty())
+        return unsupported("generators.output", "Output set identity must be nonempty.",
+                           DiagnosticCode::invalid_input);
+    if (auto errors = check_operation_shape(request); !errors.empty())
+        return errors;
+    bool constrained = false;
+    if (const auto *image = std::get_if<AffineImage>(&request.operation)) {
+        const auto input = imported(image->input);
+        if (const auto *errors = std::get_if<Diagnostics>(&input))
+            return *errors;
+        constrained = std::get<sets::GeneratorSet>(input).equalities().rows != 0;
+        if (!std::all_of(image->map.values.begin(), image->map.values.end(),
+                         [](double value) { return std::isfinite(value); }) ||
+            !std::all_of(image->offset.begin(), image->offset.end(),
+                         [](double value) { return std::isfinite(value); }))
+            return unsupported("generators.image", "Affine map and offset must be finite.",
+                               DiagnosticCode::invalid_input);
+    } else if (const auto *sum = std::get_if<MinkowskiSum>(&request.operation)) {
+        const auto left = imported(sum->left), right = imported(sum->right);
+        if (const auto *errors = std::get_if<Diagnostics>(&left))
+            return *errors;
+        if (const auto *errors = std::get_if<Diagnostics>(&right))
+            return *errors;
+        const auto &a = std::get<sets::GeneratorSet>(left);
+        const auto &b = std::get<sets::GeneratorSet>(right);
+        if (!independent(a, b))
+            return unsupported(
+                "generators.minkowski.factor_ids",
                 "Shared factor IDs denote dependence; independent Minkowski sum is unsupported.");
-        if(a.coordinate_labels()!=b.coordinate_labels())
+        if (a.coordinate_labels() != b.coordinate_labels())
             return unsupported("generators.minkowski.labels",
-                "Minkowski inputs require the same ordered coordinate labels.",DiagnosticCode::invalid_input);
-        constrained=a.equalities().rows!=0 || b.equalities().rows!=0;
-    } else if(const auto* dependent=std::get_if<DependentSum>(&request.operation)) {
-        const auto left=imported(dependent->left),right=imported(dependent->right);
-        if(const auto* errors=std::get_if<Diagnostics>(&left)) return *errors;
-        if(const auto* errors=std::get_if<Diagnostics>(&right)) return *errors;
-        const auto& a=std::get<sets::GeneratorSet>(left);
-        const auto& b=std::get<sets::GeneratorSet>(right);
-        if(a.coordinate_labels()!=b.coordinate_labels())
+                               "Minkowski inputs require the same ordered coordinate labels.",
+                               DiagnosticCode::invalid_input);
+        constrained = a.equalities().rows != 0 || b.equalities().rows != 0;
+    } else if (const auto *dependent = std::get_if<DependentSum>(&request.operation)) {
+        const auto left = imported(dependent->left), right = imported(dependent->right);
+        if (const auto *errors = std::get_if<Diagnostics>(&left))
+            return *errors;
+        if (const auto *errors = std::get_if<Diagnostics>(&right))
+            return *errors;
+        const auto &a = std::get<sets::GeneratorSet>(left);
+        const auto &b = std::get<sets::GeneratorSet>(right);
+        if (a.coordinate_labels() != b.coordinate_labels())
             return unsupported("generators.dependent.labels",
-                "Dependent summands require the same ordered coordinate labels.",DiagnosticCode::invalid_input);
-        constrained=a.equalities().rows!=0 || b.equalities().rows!=0;
+                               "Dependent summands require the same ordered coordinate labels.",
+                               DiagnosticCode::invalid_input);
+        constrained = a.equalities().rows != 0 || b.equalities().rows != 0;
     } else {
-        return unsupported("generators.operation",
+        return unsupported(
+            "generators.operation",
             "Only affine images, independent Minkowski sums and dependent sums are registered.");
     }
     registry::Output output;
-    output.representation={constrained ? "csl.constrained-zonotope" : "csl.zonotope"};
-    output.assurance=Assurance::numerical;
-    output.relation=SetRelation::equivalent;
+    output.representation = {constrained ? "csl.constrained-zonotope" : "csl.zonotope"};
+    output.assurance = Assurance::numerical;
+    output.relation = SetRelation::equivalent;
     return registry::Offer{output};
 }
 
 class OperationWorkspace final : public SetOperatorWorkspace {
     OperationRequest request_;
-public:
-    explicit OperationWorkspace(OperationRequest request):request_(std::move(request)) {}
-    OperationOutcome apply(const OperationRequest&,const ExecutionContext& context) override {
-        return ob::run_instrumented_operation(context,operation_identity(request_),[&]() -> OperationOutcome {
-        if(stopped(context)) return stop(context);
-        sets::GeneratorResult result=Diagnostics{};
-        std::vector<SetId> inputs;
-        if(const auto* image=std::get_if<AffineImage>(&request_.operation)) {
-            auto input=imported(image->input);
-            if(const auto* errors=std::get_if<Diagnostics>(&input)) return Unsupported{*errors};
-            result=affine_image(std::get<sets::GeneratorSet>(input),image->map,image->offset,
-                {request_.identity.ideal_output.value});
-            inputs={image->input.id};
-        } else if(const auto* sum=std::get_if<MinkowskiSum>(&request_.operation)) {
-            auto left=imported(sum->left),right=imported(sum->right);
-            if(const auto* errors=std::get_if<Diagnostics>(&left)) return Unsupported{*errors};
-            if(const auto* errors=std::get_if<Diagnostics>(&right)) return Unsupported{*errors};
-            result=minkowski_sum(std::get<sets::GeneratorSet>(left),std::get<sets::GeneratorSet>(right),
-                {request_.identity.ideal_output.value});
-            inputs={sum->left.id,sum->right.id};
-        } else if(const auto* dependent=std::get_if<DependentSum>(&request_.operation)) {
-            auto left=imported(dependent->left),right=imported(dependent->right);
-            if(const auto* errors=std::get_if<Diagnostics>(&left)) return Unsupported{*errors};
-            if(const auto* errors=std::get_if<Diagnostics>(&right)) return Unsupported{*errors};
-            result=dependent_sum(std::get<sets::GeneratorSet>(left),std::get<sets::GeneratorSet>(right),
-                {request_.identity.ideal_output.value});
-            inputs={dependent->left.id,dependent->right.id};
-        } else return Unsupported{unsupported("generators.operation","Unsupported generator operation.")};
-        if(const auto* errors=std::get_if<Diagnostics>(&result)) return Unsupported{*errors};
-        if(stopped(context)) return stop(context);
-        auto proof=evidence(request_.identity,std::move(inputs),
-            "Affine images retain each factor and equality; disjoint-ID Minkowski sums concatenate independent factors; dependent sums synchronize shared factors and retain both equality systems.");
-        if(auto errors=check_geometry_evidence(proof,request_);!errors.empty()) return Unsupported{std::move(errors)};
-        return OperationResult{std::get<sets::GeneratorSet>(std::move(result)).as_handle(),
-            SetRelation::equivalent,std::move(proof)};
-        },operation_termination<OperationOutcome>,
-        [&]() noexcept {return operation_input_size(request_);},
-        [](const OperationOutcome& outcome) noexcept {return operation_output_size(outcome);});
+
+  public:
+    explicit OperationWorkspace(OperationRequest request) : request_(std::move(request)) {}
+    OperationOutcome apply(const OperationRequest &, const ExecutionContext &context) override {
+        return ob::run_instrumented_operation(
+            context, operation_identity(request_),
+            [&]() -> OperationOutcome {
+                if (stopped(context))
+                    return stop(context);
+                sets::GeneratorResult result = Diagnostics{};
+                std::vector<SetId> inputs;
+                if (const auto *image = std::get_if<AffineImage>(&request_.operation)) {
+                    auto input = imported(image->input);
+                    if (const auto *errors = std::get_if<Diagnostics>(&input))
+                        return Unsupported{*errors};
+                    result = affine_image(std::get<sets::GeneratorSet>(input), image->map,
+                                          image->offset, {request_.identity.ideal_output.value});
+                    inputs = {image->input.id};
+                } else if (const auto *sum = std::get_if<MinkowskiSum>(&request_.operation)) {
+                    auto left = imported(sum->left), right = imported(sum->right);
+                    if (const auto *errors = std::get_if<Diagnostics>(&left))
+                        return Unsupported{*errors};
+                    if (const auto *errors = std::get_if<Diagnostics>(&right))
+                        return Unsupported{*errors};
+                    result = minkowski_sum(std::get<sets::GeneratorSet>(left),
+                                           std::get<sets::GeneratorSet>(right),
+                                           {request_.identity.ideal_output.value});
+                    inputs = {sum->left.id, sum->right.id};
+                } else if (const auto *dependent = std::get_if<DependentSum>(&request_.operation)) {
+                    auto left = imported(dependent->left), right = imported(dependent->right);
+                    if (const auto *errors = std::get_if<Diagnostics>(&left))
+                        return Unsupported{*errors};
+                    if (const auto *errors = std::get_if<Diagnostics>(&right))
+                        return Unsupported{*errors};
+                    result = dependent_sum(std::get<sets::GeneratorSet>(left),
+                                           std::get<sets::GeneratorSet>(right),
+                                           {request_.identity.ideal_output.value});
+                    inputs = {dependent->left.id, dependent->right.id};
+                } else
+                    return Unsupported{
+                        unsupported("generators.operation", "Unsupported generator operation.")};
+                if (const auto *errors = std::get_if<Diagnostics>(&result))
+                    return Unsupported{*errors};
+                if (stopped(context))
+                    return stop(context);
+                auto proof = evidence(
+                    request_.identity, std::move(inputs),
+                    "Affine images retain each factor and equality; disjoint-ID Minkowski sums concatenate independent factors; dependent sums synchronize shared factors and retain both equality systems.");
+                if (auto errors = check_geometry_evidence(proof, request_); !errors.empty())
+                    return Unsupported{std::move(errors)};
+                return OperationResult{std::get<sets::GeneratorSet>(std::move(result)).as_handle(),
+                                       SetRelation::equivalent, std::move(proof)};
+            },
+            operation_termination<OperationOutcome>,
+            [&]() noexcept { return operation_input_size(request_); },
+            [](const OperationOutcome &outcome) noexcept {
+                return operation_output_size(outcome);
+            });
     }
 };
 
-std::variant<std::size_t,Diagnostics> corner_count(const sets::GeneratorSet& input,
-        std::size_t max_vertices) {
-    std::size_t count=1;
-    if(max_vertices==0) return unsupported("generators.convert.cap","A positive vertex cap is required.");
-    for(std::size_t factor=0;factor<input.factor_ids().size();++factor) {
-        if(count>max_vertices/2)
-            return unsupported("generators.convert.cap","Full cube-corner output exceeds the caller's vertex cap.");
-        count*=2;
+std::variant<std::size_t, Diagnostics> corner_count(const sets::GeneratorSet &input,
+                                                    std::size_t max_vertices) {
+    std::size_t count = 1;
+    if (max_vertices == 0)
+        return unsupported("generators.convert.cap", "A positive vertex cap is required.");
+    for (std::size_t factor = 0; factor < input.factor_ids().size(); ++factor) {
+        if (count > max_vertices / 2)
+            return unsupported("generators.convert.cap",
+                               "Full cube-corner output exceeds the caller's vertex cap.");
+        count *= 2;
     }
-    const auto dimension=input.center().size();
-    if(dimension!=0 && count>std::vector<double>{}.max_size()/dimension)
-        return unsupported("generators.convert.capacity","V coordinate storage exceeds container capacity.");
+    const auto dimension = input.center().size();
+    if (dimension != 0 && count > std::vector<double>{}.max_size() / dimension)
+        return unsupported("generators.convert.capacity",
+                           "V coordinate storage exceeds container capacity.");
     return count;
 }
 
-registry::Capability conversion_capability(const ConversionRequest& request,
-        const registry::Requirements& requirements,std::size_t max_vertices) {
-    if(auto errors=common_admission(request.assurance,requirements);!errors.empty()) return errors;
-    if(request.output.value!="csl.polyhedron.v")
-        return unsupported("generators.convert.output","Only explicit finite V output is supported.");
-    if(request.identity.ideal_output.value.empty())
-        return unsupported("generators.convert.id","Output set identity must be nonempty.",DiagnosticCode::invalid_input);
-    auto input=imported(request.input);
-    if(const auto* errors=std::get_if<Diagnostics>(&input)) return *errors;
-    const auto& set=std::get<sets::GeneratorSet>(input);
-    if(set.equalities().rows!=0)
-        return unsupported("generators.convert.equalities",
+registry::Capability conversion_capability(const ConversionRequest &request,
+                                           const registry::Requirements &requirements,
+                                           std::size_t max_vertices) {
+    if (auto errors = common_admission(request.assurance, requirements); !errors.empty())
+        return errors;
+    if (request.output.value != "csl.polyhedron.v")
+        return unsupported("generators.convert.output",
+                           "Only explicit finite V output is supported.");
+    if (request.identity.ideal_output.value.empty())
+        return unsupported("generators.convert.id", "Output set identity must be nonempty.",
+                           DiagnosticCode::invalid_input);
+    auto input = imported(request.input);
+    if (const auto *errors = std::get_if<Diagnostics>(&input))
+        return *errors;
+    const auto &set = std::get<sets::GeneratorSet>(input);
+    if (set.equalities().rows != 0)
+        return unsupported(
+            "generators.convert.equalities",
             "Constrained generators require a separate factor-feasibility and projection conversion.");
-    if(auto count=corner_count(set,max_vertices);std::holds_alternative<Diagnostics>(count))
+    if (auto count = corner_count(set, max_vertices); std::holds_alternative<Diagnostics>(count))
         return std::get<Diagnostics>(std::move(count));
     registry::Output output;
-    output.representation={"csl.polyhedron.v"};
-    output.assurance=Assurance::numerical;
-    output.relation=SetRelation::equivalent;
+    output.representation = {"csl.polyhedron.v"};
+    output.assurance = Assurance::numerical;
+    output.relation = SetRelation::equivalent;
     return registry::Offer{output};
 }
 
 class ConversionWorkspace final : public RepresentationConverterWorkspace {
     ConversionRequest request_;
     std::size_t max_vertices_;
-public:
-    ConversionWorkspace(ConversionRequest request,std::size_t max_vertices)
-        :request_(std::move(request)),max_vertices_(max_vertices) {}
-    SetTransformOutcome convert(const ConversionRequest&,const ExecutionContext& context) override {
-        return ob::run_instrumented_operation(context,conversion_identity(request_),[&]() -> SetTransformOutcome {
-        if(stopped(context)) return stop(context);
-        auto input=imported(request_.input);
-        if(const auto* errors=std::get_if<Diagnostics>(&input)) return Unsupported{*errors};
-        const auto& set=std::get<sets::GeneratorSet>(input);
-        auto admitted=corner_count(set,max_vertices_);
-        if(const auto* errors=std::get_if<Diagnostics>(&admitted)) return Unsupported{*errors};
-        const auto count=std::get<std::size_t>(admitted);
-        const auto dimension=set.center().size(),factors=set.factor_ids().size();
-        Vector vertices;
-        vertices.reserve(count*dimension);
-        for(std::size_t vertex=0;vertex<count;++vertex) {
-            if(stopped(context)) return stop(context);
-            for(std::size_t row=0;row<dimension;++row) {
-                double value=set.center()[row];
-                for(std::size_t factor=0;factor<factors;++factor)
-                    value+=set.generators().values[row*factors+factor]*
-                        ((vertex>>factor)&1 ? 1.0 : -1.0);
-                if(!std::isfinite(value))
-                    return Unsupported{unsupported("generators.convert.arithmetic",
-                        "Binary64 cube-corner calculation produced a nonfinite coordinate.")};
-                vertices.push_back(value);
-            }
-        }
-        auto points=numeric::snapshot(Matrix{count,dimension,std::move(vertices)});
-        auto rays=numeric::snapshot(Matrix{0,dimension,{}});
-        if(const auto* error=std::get_if<Diagnostic>(&points)) return Unsupported{{*error}};
-        if(const auto* error=std::get_if<Diagnostic>(&rays)) return Unsupported{{*error}};
-        auto output=sets::make_v({{request_.identity.ideal_output.value},dimension,set.coordinate_labels()},
-            {std::get<numeric::MatrixView>(points),std::get<numeric::MatrixView>(rays)});
-        if(const auto* error=std::get_if<Diagnostic>(&output)) return Unsupported{{*error}};
-        auto proof=evidence(request_.identity,{request_.input.id},
-            "The convex hull of all mapped cube corners equals the unconstrained generator set in real arithmetic; redundant corners remain.");
-        proof.assumptions.emplace_back("V materialization loses FactorId dependence metadata; it must not be used to infer independence in later sums.");
-        if(auto errors=check_geometry_evidence(proof,request_);!errors.empty()) return Unsupported{std::move(errors)};
-        return OperationResult{std::get<sets::SetData>(std::move(output)).as_handle(),
-            SetRelation::equivalent,std::move(proof)};
-        },operation_termination<SetTransformOutcome>,
-        [&]() noexcept {return factor_count(request_.input);},
-        [](const SetTransformOutcome& outcome) noexcept {return conversion_output_size(outcome);});
+
+  public:
+    ConversionWorkspace(ConversionRequest request, std::size_t max_vertices)
+        : request_(std::move(request)), max_vertices_(max_vertices) {}
+    SetTransformOutcome convert(const ConversionRequest &,
+                                const ExecutionContext &context) override {
+        return ob::run_instrumented_operation(
+            context, conversion_identity(request_),
+            [&]() -> SetTransformOutcome {
+                if (stopped(context))
+                    return stop(context);
+                auto input = imported(request_.input);
+                if (const auto *errors = std::get_if<Diagnostics>(&input))
+                    return Unsupported{*errors};
+                const auto &set = std::get<sets::GeneratorSet>(input);
+                auto admitted = corner_count(set, max_vertices_);
+                if (const auto *errors = std::get_if<Diagnostics>(&admitted))
+                    return Unsupported{*errors};
+                const auto count = std::get<std::size_t>(admitted);
+                const auto dimension = set.center().size(), factors = set.factor_ids().size();
+                Vector vertices;
+                vertices.reserve(count * dimension);
+                for (std::size_t vertex = 0; vertex < count; ++vertex) {
+                    if (stopped(context))
+                        return stop(context);
+                    for (std::size_t row = 0; row < dimension; ++row) {
+                        double value = set.center()[row];
+                        for (std::size_t factor = 0; factor < factors; ++factor)
+                            value += set.generators().values[row * factors + factor] *
+                                     ((vertex >> factor) & 1 ? 1.0 : -1.0);
+                        if (!std::isfinite(value))
+                            return Unsupported{unsupported(
+                                "generators.convert.arithmetic",
+                                "Binary64 cube-corner calculation produced a nonfinite coordinate.")};
+                        vertices.push_back(value);
+                    }
+                }
+                auto points = numeric::snapshot(Matrix{count, dimension, std::move(vertices)});
+                auto rays = numeric::snapshot(Matrix{0, dimension, {}});
+                if (const auto *error = std::get_if<Diagnostic>(&points))
+                    return Unsupported{{*error}};
+                if (const auto *error = std::get_if<Diagnostic>(&rays))
+                    return Unsupported{{*error}};
+                auto output = sets::make_v(
+                    {{request_.identity.ideal_output.value}, dimension, set.coordinate_labels()},
+                    {std::get<numeric::MatrixView>(points), std::get<numeric::MatrixView>(rays)});
+                if (const auto *error = std::get_if<Diagnostic>(&output))
+                    return Unsupported{{*error}};
+                auto proof = evidence(
+                    request_.identity, {request_.input.id},
+                    "The convex hull of all mapped cube corners equals the unconstrained generator set in real arithmetic; redundant corners remain.");
+                proof.assumptions.emplace_back(
+                    "V materialization loses FactorId dependence metadata; it must not be used to infer independence in later sums.");
+                if (auto errors = check_geometry_evidence(proof, request_); !errors.empty())
+                    return Unsupported{std::move(errors)};
+                return OperationResult{std::get<sets::SetData>(std::move(output)).as_handle(),
+                                       SetRelation::equivalent, std::move(proof)};
+            },
+            operation_termination<SetTransformOutcome>,
+            [&]() noexcept { return factor_count(request_.input); },
+            [](const SetTransformOutcome &outcome) noexcept {
+                return conversion_output_size(outcome);
+            });
     }
 };
 } // namespace
 
 registry::Registration<registry::GeometryPort> make_operation_registration() {
-    return {{{"csl.geometry.generators.operations"},"1.1.0"},operation_capability,
-        [](const OperationRequest& request) {return std::make_unique<OperationWorkspace>(request);}};
+    return {{{"csl.geometry.generators.operations"}, "1.1.0"},
+            operation_capability,
+            [](const OperationRequest &request) {
+                return std::make_unique<OperationWorkspace>(request);
+            }};
 }
-registry::Registration<registry::ConversionPort> make_v_conversion_registration(
-        std::size_t max_vertices) {
-    return {{{"csl.geometry.generators.v-conversion"},"1.0.0"},
-        [max_vertices](const ConversionRequest& request,const registry::Requirements& requirements) {
-            return conversion_capability(request,requirements,max_vertices);
-        },
-        [max_vertices](const ConversionRequest& request) {
-            return std::make_unique<ConversionWorkspace>(request,max_vertices);
-        }};
+registry::Registration<registry::ConversionPort>
+make_v_conversion_registration(std::size_t max_vertices) {
+    return {{{"csl.geometry.generators.v-conversion"}, "1.0.0"},
+            [max_vertices](const ConversionRequest &request,
+                           const registry::Requirements &requirements) {
+                return conversion_capability(request, requirements, max_vertices);
+            },
+            [max_vertices](const ConversionRequest &request) {
+                return std::make_unique<ConversionWorkspace>(request, max_vertices);
+            }};
 }
 } // namespace csl::geometry::generators
