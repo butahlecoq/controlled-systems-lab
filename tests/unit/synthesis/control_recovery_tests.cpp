@@ -69,8 +69,8 @@ problem::ResolvedProblem zero_state_integrator() {
          LinearStage{{0, 0, {}}, {0, 1, {}}, {0, 0, {}}, {}}}, {}});
     Problem source{{"control-recovery-zero-state"}, model, {0, 1, 2},
         KnownInitial{{}}, ContinuousDomain{{
-            interval("zero-state-u0", -1, 1, "u0"),
-            interval("zero-state-u1", -1, 1, "u1")}},
+            interval("zero-state-u0", -1, 0, "u0"),
+            interval("zero-state-u1", 1, 2, "u1")}},
         {UniversalSet{0}, UniversalSet{0}, UniversalSet{0}}, {}, {},
         InformationPattern::nominal_open_loop, LinearTerminal{{}, 0}};
     return take(problem::resolve(source,
@@ -128,8 +128,8 @@ bool sparse_h(const sets::SetData& set) {
         std::holds_alternative<numeric::CsrInput>(h->equalities.descriptor());
 }
 
-Vector history(double u0, double u1) {
-    return {0, u0, u0 + u1, u0, u1}; // canonical [x0,x1,x2,u0,u1]
+Vector two_step_integrator_history(double u0, double u1) {
+    return {0, u0, u0 + u1, u0, u1};
 }
 
 const sets::SetData& recovered(const synthesis::ControlRecoveryOutcome& outcome) {
@@ -138,27 +138,29 @@ const sets::SetData& recovered(const synthesis::ControlRecoveryOutcome& outcome)
 }
 }
 
-TEST_CASE("backward recovery retains the two-step terminal fiber and rejects infeasible control histories") {
+TEST_CASE("recovery accepts sampled two-step terminal histories and rejects inconsistent samples") {
     const auto result = synthesis::recover_joint_history(integrator(), interval_data("terminal-one", 1, 1));
     const auto& relation = recovered(result);
     CHECK(sparse_h(relation));
 
-    // Every returned point is checked against the public meaning of a history:
-    // x0=0, x1=u0, x2=u0+u1, 0<=u0,u1<=1, and x2=1.
-    for (const Vector point : {history(0, 1), history(0.25, 0.75), history(0.5, 0.5),
-                               history(1, 0)})
+    for (const Vector point : {two_step_integrator_history(0, 1),
+                               two_step_integrator_history(0.25, 0.75),
+                               two_step_integrator_history(0.5, 0.5),
+                               two_step_integrator_history(1, 0)})
         CHECK(contains(relation, point));
-    CHECK_FALSE(contains(relation, history(1, 1)));
-    CHECK_FALSE(contains(relation, {0, 0.5, 1, 0.75, 0.25})); // inconsistent x1
-    CHECK_FALSE(contains(relation, {0, 0.5, 1.25, 0.5, 0.5})); // inconsistent x2
-    CHECK_FALSE(contains(relation, history(0.25, 0.5))); // misses terminal slice
+    CHECK_FALSE(contains(relation, two_step_integrator_history(1, 1)));
+    const Vector inconsistent_first_stage{0, 0.5, 1, 0.75, 0.25};
+    const Vector inconsistent_second_stage{0, 0.5, 1, 0.5, 0.6};
+    CHECK_FALSE(contains(relation, inconsistent_first_stage));
+    CHECK_FALSE(contains(relation, inconsistent_second_stage));
+    CHECK_FALSE(contains(relation, two_step_integrator_history(0.25, 0.5)));
 }
 
 TEST_CASE("recovery stores empty terminal contradictions as sparse zero rows") {
     const auto empty_terminal = take(sets::make_empty({{"empty-terminal"}, 1, {"x"}}));
     const auto relation = recovered(synthesis::recover_joint_history(integrator(), empty_terminal));
     CHECK(sparse_h(relation));
-    CHECK_FALSE(contains(relation, history(0.5, 0.5)));
+    CHECK_FALSE(contains(relation, two_step_integrator_history(0.5, 0.5)));
 
     const auto representation = std::get<sets::HRepresentation>(relation.representation());
     const auto rows = std::get<numeric::CsrInput>(representation.inequalities.descriptor());
@@ -177,8 +179,8 @@ TEST_CASE("recovery embeds CSR terminal rows at the terminal-state coordinates")
     const auto relation = recovered(synthesis::recover_joint_history(integrator(), terminal));
 
     CHECK(sparse_h(relation));
-    CHECK(contains(relation, history(0.25, 0.75)));
-    CHECK_FALSE(contains(relation, history(0.25, 0.5)));
+    CHECK(contains(relation, two_step_integrator_history(0.25, 0.75)));
+    CHECK_FALSE(contains(relation, two_step_integrator_history(0.25, 0.5)));
 }
 
 TEST_CASE("recovery handles singular transitions without inverting A") {
@@ -187,24 +189,20 @@ TEST_CASE("recovery handles singular transitions without inverting A") {
     const auto& relation = recovered(result);
     CHECK(sparse_h(relation));
 
-    // x1=u0 and x2=u1 when A=0. The terminal slice fixes u1=1 while
-    // leaving every admissible first-stage control free.
     for (double u0 : {0.0, 0.2, 0.5, 0.8, 1.0})
         CHECK(contains(relation, {0, u0, 1, u0, 1}));
     CHECK_FALSE(contains(relation, {0, 0.5, 0.9, 0.5, 0.9}));
     CHECK_FALSE(contains(relation, {0, 0.5, 1, 0.5, 0.99}));
 }
 
-TEST_CASE("recovery preserves the full feasible history when the supplied terminal slice is the full minimizer relation") {
-    // The helper receives no objective. This interval is already the entire
-    // terminal minimizer relation for a constant terminal criterion.
+TEST_CASE("recovery admits sampled histories across a caller-supplied terminal interval") {
     const auto result = synthesis::recover_joint_history(integrator(), interval_data("terminal-full", 0, 2));
     const auto& relation = recovered(result);
     CHECK(sparse_h(relation));
 
     for (double u0 : {0.0, 0.2, 0.5, 1.0})
         for (double u1 : {0.0, 0.3, 0.7, 1.0})
-            CHECK(contains(relation, history(u0, u1)));
+            CHECK(contains(relation, two_step_integrator_history(u0, u1)));
     CHECK_FALSE(contains(relation, {0, 0.5, 1, -0.1, 1.1}));
 }
 
@@ -213,10 +211,10 @@ TEST_CASE("recovered histories respect intermediate state constraints") {
         integrator(0.5), interval_data("terminal-full-with-stage-bound", 0, 2));
     const auto& relation = recovered(result);
 
-    CHECK(contains(relation, history(0.5, 0)));
-    CHECK(contains(relation, history(0.5, 1)));
-    CHECK_FALSE(contains(relation, history(0.5001, 0)));
-    CHECK_FALSE(contains(relation, {0, 0.75, 0.75, 0.5, 0.25})); // x1 violates bound
+    CHECK(contains(relation, two_step_integrator_history(0.5, 0)));
+    CHECK(contains(relation, two_step_integrator_history(0.5, 1)));
+    CHECK_FALSE(contains(relation, two_step_integrator_history(0.5001, 0)));
+    CHECK_FALSE(contains(relation, two_step_integrator_history(0.75, 0)));
 }
 
 TEST_CASE("recovery rejects finite control catalogues when only continuous controls are supported") {
@@ -244,13 +242,13 @@ TEST_CASE("zero-dimensional states preserve every staged control coordinate in c
     const auto outcome = synthesis::recover_joint_history(source, terminal);
     const auto& relation = recovered(outcome);
 
-    // x0,x1,x2 have zero coordinates, leaving [u0,u1] as the entire joint vector.
     CHECK(std::get<synthesis::JointHistoryRelation>(outcome).coordinates ==
         (JointCoordinates{{0, 1, 0}, 2}));
     CHECK(relation.metadata()->set.dimension == 2);
-    CHECK(contains(relation, {0.25, -0.75}));
-    CHECK(contains(relation, {-1, 1}));
-    CHECK_FALSE(contains(relation, {1.01, 0}));
+    CHECK(contains(relation, {-0.25, 1.75}));
+    CHECK(contains(relation, {-1, 2}));
+    CHECK_FALSE(contains(relation, {1.75, -0.25}));
+    CHECK_FALSE(contains(relation, {0.01, 1.5}));
     CHECK_FALSE(contains(relation, {0.25}));
 }
 
@@ -261,12 +259,12 @@ TEST_CASE("stage-labelled recovery preserves the coordinate map and complete mul
     const auto outcome = synthesis::recover_joint_history(source, terminal);
     const auto& joint = std::get<synthesis::JointHistoryRelation>(outcome);
 
-    // Hand-evaluated dynamics give x1=(1.5,-1), x2=(1.5,-1.25) for
-    // controls (0.5,-0.25); the public coordinate contract is [x0,x1,x2,u0,u1].
     CHECK(joint.coordinates == (JointCoordinates{{2, 1, 0}, 2}));
     CHECK(joint.coordinates == source.constraints().coordinates());
-    CHECK(contains(joint.relation, {1, -1, 1.5, -1, 1.5, -1.25, 0.5, -0.25}));
-    CHECK_FALSE(contains(joint.relation, {1, -1, 1.5, -1, 1.5, -1.25, -0.25, 0.5}));
+    const Vector expected_history{1, -1, 1.5, -1, 1.5, -1.25, 0.5, -0.25};
+    const Vector swapped_control_order{1, -1, 1.5, -1, 1.5, -1.25, -0.25, 0.5};
+    CHECK(contains(joint.relation, expected_history));
+    CHECK_FALSE(contains(joint.relation, swapped_control_order));
     CHECK_FALSE(contains(joint.relation, {1, -1, 1.5, -1, 1.5, -1.0, 0.5, -0.25}));
 }
 
@@ -277,7 +275,7 @@ TEST_CASE("lifted projections exclude future rows and retain the full terminal c
         synthesis::recover_lifted_history_projections(model, terminal));
     REQUIRE(lifted.prefixes.size() == 3);
     const auto h = std::get<sets::HRepresentation>(lifted.history.relation.representation());
-    CHECK_FALSE(contains(lifted.history.relation, history(0.25, 0.25)));
+    CHECK_FALSE(contains(lifted.history.relation, two_step_integrator_history(0.25, 0.25)));
 
     const auto prefix_contains = [&](std::size_t stage, const Vector& values) {
         const auto& prefix = lifted.prefixes.at(stage);
@@ -305,7 +303,7 @@ TEST_CASE("lifted projections exclude future rows and retain the full terminal c
     CHECK(prefix_contains(1, {0, 0.25, 9, 0.25, -5}));
     CHECK_FALSE(prefix_contains(1, {0, 0.75, 9, 0.75, -5}));
     CHECK_FALSE(prefix_contains(1, {0, 0.25, 9, 0.5, -5}));
-    CHECK(prefix_contains(2, history(0.25, 0.25)));
-    CHECK_FALSE(prefix_contains(2, history(0.25, 2)));
+    CHECK(prefix_contains(2, two_step_integrator_history(0.25, 0.25)));
+    CHECK_FALSE(prefix_contains(2, two_step_integrator_history(0.25, 2)));
     CHECK_FALSE(prefix_contains(2, {0, 0.25, 0.75, 0.25, 0.25}));
 }
