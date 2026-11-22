@@ -5,7 +5,6 @@ endif()
 file(READ "${SOURCE_FILE}" source)
 string(REPLACE "\r\n" "\n" logical_source "${source}")
 string(SHA256 source_sha256 "${logical_source}")
-# The following clock snapshot patch retains the scheduler accessor unchanged.
 if(source_sha256 STREQUAL "9e6849f8933e3e434c5964f78f2c7229537a9398f1d6ded35a2cd2c5d1839501")
   return()
 endif()

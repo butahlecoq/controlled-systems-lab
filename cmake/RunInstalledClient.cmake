@@ -1,5 +1,3 @@
-# Copy only consumer inputs into a separate source tree. Its sole product
-# dependency is find_package(CSL CONFIG), resolved from the installed prefix.
 if(NOT DEFINED CSL_BUILD_PARALLELISM)
   set(CSL_BUILD_PARALLELISM 4)
 endif()
@@ -27,9 +25,6 @@ file(MAKE_DIRECTORY "${work}/source")
 set(prefix "${work}/prefix")
 file(MAKE_DIRECTORY "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/CMakeLists.txt" DESTINATION "${work}/source")
-# Installed consumers are curated by tests/installed/CMakeLists.txt. Stage all
-# consumer translation units from that directory so adding a target cannot
-# silently omit its source from this isolated package check.
 file(GLOB installed_consumer_sources
   "${CSL_SOURCE_DIR}/tests/installed/*.cpp")
 if(NOT installed_consumer_sources)
@@ -70,8 +65,6 @@ if(CSL_STAGE_ONLY)
 endif()
 execute_process(COMMAND "${CMAKE_COMMAND}" --install "${CSL_BUILD_DIR}"
   --config "${CSL_CONFIG}" --prefix "${prefix}" COMMAND_ERROR_IS_FATAL ANY)
-# Installed packages expose behavior through headers and executable consumers;
-# Markdown working documents stay in the source repository and are not packaged.
 file(GLOB_RECURSE installed_markdown_docs LIST_DIRECTORIES false
   "${prefix}/${CSL_INSTALL_DATADIR}/CSL/*.md"
   "${prefix}/${CSL_INSTALL_DATADIR}/doc/CSL/*.md")
@@ -79,7 +72,6 @@ if(installed_markdown_docs)
   message(FATAL_ERROR
     "Markdown working documents must not be installed: ${installed_markdown_docs}")
 endif()
-# Inspect the installed artifacts, ignoring comments that discuss dependency names.
 set(notices_root "${prefix}/${CSL_INSTALL_DATADIR}/CSL/notices")
 if(NOT EXISTS "${notices_root}/nlohmann-json-3.11.3/LICENSE.MIT")
   message(FATAL_ERROR "Installed input dependency notice is missing")
@@ -161,8 +153,6 @@ execute_process(COMMAND "${CMAKE_COMMAND}" --build "${work}/build"
 execute_process(COMMAND "${CMAKE_CTEST_COMMAND}" --test-dir "${work}/build"
   -C "${CSL_CONFIG}" --output-on-failure --no-tests=error COMMAND_ERROR_IS_FATAL ANY)
 
-# Exercise the README examples as a second, isolated installed-package consumer.
-# Copy only their public sources/template: no repository include or build paths.
 set(example_source "${work}/examples-source")
 file(MAKE_DIRECTORY "${example_source}/scenarios")
 foreach(example_file CMakeLists.txt registered_lp.cpp registered_convex.cpp

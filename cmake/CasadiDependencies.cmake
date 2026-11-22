@@ -1,8 +1,6 @@
 find_package(casadi CONFIG REQUIRED)
 include(CheckCXXSourceCompiles)
 
-# A private imported target can otherwise change only the adapter's C++ ABI.
-# The adapter exchanges CSL string-bearing values with the rest of the library.
 set(csl_casadi_saved_required_libraries "${CMAKE_REQUIRED_LIBRARIES}")
 set(csl_casadi_abi_probe "#include <string>
 #if defined(__GLIBCXX__) && _GLIBCXX_USE_CXX11_ABI != 1
