@@ -1290,8 +1290,14 @@ jobs:
         run: |
           python -m unittest tests.reporting.test_convex_report tests.reporting.test_opt07_collector tests.reporting.test_opt12_collector tests.reporting.test_visual_examples tests.reporting.test_geo07_publication tests.reporting.test_geo07_port_publication tests.reporting.test_geo07_dependent_publication tests.reporting.test_finite_feedback_publication tests.reporting.test_ext04_publication tests.reporting.test_report_lifecycle
 
-      - name: Check the saved MPC-06 online smoke evidence
-        run: python -m unittest tests.reporting.test_mpc06_online
+      - name: Check the saved MPC-06 online evidence and entry points
+        run: |
+          python -m unittest tests.reporting.test_mpc06_online
+          for name in check render study; do
+            python "scripts/reports/mpc06_online/$name.py" --help > "$RUNNER_TEMP/mpc06-$name-direct-help"
+            python -m "scripts.reports.mpc06_online.$name" --help > "$RUNNER_TEMP/mpc06-$name-module-help"
+            cmp "$RUNNER_TEMP/mpc06-$name-direct-help" "$RUNNER_TEMP/mpc06-$name-module-help"
+          done
 
       - name: Replay the saved closed-loop pilot and terminal-cost routes
         env:
