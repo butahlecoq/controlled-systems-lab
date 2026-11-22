@@ -89,7 +89,7 @@ std::size_t find_control_budget_row(const auto &qp, std::size_t state_count,
     }
     throw std::runtime_error("Compiled QP did not retain the source control-budget row");
 }
-} // namespace
+}
 
 TEST_CASE("source profile factory records an explicit admission for every catalogue model") {
     const auto models = csl::model::catalogue::discrete_models();
@@ -177,14 +177,13 @@ TEST_CASE("model 26 source headway is a coupled transition and terminal state co
     REQUIRE(std::holds_alternative<CompiledNominalQuadraticHistory>(compiled));
     const auto &program = std::get<CompiledNominalQuadraticHistory>(compiled).program;
     const auto &qp = program.quadratic_program();
-    CHECK(qp.constraints().rows() ==
-          137); // initial/dynamics, control bounds, stage + terminal rows
+    CHECK(qp.constraints().rows() == 137);
     CHECK(qp.rows()[110].lower == 2.0);
     CHECK(qp.constraints()(110, 0) == 1.0);
     CHECK(qp.constraints()(110, 3) == -1.0);
     CHECK(qp.constraints()(110, 4) == -1.2);
     CHECK(qp.rows()[128].lower == 2.0);
-    CHECK(qp.constraints()(128, 60) == 1.0); // terminal x[T], no terminal control column
+    CHECK(qp.constraints()(128, 60) == 1.0);
     CHECK(qp.constraints()(128, 63) == -1.0);
     CHECK(qp.constraints()(128, 64) == -1.2);
 }
@@ -273,7 +272,7 @@ TEST_CASE(
     REQUIRE(std::holds_alternative<CompiledNominalQuadraticHistory>(compiled));
     const auto &full_qp =
         std::get<CompiledNominalQuadraticHistory>(compiled).program.quadratic_program();
-    CHECK(full_qp.rows()[132].upper == 2.0); // state/control bounds precede availability rows
+    CHECK(full_qp.rows()[132].upper == 2.0);
 
     const auto suffix = compile_mpc_decision(task, {1}, task.initial.point);
     REQUIRE(std::holds_alternative<CompiledNominalQuadraticHistory>(suffix));
@@ -305,8 +304,8 @@ TEST_CASE("authored terminal constraints cannot encode a control at the terminal
     REQUIRE(std::holds_alternative<CompiledNominalQuadraticHistory>(compiled));
     const auto &qp =
         std::get<CompiledNominalQuadraticHistory>(compiled).program.quadratic_program();
-    CHECK(qp.constraints().rows() == 11);  // initial, dynamics, state/control bounds, one terminal
-    CHECK(qp.constraints()(10, 2) == 1.0); // terminal x1 first state
+    CHECK(qp.constraints().rows() == 11);
+    CHECK(qp.constraints()(10, 2) == 1.0);
 }
 
 TEST_CASE("profile admission rejects malformed authored schedules and bounds") {
