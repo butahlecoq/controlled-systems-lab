@@ -95,6 +95,8 @@ on:
       - 'reports/algorithm-results/catalogue-external-fixed-plan-v1/**'
       - 'scripts/reports/preserve_published_routes.py'
       - 'scripts/reports/audit_published_route_preservation.py'
+      - 'scripts/reports/geo05/**'
+      - 'reports/algorithm-results/geo05-*/records.json'
       - 'tests/reporting/test_preserve_published_routes.py'
       - 'tests/reporting/test_published_route_audit_policy.py'
       - 'tests/fixtures/published-route-baseline/**'
@@ -598,6 +600,8 @@ on:
       - 'reports/algorithm-results/catalogue-external-fixed-plan-v1/**'
       - 'scripts/reports/preserve_published_routes.py'
       - 'scripts/reports/audit_published_route_preservation.py'
+      - 'scripts/reports/geo05/**'
+      - 'reports/algorithm-results/geo05-*/records.json'
       - 'tests/reporting/test_preserve_published_routes.py'
       - 'tests/reporting/test_published_route_audit_policy.py'
       - 'tests/fixtures/published-route-baseline/**'
@@ -1129,6 +1133,14 @@ jobs:
           diff -r reports/closed-loop-history-functional "$site/closed-loop-history-functional"
       - name: Exercise maintained compatibility entry points
         run: |
+          python -m unittest discover -s scripts/reports/geo05 -p 'test_*.py'
+          for report_id in geo05-4dc3c0557570a52e geo05-7fddaba0c7698f72; do
+            records="reports/algorithm-results/$report_id/records.json"
+            output="$RUNNER_TEMP/$report_id"
+            python scripts/reports/geo05/render.py --records "$records" --out "$output"
+            python reports/algorithm-results/tooling/geo05/render.py --records "$records" --out "$output-compat"
+            cmp "$output/index.html" "$output-compat/index.html"
+          done
           python -m unittest discover -s tests/reporting -p 'test_syn03_strategy_a_report.py'
           python -m unittest discover -s tests/reporting -p 'test_syn03_ts02_report.py'
       - name: Check six saved environment routes and offline ZIPs
