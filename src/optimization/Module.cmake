@@ -1,4 +1,3 @@
-
 csl_add_library(csl_objectives STATIC src/optimization/objective_reformulation.cpp)
 
 target_link_libraries(csl_objectives PUBLIC CSL::numeric)

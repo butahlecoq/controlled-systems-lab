@@ -1,4 +1,3 @@
-
 csl_add_library(csl_experiments STATIC
     src/experiments/batch_runner.cpp
     src/experiments/replay_comparison.cpp

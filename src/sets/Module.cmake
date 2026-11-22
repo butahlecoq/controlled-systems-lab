@@ -1,4 +1,3 @@
-
 csl_add_library(csl_sets STATIC src/sets/data.cpp)
 
 target_link_libraries(csl_sets PUBLIC CSL::numeric)

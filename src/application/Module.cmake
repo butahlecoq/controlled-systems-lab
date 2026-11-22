@@ -1,4 +1,3 @@
-
 csl_add_library(csl_application STATIC src/application/comparison.cpp)
 
 target_link_libraries(csl_application PUBLIC

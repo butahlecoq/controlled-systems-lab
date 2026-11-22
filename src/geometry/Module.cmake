@@ -1,4 +1,3 @@
-
 csl_add_library(csl_hull STATIC
   src/geometry/composition_catalogue.cpp
   src/geometry/hull_reducer.cpp

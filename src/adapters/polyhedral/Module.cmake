@@ -1,4 +1,3 @@
-
 if(CSL_ENABLE_QHULL)
   include(cmake/QhullDependencies.cmake)
 

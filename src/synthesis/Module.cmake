@@ -1,4 +1,3 @@
-
 csl_add_library(csl_terminal_minimizers STATIC src/synthesis/terminal_minimizers.cpp)
 
 target_link_libraries(csl_terminal_minimizers PUBLIC CSL::sets CSL::registry CSL::convex CSL::problem PRIVATE CSL::artifacts)
