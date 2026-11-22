@@ -15,10 +15,13 @@ producers, while descriptors expose spans into the retained storage.
 - Snapshot borrowed matrix and vector inputs into immutable retained storage.
   Matrix and vector views may be copied and shared by readers; descriptor spans
   are borrowed and remain valid only while a retaining view is alive.
-- Interpret dense matrices by their declared layout and element strides. Accept
-  non-square and nonoverlapping strided layouts, use the addressed extent, and
-  ignore padding values that are not matrix coefficients. Do not retain storage
-  after the final addressed coefficient.
+- Interpret dense matrices by their declared layout and element strides. For
+  nonempty shapes, accept only positive strides that satisfy the declared
+  layout, do not overlap logical coefficients, and address within the input
+  storage extent. Negative strides are unsupported. Empty shapes have no
+  addressed coefficients; preserve their dimensions for nonnegative strides
+  without requiring storage. Copy the addressed prefix, including internal
+  padding, but validate and use only logical coefficients.
 - Preserve zero-row and zero-column dimensions in both dense and CSR forms.
   Preserve CSR row offsets, including empty rows, rather than inferring shape
   from the nonzero entries.
