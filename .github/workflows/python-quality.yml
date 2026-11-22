@@ -236,6 +236,8 @@ on:
       - 'scripts/reports/audit_mathematical_presentation.py'
       - 'scripts/reports/augment_pages_bundle.py'
       - 'tests/reporting/test_pages_augmentation_aggregation.py'
+      - 'tests/reporting/run_controller_publication_checks.py'
+      - 'tests/reporting/test_controller_publication_runner.py'
       - 'tests/reporting/test_mathematical_presentation.py'
       - 'scripts/reports/check_deploy_head.py'
       - 'tests/reporting/test_deploy_head.py'
@@ -643,6 +645,8 @@ on:
       - 'scripts/reports/audit_mathematical_presentation.py'
       - 'scripts/reports/augment_pages_bundle.py'
       - 'tests/reporting/test_pages_augmentation_aggregation.py'
+      - 'tests/reporting/run_controller_publication_checks.py'
+      - 'tests/reporting/test_controller_publication_runner.py'
       - 'tests/reporting/test_mathematical_presentation.py'
       - 'scripts/reports/check_deploy_head.py'
       - 'tests/reporting/test_deploy_head.py'
@@ -962,6 +966,8 @@ jobs:
           done
       - name: Check mathematical presentation and frozen HTML
         run: python -m unittest tests.reporting.test_mathematical_presentation
+      - name: Check required modules in the controller evidence runner
+        run: python -m unittest tests.reporting.test_controller_publication_runner
       - name: Validate recorded control figures
         run: python -m unittest tests.reporting.test_recorded_closed_loop_figures tests.reporting.test_viz03_control_figures
       - name: Exercise Pages deployment freshness and source identity
