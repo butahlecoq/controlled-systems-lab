@@ -199,17 +199,19 @@ in its image, and zero residual occurs on `x0+2*x1=3`, a segment in
 check the zero minor, all three residual coordinates, and the authored norm
 separately from the squared quadratic objective.
 
-When a convex quadratic has nonempty Hessian storage but every authored
-constraint coefficient is zero, the adapter adds a private row with a unit
-entry in the first variable column and unbounded row limits. This row does not
-restrict the feasible variable set or alter the objective; it avoids the
-pinned HiGHS basis empty-transpose invariant. The zero-quadratic route does not
-use this row, though admission conservatively includes its possible storage.
+When a convex quadratic has at least one nonzero translated Hessian
+coefficient but every authored constraint coefficient is zero, the adapter
+adds a private row with a unit entry in the first variable column and unbounded
+row limits. This row does not restrict the feasible variable set or alter the
+objective; it avoids the pinned HiGHS basis empty-transpose invariant. The
+zero-quadratic route does not use this row, though admission conservatively
+includes its possible storage.
 Tests retain positive authored row counts, explicit and implicit zero
 coefficients, and a variable interval `[1,5]` so the private row's activity is
 not assumed zero. They check preservation of authored rows and numerical
-residuals. A zero coefficient row with bound `1` is instead infeasible and is
-rejected before a native QP attempt.
+residuals. An authored zero row with equality bound `1` is `0=1`: model
+admission accepts it, then the feasibility solve returns an infeasible result
+before the native QP call.
 
 Capacity boundary arithmetic is checked independently with `c=2(n+1)`. At
 `n=4096`, `c=8194`, `c^2=67,141,636`, `8c^2=537,133,088`, and
