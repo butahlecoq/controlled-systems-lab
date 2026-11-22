@@ -96,6 +96,13 @@ on:
       - 'reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/raw-runs.jsonl'
       - 'tests/fixtures/reports/b06-measured-source/b06_finite_minimax.cpp'
       - 'scripts/reports/plot.py'
+      - 'benchmarks/reporting/it17_hull/**'
+      - 'scripts/reports/*it17*.py'
+      - 'scripts/reports/summarize_exp02_hull_ladder.py'
+      - 'tests/reporting/test_exp02_it17_*.py'
+      - 'reports/algorithm-results/exp02-it17-*/**'
+      - 'reports/algorithm-results/exp02-it17-*.zip*'
+      - 'reports/algorithm-results/quickhull-it17-paper-adaptations-*/**'
       - 'scripts/reports/b04_c_exact_registered_reports.py'
       - 'tests/reporting/test_b04_publication_source_snapshot.py'
       - 'tests/reporting/test_publication_spine_boundaries.py'
@@ -401,6 +408,13 @@ on:
       - 'reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/raw-runs.jsonl'
       - 'tests/fixtures/reports/b06-measured-source/b06_finite_minimax.cpp'
       - 'scripts/reports/plot.py'
+      - 'benchmarks/reporting/it17_hull/**'
+      - 'scripts/reports/*it17*.py'
+      - 'scripts/reports/summarize_exp02_hull_ladder.py'
+      - 'tests/reporting/test_exp02_it17_*.py'
+      - 'reports/algorithm-results/exp02-it17-*/**'
+      - 'reports/algorithm-results/exp02-it17-*.zip*'
+      - 'reports/algorithm-results/quickhull-it17-paper-adaptations-*/**'
       - 'scripts/reports/b04_c_exact_registered_reports.py'
       - 'tests/reporting/test_b04_publication_source_snapshot.py'
       - 'tests/reporting/test_publication_spine_boundaries.py'
@@ -701,6 +715,35 @@ jobs:
           python -m unittest tests.reporting.test_report_data tests.reporting.test_render tests.reporting.test_publication_policy tests.reporting.test_report_source_identity tests.reporting.test_registered_kinds tests.reporting.test_landing tests.reporting.test_learning_book tests.reporting.test_plot tests.reporting.test_b04_publication_source_snapshot tests.reporting.test_publication_spine_boundaries
       - name: Check cumulative Pages artifact identity and output
         run: python -m unittest tests.reporting.test_pages_augmentation_waiter
+      - name: Check ITIS17 saved hull reports and summary commands
+        run: |
+          python -m unittest tests.reporting.test_exp02_it17_dyadic_stage tests.reporting.test_exp02_it17_hull3d_publication tests.reporting.test_exp02_it17_hull4d_publication
+          out=$(mktemp -d "$RUNNER_TEMP/it17-replay.XXXXXXXX")
+          reports=reports/algorithm-results
+          preliminary="$reports/quickhull-it17-paper-adaptations-20261024-r1"
+          mkdir "$out/site"
+          printf '<ul></ul>\n' > "$out/site/index.html"
+          python scripts/reports/stage_it17_hull_adaptations.py --source "$preliminary" --site "$out/site"
+          python benchmarks/reporting/it17_hull/summarize.py "$preliminary/raw-capture.jsonl" "$out/preliminary"
+          for file in summary.csv index.html fixture-geometry.svg raw-rows.jsonl; do
+            cmp "$preliminary/$file" "$out/preliminary/$file"
+          done
+          for dimension in 3d 4d; do
+            source="$reports/exp02-it17-hull-$dimension-simplex-20261028-r1"
+            python "benchmarks/reporting/it17_hull/summarize_$dimension.py" --raw "$source/raw/raw-rows.jsonl" --output-dir "$out/$dimension"
+            for file in summary.csv index.html input-projections.svg validated-rows.jsonl; do
+              cmp "$source/$file" "$out/$dimension/$file"
+            done
+          done
+          ladder="$reports/exp02-it17-hull-ladder-20261024-r1"
+          python scripts/reports/summarize_exp02_hull_ladder.py --raw-dir "$ladder/raw" --output-dir "$out/ladder"
+          cmp "$ladder/coverage.json" "$out/ladder/coverage.json"
+          cmp "$ladder/validated-rows.jsonl" "$out/ladder/validated-rows.jsonl"
+          dyadic="$reports/exp02-it17-dyadic-250-20261029-r1"
+          python scripts/reports/summarize_exp02_it17_250.py "$dyadic/raw/raw-rows.jsonl" "$out/dyadic"
+          for file in summary.csv index.html fixture-geometry.svg raw/raw-rows.jsonl; do
+            cmp "$dyadic/$file" "$out/dyadic/$file"
+          done
       - name: Check mathematical presentation and frozen HTML
         run: python -m unittest tests.reporting.test_mathematical_presentation
       - name: Validate recorded control figures
