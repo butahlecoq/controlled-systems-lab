@@ -153,16 +153,16 @@ TEST_CASE("unit square intersected with x+y<=1 matches the independent rational 
     };
     const std::array<std::array<double,2>,3> vertices{{{0,0},{1,0},{0,1}}};
     for (const auto& point : vertices) CHECK(inside(point));
-    const std::array<std::array<double,3>,5> expected_input_inequalities{{
-        {{1,0,1}}, {{-1,0,0}}, {{0,1,1}}, {{0,-1,0}}, {{1,1,1}}}};
-    for (const auto& inequality : expected_input_inequalities) {
+    const std::array<std::array<double,3>,3> expected_triangle_facets{{
+        {{-1,0,0}}, {{0,-1,0}}, {{1,1,1}}}};
+    for (const auto& facet : expected_triangle_facets) {
         bool represented=false;
         for (std::size_t row=0;row<h.inequalities.rows();++row) {
-            const auto scale=inequality[0]!=0 ? h.inequalities(row,0)/inequality[0] :
-                h.inequalities(row,1)/inequality[1];
-            if (scale>0 && h.inequalities(row,0)==scale*inequality[0] &&
-                h.inequalities(row,1)==scale*inequality[1] &&
-                h.upper_bounds[row]==scale*inequality[2]) represented=true;
+            const auto scale=facet[0]!=0 ? h.inequalities(row,0)/facet[0] :
+                h.inequalities(row,1)/facet[1];
+            if (scale>0 && h.inequalities(row,0)==scale*facet[0] &&
+                h.inequalities(row,1)==scale*facet[1] &&
+                h.upper_bounds[row]==scale*facet[2]) represented=true;
         }
         CHECK(represented);
     }
@@ -256,7 +256,7 @@ TEST_CASE("analytic LP fixture rejects programs outside its exact implication sh
             {{ {},1.0 },{{},0.0},{{},0.0},{0.0,0.0}}),
         make_program({2,2,{0,1,2},{0,0},{1,-1}}, {0,-1}, {{ {},1.0 },{{},0.0}}),
         make_program({3,2,{0,1,2,3},{0,0,1},{1,-1,1}}, {0,-1},
-            {{ {},1.0 },{{},0.0},{{},0.0}}, std::move(bounded_variables))
+            {{ {},1.0 },{{},0.0},{0.0,0.0}}, std::move(bounded_variables))
     }};
     for (const auto& program : out_of_shape_programs) {
         FixedBoundWorkspace oracle{support};
