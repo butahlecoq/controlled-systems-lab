@@ -105,9 +105,8 @@ TEST_CASE("ambient-one H conversion publishes a global stored-dyadic interval bo
     CHECK(check_geometry_evidence(result.evidence,req).empty());
     REQUIRE(result.evidence.error_bound.has_value());
     CHECK(result.evidence.error_bound->metric.value=="csl.geometry.metric.l-infinity");
-    // The exact distance is 1/3 - 6004799503160661/2^54 = 1/(3*2^54).
-    // This literal is its least outward-rounded binary64 representation.
-    CHECK(std::bit_cast<std::uint64_t>(result.evidence.error_bound->bound)==0x3c75555555555556ULL);
+    constexpr std::uint64_t expected_outward_bound_bits=0x3c75555555555556ULL;
+    CHECK(std::bit_cast<std::uint64_t>(result.evidence.error_bound->bound)==expected_outward_bound_bits);
 }
 
 TEST_CASE("independent ambient-one checker detects a missing H endpoint despite zero row residual") {
@@ -201,11 +200,14 @@ TEST_CASE("bounded H to V conversion retains the square under independent checks
     const auto representation = converted.representation();
     REQUIRE(std::holds_alternative<sets::VRepresentation>(representation));
     const auto v = std::get<sets::VRepresentation>(representation);
-    CHECK(v.vertices.rows() == 4);
+    REQUIRE(v.vertices.rows() == 4);
     CHECK(v.rays.rows() == 0);
-    // Literal support/membership checks are independent of Qhull output order.
-    CHECK(v.vertices(0,0) >= -1e-8);
-    CHECK(v.vertices(0,0) <= 1.0 + 1e-8);
+    for(std::size_t row=0;row<v.vertices.rows();++row) {
+        CHECK(v.vertices(row,0)>=-1e-8);
+        CHECK(v.vertices(row,0)<=1.0+1e-8);
+        CHECK(v.vertices(row,1)>=-1e-8);
+        CHECK(v.vertices(row,1)<=1.0+1e-8);
+    }
     std::vector<std::array<double,2>> corners;
     for (std::size_t i=0;i<v.vertices.rows();++i) corners.push_back({v.vertices(i,0),v.vertices(i,1)});
     CHECK(std::any_of(corners.begin(),corners.end(),[](auto p){return std::abs(p[0])<1e-7&&std::abs(p[1])<1e-7;}));
@@ -446,7 +448,6 @@ TEST_CASE("simplex H/V conversions preserve literal membership, support, and emp
     CHECK(within_tolerance(support_x,1.0));
     CHECK(within_tolerance(support_y,1.0));
     CHECK(within_tolerance(support_negative_x,0.0));
-    // Three non-collinear literal vertices establish affine dimension two.
     auto to_h=convert(std::get<OperationResult>(to_v).output,"csl.polyhedron.h","simplex-v-to-h");
     REQUIRE(std::holds_alternative<OperationResult>(to_h));
     auto h=take(sets::from_handle(std::get<OperationResult>(to_h).output));
@@ -454,7 +455,6 @@ TEST_CASE("simplex H/V conversions preserve literal membership, support, and emp
     const auto& triangle_h=std::get<sets::HRepresentation>(hr);
     REQUIRE(triangle_h.inequalities.rows()==3);
     CHECK(triangle_h.equalities.rows()==0);
-    // H facets are positive multiples of -x<=0, -y<=0, x+y<=1.
     const std::array<std::array<double,3>,3> expected_facets{{
         {-1,0,0}, {0,-1,0}, {1,1,1}}};
     std::array<bool,3> found_facet{};
@@ -531,8 +531,6 @@ TEST_CASE("embedded segments, singleton and explicit equality rows retain their 
     CHECK(h.equalities(0,0)==0.0);
     CHECK(std::abs(h.equalities(0,1))==1.0);
     CHECK(h.equality_values[0]==0.0);
-    // Ambient dimension is two; y=0 and two distinct endpoints establish
-    // affine dimension one for this bounded segment.
     const std::array<double,2> left{-1,0},right{2,0},middle{0,0},off{0,1};
     CHECK(satisfies(h,left)); CHECK(satisfies(h,right)); CHECK(satisfies(h,middle)); CHECK_FALSE(satisfies(h,off));
     const std::array<double,2> beyond_left{-1.01,0},beyond_right{2.01,0};
@@ -718,25 +716,25 @@ TEST_CASE("nonempty ray descriptions reject bounded V to H conversion") {
 TEST_CASE("Qhull generated LPs retain the selected owning provider and query identities") {
     std::vector<ProgramIdentity> admitted;
     std::size_t factories=0;
-    auto native=take(make_highs_registration());
-    auto capability=native.capabilities;
-    auto factory=native.factory;
-    native.identity={{"test.lp.alternate"},"7"};
-    native.capabilities=[&](const LinearProgram& lp,const Requirements& requirements)->Capability {
-        admitted.push_back(lp.identity());
-        CHECK(requirements.output.representation.value=="csl.program-result.v1");
-        CHECK(requirements.output.assurance==Assurance::numerical);
-        CHECK_FALSE(requirements.basis_diagnostics);
-        return capability(lp,requirements);
-    };
-    native.factory=[&](const LinearProgram& lp) { ++factories; return factory(lp); };
     auto req=request(square_h(),"csl.polyhedron.v","alternate-provider");
     auto prepared=[&] {
+        auto native=take(make_highs_registration());
+        const auto capability=native.capabilities;
+        const auto factory=native.factory;
+        native.identity={{"test.lp.alternate"},"7"};
+        native.capabilities=[&,capability](const LinearProgram& lp,const Requirements& requirements)->Capability {
+            admitted.push_back(lp.identity());
+            CHECK(requirements.output.representation.value=="csl.program-result.v1");
+            CHECK(requirements.output.assurance==Assurance::numerical);
+            CHECK_FALSE(requirements.basis_diagnostics);
+            return capability(lp,requirements);
+        };
+        native.factory=[&,factory](const LinearProgram& lp) { ++factories; return factory(lp); };
         Registry<ConversionPort> conversions;
         REQUIRE_FALSE(conversions.add(take(make_qhull_registration(std::move(native)))).has_value());
         return take(prepare_pipeline(select(conversions,{{"csl.conversion.qhull"},{}},req,
             conversion_requirements(req.output.value))));
-    }(); // Both registration sources are gone before generated LP execution.
+    }();
     auto [worker]=prepared.create();
     auto outcome=worker->run(context());
     REQUIRE(std::holds_alternative<OperationResult>(outcome));
@@ -752,21 +750,21 @@ TEST_CASE("Qhull generated LPs retain the selected owning provider and query ide
 }
 
 TEST_CASE("Qhull generated LP provider rejection and late stops publish no geometry") {
-    bool reject=false,cancel=false;
-    SUBCASE("capability rejection") { reject=true; }
-    SUBCASE("cancellation during provider admission") { cancel=true; }
-    SUBCASE("deadline during provider admission") {}
+    enum class AdmissionScenario { rejected, cancelled, expired_deadline };
+    auto scenario=AdmissionScenario::expired_deadline;
+    SUBCASE("capability rejection") { scenario=AdmissionScenario::rejected; }
+    SUBCASE("cancellation during provider admission") { scenario=AdmissionScenario::cancelled; }
+    SUBCASE("deadline during provider admission") { scenario=AdmissionScenario::expired_deadline; }
     std::stop_source stop;
     auto execution=context();
     execution.cancellation=stop.get_token();
-    // Mutate the live execution deadline in admission to exercise the stop
-    // between provider admission and native workspace creation deterministically.
     auto native=take(make_highs_registration());
     auto capability=native.capabilities;
     std::size_t factories=0;
     native.capabilities=[&](const LinearProgram& lp,const Requirements& r)->Capability {
-        if(reject) return Diagnostics{{DiagnosticCode::unsupported,"test.lp","deliberately rejected"}};
-        if(cancel) stop.request_stop();
+        if(scenario==AdmissionScenario::rejected)
+            return Diagnostics{{DiagnosticCode::unsupported,"test.lp","deliberately rejected"}};
+        if(scenario==AdmissionScenario::cancelled) stop.request_stop();
         else execution.deadline=std::chrono::steady_clock::now();
         return capability(lp,r);
     };
@@ -780,9 +778,11 @@ TEST_CASE("Qhull generated LP provider rejection and late stops publish no geome
     auto [worker]=prepared.create();
     const auto outcome=worker->run(execution);
     CHECK(factories==0);
-    if(reject) CHECK(std::holds_alternative<Unsupported>(outcome));
+    if(scenario==AdmissionScenario::rejected) CHECK(std::holds_alternative<Unsupported>(outcome));
     else {
         REQUIRE(std::holds_alternative<OperationStopped>(outcome));
-        CHECK(std::get<OperationStopped>(outcome).reason==(cancel?StopReason::cancelled:StopReason::resource_limit));
+        const auto expected_reason=scenario==AdmissionScenario::cancelled
+            ? StopReason::cancelled : StopReason::resource_limit;
+        CHECK(std::get<OperationStopped>(outcome).reason==expected_reason);
     }
 }
