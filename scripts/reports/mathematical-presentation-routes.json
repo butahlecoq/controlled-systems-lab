@@ -1884,6 +1884,20 @@
     },
     {
       "route": "mpc08-complete-df312784b3995e4633bd/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "7d3c5df243dc0c76582612592cb98edc2304ec0a2c5ee578e53de8b0345bb1e1",
+      "witness": "Exact staged predecessor from source 788c1f730ce17b7e10da4c7324ed6520eaea5ff8, archive SHA256 92d9a564fcbdf8af8bef3783778afea22c514daa8a0eeab45dba09b8554c9629"
+    },
+    {
+      "route": "mpc08-complete-b99d2911e40022337f8a/captures/exact/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/mpc08-exact-regions-79ec2978-20261110/capture.zip",
+      "sha256": "65cd8f5d0c153d0f9016d3d5aec28168db3ecf03b3fa2fec664433bee664dd98",
+      "witness": "Exact index.html member of reports/algorithm-results/mpc08-exact-regions-79ec2978-20261110/capture.zip, ZIP SHA256 6487e8c642efc2f4c4ea9ab5cc83719c511022d4a1ee0e4fd2a9429a7ff29e76; complete SHA256SUMS anchored by stage_mpc08_complete.SPECS = 4b5fcbac7a4e158dc52c43834409ccddc3ba03ae95a0d8b0a47556899b5a5d22; capture source 79ec2978bb18a77abf5817b6f940aa3a89b0e488"
+    },
+    {
+      "route": "mpc08-complete-b99d2911e40022337f8a/index.html",
       "disposition": "maintained",
       "owner": "scripts/reports/stage_mpc08_complete.py"
     },

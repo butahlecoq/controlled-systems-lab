@@ -89,7 +89,7 @@ class PublishedRoutePreservationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             site = Path(directory)
             assets = preservation.payloads()
-            self.assertEqual(preservation.stage(site)["preserved_routes"], 671)
+            self.assertEqual(preservation.stage(site)["preserved_routes"], 731)
             self.assertEqual(
                 {
                     p.relative_to(site).as_posix(): p.read_bytes()
@@ -98,14 +98,15 @@ class PublishedRoutePreservationTests(unittest.TestCase):
                 },
                 assets,
             )
-            self.assertEqual(preservation.stage(site)["preserved_routes"], 671)
-            self.assertEqual(preservation.stage(site)["preserved_top_level_zips"], 7)
-            self.assertEqual(sum(n.endswith(".zip") for n in assets), 33)
+            self.assertEqual(preservation.stage(site)["preserved_routes"], 731)
+            self.assertEqual(preservation.stage(site)["preserved_top_level_zips"], 8)
+            self.assertEqual(sum(n.endswith(".zip") for n in assets), 36)
             self.assertFalse(any(".git" in Path(n).parts for n in assets))
 
     def test_original_mpc08_mpc10_namespaces_and_offline_source_objects_survive(self):
         archives = {
             "mpc08-complete-5a9414f2ae07b6708738": "8e8351b8cca2eed02f80d0f9930d2fd78ecff8cdd242b35b75f1d651b9c26dd6",
+            "mpc08-complete-df312784b3995e4633bd": "92d9a564fcbdf8af8bef3783778afea22c514daa8a0eeab45dba09b8554c9629",
             "mpc10-comparison-cbf22e8c7e22c30bf91f": "05c9be1e826fb032caf11108ae9bea2644bf60f039f296205e2114aa9f787224",
         }
         with tempfile.TemporaryDirectory() as directory:
