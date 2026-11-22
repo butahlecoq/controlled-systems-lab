@@ -50,12 +50,9 @@ TEST_CASE("wide rectangular reformulation retains literal coefficients and origi
     check_costs(record, {4, 1, 7}, 5, 25);
 }
 
-// Literal expected values below are independent of the implementation under test.
-// These finite witnesses check evaluation; the API is not enumerating minimizers.
-TEST_CASE("zero minimum on the bounded segment retains endpoints and interior") {
+TEST_CASE("residual norm and square evaluate to zero at three segment witnesses") {
     const auto record = accepted(square_residual_norm(accepted(snapshot(
         ResidualNormTerminal{{2, 3, {1, 0, 0, 0, 1, 1}}, {1, 4}}))));
-    // Box [0,2] x [0,4] x [0,4]; minimizers [1,t,4-t], 0 <= t <= 4.
     check_costs(record, {1, 0, 4}, 0, 0);
     check_costs(record, {1, 2, 2}, 0, 0);
     check_costs(record, {1, 4, 0}, 0, 0);
@@ -63,30 +60,27 @@ TEST_CASE("zero minimum on the bounded segment retains endpoints and interior") 
     check_costs(record, {1, 1, 2}, 1, 1);
 }
 
-TEST_CASE("nonzero bounded minimum preserves the segment but changes cost units") {
+TEST_CASE("segment witnesses have residual norm 2 and squared norm 4") {
     const auto record = accepted(square_residual_norm(accepted(snapshot(
         ResidualNormTerminal{{2, 3, {1, 0, 0, 0, 1, 1}}, {3, 4}}))));
-    // Box [0,1] x [0,4] x [0,4]; same segment, minima 2 and 4.
     check_costs(record, {1, 0, 4}, 2, 4);
     check_costs(record, {1, 2, 2}, 2, 4);
     check_costs(record, {1, 4, 0}, 2, 4);
     check_costs(record, {0, 0, 4}, 3, 9);
 }
 
-TEST_CASE("rank-one residual retains a bounded two-parameter zero-cost family") {
+TEST_CASE("rank-one residual gives zero cost at three points and positive cost at the origin") {
     const auto record = accepted(square_residual_norm(accepted(snapshot(
         ResidualNormTerminal{{2, 3, {1, 1, 0, 2, 2, 0}}, {1, 2}}))));
-    // Box [0,1]^3; minimizers [t,1-t,s], 0 <= t,s <= 1.
     check_costs(record, {0, 1, 0}, 0, 0);
     check_costs(record, {1, 0, 1}, 0, 0);
     check_costs(record, {0.5, 0.5, 0.25}, 0, 0);
     check_costs(record, {0, 0, 0}, 2.23606797749979, 5);
 }
 
-TEST_CASE("constant residual preserves every point of an analytic bounded box") {
+TEST_CASE("constant residual gives costs 5 and 25 at three points") {
     const auto record = accepted(square_residual_norm(accepted(snapshot(
         ResidualNormTerminal{{2, 2, {0, 0, 0, 0}}, {3, 4}}))));
-    // Every point of [-1,1]^2 minimizes these constant criteria.
     check_costs(record, {-1, -1}, 5, 25);
     check_costs(record, {1, 1}, 5, 25);
     check_costs(record, {0, 0}, 5, 25);
@@ -128,11 +122,9 @@ TEST_CASE("tall weighted residual provenance retains targets policy and quadrati
     check_costs(record, {0, 0}, 7.483314773547883, 56);
 }
 
-TEST_CASE("squaring only the norm in a mixed objective changes its minimizer") {
+TEST_CASE("squaring the norm reverses mixed-cost ordering at 1 and 0.75") {
     const auto record = accepted(square_residual_norm(accepted(snapshot(ResidualNormTerminal{{1, 1, {1}}, {1}}))));
     const auto linear = accepted(snapshot(LinearTerminal{{0.5}, 0}));
-    // On [0,2], |x-1|+x/2 minimizes at 1; (x-1)^2+x/2 minimizes at 0.75.
-    // The sums below are test expressions, not a supported sum-objective API.
     CHECK(accepted(evaluate(record.original(), Vector{1})) + accepted(evaluate(linear, Vector{1})) == 0.5);
     CHECK(accepted(evaluate(record.original(), Vector{0.75})) + accepted(evaluate(linear, Vector{0.75})) == 0.625);
     CHECK(accepted(evaluate(record.squared(), Vector{1})) + accepted(evaluate(linear, Vector{1})) == 0.5);
