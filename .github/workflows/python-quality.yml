@@ -294,6 +294,17 @@ on:
       - 'docs/contracts/closed-loop/earth-orbit.json'
       - 'docs/contracts/closed-loop/earth-orbit.sha256'
       - 'tests/reporting/test_closed_loop_initial_baselines_publication.py'
+      - 'scripts/reports/stage_mpc04_max_coordinate.py'
+      - 'scripts/reports/stage_mpc09_output_feedback.py'
+      - 'tests/reporting/test_mpc04_publication.py'
+      - 'tests/reporting/test_mpc09_output_feedback_publication.py'
+      - 'scripts/reports/mpc04/max_coordinate_replanning.py'
+      - 'scripts/reports/mpc04/check_max_coordinate.py'
+      - 'scripts/reports/mpc09/make_report.py'
+      - 'scripts/reports/mpc09/check_output_feedback.py'
+      - 'benchmarks/scenarios/mpc09-two-particle-output-feedback-v1.json'
+      - 'reports/algorithm-results/mpc04-max-coordinate-replanning-pilot-20261030/**'
+      - 'reports/algorithm-results/mpc09-two-particle-output-feedback-v1/**'
       - 'scripts/reports/stage_discrete_mpc_2d.py'
       - 'scripts/reports/stage_catalogue_forward_reachability.py'
       - 'tests/reporting/test_catalogue_forward_publication.py'
@@ -690,6 +701,17 @@ on:
       - 'docs/contracts/closed-loop/earth-orbit.json'
       - 'docs/contracts/closed-loop/earth-orbit.sha256'
       - 'tests/reporting/test_closed_loop_initial_baselines_publication.py'
+      - 'scripts/reports/stage_mpc04_max_coordinate.py'
+      - 'scripts/reports/stage_mpc09_output_feedback.py'
+      - 'tests/reporting/test_mpc04_publication.py'
+      - 'tests/reporting/test_mpc09_output_feedback_publication.py'
+      - 'scripts/reports/mpc04/max_coordinate_replanning.py'
+      - 'scripts/reports/mpc04/check_max_coordinate.py'
+      - 'scripts/reports/mpc09/make_report.py'
+      - 'scripts/reports/mpc09/check_output_feedback.py'
+      - 'benchmarks/scenarios/mpc09-two-particle-output-feedback-v1.json'
+      - 'reports/algorithm-results/mpc04-max-coordinate-replanning-pilot-20261030/**'
+      - 'reports/algorithm-results/mpc09-two-particle-output-feedback-v1/**'
       - 'scripts/reports/stage_discrete_mpc_2d.py'
       - 'scripts/reports/stage_catalogue_forward_reachability.py'
       - 'tests/reporting/test_catalogue_forward_publication.py'
@@ -881,6 +903,32 @@ jobs:
           MPLBACKEND: Agg
         run: |
           python -m unittest tests.reporting.test_report_data tests.reporting.test_render tests.reporting.test_publication_policy tests.reporting.test_report_source_identity tests.reporting.test_registered_kinds tests.reporting.test_landing tests.reporting.test_learning_book tests.reporting.test_plot tests.reporting.test_b04_publication_source_snapshot tests.reporting.test_publication_spine_boundaries
+      - name: Replay saved MPC replanning and output feedback
+        run: |
+          reports=reports/algorithm-results
+          # Captured commits may be outside main history. Fetch them once for all replays.
+          mpc04_commit=$(jq -er '.source.report_code_commit | select(test("^[a-f0-9]{40}$"))' "$reports/mpc04-max-coordinate-replanning-pilot-20261030/capture.json")
+          mpc09_commit=$(jq -er '.source_commit | select(test("^[a-f0-9]{40}$"))' "$reports/mpc09-two-particle-output-feedback-v1/capture.json")
+          missing=()
+          for commit in "$mpc04_commit" "$mpc09_commit"; do
+            if ! git cat-file -e "$commit^{commit}"; then
+              missing+=("$commit")
+            fi
+          done
+          if (( ${#missing[@]} )); then
+            git fetch --no-tags --depth=1 origin "${missing[@]}"
+          fi
+          python -m unittest tests.reporting.test_mpc04_publication tests.reporting.test_mpc09_output_feedback_publication
+          site=$(mktemp -d "$RUNNER_TEMP/mpc-replanning-feedback.XXXXXXXX")
+          printf '<html><body><ul></ul></body></html>\n' > "$site/index.html"
+          python scripts/reports/stage_mpc04_max_coordinate.py --source "$reports/mpc04-max-coordinate-replanning-pilot-20261030" --site "$site"
+          python scripts/reports/stage_mpc09_output_feedback.py --source "$reports/mpc09-two-particle-output-feedback-v1" --site "$site"
+          cd "$site"
+          # Verify the published offline ZIPs, including compression and metadata.
+          sha256sum --check <<'SHA256'
+          ab5a12359f365d3044743dd9ad74d3ee6279e00f2d68895830c84f8ab59aa965  mpc04-max-coordinate-replanning-9737632b9802b7f5dc32.zip
+          457cd203b245f8d7cfc26a8c3c464155cf20d5ed84e3e77ac04fd5b99079ba20  mpc09-output-feedback-62e43f8e4f58eda35210.zip
+          SHA256
       - name: Check cumulative Pages artifact identity and output
         run: python -m unittest tests.reporting.test_pages_augmentation_waiter
       - name: Check ITIS17 saved hull reports and summary commands

@@ -2,22 +2,27 @@ from __future__ import annotations
 
 import importlib.util
 import json
-from pathlib import Path
 import shutil
 import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 from zipfile import ZipFile
 
 ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location(
-    "stage_mpc09_output_feedback_test", ROOT / "scripts/reports/stage_mpc09_output_feedback.py")
+    "stage_mpc09_output_feedback_test", ROOT / "scripts/reports/stage_mpc09_output_feedback.py"
+)
+if SPEC is None or SPEC.loader is None:
+    raise ImportError("Cannot load the MPC-09 publisher")
 stage_report = importlib.util.module_from_spec(SPEC)
-assert SPEC.loader is not None
 SPEC.loader.exec_module(stage_report)
-LANDING_SPEC = importlib.util.spec_from_file_location("landing_mpc09", ROOT / "scripts/reports/landing.py")
+LANDING_SPEC = importlib.util.spec_from_file_location(
+    "landing_mpc09", ROOT / "scripts/reports/landing.py"
+)
+if LANDING_SPEC is None or LANDING_SPEC.loader is None:
+    raise ImportError("Cannot load the report landing page module")
 landing = importlib.util.module_from_spec(LANDING_SPEC)
-assert LANDING_SPEC.loader is not None
 LANDING_SPEC.loader.exec_module(landing)
 
 
@@ -28,21 +33,26 @@ class Mpc09PublicationTests(unittest.TestCase):
             checkout = Path(temporary)
             shutil.copytree(source, checkout / source.name)
             scenario = ROOT / "benchmarks/scenarios/mpc09-two-particle-output-feedback-v1.json"
-            scenario_target = checkout / "benchmarks/scenarios/mpc09-two-particle-output-feedback-v1.json"
+            scenario_target = (
+                checkout / "benchmarks/scenarios/mpc09-two-particle-output-feedback-v1.json"
+            )
             scenario_target.parent.mkdir(parents=True)
             shutil.copyfile(scenario, scenario_target)
             workflow = checkout / ".github/workflows/algorithm-reports.yml"
             workflow.parent.mkdir(parents=True)
             workflow.write_text("later unrelated workflow edit\n", encoding="utf-8")
 
-            with patch.object(stage_report, "ROOT", checkout), \
-                 patch.object(stage_report.report, "ROOT", checkout):
+            with (
+                patch.object(stage_report, "ROOT", checkout),
+                patch.object(stage_report.report, "ROOT", checkout),
+            ):
                 _, _, _, capture = stage_report.validate_bundle(checkout / source.name)
 
             self.assertEqual(capture["source_commit"], "46da55a5967c0db326b7126ced55654b20bc570d")
-            self.assertEqual(capture["source_sha256"][
-                ".github/workflows/algorithm-reports.yml"],
-                "12e18a9080f7c6485d0628e17efa73d5ab1fc05447020ca36554dd68ef65fc87")
+            self.assertEqual(
+                capture["source_sha256"][".github/workflows/algorithm-reports.yml"],
+                "12e18a9080f7c6485d0628e17efa73d5ab1fc05447020ca36554dd68ef65fc87",
+            )
 
     def test_rejects_forged_historical_source_fingerprint(self) -> None:
         source = ROOT / "reports/algorithm-results/mpc09-two-particle-output-feedback-v1"
@@ -52,17 +62,24 @@ class Mpc09PublicationTests(unittest.TestCase):
             capture_path = bundle / "capture.json"
             capture = json.loads(capture_path.read_text(encoding="utf-8"))
             capture["source_sha256"][
-                "benchmarks/reporting/mpc09/two_particle_output_feedback.cpp"] = "0" * 64
-            capture_path.write_text(json.dumps(capture, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+                "benchmarks/reporting/mpc09/two_particle_output_feedback.cpp"
+            ] = "0" * 64
+            capture_path.write_text(
+                json.dumps(capture, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+            )
             sums_path = bundle / "SHA256SUMS"
             sums = {}
             for line in sums_path.read_text(encoding="ascii").splitlines():
                 _, name = line.split("  ", 1)
                 sums[name] = stage_report.digest((bundle / name).read_bytes())
-            sums_path.write_text("".join(f"{value}  {name}\n" for name, value in sorted(sums.items())),
-                                 encoding="ascii")
+            sums_path.write_text(
+                "".join(f"{value}  {name}\n" for name, value in sorted(sums.items())),
+                encoding="ascii",
+            )
 
-            with self.assertRaisesRegex(ValueError, "captured source fingerprint differs at source_commit"):
+            with self.assertRaisesRegex(
+                ValueError, "captured source fingerprint differs at source_commit"
+            ):
                 stage_report.validate_bundle(bundle)
 
     def test_report_rerenders_and_stages_offline_bundle(self) -> None:
@@ -73,7 +90,9 @@ class Mpc09PublicationTests(unittest.TestCase):
             shutil.copytree(source, bundle)
             site = root / "site"
             site.mkdir()
-            (site / "index.html").write_text("<!doctype html><html><body><ul></ul></body></html>", encoding="utf-8")
+            (site / "index.html").write_text(
+                "<!doctype html><html><body><ul></ul></body></html>", encoding="utf-8"
+            )
 
             route = stage_report.stage(bundle, site)
             landing.build(site)
