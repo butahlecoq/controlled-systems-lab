@@ -68,6 +68,13 @@ on:
       - 'scripts/reports/schema3_publication_policies.py'
       - 'scripts/reports/registered_reports.py'
       - 'scripts/reports/collector_common.py'
+      - 'scripts/reports/stage_history_functional.py'
+      - 'scripts/reports/history_warm_gap_report.py'
+      - 'scripts/reports/native_parallelotope_functional.py'
+      - 'tests/reporting/test_history_warm_gap_publication.py'
+      - 'tests/reporting/test_native_parallelotope_functional.py'
+      - 'scripts/reports/package_history_functional.py'
+      - 'reports/closed-loop-history-functional/**'
       - 'scripts/reports/render.py'
       - 'scripts/reports/site.py'
       - 'scripts/reports/report_site.py'
@@ -520,6 +527,13 @@ on:
       - 'scripts/reports/schema3_publication_policies.py'
       - 'scripts/reports/registered_reports.py'
       - 'scripts/reports/collector_common.py'
+      - 'scripts/reports/stage_history_functional.py'
+      - 'scripts/reports/history_warm_gap_report.py'
+      - 'scripts/reports/native_parallelotope_functional.py'
+      - 'tests/reporting/test_history_warm_gap_publication.py'
+      - 'tests/reporting/test_native_parallelotope_functional.py'
+      - 'scripts/reports/package_history_functional.py'
+      - 'reports/closed-loop-history-functional/**'
       - 'scripts/reports/render.py'
       - 'scripts/reports/site.py'
       - 'scripts/reports/report_site.py'
@@ -976,6 +990,16 @@ jobs:
           diff -r "$bundle" "$site/${bundle##*/}"
       - name: Exercise the composed Pages route finalizer
         run: python -m unittest tests.reporting.test_pages_route_retirement
+      - name: Check the saved affine-history functional reports
+        env:
+          MPLBACKEND: Agg
+        run: |
+          python -m unittest tests.reporting.test_history_warm_gap_publication tests.reporting.test_native_parallelotope_functional
+          site="$RUNNER_TEMP/affine-history-functional-site"
+          mkdir -p "$site/examples"
+          printf '%s\n' '<html><body><section id="analytic-illustrations"></section></body></html>' > "$site/examples/index.html"
+          python scripts/reports/stage_history_functional.py --site "$site"
+          diff -r reports/closed-loop-history-functional "$site/closed-loop-history-functional"
       - name: Exercise maintained compatibility entry points
         run: |
           python -m unittest discover -s tests/reporting -p 'test_syn03_strategy_a_report.py'
