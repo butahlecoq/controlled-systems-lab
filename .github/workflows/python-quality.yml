@@ -619,6 +619,8 @@ jobs:
           python -m unittest discover -s tests/reporting -p 'test_site_additions.py'
           python -m unittest discover -s tests/reporting -p 'test_app02_saved.py'
           python -m unittest discover -s tests/reporting -p 'test_closed_loop_initial_baselines_publication.py'
+      - name: Check the OPT-04 collection, renderer, and validator
+        run: python -m unittest discover -s reports/algorithm-results/tooling/opt04 -p 'test_*.py'
       - name: Check the saved OPT-04 publication and source evidence
         run: python -m unittest tests.reporting.test_opt04_publication
       - name: Replay APP-03 and APP-04 saved reports and offline ZIPs
