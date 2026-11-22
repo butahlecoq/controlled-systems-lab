@@ -67,6 +67,11 @@ on:
       - 'tests/reporting/test_mpc01_per_attempt_publication.py'
       - 'scripts/reports/schema3_publication_policies.py'
       - 'scripts/reports/registered_reports.py'
+      - 'scripts/reports/stage_exp06.py'
+      - 'scripts/reports/exp06/**'
+      - 'tests/reporting/test_exp06_pilot.py'
+      - 'reports/algorithm-results/exp06-geometry-pilot-20261029/**'
+      - 'reports/algorithm-results/exp06-it17-paper-reducers-20261029-r3/**'
       - 'scripts/reports/collector_common.py'
       - 'scripts/reports/stage_history_functional.py'
       - 'scripts/reports/history_warm_gap_report.py'
@@ -526,6 +531,11 @@ on:
       - 'tests/reporting/test_mpc01_per_attempt_publication.py'
       - 'scripts/reports/schema3_publication_policies.py'
       - 'scripts/reports/registered_reports.py'
+      - 'scripts/reports/stage_exp06.py'
+      - 'scripts/reports/exp06/**'
+      - 'tests/reporting/test_exp06_pilot.py'
+      - 'reports/algorithm-results/exp06-geometry-pilot-20261029/**'
+      - 'reports/algorithm-results/exp06-it17-paper-reducers-20261029-r3/**'
       - 'scripts/reports/collector_common.py'
       - 'scripts/reports/stage_history_functional.py'
       - 'scripts/reports/history_warm_gap_report.py'
@@ -950,6 +960,18 @@ jobs:
         run: python scripts/ci/check_comment_ratchet.py check --base "$COMMENT_BASE"
       - name: Check closed-loop task and replay input shapes
         run: python -m unittest tests.reporting.test_closed_loop_tasks
+      - name: Replay both saved EXP-06 hull comparison publishers
+        run: |
+          python -m unittest tests.reporting.test_exp06_pilot
+          site="$RUNNER_TEMP/exp06-saved-site"
+          mkdir "$site"
+          printf '%s\n' '<html><body><ul></ul></body></html>' > "$site/index.html"
+          ordinary=reports/algorithm-results/exp06-geometry-pilot-20261029
+          paper=reports/algorithm-results/exp06-it17-paper-reducers-20261029-r3
+          ordinary_route=$(python scripts/reports/stage_exp06.py --source "$ordinary" --site "$site")
+          paper_route=$(python scripts/reports/stage_exp06.py --source "$paper" --site "$site" --paper-followup)
+          diff -r "$ordinary" "$site/$ordinary_route"
+          diff -r "$paper" "$site/$paper_route"
       - name: Exercise real Git and process behavior
         run: python -m unittest discover -s tests/ci -p 'test_*.py'
       - name: Exercise site additions and the APP02 staging caller
