@@ -164,8 +164,14 @@ bounded_h_support(const BoundedHSupportInput &in, ProgramIdentity id,
             return BoundedHSupportResult{fallback, std::move(records)};
         }
         const auto &result = std::get<ProgramResult>(answer);
+        if (result.termination == Termination::numerical_failure ||
+            (result.termination == Termination::completed &&
+             result.outcome.value != MathematicalOutcome::optimal)) {
+            auto fallback = std::get<SupportUpperBound>(validation);
+            fallback.method = SupportBoundMethod::carrier_only;
+            return BoundedHSupportResult{fallback, std::move(records)};
+        }
         if (result.termination != Termination::completed ||
-            result.outcome.value != MathematicalOutcome::optimal ||
             result.outcome.subject != program.identity() || !result.primal ||
             result.primal->size() != columns || !finite(*result.primal)) {
             StopReason reason = StopReason::numerical_failure;
