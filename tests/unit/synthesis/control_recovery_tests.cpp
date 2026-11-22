@@ -149,7 +149,7 @@ TEST_CASE("recovery accepts sampled two-step terminal histories and rejects inco
                                two_step_integrator_history(1, 0)})
         CHECK(contains(relation, point));
     CHECK_FALSE(contains(relation, two_step_integrator_history(1, 1)));
-    const Vector inconsistent_first_stage{0, 0.5, 1, 0.75, 0.25};
+    const Vector inconsistent_first_stage{0, 0.5, 1, 0.75, 0.5};
     const Vector inconsistent_second_stage{0, 0.5, 1, 0.5, 0.6};
     CHECK_FALSE(contains(relation, inconsistent_first_stage));
     CHECK_FALSE(contains(relation, inconsistent_second_stage));
