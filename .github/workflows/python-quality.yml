@@ -4,31 +4,28 @@ on:
   pull_request:
     paths:
       - '.github/actions/pages-deploy/**'
-      - 'benchmarks/reporting/closed_loop/capabilities.py'
-      - 'benchmarks/reporting/closed_loop/native_strategy_history.py'
-      - 'benchmarks/reporting/closed_loop/history_policy.py'
-      - 'benchmarks/reporting/closed_loop/attempt_records.py'
+      - 'benchmarks/reporting/closed_loop/**'
+      - 'benchmarks/reporting/mpc11/affine.py'
+      - 'benchmarks/reporting/mpc11/nmpc.py'
+      - 'tests/reporting/test_closed_loop_native_capabilities.py'
+      - 'tests/reporting/test_closed_loop_runner_failures.py'
+      - 'docs/catalogue/closed-loop-*-capabilities-v1.*'
+      - 'tests/reporting/test_history_geometry.py'
+      - 'tests/reporting/test_history_norm_solver.py'
+      - 'tests/reporting/test_native_fixed_tail_policy.py'
+      - 'tests/reporting/test_nominal_tube_source.py'
       - 'tests/reporting/test_native_strategy_history.py'
       - 'tests/reporting/test_closed_loop_attempt_records.py'
-      - 'benchmarks/reporting/closed_loop/native_compositions.py'
-      - 'benchmarks/reporting/closed_loop/run_closed_loop.py'
-      - 'benchmarks/reporting/closed_loop/run_campaign.py'
       - 'tests/reporting/test_native_compositions.py'
       - 'tests/reporting/test_closed_loop_campaign.py'
       - 'tests/reporting/test_closed_loop_tracing.py'
       - 'docs/catalogue/closed-loop-native-compositions-v1.*'
-      - 'benchmarks/reporting/closed_loop/requirements.txt'
       - 'tests/architecture/check_numeric_dependencies.py'
       - 'tests/architecture/check_stage_projection_boundaries.py'
       - 'tests/cmake/test_dependency_archive.py'
       - 'tests/obs04/perf_control_mock.py'
       - 'tests/obs04/perf_probe_tests.py'
       - 'scripts/obs04_perf_probe.py'
-      - 'benchmarks/reporting/closed_loop/check_contracts.py'
-      - 'benchmarks/reporting/closed_loop/validate_contracts.py'
-      - 'benchmarks/reporting/closed_loop/check_episode.py'
-      - 'benchmarks/reporting/closed_loop/check_replay.py'
-      - 'benchmarks/reporting/closed_loop/contracts.py'
       - 'tests/reporting/test_closed_loop_tasks.py'
       - 'scripts/ci/**'
       - 'scripts/reports/await_pages_augmentation_runs.py'
@@ -153,6 +150,13 @@ on:
       - 'tests/reporting/test_opt07_collector.py'
       - 'tests/reporting/test_opt12_collector.py'
       - 'tests/reporting/test_visual_examples.py'
+      - 'scripts/reports/stage_buryatia_dim4.py'
+      - 'scripts/reports/stage_buryatia_volterra.py'
+      - 'tests/reporting/test_stage_buryatia_dim4.py'
+      - 'tests/reporting/test_stage_buryatia_volterra.py'
+      - 'docs/examples/buryatia-dim4-*'
+      - 'docs/examples/buryatia-volterra-affine-2d*'
+      - 'benchmarks/scenarios/buryatia-dim4-matlab-literal-affine-v1.json'
       - 'tests/reporting/test_geo07_publication.py'
       - 'tests/reporting/test_geo07_port_publication.py'
       - 'tests/reporting/test_geo07_dependent_publication.py'
@@ -188,6 +192,11 @@ on:
       - 'reports/algorithm-results/history-optimizer-native-2d-v1/**'
       - 'scripts/reports/capture_history_membership_2d.py'
       - 'scripts/reports/stage_history_membership_2d.py'
+      - 'scripts/reports/lotka_volterra_sampled.py'
+      - 'scripts/reports/stage_lotka_volterra_sampled.py'
+      - 'tests/reporting/test_lotka_volterra_sampled.py'
+      - 'scripts/reports/lotka_volterra_sampled_frozen_321ac099.py'
+      - 'reports/algorithm-results/lotka-volterra-sampled-20261023/**'
       - 'tests/reporting/test_history_membership_2d.py'
       - 'reports/algorithm-results/history-membership-zonotope-2d-v1/**'
       - 'scripts/reports/visual_examples.py'
@@ -227,6 +236,11 @@ on:
       - 'reports/algorithm-results/env717-point-on-plane-pilot-v1/**'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
       - 'scripts/reports/stage_closed_loop_initial_baselines.py'
+      - 'scripts/reports/stage_issue4_volterra.py'
+      - 'scripts/research/issue4_volterra_enclosure.py'
+      - 'tests/reporting/test_issue4_volterra_enclosure.py'
+      - 'scripts/reports/issue4_volterra/render.py'
+      - 'reports/algorithm-results/issue4-volterra-7dce05b47c50c27a/**'
       - 'scripts/reports/fixed_tail_example.py'
       - 'scripts/reports/native_fixed_tail_episode_report.py'
       - 'scripts/reports/native_fixed_tail_geometry.py'
@@ -283,31 +297,28 @@ on:
     branches: [main]
     paths:
       - '.github/actions/pages-deploy/**'
-      - 'benchmarks/reporting/closed_loop/capabilities.py'
-      - 'benchmarks/reporting/closed_loop/native_strategy_history.py'
-      - 'benchmarks/reporting/closed_loop/history_policy.py'
-      - 'benchmarks/reporting/closed_loop/attempt_records.py'
+      - 'benchmarks/reporting/closed_loop/**'
+      - 'benchmarks/reporting/mpc11/affine.py'
+      - 'benchmarks/reporting/mpc11/nmpc.py'
+      - 'tests/reporting/test_closed_loop_native_capabilities.py'
+      - 'tests/reporting/test_closed_loop_runner_failures.py'
+      - 'docs/catalogue/closed-loop-*-capabilities-v1.*'
+      - 'tests/reporting/test_history_geometry.py'
+      - 'tests/reporting/test_history_norm_solver.py'
+      - 'tests/reporting/test_native_fixed_tail_policy.py'
+      - 'tests/reporting/test_nominal_tube_source.py'
       - 'tests/reporting/test_native_strategy_history.py'
       - 'tests/reporting/test_closed_loop_attempt_records.py'
-      - 'benchmarks/reporting/closed_loop/native_compositions.py'
-      - 'benchmarks/reporting/closed_loop/run_closed_loop.py'
-      - 'benchmarks/reporting/closed_loop/run_campaign.py'
       - 'tests/reporting/test_native_compositions.py'
       - 'tests/reporting/test_closed_loop_campaign.py'
       - 'tests/reporting/test_closed_loop_tracing.py'
       - 'docs/catalogue/closed-loop-native-compositions-v1.*'
-      - 'benchmarks/reporting/closed_loop/requirements.txt'
       - 'tests/architecture/check_numeric_dependencies.py'
       - 'tests/architecture/check_stage_projection_boundaries.py'
       - 'tests/cmake/test_dependency_archive.py'
       - 'tests/obs04/perf_control_mock.py'
       - 'tests/obs04/perf_probe_tests.py'
       - 'scripts/obs04_perf_probe.py'
-      - 'benchmarks/reporting/closed_loop/check_contracts.py'
-      - 'benchmarks/reporting/closed_loop/validate_contracts.py'
-      - 'benchmarks/reporting/closed_loop/check_episode.py'
-      - 'benchmarks/reporting/closed_loop/check_replay.py'
-      - 'benchmarks/reporting/closed_loop/contracts.py'
       - 'tests/reporting/test_closed_loop_tasks.py'
       - 'scripts/ci/**'
       - 'scripts/reports/await_pages_augmentation_runs.py'
@@ -432,6 +443,13 @@ on:
       - 'tests/reporting/test_opt07_collector.py'
       - 'tests/reporting/test_opt12_collector.py'
       - 'tests/reporting/test_visual_examples.py'
+      - 'scripts/reports/stage_buryatia_dim4.py'
+      - 'scripts/reports/stage_buryatia_volterra.py'
+      - 'tests/reporting/test_stage_buryatia_dim4.py'
+      - 'tests/reporting/test_stage_buryatia_volterra.py'
+      - 'docs/examples/buryatia-dim4-*'
+      - 'docs/examples/buryatia-volterra-affine-2d*'
+      - 'benchmarks/scenarios/buryatia-dim4-matlab-literal-affine-v1.json'
       - 'tests/reporting/test_geo07_publication.py'
       - 'tests/reporting/test_geo07_port_publication.py'
       - 'tests/reporting/test_geo07_dependent_publication.py'
@@ -467,6 +485,11 @@ on:
       - 'reports/algorithm-results/history-optimizer-native-2d-v1/**'
       - 'scripts/reports/capture_history_membership_2d.py'
       - 'scripts/reports/stage_history_membership_2d.py'
+      - 'scripts/reports/lotka_volterra_sampled.py'
+      - 'scripts/reports/stage_lotka_volterra_sampled.py'
+      - 'tests/reporting/test_lotka_volterra_sampled.py'
+      - 'scripts/reports/lotka_volterra_sampled_frozen_321ac099.py'
+      - 'reports/algorithm-results/lotka-volterra-sampled-20261023/**'
       - 'tests/reporting/test_history_membership_2d.py'
       - 'reports/algorithm-results/history-membership-zonotope-2d-v1/**'
       - 'scripts/reports/visual_examples.py'
@@ -506,6 +529,11 @@ on:
       - 'reports/algorithm-results/env717-point-on-plane-pilot-v1/**'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
       - 'scripts/reports/stage_closed_loop_initial_baselines.py'
+      - 'scripts/reports/stage_issue4_volterra.py'
+      - 'scripts/research/issue4_volterra_enclosure.py'
+      - 'tests/reporting/test_issue4_volterra_enclosure.py'
+      - 'scripts/reports/issue4_volterra/render.py'
+      - 'reports/algorithm-results/issue4-volterra-7dce05b47c50c27a/**'
       - 'scripts/reports/fixed_tail_example.py'
       - 'scripts/reports/native_fixed_tail_episode_report.py'
       - 'scripts/reports/native_fixed_tail_geometry.py'
@@ -613,6 +641,15 @@ jobs:
           python scripts/reports/native_fixed_tail_geometry.py --output "$RUNNER_TEMP/fixed-tail-geometry-site"
           cmp docs/examples/examples.css "$RUNNER_TEMP/fixed-tail-episode-site/examples/examples.css"
           cmp docs/examples/examples.css "$RUNNER_TEMP/fixed-tail-geometry-site/examples.css"
+      - name: Replay the saved Volterra certificate and offline ZIP
+        run: |
+          python -m unittest tests.reporting.test_issue4_volterra_enclosure
+          site="$RUNNER_TEMP/issue4-volterra-site"
+          bundle=reports/algorithm-results/issue4-volterra-7dce05b47c50c27a
+          mkdir "$site"
+          printf '<ul></ul>\n' > "$site/index.html"
+          python scripts/reports/stage_issue4_volterra.py --source "$bundle" --site "$site"
+          diff -r "$bundle" "$site/${bundle##*/}"
       - name: Exercise the composed Pages route finalizer
         run: python -m unittest tests.reporting.test_pages_route_retirement
       - name: Exercise maintained compatibility entry points
@@ -642,6 +679,8 @@ jobs:
         run: python -m unittest tests.reporting.test_recorded_closed_loop_figures tests.reporting.test_viz03_control_figures
       - name: Exercise Pages deployment freshness and source identity
         run: python -m unittest tests.reporting.test_deploy_head
+      - name: Check the frozen Buryatia reachability lessons
+        run: python -m unittest tests.reporting.test_stage_buryatia_dim4 tests.reporting.test_stage_buryatia_volterra
       - name: Exercise saved publication and collector consumer families
         env:
           MPLBACKEND: Agg
@@ -662,10 +701,23 @@ jobs:
           OPENBLAS_NUM_THREADS: '1'
           OMP_NUM_THREADS: '1'
         run: python -m unittest tests.reporting.test_native_strategy_history tests.reporting.test_closed_loop_attempt_records
+      - name: Exercise full-history validation, norms, and fixed-tail receipts
+        env:
+          OPENBLAS_NUM_THREADS: '1'
+          OMP_NUM_THREADS: '1'
+        run: >-
+          python -m unittest tests.reporting.test_history_geometry
+          tests.reporting.test_history_norm_solver
+          tests.reporting.test_native_fixed_tail_policy
+          tests.reporting.test_nominal_tube_source
+      - name: Check standalone closed-loop diagnostic imports
+        run: python benchmarks/reporting/closed_loop/terminal_objective_probe.py --help
       - name: Check the saved native whole-history optimizer route
         run: python -m unittest discover -s tests/reporting -p 'test_history_optimizer_native.py'
       - name: Check the frozen CartPole route and offline ZIP
         run: python -m unittest tests.reporting.test_env717_cartpole_publication
+      - name: Check the sampled Lotka–Volterra publication
+        run: python -m unittest tests.reporting.test_lotka_volterra_sampled
       - name: Check the saved typed-membership 2D example
         run: python -m unittest discover -s tests/reporting -p 'test_history_membership_2d.py'
       - name: Check the four-state projection approximation report

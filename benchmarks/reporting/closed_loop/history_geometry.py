@@ -1,4 +1,5 @@
 """Full-state membership constraints for an exported affine history."""
+
 from __future__ import annotations
 
 from fractions import Fraction
@@ -16,9 +17,14 @@ def _array(value, shape, name):
 
 def _lifted_rows(relation, dimension):
     result = []
-    for rows_key, values_key in (("inequalities", "upper_bounds"), ("equalities", "equality_values")):
+    for rows_key, values_key in (
+        ("inequalities", "upper_bounds"),
+        ("equalities", "equality_values"),
+    ):
         rows = relation[rows_key]
-        matrix = _array(rows, (len(rows), dimension), rows_key) if rows else np.empty((0, dimension))
+        matrix = (
+            _array(rows, (len(rows), dimension), rows_key) if rows else np.empty((0, dimension))
+        )
         values = _array(relation[values_key], (len(rows),), values_key)
         result.append((rows_key, matrix, values))
     return result
@@ -36,8 +42,11 @@ def _lifted_slices(selection, rows):
             raise ValueError("invalid lifted history row ranges")
         last_end = 0
         for interval in ranges:
-            if (not isinstance(interval, list) or len(interval) != 2
-                    or any(type(i) is not int for i in interval)):
+            if (
+                not isinstance(interval, list)
+                or len(interval) != 2
+                or any(type(i) is not int for i in interval)
+            ):
                 raise ValueError("invalid lifted history row range")
             lo, hi = interval
             if not last_end <= lo < hi <= len(matrix):
@@ -54,13 +63,23 @@ def parse(entries, dimension, *, relation=None, history_dimension=None):
     for entry in entries:
         kind = entry["kind"]
         indices = entry["indices"]
-        if (not indices or any(not isinstance(i, int) or isinstance(i, bool) or i < 0 or i >= dimension
-                               for i in indices) or len(set(indices)) != len(indices)):
+        if (
+            not indices
+            or any(
+                not isinstance(i, int) or isinstance(i, bool) or i < 0 or i >= dimension
+                for i in indices
+            )
+            or len(set(indices)) != len(indices)
+        ):
             raise ValueError("invalid geometry coordinate indices")
         count = len(indices)
         if kind == "lifted-h":
-            if (not relation or relation.get("representation") != "polytope-h"
-                    or not relation.get("set_id") or relation["set_id"] != entry.get("history_set_id")):
+            if (
+                not relation
+                or relation.get("representation") != "polytope-h"
+                or not relation.get("set_id")
+                or relation["set_id"] != entry.get("history_set_id")
+            ):
                 raise ValueError("lifted projection must refer to the mandatory original H history")
             if reuse_rows is None:
                 reuse_rows = _lifted_rows(relation, history_dimension or dimension)
@@ -68,11 +87,20 @@ def parse(entries, dimension, *, relation=None, history_dimension=None):
         elif kind == "h":
             inequalities = entry["inequalities"]
             equalities = entry["equalities"]
-            result.append((kind, indices,
-                _array(inequalities, (len(inequalities), count), "inequalities") if inequalities else np.empty((0, count)),
-                _array(entry["upper_bounds"], (len(inequalities),), "upper bounds"),
-                _array(equalities, (len(equalities), count), "equalities") if equalities else np.empty((0, count)),
-                _array(entry["equality_values"], (len(equalities),), "equality values")))
+            result.append(
+                (
+                    kind,
+                    indices,
+                    _array(inequalities, (len(inequalities), count), "inequalities")
+                    if inequalities
+                    else np.empty((0, count)),
+                    _array(entry["upper_bounds"], (len(inequalities),), "upper bounds"),
+                    _array(equalities, (len(equalities), count), "equalities")
+                    if equalities
+                    else np.empty((0, count)),
+                    _array(entry["equality_values"], (len(equalities),), "equality values"),
+                )
+            )
         elif kind in {"zonotope", "ellipsoid"}:
             center = _array(entry["center"], (count,), "center")
             columns = entry["factor_count"]
@@ -94,7 +122,9 @@ def fixed_axis_witnesses(entries, fixed, *, include_zonotopes=False):
         if any(index not in fixed for index in indices):
             continue
         center, factor = data
-        if factor.shape != (len(indices), len(indices)) or np.any(factor != np.diag(np.diag(factor))):
+        if factor.shape != (len(indices), len(indices)) or np.any(
+            factor != np.diag(np.diag(factor))
+        ):
             continue
 
         values = []
@@ -106,8 +136,11 @@ def fixed_axis_witnesses(entries, fixed, *, include_zonotopes=False):
             values.append(residual / scale if scale else Fraction(0))
         if len(values) != len(indices):
             continue
-        admissible = (all(abs(value) <= 1 for value in values) if kind == "zonotope"
-                      else sum(value * value for value in values) <= 1)
+        admissible = (
+            all(abs(value) <= 1 for value in values)
+            if kind == "zonotope"
+            else sum(value * value for value in values) <= 1
+        )
         if admissible:
             witnesses[position] = list(map(float, values))
     return witnesses
@@ -158,7 +191,7 @@ def verify(entries, primal, factors, *, tolerance=1e-7):
     if len(entries) != len(factors) or z.ndim != 1 or not np.isfinite(z).all():
         raise ValueError("invalid geometry witness")
     checks = []
-    for entry, witness in zip(entries, factors):
+    for entry, witness in zip(entries, factors, strict=True):
         kind, indices, *data = entry
         x = z[indices]
         if kind == "lifted-h":
@@ -173,14 +206,18 @@ def verify(entries, primal, factors, *, tolerance=1e-7):
                 residual = max(residual, float(np.max(delta, initial=0)))
         elif kind == "h":
             A, b, E, e = data
-            residual = max(float(np.max(A @ x - b, initial=0)),
-                           float(np.max(np.abs(E @ x - e), initial=0)))
+            residual = max(
+                float(np.max(A @ x - b, initial=0)), float(np.max(np.abs(E @ x - e), initial=0))
+            )
         else:
             center, matrix = data
             factor = _array(witness, (matrix.shape[1],), "factor witness")
             reconstruction = float(np.max(np.abs(x - center - matrix @ factor), initial=0))
-            bound = (float(np.max(np.abs(factor), initial=0)) - 1 if kind == "zonotope"
-                     else float(np.linalg.norm(factor)) - 1)
+            bound = (
+                float(np.max(np.abs(factor), initial=0)) - 1
+                if kind == "zonotope"
+                else float(np.linalg.norm(factor)) - 1
+            )
             residual = max(0.0, reconstruction, bound)
         checks.append({"kind": kind, "max_residual": residual, "passed": residual <= tolerance})
     return {"accepted": all(c["passed"] for c in checks), "checks": checks}

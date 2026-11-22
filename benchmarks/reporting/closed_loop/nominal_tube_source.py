@@ -1,13 +1,14 @@
 """Build a source-bound native H-tube request from the frozen LV task."""
+
 from __future__ import annotations
 
 import hashlib
 import json
 from pathlib import Path
 
-from contracts import ROOT, load_task, manifest_sha256
 from task_models import prediction_receipt, source_scenario
 
+from contracts import ROOT, load_task, manifest_sha256
 
 LOTKA_TASK = "syn-nl-lv-01"
 SAVED_NMPC = Path(
@@ -27,21 +28,30 @@ def build_request(task: dict | None = None) -> dict:
         raise ValueError("Lotka source plant identity changed")
     if task["prediction"]["affine_model_id"] != "syn-nl-lv-01/frozen-coexistence-affine/1":
         raise ValueError("Lotka frozen-affine predictor identity changed")
-    if task["control_domains"]["continuous"]["semantics"] != \
-            "independent admissible control at every physical interval":
+    if (
+        task["control_domains"]["continuous"]["semantics"]
+        != "independent admissible control at every physical interval"
+    ):
         raise ValueError("source continuous control domain does not describe all admissible holds")
     if task["terminal_condition"] != {
-            "kind": "physical-state-bounds", "objective_target_is_feasibility_constraint": False}:
-        raise ValueError("the physical terminal bounds and soft objective target must stay distinct")
+        "kind": "physical-state-bounds",
+        "objective_target_is_feasibility_constraint": False,
+    }:
+        raise ValueError(
+            "the physical terminal bounds and soft objective target must stay distinct"
+        )
 
     receipt = prediction_receipt(task)
     task_sha = manifest_sha256(task)
-    scenario = source_scenario(task)
+    source_scenario(task)
     count = task["episode"]["intervals"]
     dt = task["episode"]["dt"]
     if count != 30 or dt != 0.1 or task["episode"]["final_time"] != 3:
         raise ValueError("the original 30-stage 0.1-day task grid is required")
-    if receipt["task_sha256"] != task_sha or receipt["source_model_sha256"] != task["source"]["sha256"]:
+    if (
+        receipt["task_sha256"] != task_sha
+        or receipt["source_model_sha256"] != task["source"]["sha256"]
+    ):
         raise ValueError("prediction receipt is not bound to the task and source scenario")
     physical = receipt["physical_coefficients"]
     if not isinstance(physical, list) or len(physical) != count:
@@ -52,24 +62,40 @@ def build_request(task: dict | None = None) -> dict:
         bounds = row.get("bounds")
         if bounds is None or len(bounds) != 2:
             raise ValueError("the Lotka geometry profile requires explicit physical state bounds")
-        state_coordinates.append({
-            "name": row["name"], "unit": row["unit"], "scale": row["scale"],
-            "initial": row["initial"], "bounds": list(bounds),
-        })
+        state_coordinates.append(
+            {
+                "name": row["name"],
+                "unit": row["unit"],
+                "scale": row["scale"],
+                "initial": row["initial"],
+                "bounds": list(bounds),
+            }
+        )
     control_coordinates = []
     for row in task["model"]["controls"]:
         bounds = row.get("bounds")
         if bounds is None or len(bounds) != 2:
-            raise ValueError("the Lotka continuous profile requires explicit physical control bounds")
-        control_coordinates.append({"name": row["name"], "unit": row["unit"], "bounds": list(bounds)})
-    if task["control_domains"]["continuous"]["bounds"] != [row["bounds"] for row in control_coordinates]:
+            raise ValueError(
+                "the Lotka continuous profile requires explicit physical control bounds"
+            )
+        control_coordinates.append(
+            {"name": row["name"], "unit": row["unit"], "bounds": list(bounds)}
+        )
+    if task["control_domains"]["continuous"]["bounds"] != [
+        row["bounds"] for row in control_coordinates
+    ]:
         raise ValueError("continuous action profile does not match the source actuator bounds")
 
     for stage in physical:
         a, b, offset = stage.get("A"), stage.get("B"), stage.get("c")
         n, m = len(state_coordinates), len(control_coordinates)
-        if len(a) != n or any(len(row) != n for row in a) or \
-                len(b) != n or any(len(row) != m for row in b) or len(offset) != n:
+        if (
+            len(a) != n
+            or any(len(row) != n for row in a)
+            or len(b) != n
+            or any(len(row) != m for row in b)
+            or len(offset) != n
+        ):
             raise ValueError("physical affine coefficient shape differs from source coordinates")
 
     # Keep every source cost term verbatim for identity and interpretation. The
@@ -77,7 +103,8 @@ def build_request(task: dict | None = None) -> dict:
     return {
         "schema": "csl.nominal-h-tube-input/1",
         "source": {
-            "task_id": task["task_id"], "task_sha256": task_sha,
+            "task_id": task["task_id"],
+            "task_sha256": task_sha,
             "source_case_id": task["source"]["case_id"],
             "source_model_id": task["source"]["model_id"],
             "source_scenario_path": task["source"]["path"],
@@ -97,8 +124,10 @@ def build_request(task: dict | None = None) -> dict:
             "optimizer_reason": "This capture computes full-state geometry only; it does not select or optimize controls.",
         },
         "time": {
-            "unit": task["episode"]["time_unit"], "dt": dt,
-            "intervals": count, "final_time": task["episode"]["final_time"],
+            "unit": task["episode"]["time_unit"],
+            "dt": dt,
+            "intervals": count,
+            "final_time": task["episode"]["final_time"],
             "grid": [k * dt for k in range(count + 1)],
         },
         "state_coordinates": state_coordinates,
@@ -122,9 +151,14 @@ def build_request(task: dict | None = None) -> dict:
         "scaled_coefficients_for_audit_only": receipt["scaled_coefficients"],
         "coefficient_scope": receipt["validity"],
         "coefficient_producer_receipt": {
-            key: receipt[key] for key in (
-                "discretization_method", "coefficient_assurance", "linearization_receipt",
-                "discretization_receipt", "source_model_sha256")
+            key: receipt[key]
+            for key in (
+                "discretization_method",
+                "coefficient_assurance",
+                "linearization_receipt",
+                "discretization_receipt",
+                "source_model_sha256",
+            )
         },
     }
 

@@ -1,4 +1,5 @@
 """Task-aware direct-shooting NMPC for the continuous Earth-orbit task."""
+
 from __future__ import annotations
 
 import time
@@ -27,14 +28,21 @@ def solve(task: dict, observed: np.ndarray, stage: int, previous_prediction=None
         opti.subject_to(opti.bounded(bounds[0][0], u[0, k], bounds[0][1]))
         opti.subject_to(opti.bounded(bounds[1][0], u[1, k], bounds[1][1]))
 
-        def f(z):
+        def f(z, k=k):
             r, v, theta, omega = [z[i] * scales[i] for i in range(4)]
             mu = p["G"] * p["M_earth"]
-            return ca.vertcat(v, r * omega**2 - mu / r**2 + u[0, k] / (1000 * p["m_vehicle"]),
-                              omega, -2 * omega * v / r + u[1, k] / (1000 * p["m_vehicle"] * r)) / ca.DM(scales)
+            return ca.vertcat(
+                v,
+                r * omega**2 - mu / r**2 + u[0, k] / (1000 * p["m_vehicle"]),
+                omega,
+                -2 * omega * v / r + u[1, k] / (1000 * p["m_vehicle"] * r),
+            ) / ca.DM(scales)
 
         z = x[:, k]
-        k1 = f(z); k2 = f(z + dt * k1 / 2); k3 = f(z + dt * k2 / 2); k4 = f(z + dt * k3)
+        k1 = f(z)
+        k2 = f(z + dt * k1 / 2)
+        k3 = f(z + dt * k2 / 2)
+        k4 = f(z + dt * k3)
         opti.subject_to(x[:, k + 1] == z + dt * (k1 + 2 * k2 + 2 * k3 + k4) / 6)
         opti.subject_to(x[0, k + 1] >= 1e-12)  # numerical representation of the source r>0 domain
         if stage + k <= 18:
@@ -67,26 +75,53 @@ def solve(task: dict, observed: np.ndarray, stage: int, previous_prediction=None
     initial_dw = 100000 * (target["angular_rate_rad_s"] - observed[3])
     opti.set_initial(terminal_norm, float(np.hypot(initial_dr, initial_dw)))
     opti.set_initial(running_norm, 0)
-    opti.solver("ipopt", {"expand": True, "print_time": False}, {"max_iter": 3000, "tol": 1e-9,
-        "acceptable_tol": 1e-8, "bound_relax_factor": 0.0, "print_level": 0})
+    opti.solver(
+        "ipopt",
+        {"expand": True, "print_time": False},
+        {
+            "max_iter": 3000,
+            "tol": 1e-9,
+            "acceptable_tol": 1e-8,
+            "bound_relax_factor": 0.0,
+            "print_level": 0,
+        },
+    )
     try:
         solution = opti.solve()
         controls = np.asarray(solution.value(u), dtype=float).reshape((2, h), order="F").T
         states = np.asarray(solution.value(x)).T * scales
         objective = float(solution.value(opti.f))
         status = str(opti.stats().get("return_status", "unknown"))
-        success = bool(opti.stats().get("success", False) and np.isfinite(controls).all() and np.isfinite(states).all())
+        success = bool(
+            opti.stats().get("success", False)
+            and np.isfinite(controls).all()
+            and np.isfinite(states).all()
+        )
     except Exception as error:
-        return {"accepted": False, "success": False, "status": "solver-error", "error": str(error),
-                "solve_seconds": time.monotonic() - started, "solver_profile": "casadi-ipopt/direct-shooting-rk4-1-step/epigraph-exact-euclidean/1"}
-    direct = np.hypot(target["radius_km"] - states[-1, 0],
-                      100000 * (target["angular_rate_rad_s"] - states[-1, 3]))
+        return {
+            "accepted": False,
+            "success": False,
+            "status": "solver-error",
+            "error": str(error),
+            "solve_seconds": time.monotonic() - started,
+            "solver_profile": "casadi-ipopt/direct-shooting-rk4-1-step/epigraph-exact-euclidean/1",
+        }
+    direct = np.hypot(
+        target["radius_km"] - states[-1, 0], 100000 * (target["angular_rate_rad_s"] - states[-1, 3])
+    )
     direct += 0.1 * sum(np.hypot(*controls[k]) for k in range(h) if stage + k <= 18)
-    return {"accepted": success and abs(direct - objective) <= 1e-6 * max(1.0, abs(direct)),
-            "success": success, "status": status, "objective": objective, "objective_recomputed": float(direct),
-            "objective_reconstruction_difference": float(abs(direct - objective)),
-            "solve_seconds": time.monotonic() - started, "predicted_controls": controls.tolist(),
-            "predicted_mesh_physical": states.tolist(), "solver_iterations": opti.stats().get("iter_count"),
-            "warm_start_policy": "shift-prior-primal-drop-first-stage-no-terminal-repeat;zero-duals",
-            "assurance": "local NLP diagnostics only; direct RK4 transcription; exact source norms represented by epigraphs; no global nonlinear certificate",
-            "solver_profile": "casadi-ipopt/direct-shooting-rk4-1-step/epigraph-exact-euclidean/1"}
+    return {
+        "accepted": success and abs(direct - objective) <= 1e-6 * max(1.0, abs(direct)),
+        "success": success,
+        "status": status,
+        "objective": objective,
+        "objective_recomputed": float(direct),
+        "objective_reconstruction_difference": float(abs(direct - objective)),
+        "solve_seconds": time.monotonic() - started,
+        "predicted_controls": controls.tolist(),
+        "predicted_mesh_physical": states.tolist(),
+        "solver_iterations": opti.stats().get("iter_count"),
+        "warm_start_policy": "shift-prior-primal-drop-first-stage-no-terminal-repeat;zero-duals",
+        "assurance": "local NLP diagnostics only; direct RK4 transcription; exact source norms represented by epigraphs; no global nonlinear certificate",
+        "solver_profile": "casadi-ipopt/direct-shooting-rk4-1-step/epigraph-exact-euclidean/1",
+    }
