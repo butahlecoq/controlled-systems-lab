@@ -257,8 +257,8 @@ TEST_CASE("native V to H verification observes cancellation and deadline") {
 }
 
 TEST_CASE("dropping a native H constraint admits a nontrivial outer enclosure") {
-    auto input=h_set("reference",{1.0,-1.0},{2.0,1.0}); // [-1,2]
-    auto output=h_set("outer",{-1.0},{1.0}); // [-1,+infinity)
+    auto input=h_set("reference",{1.0,-1.0},{2.0,1.0});
+    auto output=h_set("outer",{-1.0},{1.0});
     auto query=request(input,SetRelation::outer,output.metadata.representation);
     query.size_budget=1;
     auto outcome=execute(provider(query,output,SetRelation::outer,SetRelation::outer),query);
@@ -268,8 +268,8 @@ TEST_CASE("dropping a native H constraint admits a nontrivial outer enclosure") 
 }
 
 TEST_CASE("adding a native H equality admits a nontrivial inner enclosure") {
-    auto input=h_set("reference",{1.0,-1.0},{2.0,1.0}); // [-1,2]
-    auto output=h_set("inner",{-1.0,1.0},{1.0,2.0},{1.0},{0.0}); // {0}
+    auto input=h_set("reference",{1.0,-1.0},{2.0,1.0});
+    auto output=h_set("inner",{-1.0,1.0},{1.0,2.0},{1.0},{0.0});
     auto query=request(input,SetRelation::inner,output.metadata.representation);
     query.size_budget=3;
     auto outcome=execute(provider(query,output,SetRelation::inner,SetRelation::inner),query);
@@ -278,11 +278,11 @@ TEST_CASE("adding a native H equality admits a nontrivial inner enclosure") {
     CHECK(std::get<EnclosedApproximation>(outcome).basis==StructuralBasis::h_constraint_containment);
 }
 
-TEST_CASE("different H coefficients or coordinate labels do not prove enclosure") {
+TEST_CASE("changing an H bound or coordinate label prevents a stored-row enclosure proof") {
     auto input=h_set("reference",{1.0,-1.0},{2.0,1.0});
-    auto changed=h_set("changed",{1.0},{3.0}); // Not an authored reference row.
-    auto query=request(input,SetRelation::outer,changed.metadata.representation);
-    auto outcome=execute(provider(query,changed,SetRelation::outer,SetRelation::outer),query);
+    auto relaxed_upper_bound=h_set("changed",{1.0},{3.0});
+    auto query=request(input,SetRelation::outer,relaxed_upper_bound.metadata.representation);
+    auto outcome=execute(provider(query,relaxed_upper_bound,SetRelation::outer,SetRelation::outer),query);
     REQUIRE(std::holds_alternative<Unsupported>(outcome));
     CHECK(std::get<Unsupported>(outcome).diagnostics[0].field=="approximation.inclusion");
 
@@ -294,11 +294,11 @@ TEST_CASE("different H coefficients or coordinate labels do not prove enclosure"
 }
 
 TEST_CASE("dropping an H equality supports only the outer direction") {
-    auto input=h_set("reference",{1.0},{2.0},{1.0},{0.0}); // {0}
-    auto output=h_set("candidate",{1.0},{2.0}); // (-infinity,2]
+    auto input=h_set("reference",{1.0},{2.0},{1.0},{0.0});
+    auto output=h_set("candidate",{1.0},{2.0});
     auto query=request(input,SetRelation::outer,output.metadata.representation);
     auto outcome=execute(provider(query,output,SetRelation::outer,SetRelation::outer),query);
-    REQUIRE(std::holds_alternative<EnclosedApproximation>(outcome)); // Dropping equality is a sound outer relation.
+    REQUIRE(std::holds_alternative<EnclosedApproximation>(outcome));
     CHECK(std::get<EnclosedApproximation>(outcome).basis==StructuralBasis::h_constraint_containment);
 
     query=request(input,SetRelation::inner,output.metadata.representation);
