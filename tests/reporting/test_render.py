@@ -1,6 +1,7 @@
 """Saved-input rendering and offline safety behavior."""
 
 import csv
+import errno
 import hashlib
 import importlib
 import importlib.util
@@ -128,7 +129,7 @@ assert "jsonschema" not in sys.modules
             with self.subTest(content=content), self.assertRaises(ValueError):
                 data.validate_svg(content)
 
-    def test_path_traversal_absolute_and_escape_symlink_rejected(self):
+    def test_path_traversal_absolute_and_external_paths_rejected(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp) / "bundle"
             root.mkdir()
@@ -137,12 +138,20 @@ assert "jsonschema" not in sys.modules
             for name in ("../x", "/x", "C:/x", "https://x", "a\\b", "a/../../x"):
                 with self.subTest(name=name), self.assertRaises(ValueError):
                     data.local_file(root, name)
+
+    def test_escape_symlink_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp) / "bundle"
+            root.mkdir()
             outside = Path(temp) / "outside.json"
             outside.write_text("{}")
             try:
                 (root / "link.json").symlink_to(outside)
-            except OSError:
-                return
+            except OSError as error:
+                unsupported = {errno.EACCES, errno.EPERM, errno.ENOSYS}
+                if error.errno in unsupported or getattr(error, "winerror", None) == 1314:
+                    self.skipTest(f"symlink creation is unavailable: {error}")
+                raise
 
             with self.assertRaises(ValueError):
                 data.local_file(root, "link.json")

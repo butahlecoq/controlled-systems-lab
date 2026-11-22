@@ -16,10 +16,11 @@ find across related tests.
   before checking optional solver availability. Missing optional backends may
   make a qualified run unavailable, but must not hide malformed or
   source-mismatched evidence.
-- The route-change fixture for Pages aggregation preserves the complete
-  four-file change from [PR #1111](https://github.com/butahlecoq/controlled-systems-lab/pull/1111)
-  at `224cad7804bfdaa162ebfb1f2affae8aafea476f`. Its mixed Python and native
-  changes verify that the Python quality gate can coexist with native routing.
+- The route-change fixture for Pages aggregation preserves the four reporting
+  paths from [PR #1111](https://github.com/butahlecoq/controlled-systems-lab/pull/1111)
+  at `224cad7804bfdaa162ebfb1f2affae8aafea476f`. A separate synthetic
+  `src/existing.cpp` change verifies that the Python quality gate can coexist
+  with native routing.
 - The dependency archive test exercises both a local path passed through
   FetchContent and a file URI used by the cache download path. These are
   distinct call sites and the fixture verifies their interaction; it does not
