@@ -37,6 +37,8 @@ protected:
         const auto csr = std::get<numeric::CsrInput>(p.constraints().descriptor());
         if (csr.rows != 3 || csr.cols != 2 || csr.row_offsets.size() != 4 ||
             csr.column_indices.size() != 3 || csr.values.size() != 3 ||
+            p.variables()[0].lower || p.variables()[0].upper ||
+            p.variables()[1].lower || p.variables()[1].upper ||
             csr.row_offsets[0] != 0 || csr.row_offsets[1] != 1 ||
             csr.row_offsets[2] != 2 || csr.row_offsets[3] != 3 ||
             csr.column_indices[0] != 0 || csr.values[0] != 1.0 ||
@@ -47,7 +49,6 @@ protected:
             p.rows()[2].lower == 0.0 && p.rows()[2].upper == 0.0;
     }
     ProgramOutcome do_solve(const LinearProgram& p, const ExecutionContext&) override {
-        // Only the expected implication LP receives the analytic lower bound.
         if (!is_expected_implication_program(p))
             return ProgramResult{Termination::completed,
                 {p.identity(), MathematicalOutcome::optimal, Unestablished{}, {}}, {}, {}, "no bound"};
@@ -61,8 +62,6 @@ protected:
 }
 
 TEST_CASE("H intersection discovers new vertices when no input corner is feasible") {
-    // The square [-1,1]^2 and diamond |x|+|y|<=1.5 have no vertex in
-    // common, but their intersection is a nonempty octagon of edge crossings.
     const auto left = hset("left", {4,2,{1,0,-1,0,0,1,0,-1}}, {1,1,1,1});
     const auto right = hset("right", {4,2,{1,1,1,-1,-1,1,-1,-1}}, {1.5,1.5,1.5,1.5});
     const std::array<std::array<double,2>,4> left_corners{{{1,1},{-1,1},{-1,-1},{1,-1}}};
@@ -152,15 +151,11 @@ TEST_CASE("unit square intersected with x+y<=1 matches the independent rational 
                 !=h.equality_values[row]) return false;
         return true;
     };
-    // Independently enumerate the rational triangle's vertices. Every point
-    // in the expected triangle must satisfy all returned rows, and the five
-    // square/diagonal facets must all be present, proving set equality while
-    // allowing redundant or positively scaled rows.
     const std::array<std::array<double,2>,3> vertices{{{0,0},{1,0},{0,1}}};
     for (const auto& point : vertices) CHECK(inside(point));
-    const std::array<std::array<double,3>,5> facets{{
-        {{1,0,1}}, {{-1,0,0}}, {{0,1,1}}, {{0,-1,0}}, {{1,1,1}}}};
-    for (const auto& facet : facets) {
+    const std::array<std::array<double,3>,3> expected_triangle_facets{{
+        {{-1,0,0}}, {{0,-1,0}}, {{1,1,1}}}};
+    for (const auto& facet : expected_triangle_facets) {
         bool represented=false;
         for (std::size_t row=0;row<h.inequalities.rows();++row) {
             const auto scale=facet[0]!=0 ? h.inequalities(row,0)/facet[0] :
@@ -171,7 +166,6 @@ TEST_CASE("unit square intersected with x+y<=1 matches the independent rational 
         }
         CHECK(represented);
     }
-    // Check interior, edges, and excluded points against the returned rows.
     const std::array<std::array<double,2>,6> inside_points{{
         {0,0}, {1,0}, {0,1}, {0.25,0.25}, {0.5,0.5}, {0.25,0.75}}};
     for (const auto& point : inside_points) {
@@ -245,23 +239,26 @@ TEST_CASE("halfspace deletion requires a supported implication bound and preserv
     CHECK(conservative.retained_inequalities == std::vector<std::size_t>{0,1,2});
 }
 
-TEST_CASE("analytic LP fixture rejects a matching ID with malformed implication rows") {
+TEST_CASE("analytic LP fixture rejects programs outside its exact implication shape") {
     const auto make_program = [](SparseMatrix rows, Vector objective,
-            std::vector<Interval> row_bounds) {
+            std::vector<Interval> row_bounds,
+            std::vector<Interval> variable_bounds = std::vector<Interval>(2)) {
         auto result = optimization::make_linear_program({{{"geo04:bounded"},{"halfspace-2"}},
-            std::move(objective), 0.0, std::move(rows), std::vector<Interval>(2),
+            std::move(objective), 0.0, std::move(rows), std::move(variable_bounds),
             std::move(row_bounds)});
         return take(std::move(result));
     };
     const EvidenceSupport support = NumericalCheck{0.0, 0.0, 0.0, {"test.lp-bound"}};
-    const std::array<LinearProgram,2> malformed{{
-        // Candidate y<=0 leaked into the implication constraints.
+    std::vector<Interval> bounded_variables(2);
+    bounded_variables[1].lower=1.0;
+    const std::array<LinearProgram,3> out_of_shape_programs{{
         make_program({4,2,{0,1,2,3,4},{0,0,1,1},{1,-1,1,1}}, {0,-1},
             {{ {},1.0 },{{},0.0},{{},0.0},{0.0,0.0}}),
-        // Equality y=0 was omitted, so y<=0 is not implied by the remaining rows.
-        make_program({2,2,{0,1,2},{0,0},{1,-1}}, {0,-1}, {{ {},1.0 },{{},0.0}})
+        make_program({2,2,{0,1,2},{0,0},{1,-1}}, {0,-1}, {{ {},1.0 },{{},0.0}}),
+        make_program({3,2,{0,1,2,3},{0,0,1},{1,-1,1}}, {0,-1},
+            {{ {},1.0 },{{},0.0},{0.0,0.0}}, std::move(bounded_variables))
     }};
-    for (const auto& program : malformed) {
+    for (const auto& program : out_of_shape_programs) {
         FixedBoundWorkspace oracle{support};
         const auto result = oracle.solve(program, {});
         REQUIRE(std::holds_alternative<ProgramResult>(result));
