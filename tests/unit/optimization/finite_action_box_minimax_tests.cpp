@@ -4,6 +4,7 @@
 #include <two_points_fixture.hpp>
 
 #include <algorithm>
+#include <limits>
 
 using namespace csl;
 using namespace csl::optimization;
