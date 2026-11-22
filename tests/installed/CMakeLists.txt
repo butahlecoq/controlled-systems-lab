@@ -296,7 +296,7 @@ set_tests_properties(installed_validated_finite_action_minimax_port_client PROPE
 set_tests_properties(installed_model_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed model client: immutable LTI/LTV and scheduled observation literals passed")
 add_executable(installed_public_client public_client.cpp)
-target_link_libraries(installed_public_client PRIVATE CSL::contracts)
+target_link_libraries(installed_public_client PRIVATE CSL::contracts CSL::model)
 set_target_properties(installed_public_client PROPERTIES CXX_EXTENSIONS OFF)
 enable_testing()
 

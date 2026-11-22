@@ -1,5 +1,5 @@
-// Backend-neutral acceptance client; no numerical model module exists yet.
 #include <csl/contracts.hpp>
+#include <csl/model/linear_system.hpp>
 #include <iostream>
 #include <stdexcept>
 
@@ -17,32 +17,27 @@ void require_shape_rejection(const Dynamics& dynamics, std::size_t horizon) {
         "Shape diagnostic must identify the stages field");
 }
 
-// Test-local arithmetic over neutral values, NOT a product model/numeric API.
-// The boundary guard is called before this helper; validated shapes are trusted.
-Vector fixture_step(const LinearStage& stage, const Vector& state, double control) {
-    Vector result = stage.offset;
-    for (std::size_t row = 0; row < stage.A.rows; ++row) {
-        for (std::size_t col = 0; col < stage.A.cols; ++col)
-            result[row] += stage.A.values[row * stage.A.cols + col] * state[col];
-        result[row] += stage.B.values[row] * control;
-    }
-    return result;
-}
 void literal_affine_fixture(const Dynamics& dynamics) {
     require(check_model_shape(dynamics, 2).empty(), "Fixture must have valid shape");
-    const auto stage_at = [&](std::size_t index) -> const LinearStage& {
-        if (const auto* constant = std::get_if<LinearStage>(&dynamics.stages)) return *constant;
-        return std::get<std::vector<LinearStage>>(dynamics.stages)[index];
-    };
-    // Independently derived for A=[[1,2],[0,0]], B=[[2],[-1]], a=[1,3]:
-    // x0=[2,-1], u0=2 => x1=[2-2+4+1, -2+3]=[5,1].
-    // u1=-1 => x2=[5+2-2+1, 1+3]=[6,4]. Singular A needs no inverse.
-    const auto first = fixture_step(stage_at(0), {2,-1}, 2);
-    require(first == Vector{5,1}, "First affine state must equal literal [5,1]");
-    require(fixture_step(stage_at(1), first, -1) == Vector{6,4},
+    const Vector times{0,1,2};
+    const auto snapshot = csl::model::snapshot({dynamics,{}}, times);
+    require(std::holds_alternative<csl::model::LinearSystem>(snapshot),
+        "Affine fixture must snapshot successfully");
+    const auto& system = std::get<csl::model::LinearSystem>(snapshot);
+    Vector state{2,-1};
+    Vector control{2};
+    const Vector external{};
+    const auto first = system.step({0}, state, control, external);
+    require(std::holds_alternative<Vector>(first), "First affine step must succeed");
+    state = std::get<Vector>(first);
+    require(state == Vector{5,1}, "First affine state must equal literal [5,1]");
+    control = {-1};
+    const auto second = system.step({1}, state, control, external);
+    require(std::holds_alternative<Vector>(second), "Second affine step must succeed");
+    require(std::get<Vector>(second) == Vector{6,4},
         "Second affine state must equal literal [6,4]");
 }
-} // namespace
+}
 
 int main() try {
     using namespace csl;
