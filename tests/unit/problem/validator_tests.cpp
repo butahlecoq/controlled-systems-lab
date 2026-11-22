@@ -97,7 +97,6 @@ struct Strategies {
                     return Diagnostics{{DiagnosticCode::unsupported,"strategy.history","requires stagewise constraints"}};
                 if(profile=="square-safe") {
                     const auto* residual=std::get_if<ResidualNormTerminal>(&p.objective);
-                    // Pure narrow arithmetic admission; no reformulation allocation/eigensolver.
                     if(!residual || residual->map.rows!=1 || residual->map.cols!=1 || residual->target!=Vector{0} ||
                         std::abs(residual->map.values[0])>std::sqrt(std::numeric_limits<double>::max()/2))
                         return Diagnostics{{DiagnosticCode::unsupported,"strategy.objective","requires a scalar zero-target residual with representable squared coefficient"}};
@@ -112,7 +111,6 @@ struct Strategies {
                         const auto metadata=accepted(sets::from_handle(*h)).metadata();
                         if(metadata->affine_dimension) {
                             const auto* dimension=std::get_if<sets::DimensionValue>(&metadata->affine_dimension->claim.value);
-                            // This fixture requires dimension established by the representation definition.
                             supported=dimension && dimension->value==metadata->set.dimension && metadata->affine_dimension->origin==sets::DimensionOrigin::definition;
                         }
                     } else supported=std::holds_alternative<UniversalSet>(set);
@@ -298,8 +296,6 @@ TEST_CASE("one immutable dynamics model serves distinct constrained objective re
     CHECK(second_resolved.objective().policy().numerical.absolute_tolerance==1e-9);
     CHECK(second_resolved.objective().policy().numerical.relative_tolerance==3e-9);
 
-    // x[1] = 2*x[0] + u[0]: the two requests define distinct feasible
-    // singleton terminal sections in the joint (state, control) coordinates.
     const auto first_terminal=accepted(first_resolved.model().step({0},Vector{1},Vector{2},{}));
     const auto second_terminal=accepted(second_resolved.model().step({0},Vector{1},Vector{5},{}));
     CHECK(first_terminal==Vector{4});
@@ -313,8 +309,6 @@ TEST_CASE("one immutable dynamics model serves distinct constrained objective re
     CHECK_FALSE(first_terminal==std::get<Singleton>(second_resolved.constraints().states()->at(1)).point);
     CHECK_FALSE(second_terminal==std::get<Singleton>(first_resolved.constraints().states()->at(1)).point);
 
-    // Resolving under per-request settings must leave both authored requests
-    // and the shared immutable dynamics payload untouched.
     CHECK(first.model==shared_model);
     CHECK(second.model==shared_model);
     CHECK(std::get<LinearStage>(shared_model->dynamics.stages).A.values==Vector{2});
@@ -528,7 +522,6 @@ TEST_CASE("sparse native H and V gaps empty rows and signed zero retain literal 
     auto p=scalar();edit_model(p,[](auto& m){m.dynamics.dimensions.control=5;std::get<LinearStage>(m.dynamics.stages).B={1,5,{1,1,1,1,1}};});
     const auto dense=matrix({4,5,{0,2,0,-3,0, 0,0,0,0,0, 4,0,0,0,0, 0,5,0,0,0}});
     const auto sparse=accepted(numeric::snapshot(SparseMatrix{4,5,{0,2,2,4,5},{1,3,0,2,1},{2,-3,4,-0.0,5}}));
-    // Independent struct/hashlib reference over literal mathematical fields, not product output.
     const char* digests[]={"4c9cfc7a18bc7c22e828511decdc7a2d3b37ca7749a41de0ab2b58abe8045b16",
                            "1f60feadeece0620d9283079541758e43b51315494e979edc5c10efd989a50da"};
     for(int representation=0;representation<2;++representation) {
