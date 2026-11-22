@@ -1,5 +1,3 @@
-// Exercise the staged lesson in real Chromium viewports; no browser dependencies.
-// node tests/reporting/check_native_discrete_layout.mjs LESSON.html OUTPUT_DIRECTORY
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { openSync, closeSync } from 'node:fs';
