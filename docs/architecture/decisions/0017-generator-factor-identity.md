@@ -19,14 +19,15 @@ and the physical image.
   generator map.
 - In a dependent sum, equal factor IDs denote a shared variable. Their
   generator columns are combined, preserving correlation and allowing shared
-  contributions to cancel. New IDs remain independent coordinates.
+  contributions to cancel. New IDs create distinct coordinates; equality
+  constraints may still couple those coordinates.
 - A Minkowski sum denotes independent summands and requires disjoint factor
   IDs. Reject aliases and direct callers to the dependent sum when sharing is
   intended.
 - Test lifted membership against the factor polyhedron and physical membership
-  against an independently authored H representation. Do not infer physical
-  membership from one chosen factor tuple when the generator map is
-  noninjective.
+  against an independently authored H representation. A feasible factor tuple
+  witnesses membership of its image. An infeasible tuple alone does not prove
+  that the image is outside the set when the generator map is noninjective.
 
 ## Consequences
 
