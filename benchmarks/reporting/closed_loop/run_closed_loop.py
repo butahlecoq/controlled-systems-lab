@@ -1288,8 +1288,6 @@ def run_task(
         "stdout": "worker-stdout.txt",
         "stderr": "worker-stderr.txt",
     }
-    # The parent spans worker launch through process exit, including preparation,
-    # checkpoints, lifecycle close, and the worker's terminal JSON write.
     result.setdefault("resource_limits", {}).setdefault("observed", {})["worker_wall_seconds"] = (
         result["supervisor"]["wall_seconds"]
     )
@@ -1983,8 +1981,6 @@ def write_coverage(root: Path) -> Path:
             else:
                 phase_ordering = "ambiguous_unsequenced_receipt"
         elif retry_postcheck_names or retry_render_names:
-            # Legacy retry files have no shared sequence. Do not infer one from
-            # mtimes or from a ledger that orders only one receipt type.
             phase_ordering = "ambiguous_legacy_unsequenced_retries"
         if phase_ordering.startswith("ambiguous"):
             if retry_postcheck_names:
