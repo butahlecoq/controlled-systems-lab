@@ -11,6 +11,7 @@ import sys
 import tempfile
 import unittest
 import xml.etree.ElementTree as ET
+import zipfile
 from itertools import pairwise
 from pathlib import Path
 
@@ -18,6 +19,7 @@ import geo04_catalog
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
+COMMITTED_EXPORT_ZIP_SHA256 = "1b5d380d817dfbb2c3d79aa623874f382c2e9a38c19a6eb3a5afc7eb386f0a56"
 
 
 def load(name: str, path: Path):
@@ -488,7 +490,40 @@ class ReportToolTests(unittest.TestCase):
                 with self.subTest(file=name):
                     self.assertEqual((bundle / name).read_bytes(), (collection / name).read_bytes())
             generated_zip = root / committed_zip.name
-            self.assertEqual(generated_zip.read_bytes(), committed_zip.read_bytes())
+            self.assertEqual(
+                hashlib.sha256(committed_zip.read_bytes()).hexdigest(),
+                COMMITTED_EXPORT_ZIP_SHA256,
+            )
+            with (
+                zipfile.ZipFile(generated_zip) as generated_archive,
+                zipfile.ZipFile(committed_zip) as committed_archive,
+            ):
+                self.assertEqual(generated_archive.comment, committed_archive.comment)
+                self.assertEqual(generated_archive.namelist(), committed_archive.namelist())
+                for name in generated_archive.namelist():
+                    with self.subTest(archive_member=name):
+                        generated_info = generated_archive.getinfo(name)
+                        committed_info = committed_archive.getinfo(name)
+                        for field in (
+                            "filename",
+                            "date_time",
+                            "compress_type",
+                            "create_system",
+                            "external_attr",
+                            "internal_attr",
+                            "flag_bits",
+                            "create_version",
+                            "extract_version",
+                            "CRC",
+                            "file_size",
+                        ):
+                            self.assertEqual(
+                                getattr(generated_info, field),
+                                getattr(committed_info, field),
+                                field,
+                            )
+                        self.assertEqual(generated_archive.read(name), committed_archive.read(name))
+                        self.assertEqual(generated_archive.read(name), (bundle / name).read_bytes())
 
     def test_renderer_rejects_failed_group_with_success_only_summary(self):
         rows = [trial(scenario) for scenario in collect.SCENARIOS]
