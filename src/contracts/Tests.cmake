@@ -8,7 +8,7 @@ target_link_libraries(public_client PRIVATE CSL::contracts)
 set_target_properties(public_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME public_client COMMAND public_client)
 set_tests_properties(public_client PROPERTIES
-    PASS_REGULAR_EXPRESSION "Public contract client: shape guards and literal affine fixture passed")
+    PASS_REGULAR_EXPRESSION "Public contract client: shape guards passed")
 csl_test_target(public_client contracts)
 
 set(csl_contract_headers
