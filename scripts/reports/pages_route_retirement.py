@@ -597,7 +597,11 @@ def _producer_record(
         if not adapter.is_file():
             adapter = Path(__file__).with_name("registered_reports.py")
         return {
-            "files": ["scripts/reports/site.py", adapter.relative_to(repo).as_posix()],
+            "files": [
+                "scripts/reports/site.py",
+                "scripts/reports/report_site.py",
+                adapter.relative_to(repo).as_posix(),
+            ],
             "owner_status": "exact",
         }
     manifest_path = site / top / "publication-manifest.json"

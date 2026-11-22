@@ -39,7 +39,7 @@ def limit_process() -> None:
 
 
 def run_with_resource_receipt(command: list[str], timeout_seconds: int,
-                              child_environment: dict[str, str]) -> tuple[
+                              child_environment: dict[str, str] | None = None) -> tuple[
     int | None, bool, bytes, bytes, dict[str, object]
 ]:
     """Wait for one isolated Linux child and retain its own wait4 counters."""

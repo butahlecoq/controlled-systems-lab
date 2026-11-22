@@ -18,11 +18,7 @@ SOURCE_ID = "syn-ts01-paired-20261014-b7f1ac0"
 SOURCE = REPORTS / SOURCE_ID
 sys.path.insert(0, str(ROOT / "scripts" / "reports"))
 import syn_ts01_paired_registered_reports as paired
-
-SITE_SPEC = importlib.util.spec_from_file_location("syn_ts01_paired_test_site", ROOT / "scripts/reports/site.py")
-assert SITE_SPEC is not None and SITE_SPEC.loader is not None
-SITE = importlib.util.module_from_spec(SITE_SPEC)
-SITE_SPEC.loader.exec_module(SITE)
+import report_site as SITE
 
 
 class PairedTs01PublicationTests(unittest.TestCase):

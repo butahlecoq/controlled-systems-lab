@@ -10,10 +10,13 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 EXPECTED_FAMILIES = {
-    "exact_affine_polytope", "unreduced_zonotope", "reduced_zonotope",
-    "box", "parallelotope", "ellipsoid",
+    "exact_affine_polytope",
+    "unreduced_zonotope",
+    "reduced_zonotope",
+    "box",
+    "parallelotope",
+    "ellipsoid",
 }
 EXPECTED_MODULES = {
     "exact_affine_polytope": "csl.geometry.affine-sum",
@@ -62,8 +65,12 @@ def validate(record: dict, *, require_full_box_orientation: bool = False) -> Non
             assert family["volume_assurance"].startswith("floating-point binary64")
             assert len(family["support_diagnostics"]) == 24
             if family["family"] in {"exact_affine_polytope", "unreduced_zonotope"}:
-                assert family["coordinate_projections"] == {"derived_from": "exact_reference.vertices"}
-                assert family["coordinate_projections_2d"] == {"derived_from": "exact_reference.vertices"}
+                assert family["coordinate_projections"] == {
+                    "derived_from": "exact_reference.vertices"
+                }
+                assert family["coordinate_projections_2d"] == {
+                    "derived_from": "exact_reference.vertices"
+                }
             else:
                 assert len(family["coordinate_projections"]) == 3
                 assert len(family["coordinate_projections_2d"]) == 6
@@ -75,25 +82,42 @@ def validate(record: dict, *, require_full_box_orientation: bool = False) -> Non
                 if family["family"] == "exact_affine_polytope":
                     assert invocations["operations"]["provider"] == "csl.geometry.affine-sum"
                 elif family["family"] == "unreduced_zonotope":
-                    assert invocations["operations"]["affine_image"] == "csl.geometry.generators.operations"
-                    assert invocations["operations"]["minkowski_sum"] == "csl.geometry.generators.operations"
+                    assert (
+                        invocations["operations"]["affine_image"]
+                        == "csl.geometry.generators.operations"
+                    )
+                    assert (
+                        invocations["operations"]["minkowski_sum"]
+                        == "csl.geometry.generators.operations"
+                    )
                 elif family["family"] == "reduced_zonotope":
                     assert invocations["reduction"].startswith("csl.geometry.zonotope.axis-cover/")
                     assert invocations["reduced_image"] == "csl.geometry.generators.operations"
                     assert invocations["minkowski_sum"] == "csl.geometry.generators.operations"
-                    assert invocations["generator_v_conversion"] == "csl.geometry.generators.v-conversion/1.0.0"
-                    assert invocations["hull_materialization"]["provider"] == "csl.geometry.affine-sum"
+                    assert (
+                        invocations["generator_v_conversion"]
+                        == "csl.geometry.generators.v-conversion/1.0.0"
+                    )
+                    assert (
+                        invocations["hull_materialization"]["provider"] == "csl.geometry.affine-sum"
+                    )
                 elif family["family"] in {"box", "parallelotope"}:
                     operation = invocations["operation"]
                     assert operation["affine_sum"] == "csl.geometry.affine-sum"
-                    assert operation["approximation"].startswith(expected_provider + "/")
+                    provider = EXPECTED_MODULES[family["family"]]
+                    assert operation["approximation"].startswith(provider + "/")
                     assert operation["inclusion_basis"] == "v_h_containment"
                     if require_full_box_orientation and family["family"] == "box":
-                        assert box_orientation_rows(record["state_dimension"]) in operation["inclusion_evidence"]
+                        assert (
+                            box_orientation_rows(record["state_dimension"])
+                            in operation["inclusion_evidence"]
+                        )
                 elif family["family"] == "ellipsoid":
                     operations = invocations["operations"]
                     assert operations["affine_image"] == "csl.geometry.ellipsoidal.factor-affine/1"
-                    assert operations["control_box_outer"] == "csl.geometry.ellipsoidal.factor-box/1"
+                    assert (
+                        operations["control_box_outer"] == "csl.geometry.ellipsoidal.factor-box/1"
+                    )
                     assert operations["outer_sum"] == "csl.geometry.ellipsoidal.factor-minkowski/1"
             assert family["max_abs_support_error_sampled_directions"] >= 0.0
             for sample in family["support_diagnostics"]:
@@ -102,9 +126,15 @@ def validate(record: dict, *, require_full_box_orientation: bool = False) -> Non
                     assert abs(sample["support_excess"]) <= tolerance
                 else:
                     assert sample["support_excess"] >= -tolerance
-        assert by_family["exact_affine_polytope"]["represented_set"]["vertices_ref"] == "exact_reference.vertices"
+        assert (
+            by_family["exact_affine_polytope"]["represented_set"]["vertices_ref"]
+            == "exact_reference.vertices"
+        )
         assert by_family["unreduced_zonotope"]["generator_count"] == 2 * stage_index
-        assert by_family["unreduced_zonotope"]["volume"] == by_family["exact_affine_polytope"]["volume"]
+        assert (
+            by_family["unreduced_zonotope"]["volume"]
+            == by_family["exact_affine_polytope"]["volume"]
+        )
         assert by_family["reduced_zonotope"]["volume"] + 1e-8 >= exact["volume"]
         assert by_family["box"]["volume"] + 1e-8 >= exact["volume"]
         assert by_family["parallelotope"]["volume"] + 1e-8 >= exact["volume"]
@@ -118,7 +148,10 @@ def validate(record: dict, *, require_full_box_orientation: bool = False) -> Non
         for projection in by_family["ellipsoid"]["coordinate_projections_2d"].values():
             assert projection["kind"] == "factor_ellipsoid_projection"
             assert projection["dimension"] == 2 and projection["factor_columns"] == 2 * stage_index
-        assert by_family["exact_affine_polytope"]["module_invocations"]["provider"] == "csl.geometry.affine-sum"
+        assert (
+            by_family["exact_affine_polytope"]["module_invocations"]["provider"]
+            == "csl.geometry.affine-sum"
+        )
     terminal = record["records"][-1]
     assert terminal["exact_reference"]["v_candidate_rows"] == 16384
     assert abs(terminal["exact_reference"]["volume"] - REFERENCE_VOLUME) <= 1e-9
@@ -129,20 +162,31 @@ def main() -> int:
     input_group = parser.add_mutually_exclusive_group(required=True)
     input_group.add_argument("--exe", type=Path, help="run and check the native report executable")
     input_group.add_argument("--raw", type=Path, help="check a saved JSON record")
-    parser.add_argument("--require-full-box-orientation", action="store_true",
-                        help="require corrected full-state box orientation evidence for saved records")
+    parser.add_argument(
+        "--require-full-box-orientation",
+        action="store_true",
+        help="require corrected full-state box orientation evidence for saved records",
+    )
     args = parser.parse_args()
     if args.raw:
-        validate(json.loads(args.raw.read_text(encoding="utf-8")),
-                 require_full_box_orientation=args.require_full_box_orientation)
+        validate(
+            json.loads(args.raw.read_text(encoding="utf-8")),
+            require_full_box_orientation=args.require_full_box_orientation,
+        )
     else:
-        result = subprocess.run([str(args.exe.resolve(strict=True)), "--dim4-literal-affine"],
-                                check=False, capture_output=True, text=True)
+        result = subprocess.run(
+            [str(args.exe.resolve(strict=True)), "--dim4-literal-affine"],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
         if result.returncode:
             print(result.stderr, file=sys.stderr, end="")
             return result.returncode
         validate(json.loads(result.stdout), require_full_box_orientation=True)
-    print("Buryatia Dim4: eight full-state stages, six families, source reference, support diagnostics, and 3D ellipsoid projections pass")
+    print(
+        "Buryatia Dim4: eight full-state stages, six families, source reference, support diagnostics, and 3D ellipsoid projections pass"
+    )
     return 0
 
 

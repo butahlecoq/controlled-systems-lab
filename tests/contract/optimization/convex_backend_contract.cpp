@@ -37,8 +37,6 @@ void check_numerical_point(const ProgramResult& result,const ConvexProgram& prog
 void check_reported_original_cost(const ProgramResult& result,double independent_cost);
 
 TEST_CASE("convex publication rejects nonconvex and unresolved quadratic curvature") {
-    // A negative 1D Hessian has eigenvalue -2; a tiny negative eigenvalue
-    // stays unresolved under the numerical PSD policy, never silently clipped.
     for(const auto [hessian,code]: {
         std::pair{-2.0,DiagnosticCode::invalid_input},
         std::pair{-1e-10,DiagnosticCode::unsupported}}) {
@@ -84,7 +82,6 @@ TEST_CASE("registered convex finite infeasible and QP iteration-limit outcomes s
     CHECK(solved.residuals.primal->variables.violation==doctest::Approx(0).epsilon(1e-8));
     check_reported_original_cost(solved,1);
 
-    // x is within [0,1], while the authored row requires x>=2.
     const auto impossible=accepted(make_convex_program({{{"test-06"},{"status-infeasible"}},
         QuadraticTerminal{{1,1,{2}},{-4},4},
         {1,1,{0,1},{0},{1}},{{0,1}},{{2,{}}},{}}));
@@ -161,9 +158,9 @@ void check_numerical_point(const ProgramResult& result,const ConvexProgram& prog
 void check_reported_original_cost(const ProgramResult& result,double independent_cost) {
     constexpr std::string_view marker="\nobjective.original=";
     const std::string_view raw=result.raw_diagnostics;
-    const auto position=raw.rfind(marker); // A retried QP can retain earlier attempts.
-    REQUIRE(position!=std::string_view::npos);
-    const auto start=position+marker.size();
+    const auto last_objective_position=raw.rfind(marker);
+    REQUIRE(last_objective_position!=std::string_view::npos);
+    const auto start=last_objective_position+marker.size();
     const auto end=raw.find_first_of("\r\n",start);
     const auto number=raw.substr(start,end==std::string_view::npos?raw.size()-start:end-start);
     double reported=0;
@@ -171,13 +168,11 @@ void check_reported_original_cost(const ProgramResult& result,double independent
     REQUIRE(error==std::errc{});
     REQUIRE(parsed==number.data()+number.size());
     REQUIRE(std::isfinite(reported));
-    // The adapter emits 17 digits; this allows arithmetic rounding in these small QPs.
     CHECK(std::abs(reported-independent_cost)<=1e-12*(1+std::abs(independent_cost)));
 }
 }
 
 TEST_CASE("registered convex boundary QP returns the hand-solved original cost") {
-    // (x-2)^2 = (1/2)(2)x^2 - 4x + 4 on 0 <= x <= 1.
     const auto program=accepted(make_convex_program({{{"test-06"},{"bounded-parabola"}},
         QuadraticTerminal{{1,1,{2}},{-4},4},{0,1,{0},{},{}},{{0,1}},{},{}}));
     const auto result=solve_registered(program);
@@ -193,7 +188,6 @@ TEST_CASE("registered convex boundary QP returns the hand-solved original cost")
 }
 
 TEST_CASE("registered convex singular QP returns one point without claiming its whole optimal segment") {
-    // (x+y-1)^2 has distinct zero-cost minimizers (0,1) and (1,0).
     const auto program=accepted(make_convex_program({{{"test-06"},{"coupled-segment"}},
         QuadraticTerminal{{2,2,{2,2,2,2}},{-2,-2},1},
         {0,2,{0},{},{}},{{0,1},{0,1}},{},{}}));
@@ -225,7 +219,6 @@ TEST_CASE("registered convex singular QP returns one point without claiming its 
 }
 
 TEST_CASE("registered unconstrained positive-definite QP respects the translated half-Hessian factor") {
-    // Q=[4,2;2,4], q=[-8,-10], c=14: gradient Qz+q vanishes at (1,2).
     const auto program=accepted(make_convex_program({{{"test-06"},{"unconstrained-pd"}},
         QuadraticTerminal{{2,2,{4,2,2,4}},{-8,-10},14},
         {0,2,{0},{},{}},{{{},{}},{{},{}}},{},{}}));

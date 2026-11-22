@@ -1,27 +1,29 @@
 """Check the educational gallery against reviewed native data and literal geometry."""
+
 import hashlib
 import html
-from html.parser import HTMLParser
 import json
-from pathlib import Path
 import re
 import shutil
 import sys
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
+from html.parser import HTMLParser
+from pathlib import Path
 from unittest.mock import patch
 from urllib.parse import urlsplit
-import xml.etree.ElementTree as ET
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports"))
-import visual_examples as gallery
-import stage_app01 as app01_reports
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
 import control_witness_companions
+import stage_app01 as app01_reports
 import stage_mpc06_tube
-import stage_syn03_nominal_exact_example as nominal_exact_example
 import stage_nominal_quadratic_history
 import stage_positive_part_budget_2d
+import visual_examples as gallery
+
+ROOT = Path(__file__).resolve().parents[2]
+SVG_DESCRIPTION = "{http://www.w3.org/2000/svg}desc"
 
 
 class Links(HTMLParser):
@@ -55,28 +57,45 @@ class GalleryTests(unittest.TestCase):
             (target / "index.html").write_text("<html><body>Reviewed report</body></html>")
         report_ids = [report_id for report_id, *_ in control_witness_companions.PROJECTIONS]
         report_ids.extend(report_id for report_id, _ in control_witness_companions.STRATEGY_TIMINGS)
-        report_ids.extend(("syn01-nominal-20261013-f7ba310d-48a679cfc0d4",
-                           "syn02-terminal-20261013-c234a1a0-35de886a7fb4",
-                           "syn06-verifier-20261012-f0e32e2b",
-                           "syn-ts01-paired-20261014-b7f1ac0"))
+        report_ids.extend(
+            (
+                "syn01-nominal-20261013-f7ba310d-48a679cfc0d4",
+                "syn02-terminal-20261013-c234a1a0-35de886a7fb4",
+                "syn06-verifier-20261012-f0e32e2b",
+                "syn-ts01-paired-20261014-b7f1ac0",
+            )
+        )
         for report_id in set(report_ids):
             target = self.site / route_by_source[report_id]
             target.mkdir(exist_ok=True)
             source = ROOT / "reports/algorithm-results" / report_id
             shutil.copyfile(source / "records.json", target / "records.json")
             (target / "index.html").write_text("<html><body>Reviewed control report</body></html>")
-        ext01 = self.site / "ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54"
+        ext01 = (
+            self.site
+            / "ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54"
+        )
         ext01.mkdir()
-        shutil.copyfile(ROOT / "reports/algorithm-results/ext01-fixed-plan-20261016-11b7bc74/records.json",
-                        ext01 / "records.json")
+        shutil.copyfile(
+            ROOT / "reports/algorithm-results/ext01-fixed-plan-20261016-11b7bc74/records.json",
+            ext01 / "records.json",
+        )
         (ext01 / "index.html").write_text("<html><body>Reviewed EXT-01 report</body></html>")
         for source_id, public_id in (
-                ("ext04-df62c7c6d295e135",
-                 "ext04-observed-replay-eb0b06e560360611d2f2a16fba9b1204e0415b4ba5cd0d5210427c6349963b34"),
-                ("ext07-hybrid-51d9ee2e89d240eb", "ext07-hybrid-51d9ee2e89d240eb"),
-                ("ext07-hybrid-two-parameter-26f402289a309403", "ext07-hybrid-two-parameter-8ad871b5ea29fc7b"),
-                ("finite-feedback-a6e96fd96c7ac7cc",
-                 "finite-feedback-registered-f874133e442eb0fb884b8813a06591cc0f077063ee75ddf627de74656fc11c0f")):
+            (
+                "ext04-df62c7c6d295e135",
+                "ext04-observed-replay-eb0b06e560360611d2f2a16fba9b1204e0415b4ba5cd0d5210427c6349963b34",
+            ),
+            ("ext07-hybrid-51d9ee2e89d240eb", "ext07-hybrid-51d9ee2e89d240eb"),
+            (
+                "ext07-hybrid-two-parameter-26f402289a309403",
+                "ext07-hybrid-two-parameter-8ad871b5ea29fc7b",
+            ),
+            (
+                "finite-feedback-a6e96fd96c7ac7cc",
+                "finite-feedback-registered-f874133e442eb0fb884b8813a06591cc0f077063ee75ddf627de74656fc11c0f",
+            ),
+        ):
             target = self.site / public_id
             target.mkdir(exist_ok=True)
             source = ROOT / "reports/algorithm-results" / source_id
@@ -89,8 +108,11 @@ class GalleryTests(unittest.TestCase):
         self.assertNotEqual(self.app01_report_id, self.app01_source_id)
         self.assertTrue((self.site / self.app01_report_id / "records.json").is_file())
         self.assertFalse((self.site / self.app01_source_id).exists())
-        by_source = {entry["source_report_id"]: entry["report_id"]
-                     for entry in catalog["reports"] if "source_report_id" in entry}
+        by_source = {
+            entry["source_report_id"]: entry["report_id"]
+            for entry in catalog["reports"]
+            if "source_report_id" in entry
+        }
         by_kind = {}
         for entry in catalog["reports"]:
             by_kind.setdefault(entry["report_kind"], entry["report_id"])
@@ -118,7 +140,9 @@ class GalleryTests(unittest.TestCase):
         for case in gallery.visual_illustrations.CASES:
             if "report_kind" not in case:
                 continue
-            target = self.site / by_kind[case["report_kind"]]
+            report_id = by_kind[case["report_kind"]]
+            assert isinstance(report_id, str), f"missing report ID for {case['report_kind']}"
+            target = self.site / report_id
             target.mkdir(exist_ok=True)
             if not (target / "records.json").exists():
                 (target / "records.json").write_text("{}", encoding="utf-8")
@@ -127,16 +151,23 @@ class GalleryTests(unittest.TestCase):
         for report in catalog["reports"]:
             target = self.site / report["report_id"]
             target.mkdir(exist_ok=True)
-            raw_name = ("raw/summary.json" if report["report_kind"] == "btulshor-source-faithful" else
-                        "results.jsonl" if report["report_kind"] == "issue6-b07-reference" else
-                        "manifest-correction.json" if report["report_kind"] == "issue6-b06-manifest-correction" else
-                        "records.json")
+            raw_name = (
+                "raw/summary.json"
+                if report["report_kind"] == "btulshor-source-faithful"
+                else "results.jsonl"
+                if report["report_kind"] == "issue6-b07-reference"
+                else "manifest-correction.json"
+                if report["report_kind"] == "issue6-b06-manifest-correction"
+                else "records.json"
+            )
             (target / raw_name).parent.mkdir(parents=True, exist_ok=True)
             if not (target / raw_name).exists():
                 (target / raw_name).write_text("{}", encoding="utf-8")
             if not (target / "index.html").exists():
                 (target / "index.html").write_text("<html>report fixture</html>", encoding="utf-8")
-        coverage_source = json.loads((ROOT / "scripts/reports/algorithm_visual_coverage.json").read_text())
+        coverage_source = json.loads(
+            (ROOT / "scripts/reports/algorithm_visual_coverage.json").read_text()
+        )
         for family in coverage_source["families"]:
             for route in family["report_routes"]:
                 target = self.site / route
@@ -144,35 +175,58 @@ class GalleryTests(unittest.TestCase):
                 if not (target / "records.json").exists():
                     (target / "records.json").write_text("{}", encoding="utf-8")
                 if not (target / "index.html").exists():
-                    (target / "index.html").write_text("<html>report fixture</html>", encoding="utf-8")
+                    (target / "index.html").write_text(
+                        "<html>report fixture</html>", encoding="utf-8"
+                    )
 
     def test_source_index_example_has_exact_pages_producer_after_finalizer(self):
         import subprocess
+
         with tempfile.TemporaryDirectory() as temporary:
-            site=Path(temporary)
-            (site/"examples").mkdir()
-            (site/"index.html").write_text(
-                '<!doctype html><html><body><h1>Learning</h1><a href="examples/index.html">Examples</a></body></html>')
-            (site/"examples/index.html").write_text(
+            site = Path(temporary)
+            (site / "examples").mkdir()
+            (site / "index.html").write_text(
+                '<!doctype html><html><body><h1>Learning</h1><a href="examples/index.html">Examples</a></body></html>'
+            )
+            (site / "examples/index.html").write_text(
                 '<!doctype html><html><body><h1>Visual examples</h1><article id="source-index-geometry-2d">'
                 '<a href="source-index-geometry-2d.html">Inputs and reproduction</a>'
                 '<a href="source-index-geometry-2d-records.json">Raw record</a>'
                 '<img src="source-index-geometry-2d.svg" alt="2D source-index hull example"></article>'
-                '<section id="algorithm-coverage"></section></body></html>')
-            assets=ROOT/"docs/examples"
-            for name in ("source-index-geometry-2d.html","source-index-geometry-2d.svg",
-                         "source-index-geometry-2d-records.json"):
-                shutil.copyfile(assets/name,site/"examples"/name)
-            completed=subprocess.run([sys.executable,str(ROOT/"scripts/reports/pages_route_retirement.py"),
-                "--site",str(site),"--source-commit","source-index-gallery-test"],
-                check=False,capture_output=True,text=True)
-            self.assertEqual(completed.returncode,0,completed.stderr)
-            self.assertIn('"html_route_count"',completed.stdout)
-            routes=json.loads((site/"pages-route-inventory.json").read_text(encoding="utf-8"))
-            owner=routes["html_routes"]["examples/source-index-geometry-2d.html"]["producer"]
-            self.assertEqual(owner["owner_status"],"gallery-aggregator")
-            self.assertEqual(owner["files"],["scripts/reports/visual_examples.py",
-                "docs/examples/source-index-geometry-2d.html"])
+                '<section id="algorithm-coverage"></section></body></html>'
+            )
+            assets = ROOT / "docs/examples"
+            for name in (
+                "source-index-geometry-2d.html",
+                "source-index-geometry-2d.svg",
+                "source-index-geometry-2d-records.json",
+            ):
+                shutil.copyfile(assets / name, site / "examples" / name)
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts/reports/pages_route_retirement.py"),
+                    "--site",
+                    str(site),
+                    "--source-commit",
+                    "source-index-gallery-test",
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            self.assertIn('"html_route_count"', completed.stdout)
+            routes = json.loads((site / "pages-route-inventory.json").read_text(encoding="utf-8"))
+            owner = routes["html_routes"]["examples/source-index-geometry-2d.html"]["producer"]
+            self.assertEqual(owner["owner_status"], "gallery-aggregator")
+            self.assertEqual(
+                owner["files"],
+                [
+                    "scripts/reports/visual_examples.py",
+                    "docs/examples/source-index-geometry-2d.html",
+                ],
+            )
 
     def test_generated_example_code_regions_are_keyboard_focusable(self):
         page = gallery.section(self.examples[0], 1)
@@ -181,25 +235,42 @@ class GalleryTests(unittest.TestCase):
         self.assertGreaterEqual(page.count('pre tabindex="0"'), 2)
         self.assertNotIn("<pre><code>", page)
         future_block = gallery.site_design.focusable_code_blocks(
-            '<pre tabindex="-1"><code>future code</code></pre>')
-        self.assertIn('<pre tabindex="0" role="region" aria-label="Scrollable code example">', future_block)
+            '<pre tabindex="-1"><code>future code</code></pre>'
+        )
+        self.assertIn(
+            '<pre tabindex="0" role="region" aria-label="Scrollable code example">', future_block
+        )
 
     def test_point_input_matrix_and_compact_json_preserve_the_seven_source_rows(self):
         example = next(item for item in self.examples if item["slug"] == "square_duplicates")
         page = gallery.section(example, 1)
         self.assertIn("Data · 7 source points · copyable JSON", page)
         self.assertIn("Matrix columns, in order: source points", page)
-        self.assertIn('<span class="math-matrix" role="math" aria-label="Point matrix V, 2 coordinate rows by 7 source-point columns:', page)
+        self.assertIn(
+            '<span class="math-matrix" role="math" aria-label="Point matrix V, 2 coordinate rows by 7 source-point columns:',
+            page,
+        )
         self.assertIn("<var>V</var> = [<var>v</var><sub>0</sub> … <var>v</var><sub>6</sub>]", page)
-        self.assertIn('Matrix columns, in order: source points v<sub>0</sub>, v<sub>1</sub>, v<sub>2</sub>, v<sub>3</sub>, v<sub>4</sub>, v<sub>5</sub>, v<sub>6</sub>; rows: x<sub>1</sub>, x<sub>2</sub>. Duplicate source points remain separate.', page)
-        self.assertIn('<mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0.5</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr>', page)
-        self.assertIn('<mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>0.5</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr>', page)
+        self.assertIn(
+            "Matrix columns, in order: source points v<sub>0</sub>, v<sub>1</sub>, v<sub>2</sub>, v<sub>3</sub>, v<sub>4</sub>, v<sub>5</sub>, v<sub>6</sub>; rows: x<sub>1</sub>, x<sub>2</sub>. Duplicate source points remain separate.",
+            page,
+        )
+        self.assertIn(
+            "<mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0.5</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr>",
+            page,
+        )
+        self.assertIn(
+            "<mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>0.5</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr>",
+            page,
+        )
         self.assertNotIn("<th", page)
         self.assertEqual(page.count("<mtr>"), 2)
         self.assertNotIn('scope="col">Role', page)
         self.assertNotIn("<details open", page)
-        code_blocks = [html.unescape(block) for block in re.findall(
-            r'<pre[^>]*><code>(.*?)</code></pre>', page, flags=re.DOTALL)]
+        code_blocks = [
+            html.unescape(block)
+            for block in re.findall(r"<pre[^>]*><code>(.*?)</code></pre>", page, flags=re.DOTALL)
+        ]
         displayed_json = code_blocks[0]
         self.assertEqual(json.loads(displayed_json), example["inputs"])
         self.assertIn('"points": [\n    [0, 0],\n    [1, 0],\n    [1, 1],', displayed_json)
@@ -218,57 +289,98 @@ class GalleryTests(unittest.TestCase):
                 page = gallery.section(example, 1)
                 self.assertIn("coordinates ", page)
                 spoken_coordinates = rows.replace("<sub>", "").replace("</sub>", "")
-                self.assertIn("displayed to six significant digits; coordinates " + spoken_coordinates, page)
-                self.assertIn("coordinates are rows: " + rows + ". Repeated coordinates remain in place.", page)
-                blocks = [html.unescape(block) for block in re.findall(
-                    r'<pre[^>]*><code>(.*?)</code></pre>', page, flags=re.DOTALL)]
+                self.assertIn(
+                    "displayed to six significant digits; coordinates " + spoken_coordinates, page
+                )
+                self.assertIn(
+                    "coordinates are rows: " + rows + ". Repeated coordinates remain in place.",
+                    page,
+                )
+                blocks = [
+                    html.unescape(block)
+                    for block in re.findall(
+                        r"<pre[^>]*><code>(.*?)</code></pre>", page, flags=re.DOTALL
+                    )
+                ]
                 self.assertEqual(json.loads(blocks[0]), example["points"])
 
         intersection = next(item for item in self.examples if item["slug"] == "crossing_octagon")
         intersection_page = gallery.section(intersection, 3)
-        self.assertIn("Data · 8 intersection vertices · output matrix and copyable JSON", intersection_page)
-        self.assertIn("<var>P</var> = {<var>x</var> ∈ ℝ<sup>2</sup> : <var>A</var><sub>L</sub><var>x</var> ≤ <var>b</var><sub>L</sub>}", intersection_page)
-        self.assertIn("<var>Q</var> = {<var>x</var> ∈ ℝ<sup>2</sup> : <var>A</var><sub>R</sub><var>x</var> ≤ <var>b</var><sub>R</sub>}", intersection_page)
+        self.assertIn(
+            "Data · 8 intersection vertices · output matrix and copyable JSON", intersection_page
+        )
+        self.assertIn(
+            "<var>P</var> = {<var>x</var> ∈ ℝ<sup>2</sup> : <var>A</var><sub>L</sub><var>x</var> ≤ <var>b</var><sub>L</sub>}",
+            intersection_page,
+        )
+        self.assertIn(
+            "<var>Q</var> = {<var>x</var> ∈ ℝ<sup>2</sup> : <var>A</var><sub>R</sub><var>x</var> ≤ <var>b</var><sub>R</sub>}",
+            intersection_page,
+        )
         self.assertIn('aria-label="Matrix A_L, 4 rows by 2 columns:', intersection_page)
         self.assertIn('aria-label="Column vector b_L, 4 entries:', intersection_page)
         self.assertIn('aria-label="Matrix A_R, 4 rows by 2 columns:', intersection_page)
         self.assertIn('aria-label="Column vector b_R, 4 entries:', intersection_page)
-        self.assertIn('<mtr><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd></mtr>', intersection_page)
-        self.assertIn('<mtr><mtd><mn>1</mn></mtd></mtr>', intersection_page)
+        self.assertIn("<mtr><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd></mtr>", intersection_page)
+        self.assertIn("<mtr><mtd><mn>1</mn></mtd></mtr>", intersection_page)
         self.assertNotIn('<th scope="col">row</th>', intersection_page)
         self.assertEqual(intersection_page.count('<span class="math-matrix" role="math"'), 5)
-        self.assertEqual(intersection_page.count('<mtr>'), 18)
+        self.assertEqual(intersection_page.count("<mtr>"), 18)
         output_matrix = re.search(
             r'<span class="math-matrix" role="math" aria-label="(Output coordinate matrix W, 2 coordinate rows by 8 stored-output columns, displayed to six significant digits; coordinates x1, x2:[^"]*)">.*?<math display="inline" aria-hidden="true">(.*?)</math>',
-            intersection_page, re.DOTALL)
-        self.assertIsNotNone(output_matrix)
+            intersection_page,
+            re.DOTALL,
+        )
+        assert output_matrix is not None, "the intersection page must expose its output matrix"
         self.assertIn("<var>W</var> ≈", intersection_page)
-        self.assertIn("Displayed matrix values are rounded to 6 significant digits (≈);", intersection_page)
-        expected_label = ("Output coordinate matrix W, 2 coordinate rows by 8 stored-output columns, "
-                          "displayed to six significant digits; coordinates x1, x2: "
-                          + "; ".join(", ".join(format(value, ".6g") for value in row)
-                                      for row in [[point[coordinate] for point in intersection["points"]]
-                                                  for coordinate in range(2)]))
+        self.assertIn(
+            "Displayed matrix values are rounded to 6 significant digits (≈);", intersection_page
+        )
+        expected_label = (
+            "Output coordinate matrix W, 2 coordinate rows by 8 stored-output columns, "
+            "displayed to six significant digits; coordinates x1, x2: "
+            + "; ".join(
+                ", ".join(format(value, ".6g") for value in row)
+                for row in [
+                    [point[coordinate] for point in intersection["points"]]
+                    for coordinate in range(2)
+                ]
+            )
+        )
         self.assertEqual(html.unescape(output_matrix.group(1)), expected_label)
-        matrix_rows = re.findall(r'<mtr>(.*?)</mtr>', output_matrix.group(2))
+        matrix_rows = re.findall(r"<mtr>(.*?)</mtr>", output_matrix.group(2))
         self.assertEqual(len(matrix_rows), 2)
         for coordinate, row in enumerate(matrix_rows):
-            cells = [html.unescape(value) for value in re.findall(r'<mn>(.*?)</mn>', row)]
-            self.assertEqual(cells, [format(point[coordinate], ".6g")
-                                     for point in intersection["points"]])
-            self.assertNotEqual(cells, [json.dumps(point[coordinate], allow_nan=False)
-                                        for point in intersection["points"]])
+            cells = [html.unescape(value) for value in re.findall(r"<mn>(.*?)</mn>", row)]
+            self.assertEqual(
+                cells, [format(point[coordinate], ".6g") for point in intersection["points"]]
+            )
+            self.assertNotEqual(
+                cells,
+                [
+                    json.dumps(point[coordinate], allow_nan=False)
+                    for point in intersection["points"]
+                ],
+            )
         self.assertIn("Matrix columns are output rows in stored order:", intersection_page)
         self.assertIn("Repeated coordinates remain in place.", intersection_page)
-        self.assertIn('<details><summary>Copy JSON for reproduction</summary>', intersection_page)
+        self.assertIn("<details><summary>Copy JSON for reproduction</summary>", intersection_page)
         self.assertNotIn("<details open", intersection_page)
-        intersection_blocks = [html.unescape(block) for block in re.findall(
-            r'<pre[^>]*><code>(.*?)</code></pre>', intersection_page, flags=re.DOTALL)]
+        intersection_blocks = [
+            html.unescape(block)
+            for block in re.findall(
+                r"<pre[^>]*><code>(.*?)</code></pre>", intersection_page, flags=re.DOTALL
+            )
+        ]
         self.assertEqual(json.loads(intersection_blocks[0]), intersection["points"])
         coordinate_lines = intersection_blocks[0].splitlines()[1:-1]
         self.assertEqual(len(coordinate_lines), 8)
-        self.assertTrue(all(line.strip().startswith("[") and line.strip().endswith(("],", "]"))
-                            for line in coordinate_lines))
+        self.assertTrue(
+            all(
+                line.strip().startswith("[") and line.strip().endswith(("],", "]"))
+                for line in coordinate_lines
+            )
+        )
         self.assertEqual(json.loads(intersection_blocks[1]), intersection["inputs"])
         self.assertIn('"left_A": [\n    [1, 0],\n    [-1, 0],', intersection_blocks[1])
         self.assertIn('"left_b": [1, 1, 1, 1]', intersection_blocks[1])
@@ -277,8 +389,12 @@ class GalleryTests(unittest.TestCase):
         long_vector = list(range(40))
         wrapped_vector = gallery.site_design.compact_json(long_vector, width=32)
         self.assertEqual(json.loads(wrapped_vector), long_vector)
-        self.assertTrue(all(len(line.strip().strip(",").split(", ")) > 1
-                            for line in wrapped_vector.splitlines()[1:-1]))
+        self.assertTrue(
+            all(
+                len(line.strip().strip(",").split(", ")) > 1
+                for line in wrapped_vector.splitlines()[1:-1]
+            )
+        )
 
     def test_saved_outputs_match_literal_geometry(self):
         cases = {example["slug"]: example for example in self.examples}
@@ -286,14 +402,29 @@ class GalleryTests(unittest.TestCase):
         line = cases["collinear_endpoints"]
         intersection = cases["crossing_octagon"]
         hybrid = cases["two_stage_scalar_family"]
-        self.assertEqual(square["points"], [[0,0],[1,0],[1,1],[0,1],[.5,.5],[0,0],[1,0]])
-        self.assertEqual(square["indices"], [0,1,2,3])
-        self.assertEqual(line["indices"], [1,3])
+        self.assertEqual(
+            square["points"], [[0, 0], [1, 0], [1, 1], [0, 1], [0.5, 0.5], [0, 0], [1, 0]]
+        )
+        self.assertEqual(square["indices"], [0, 1, 2, 3])
+        self.assertEqual(line["indices"], [1, 3])
         self.assertEqual(len(intersection["vertices"]), 8)
-        expected = {(1,.5),(1,-.5),(-1,.5),(-1,-.5),(.5,1),(-.5,1),(.5,-1),(-.5,-1)}
-        self.assertEqual({tuple(round(x, 7) for x in p) for p in intersection["vertices"]}, expected)
-        self.assertEqual(intersection["vertices"][0], [-1.0000000000000002, -.5000000000000001])
-        self.assertEqual(hybrid["analytic"]["feasible_projection"], "(u[0], x[2]) = (s, s), 0<=s<=0.5")
+        expected = {
+            (1, 0.5),
+            (1, -0.5),
+            (-1, 0.5),
+            (-1, -0.5),
+            (0.5, 1),
+            (-0.5, 1),
+            (0.5, -1),
+            (-0.5, -1),
+        }
+        self.assertEqual(
+            {tuple(round(x, 7) for x in p) for p in intersection["vertices"]}, expected
+        )
+        self.assertEqual(intersection["vertices"][0], [-1.0000000000000002, -0.5000000000000001])
+        self.assertEqual(
+            hybrid["analytic"]["feasible_projection"], "(u[0], x[2]) = (s, s), 0<=s<=0.5"
+        )
         self.assertEqual(hybrid["analytic"]["complete_minimizer"], "all joint coordinates are zero")
         self.assertEqual(hybrid["inputs"]["horizon"], 2)
         loaded = gallery.load_examples(self.catalog)
@@ -301,45 +432,72 @@ class GalleryTests(unittest.TestCase):
         two_parameter = loaded_by_id["two_parameter_scalar_polytopes"]
         projected = loaded_by_id["one_step_projected_hybrid_reachability"]
         self.assertEqual(two_parameter["kind"], "two_parameter")
-        self.assertEqual(two_parameter["report_id"],
-                         "ext07-hybrid-two-parameter-8ad871b5ea29fc7b")
-        self.assertEqual([path["feasible_polygon_in_control_coordinates"]
-                          for path in two_parameter["polygons"]],
-                         [[[0, 0], [0.5, 0], [0.5, 0.5], [0, 1]],
-                          [[0, 0], [1, 0], [0, 1]]])
+        self.assertEqual(two_parameter["report_id"], "ext07-hybrid-two-parameter-8ad871b5ea29fc7b")
+        self.assertEqual(
+            [path["feasible_polygon_in_control_coordinates"] for path in two_parameter["polygons"]],
+            [[[0, 0], [0.5, 0], [0.5, 0.5], [0, 1]], [[0, 0], [1, 0], [0, 1]]],
+        )
         self.assertEqual(two_parameter["analytic"]["minimum_objective"], 0)
-        self.assertEqual(two_parameter["analytic"]["complete_optimal_family"],
-                         "every point in each labelled feasible polygon; both paths are retained")
+        self.assertEqual(
+            two_parameter["analytic"]["complete_optimal_family"],
+            "every point in each labelled feasible polygon; both paths are retained",
+        )
         self.assertEqual(projected["analytic"]["projected_terminal_set"], "0<=x[1]<=0.5")
-        self.assertEqual(projected["analytic"]["feasible_projection"],
-                         "(u[0], x[1]) = (s, s), 0<=s<=0.5")
-        self.assertEqual(projected["inputs"]["modes"][0]["flow_by_stage"],
-                         [{"A": 1, "B": 1, "offset": 0}])
-        self.assertEqual(projected["inputs"]["edges"][0]["guards_by_stage"],
-                         [{"interval": [0, 0.5]}])
-        self.assertEqual(projected["inputs"]["terminal_objectives"][0]["linear"],
-                         {"coefficients": [1], "constant": 0})
+        self.assertEqual(
+            projected["analytic"]["feasible_projection"], "(u[0], x[1]) = (s, s), 0<=s<=0.5"
+        )
+        self.assertEqual(
+            projected["inputs"]["modes"][0]["flow_by_stage"], [{"A": 1, "B": 1, "offset": 0}]
+        )
+        self.assertEqual(
+            projected["inputs"]["edges"][0]["guards_by_stage"], [{"interval": [0, 0.5]}]
+        )
+        self.assertEqual(
+            projected["inputs"]["terminal_objectives"][0]["linear"],
+            {"coefficients": [1], "constant": 0},
+        )
 
     def test_case_owners_keep_case_evidence_and_narrative_together(self):
-        geometry = {case["slug"]: case for case in gallery.geometry_examples.load_examples(self.catalog)}
-        hybrid = {case["slug"]: case for case in gallery.hybrid_examples.load_examples(self.catalog)}
-        self.assertEqual(set(geometry), {"square_duplicates", "collinear_endpoints", "crossing_octagon"})
-        self.assertEqual(set(hybrid), {"two_stage_scalar_family", "two_parameter_scalar_polytopes",
-                                       "one_step_projected_hybrid_reachability"})
+        geometry = {
+            case["slug"]: case for case in gallery.geometry_examples.load_examples(self.catalog)
+        }
+        hybrid = {
+            case["slug"]: case for case in gallery.hybrid_examples.load_examples(self.catalog)
+        }
+        self.assertEqual(
+            set(geometry), {"square_duplicates", "collinear_endpoints", "crossing_octagon"}
+        )
+        self.assertEqual(
+            set(hybrid),
+            {
+                "two_stage_scalar_family",
+                "two_parameter_scalar_polytopes",
+                "one_step_projected_hybrid_reachability",
+            },
+        )
         geometry_html = gallery.section(geometry["crossing_octagon"], 1)
         hybrid_html = gallery.section(hybrid["two_parameter_scalar_polytopes"], 2)
         self.assertIn("not a validated exact enclosure", geometry_html)
         self.assertIn("constant-zero objective", hybrid_html)
         self.assertIn("two_parameter_scalar_polytopes.json", hybrid_html)
+
     def test_control_witness_companions_project_frozen_relations(self):
         routes = control_witness_companions.published_routes(self.catalog)
-        originals = {report_id: hashlib.sha256((self.site / routes[report_id] / "records.json").read_bytes()).hexdigest()
-                     for report_id, *_ in control_witness_companions.PROJECTIONS}
+        originals = {
+            report_id: hashlib.sha256(
+                (self.site / routes[report_id] / "records.json").read_bytes()
+            ).hexdigest()
+            for report_id, *_ in control_witness_companions.PROJECTIONS
+        }
         result = control_witness_companions.build(self.site, self.catalog)
         mathematical_page = result.files["control-witness-v1.html"].decode()
-        preservation = json.loads((ROOT / "reports/published-route-preservation/manifest.json").read_text())
-        self.assertEqual(hashlib.sha256(result.files["control-witness-v1.html"]).hexdigest(),
-                         preservation["mutable_copy_reviewed_sha256"]["examples/control-witness-v1.html"])
+        preservation = json.loads(
+            (ROOT / "reports/published-route-preservation/manifest.json").read_text()
+        )
+        self.assertEqual(
+            hashlib.sha256(result.files["control-witness-v1.html"]).hexdigest(),
+            preservation["mutable_copy_reviewed_sha256"]["examples/control-witness-v1.html"],
+        )
         self.assertNotIn("saved projection vertex</td>", mathematical_page)
         self.assertNotIn("[[-1, -2]]", mathematical_page)
         self.assertIn("Feedback matrix K, 1 by 2", mathematical_page)
@@ -348,22 +506,54 @@ class GalleryTests(unittest.TestCase):
         for _, _, _, points in control_witness_companions.PROJECTIONS:
             columns = [[point[axis] for point in points] for axis in range(2)]
             label = f"Projected vertices, 2 by {len(points)}, columns in saved order"
-            self.assertIn(control_witness_companions.mathematical_notation.matrix_html(columns, label),
-                          mathematical_page)
+            self.assertIn(
+                control_witness_companions.mathematical_notation.matrix_html(columns, label),
+                mathematical_page,
+            )
         self.assertEqual(len(result.gallery_entries), 6)
         gallery_anchors = {entry["anchor"] for entry in result.gallery_entries}
-        self.assertEqual(gallery_anchors, {"control-witness-companions", "control-witness-timings",
-                                           "ts01-strategy-ab", "b04-native-smoke",
-                                           "b04-repeated-benchmark", "exp02-paired-family"})
-        self.assertTrue(all(set(disposition.companion_ids) <= gallery_anchors
-                            for disposition in control_witness_companions.SOURCE_DISPOSITIONS))
-        self.assertEqual(len([name for name in result.files if name.startswith("control-witness/strategy-") and name.endswith(".svg")]), 10)
-        strategy_timing = [name for name in result.files
-                            if name.startswith("control-witness/strategy-") and "-timing.svg" in name]
+        self.assertEqual(
+            gallery_anchors,
+            {
+                "control-witness-companions",
+                "control-witness-timings",
+                "ts01-strategy-ab",
+                "b04-native-smoke",
+                "b04-repeated-benchmark",
+                "exp02-paired-family",
+            },
+        )
+        self.assertTrue(
+            all(
+                set(disposition.companion_ids) <= gallery_anchors
+                for disposition in control_witness_companions.SOURCE_DISPOSITIONS
+            )
+        )
+        self.assertEqual(
+            len(
+                [
+                    name
+                    for name in result.files
+                    if name.startswith("control-witness/strategy-") and name.endswith(".svg")
+                ]
+            ),
+            10,
+        )
+        strategy_timing = [
+            name
+            for name in result.files
+            if name.startswith("control-witness/strategy-") and "-timing.svg" in name
+        ]
         self.assertEqual(len(strategy_timing), 5)
         for report_id, *_ in control_witness_companions.STRATEGY_TIMINGS:
             task = next(f"ts0{n}" for n in range(1, 4) if f"-ts0{n}-" in report_id)
-            stem = "control-witness/" + ("strategy-a" if "syn03" in report_id else "strategy-b") + "-" + task + "-timing"
+            stem = (
+                "control-witness/"
+                + ("strategy-a" if "syn03" in report_id else "strategy-b")
+                + "-"
+                + task
+                + "-timing"
+            )
             timing_record = json.loads(result.files[stem + "-evidence.json"])
             self.assertEqual(timing_record["report_id"], report_id)
             self.assertEqual(len(timing_record["rows"]), 7)
@@ -385,27 +575,50 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("Complete analytic optimal family", exp02_labels)
         exp02 = json.loads(result.files["control-witness/exp02-ts03-control-family-evidence.json"])
         self.assertEqual(exp02["displayed_sets"]["optimal_family"], "u1=1, 0<=u0<=1")
-        self.assertEqual(exp02["assurance"], "exact algebraic fixture derivation; saved algorithm family checks are numerical")
-        self.assertEqual(json.loads(result.files["control-witness/exp02-ts02-control-family-evidence.json"])
-                         ["displayed_sets"]["optimal_family"], "entire feasible square")
+        self.assertEqual(
+            exp02["assurance"],
+            "exact algebraic fixture derivation; saved algorithm family checks are numerical",
+        )
+        self.assertEqual(
+            json.loads(result.files["control-witness/exp02-ts02-control-family-evidence.json"])[
+                "displayed_sets"
+            ]["optimal_family"],
+            "entire feasible square",
+        )
         repeated_b04 = json.loads(result.files["control-witness/b04-repeated-evidence.json"])
-        self.assertEqual(repeated_b04["coordinate_pairs"], {"oxidizer": ["x1", "x2"], "fuel": ["x3", "x4"]})
+        self.assertEqual(
+            repeated_b04["coordinate_pairs"], {"oxidizer": ["x1", "x2"], "fuel": ["x3", "x4"]}
+        )
         self.assertIn("inconclusive", repeated_b04["evidence_status"])
-        comparison_raw = (ROOT / "docs/research/evidence/mpc01-external-qps-20261026-r3/comparison-records.jsonl").read_bytes()
-        self.assertEqual(repeated_b04["comparison_records_sha256"], hashlib.sha256(comparison_raw).hexdigest())
-        case_raw = (ROOT / "docs/research/evidence/b04-reference-v1/canonical-case.json").read_bytes()
+        comparison_raw = (
+            ROOT / "docs/research/evidence/mpc01-external-qps-20261026-r3/comparison-records.jsonl"
+        ).read_bytes()
+        self.assertEqual(
+            repeated_b04["comparison_records_sha256"], hashlib.sha256(comparison_raw).hexdigest()
+        )
+        case_raw = (
+            ROOT / "docs/research/evidence/b04-reference-v1/canonical-case.json"
+        ).read_bytes()
         case_hash = hashlib.sha256(case_raw).hexdigest()
         self.assertEqual(repeated_b04["case_sha256"], case_hash)
         self.assertEqual(repeated_b04["problem_id"], f"csl.problem.v1.sha256:{case_hash}")
         self.assertEqual(repeated_b04["input_manifest_hash"], case_hash)
         self.assertEqual(len(repeated_b04["selection"]), 2)
         self.assertTrue(all(0 <= item["repetition"] < 5 for item in repeated_b04["selection"]))
-        for asset in ("b04-repeated-oxidizer.svg", "b04-repeated-fuel.svg",
-                      "exp02-ts02-control-family.svg", "exp02-ts03-control-family.svg"):
+        for asset in (
+            "b04-repeated-oxidizer.svg",
+            "b04-repeated-fuel.svg",
+            "exp02-ts02-control-family.svg",
+            "exp02-ts03-control-family.svg",
+        ):
             svg = ET.fromstring(result.files["control-witness/" + asset])
             self.assertEqual(svg.attrib["role"], "img")
             self.assertTrue(any(node.tag.endswith("desc") for node in svg))
-            self.assertTrue(result.files["control-witness/" + asset.replace(".svg", ".png")].startswith(b"\x89PNG\r\n\x1a\n"))
+            self.assertTrue(
+                result.files["control-witness/" + asset.replace(".svg", ".png")].startswith(
+                    b"\x89PNG\r\n\x1a\n"
+                )
+            )
         examples_dir = self.site / "examples"
         examples_dir.mkdir(exist_ok=True)
         (examples_dir / "index.html").write_text("<html>gallery fixture</html>", encoding="utf-8")
@@ -425,38 +638,64 @@ class GalleryTests(unittest.TestCase):
                 target = (examples_dir / parts.path).resolve()
                 self.assertTrue(target.is_file(), link)
         for report_id, digest in originals.items():
-            self.assertEqual(hashlib.sha256((self.site / routes[report_id] / "records.json").read_bytes()).hexdigest(), digest)
+            self.assertEqual(
+                hashlib.sha256(
+                    (self.site / routes[report_id] / "records.json").read_bytes()
+                ).hexdigest(),
+                digest,
+            )
         evidence = json.loads(result.files["control-witness/strategy-b-ts03-evidence.json"])
-        self.assertEqual(evidence["record_sha256"], originals["syn04-strategy-b-ts03-20261022-2c0c9210"])
-        self.assertEqual(evidence["published_report_id"], routes["syn04-strategy-b-ts03-20261022-2c0c9210"])
+        self.assertEqual(
+            evidence["record_sha256"], originals["syn04-strategy-b-ts03-20261022-2c0c9210"]
+        )
+        self.assertEqual(
+            evidence["published_report_id"], routes["syn04-strategy-b-ts03-20261022-2c0c9210"]
+        )
         self.assertEqual(evidence["projection"]["axes"], ["u0", "u1"])
         self.assertEqual(evidence["projection"]["vertices"], [[0, 1], [1, 1]])
         svg = ET.fromstring(result.files["control-witness/strategy-b-ts03.svg"])
         self.assertEqual(svg.attrib["role"], "img")
         self.assertTrue(any(node.tag.endswith("title") for node in svg))
         self.assertTrue(any(node.tag.endswith("desc") for node in svg))
-        self.assertTrue(result.files["control-witness/strategy-b-ts03.png"].startswith(b"\x89PNG\r\n\x1a\n"))
+        self.assertTrue(
+            result.files["control-witness/strategy-b-ts03.png"].startswith(b"\x89PNG\r\n\x1a\n")
+        )
         mpc06_evidence = json.loads(result.files["control-witness/mpc06-tube-evidence.json"])
         self.assertEqual(mpc06_evidence["published_route"], self.mpc06_route)
-        self.assertEqual(mpc06_evidence["claim_scope"],
-                         "presentation of frozen saved geometry; no solver or geometry query")
+        self.assertEqual(
+            mpc06_evidence["claim_scope"],
+            "presentation of frozen saved geometry; no solver or geometry query",
+        )
         self.assertEqual(mpc06_evidence["profile"]["state_dimension"], 2)
         self.assertEqual(mpc06_evidence["profile"]["horizon_steps"], 3)
         self.assertEqual(mpc06_evidence["profile"]["feedback_law"], "u=v+K(x-z)")
-        self.assertEqual(mpc06_evidence["plot_data"]["sets"]["state_box_X"]["bounds"],
-                         [[-1, 1], [-1, 1]])
-        self.assertEqual(mpc06_evidence["plot_data"]["sets"]["error_tube_Z"]["vertices"],
-                         [[.125, 0], [-.125, .25], [-.125, 0], [.125, -.25]])
-        self.assertIn(control_witness_companions.mathematical_notation.matrix_html(
-            mpc06_evidence["profile"]["feedback_gain"], "Feedback matrix K, 1 by 2"),
-            mathematical_page)
-        self.assertIn(control_witness_companions.mathematical_notation.matrix_html(
-            [[.125, -.125, -.125, .125], [0.0, .25, 0.0, -.25]],
-            "V_Z, 2 by 4, vertices in columns"), mathematical_page)
-        self.assertIn('State constraint X: [-1.0, 1.0] times [-1.0, 1.0]', mathematical_page)
-        self.assertIn('Tightened state set X ⊖ Z: [-0.875, 0.875] times [-0.75, 0.75]',
-                      mathematical_page)
-        self.assertTrue(result.files["control-witness/mpc06-tube.png"].startswith(b"\x89PNG\r\n\x1a\n"))
+        self.assertEqual(
+            mpc06_evidence["plot_data"]["sets"]["state_box_X"]["bounds"], [[-1, 1], [-1, 1]]
+        )
+        self.assertEqual(
+            mpc06_evidence["plot_data"]["sets"]["error_tube_Z"]["vertices"],
+            [[0.125, 0], [-0.125, 0.25], [-0.125, 0], [0.125, -0.25]],
+        )
+        self.assertIn(
+            control_witness_companions.mathematical_notation.matrix_html(
+                mpc06_evidence["profile"]["feedback_gain"], "Feedback matrix K, 1 by 2"
+            ),
+            mathematical_page,
+        )
+        self.assertIn(
+            control_witness_companions.mathematical_notation.matrix_html(
+                [[0.125, -0.125, -0.125, 0.125], [0.0, 0.25, 0.0, -0.25]],
+                "V_Z, 2 by 4, vertices in columns",
+            ),
+            mathematical_page,
+        )
+        self.assertIn("State constraint X: [-1.0, 1.0] times [-1.0, 1.0]", mathematical_page)
+        self.assertIn(
+            "Tightened state set X ⊖ Z: [-0.875, 0.875] times [-0.75, 0.75]", mathematical_page
+        )
+        self.assertTrue(
+            result.files["control-witness/mpc06-tube.png"].startswith(b"\x89PNG\r\n\x1a\n")
+        )
         mpc06_svg = ET.fromstring(result.files["control-witness/mpc06-tube.svg"])
         self.assertEqual(mpc06_svg.attrib["role"], "img")
         self.assertTrue(any(node.tag.endswith("title") for node in mpc06_svg))
@@ -466,51 +705,90 @@ class GalleryTests(unittest.TestCase):
         environment = (ts01_source / "strategy-ab-ts01-environment.json").read_bytes()
         scenario = (ROOT / "examples/scenarios/two-stage-integrator.json").read_bytes()
         self.assertEqual(result.files["control-witness/ts01-strategy-ab-events.jsonl"], events)
-        self.assertEqual(result.files["control-witness/ts01-strategy-ab-environment.json"], environment)
+        self.assertEqual(
+            result.files["control-witness/ts01-strategy-ab-environment.json"], environment
+        )
         self.assertEqual(result.files["control-witness/ts01-strategy-ab-scenario.json"], scenario)
         ts01_evidence = json.loads(result.files["control-witness/ts01-strategy-ab-evidence.json"])
         self.assertEqual(ts01_evidence["events_sha256"], hashlib.sha256(events).hexdigest())
-        self.assertEqual(ts01_evidence["environment_sha256"], hashlib.sha256(environment).hexdigest())
+        self.assertEqual(
+            ts01_evidence["environment_sha256"], hashlib.sha256(environment).hexdigest()
+        )
         self.assertEqual(ts01_evidence["scenario_sha256"], hashlib.sha256(scenario).hexdigest())
         self.assertEqual(ts01_evidence["plot_data"]["optimal_family"]["relation"], "u₀ + u₁ = 1")
-        self.assertEqual(ts01_evidence["plot_data"]["strategies"]["csl.synthesis.reach-back"],
-                         [[0, 1], [1, 0]])
-        self.assertEqual(ts01_evidence["plot_data"]["strategies"]["csl.synthesis.strategy-b"],
-                         [[0, 1], [1, 0]])
-        self.assertEqual(ts01_evidence["plot_data"]["axes"],
-                         {"x": "u₀", "y": "u₁", "units": "dimensionless"})
+        self.assertEqual(
+            ts01_evidence["plot_data"]["strategies"]["csl.synthesis.reach-back"], [[0, 1], [1, 0]]
+        )
+        self.assertEqual(
+            ts01_evidence["plot_data"]["strategies"]["csl.synthesis.strategy-b"], [[0, 1], [1, 0]]
+        )
+        self.assertEqual(
+            ts01_evidence["plot_data"]["axes"], {"x": "u₀", "y": "u₁", "units": "dimensionless"}
+        )
         self.assertEqual(ts01_evidence["plot_data"]["aspect"], "equal")
-        self.assertIn("no solver, strategy, benchmark, or geometry query", ts01_evidence["claim_scope"])
+        self.assertIn(
+            "no solver, strategy, benchmark, or geometry query", ts01_evidence["claim_scope"]
+        )
         ts01_svg = ET.fromstring(result.files["control-witness/ts01-strategy-ab.svg"])
         self.assertEqual(ts01_svg.attrib["role"], "img")
         self.assertTrue(any(node.tag.endswith("title") for node in ts01_svg))
         self.assertTrue(any(node.tag.endswith("desc") for node in ts01_svg))
-        self.assertTrue(result.files["control-witness/ts01-strategy-ab.png"].startswith(b"\x89PNG\r\n\x1a\n"))
+        self.assertTrue(
+            result.files["control-witness/ts01-strategy-ab.png"].startswith(b"\x89PNG\r\n\x1a\n")
+        )
         b04_evidence = json.loads(result.files["control-witness/b04-native-smoke-evidence.json"])
-        self.assertEqual(b04_evidence["projection_data"]["oxidizer"]["axes"],
-                         ["oxidizer_flow", "oxidizer_working_stock"])
-        self.assertEqual(b04_evidence["projection_data"]["fuel"]["axes"],
-                         ["fuel_flow", "fuel_working_stock"])
-        self.assertTrue(all(len(item["points"]) == 17 for projection in b04_evidence["projection_data"].values()
-                            for item in projection["series"]))
+        self.assertEqual(
+            b04_evidence["projection_data"]["oxidizer"]["axes"],
+            ["oxidizer_flow", "oxidizer_working_stock"],
+        )
+        self.assertEqual(
+            b04_evidence["projection_data"]["fuel"]["axes"], ["fuel_flow", "fuel_working_stock"]
+        )
+        self.assertTrue(
+            all(
+                len(item["points"]) == 17
+                for projection in b04_evidence["projection_data"].values()
+                for item in projection["series"]
+            )
+        )
         self.assertIn("trajectory presentation", b04_evidence["claim_scope"])
         self.assertIn("does not show reachable sets", " ".join(b04_evidence["limitations"]))
         b04_root = ROOT / "docs/research/evidence/b04-reference-v1"
-        self.assertEqual(result.files["control-witness/b04-native-smoke-case.json"],
-                         (b04_root / "canonical-case.json").read_bytes())
-        self.assertEqual(result.files["control-witness/b04-native-smoke-reference.json"],
-                         (b04_root / "exact-optimal-reference.json").read_bytes())
+        self.assertEqual(
+            result.files["control-witness/b04-native-smoke-case.json"],
+            (b04_root / "canonical-case.json").read_bytes(),
+        )
+        self.assertEqual(
+            result.files["control-witness/b04-native-smoke-reference.json"],
+            (b04_root / "exact-optimal-reference.json").read_bytes(),
+        )
         smoke_root = b04_root / "native-smoke-20261026"
         attempts = (smoke_root / "b04-cold-attempts.jsonl").read_bytes()
         self.assertEqual(result.files["control-witness/b04-native-smoke-attempts.jsonl"], attempts)
         self.assertEqual(b04_evidence["attempt_rows_sha256"], hashlib.sha256(attempts).hexdigest())
-        self.assertEqual(b04_evidence["exact_reference_sha256"],
-                         hashlib.sha256((b04_root / "exact-optimal-reference.json").read_bytes()).hexdigest())
+        self.assertEqual(
+            b04_evidence["exact_reference_sha256"],
+            hashlib.sha256((b04_root / "exact-optimal-reference.json").read_bytes()).hexdigest(),
+        )
         b04_svg = ET.fromstring(result.files["control-witness/b04-native-smoke-projections.svg"])
         self.assertEqual(b04_svg.attrib["role"], "img")
-        self.assertTrue(any(node.tag.endswith("title") and "oxidizer and fuel" in node.text for node in b04_svg))
-        self.assertTrue(any(node.tag.endswith("desc") and "independent data scaling" in node.text for node in b04_svg))
-        self.assertTrue(result.files["control-witness/b04-native-smoke-projections.png"].startswith(b"\x89PNG\r\n\x1a\n"))
+        self.assertTrue(
+            any(
+                node.tag.endswith("title") and "oxidizer and fuel" in (node.text or "")
+                for node in b04_svg
+            )
+        )
+        self.assertTrue(
+            any(
+                node.tag.endswith("desc") and "independent data scaling" in (node.text or "")
+                for node in b04_svg
+            )
+        )
+        self.assertTrue(
+            result.files["control-witness/b04-native-smoke-projections.png"].startswith(
+                b"\x89PNG\r\n\x1a\n"
+            )
+        )
         b04_page = result.files["control-witness-v1.html"].decode()
         self.assertIn("oxidizer flow versus oxidizer working stock", b04_page)
         self.assertIn("fuel flow versus fuel working stock", b04_page)
@@ -520,14 +798,20 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("not a reachable-set", b04_page)
         self.assertIn("unsupported", result.files["control-witness-v1.html"].decode())
         syn02_evidence = json.loads(result.files["control-witness/syn02-timing-evidence.json"])
-        failed = [row for row in syn02_evidence["rows"] if row["label"].startswith("shifted-residual-degenerate")]
+        failed = [
+            row
+            for row in syn02_evidence["rows"]
+            if row["label"].startswith("shifted-residual-degenerate")
+        ]
         self.assertEqual(len(failed), 3)
         self.assertTrue(all(row["median"] is None and "failed" in row["status"] for row in failed))
         self.assertEqual(len([name for name in result.files if name.endswith(".svg")]), 21)
         syn06_evidence = json.loads(result.files["control-witness/syn06-timing-evidence.json"])
         self.assertEqual(syn06_evidence["rows"][0]["batch"], 28000)
-        self.assertEqual(syn06_evidence["rows"][0]["median"],
-                         syn06_evidence["rows"][0]["saved_median_elapsed_ns"] / 28000)
+        self.assertEqual(
+            syn06_evidence["rows"][0]["median"],
+            syn06_evidence["rows"][0]["saved_median_elapsed_ns"] / 28000,
+        )
         repeated = control_witness_companions.build(self.site, self.catalog)
         self.assertEqual(result.files, repeated.files)
 
@@ -538,15 +822,23 @@ class GalleryTests(unittest.TestCase):
         records_path = repeated / "comparison-records.jsonl"
         original_read_bytes = Path.read_bytes
         manifest = json.loads(manifest_path.read_bytes())
-        records = [json.loads(line) for line in records_path.read_text().splitlines() if line.strip()]
-        record = next(item for item in records if item["comparison_spec_id"] == manifest["comparison_spec_id"])
+        records = [
+            json.loads(line) for line in records_path.read_text().splitlines() if line.strip()
+        ]
+        record = next(
+            item for item in records if item["comparison_spec_id"] == manifest["comparison_spec_id"]
+        )
         spec = json.loads(record["spec"])
         spec["problem_id"] = "csl.problem.v1.sha256:" + "0" * 64
         record["spec"] = json.dumps(spec, sort_keys=True, separators=(",", ":"))
-        changed_records = ("\n".join(json.dumps(item, sort_keys=True, separators=(",", ":"))
-                                      for item in records) + "\n").encode()
+        changed_records = (
+            "\n".join(json.dumps(item, sort_keys=True, separators=(",", ":")) for item in records)
+            + "\n"
+        ).encode()
         manifest["records_sha256"] = hashlib.sha256(changed_records).hexdigest()
-        changed_manifest = (json.dumps(manifest, sort_keys=True, separators=(",", ":")) + "\n").encode()
+        changed_manifest = (
+            json.dumps(manifest, sort_keys=True, separators=(",", ":")) + "\n"
+        ).encode()
 
         def read_bytes(path):
             resolved = path.resolve()
@@ -559,27 +851,34 @@ class GalleryTests(unittest.TestCase):
         with patch.object(Path, "read_bytes", read_bytes):
             with self.assertRaisesRegex(ValueError, "canonical case identity"):
                 control_witness_companions._b04_repeated_companion(
-                    ROOT / "scripts/reports/styles/control-v1.json")
+                    ROOT / "scripts/reports/styles/control-v1.json"
+                )
 
     def test_full_history_example_binds_raw_capture_and_rejects_tampering_or_unsafe_roots(self):
         bundle = ROOT / "reports/algorithm-results/history-cost-2d-v1"
         manifest = gallery.validate_history_cost_bundle(bundle, ROOT)
-        self.assertEqual(hashlib.sha256((bundle / "history-cost-2d-v1.zip").read_bytes()).hexdigest(),
-                         "f97824a62643694d0bf333acb1896ac03b82a41382693938eeb620dca0b4b503")
+        self.assertEqual(
+            hashlib.sha256((bundle / "history-cost-2d-v1.zip").read_bytes()).hexdigest(),
+            "f97824a62643694d0bf333acb1896ac03b82a41382693938eeb620dca0b4b503",
+        )
         self.assertEqual(manifest["source_commit"], "f4e73e08908c472801aef6637d94b1a03cb0b2a7")
-        self.assertEqual(manifest["native_binary_sha256"],
-                         "2d336a436220fdc59cf2c2c5a00defceadc5fb330450b16693fd0637a5cded17")
+        self.assertEqual(
+            manifest["native_binary_sha256"],
+            "2d336a436220fdc59cf2c2c5a00defceadc5fb330450b16693fd0637a5cded17",
+        )
         total = json.loads((bundle / "records/total-cost-stdout.jsonl").read_text())
         terminal = json.loads((bundle / "records/terminal-only-stdout.jsonl").read_text())
         self.assertEqual(total["solver_receipt"]["provider"], "csl.convex.highs")
-        self.assertEqual(total["primal"], [0.0, 0.0, 0.33333333333333304,
-                                           0.0, 0.33333333333333304, 0.0])
+        self.assertEqual(
+            total["primal"], [0.0, 0.0, 0.33333333333333304, 0.0, 0.33333333333333304, 0.0]
+        )
         self.assertEqual(terminal["primal"], [0.0, 0.0, 1.0, 0.0, 1.0, 0.0])
         self.assertAlmostEqual(total["source_cost"]["total"], 2 / 3)
         current_bundle = ROOT / "reports/algorithm-results/history-cost-2d-v1-current-source"
         current_manifest = gallery.validate_current_history_cost_bundle(current_bundle, ROOT)
-        self.assertEqual(current_manifest["source_commit"],
-                         "536a5a9f81b49a164847d36ebef96501b0925312")
+        self.assertEqual(
+            current_manifest["source_commit"], "536a5a9f81b49a164847d36ebef96501b0925312"
+        )
         self.assertEqual(current_manifest["cases"]["total-cost"]["point"], [1 / 3, 0])
         self.assertEqual(current_manifest["cases"]["terminal-only"]["point"], [1, 0])
         self.assertIn("producer script was not retained", current_manifest["producer_limit"])
@@ -590,10 +889,17 @@ class GalleryTests(unittest.TestCase):
             shutil.copytree(bundle, copied)
             copied_page = temp_root / "docs/examples/history-cost-2d-v1"
             copied_page.mkdir(parents=True)
-            shutil.copy2(ROOT / "docs/examples/history-cost-2d-v1/index.html", copied_page / "index.html")
-            shutil.copy2(ROOT / "docs/examples/history-cost-2d-v1/history-cost-2d.svg", copied_page / "history-cost-2d.svg")
-            self.assertEqual(gallery.validate_history_cost_bundle(copied, temp_root)["case"],
-                             "one-step-identity-dynamics-2d")
+            shutil.copy2(
+                ROOT / "docs/examples/history-cost-2d-v1/index.html", copied_page / "index.html"
+            )
+            shutil.copy2(
+                ROOT / "docs/examples/history-cost-2d-v1/history-cost-2d.svg",
+                copied_page / "history-cost-2d.svg",
+            )
+            self.assertEqual(
+                gallery.validate_history_cost_bundle(copied, temp_root)["case"],
+                "one-step-identity-dynamics-2d",
+            )
             response = copied / "records/total-cost-stdout.jsonl"
             response.write_bytes(response.read_bytes() + b" ")
             with self.assertRaisesRegex(ValueError, "digest differs"):
@@ -607,7 +913,8 @@ class GalleryTests(unittest.TestCase):
             (alias_root / "reports").symlink_to(temp_root / "reports", target_is_directory=True)
             with self.assertRaisesRegex(ValueError, "symlinked path component"):
                 gallery.validate_history_cost_bundle(
-                    alias_root / "reports/algorithm-results/history-cost-2d-v1", Path(temporary))
+                    alias_root / "reports/algorithm-results/history-cost-2d-v1", Path(temporary)
+                )
             current_copy = temp_root / "reports/algorithm-results/history-cost-2d-v1-current-source"
             shutil.copytree(current_bundle, current_copy)
             receipt_copy = current_copy / "records/receipt.json"
@@ -627,19 +934,25 @@ class GalleryTests(unittest.TestCase):
         self.assertIn(stage_nominal_quadratic_history.SOURCE, page)
         self.assertIn("not a plot generated by the solver", page)
         self.assertIn("not raw solver response data", record["evidence"]["csv_provenance"])
-        self.assertEqual(record["evidence"]["native_example_binary_sha256"],
-                         "0b4ef226ecb460e435769589facbdcdad38be88e873d18ad9bd6980811acb98b")
+        self.assertEqual(
+            record["evidence"]["native_example_binary_sha256"],
+            "0b4ef226ecb460e435769589facbdcdad38be88e873d18ad9bd6980811acb98b",
+        )
         self.assertEqual(entries[0]["status"], "analytic-illustration")
         self.assertIn(stage_nominal_quadratic_history.PAGE, card)
         self.assertEqual(figure.tag, "{http://www.w3.org/2000/svg}svg")
-        self.assertTrue(figure.find("{http://www.w3.org/2000/svg}desc").text)
-        self.assertEqual(files[stage_nominal_quadratic_history.CSV],
-                         (ROOT / "examples/nominal_quadratic_history_2d.csv").read_bytes())
+        self.assertTrue(figure.findtext(SVG_DESCRIPTION))
+        self.assertEqual(
+            files[stage_nominal_quadratic_history.CSV],
+            (ROOT / "examples/nominal_quadratic_history_2d.csv").read_bytes(),
+        )
         with tempfile.TemporaryDirectory() as temporary:
             copied_root = Path(temporary)
-            for relative in ("examples/nominal_quadratic_history_2d.svg",
-                             "examples/nominal_quadratic_history_2d.csv",
-                             "examples/nominal_quadratic_history_2d-output.txt"):
+            for relative in (
+                "examples/nominal_quadratic_history_2d.svg",
+                "examples/nominal_quadratic_history_2d.csv",
+                "examples/nominal_quadratic_history_2d-output.txt",
+            ):
                 target = copied_root / relative
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(ROOT / relative, target)
@@ -667,16 +980,22 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("task_repro_root/output", page)
         self.assertEqual(record["answer"]["native_solution"], "(0.1,-0.2)")
         self.assertEqual(record["answer"]["literal_objective"], 0.005)
-        self.assertEqual(record["evidence"]["assurance"],
-                         "numerical feasibility and objective check; no robustness or policy claim")
+        self.assertEqual(
+            record["evidence"]["assurance"],
+            "numerical feasibility and objective check; no robustness or policy claim",
+        )
         self.assertEqual(entries[0]["status"], "saved-data-illustration")
         self.assertIn(stage_positive_part_budget_2d.PAGE, card)
         self.assertEqual(figure.tag, "{http://www.w3.org/2000/svg}svg")
-        self.assertTrue(figure.find("{http://www.w3.org/2000/svg}desc").text)
-        self.assertEqual(files[stage_positive_part_budget_2d.VERTICES],
-                         (ROOT / "examples/positive_part_budget_2d/vertices.csv").read_bytes())
-        self.assertEqual(files[stage_positive_part_budget_2d.SOLUTION],
-                         (ROOT / "examples/positive_part_budget_2d/native-solution.csv").read_bytes())
+        self.assertTrue(figure.findtext(SVG_DESCRIPTION))
+        self.assertEqual(
+            files[stage_positive_part_budget_2d.VERTICES],
+            (ROOT / "examples/positive_part_budget_2d/vertices.csv").read_bytes(),
+        )
+        self.assertEqual(
+            files[stage_positive_part_budget_2d.SOLUTION],
+            (ROOT / "examples/positive_part_budget_2d/native-solution.csv").read_bytes(),
+        )
 
     def test_positive_part_stager_rejects_native_output_that_fails_the_literal_task(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -695,8 +1014,7 @@ class GalleryTests(unittest.TestCase):
                 encoding="ascii",
             )
             (output / "run.txt").write_text(
-                "source_constraint=sum(max(u_i,0))<=0.1\n"
-                "net_sum_surrogate_admits_target=true\n",
+                "source_constraint=sum(max(u_i,0))<=0.1\nnet_sum_surrogate_admits_target=true\n",
                 encoding="ascii",
             )
             (output / "native-example.stdout").write_text(
@@ -726,10 +1044,15 @@ class GalleryTests(unittest.TestCase):
                 stage_positive_part_budget_2d.build(fixture)
 
     def test_build_preserves_reports_and_has_resolvable_links(self):
-        before = {p.relative_to(self.site): hashlib.sha256(p.read_bytes()).hexdigest()
-                  for p in self.site.rglob("*") if p.is_file() and p.name != "index.html"}
-        original_reports = {e["report_id"]: (self.site / e["report_id"] / "index.html").read_bytes()
-                            for e in self.examples}
+        before = {
+            p.relative_to(self.site): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in self.site.rglob("*")
+            if p.is_file() and p.name != "index.html"
+        }
+        original_reports = {
+            e["report_id"]: (self.site / e["report_id"] / "index.html").read_bytes()
+            for e in self.examples
+        }
         gallery.build(self.catalog, self.site)
         history_page = self.site / "examples/nominal-quadratic-history-2d.html"
         self.assertTrue(history_page.is_file())
@@ -742,19 +1065,24 @@ class GalleryTests(unittest.TestCase):
         gallery_html = (self.site / "examples/index.html").read_text(encoding="utf-8")
         self.assertIn('id="nominal-quadratic-history-2d"', gallery_html)
         visual_inventory = json.loads((self.site / "examples/visual-coverage.json").read_text())
-        history_entry = next(entry for entry in visual_inventory["entries"]
-                             if entry["anchor"] == "nominal-quadratic-history-2d")
+        history_entry = next(
+            entry
+            for entry in visual_inventory["entries"]
+            if entry["anchor"] == "nominal-quadratic-history-2d"
+        )
         self.assertEqual(history_entry["status"], "analytic-illustration")
         self.assertEqual(history_entry["raw_record"], "nominal-quadratic-history-2d.json")
         [catalogue_entry] = [
-            entry for entry in visual_inventory["entries"]
+            entry
+            for entry in visual_inventory["entries"]
             if entry["anchor"] == "catalogue-feasible-history-v1"
         ]
         for key in ("page", "figure", "raw_record"):
             self.assertTrue((self.site / "examples" / catalogue_entry[key]).is_file())
         self.assertIn('id="catalogue-feasible-history-v1"', gallery_html)
         [exact_entry] = [
-            entry for entry in visual_inventory["entries"]
+            entry
+            for entry in visual_inventory["entries"]
             if entry["anchor"] == "catalogue-exact-support-v1"
         ]
         for key in ("page", "figure", "raw_record"):
@@ -769,7 +1097,8 @@ class GalleryTests(unittest.TestCase):
             self.assertTrue((self.site / "examples" / backward_entry[key]).is_file())
         self.assertIn('id="catalogue-backward-reachability-v1"', gallery_html)
         [finite_action_entry] = [
-            entry for entry in visual_inventory["entries"]
+            entry
+            for entry in visual_inventory["entries"]
             if entry["anchor"] == "catalogue-finite-action-v1"
         ]
         for key in ("page", "figure", "raw_record"):
@@ -787,42 +1116,71 @@ class GalleryTests(unittest.TestCase):
         self.assertTrue(mpc_page.is_file())
         self.assertTrue((self.site / "examples/discrete-mpc-2d.svg").is_file())
         self.assertTrue((self.site / "examples/discrete-mpc-2d.json").is_file())
-        self.assertEqual((self.site / "examples/discrete_mpc_2d-output.csv").read_bytes(),
-                         (ROOT / "examples/discrete_mpc_2d-output.csv").read_bytes())
+        self.assertEqual(
+            (self.site / "examples/discrete_mpc_2d-output.csv").read_bytes(),
+            (ROOT / "examples/discrete_mpc_2d-output.csv").read_bytes(),
+        )
         gallery_html = (self.site / "examples/index.html").read_text(encoding="utf-8")
         self.assertIn('id="discrete-mpc-2d"', gallery_html)
         mpc_html = mpc_page.read_text(encoding="utf-8")
         self.assertIn("first changes its first control coordinate at stage 4", mpc_html)
         self.assertIn('href="examples.css"', mpc_html)
         from scripts.reports import audit_mathematical_presentation
+
         route_registry = json.loads(
-            (ROOT / "scripts/reports/mathematical-presentation-routes.json").read_text())
-        route_entry = next(entry for entry in route_registry["routes"]
-                           if entry["route"] == "examples/discrete-mpc-2d.html")
+            (ROOT / "scripts/reports/mathematical-presentation-routes.json").read_text()
+        )
+        route_entry = next(
+            entry
+            for entry in route_registry["routes"]
+            if entry["route"] == "examples/discrete-mpc-2d.html"
+        )
         with tempfile.TemporaryDirectory() as temporary:
             guard_site = Path(temporary)
             (guard_site / "examples").mkdir()
             shutil.copyfile(mpc_page, guard_site / "examples/discrete-mpc-2d.html")
             shutil.copyfile(budget_page, guard_site / "examples/positive-part-budget-2d.html")
             shutil.copyfile(self.site / "examples/index.html", guard_site / "examples/index.html")
-            (guard_site / "examples/visual-coverage.json").write_text(json.dumps({
-                "entries": [{"page": "discrete-mpc-2d.html"},
-                            {"page": "positive-part-budget-2d.html"}]}))
+            (guard_site / "examples/visual-coverage.json").write_text(
+                json.dumps(
+                    {
+                        "entries": [
+                            {"page": "discrete-mpc-2d.html"},
+                            {"page": "positive-part-budget-2d.html"},
+                        ]
+                    }
+                )
+            )
             presentation = audit_mathematical_presentation.audit_site(
                 guard_site,
-                {"routes": [route_entry, next(
-                    entry for entry in route_registry["routes"]
-                    if entry["route"] == "examples/index.html"), next(
-                    entry for entry in route_registry["routes"]
-                    if entry["route"] == "examples/positive-part-budget-2d.html")],
-                 "required_inventories": []})
+                {
+                    "routes": [
+                        route_entry,
+                        next(
+                            entry
+                            for entry in route_registry["routes"]
+                            if entry["route"] == "examples/index.html"
+                        ),
+                        next(
+                            entry
+                            for entry in route_registry["routes"]
+                            if entry["route"] == "examples/positive-part-budget-2d.html"
+                        ),
+                    ],
+                    "required_inventories": [],
+                },
+            )
         self.assertTrue(presentation["passed"], presentation["findings"][:8])
         cost_page = self.site / "examples/history-cost-2d-v1/index.html"
         self.assertTrue(cost_page.is_file())
         staged_archive = self.site / "examples/history-cost-2d-v1/history-cost-2d-v1.zip"
         self.assertTrue(staged_archive.is_file())
-        self.assertEqual(staged_archive.read_bytes(),
-                         (ROOT / "reports/algorithm-results/history-cost-2d-v1/history-cost-2d-v1.zip").read_bytes())
+        self.assertEqual(
+            staged_archive.read_bytes(),
+            (
+                ROOT / "reports/algorithm-results/history-cost-2d-v1/history-cost-2d-v1.zip"
+            ).read_bytes(),
+        )
         reproduction = self.site / "examples/history-cost-2d-v1-reproduction.html"
         self.assertTrue(reproduction.is_file())
         reproduction_html = reproduction.read_text(encoding="utf-8")
@@ -833,14 +1191,21 @@ class GalleryTests(unittest.TestCase):
         self.assertNotIn("/home/butahlecoq/", reproduction_html)
         gallery_html = (self.site / "examples/index.html").read_text(encoding="utf-8")
         volterra_page = self.site / "examples/buryatia-volterra-affine-2d.html"
-        self.assertEqual(volterra_page.read_bytes(),
-                         (ROOT / "docs/examples/buryatia-volterra-affine-2d.html").read_bytes())
+        self.assertEqual(
+            volterra_page.read_bytes(),
+            (ROOT / "docs/examples/buryatia-volterra-affine-2d.html").read_bytes(),
+        )
         for name in gallery.stage_buryatia_volterra.asset_paths():
-            self.assertEqual((self.site / "examples" / name).read_bytes(),
-                             (ROOT / "docs/examples" / name).read_bytes())
+            self.assertEqual(
+                (self.site / "examples" / name).read_bytes(),
+                (ROOT / "docs/examples" / name).read_bytes(),
+            )
         volterra_inventory = json.loads((self.site / "examples/visual-coverage.json").read_text())
-        volterra_entry = next(entry for entry in volterra_inventory["entries"]
-                              if entry.get("anchor") == "buryatia-volterra-affine-2d")
+        volterra_entry = next(
+            entry
+            for entry in volterra_inventory["entries"]
+            if entry.get("anchor") == "buryatia-volterra-affine-2d"
+        )
         self.assertEqual(volterra_entry["page"], "buryatia-volterra-affine-2d.html")
         self.assertIn('href="buryatia-volterra-affine-2d.html"', gallery_html)
         dim4_route = self.site / "examples/buryatia-dim4-literal-affine-v1"
@@ -849,12 +1214,20 @@ class GalleryTests(unittest.TestCase):
         dim4_box_trace = dim4_route / "buryatia-dim4-box-trace-correction-v1.json"
         dim4_scenario = dim4_route / "buryatia-dim4-matlab-literal-affine-v1.json"
         self.assertTrue(dim4_page.is_file())
-        self.assertEqual(hashlib.sha256(dim4_raw.read_bytes()).hexdigest(),
-                         "d0a8ca600eaa52f9630c87f1e7395c4ca2454c0080d315469e44c06a4403d8ad")
-        self.assertEqual(dim4_scenario.read_bytes(),
-                         (ROOT / "benchmarks/scenarios/buryatia-dim4-matlab-literal-affine-v1.json").read_bytes())
-        self.assertEqual(dim4_box_trace.read_bytes(),
-                         (ROOT / "docs/examples/buryatia-dim4-box-trace-correction-v1.json").read_bytes())
+        self.assertEqual(
+            hashlib.sha256(dim4_raw.read_bytes()).hexdigest(),
+            "d0a8ca600eaa52f9630c87f1e7395c4ca2454c0080d315469e44c06a4403d8ad",
+        )
+        self.assertEqual(
+            dim4_scenario.read_bytes(),
+            (
+                ROOT / "benchmarks/scenarios/buryatia-dim4-matlab-literal-affine-v1.json"
+            ).read_bytes(),
+        )
+        self.assertEqual(
+            dim4_box_trace.read_bytes(),
+            (ROOT / "docs/examples/buryatia-dim4-box-trace-correction-v1.json").read_bytes(),
+        )
         dim4_html = dim4_page.read_text(encoding="utf-8")
         self.assertIn('href="../examples.css"', dim4_html)
         self.assertIn('href="buryatia-dim4-matlab-literal-affine-v1.json"', dim4_html)
@@ -862,16 +1235,23 @@ class GalleryTests(unittest.TestCase):
         box_trace = json.loads(dim4_box_trace.read_text(encoding="utf-8"))
         self.assertEqual(box_trace["comparison"]["changed_json_values"], 7)
         self.assertTrue(box_trace["comparison"]["all_other_json_values_equal"])
-        self.assertEqual(box_trace["historical_record"]["sha256"],
-                         "d0a8ca600eaa52f9630c87f1e7395c4ca2454c0080d315469e44c06a4403d8ad")
+        self.assertEqual(
+            box_trace["historical_record"]["sha256"],
+            "d0a8ca600eaa52f9630c87f1e7395c4ca2454c0080d315469e44c06a4403d8ad",
+        )
         self.assertTrue((dim4_route / "terminal-x1-x2.svg").is_file())
         self.assertTrue((dim4_route / "buryatia-dim4-literal-affine-v1-SHA256SUMS").is_file())
         self.assertIn('id="buryatia-dim4-literal-affine-v1"', gallery_html)
         dim4_inventory = json.loads((self.site / "examples/visual-coverage.json").read_text())
-        dim4_entry = next(entry for entry in dim4_inventory["entries"]
-                          if entry.get("anchor") == "buryatia-dim4-literal-affine-v1")
-        self.assertEqual(dim4_entry["raw_record"],
-                         "buryatia-dim4-literal-affine-v1/buryatia-dim4-literal-affine-v1-records.json")
+        dim4_entry = next(
+            entry
+            for entry in dim4_inventory["entries"]
+            if entry.get("anchor") == "buryatia-dim4-literal-affine-v1"
+        )
+        self.assertEqual(
+            dim4_entry["raw_record"],
+            "buryatia-dim4-literal-affine-v1/buryatia-dim4-literal-affine-v1-records.json",
+        )
         self.assertIn("buryatia-dim4-literal-affine-v1/index.html", gallery_html)
         current_page = self.site / "examples/history-cost-2d-v1-current-source.html"
         self.assertTrue(current_page.is_file())
@@ -881,13 +1261,24 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("u₀ = [1/3; 0]", current_page_html)
         self.assertNotIn("<table>", current_page_html)
         self.assertIn("Full-precision response JSONL", current_page_html)
-        current_archive = self.site / "examples/history-cost-2d-v1-current-source/history-cost-2d-v1-current-source.zip"
-        self.assertEqual(current_archive.read_bytes(),
-                         (ROOT / "reports/algorithm-results/history-cost-2d-v1-current-source/history-cost-2d-v1-current-source.zip").read_bytes())
+        current_archive = (
+            self.site
+            / "examples/history-cost-2d-v1-current-source/history-cost-2d-v1-current-source.zip"
+        )
+        self.assertEqual(
+            current_archive.read_bytes(),
+            (
+                ROOT
+                / "reports/algorithm-results/history-cost-2d-v1-current-source/history-cost-2d-v1-current-source.zip"
+            ).read_bytes(),
+        )
         self.assertIn('id="history-cost-2d-v1-current-source"', gallery_html)
         cost_inventory = json.loads((self.site / "examples/visual-coverage.json").read_text())
-        cost_route = next(entry for entry in cost_inventory["entries"]
-                          if entry.get("anchor") == "history-cost-2d-v1")
+        cost_route = next(
+            entry
+            for entry in cost_inventory["entries"]
+            if entry.get("anchor") == "history-cost-2d-v1"
+        )
         self.assertEqual(cost_route["status"], "saved-data-illustration")
         app01_page = self.site / "examples/app01-plan-timing-v1.html"
         app01_html = app01_page.read_text(encoding="utf-8")
@@ -900,13 +1291,22 @@ class GalleryTests(unittest.TestCase):
             self.assertEqual((self.site / rid / "index.html").read_bytes(), content)
         self.assertIn('href="examples/index.html"', (self.site / "index.html").read_text())
         page = (self.site / "examples/index.html").read_text(encoding="utf-8")
-        btulshor = next(report for report in self.catalog_reports
-                         if report["report_kind"] == "btulshor-source-faithful")
+        btulshor = next(
+            report
+            for report in self.catalog_reports
+            if report["report_kind"] == "btulshor-source-faithful"
+        )
         self.assertIn('id="saved-figure-btulshor-source-faithful"', page)
-        self.assertIn(f'../{btulshor["report_id"]}/raw/summary.json', page)
-        self.assertEqual((self.site / btulshor["report_id"] / "raw/summary.json").read_bytes(),
-                         (ROOT / "reports/algorithm-results" / btulshor["source_report_id"] /
-                          "raw/summary.json").read_bytes())
+        self.assertIn(f"../{btulshor['report_id']}/raw/summary.json", page)
+        self.assertEqual(
+            (self.site / btulshor["report_id"] / "raw/summary.json").read_bytes(),
+            (
+                ROOT
+                / "reports/algorithm-results"
+                / btulshor["source_report_id"]
+                / "raw/summary.json"
+            ).read_bytes(),
+        )
         self.assertIn("TwoPoints reachable sets and approximations", page)
         self.assertIn("independently scaled with numeric ticks and grids", page)
         self.assertIn("exp03-two-points-approx-publication-v1/run.json", page)
@@ -918,7 +1318,9 @@ class GalleryTests(unittest.TestCase):
         last_anchor = "visual-fuel-b06-viz03"
         self.assertIn(
             f'<a class="nav-shortcut" href="#{last_anchor}">Jump to final example: '
-            f'{last_topic_title} ↓</a>', page)
+            f"{last_topic_title} ↓</a>",
+            page,
+        )
         self.assertIn('target.scrollIntoView({behavior:"instant",block:"start"});', page)
         self.assertIn('<nav aria-label="Examples topics" tabindex="0">', page)
         self.assertIn('<a href="../index.html">Learn</a>', page)
@@ -926,21 +1328,23 @@ class GalleryTests(unittest.TestCase):
         self.assertIn(f'<article class="saved-figure" id="{last_anchor}">', page)
         fuel_page = self.site / "examples/fuel-b06-viz03.html"
         self.assertTrue(fuel_page.is_file())
-        fuel_links = Links(); fuel_links.feed(fuel_page.read_text(encoding="utf-8"))
+        fuel_links = Links()
+        fuel_links.feed(fuel_page.read_text(encoding="utf-8"))
         for link in fuel_links.links:
             if not urlsplit(link).scheme and not link.startswith("#"):
                 self.assertTrue((fuel_page.parent / link.split("#")[0]).is_file(), link)
         readable_fuel_page = self.site / "examples/fuel-b06-viz06.html"
         self.assertTrue(readable_fuel_page.is_file())
-        readable_html=readable_fuel_page.read_text(encoding="utf-8")
-        self.assertIn("One 4D fuel set",readable_html)
-        self.assertIn("issue #668",readable_html)
-        self.assertIn("30.26",readable_html)
-        self.assertIn("fuel-b06-viz06-source.json",readable_html)
-        readable_links=Links();readable_links.feed(readable_html)
+        readable_html = readable_fuel_page.read_text(encoding="utf-8")
+        self.assertIn("One 4D fuel set", readable_html)
+        self.assertIn("issue #668", readable_html)
+        self.assertIn("30.26", readable_html)
+        self.assertIn("fuel-b06-viz06-source.json", readable_html)
+        readable_links = Links()
+        readable_links.feed(readable_html)
         for link in readable_links.links:
             if not urlsplit(link).scheme and not link.startswith("#"):
-                self.assertTrue((readable_fuel_page.parent/link.split("#")[0]).is_file(),link)
+                self.assertTrue((readable_fuel_page.parent / link.split("#")[0]).is_file(), link)
         stylesheet = gallery.site_design.stylesheet().decode("utf-8")
         self.assertIn("max-height: calc(100vh - 2rem)", stylesheet)
         self.assertIn("overflow-y: auto", stylesheet)
@@ -948,7 +1352,9 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("@media (max-height: 520px) and (min-width: 781px)", stylesheet)
         self.assertIn(".control-witness-page #mpc06-tube .scroll { overflow: visible", stylesheet)
         self.assertNotIn("* { overflow: visible", stylesheet)
-        self.assertIn(".control-witness-page #mpc06-tube th { background: #fff; color: #111; }", stylesheet)
+        self.assertIn(
+            ".control-witness-page #mpc06-tube th { background: #fff; color: #111; }", stylesheet
+        )
         self.assertIn("prefers-reduced-motion: reduce", stylesheet)
         self.assertIn("@media print", stylesheet)
         self.assertIn("Data · 7 source points · copyable JSON", page)
@@ -966,7 +1372,10 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("not part of that measured fixture", page)
         self.assertIn('href="two_parameter_scalar_polytopes.json"', page)
         self.assertIn("includes both free controls", page)
-        self.assertIn('href="https://github.com/butahlecoq/controlled-systems-lab/commit/c6d135c94ee0fe4fece074b455dae18bee0d22b2"', page)
+        self.assertIn(
+            'href="https://github.com/butahlecoq/controlled-systems-lab/commit/c6d135c94ee0fe4fece074b455dae18bee0d22b2"',
+            page,
+        )
         self.assertIn('href="two_stage_scalar_family.json"', page)
         self.assertIn("Project a one-step hybrid state set", page)
         self.assertIn("Projected terminal set: x₁∈[0,0.5]", page)
@@ -977,55 +1386,91 @@ class GalleryTests(unittest.TestCase):
         self.assertIn('href="lotka-volterra-sampled-v1.html"', page)
         self.assertIn('id="adaptive-ode-rk4"', page)
         self.assertIn('src="adaptive-ode-replay.svg"', page)
-        self.assertIn("Cards marked “Saved-data companion” are generated into this gallery from frozen records", page)
-        for stem in ("saved-figure-lotka-quantitative", "app02-diamond-v1", "app04-square-v1",
-                     "ext05-states-v1", "visual-fuel-b06-viz03"):
+        self.assertIn(
+            "Cards marked “Saved-data companion” are generated into this gallery from frozen records",
+            page,
+        )
+        for stem in (
+            "saved-figure-lotka-quantitative",
+            "app02-diamond-v1",
+            "app04-square-v1",
+            "ext05-states-v1",
+            "visual-fuel-b06-viz03",
+        ):
             card = page.split(f'id="{stem}"', 1)[1].split("</article>", 1)[0]
             self.assertIn("Saved-data companion", card)
-        for alt in ("Four initial state vertices, the terminal target, and eight saved terminal vertices.",
-                    "Seven measured 5,000-call batch durations for three observation fixtures.",
-                    "The saved one-control feasible relation and its unique terminal minimum.",
-                    "Two saved feasible control regions and their shared complete minimizing face.",
-                    "Median timings and observed ranges for four finite-feedback scenarios."):
+        for alt in (
+            "Four initial state vertices, the terminal target, and eight saved terminal vertices.",
+            "Seven measured 5,000-call batch durations for three observation fixtures.",
+            "The saved one-control feasible relation and its unique terminal minimum.",
+            "Two saved feasible control regions and their shared complete minimizing face.",
+            "Median timings and observed ranges for four finite-feedback scenarios.",
+        ):
             self.assertIn(f'alt="{alt}"', page)
         self.assertIn("065de5e45d295dfa099e25265c4014c0c46673f8", page)
-        self.assertIn("blob/b83b8dc415dbe5811371b8446931ae4c6f3d2e28/reports/algorithm-results/tooling/geo04/polyhedral_intersection_driver.cpp", page)
+        self.assertIn(
+            "blob/b83b8dc415dbe5811371b8446931ae4c6f3d2e28/reports/algorithm-results/tooling/geo04/polyhedral_intersection_driver.cpp",
+            page,
+        )
         parser = Links()
         parser.feed(page)
         for link in parser.links:
             if not urlsplit(link).scheme and not link.startswith("#"):
                 self.assertTrue((self.site / "examples" / link.split("#")[0]).is_file(), link)
         figures = list((self.site / "examples").glob("*.svg"))
-        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 32)
+        self.assertEqual(
+            len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 32
+        )
         self.assertIn('id="saved-feedback-geometry-2d"', page)
         self.assertIn('id="native-fixed-tail-2d"', page)
         self.assertTrue((self.site / "examples/native-fixed-tail-2d.html").is_file())
-        self.assertEqual((self.site / "examples/fixed-tail-tiny-a6/box/response.jsonl").read_bytes(),
-                         (ROOT / "examples/fixed-tail-tiny-a6/box/response.jsonl").read_bytes())
+        self.assertEqual(
+            (self.site / "examples/fixed-tail-tiny-a6/box/response.jsonl").read_bytes(),
+            (ROOT / "examples/fixed-tail-tiny-a6/box/response.jsonl").read_bytes(),
+        )
         self.assertTrue((self.site / "examples/feedback_geometry_2d.html").is_file())
-        self.assertEqual((self.site / "examples/feedback-geometry-tiny-fd28/box/response.jsonl").read_bytes(),
-            (ROOT / "examples/feedback-geometry-tiny-fd28/box/response.jsonl").read_bytes())
+        self.assertEqual(
+            (self.site / "examples/feedback-geometry-tiny-fd28/box/response.jsonl").read_bytes(),
+            (ROOT / "examples/feedback-geometry-tiny-fd28/box/response.jsonl").read_bytes(),
+        )
         self.assertIn('id="source-index-geometry-2d"', page)
         self.assertTrue((self.site / "examples/source-index-geometry-2d-records.json").is_file())
         for figure in figures:
-            if figure.name in {"buryatia-volterra-affine-2d-terminal.svg",
-                               "buryatia-volterra-affine-2d-terminal-superseded-v1.svg"}:
-                self.assertEqual(figure.read_bytes(), (ROOT / "docs/examples" / figure.name).read_bytes())
+            if figure.name in {
+                "buryatia-volterra-affine-2d-terminal.svg",
+                "buryatia-volterra-affine-2d-terminal-superseded-v1.svg",
+            }:
+                self.assertEqual(
+                    figure.read_bytes(), (ROOT / "docs/examples" / figure.name).read_bytes()
+                )
                 continue
             if figure.name == "fuel-b06-viz06-before.svg":
-                self.assertEqual(hashlib.sha256(figure.read_bytes()).hexdigest(),
-                                 "ac5997b750ef20fb80c90b46549a1110cf10f7ff37bbb5f9d72ab1cc44461f20")
+                self.assertEqual(
+                    hashlib.sha256(figure.read_bytes()).hexdigest(),
+                    "ac5997b750ef20fb80c90b46549a1110cf10f7ff37bbb5f9d72ab1cc44461f20",
+                )
                 continue
             tree = ET.fromstring(figure.read_text())
             self.assertEqual(tree.attrib["role"], "img")
             self.assertIsNotNone(tree.find("{http://www.w3.org/2000/svg}desc"))
         workflow = (self.site / "examples/issue3-control-walkthrough.html").read_text()
-        for step in ("1. Define the problem", "2. Run the supported profile",
-                     "3. Select from the complete finite family", "4. Independently verify the answer",
-                     "5. Inspect the saved export and provenance", "validated_bounds [0,0]"):
+        for step in (
+            "1. Define the problem",
+            "2. Run the supported profile",
+            "3. Select from the complete finite family",
+            "4. Independently verify the answer",
+            "5. Inspect the saved export and provenance",
+            "validated_bounds [0,0]",
+        ):
             self.assertIn(step, workflow)
-        self.assertIn("blob/1c606969b0d15700b61e43effdbbd545e9d0ed73/benchmarks/reporting/issue3/validated_driver.cpp", workflow)
-        self.assertIn("blob/c72f3480c8fea2575ba860890502857006e9b9f4/include/csl/optimization/validated_finite_action_minimax.hpp", workflow)
+        self.assertIn(
+            "blob/1c606969b0d15700b61e43effdbbd545e9d0ed73/benchmarks/reporting/issue3/validated_driver.cpp",
+            workflow,
+        )
+        self.assertIn(
+            "blob/c72f3480c8fea2575ba860890502857006e9b9f4/include/csl/optimization/validated_finite_action_minimax.hpp",
+            workflow,
+        )
         workflow_links = Links()
         workflow_links.feed(workflow)
         for link in workflow_links.links:
@@ -1038,38 +1483,55 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("frozen record directly; it does not re-run the recurrence", lotka_page)
         self.assertIn("not an exact reachability set", lotka_page)
         lotka_svg = ET.parse(self.site / "examples/lotka-volterra-sampled-v1.svg").getroot()
-        lotka_description = lotka_svg.find("{http://www.w3.org/2000/svg}desc")
-        self.assertIn("csl-report-quantitative-v1", lotka_description.text)
+        lotka_description = lotka_svg.findtext(SVG_DESCRIPTION, default="")
+        self.assertIn("csl-report-quantitative-v1", lotka_description)
         visual_inventory = json.loads((self.site / "examples/visual-coverage.json").read_text())
-        lotka_entry = next(entry for entry in visual_inventory["entries"]
-                           if entry["anchor"] == "saved-figure-lotka-quantitative")
+        lotka_entry = next(
+            entry
+            for entry in visual_inventory["entries"]
+            if entry["anchor"] == "saved-figure-lotka-quantitative"
+        )
         self.assertEqual(lotka_entry["figure"], "lotka-volterra-sampled-v1.svg")
         self.assertEqual(lotka_entry["status"], "saved-data-companion")
-        fuel_entry = next(entry for entry in visual_inventory["entries"]
-                          if entry["anchor"] == "visual-fuel-b06-viz03")
+        fuel_entry = next(
+            entry
+            for entry in visual_inventory["entries"]
+            if entry["anchor"] == "visual-fuel-b06-viz03"
+        )
         self.assertEqual(fuel_entry["status"], "saved-data-companion")
-        layered_fuel = next(entry for entry in visual_inventory["entries"]
-                            if entry["anchor"] == "fuel-reachability-layers")
+        layered_fuel = next(
+            entry
+            for entry in visual_inventory["entries"]
+            if entry["anchor"] == "fuel-reachability-layers"
+        )
         self.assertEqual(layered_fuel["page"], "fuel-reachability-layers/index.html")
         self.assertTrue((self.site / "examples" / layered_fuel["page"]).is_file())
         self.assertTrue((self.site / "examples" / layered_fuel["figure"]).is_file())
-        for stem, expected_text in (("app02-diamond-v1", "saved input and rotated outer bound"),
-                                   ("app04-square-v1", "diagonal orientation"),
-                                   ("app03-zonotope-v1", "input zonotope · saved generators"),
-                                   ("ext05-states-v1", "saved states at t = 0, 1, 3"),
-                                   ("ext01-b08-timing-v1", "saved B08 calls"),
-                                   ("app01-plan-timing-v1", "Three markers show archived fixture medians"),
-                                   ("ext04-affine-synthesis-v1", "The pale rectangle is the authored initial state set"),
-                                   ("ext04-observed-replay-v1", "Each marker is one of seven saved 5,000-call batches"),
-                                   ("ext07-feasible-relation-v1", "The feasible relation is x1=u0 over the saved transition guard"),
-                                   ("ext07-two-control-family-v1", "The dashed outer square is the enter-full path"),
-                                   ("finite-feedback-timing-v1", "Each median marker and vertical range line summarizes seven saved checked calls")):
+        for stem, expected_text in (
+            ("app02-diamond-v1", "saved input and rotated outer bound"),
+            ("app04-square-v1", "diagonal orientation"),
+            ("app03-zonotope-v1", "input zonotope · saved generators"),
+            ("ext05-states-v1", "saved states at t = 0, 1, 3"),
+            ("ext01-b08-timing-v1", "saved B08 calls"),
+            ("app01-plan-timing-v1", "Three markers show archived fixture medians"),
+            ("ext04-affine-synthesis-v1", "The pale rectangle is the authored initial state set"),
+            ("ext04-observed-replay-v1", "Each marker is one of seven saved 5,000-call batches"),
+            (
+                "ext07-feasible-relation-v1",
+                "The feasible relation is x1=u0 over the saved transition guard",
+            ),
+            ("ext07-two-control-family-v1", "The dashed outer square is the enter-full path"),
+            (
+                "finite-feedback-timing-v1",
+                "Each median marker and vertical range line summarizes seven saved checked calls",
+            ),
+        ):
             companion_page = (self.site / "examples" / (stem + ".html")).read_text()
             self.assertIn("csl-report-quantitative-v1", companion_page)
             self.assertIn("Frozen values", companion_page)
             companion_svg = ET.parse(self.site / "examples" / (stem + ".svg")).getroot()
-            description = companion_svg.find("{http://www.w3.org/2000/svg}desc")
-            self.assertIn("csl-report-quantitative-v1", description.text)
+            description = companion_svg.findtext(SVG_DESCRIPTION, default="")
+            self.assertIn("csl-report-quantitative-v1", description)
             self.assertIn(expected_text, " ".join(companion_svg.itertext()))
             entry = next(entry for entry in visual_inventory["entries"] if entry["anchor"] == stem)
             self.assertEqual(entry["figure"], stem + ".svg")
@@ -1086,24 +1548,29 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("microseconds per checked call", finite_feedback_page)
         self.assertIn("Scenario ordinal", finite_feedback_page)
         ext01_svg = ET.parse(self.site / "examples/ext01-b08-timing-v1.svg").getroot()
-        ext01_description = ext01_svg.find("{http://www.w3.org/2000/svg}desc")
-        self.assertIn("Seven markers show saved full-catalogue timing observations",
-                      ext01_description.text)
-        self.assertIn("elapsed time (ms per call)", ext01_description.text)
-        self.assertIn("ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54/records.json",
-                      ext01_page)
+        ext01_description = ext01_svg.findtext(SVG_DESCRIPTION, default="")
+        self.assertIn(
+            "Seven markers show saved full-catalogue timing observations", ext01_description
+        )
+        self.assertIn("elapsed time (ms per call)", ext01_description)
+        self.assertIn(
+            "ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54/records.json",
+            ext01_page,
+        )
         app01_page = (self.site / "examples/app01-plan-timing-v1.html").read_text()
         self.assertIn("seven measured batches of 40,000 checked calls", app01_page)
         self.assertIn("not a speed comparison or a performance-winner claim", app01_page)
         self.assertIn("valid_plan 189.261 ms", app01_page)
         self.assertIn("invalid_plan 190.659 ms", app01_page)
         self.assertIn("empty_inner 127.619 ms", app01_page)
-        self.assertIn("Fixture ordinal and median elapsed time use separate numeric axes", app01_page)
+        self.assertIn(
+            "Fixture ordinal and median elapsed time use separate numeric axes", app01_page
+        )
         self.assertIn("Source commit 22d406fd9ea92315ef2a4f6b5703eec74e710d47", app01_page)
         app01_svg = ET.parse(self.site / "examples/app01-plan-timing-v1.svg").getroot()
-        app01_description = app01_svg.find("{http://www.w3.org/2000/svg}desc")
-        self.assertIn("median elapsed time per 40,000-call batch (ms)", app01_description.text)
-        self.assertIn("not a speed comparison", app01_description.text)
+        app01_description = app01_svg.findtext(SVG_DESCRIPTION, default="")
+        self.assertIn("median elapsed time per 40,000-call batch (ms)", app01_description)
+        self.assertIn("not a speed comparison", app01_description)
         app03_page = (self.site / "examples/app03-zonotope-v1.html").read_text()
         self.assertIn("method tag generator-axis-cover", app03_page)
         self.assertIn("Input generators are (1,0), (0,1), (0.5,0.5)", app03_page)
@@ -1111,61 +1578,98 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("support 2 for the input and 3 for its axis cover", app03_page)
         self.assertIn("Source commit e105a86b8e2ab7d09b1e7042fc5f0d5bc0ce5c40", app03_page)
         app03_svg = ET.parse(self.site / "examples/app03-zonotope-v1.svg").getroot()
-        app03_description = app03_svg.find("{http://www.w3.org/2000/svg}desc")
-        self.assertIn("convex hull of the eight signed sums", app03_description.text)
-        self.assertIn("Dark points show those saved-coefficient sums", app03_description.text)
-        self.assertIn("outer-cover generators", app03_description.text)
+        app03_description = app03_svg.findtext(SVG_DESCRIPTION, default="")
+        self.assertIn("convex hull of the eight signed sums", app03_description)
+        self.assertIn("Dark points show those saved-coefficient sums", app03_description)
+        self.assertIn("outer-cover generators", app03_description)
         square = ET.parse(self.site / "examples/square_duplicates.svg")
         boundary = square.find(".//{http://www.w3.org/2000/svg}polygon")
-        self.assertEqual(boundary.attrib["points"],
-                         "146.666667,373.333333 413.333333,373.333333 413.333333,106.666667 146.666667,106.666667")
+        assert boundary is not None, "the square hull SVG must contain a boundary polygon"
+        self.assertEqual(
+            boundary.attrib["points"],
+            "146.666667,373.333333 413.333333,373.333333 413.333333,106.666667 146.666667,106.666667",
+        )
         self.assertEqual(len(square.findall(".//{http://www.w3.org/2000/svg}circle")), 5)
-        self.assertEqual(len(ET.parse(self.site / "examples/collinear_endpoints.svg")
-                             .findall(".//{http://www.w3.org/2000/svg}polyline")), 1)
+        self.assertEqual(
+            len(
+                ET.parse(self.site / "examples/collinear_endpoints.svg").findall(
+                    ".//{http://www.w3.org/2000/svg}polyline"
+                )
+            ),
+            1,
+        )
         hybrid_svg = ET.parse(self.site / "examples/two_stage_scalar_family.svg")
         self.assertIn("x₂ (terminal state)", "".join(hybrid_svg.getroot().itertext()))
         record = json.loads((self.site / "examples/two_stage_scalar_family.json").read_text())
         self.assertTrue(record["illustration_only"])
         self.assertEqual(record["analytic"]["minimum_objective"], 0)
         self.assertEqual(record["inputs"]["state_dimension"], 1)
-        self.assertEqual(record["inputs"]["modes"][0]["controls_by_stage"],
-                         [{"interval": [0, 1]}, {"singleton": 0}])
+        self.assertEqual(
+            record["inputs"]["modes"][0]["controls_by_stage"],
+            [{"interval": [0, 1]}, {"singleton": 0}],
+        )
         two_parameter_svg = ET.parse(self.site / "examples/two_parameter_scalar_polytopes.svg")
         two_parameter_svg_text = "".join(two_parameter_svg.getroot().itertext())
         self.assertIn("objective = 0 everywhere", two_parameter_svg_text)
         self.assertIn("u₁ (second free control)", two_parameter_svg_text)
         polygons = two_parameter_svg.findall(".//{http://www.w3.org/2000/svg}polygon")
-        self.assertEqual([polygon.attrib["points"] for polygon in polygons],
-                         ["80.000000,440.000000 480.000000,440.000000 80.000000,40.000000",
-                          "80.000000,440.000000 280.000000,440.000000 280.000000,240.000000 80.000000,40.000000"])
-        two_record = json.loads((self.site / "examples/two_parameter_scalar_polytopes.json").read_text())
+        self.assertEqual(
+            [polygon.attrib["points"] for polygon in polygons],
+            [
+                "80.000000,440.000000 480.000000,440.000000 80.000000,40.000000",
+                "80.000000,440.000000 280.000000,440.000000 280.000000,240.000000 80.000000,40.000000",
+            ],
+        )
+        two_record = json.loads(
+            (self.site / "examples/two_parameter_scalar_polytopes.json").read_text()
+        )
         self.assertTrue(two_record["illustration_only"])
-        self.assertEqual(two_record["inputs"]["terminal_objective"],
-                         {"type": "linear", "coefficients": [0], "constant": 0})
+        self.assertEqual(
+            two_record["inputs"]["terminal_objective"],
+            {"type": "linear", "coefficients": [0], "constant": 0},
+        )
         self.assertEqual(len(two_record["analytic"]["paths"]), 2)
         projected_svg = ET.parse(self.site / "examples/one_step_projected_hybrid_reachability.svg")
         projected_text = "".join(projected_svg.getroot().itertext())
         self.assertIn("u₀ (free control)", projected_text)
         self.assertIn("x₁ (terminal state)", projected_text)
         self.assertEqual(len(projected_svg.findall(".//{http://www.w3.org/2000/svg}polyline")), 1)
-        self.assertEqual([point.attrib["fill"] for point in projected_svg.findall(".//{http://www.w3.org/2000/svg}circle")],
-                         ["#b4cda3", "#b4cda3"])
-        projected_record = json.loads((self.site / "examples/projected_hybrid_reachability.json").read_text())
+        self.assertEqual(
+            [
+                point.attrib["fill"]
+                for point in projected_svg.findall(".//{http://www.w3.org/2000/svg}circle")
+            ],
+            ["#b4cda3", "#b4cda3"],
+        )
+        projected_record = json.loads(
+            (self.site / "examples/projected_hybrid_reachability.json").read_text()
+        )
         self.assertTrue(projected_record["illustration_only"])
         self.assertEqual(projected_record["analytic"]["projected_terminal_set"], "0<=x[1]<=0.5")
         coverage = json.loads((self.site / "examples/algorithm-coverage.json").read_text())
         self.assertEqual(coverage["schema"], "csl.algorithm-visual-coverage/1")
-        self.assertTrue(all(isinstance(family.get("modules"), list) and family["modules"] and
-                            all(isinstance(module, str) and module for module in family["modules"])
-                            for family in coverage["families"]))
-        catalog_kinds = {report["report_kind"] for report in json.loads(self.catalog.read_text())["reports"]}
-        mapped_kinds = ({kind for family in coverage["families"] for kind in family["catalog_kinds"]} |
-                        set(coverage.get("evidence_only_kinds", {})))
+        self.assertTrue(
+            all(
+                isinstance(family.get("modules"), list)
+                and family["modules"]
+                and all(isinstance(module, str) and module for module in family["modules"])
+                for family in coverage["families"]
+            )
+        )
+        catalog_kinds = {
+            report["report_kind"] for report in json.loads(self.catalog.read_text())["reports"]
+        }
+        mapped_kinds = {
+            kind for family in coverage["families"] for kind in family["catalog_kinds"]
+        } | set(coverage.get("evidence_only_kinds", {}))
         self.assertEqual(mapped_kinds, catalog_kinds)
         visual_coverage = json.loads((self.site / "examples/visual-coverage.json").read_text())
         visual_anchors = {entry["anchor"] for entry in visual_coverage["entries"]}
-        issue3_entry = next(entry for entry in visual_coverage["entries"]
-                            if entry["anchor"] == "visual-issue3-validated-minimax-2d")
+        issue3_entry = next(
+            entry
+            for entry in visual_coverage["entries"]
+            if entry["anchor"] == "visual-issue3-validated-minimax-2d"
+        )
         self.assertEqual(issue3_entry["walkthrough_page"], "issue3-control-walkthrough.html")
         for family in coverage["families"]:
             if family["support"].startswith("supported-"):
@@ -1176,12 +1680,19 @@ class GalleryTests(unittest.TestCase):
         self.assertEqual(minkowski["answer"]["vertices_ccw"], [[0, 0], [3, 0], [2, 1], [0, 2]])
         self.assertIn("visual_examples.py --catalog", minkowski["reproduction_command"])
         ns = "{http://www.w3.org/2000/svg}"
-        self.assertEqual(len(ET.parse(self.site / "examples/geo02-minkowski.svg").findall(f".//{ns}polygon")), 1)
+        self.assertEqual(
+            len(ET.parse(self.site / "examples/geo02-minkowski.svg").findall(f".//{ns}polygon")), 1
+        )
         hv = json.loads((self.site / "examples/geo03-hv-square.json").read_text())
         self.assertEqual(hv["answer"]["V_vertices_ccw"], [[0, 0], [1, 0], [1, 1], [0, 1]])
         predecessor = json.loads((self.site / "examples/geo05-predecessor.json").read_text())
-        self.assertEqual(predecessor["answer"]["predecessor_X_intersect_S_minus_U"], [[0, 2], [0, 2]])
-        self.assertEqual(len(ET.parse(self.site / "examples/geo05-predecessor.svg").findall(f".//{ns}polygon")), 3)
+        self.assertEqual(
+            predecessor["answer"]["predecessor_X_intersect_S_minus_U"], [[0, 2], [0, 2]]
+        )
+        self.assertEqual(
+            len(ET.parse(self.site / "examples/geo05-predecessor.svg").findall(f".//{ns}polygon")),
+            3,
+        )
         lp = json.loads((self.site / "examples/lp-triangle.json").read_text())
         self.assertEqual((lp["answer"]["optimizer"], lp["answer"]["objective_value"]), ([0, 1], -2))
         phase_one = json.loads((self.site / "examples/opt04-phase-one.json").read_text())
@@ -1194,10 +1705,18 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("not a replay", validated["evidence"])
         self.assertIn("a2c0736f43e4ff15d9a9323a51296e1b416d8809", validated["source_commit"])
         self.assertEqual(len(validated["source_urls"]), 2)
-        self.assertTrue(all(url.startswith("https://github.com/butahlecoq/controlled-systems-lab/blob/a2c0736f43e4ff15d9a9323a51296e1b416d8809/")
-                            for url in validated["source_urls"]))
-        self.assertIn("--catalog reports/algorithm-results/catalog.json --site build/report-site",
-                      validated["reproduction_command"])
+        self.assertTrue(
+            all(
+                url.startswith(
+                    "https://github.com/butahlecoq/controlled-systems-lab/blob/a2c0736f43e4ff15d9a9323a51296e1b416d8809/"
+                )
+                for url in validated["source_urls"]
+            )
+        )
+        self.assertIn(
+            "--catalog reports/algorithm-results/catalog.json --site build/report-site",
+            validated["reproduction_command"],
+        )
         self.assertIn("<code>python scripts/reports/visual_examples.py", page)
         for url in validated["source_urls"]:
             self.assertIn(f'href="{url}"', page)
@@ -1206,31 +1725,50 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("u=(1,0): bad", "".join(validated_svg.getroot().itertext()))
         self.assertIn("gap=¼", "".join(validated_svg.getroot().itertext()))
         slew = json.loads((self.site / "examples/ext03-slew-memory.json").read_text())
-        self.assertEqual(slew["answer"]["feasible_polygon_ccw"],
-                         [[-1,-1],[-.75,-1],[1,.75],[1,1],[.75,1],[-1,-.75]])
-        self.assertEqual(slew["answer"]["complete_minimizer_segment"], [[-.125,.125],[.125,-.125]])
+        self.assertEqual(
+            slew["answer"]["feasible_polygon_ccw"],
+            [[-1, -1], [-0.75, -1], [1, 0.75], [1, 1], [0.75, 1], [-1, -0.75]],
+        )
+        self.assertEqual(
+            slew["answer"]["complete_minimizer_segment"], [[-0.125, 0.125], [0.125, -0.125]]
+        )
         self.assertEqual(slew["inputs"]["temporal_constraint"], "|u1-u0|<=1/4")
         self.assertIn("not a replay or measurement", slew["evidence"])
         self.assertIn("temporal-slew-integrator.json", slew["source_path"])
         slew_svg = ET.parse(self.site / "examples/ext03-slew-memory.svg")
         self.assertEqual(len(slew_svg.findall(f".//{ns}polygon")), 1)
-        first = {p.relative_to(self.site / "examples").as_posix(): p.read_bytes()
-                 for p in (self.site / "examples").rglob("*") if p.is_file()}
+        first = {
+            p.relative_to(self.site / "examples").as_posix(): p.read_bytes()
+            for p in (self.site / "examples").rglob("*")
+            if p.is_file()
+        }
         gallery.build(self.catalog, self.site)
-        self.assertEqual({p.relative_to(self.site / "examples").as_posix(): p.read_bytes()
-                          for p in (self.site / "examples").rglob("*") if p.is_file()}, first)
-        self.assertEqual((self.site / "index.html").read_text().count('id="visual-examples-link"'), 1)
+        self.assertEqual(
+            {
+                p.relative_to(self.site / "examples").as_posix(): p.read_bytes()
+                for p in (self.site / "examples").rglob("*")
+                if p.is_file()
+            },
+            first,
+        )
+        self.assertEqual(
+            (self.site / "index.html").read_text().count('id="visual-examples-link"'), 1
+        )
         companion = self.site / "examples/geometry-optimization-v1.html"
         self.assertTrue(companion.is_file())
         companion_html = companion.read_text()
-        self.assertEqual(companion_html.count('<section id='), 11)
-        self.assertIn('role="region" tabindex="0" aria-label="Timing values for GEO-04 intersection and reduction"',
-                      companion_html)
+        self.assertEqual(companion_html.count("<section id="), 11)
+        self.assertIn(
+            'role="region" tabindex="0" aria-label="Timing values for GEO-04 intersection and reduction"',
+            companion_html,
+        )
         for name in ("geo08/geometry.svg", "opt10/geometry.svg", "geo04/figure.svg"):
             svg = ET.parse(self.site / "examples/geometry-opt" / name).getroot()
             self.assertEqual(svg.get("role"), "img")
-            self.assertTrue(svg.find("{http://www.w3.org/2000/svg}desc").text)
-        raw = json.loads((self.site / "examples/geometry-opt/data/geo08-lazy-6dbdd6b2f9235837.json").read_text())
+            self.assertTrue(svg.findtext(SVG_DESCRIPTION))
+        raw = json.loads(
+            (self.site / "examples/geometry-opt/data/geo08-lazy-6dbdd6b2f9235837.json").read_text()
+        )
         self.assertIn("fixture", raw)
 
     def test_every_rendered_example_is_listed_in_inventory(self):
@@ -1270,44 +1808,47 @@ class GalleryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "staged report"):
             gallery.build(self.catalog, self.site)
 
-    def test_nominal_exact_example_stages_its_hash_checked_bundle(self):
-        source = ROOT / "reports/algorithm-results/syn03-nominal-exact-2d-8b94095"
-        stage_root = self.site / "custom-stage"
-        stage_root.mkdir()
-        report_id = nominal_exact_example.stage(source, stage_root)
-        staged = stage_root / report_id
-        self.assertEqual(report_id, "syn03-nominal-exact-2d-8b94095")
-        self.assertEqual((staged / "records.json").read_bytes(), (source / "records.json").read_bytes())
-        self.assertIn("optimal-face.svg", (staged / "index.html").read_text())
-
-    def test_nominal_exact_example_rejects_changed_bytes(self):
-        source = ROOT / "reports/algorithm-results/syn03-nominal-exact-2d-8b94095"
-        copied = self.site / "modified-bundle"
-        shutil.copytree(source, copied)
-        (copied / "optimal-face.svg").write_text("changed")
-        stage_root = self.site / "modified-stage"
-        stage_root.mkdir()
-        with self.assertRaisesRegex(ValueError, "checksum mismatch"):
-            nominal_exact_example.stage(copied, stage_root)
-
     def test_cli_stages_the_downloaded_values(self):
         import subprocess
-        subprocess.run([sys.executable, str(ROOT / "scripts/reports/visual_examples.py"),
-                        "--catalog", str(self.catalog), "--site", str(self.site)], check=True)
+
+        subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "scripts/reports/visual_examples.py"),
+                "--catalog",
+                str(self.catalog),
+                "--site",
+                str(self.site),
+            ],
+            check=True,
+        )
         result = json.loads((self.site / "examples/minimal-inputs.json").read_text())
         examples = {example["slug"]: example for example in result["examples"]}
-        self.assertEqual(examples["square_duplicates"]["indices"], [0,1,2,3])
-        self.assertEqual(examples["collinear_endpoints"]["vertices"], [[0,0],[3,3]])
-        self.assertEqual(examples["crossing_octagon"]["vertices"][0], [-1.0000000000000002, -.5000000000000001])
+        self.assertEqual(examples["square_duplicates"]["indices"], [0, 1, 2, 3])
+        self.assertEqual(examples["collinear_endpoints"]["vertices"], [[0, 0], [3, 3]])
+        self.assertEqual(
+            examples["crossing_octagon"]["vertices"][0], [-1.0000000000000002, -0.5000000000000001]
+        )
         self.assertEqual(examples["two_stage_scalar_family"]["kind"], "hybrid")
         self.assertEqual(examples["two_parameter_scalar_polytopes"]["kind"], "two_parameter")
-        coverage=json.loads((self.site/"examples/algorithm-coverage.json").read_text())
-        b07=next(report for report in self.catalog_reports if report["report_kind"]=="issue6-b07-reference")
-        family=next(entry for entry in coverage["families"] if "issue6-b07-reference" in entry["catalog_kinds"])
-        linked=next(report for report in family["catalog_reports"] if report["report_kind"]=="issue6-b07-reference")
-        self.assertEqual(linked["report_id"],b07["report_id"])
-        self.assertTrue(linked["raw_record"].endswith(b07["report_id"]+"/results.jsonl"))
-
+        coverage = json.loads((self.site / "examples/algorithm-coverage.json").read_text())
+        b07 = next(
+            report
+            for report in self.catalog_reports
+            if report["report_kind"] == "issue6-b07-reference"
+        )
+        family = next(
+            entry
+            for entry in coverage["families"]
+            if "issue6-b07-reference" in entry["catalog_kinds"]
+        )
+        linked = next(
+            report
+            for report in family["catalog_reports"]
+            if report["report_kind"] == "issue6-b07-reference"
+        )
+        self.assertEqual(linked["report_id"], b07["report_id"])
+        self.assertTrue(linked["raw_record"].endswith(b07["report_id"] + "/results.jsonl"))
 
     def test_output_symlinks_are_rejected_before_any_gallery_write(self):
         for relative in ("examples/examples.css", "examples/viz10"):
@@ -1317,36 +1858,55 @@ class GalleryTests(unittest.TestCase):
                 output = self.site / relative
                 output.parent.mkdir(parents=True, exist_ok=True)
                 output.symlink_to(target, target_is_directory=relative.endswith("viz10"))
-                before = {path.relative_to(self.site).as_posix():
-                          ("symlink", str(path.readlink())) if path.is_symlink() else
-                          ("file", path.read_bytes()) if path.is_file() else ("directory", None)
-                          for path in self.site.rglob("*")}
+                before = {
+                    path.relative_to(self.site).as_posix(): ("symlink", str(path.readlink()))
+                    if path.is_symlink()
+                    else ("file", path.read_bytes())
+                    if path.is_file()
+                    else ("directory", None)
+                    for path in self.site.rglob("*")
+                }
                 with self.assertRaisesRegex(ValueError, "symlink"):
                     gallery.build(self.catalog, self.site)
-                after = {path.relative_to(self.site).as_posix():
-                         ("symlink", str(path.readlink())) if path.is_symlink() else
-                         ("file", path.read_bytes()) if path.is_file() else ("directory", None)
-                         for path in self.site.rglob("*")}
+                after = {
+                    path.relative_to(self.site).as_posix(): ("symlink", str(path.readlink()))
+                    if path.is_symlink()
+                    else ("file", path.read_bytes())
+                    if path.is_file()
+                    else ("directory", None)
+                    for path in self.site.rglob("*")
+                }
                 self.assertEqual(after, before)
                 output.unlink()
 
     def test_generated_inventory_failure_leaves_gallery_and_site_index_unchanged(self):
-        before = {path.relative_to(self.site).as_posix():
-                  ("file", path.read_bytes()) if path.is_file() else ("directory", None)
-                  for path in self.site.rglob("*")}
-        with patch.object(gallery, "validate_gallery_inventory",
-                          side_effect=ValueError("invalid generated inventory")):
+        before = {
+            path.relative_to(self.site).as_posix(): ("file", path.read_bytes())
+            if path.is_file()
+            else ("directory", None)
+            for path in self.site.rglob("*")
+        }
+        with patch.object(
+            gallery,
+            "validate_gallery_inventory",
+            side_effect=ValueError("invalid generated inventory"),
+        ):
             with self.assertRaisesRegex(ValueError, "invalid generated inventory"):
                 gallery.build(self.catalog, self.site)
-        after = {path.relative_to(self.site).as_posix():
-                 ("file", path.read_bytes()) if path.is_file() else ("directory", None)
-                 for path in self.site.rglob("*")}
+        after = {
+            path.relative_to(self.site).as_posix(): ("file", path.read_bytes())
+            if path.is_file()
+            else ("directory", None)
+            for path in self.site.rglob("*")
+        }
         self.assertEqual(after, before)
 
     def test_commit_io_failure_leaves_root_index_unchanged_and_may_leave_partial_gallery(self):
         root_index = (self.site / "index.html").read_bytes()
-        report_bytes = {entry["report_id"]: (self.site / entry["report_id"] / "index.html").read_bytes()
-                        for entry in self.examples}
+        report_bytes = {
+            entry["report_id"]: (self.site / entry["report_id"] / "index.html").read_bytes()
+            for entry in self.examples
+        }
         real_commit = gallery.site_additions.commit
 
         def fail_after_one(plan):

@@ -18,15 +18,16 @@ struct TrialRecord {
     std::string harness_status = "exception", error, actual_version;
     std::vector<std::string> errors;
     Diagnostics diagnostics;
-    std::array<Interval,6> timings{};
+    std::array<Interval, 6> timings{};
     std::uint64_t observation = 0;
     bool passed() const { return harness_status == "returned" && errors.empty(); }
 };
-const std::vector<Fixture>& catalogue();
-TrialRecord run_trial(const Fixture&, std::stop_token);
-std::string json_string(const std::string&);
+const std::vector<Fixture> &catalogue();
+TrialRecord run_trial(const Fixture &, std::stop_token);
+std::string json_string(const std::string &);
 std::string json_number(double);
 std::string catalogue_json();
-std::string trial_json(const Fixture&, const TrialRecord&, std::size_t round, std::size_t sequence, const std::string& purpose);
+std::string trial_json(const Fixture &, const TrialRecord &, std::size_t round,
+                       std::size_t sequence, const std::string &purpose);
 std::string build_info_json();
 } // namespace csl::reporting

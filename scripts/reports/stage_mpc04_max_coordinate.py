@@ -10,7 +10,6 @@ import importlib.util
 import io
 import json
 import os
-from pathlib import Path, PurePosixPath
 import re
 import shutil
 import stat
@@ -18,14 +17,27 @@ import subprocess
 import sys
 import tempfile
 import zipfile
+from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE_REPOSITORY_URL = "https://github.com/butahlecoq/controlled-systems-lab.git"
 SOURCE = ROOT / "reports/algorithm-results/mpc04-max-coordinate-replanning-pilot-20261030"
+# Retain the deployed route only for the exact captured input inventory.
+HISTORICAL_BUNDLE_SHA256 = "a600448ea698e559505f549c4dcb639c8716abe1e929be3d4313507987e67375"
+HISTORICAL_STAGER_SHA256 = "7becddc7cdc71222bb0927e3ef5b07d3703a7720f57808899873376d4bee93f9"
+HISTORICAL_ZIP_SHA256 = "ab5a12359f365d3044743dd9ad74d3ee6279e00f2d68895830c84f8ab59aa965"
 REPORT_PATH = ROOT / "scripts/reports/mpc04/max_coordinate_replanning.py"
 CHECKER_PATH = ROOT / "scripts/reports/mpc04/check_max_coordinate.py"
-PAYLOAD_FILES = ("README.md", "build-config.json", "build.log", "capture.json",
-                 "environment.json", "index.html", "result.json", "trajectory.svg")
+PAYLOAD_FILES = (
+    "README.md",
+    "build-config.json",
+    "build.log",
+    "capture.json",
+    "environment.json",
+    "index.html",
+    "result.json",
+    "trajectory.svg",
+)
 ZIP_FILE = "mpc04-max-coordinate-replanning-pilot.zip"
 BUNDLE_SUMS = "BUNDLE-SHA256SUMS"
 OUTER_FILES = (*PAYLOAD_FILES, BUNDLE_SUMS, ZIP_FILE)
@@ -83,14 +95,14 @@ def _regular_file(directory: Path, name: str) -> bytes:
 def read_bundle(source: Path) -> dict[str, bytes]:
     if source.is_symlink() or not source.is_dir():
         raise ValueError("MPC-04 report source must be a regular directory")
-    outer = parse_sums(_regular_file(source, "SHA256SUMS"), set(OUTER_FILES),
-                       "MPC-04 outer checksums")
+    outer = parse_sums(
+        _regular_file(source, "SHA256SUMS"), set(OUTER_FILES), "MPC-04 outer checksums"
+    )
     files = {name: _regular_file(source, name) for name in OUTER_FILES}
     for name, content in files.items():
         if digest(content) != outer[name]:
             raise ValueError(f"MPC-04 outer checksum mismatch: {name}")
-    inner = parse_sums(files[BUNDLE_SUMS], set(PAYLOAD_FILES),
-                       "MPC-04 bundle checksums")
+    inner = parse_sums(files[BUNDLE_SUMS], set(PAYLOAD_FILES), "MPC-04 bundle checksums")
     for name in PAYLOAD_FILES:
         if digest(files[name]) != inner[name]:
             raise ValueError(f"MPC-04 bundle checksum mismatch: {name}")
@@ -104,11 +116,18 @@ def read_bundle(source: Path) -> dict[str, bytes]:
             for entry in entries:
                 member = PurePosixPath(entry.filename)
                 mode = entry.external_attr >> 16
-                if (member.is_absolute() or ".." in member.parts or len(member.parts) != 1 or
-                        entry.is_dir() or (stat.S_IFMT(mode) not in (0, stat.S_IFREG))):
+                if (
+                    member.is_absolute()
+                    or ".." in member.parts
+                    or len(member.parts) != 1
+                    or entry.is_dir()
+                    or (stat.S_IFMT(mode) not in (0, stat.S_IFREG))
+                ):
                     raise ValueError("MPC-04 offline ZIP contains an unsafe entry")
                 content = archive.read(entry)
-                expected_content = files[BUNDLE_SUMS] if entry.filename == BUNDLE_SUMS else files[entry.filename]
+                expected_content = (
+                    files[BUNDLE_SUMS] if entry.filename == BUNDLE_SUMS else files[entry.filename]
+                )
                 if content != expected_content:
                     raise ValueError(f"MPC-04 offline ZIP content differs: {entry.filename}")
     except (zipfile.BadZipFile, OSError):
@@ -120,16 +139,31 @@ def verify_source_fingerprints(commit: str, fingerprints: dict[str, str]) -> Non
     repository = ROOT
     present = subprocess.run(
         ["git", "-C", str(repository), "cat-file", "-e", f"{commit}^{{commit}}"],
-        capture_output=True, check=False)
+        capture_output=True,
+        check=False,
+    )
     temporary = None
     if present.returncode != 0:
         temporary = tempfile.TemporaryDirectory(prefix="mpc04-source-commit-")
         repository = Path(temporary.name) / "repository.git"
-        initialized = subprocess.run(["git", "init", "--bare", str(repository)],
-                                     capture_output=True, check=False)
+        initialized = subprocess.run(
+            ["git", "init", "--bare", str(repository)], capture_output=True, check=False
+        )
         fetched = subprocess.run(
-            ["git", "-C", str(repository), "fetch", "--quiet", "--no-tags", "--depth=1",
-             SOURCE_REPOSITORY_URL, commit], capture_output=True, check=False)
+            [
+                "git",
+                "-C",
+                str(repository),
+                "fetch",
+                "--quiet",
+                "--no-tags",
+                "--depth=1",
+                SOURCE_REPOSITORY_URL,
+                commit,
+            ],
+            capture_output=True,
+            check=False,
+        )
         if initialized.returncode != 0 or fetched.returncode != 0:
             temporary.cleanup()
             raise ValueError("MPC-04 captured source commit is unavailable for verification")
@@ -137,7 +171,9 @@ def verify_source_fingerprints(commit: str, fingerprints: dict[str, str]) -> Non
         for key, path in SOURCE_PATHS.items():
             blob = subprocess.run(
                 ["git", "-C", str(repository), "cat-file", "blob", f"{commit}:{path}"],
-                capture_output=True, check=False)
+                capture_output=True,
+                check=False,
+            )
             if blob.returncode != 0:
                 raise ValueError(f"MPC-04 captured source is absent: {path}")
             if digest(blob.stdout) != fingerprints[key]:
@@ -161,28 +197,41 @@ def validate_bundle(source: Path):
     provenance = capture.get("source", {})
     commit = provenance.get("report_code_commit")
     fingerprints = provenance.get("source_sha256")
-    if (not isinstance(commit, str) or SOURCE_COMMIT_RE.fullmatch(commit) is None or
-            not isinstance(fingerprints, dict) or set(fingerprints) != set(SOURCE_PATHS) or
-            any(not isinstance(value, str) or SHA256_RE.fullmatch(value) is None
-                for value in fingerprints.values())):
+    if (
+        not isinstance(commit, str)
+        or SOURCE_COMMIT_RE.fullmatch(commit) is None
+        or not isinstance(fingerprints, dict)
+        or set(fingerprints) != set(SOURCE_PATHS)
+        or any(
+            not isinstance(value, str) or SHA256_RE.fullmatch(value) is None
+            for value in fingerprints.values()
+        )
+    ):
         raise ValueError("MPC-04 captured source provenance is malformed")
-    if implementation.get("commit") != commit or implementation.get("source_sha256") != fingerprints:
+    if (
+        implementation.get("commit") != commit
+        or implementation.get("source_sha256") != fingerprints
+    ):
         raise ValueError("MPC-04 result and capture source provenance differ")
     build = provenance.get("build", {})
-    if (provenance.get("algorithm_sources_dirty") is not False or
-            build.get("algorithm_sources_clean_at_build") is not True or
-            build.get("type") != "Release" or
-            build.get("target") != "csl_mpc04_max_coordinate_replanning" or
-            build.get("native_driver_sha256") != fingerprints["native_driver"] or
-            SHA256_RE.fullmatch(str(provenance.get("binary_sha256", ""))) is None or
-            not files["build.log"].strip()):
+    if (
+        provenance.get("algorithm_sources_dirty") is not False
+        or build.get("algorithm_sources_clean_at_build") is not True
+        or build.get("type") != "Release"
+        or build.get("target") != "csl_mpc04_max_coordinate_replanning"
+        or build.get("native_driver_sha256") != fingerprints["native_driver"]
+        or SHA256_RE.fullmatch(str(provenance.get("binary_sha256", ""))) is None
+        or not files["build.log"].strip()
+    ):
         raise ValueError("MPC-04 clean Release build evidence is incomplete")
-    if (environment.get("schema") != "csl.mpc04-runtime/4" or environment != provenance):
+    if environment.get("schema") != "csl.mpc04-runtime/4" or environment != provenance:
         raise ValueError("MPC-04 environment schema differs")
-    if (capture.get("episode_count") != len(result_data.get("episodes", [])) or
-            capture.get("variants") != len(result_data.get("variants", {})) or
-            capture.get("state_transitions") != 512 or
-            capture.get("complete_histories_per_variant") != 16):
+    if (
+        capture.get("episode_count") != len(result_data.get("episodes", []))
+        or capture.get("variants") != len(result_data.get("variants", {}))
+        or capture.get("state_transitions") != 512
+        or capture.get("complete_histories_per_variant") != 16
+    ):
         raise ValueError("MPC-04 capture counts differ from the saved result")
 
     with tempfile.TemporaryDirectory(prefix="mpc04-report-replay-") as temporary:
@@ -216,27 +265,43 @@ def stage(source: Path, site: Path) -> str:
         raise ValueError("MPC-04 archive insertion point differs")
 
     source_commit = capture["source"]["report_code_commit"]
+    source_hashes = {name: digest(content) for name, content in sorted(files.items())}
+    historical = (
+        source.name == SOURCE.name
+        and digest(json.dumps(source_hashes, separators=(",", ":")).encode())
+        == HISTORICAL_BUNDLE_SHA256
+    )
+    stager_sha256 = HISTORICAL_STAGER_SHA256 if historical else digest(Path(__file__).read_bytes())
     identity = {
         "source_commit": source_commit,
         "capture_sha256": digest(files["capture.json"]),
         "result_sha256": digest(files["result.json"]),
-        "stager_sha256": digest(Path(__file__).read_bytes()),
-        "source_bundle_sha256": {name: digest(content) for name, content in sorted(files.items())},
+        "stager_sha256": stager_sha256,
+        "source_bundle_sha256": source_hashes,
     }
-    route = "mpc04-max-coordinate-replanning-" + digest(
-        json.dumps(identity, sort_keys=True, separators=(",", ":")).encode())[:20]
+    route = (
+        "mpc04-max-coordinate-replanning-"
+        + digest(json.dumps(identity, sort_keys=True, separators=(",", ":")).encode())[:20]
+    )
     destination, archive_path = site / route, site / f"{route}.zip"
     if destination.exists() or archive_path.exists() or route in page:
         raise ValueError("MPC-04 immutable route already exists")
 
     generated = {name: files[name] for name in PAYLOAD_FILES}
-    footer = (f'<p>Immutable report <code>{html.escape(route)}</code> · '
-              '<a href="publication-manifest.json">Publication manifest</a> · '
-              f'<a href="../{html.escape(route)}.zip">Offline ZIP</a>.</p>')
-    generated["index.html"] = generated["index.html"].decode("utf-8").replace(
-        "</html>", footer + "</html>").encode("utf-8")
+    footer = (
+        f"<p>Immutable report <code>{html.escape(route)}</code> · "
+        '<a href="publication-manifest.json">Publication manifest</a> · '
+        f'<a href="../{html.escape(route)}.zip">Offline ZIP</a>.</p>'
+    )
+    generated["index.html"] = (
+        generated["index.html"]
+        .decode("utf-8")
+        .replace("</html>", footer + "</html>")
+        .encode("utf-8")
+    )
     generated["SHA256SUMS"] = "".join(
-        f"{digest(generated[name])}  {name}\n" for name in sorted(generated)).encode("ascii")
+        f"{digest(generated[name])}  {name}\n" for name in sorted(generated)
+    ).encode("ascii")
     manifest = {
         "schema": "csl.mpc04-max-coordinate-publication/1",
         "report_id": route,
@@ -249,15 +314,22 @@ def stage(source: Path, site: Path) -> str:
             "Measurements are descriptive for one adapter and host; no limiter profile or performance winner is claimed.",
             "Finite-episode evidence does not establish recursive feasibility, stability, or globally optimal causal minimax control.",
         ],
-        "verification": {"status": "passed", "checker": "scripts/reports/mpc04/check_max_coordinate.py"},
+        "verification": {
+            "status": "passed",
+            "checker": "scripts/reports/mpc04/check_max_coordinate.py",
+        },
         "source_bundle_sha256": identity["source_bundle_sha256"],
         "published_files": {name: digest(content) for name, content in sorted(generated.items())},
     }
-    generated["publication-manifest.json"] = (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode()
-    link = (f'<li><a href="{route}/index.html">MaxCoordinateGame replanning and QP comparison</a>'
-            f' · <a href="{route}/result.json">all episode records</a>'
-            f' · <a href="{route}/trajectory.svg">phase plane and decision timeline</a>'
-            f' · <a href="{route}.zip">offline ZIP</a></li>')
+    generated["publication-manifest.json"] = (
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n"
+    ).encode()
+    link = (
+        f'<li><a href="{route}/index.html">MaxCoordinateGame replanning and QP comparison</a>'
+        f' · <a href="{route}/result.json">all episode records</a>'
+        f' · <a href="{route}/trajectory.svg">phase plane and decision timeline</a>'
+        f' · <a href="{route}.zip">offline ZIP</a></li>'
+    )
 
     with tempfile.TemporaryDirectory(prefix=f".{route}-", dir=site) as temporary:
         temporary_path = Path(temporary)
@@ -265,20 +337,26 @@ def stage(source: Path, site: Path) -> str:
         staged_route.mkdir()
         for name, content in generated.items():
             (staged_route / name).write_bytes(content)
-        offline = (f'<!doctype html><html lang="en"><meta charset="utf-8">'
-                   f'<title>Offline MPC-04 report</title><a href="{route}/index.html">'
-                   "Open the MaxCoordinateGame replanning report</a></html>").encode("utf-8")
+        offline = (
+            f'<!doctype html><html lang="en"><meta charset="utf-8">'
+            f'<title>Offline MPC-04 report</title><a href="{route}/index.html">'
+            "Open the MaxCoordinateGame replanning report</a></html>"
+        ).encode("utf-8")
         archive_bytes = io.BytesIO()
         with zipfile.ZipFile(archive_bytes, "w", compression=zipfile.ZIP_DEFLATED) as archive:
             entries = [("index.html", offline)] + [
-                (f"{route}/{name}", content) for name, content in sorted(generated.items())]
+                (f"{route}/{name}", content) for name, content in sorted(generated.items())
+            ]
             for name, content in entries:
                 item = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
                 item.compress_type = zipfile.ZIP_DEFLATED
                 item.external_attr = 0o100644 << 16
                 archive.writestr(item, content)
+        archive_data = archive_bytes.getvalue()
+        if historical and digest(archive_data) != HISTORICAL_ZIP_SHA256:
+            raise ValueError("MPC-04 historical archive checksum differs")
         staged_archive = temporary_path / f"{route}.zip"
-        staged_archive.write_bytes(archive_bytes.getvalue())
+        staged_archive.write_bytes(archive_data)
         staged_index = temporary_path / "index.html"
         staged_index.write_text(page.replace("</ul>", link + "</ul>"), encoding="utf-8")
         if destination.exists() or archive_path.exists():

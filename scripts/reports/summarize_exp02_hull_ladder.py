@@ -8,7 +8,6 @@ import statistics
 from collections import defaultdict
 from pathlib import Path
 
-
 METHODS = (
     "geometric-quickhull",
     "lp-membership-baseline",
@@ -77,7 +76,9 @@ def main():
         raise SystemExit("input hash changed within a fixture")
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
-    ordered = sorted(unique.values(), key=lambda r: (r["input_points"], r["warmup"], r["round"], r["method"]))
+    ordered = sorted(
+        unique.values(), key=lambda r: (r["input_points"], r["warmup"], r["round"], r["method"])
+    )
     with (args.output_dir / "validated-rows.jsonl").open("w", encoding="utf-8") as stream:
         for row in ordered:
             stream.write(json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n")
@@ -90,37 +91,49 @@ def main():
             passed = [r for r in trials if r["passed"]]
             complete = [r for r in trials if r.get("reduction_complete", r["passed"])]
             times = [r["elapsed_ns"] / 1e6 for r in passed]
-            summaries.append({
-                "input_points": size,
-                "method": method,
-                "valid_trials": len(passed),
-                "classification_complete_trials": len(complete),
-                "incomplete_reduction_trials": len(trials) - len(complete),
-                "trials": len(trials),
-                "median_valid_ms": statistics.median(times) if times else "",
-                "min_valid_ms": min(times) if times else "",
-                "max_valid_ms": max(times) if times else "",
-                "failed_trials": sum(not r["passed"] for r in trials),
-                "median_attempt_ms_all_trials": statistics.median(
-                    [r["elapsed_ns"] / 1e6 for r in trials]),
-                "median_retained": statistics.median([r["retained"] for r in trials]),
-                "median_removed": statistics.median([r["removed"] for r in trials]),
-            })
+            summaries.append(
+                {
+                    "input_points": size,
+                    "method": method,
+                    "valid_trials": len(passed),
+                    "classification_complete_trials": len(complete),
+                    "incomplete_reduction_trials": len(trials) - len(complete),
+                    "trials": len(trials),
+                    "median_valid_ms": statistics.median(times) if times else "",
+                    "min_valid_ms": min(times) if times else "",
+                    "max_valid_ms": max(times) if times else "",
+                    "failed_trials": sum(not r["passed"] for r in trials),
+                    "median_attempt_ms_all_trials": statistics.median(
+                        [r["elapsed_ns"] / 1e6 for r in trials]
+                    ),
+                    "median_retained": statistics.median([r["retained"] for r in trials]),
+                    "median_removed": statistics.median([r["removed"] for r in trials]),
+                }
+            )
     with (args.output_dir / "summary.csv").open("w", newline="", encoding="utf-8") as stream:
         writer = csv.DictWriter(stream, fieldnames=list(summaries[0]))
         writer.writeheader()
         writer.writerows(summaries)
 
-    (args.output_dir / "coverage.json").write_text(json.dumps({
-        "expected_rows": len(expected),
-        "raw_rows": len(all_rows),
-        "unique_rows": len(unique),
-        "duplicate_keys_preserved_by_first_observation": len(duplicates),
-        "fixture_sha256": {fixture: next(iter(values)) for fixture, values in sorted(hashes.items())},
-        "source_commits": sorted({r["source_commit"] for r in unique.values()}),
-        "all_warmups_present": True,
-        "all_seven_repetitions_present": True,
-    }, indent=2) + "\n", encoding="utf-8")
+    (args.output_dir / "coverage.json").write_text(
+        json.dumps(
+            {
+                "expected_rows": len(expected),
+                "raw_rows": len(all_rows),
+                "unique_rows": len(unique),
+                "duplicate_keys_preserved_by_first_observation": len(duplicates),
+                "fixture_sha256": {
+                    fixture: next(iter(values)) for fixture, values in sorted(hashes.items())
+                },
+                "source_commits": sorted({r["source_commit"] for r in unique.values()}),
+                "all_warmups_present": True,
+                "all_seven_repetitions_present": True,
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
 
 
 if __name__ == "__main__":

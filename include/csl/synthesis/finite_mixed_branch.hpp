@@ -58,10 +58,10 @@ struct FiniteMixedBranchEvaluation {
     std::optional<sets::SetData> source_relation;
 
     FiniteMixedBranchEvaluation(FiniteMixedBranchEntry branch_value,
-        std::optional<double> objective_value,
-        std::optional<sets::SetData> continuous_relation_value = {},
-        std::optional<OptimalFamily> verified_family_value = {},
-        std::optional<sets::SetData> source_relation_value = {})
+                                std::optional<double> objective_value,
+                                std::optional<sets::SetData> continuous_relation_value = {},
+                                std::optional<OptimalFamily> verified_family_value = {},
+                                std::optional<sets::SetData> source_relation_value = {})
         : branch(std::move(branch_value)), objective(objective_value),
           continuous_relation(std::move(continuous_relation_value)),
           verified_continuous_family(std::move(verified_family_value)),
@@ -75,7 +75,7 @@ struct FiniteMixedBranchPortfolio {
     std::vector<std::size_t> optimal_evaluation_indices;
     std::optional<double> optimum;
     bool enumeration_complete{}; // Every history was evaluated without an execution stop.
-    bool complete{}; // Enumeration completed and every history has a valid objective.
+    bool complete{};             // Enumeration completed and every history has a valid objective.
     // True when every tolerance-selected branch has a relation payload. This
     // does not certify family validity, objective optimality, or completeness.
     bool all_selected_relations_present{};
@@ -103,7 +103,8 @@ struct FiniteMixedBranchSolveRequest {
 
 struct FiniteMixedBranchSolveResult {
     FiniteMixedBranchPortfolio portfolio;
-    bool history_enumeration_complete{}; // Cursor emitted every history, including stopped attempts.
+    bool
+        history_enumeration_complete{}; // Cursor emitted every history, including stopped attempts.
     bool every_branch_solved{};
     double effective_tie_tolerance{};
     std::optional<OperationStopped> stop;
@@ -120,9 +121,9 @@ class FiniteMixedBranchCursor {
 
     FiniteMixedBranchCursor(problem::ResolvedProblem, FiniteActionHistoryCursor);
 
-public:
-    static std::variant<FiniteMixedBranchCursor, Diagnostics> prepare(
-        const problem::ResolvedProblem&);
+  public:
+    static std::variant<FiniteMixedBranchCursor, Diagnostics>
+    prepare(const problem::ResolvedProblem &);
 
     // A zero-sized request leaves the continuation position unchanged.
     FiniteMixedBranchPrefix take_prefix(std::size_t max_branches);
@@ -131,29 +132,29 @@ public:
 // Fixes one complete catalogue-index history in a nominal discrete-time
 // mixed-control problem and returns the equivalent continuous subproblem.
 // The mapping records how a later joint relation returns to source coordinates.
-FiniteMixedBranchOutcome prepare_finite_mixed_branch(
-    const problem::ResolvedProblem&, const FiniteActionHistory&);
+FiniteMixedBranchOutcome prepare_finite_mixed_branch(const problem::ResolvedProblem &,
+                                                     const FiniteActionHistory &);
 
 // Embeds an H-represented continuous branch relation into the source problem's
 // canonical joint coordinates and fixes every discrete control coordinate.
-FiniteMixedBranchRelationOutcome lift_finite_mixed_branch_relation(
-    const FiniteMixedBranchProblem&, const sets::SetData&);
+FiniteMixedBranchRelationOutcome lift_finite_mixed_branch_relation(const FiniteMixedBranchProblem &,
+                                                                   const sets::SetData &);
 
 // Selects every minimal evaluated branch within the caller's tolerance,
 // without reordering catalogue histories or dropping refusals. The result is
 // a global minimum only when enumeration_complete is true.
 // The selector does not solve a branch, infer a continuous family, or treat a
 // convex relaxation as a discrete candidate.
-FiniteMixedBranchPortfolioOutcome select_finite_mixed_branch_portfolio(
-    std::vector<FiniteMixedBranchEvaluation>, bool enumeration_complete,
-    double near_optimal_tolerance);
+FiniteMixedBranchPortfolioOutcome
+select_finite_mixed_branch_portfolio(std::vector<FiniteMixedBranchEvaluation>,
+                                     bool enumeration_complete, double near_optimal_tolerance);
 
 // Resolves every finite-action history, solves its continuous subproblem with
 // the requested registered strategy, and retains only registry-verified
 // complete branch families. The returned portfolio is globally complete only
 // when enumeration and every branch solve succeeded.
 FiniteMixedBranchSolveOutcome solve_finite_mixed_branch_portfolio(
-    const problem::ResolvedProblem&, const registry::StrategyRegistry&,
-    const FiniteMixedBranchSolveRequest&, const ExecutionContext& = {});
+    const problem::ResolvedProblem &, const registry::StrategyRegistry &,
+    const FiniteMixedBranchSolveRequest &, const ExecutionContext & = {});
 
 } // namespace csl::synthesis

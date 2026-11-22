@@ -66,7 +66,48 @@ class RoutingTests(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stderr)
         outputs = dict(line.split("=", 1) for line in output.read_text().splitlines())
+        self.route_outputs = outputs
         return outputs["native"], outputs["reports"]
+
+    def test_path_filtered_workflows_have_stable_scope_outputs(self):
+        self.write(".github/workflows/python-quality.yml", "refresh Python quality scope")
+        self.commit()
+        self.route()
+        self.assertEqual(self.route_outputs["python_quality"], "true")
+        self.assertEqual(self.route_outputs["research_sdk"], "false")
+        self.assertEqual(self.route_outputs["cpp_core_quality"], "false")
+
+        self.git("reset", "--hard", self.base)
+        self.write("benchmarks/sdk-revision", "pinned SDK source")
+        self.commit()
+        self.route()
+        self.assertEqual(self.route_outputs["research_sdk"], "true")
+        self.assertEqual(self.route_outputs["python_quality"], "false")
+
+        self.git("reset", "--hard", self.base)
+        self.write("include/csl/core/value.hpp", "core interface")
+        self.commit()
+        self.route()
+        self.assertEqual(self.route_outputs["cpp_core_quality"], "true")
+
+        self.git("reset", "--hard", self.base)
+        self.write("docs/build/readme.md", "unrelated documentation")
+        self.commit()
+        self.route()
+        for name in ("python_quality", "research_sdk", "cpp_core_quality"):
+            self.assertEqual(self.route_outputs[name], "false")
+
+        for routing_file in (
+            ".github/workflows/validation-routing.yml",
+            "scripts/ci/route_changes.py",
+            "tests/ci/test_route_changes.py",
+        ):
+            self.git("reset", "--hard", self.base)
+            self.write(routing_file, "shared validation routing")
+            self.commit()
+            self.route()
+            for name in ("python_quality", "research_sdk", "cpp_core_quality"):
+                self.assertEqual(self.route_outputs[name], "true")
 
     def test_educational_renderer_and_test_use_complete_reporting_only(self):
         self.write("scripts/reports/visual_examples.py", "legend, CSS and hyperlinks")
@@ -96,7 +137,6 @@ class RoutingTests(unittest.TestCase):
         self.assertEqual(self.route(), ("true", "true"))
 
     def test_pages_composer_and_python_quality_pr_runs_reporting_only(self):
-        # Complete PR #1111 diff at 224cad7804bfdaa162ebfb1f2affae8aafea476f.
         for path in (
             ".github/workflows/python-quality.yml",
             "pyproject.toml",
@@ -223,10 +263,14 @@ class RoutingTests(unittest.TestCase):
 
     def test_unavailable_history_and_empty_diff_are_conservative(self):
         self.assertEqual(self.route(), ("true", "true"))
+        for name in ("python_quality", "research_sdk", "cpp_core_quality"):
+            self.assertEqual(self.route_outputs[name], "true")
         self.assertEqual(
             self.route("push", {"before": "0" * 40, "after": self.base}), ("true", "true")
         )
         self.assertEqual(self.route("pull_request", {}), ("true", "true"))
+        for name in ("python_quality", "research_sdk", "cpp_core_quality"):
+            self.assertEqual(self.route_outputs[name], "true")
 
     def test_deleted_native_file_cannot_hide_as_renamed_presentation(self):
         (self.repo / "scripts/reports").mkdir(parents=True)

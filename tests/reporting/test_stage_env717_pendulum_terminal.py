@@ -86,6 +86,20 @@ class PendulumTerminalPublicationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "saved report evidence"):
                 publication._inputs(source)
 
+    def test_rejects_a_truncated_predicted_state_history(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            source = Path(temporary) / "source"
+            shutil.copytree(SOURCE, source)
+            result_path = source / "result.json"
+            result = json.loads(result_path.read_text(encoding="utf-8"))
+            winners = result["linearized_minimizing_plan_indices"]
+            plan = next(plan for index, plan in enumerate(result["plans"]) if index not in winners)
+            plan["predicted_states"].pop()
+            result_path.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+            self.refresh_checksums(source)
+            with self.assertRaisesRegex(ValueError, "predicted state count differs"):
+                publication._inputs(source)
+
     def test_rejects_saved_html_that_differs_from_the_result(self):
         with tempfile.TemporaryDirectory() as temporary:
             source = Path(temporary) / "source"

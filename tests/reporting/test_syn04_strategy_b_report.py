@@ -16,8 +16,7 @@ report=importlib.util.module_from_spec(spec);sys.modules[spec.name]=report;spec.
 sys.path.insert(0,str(ROOT/"scripts/reports"))
 import report_data
 import syn04_strategy_b_registered_reports as publication
-site_spec=importlib.util.spec_from_file_location("csl_test_syn04_report_site",ROOT/"scripts/reports/site.py")
-report_site=importlib.util.module_from_spec(site_spec);sys.modules[site_spec.name]=report_site;site_spec.loader.exec_module(report_site)
+import report_site
 COLLECT_TOOL=ROOT/"reports/algorithm-results/tooling/syn04/collect.py"
 sys.path.insert(0,str(COLLECT_TOOL.parent));sys.modules.pop("report",None)
 collect_spec=importlib.util.spec_from_file_location("csl_test_syn04_strategy_b_collect",COLLECT_TOOL)

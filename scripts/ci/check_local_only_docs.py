@@ -98,6 +98,8 @@ def git(root: Path, *args: str) -> str:
 
 
 def is_retained_markdown(path: str, root: Path) -> bool:
+    if path == ".agents/skills/delete-comment/SKILL.md":
+        return True
     if path in ROOT_ENTRY_DOCS or path in ISSUE_TEMPLATES or path in STANDING_DOCS:
         return True
     match = ADR_PATH.fullmatch(path)

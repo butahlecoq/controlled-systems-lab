@@ -6,7 +6,6 @@ function(csl_strict_warnings target)
   endif()
 endfunction()
 
-# Shared mechanics only. Module.cmake/Tests.cmake own membership and dependencies.
 function(csl_target_policy target)
   target_compile_features(${target} PUBLIC cxx_std_20)
   target_include_directories(${target} PUBLIC
@@ -31,7 +30,6 @@ function(csl_install_headers domain)
 endfunction()
 
 function(csl_test_target target domain)
-  # Keep tests as consumers of the owning module; no product include paths here.
   target_compile_features(${target} PRIVATE cxx_std_20)
   set_target_properties(${target} PROPERTIES CXX_EXTENSIONS OFF)
   set_tests_properties(${target} PROPERTIES LABELS ${domain})

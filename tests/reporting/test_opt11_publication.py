@@ -2,7 +2,6 @@
 
 import hashlib
 import importlib
-import importlib.util
 import json
 import shutil
 import sys
@@ -12,12 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts" / "reports"))
-SITE_PATH = ROOT / "scripts" / "reports" / "site.py"
-SITE_SPEC = importlib.util.spec_from_file_location("csl_opt11_test_report_site", SITE_PATH)
-if SITE_SPEC is None or SITE_SPEC.loader is None:
-    raise ImportError("cannot load the CSL report site")
-report_site = importlib.util.module_from_spec(SITE_SPEC)
-SITE_SPEC.loader.exec_module(report_site)
+import report_site
 
 
 class Opt11PublicationTests(unittest.TestCase):

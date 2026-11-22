@@ -18,9 +18,54 @@ sys.path.insert(0, str(ROOT / "scripts/reports"))
 landing = importlib.import_module("landing")
 stage = importlib.import_module("stage_catalogue_forward_reachability")
 presentation = importlib.import_module("audit_mathematical_presentation")
+external_stage = importlib.import_module("stage_catalogue_external_fixed_plan")
 
 
 class CatalogueForwardPublicationTests(unittest.TestCase):
+    def test_fixed_plan_external_study_and_offline_audit(self) -> None:
+        files, [entry], card = external_stage.build(ROOT)
+        route = external_stage.IDENTITY.route
+        archive_path = f"{route}/{route}.zip"
+        self.assertIn(entry["page"], card)
+        self.assertIn(entry["figure"], card)
+        self.assertIn(archive_path, card)
+        book = json.loads((ROOT / "docs/catalogue/learning-book-v1.json").read_bytes())
+        [chapter] = [item for item in book["chapters"] if item["id"] == "native-forward-models"]
+        page = "examples/" + entry["page"]
+        self.assertIn("../" + page, {item["href"] for item in chapter["records"]})
+        with tempfile.TemporaryDirectory() as directory:
+            site = Path(directory)
+            for name, content in files.items():
+                target = site / "examples" / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(content)
+            ledger = json.loads(presentation.REGISTRY.read_bytes())
+            [record] = [item for item in ledger["routes"] if item["route"] == page]
+            self.assertTrue(presentation.audit_site(site, {"routes": [record]})["passed"])
+            index = site / "index.html"
+            index.write_text("<ul></ul>", encoding="utf-8")
+            (site / "archive.html").touch()
+            landing.build(site)
+            [archive_entry], _ = landing.parse_index(index.read_text(encoding="utf-8"))
+            self.assertEqual(archive_entry.report_id + "/index.html", page)
+            self.assertIn(("Offline evidence", "examples/" + archive_path), archive_entry.links)
+            offline = site / "offline"
+            with ZipFile(BytesIO(files[archive_path])) as archive:
+                archive.extractall(offline)
+            audited = subprocess.check_output(
+                [sys.executable, "verify.py", "records.jsonl", "prior-inputs.json"], cwd=offline
+            )
+            self.assertEqual(audited, (offline / "audit.json").read_bytes())
+            summary = json.loads(audited)
+            self.assertEqual(
+                summary["coverage"],
+                {
+                    f"{family}/complete": 35
+                    for family in ("box", "ellipsoid", "parallelotope", "polytope", "zonotope")
+                },
+            )
+            self.assertEqual(len(summary["zero_external_maps"]), 2)
+
     def test_gallery_book_and_archive_link_the_verified_capture(self) -> None:
         files, [entry], gallery_card = stage.build(ROOT)
         route = stage.IDENTITY.route

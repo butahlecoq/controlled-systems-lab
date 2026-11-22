@@ -7,7 +7,6 @@ import html
 import json
 from pathlib import Path
 
-
 FAMILIES = [
     ("exact_affine_polytope", "Exact affine polytope", "#f8f8f2"),
     ("unreduced_zonotope", "Unreduced zonotope", "#66d9ef"),
@@ -32,14 +31,15 @@ def bounds(records):
 def svg_path(points, extents, width=760, height=520):
     x0, x1, y0, y1 = extents
     margin = 42
-    scale = min((width - 2 * margin) / max(x1 - x0, 1e-12),
-                (height - 2 * margin) / max(y1 - y0, 1e-12))
+    scale = min(
+        (width - 2 * margin) / max(x1 - x0, 1e-12), (height - 2 * margin) / max(y1 - y0, 1e-12)
+    )
     dx = (width - scale * (x1 - x0)) / 2
     dy = (height - scale * (y1 - y0)) / 2
-    coords = [(dx + (x - x0) * scale, height - dy - (y - y0) * scale)
-              for x, y in points]
-    return " ".join(("M" if i == 0 else "L") + f"{x:.2f},{y:.2f}"
-                    for i, (x, y) in enumerate(coords)) + (" Z" if len(points) > 2 else "")
+    coords = [(dx + (x - x0) * scale, height - dy - (y - y0) * scale) for x, y in points]
+    return " ".join(
+        ("M" if i == 0 else "L") + f"{x:.2f},{y:.2f}" for i, (x, y) in enumerate(coords)
+    ) + (" Z" if len(points) > 2 else "")
 
 
 def make_svg(records, stage, title):
@@ -53,16 +53,20 @@ def make_svg(records, stage, title):
         key = row["family"]
         label, color = next((label, color) for family, label, color in FAMILIES if family == key)
         opacity = "0.16" if key == "exact_affine_polytope" else "0.20"
-        paths.append(f'<path d="{svg_path(points, extents)}" fill="{color}" fill-opacity="{opacity}" '
-                     f'stroke="{color}" stroke-width="2"><title>{html.escape(label)}</title></path>')
+        paths.append(
+            f'<path d="{svg_path(points, extents)}" fill="{color}" fill-opacity="{opacity}" '
+            f'stroke="{color}" stroke-width="2"><title>{html.escape(label)}</title></path>'
+        )
     xmin, xmax, ymin, ymax = extents
-    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 520" role="img" '
-            f'aria-label="{html.escape(title)}"><rect width="760" height="520" fill="#303129"/>'
-            + "".join(paths)
-            + '<path d="M42 478H718M42 42V478" stroke="#b7b7af" fill="none"/>'
-            + '<text x="380" y="510" fill="#f8f8f2" text-anchor="middle">deviation x₁</text>'
-            + '<text x="17" y="260" fill="#f8f8f2" text-anchor="middle" transform="rotate(-90 17 260)">deviation x₂</text>'
-            + f'<text x="50" y="30" fill="#d5c4a1">x₁ [{xmin:.4g}, {xmax:.4g}] · x₂ [{ymin:.4g}, {ymax:.4g}]</text></svg>')
+    return (
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 520" role="img" '
+        f'aria-label="{html.escape(title)}"><rect width="760" height="520" fill="#303129"/>'
+        + "".join(paths)
+        + '<path d="M42 478H718M42 42V478" stroke="#b7b7af" fill="none"/>'
+        + '<text x="380" y="510" fill="#f8f8f2" text-anchor="middle">deviation x₁</text>'
+        + '<text x="17" y="260" fill="#f8f8f2" text-anchor="middle" transform="rotate(-90 17 260)">deviation x₂</text>'
+        + f'<text x="50" y="30" fill="#d5c4a1">x₁ [{xmin:.4g}, {xmax:.4g}] · x₂ [{ymin:.4g}, {ymax:.4g}]</text></svg>'
+    )
 
 
 def render(raw_path, html_path, terminal_svg_path, manifest_path):
@@ -80,8 +84,9 @@ def render(raw_path, html_path, terminal_svg_path, manifest_path):
     terminal_svg_path.write_text(terminal_svg, encoding="utf-8")
 
     payload = json.dumps(records, separators=(",", ":"), ensure_ascii=False)
-    legend = "".join(f'<li><span style="color:{color}">●</span> {label}</li>'
-                     for _, label, color in FAMILIES)
+    legend = "".join(
+        f'<li><span style="color:{color}">●</span> {label}</li>' for _, label, color in FAMILIES
+    )
     escaped_payload = payload.replace("</", "<\\/")
     page = f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -99,9 +104,9 @@ body{{background:var(--page);color:var(--text)}} .page-content{{max-width:78rem}
 <p>This example compares six native C++ tracks on the affine deviation recurrence transcribed from the local <code>Volterra.m</code> source identity. It is not the canonical controlled Lotka–Volterra task and makes no nonlinear, feedback, minimax, or timing claim.</p>
 <section><h2>Model and source</h2>
 <div class="math-input"><p><strong>Deviation state:</strong> z₀ = (1, 2), around nominal physical state (410, 300).</p>
-<p><strong>Parameters:</strong> a = 0.9, b = 0.003, c = 0.8, d = 0.002, e = 0.85; h = 2π / (60√(ac)) = {raw['step']:.15g}; uₖ ∈ [−0.3, 0.3] independently.</p>
+<p><strong>Parameters:</strong> a = 0.9, b = 0.003, c = 0.8, d = 0.002, e = 0.85; h = 2π / (60√(ac)) = {raw["step"]:.15g}; uₖ ∈ [−0.3, 0.3] independently.</p>
 <p>zₖ₊₁ = Aₖ zₖ + B uₖ, B = (he, 0)ᵀ. The literal script evaluates Aₖ at the next Euler nominal point. Each set is propagated at all 60 stages.</p></div>
-<p class="provenance">Private source is not included. SHA-256: <code>{html.escape(raw['source_sha256'])}</code>. Reference values from the independent affine reconstruction: 120 terminal vertices and area 4.619042908487405 (published table rounds to 120 and 4.62). This corrected capture supersedes the earlier ellipse drawing record; the prior bytes remain available under the superseded filename.</p>
+<p class="provenance">Private source is not included. SHA-256: <code>{html.escape(raw["source_sha256"])}</code>. Reference values from the independent affine reconstruction: 120 terminal vertices and area 4.619042908487405 (published table rounds to 120 and 4.62). This corrected capture supersedes the earlier ellipse drawing record; the prior bytes remain available under the superseded filename.</p>
 </section>
 <section><h2>Explore every time slice</h2><p>Use the stage control to inspect the complete stored slice for each family. The factor ellipsoid is sampled only to draw its boundary; the raw record retains the factor matrix and reported support diagnostics.</p>
 <div class="controls"><label for="stage">Stage <output id="stage-value">0</output> / 60</label><input id="stage" type="range" min="0" max="60" value="0"><label><input id="all-stages" type="checkbox"> Overlay every stage faintly</label></div>
@@ -114,7 +119,7 @@ cmake --build build --target csl_buryatia_approximation_report
 python3 scripts/reports/buryatia/check_2d.py --exe build/csl_buryatia_approximation_report --cmake-cache build/CMakeCache.txt --record-out docs/examples/buryatia-volterra-affine-2d-records.json
 python3 scripts/reports/buryatia/render_2d.py --raw docs/examples/buryatia-volterra-affine-2d-records.json</code></pre>
 <p><a href="{html.escape(raw_path.name)}">Download corrected raw stage records</a> · <a href="{html.escape(manifest_path.name)}">Artifact checksums and scope</a> · <a href="buryatia-volterra-affine-2d-records-superseded-v1.json">Download superseded v1 records</a></p>
-<p>Native executable SHA-256: <code>{html.escape(raw['native_build']['executable_sha256'])}</code>; source hashes and build configuration are included in the raw record.</p>
+<p>Native executable SHA-256: <code>{html.escape(raw["native_build"]["executable_sha256"])}</code>; source hashes and build configuration are included in the raw record.</p>
 <p>The native driver uses the registered source-index affine-sum operation, native generator operations, axis-cover reduction, registered box and parallelotope producers, a factor ellipsoid recursion, and the existing directional V-to-ellipsoid provider as a separately labeled per-stage candidate.</p>
 </section><footer><p>Numerical binary64 record; no validated global rounding certificate. No nonlinear outer-reachability claim.</p></footer></main>
 <script id="data" type="application/json">{escaped_payload}</script>
@@ -142,8 +147,10 @@ const terminal=rows.filter(r=>r.stage===60);document.getElementById('terminal-ta
             for path in artifacts
         ],
         "superseded_artifacts": [
-            {"path": f"docs/examples/{name}",
-             "sha256": hashlib.sha256((manifest_path.parent / name).read_bytes()).hexdigest()}
+            {
+                "path": f"docs/examples/{name}",
+                "sha256": hashlib.sha256((manifest_path.parent / name).read_bytes()).hexdigest(),
+            }
             for name in (
                 "buryatia-volterra-affine-2d-records-superseded-v1.json",
                 "buryatia-volterra-affine-2d-superseded-v1.html",
@@ -159,9 +166,19 @@ const terminal=rows.filter(r=>r.stage===60);document.getElementById('terminal-ta
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--raw", type=Path, required=True)
-    parser.add_argument("--html", type=Path, default=Path("docs/examples/buryatia-volterra-affine-2d.html"))
-    parser.add_argument("--terminal-svg", type=Path, default=Path("docs/examples/buryatia-volterra-affine-2d-terminal.svg"))
-    parser.add_argument("--manifest", type=Path, default=Path("docs/examples/buryatia-volterra-affine-2d-manifest.json"))
+    parser.add_argument(
+        "--html", type=Path, default=Path("docs/examples/buryatia-volterra-affine-2d.html")
+    )
+    parser.add_argument(
+        "--terminal-svg",
+        type=Path,
+        default=Path("docs/examples/buryatia-volterra-affine-2d-terminal.svg"),
+    )
+    parser.add_argument(
+        "--manifest",
+        type=Path,
+        default=Path("docs/examples/buryatia-volterra-affine-2d-manifest.json"),
+    )
     args = parser.parse_args()
     render(args.raw, args.html, args.terminal_svg, args.manifest)
 

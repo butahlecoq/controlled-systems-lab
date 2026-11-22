@@ -23,7 +23,6 @@ template<class T> void rejected(const Result<T>& result, DiagnosticCode code, co
     CHECK(error.field == field);
     CHECK_FALSE(error.explanation.empty());
 }
-// Declare after futures: unwinding releases workers before their futures join.
 class WorkerGate {
 public:
     WorkerGate() : future_(promise_.get_future().share()) {}
@@ -43,7 +42,6 @@ struct LayoutFixture {
 };
 }
 
-// Catches destructive moves, stale assignment storage and layout-dependent retention.
 TEST_CASE("all literal layouts retain values through copy and move assignment") {
     const double p = std::numeric_limits<double>::quiet_NaN();
     const std::vector<LayoutFixture> fixtures{
@@ -80,7 +78,6 @@ TEST_CASE("all literal layouts retain values through copy and move assignment") 
     }
 }
 
-// New signed/rectangular oracle catches swapped axes, discarded signs and omitted columns.
 TEST_CASE("signed three by four oracle is independent of dense representation") {
     const double p = std::numeric_limits<double>::infinity();
     const std::vector<LayoutFixture> fixtures{
@@ -100,7 +97,6 @@ TEST_CASE("signed three by four oracle is independent of dense representation") 
     CHECK(accepted(multiply(sparse, vector)) == Vector{-30, 9, 5});
 }
 
-// A borrow outlives its original handle because an independent owning copy remains alive.
 TEST_CASE("dense descriptors and vector spans survive original handle replacement") {
     auto matrix = accepted(snapshot(DenseInput{Vector{1, 99, 2, 4, 3, 5, 99, 6},
         2, 3, 3, 2, DenseLayout::strided}));
@@ -137,10 +133,8 @@ TEST_CASE("CSR retained borrows preserve empty rows and explicit zero after move
     CHECK(accepted(multiply(moved, vector)) == Vector{14, 0, -9, 18});
 }
 
-// All producer arrays and main-thread handles die before workers obtain their borrows.
 TEST_CASE("gated joined workers retain dense and CSR views after source owners die") {
     std::vector<std::future<Vector>> workers;
-    // Allocate before launch: a throwing push_back must not destroy a gated async temporary.
     workers.reserve(4);
     WorkerGate gate;
     {

@@ -14,13 +14,27 @@ struct HRelationAttachmentLimits {
     std::uint64_t max_text_bytes;
 };
 
-struct RecordedNumericalCheck { double absolute_tolerance, relative_tolerance, max_residual; ModuleId verifier; };
-struct RecordedSymbolicArgument { std::string reference, assumptions; };
-struct RecordedCertificateReference { std::string artifact, verifier; };
-struct RecordedExactFarkasEvidence { LinearInfeasibilityCertificate certificate; };
-using RecordedEvidenceSupport=std::variant<Unestablished,RecordedNumericalCheck,RecordedSymbolicArgument,
-    RecordedCertificateReference,RecordedExactFarkasEvidence>;
-struct RecordedAffineDimensionClaim { sets::AffineDimension value; sets::DimensionOrigin origin; RecordedEvidenceSupport support; };
+struct RecordedNumericalCheck {
+    double absolute_tolerance, relative_tolerance, max_residual;
+    ModuleId verifier;
+};
+struct RecordedSymbolicArgument {
+    std::string reference, assumptions;
+};
+struct RecordedCertificateReference {
+    std::string artifact, verifier;
+};
+struct RecordedExactFarkasEvidence {
+    LinearInfeasibilityCertificate certificate;
+};
+using RecordedEvidenceSupport =
+    std::variant<Unestablished, RecordedNumericalCheck, RecordedSymbolicArgument,
+                 RecordedCertificateReference, RecordedExactFarkasEvidence>;
+struct RecordedAffineDimensionClaim {
+    sets::AffineDimension value;
+    sets::DimensionOrigin origin;
+    RecordedEvidenceSupport support;
+};
 struct RecordedHRelation {
     SetId id;
     SetMetadata metadata;
@@ -33,10 +47,10 @@ struct RecordedHRelation {
 // establishes exact encoding equality only, not mathematical relation equivalence.
 // Import creates only an inert RecordedHRelation, never SetData or
 // verifier-authorized evidence.
-ArtifactResult<problem::ResolvedContent> encode_h_relation_attachment(
-    const sets::SetData&, HRelationAttachmentLimits);
-ArtifactResult<RecordedHRelation> decode_h_relation_attachment(
-    std::span<const std::byte>, HRelationAttachmentLimits,
-    std::optional<problem::ContentDigest> expected_digest = {});
+ArtifactResult<problem::ResolvedContent> encode_h_relation_attachment(const sets::SetData &,
+                                                                      HRelationAttachmentLimits);
+ArtifactResult<RecordedHRelation>
+decode_h_relation_attachment(std::span<const std::byte>, HRelationAttachmentLimits,
+                             std::optional<problem::ContentDigest> expected_digest = {});
 
 } // namespace csl::artifacts

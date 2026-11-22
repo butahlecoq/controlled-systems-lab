@@ -4,11 +4,57 @@
 #include <csl/reachability/finite_plan_zonotope.hpp>
 #include <csl/reachability/finite_plan_box.hpp>
 #include <csl/reachability/finite_plan_ellipsoid.hpp>
-#include <cstdlib>
-
-void check(bool condition) { if (!condition) std::abort(); }
+#include <csl/optimization/contracts.hpp>
+#include <csl/optimization/linear_program.hpp>
 #include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <memory>
+#include <source_location>
 #include <variant>
+
+void check(bool condition, std::source_location where = std::source_location::current()) {
+    if (!condition) {
+        std::fprintf(stderr, "check failed at line %u\n", where.line());
+        std::abort();
+    }
+}
+
+class FixedResultLP final : public csl::LPWorkspace {
+    csl::Termination termination_;
+    csl::MathematicalOutcome outcome_;
+
+    csl::ProgramOutcome do_solve(const csl::LinearProgram &program,
+                                 const csl::ExecutionContext &) override {
+        return csl::ProgramResult{termination_,
+                                  {program.identity(), outcome_, csl::Unestablished{}, {}},
+                                  {},
+                                  {},
+                                  "bounded-H support fixture result"};
+    }
+
+  public:
+    FixedResultLP(csl::Termination termination, csl::MathematicalOutcome outcome)
+        : termination_(termination), outcome_(outcome) {}
+};
+
+csl::registry::PreparedProvider<csl::registry::LPPort>
+fixed_result_provider(csl::Termination termination, csl::MathematicalOutcome outcome) {
+    using namespace csl;
+    registry::Registry<registry::LPPort> registry;
+    check(!registry
+               .add({{{"bounded-h-support-fixture"}, "1"},
+                     [](const LinearProgram &, const registry::Requirements &)
+                         -> registry::Capability { return registry::Offer{}; },
+                     [termination, outcome](const LinearProgram &) {
+                         return std::make_unique<FixedResultLP>(termination, outcome);
+                     }})
+               .has_value());
+    auto prepared = registry::prepare_provider(
+        registry::select_provider(registry, {{"bounded-h-support-fixture"}, "1"}));
+    check(std::holds_alternative<registry::PreparedProvider<registry::LPPort>>(prepared));
+    return std::get<registry::PreparedProvider<registry::LPPort>>(std::move(prepared));
+}
 
 int main() {
     using namespace csl;
@@ -114,9 +160,31 @@ int main() {
     // HiGHS rejects the candidate LP threshold. The carrier-only result uses
     // zero multipliers and retains that rejection without altering the H rows.
     check(std::holds_alternative<BoundedHSupportResult>(tiny_answer));
-    const auto& tiny_result=std::get<BoundedHSupportResult>(tiny_answer);
-    check(tiny_result.bound.method==SupportBoundMethod::carrier_only);
-    check(tiny_result.bound.value>=1 && tiny_result.lp_calls.size()==1);
+    const auto &tiny_result = std::get<BoundedHSupportResult>(tiny_answer);
+    check(tiny_result.bound.method == SupportBoundMethod::carrier_only);
+    check(tiny_result.bound.value >= 1 && tiny_result.lp_calls.size() == 1);
+    auto numerical_failure = bounded_h_support(
+        input, {{"test"}, {"carrier-fallback-numerical"}},
+        fixed_result_provider(Termination::numerical_failure, MathematicalOutcome::undetermined),
+        {});
+    check(std::holds_alternative<BoundedHSupportResult>(numerical_failure));
+    const auto &numerical_fallback = std::get<BoundedHSupportResult>(numerical_failure);
+    check(numerical_fallback.bound.method == SupportBoundMethod::carrier_only);
+    check(numerical_fallback.bound.value >= 1 && numerical_fallback.lp_calls.size() == 1);
+    auto undetermined = bounded_h_support(
+        input, {{"test"}, {"carrier-fallback-undetermined"}},
+        fixed_result_provider(Termination::completed, MathematicalOutcome::undetermined), {});
+    check(std::holds_alternative<BoundedHSupportResult>(undetermined));
+    const auto &undetermined_fallback = std::get<BoundedHSupportResult>(undetermined);
+    check(undetermined_fallback.bound.method == SupportBoundMethod::carrier_only);
+    check(undetermined_fallback.bound.value >= 1 && undetermined_fallback.lp_calls.size() == 1);
+    auto resource_limit = bounded_h_support(
+        input, {{"test"}, {"carrier-fallback-resource-limit"}},
+        fixed_result_provider(Termination::resource_limit, MathematicalOutcome::undetermined), {});
+    check(std::holds_alternative<BoundedHSupportFailure>(resource_limit));
+    const auto &resource_failure = std::get<BoundedHSupportFailure>(resource_limit);
+    check(std::holds_alternative<OperationStopped>(resource_failure.cause));
+    check(std::get<OperationStopped>(resource_failure.cause).reason == StopReason::resource_limit);
     auto four_answer=bounded_h_support(four,{{"test"},{"dual-four"}},
         std::get<csl::registry::PreparedProvider<csl::registry::LPPort>>(prepared),{});
     check(std::holds_alternative<BoundedHSupportResult>(four_answer));

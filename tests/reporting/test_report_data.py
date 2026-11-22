@@ -53,7 +53,6 @@ class RecordTests(unittest.TestCase):
             self.data.validate_view(view)
 
     def test_canonical_binary64_and_integer_hash_vocabulary(self):
-        # Independent literal UTF-8 bytes: declared floats are hexadecimal tags.
         self.assertEqual(
             self.data.canonical_bytes({"z": -0.0, "a": [1, 1.5]}),
             b'{"a":[1,{"$binary64":"0x1.8000000000000p+0"}],"z":{"$binary64":"-0x0.0p+0"}}',
@@ -76,25 +75,52 @@ class RecordTests(unittest.TestCase):
         )
 
     def test_hash_tamper_duplicate_round_and_invalid_intervals_rejected(self):
-        for mutate in (
-            lambda v: v["payload"]["scenarios"][0]["input"].update(offset=8.0),
-            lambda v: v["payload"]["trials"].append(copy.deepcopy(v["payload"]["trials"][0])),
-            lambda v: v["payload"]["trials"][0]["timings"]["public_run"].update(duration_ns=-1),
-            lambda v: v["payload"]["trials"][0]["timings"]["public_run"].update(unit="ms"),
-            lambda v: v["payload"]["trials"][0]["result"].update(outcome="unbounded"),
-            lambda v: v["payload"]["trials"][0]["result"].update(
-                support={"kind": "exact_farkas_verified"}
+        for mutate, diagnostic in (
+            (
+                lambda v: v["payload"]["scenarios"][0]["input"].update(offset=8.0),
+                "input hash mismatch",
             ),
-            lambda v: v["payload"]["trials"][3]["result"].update(support={"kind": "untrusted"}),
-            lambda v: v["payload"]["trials"][0]["result"]["primal_residuals"]["context"][
-                "subject"
-            ].update(program="wrong"),
+            (
+                lambda v: v["payload"]["trials"].append(copy.deepcopy(v["payload"]["trials"][0])),
+                "trial round/order differs",
+            ),
+            (
+                lambda v: v["payload"]["trials"][0]["timings"]["public_run"].update(duration_ns=-1),
+                "nonnegative integer required",
+            ),
+            (
+                lambda v: v["payload"]["trials"][0]["timings"]["public_run"].update(unit="ms"),
+                "timing unit/scope mismatch",
+            ),
+            (
+                lambda v: v["payload"]["trials"][0]["result"].update(outcome="unbounded"),
+                "inconsistent successful validation",
+            ),
+            (
+                lambda v: v["payload"]["trials"][0]["result"].update(
+                    support={"kind": "exact_farkas_verified"}
+                ),
+                "unsupported evidence projection",
+            ),
+            (
+                lambda v: v["payload"]["trials"][3]["result"].update(support={"kind": "untrusted"}),
+                "unsupported evidence projection",
+            ),
+            (
+                lambda v: v["payload"]["trials"][0]["result"]["primal_residuals"]["context"][
+                    "subject"
+                ].update(program="wrong"),
+                "residual subject mismatch",
+            ),
         ):
             view = self.fixture()
             mutate(view)
-            with self.subTest(mutate=mutate), self.assertRaises(ValueError):
-                # Reseal envelope: nested structural/oracle checks must still run.
-                self.data.validate_view(self.data.seal(view["payload"]))
+            sealed = self.data.seal(view["payload"])
+            with (
+                self.subTest(diagnostic=diagnostic),
+                self.assertRaisesRegex(ValueError, diagnostic),
+            ):
+                self.data.validate_view(sealed)
 
     def test_nonconvex_unestablished_record_without_assumptions_is_valid(self):
         view = self.fixture()
@@ -416,7 +442,6 @@ class RecordTests(unittest.TestCase):
             self.data.validate_view(self.data.seal(payload))
 
     def test_synthetic_measurement_shape_cannot_hide_spans_or_change_source(self):
-        # Literal data only, no process execution or real measurement claim.
         view = self.fixture()
         p = view["payload"]
         p["purpose"] = "measurement"

@@ -83,8 +83,6 @@ find_package(Threads REQUIRED)
 include(cmake/ModulePolicy.cmake)
 include(cmake/JsonDependencies.cmake)
 
-# Include module-owned declarations in the project scope so dependency pins and
-# package state remain shared. The same order is used for focused test ownership.
 set(csl_modules contracts numeric optimization registry sets model geometry problem controllers
   reachability synthesis verification simulation input execution artifacts adapters/highs adapters/polyhedral application experiments)
 foreach(module IN LISTS csl_modules)

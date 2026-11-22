@@ -81,7 +81,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
                          "publication-validation-or-frozen-route")
         self.assertEqual(producers["scripts/reports/mpc01/validate_strategy_ab_ts03_bundle.py"]["disposition"],
                          "publication-validation-or-frozen-route")
-        self.assertNotIn("policy.svg", producers["scripts/reports/site.py"]["asset_name_literals"])
+        self.assertNotIn("policy.svg", producers["scripts/reports/report_site.py"]["asset_name_literals"])
         self.assertIn("visual.svg", producers["scripts/reports/ext03_transform/report.py"]["asset_name_literals"])
         self.assertNotIn("csl.report.svg", {
             asset for entry in producers.values() for asset in entry["asset_name_literals"]})
@@ -232,6 +232,14 @@ class VisualRouteInventoryTests(unittest.TestCase):
         hull_4d=routes["exp02-it17-hull-4d-simplex-20261028-r1"]
         self.assertEqual(hull_4d["assets"],["2d-visual-companion.svg", "input-projections.svg"])
         self.assertTrue(hull_4d["index_sha256"])
+        disturbance = routes["catalogue-disturbance-control-v1"]
+        self.assertEqual(disturbance["assets"], ["ev-causal-minimax.svg", "puffer-robust-predecessor.svg", "queue-safety-obstruction.svg"])
+        self.assertEqual(disturbance["companion_route"], "examples/catalogue-disturbance-control-v1/index.html")
+        self.assertIn("reviewed: overlays robust predecessor geometry", disturbance["disposition"])
+        external = routes["catalogue-external-fixed-plan-v1"]
+        self.assertEqual(external["assets"], ["queue-outer-projections.png", "queue-outer-projections.svg"])
+        self.assertEqual(external["companion_route"], "examples/catalogue-external-fixed-plan-v1/index.html")
+        self.assertIn("reviewed: three stage projections", external["disposition"])
         paired=routes["exp02-paired-profiles-20261027-r1"]
         self.assertIn("reviewed: frozen control-family", paired["disposition"])
         self.assertEqual(paired["companion_route"],
@@ -279,12 +287,12 @@ class VisualRouteInventoryTests(unittest.TestCase):
             finite_action["route"], ring["route"], constrained["route"],
         }
         self.assertTrue(all(entry["disposition"].startswith("deferred: original frozen route-level readability")
-                            for entry in routes.values() if entry["route"] not in reviewed_routes))
+                            for entry in routes.values() if entry["route"] not in reviewed_routes | {external["route"], disturbance["route"]}))
         self.assertTrue(all(entry["follow_up_issue"] ==
                             audit_visual_routes.FROZEN_ROUTE_FOLLOW_UP_ISSUES.get(
                                 entry["route"],
                                 717 if entry["route"].startswith("env717-") else 669)
-                            for entry in routes.values() if entry["route"] not in reviewed_routes))
+                            for entry in routes.values() if entry["route"] not in reviewed_routes | {external["route"], disturbance["route"]}))
         self.assertEqual(routes["app03-zonotope-4522855018fa9b0b"]["companion_route"],
                          "examples/app03-zonotope-v1.html")
         self.assertEqual(routes["app01-plan-20261016-22d406fd"]["companion_route"],
@@ -336,6 +344,12 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "positive-part-budget-2d.json", "positive_part_budget_2d_vertices.csv",
             "positive_part_budget_2d_native-solution.csv", "positive_part_budget_2d_run.txt",
             "positive_part_budget_2d_native-example.stdout",
+            "catalogue-disturbance-control-v1/index.html",
+            "catalogue-disturbance-control-v1/ev-causal-minimax.svg",
+            "catalogue-disturbance-control-v1/puffer-robust-predecessor.svg",
+            "catalogue-disturbance-control-v1/queue-safety-obstruction.svg",
+            "catalogue-external-fixed-plan-v1/index.html",
+            "catalogue-external-fixed-plan-v1/queue-outer-projections.svg",
             "catalogue-forward-reachability-v1/index.html",
             "catalogue-forward-reachability-v1/platoon-forward.svg",
             "catalogue-feasible-history-v1/index.html",

@@ -1,4 +1,5 @@
 """Independently replay and render the source-equation Van der Pol pilot."""
+
 from __future__ import annotations
 
 import argparse
@@ -23,7 +24,7 @@ NOTEBOOK_URL = f"https://github.com/imm-rl-lab/optimal_control/blob/{SOURCE_COMM
 ACTIONS = (-1.0, 0.0, 1.0)
 STAGES = 5
 STEPS_PER_STAGE = (22, 22, 22, 22, 23)
-STAGE_ENDS = tuple(sum(STEPS_PER_STAGE[:index + 1]) for index in range(STAGES))
+STAGE_ENDS = tuple(sum(STEPS_PER_STAGE[: index + 1]) for index in range(STAGES))
 TOTAL_SOURCE_STEPS = sum(STEPS_PER_STAGE)
 OUTER_DT = 0.1
 INNER_STEPS = 10
@@ -31,10 +32,27 @@ INNER_DT = OUTER_DT / INNER_STEPS
 TERMINAL_TIME = 11.0
 WARMUP_REPETITIONS = 5
 EXPECTED_FIELDS = {
-    "schema", "scenario_id", "reference_variant", "source_repository_commit", "source_file", "source_file_blob",
-    "source_notebook", "source_notebook_blob", "source_license", "state_order", "source_parameters", "adaptation",
-    "source_execution_status", "assumptions", "objective_value", "minimizing_plan_indices", "driver_sha256",
-    "source_commit", "capture_environment", "performance", "plans",
+    "schema",
+    "scenario_id",
+    "reference_variant",
+    "source_repository_commit",
+    "source_file",
+    "source_file_blob",
+    "source_notebook",
+    "source_notebook_blob",
+    "source_license",
+    "state_order",
+    "source_parameters",
+    "adaptation",
+    "source_execution_status",
+    "assumptions",
+    "objective_value",
+    "minimizing_plan_indices",
+    "driver_sha256",
+    "source_commit",
+    "capture_environment",
+    "performance",
+    "plans",
 }
 
 
@@ -76,21 +94,29 @@ def close(actual, expected, tol=2e-11):
 def verify(result):
     if set(result) != EXPECTED_FIELDS:
         raise ValueError("Van der Pol result schema differs")
-    if (result["schema"] != "csl.env717-vanderpol/1" or
-            result["scenario_id"] != "env717-vanderpol-equation-replay-finite-catalogue-v1" or
-            result["reference_variant"] != "equation-replayed finite-action reference; not direct execution of the upstream class" or
-            result["source_repository_commit"] != SOURCE_COMMIT or
-            result["source_file"] != SOURCE_PATH or
-            result["source_file_blob"] != SOURCE_BLOB or
-            result["source_notebook"] != NOTEBOOK_PATH or
-            result["source_notebook_blob"] != NOTEBOOK_BLOB or
-            result["source_license"] != "no license declared in upstream repository metadata"):
+    if (
+        result["schema"] != "csl.env717-vanderpol/1"
+        or result["scenario_id"] != "env717-vanderpol-equation-replay-finite-catalogue-v1"
+        or result["reference_variant"]
+        != "equation-replayed finite-action reference; not direct execution of the upstream class"
+        or result["source_repository_commit"] != SOURCE_COMMIT
+        or result["source_file"] != SOURCE_PATH
+        or result["source_file_blob"] != SOURCE_BLOB
+        or result["source_notebook"] != NOTEBOOK_PATH
+        or result["source_notebook_blob"] != NOTEBOOK_BLOB
+        or result["source_license"] != "no license declared in upstream repository metadata"
+    ):
         raise ValueError("pinned Van der Pol source identity differs")
-    if (result["source_execution_status"] != "step() raises NameError after state mutation because its return tuple references undefined _" or
-            result["assumptions"] != [
-                "the recorded derivative and reward equations define the intended transition despite the source return error",
-                "one control from {-1,0,1} is held for 22 source steps in each of the first four report-level macro stages and 23 in the last, matching the pinned source's strict binary64 horizon check",
-                "the final source step uses terminal cost instead of the nonterminal running penalty"]):
+    if (
+        result["source_execution_status"]
+        != "step() raises NameError after state mutation because its return tuple references undefined _"
+        or result["assumptions"]
+        != [
+            "the recorded derivative and reward equations define the intended transition despite the source return error",
+            "one control from {-1,0,1} is held for 22 source steps in each of the first four report-level macro stages and 23 in the last, matching the pinned source's strict binary64 horizon check",
+            "the final source step uses terminal cost instead of the nonterminal running penalty",
+        ]
+    ):
         raise ValueError("source-variant assumptions or execution defect differ")
     if result["state_order"] != ["time", "position", "velocity"]:
         raise ValueError("Van der Pol state coordinate order differs")
@@ -109,7 +135,7 @@ def verify(result):
     }:
         raise ValueError("source task parameters or disclosed source defect differ")
     adaptation = result["adaptation"]
-    if (adaptation != {
+    if adaptation != {
         "macro_stages": STAGES,
         "source_steps_per_macro_stage": list(STEPS_PER_STAGE),
         "total_source_steps": TOTAL_SOURCE_STEPS,
@@ -117,28 +143,39 @@ def verify(result):
         "plan_count": len(ACTIONS) ** STAGES,
         "semantics": "one open-loop control per macro stage; the first four hold for 22 source steps and the last for 23 to follow the source's strict binary64 horizon check; all finite plans are enumerated",
         "claim_boundary": "minimum of this finite open-loop catalogue only; not the continuous-action optimum",
-    }):
+    }:
         raise ValueError("finite-action adaptation differs")
     performance = result["performance"]
     raw_ns = performance.get("raw_elapsed_ns")
-    if (performance.get("metric") != "finite_catalogue_enumeration_elapsed" or
-            performance.get("unit") != "ns" or
-            performance.get("scope") != "steady_clock interval around allocation, propagation, and objective evaluation for all 243 plans; excludes JSON construction and serialization" or
-            performance.get("worker_threads") != 1 or
-            performance.get("warmup_repetitions") != WARMUP_REPETITIONS or
-            not isinstance(performance.get("measured_repetitions"), int) or
-            not 1 <= performance["measured_repetitions"] <= 1000 or
-            not isinstance(raw_ns, list) or len(raw_ns) != performance["measured_repetitions"] or
-            any(not isinstance(value, int) or value <= 0 for value in raw_ns) or
-            performance.get("timing_clock") != "std::chrono::steady_clock"):
+    if (
+        performance.get("metric") != "finite_catalogue_enumeration_elapsed"
+        or performance.get("unit") != "ns"
+        or performance.get("scope")
+        != "steady_clock interval around allocation, propagation, and objective evaluation for all 243 plans; excludes JSON construction and serialization"
+        or performance.get("worker_threads") != 1
+        or performance.get("warmup_repetitions") != WARMUP_REPETITIONS
+        or not isinstance(performance.get("measured_repetitions"), int)
+        or not 1 <= performance["measured_repetitions"] <= 1000
+        or not isinstance(raw_ns, list)
+        or len(raw_ns) != performance["measured_repetitions"]
+        or any(not isinstance(value, int) or value <= 0 for value in raw_ns)
+        or performance.get("timing_clock") != "std::chrono::steady_clock"
+    ):
         raise ValueError("performance record metadata is invalid")
     sorted_ns = sorted(raw_ns)
-    median_ns = sorted_ns[len(sorted_ns) // 2] if len(sorted_ns) % 2 else (
-        sorted_ns[len(sorted_ns) // 2 - 1] +
-        (sorted_ns[len(sorted_ns) // 2] - sorted_ns[len(sorted_ns) // 2 - 1]) // 2)
-    if (performance.get("median_elapsed_ns") != median_ns or
-            performance.get("minimum_elapsed_ns") != sorted_ns[0] or
-            performance.get("maximum_elapsed_ns") != sorted_ns[-1]):
+    median_ns = (
+        sorted_ns[len(sorted_ns) // 2]
+        if len(sorted_ns) % 2
+        else (
+            sorted_ns[len(sorted_ns) // 2 - 1]
+            + (sorted_ns[len(sorted_ns) // 2] - sorted_ns[len(sorted_ns) // 2 - 1]) // 2
+        )
+    )
+    if (
+        performance.get("median_elapsed_ns") != median_ns
+        or performance.get("minimum_elapsed_ns") != sorted_ns[0]
+        or performance.get("maximum_elapsed_ns") != sorted_ns[-1]
+    ):
         raise ValueError("performance summary differs from raw repetitions")
     if len(result["plans"]) != len(ACTIONS) ** STAGES:
         raise ValueError("finite plan count differs")
@@ -146,7 +183,7 @@ def verify(result):
     for indices in itertools.product(range(len(ACTIONS)), repeat=STAGES):
         stages, trajectory, running, terminal = replay(indices)
         expected_rows.append((indices, stages, trajectory, running, terminal, running + terminal))
-    for row_index, (row, expected) in enumerate(zip(result["plans"], expected_rows)):
+    for row_index, (row, expected) in enumerate(zip(result["plans"], expected_rows, strict=True)):
         indices, stages, _trajectory, running, terminal, objective = expected
         if row["plan_index"] != row_index or row["control_indices"] != list(indices):
             raise ValueError("plans are not in canonical catalogue order")
@@ -154,20 +191,28 @@ def verify(result):
             raise ValueError("control sequence differs")
         if len(row["stage_states"]) != STAGES:
             raise ValueError("stage state count differs")
-        for actual, wanted in zip(row["stage_states"], stages):
-            if len(actual) != 3 or any(not close(a, b) for a, b in zip(actual, wanted)):
+        for actual, wanted in zip(row["stage_states"], stages, strict=True):
+            if len(actual) != 3 or any(
+                not close(a, b) for a, b in zip(actual, wanted, strict=True)
+            ):
                 raise ValueError("independent Euler stage replay differs")
-        if (not close(row["running_cost"], running) or
-                not close(row["terminal_cost"], terminal) or
-                not close(row["objective"], objective)):
+        if (
+            not close(row["running_cost"], running)
+            or not close(row["terminal_cost"], terminal)
+            or not close(row["objective"], objective)
+        ):
             raise ValueError("independent objective replay differs")
     minimum = min(row[-1] for row in expected_rows)
     minimizers = [i for i, row in enumerate(expected_rows) if abs(row[-1] - minimum) <= 1e-12]
-    if (not close(result["objective_value"], minimum) or
-            result["minimizing_plan_indices"] != minimizers):
+    if (
+        not close(result["objective_value"], minimum)
+        or result["minimizing_plan_indices"] != minimizers
+    ):
         raise ValueError("finite catalogue minimum differs")
     capture = result["capture_environment"]
-    if not all(capture.get(name) for name in ("compiler", "compiler_version", "build_type", "architecture")):
+    if not all(
+        capture.get(name) for name in ("compiler", "compiler_version", "build_type", "architecture")
+    ):
         raise ValueError("build environment metadata is incomplete")
     if len(result["driver_sha256"]) != 64 or len(result["source_commit"]) != 40:
         raise ValueError("capture identity is incomplete")
@@ -177,9 +222,9 @@ def verify(result):
 def figure_data(analysis):
     clouds = []
     for stage in range(STAGES):
-        by_prefix = {}
+        by_prefix: dict[tuple[int, ...], tuple[float, float, float]] = {}
         for row in analysis["rows"]:
-            by_prefix.setdefault(row[0][:stage + 1], row[1][stage])
+            by_prefix.setdefault(row[0][: stage + 1], row[1][stage])
         clouds.append([[state[1], state[2]] for state in by_prefix.values()])
     selected = analysis["rows"][analysis["minimizers"][0]]
     return {
@@ -206,74 +251,106 @@ def svg_figure(data):
     ypad = max((yhi - ylo) * 0.08, 0.08)
     xlo, xhi, ylo, yhi = xlo - xpad, xhi + xpad, ylo - ypad, yhi + ypad
 
-    def sx(x): return left + (x - xlo) / (xhi - xlo) * plot_w
-    def sy(y): return top + plot_h - (y - ylo) / (yhi - ylo) * plot_h
+    def sx(x):
+        return left + (x - xlo) / (xhi - xlo) * plot_w
+
+    def sy(y):
+        return top + plot_h - (y - ylo) / (yhi - ylo) * plot_h
 
     colors = ("#49b6c7", "#f2a65a", "#93c47d", "#b38add", "#e58aa5")
-    parts = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc">',
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc">',
         '<title id="title">Van der Pol finite open-loop stage projections</title>',
         '<desc id="desc">Position-velocity phase plane with endpoint clouds from each control stage and the selected finite-catalogue trajectory; lower charts show position and velocity over time.</desc>',
         '<rect width="100%" height="100%" fill="#101a23"/>',
         '<defs><marker id="timeArrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L0,6 L7,3 z" fill="#fff4d2"/></marker></defs>',
         '<text x="590" y="28" fill="#f4f1e8" font-family="sans-serif" font-size="20" text-anchor="middle">Van der Pol · finite open-loop catalogue</text>',
-        f'<rect x="{left}" y="{top}" width="{plot_w}" height="{plot_h}" fill="#18232c" stroke="#53616c"/>']
+        f'<rect x="{left}" y="{top}" width="{plot_w}" height="{plot_h}" fill="#18232c" stroke="#53616c"/>',
+    ]
     for tick in range(6):
         x = xlo + tick * (xhi - xlo) / 5
         y = ylo + tick * (yhi - ylo) / 5
-        parts.extend([
-            f'<line x1="{sx(x):.2f}" y1="{top}" x2="{sx(x):.2f}" y2="{top + plot_h}" stroke="#33424d"/>',
-            f'<line x1="{left}" y1="{sy(y):.2f}" x2="{left + plot_w}" y2="{sy(y):.2f}" stroke="#33424d"/>',
-            f'<text x="{sx(x):.2f}" y="{top + plot_h + 18}" fill="#bdc8cf" font-size="11" text-anchor="middle">{x:.2f}</text>',
-            f'<text x="{left - 8}" y="{sy(y) + 4:.2f}" fill="#bdc8cf" font-size="11" text-anchor="end">{y:.2f}</text>'])
+        parts.extend(
+            [
+                f'<line x1="{sx(x):.2f}" y1="{top}" x2="{sx(x):.2f}" y2="{top + plot_h}" stroke="#33424d"/>',
+                f'<line x1="{left}" y1="{sy(y):.2f}" x2="{left + plot_w}" y2="{sy(y):.2f}" stroke="#33424d"/>',
+                f'<text x="{sx(x):.2f}" y="{top + plot_h + 18}" fill="#bdc8cf" font-size="11" text-anchor="middle">{x:.2f}</text>',
+                f'<text x="{left - 8}" y="{sy(y) + 4:.2f}" fill="#bdc8cf" font-size="11" text-anchor="end">{y:.2f}</text>',
+            ]
+        )
     for stage in reversed(range(STAGES)):
         cloud = data["stage_clouds"][stage]
         for x, y in cloud:
-            parts.append(f'<circle cx="{sx(x):.2f}" cy="{sy(y):.2f}" r="3.1" fill="{colors[stage]}" fill-opacity=".58"/>')
+            parts.append(
+                f'<circle cx="{sx(x):.2f}" cy="{sy(y):.2f}" r="3.1" fill="{colors[stage]}" fill-opacity=".58"/>'
+            )
     trajectory = data["trajectory"]
-    points = " ".join(f'{sx(state[1]):.2f},{sy(state[2]):.2f}' for state in trajectory)
-    parts.append(f'<polyline points="{points}" fill="none" stroke="#fff4d2" stroke-width="2.4" stroke-linejoin="round"/>')
+    points = " ".join(f"{sx(state[1]):.2f},{sy(state[2]):.2f}" for state in trajectory)
+    parts.append(
+        f'<polyline points="{points}" fill="none" stroke="#fff4d2" stroke-width="2.4" stroke-linejoin="round"/>'
+    )
     for stage, boundary in enumerate((0, *STAGE_ENDS)):
         state = trajectory[boundary]
-        parts.append(f'<circle cx="{sx(state[1]):.2f}" cy="{sy(state[2]):.2f}" r="5" fill="{colors[min(stage, STAGES - 1)]}" stroke="#101a23" stroke-width="1.5"/>')
+        parts.append(
+            f'<circle cx="{sx(state[1]):.2f}" cy="{sy(state[2]):.2f}" r="5" fill="{colors[min(stage, STAGES - 1)]}" stroke="#101a23" stroke-width="1.5"/>'
+        )
     for stage in range(STAGES):
         stage_start = 0 if stage == 0 else STAGE_ENDS[stage - 1]
         index = stage_start + STEPS_PER_STAGE[stage] // 2
         start, end = trajectory[index - 1], trajectory[index + 1]
-        parts.append(f'<line x1="{sx(start[1]):.2f}" y1="{sy(start[2]):.2f}" x2="{sx(end[1]):.2f}" y2="{sy(end[2]):.2f}" stroke="#fff4d2" stroke-width="1.7" marker-end="url(#timeArrow)"/>')
-    parts.extend([
-        f'<text x="{left + plot_w / 2}" y="{top + plot_h + 44}" fill="#cbd5dc" font-size="14" text-anchor="middle">position x</text>',
-        f'<text x="18" y="{top + plot_h / 2}" fill="#cbd5dc" font-size="14" text-anchor="middle" transform="rotate(-90 18 {top + plot_h / 2})">velocity dx/dt</text>',
-        '<g font-family="sans-serif" font-size="12" fill="#d6dee4">'])
-    for stage, (color, cloud) in enumerate(zip(colors, data["stage_clouds"]), start=1):
+        parts.append(
+            f'<line x1="{sx(start[1]):.2f}" y1="{sy(start[2]):.2f}" x2="{sx(end[1]):.2f}" y2="{sy(end[2]):.2f}" stroke="#fff4d2" stroke-width="1.7" marker-end="url(#timeArrow)"/>'
+        )
+    parts.extend(
+        [
+            f'<text x="{left + plot_w / 2}" y="{top + plot_h + 44}" fill="#cbd5dc" font-size="14" text-anchor="middle">position x</text>',
+            f'<text x="18" y="{top + plot_h / 2}" fill="#cbd5dc" font-size="14" text-anchor="middle" transform="rotate(-90 18 {top + plot_h / 2})">velocity dx/dt</text>',
+            '<g font-family="sans-serif" font-size="12" fill="#d6dee4">',
+        ]
+    )
+    for stage, (color, cloud) in enumerate(zip(colors, data["stage_clouds"], strict=True), start=1):
         y = 75 + (stage - 1) * 27
-        parts.append(f'<circle cx="62" cy="{y}" r="4" fill="{color}"/><text x="76" y="{y + 4}">after stage {stage} · {len(cloud)} distinct prefixes</text>')
-    parts.extend([
-        '<line x1="50" y1="224" x2="72" y2="224" stroke="#fff4d2" stroke-width="2.4"/><text x="82" y="228">selected finite minimizer, direction follows time</text>',
-        f'<text x="50" y="270">selected controls: {html.escape(json.dumps(data["controls"]))}</text>',
-        f'<text x="50" y="294">J = {data["objective_value"]:.8g}</text>',
-        f'<text x="50" y="318">running cost = {data["running_cost"]:.8g}</text>',
-        f'<text x="50" y="342">terminal cost = {data["terminal_cost"]:.8g}</text>',
-        '<text x="50" y="385" fill="#f2c14e">Source step() raises NameError after updating state;</text>',
-        '<text x="50" y="405" fill="#f2c14e">the plotted path replays the pinned equations independently.</text>',
-        '</g>'])
+        parts.append(
+            f'<circle cx="62" cy="{y}" r="4" fill="{color}"/><text x="76" y="{y + 4}">after stage {stage} · {len(cloud)} distinct prefixes</text>'
+        )
+    parts.extend(
+        [
+            '<line x1="50" y1="224" x2="72" y2="224" stroke="#fff4d2" stroke-width="2.4"/><text x="82" y="228">selected finite minimizer, direction follows time</text>',
+            f'<text x="50" y="270">selected controls: {html.escape(json.dumps(data["controls"]))}</text>',
+            f'<text x="50" y="294">J = {data["objective_value"]:.8g}</text>',
+            f'<text x="50" y="318">running cost = {data["running_cost"]:.8g}</text>',
+            f'<text x="50" y="342">terminal cost = {data["terminal_cost"]:.8g}</text>',
+            '<text x="50" y="385" fill="#f2c14e">Source step() raises NameError after updating state;</text>',
+            '<text x="50" y="405" fill="#f2c14e">the plotted path replays the pinned equations independently.</text>',
+            "</g>",
+        ]
+    )
     # Time response charts share the same time axis and use separate scales.
     tx0, tx1 = 110, 570
     times = [state[0] for state in trajectory]
-    for chart_index, (coord, y0, chart_h, label, color) in enumerate([
-            (1, 552, 48, "position", "#49b6c7"), (2, 632, 48, "velocity", "#f2a65a")]):
+    for coord, y0, chart_h, label, color in (
+        (1, 552, 48, "position", "#49b6c7"),
+        (2, 632, 48, "velocity", "#f2a65a"),
+    ):
         values = [state[coord] for state in trajectory]
         lo, hi = min(values), max(values)
-        if hi == lo: hi = lo + 1.0
-        sx_time = lambda t: tx0 + t / times[-1] * (tx1 - tx0)
-        sy_val = lambda v: y0 + chart_h - (v - lo) / (hi - lo) * chart_h
-        points = " ".join(f"{sx_time(t):.2f},{sy_val(v):.2f}" for t, v in zip(times, values))
-        parts.extend([
-            f'<text x="55" y="{y0 + 24}" fill="#cbd5dc" font-size="12">{label}</text>',
-            f'<rect x="{tx0}" y="{y0}" width="{tx1 - tx0}" height="{chart_h}" fill="#18232c" stroke="#53616c"/>',
-            f'<polyline points="{points}" fill="none" stroke="{color}" stroke-width="2"/>',
-            f'<text x="{tx0}" y="{y0 + chart_h + 13}" fill="#bdc8cf" font-size="10">0</text>',
-            f'<text x="{tx1}" y="{y0 + chart_h + 13}" fill="#bdc8cf" font-size="10" text-anchor="end">{times[-1]:.1f} s</text>'])
-    parts.append('</svg>')
+        if hi == lo:
+            hi = lo + 1.0
+        points = " ".join(
+            f"{tx0 + t / times[-1] * (tx1 - tx0):.2f},"
+            f"{y0 + chart_h - (value - lo) / (hi - lo) * chart_h:.2f}"
+            for t, value in zip(times, values, strict=True)
+        )
+        parts.extend(
+            [
+                f'<text x="55" y="{y0 + 24}" fill="#cbd5dc" font-size="12">{label}</text>',
+                f'<rect x="{tx0}" y="{y0}" width="{tx1 - tx0}" height="{chart_h}" fill="#18232c" stroke="#53616c"/>',
+                f'<polyline points="{points}" fill="none" stroke="{color}" stroke-width="2"/>',
+                f'<text x="{tx0}" y="{y0 + chart_h + 13}" fill="#bdc8cf" font-size="10">0</text>',
+                f'<text x="{tx1}" y="{y0 + chart_h + 13}" fill="#bdc8cf" font-size="10" text-anchor="end">{times[-1]:.1f} s</text>',
+            ]
+        )
+    parts.append("</svg>")
     return "\n".join(parts)
 
 
@@ -296,10 +373,10 @@ def report_page(result, data, svg):
 <div class="note"><strong>Source limitation:</strong> the upstream <code>step()</code> mutates state and then raises <code>NameError</code> because its return tuple references undefined <code>_</code>. This report independently replays the documented update equations and reward; it does not claim to run the broken Python environment.</div>
 <div class="note"><strong>Adaptation:</strong> the source has continuous scalar controls. This pilot enumerates five open-loop macro controls chosen from <code>{list(ACTIONS)}</code>, held for 22, 22, 22, 22, and 23 source steps. The minimum is over all 243 plans only; it is not a continuous-action optimum or minimax value.</div>
 <h2>Position–velocity phase plane and selected path</h2>{svg}
-<h2>Finite-catalogue result</h2><p>Minimum objective: <strong>{result['objective_value']:.12g}</strong>. Selected catalogue row: {data['selected_plan_index']}; controls: <code>{html.escape(json.dumps(data['controls']))}</code>.</p>
-<h2>Measured enumeration time</h2><p>{result['performance']['measured_repetitions']} Release repetitions after {result['performance']['warmup_repetitions']} warm-ups: median <strong>{result['performance']['median_elapsed_ns'] / 1e6:.6f} ms</strong>, range {result['performance']['minimum_elapsed_ns'] / 1e6:.6f}–{result['performance']['maximum_elapsed_ns'] / 1e6:.6f} ms. Timing covers allocation, propagation, and objective evaluation for all 243 plans; JSON construction and serialization are excluded. This descriptive single-host result makes no comparison or speedup claim. No source-mapped profiler was available for this small pilot.</p>
-<table><thead><tr><th>t</th><th>position</th><th>velocity</th></tr></thead><tbody>{''.join(f'<tr><td>{state[0]:.3f}</td><td>{state[1]:.9f}</td><td>{state[2]:.9f}</td></tr>' for state in [data['trajectory'][0], *[result['plans'][data['selected_plan_index']]['stage_states'][i] for i in range(STAGES)]])}</tbody></table>
-<h2>Source and reproduce</h2><p>Scenario: <code>{result['scenario_id']}</code>. Upstream source blob: <code>{SOURCE_BLOB}</code>; notebook blob: <code>{NOTEBOOK_BLOB}</code>. No license is declared in the upstream repository. The notebook's CCEM score of -0.82 is a learning result, not a verified optimum; it labels the true value unknown, so this report does not use it as an oracle.</p>
+<h2>Finite-catalogue result</h2><p>Minimum objective: <strong>{result["objective_value"]:.12g}</strong>. Selected catalogue row: {data["selected_plan_index"]}; controls: <code>{html.escape(json.dumps(data["controls"]))}</code>.</p>
+<h2>Measured enumeration time</h2><p>{result["performance"]["measured_repetitions"]} Release repetitions after {result["performance"]["warmup_repetitions"]} warm-ups: median <strong>{result["performance"]["median_elapsed_ns"] / 1e6:.6f} ms</strong>, range {result["performance"]["minimum_elapsed_ns"] / 1e6:.6f}–{result["performance"]["maximum_elapsed_ns"] / 1e6:.6f} ms. Timing covers allocation, propagation, and objective evaluation for all 243 plans; JSON construction and serialization are excluded. This descriptive single-host result makes no comparison or speedup claim. No source-mapped profiler was available for this small pilot.</p>
+<table><thead><tr><th>t</th><th>position</th><th>velocity</th></tr></thead><tbody>{"".join(f"<tr><td>{state[0]:.3f}</td><td>{state[1]:.9f}</td><td>{state[2]:.9f}</td></tr>" for state in [data["trajectory"][0], *[result["plans"][data["selected_plan_index"]]["stage_states"][i] for i in range(STAGES)]])}</tbody></table>
+<h2>Source and reproduce</h2><p>Scenario: <code>{result["scenario_id"]}</code>. Upstream source blob: <code>{SOURCE_BLOB}</code>; notebook blob: <code>{NOTEBOOK_BLOB}</code>. No license is declared in the upstream repository. The notebook's CCEM score of -0.82 is a learning result, not a verified optimum; it labels the true value unknown, so this report does not use it as an oracle.</p>
 <pre><code>cmake -S benchmarks/reporting/env717/vanderpol-build -B build/env717-vanderpol -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release
 cmake --build build/env717-vanderpol --config Release --target csl_env717_vanderpol
 python3 scripts/reports/env717/check_vanderpol.py build/env717-vanderpol/csl_env717_vanderpol --repetitions 9 --output reports/algorithm-results/env717-vanderpol-pilot-v1</code></pre>
@@ -307,7 +384,9 @@ python3 scripts/reports/env717/check_vanderpol.py build/env717-vanderpol/csl_env
 
 
 def read_result(executable, repetitions):
-    completed = subprocess.run([str(executable), "--measure", str(repetitions)], check=True, capture_output=True, text=True)
+    completed = subprocess.run(
+        [str(executable), "--measure", str(repetitions)], check=True, capture_output=True, text=True
+    )
     return json.loads(completed.stdout)
 
 
@@ -316,23 +395,32 @@ def write_bundle(result, output):
     data = figure_data(analysis)
     svg = svg_figure(data)
     output.mkdir(parents=True, exist_ok=True)
-    environment = {"scenario_id": result["scenario_id"],
+    environment = {
+        "scenario_id": result["scenario_id"],
         "reference_variant": result["reference_variant"],
-        "source_repository_commit": SOURCE_COMMIT, "source_file_blob": SOURCE_BLOB,
+        "source_repository_commit": SOURCE_COMMIT,
+        "source_file_blob": SOURCE_BLOB,
         "source_notebook_blob": NOTEBOOK_BLOB,
-        "driver_sha256": result["driver_sha256"], "compiler": result["capture_environment"],
-        "platform": platform.platform(), "machine": platform.machine(),
-        "processor": processor_model(), "logical_cpu_count": os.cpu_count(),
+        "driver_sha256": result["driver_sha256"],
+        "compiler": result["capture_environment"],
+        "platform": platform.platform(),
+        "machine": platform.machine(),
+        "processor": processor_model(),
+        "logical_cpu_count": os.cpu_count(),
         "python": platform.python_version(),
-        "arithmetic": "IEEE-754 binary64"}
-    capture = {"source_commit": result["source_commit"], "driver_sha256": result["driver_sha256"],
+        "arithmetic": "IEEE-754 binary64",
+    }
+    capture = {
+        "source_commit": result["source_commit"],
+        "driver_sha256": result["driver_sha256"],
         "compiler": result["capture_environment"],
         "capture_kind": "finite-catalogue equation replay and descriptive runtime measurement; upstream step() defect disclosed; no comparative claim",
-        "performance": result["performance"]}
+        "performance": result["performance"],
+    }
     selected = result["plans"][data["selected_plan_index"]]
-    readme = f'''# Van der Pol finite-action pilot
+    readme = f"""# Van der Pol finite-action pilot
 
-Scenario: `{result['scenario_id']}` (`{result['reference_variant']}`).
+Scenario: `{result["scenario_id"]}` (`{result["reference_variant"]}`).
 
 Pinned source: [{SOURCE_PATH}]({SOURCE_URL}) at `{SOURCE_COMMIT}` (blob `{SOURCE_BLOB}`) and [{NOTEBOOK_PATH}]({NOTEBOOK_URL}) (blob `{NOTEBOOK_BLOB}`). The upstream repository declares no license. This report re-expresses the equations and does not copy upstream source code. The source note is [env717-vanderpol-source-notes.md](https://github.com/butahlecoq/controlled-systems-lab/blob/{SOURCE_NOTE_COMMIT}/docs/research/env717-vanderpol-source-notes.md).
 
@@ -346,11 +434,11 @@ The notebook lists a CCEM learning value of `-0.82` and says the true value is u
 
 ## Finite adaptation
 
-The source control is continuous. The source's strict horizon comparison remains true after 1,100 binary64 additions of 0.01, so it takes 111 source steps to pass 11 seconds. This report uses five macro stages of 22, 22, 22, 22, and 23 source steps, with one constant action per stage from `{json.dumps(ACTIONS)}`. It enumerates all 243 open-loop plans. The minimum is `{result['objective_value']:.12g}` at plan row `{data['selected_plan_index']}`, controls `{selected['controls']}`. This is a finite-catalogue result only, not the continuous-action optimum or a performance comparison.
+The source control is continuous. The source's strict horizon comparison remains true after 1,100 binary64 additions of 0.01, so it takes 111 source steps to pass 11 seconds. This report uses five macro stages of 22, 22, 22, 22, and 23 source steps, with one constant action per stage from `{json.dumps(ACTIONS)}`. It enumerates all 243 open-loop plans. The minimum is `{result["objective_value"]:.12g}` at plan row `{data["selected_plan_index"]}`, controls `{selected["controls"]}`. This is a finite-catalogue result only, not the continuous-action optimum or a performance comparison.
 
 ## Measured enumeration time
 
-The Release driver had {result['performance']['warmup_repetitions']} warm-ups and {result['performance']['measured_repetitions']} measured repetitions. Median {result['performance']['median_elapsed_ns'] / 1e6:.6f} ms (range {result['performance']['minimum_elapsed_ns'] / 1e6:.6f}–{result['performance']['maximum_elapsed_ns'] / 1e6:.6f} ms). Timing covers allocation, propagation, and objective evaluation for all 243 plans, excluding JSON construction and serialization. These descriptive measurements are not a cross-algorithm comparison or speedup claim. No source-mapped profiler was available for this small pilot.
+The Release driver had {result["performance"]["warmup_repetitions"]} warm-ups and {result["performance"]["measured_repetitions"]} measured repetitions. Median {result["performance"]["median_elapsed_ns"] / 1e6:.6f} ms (range {result["performance"]["minimum_elapsed_ns"] / 1e6:.6f}–{result["performance"]["maximum_elapsed_ns"] / 1e6:.6f} ms). Timing covers allocation, propagation, and objective evaluation for all 243 plans, excluding JSON construction and serialization. These descriptive measurements are not a cross-algorithm comparison or speedup claim. No source-mapped profiler was available for this small pilot.
 
 ## Reproduce
 
@@ -361,17 +449,22 @@ python3 scripts/reports/env717/check_vanderpol.py build/env717-vanderpol/csl_env
 ```
 
 The Python checker independently enumerates and replays every finite plan. The report contains descriptive enumeration timings but makes no algorithm-comparison or speedup claim.
-'''
-    files = {"README.md": readme.encode(),
+"""
+    files = {
+        "README.md": readme.encode(),
         "capture.json": (json.dumps(capture, indent=2) + "\n").encode(),
         "environment.json": (json.dumps(environment, indent=2) + "\n").encode(),
         "figure-data.json": (json.dumps(data, indent=2) + "\n").encode(),
         "index.html": report_page(result, data, svg).encode(),
         "projections.svg": svg.encode(),
-        "result.json": (json.dumps(result, indent=2) + "\n").encode()}
+        "result.json": (json.dumps(result, indent=2) + "\n").encode(),
+    }
     for name, content in files.items():
         (output / name).write_bytes(content)
-    sums = "".join(f"{hashlib.sha256(content).hexdigest()}  {name}\n" for name, content in sorted(files.items()))
+    sums = "".join(
+        f"{hashlib.sha256(content).hexdigest()}  {name}\n"
+        for name, content in sorted(files.items())
+    )
     (output / "SHA256SUMS").write_text(sums, encoding="ascii")
     return analysis
 
@@ -396,8 +489,17 @@ def main():
     analysis = verify(result)
     if args.output:
         write_bundle(result, args.output)
-    print(json.dumps({"plan_count": len(analysis["rows"]), "objective_value": analysis["minimum"],
-        "minimizing_plan_indices": analysis["minimizers"], "independent_replay": "passed"}, indent=2))
+    print(
+        json.dumps(
+            {
+                "plan_count": len(analysis["rows"]),
+                "objective_value": analysis["minimum"],
+                "minimizing_plan_indices": analysis["minimizers"],
+                "independent_replay": "passed",
+            },
+            indent=2,
+        )
+    )
 
 
 if __name__ == "__main__":

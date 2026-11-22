@@ -15,10 +15,7 @@ sys.path.insert(0, str(ROOT / "scripts" / "reports"))
 
 import opt12_registered_reports as publisher
 import registered_reports
-site_spec = importlib.util.spec_from_file_location("opt12_publication_site", ROOT / "scripts" / "reports" / "site.py")
-report_site = importlib.util.module_from_spec(site_spec)
-sys.modules[site_spec.name] = report_site
-site_spec.loader.exec_module(report_site)
+import report_site
 
 
 class Opt12PublicationTests(unittest.TestCase):

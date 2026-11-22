@@ -11,12 +11,12 @@ namespace csl::optimization::finite_causal_minimax {
 
 struct StateId {
     std::size_t value;
-    bool operator==(const StateId&) const = default;
+    bool operator==(const StateId &) const = default;
 };
 
 struct ActionId {
     std::size_t value;
-    bool operator==(const ActionId&) const = default;
+    bool operator==(const ActionId &) const = default;
 };
 
 struct Stage {
@@ -53,21 +53,19 @@ struct StateValue {
     bool feasible;
     double value; // meaningful only when feasible
     std::vector<ActionId> optimal_actions;
-    bool operator==(const StateValue&) const = default;
+    bool operator==(const StateValue &) const = default;
 };
 
 struct Result {
     // Includes the terminal layer at index stages.size().
     std::vector<std::vector<StateValue>> values_by_stage;
     StateId initial_state;
-    const StateValue& initial() const {
-        return values_by_stage.front().at(initial_state.value);
-    }
+    const StateValue &initial() const { return values_by_stage.front().at(initial_state.value); }
 };
 
 using Outcome = std::variant<Result, Diagnostic>;
 
-std::optional<Diagnostic> validate(const Game& game, const Options& options);
-Outcome solve(const Game& game, const Options& options);
+std::optional<Diagnostic> validate(const Game &game, const Options &options);
+Outcome solve(const Game &game, const Options &options);
 
 } // namespace csl::optimization::finite_causal_minimax

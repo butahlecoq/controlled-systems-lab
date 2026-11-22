@@ -133,9 +133,6 @@ TEST_CASE("registered quadratic interior and boundary optima retain original num
     }
 }
 TEST_CASE("registered convex adapter solves the minimal five-variable lifted integrator equality QP") {
-    // Coordinates are (x0,x1,x2,u0,u1), with x0=0, x1=x0+u0,
-    // x2=x1+u1, and 0<=u0,u1<=1. The hand solution has x2=1,
-    // terminal cost (x2-1)^2=0, and a continuum of feasible controls.
     const auto p=accepted(make_convex_program({{{"minimal-lift"},{"minimal-lift-terminal"}},
         QuadraticTerminal{{5,5,{0,0,0,0,0, 0,0,0,0,0, 0,0,2,0,0, 0,0,0,0,0, 0,0,0,0,0}},
             {0,0,-2,0,0},1},
@@ -173,10 +170,6 @@ TEST_CASE("native norm zero residual and constant norm preserve original rather 
     }
 }
 TEST_CASE("registered rectangular rank-deficient residual reaches its nondifferentiable zero minimum") {
-    // L is rectangular 3x2 and rank one (each row is a multiple of [1,2]),
-    // while the residual has three coordinates. The target is attained on
-    // x0+2*x1=3, a segment inside [0,3]^2. The Euclidean norm is
-    // nondifferentiable where L*x=r.
     ConvexProgramInput input{{{"native-convex"},{"rank-deficient-residual"}},
         ResidualNormTerminal{{3,2,{1,2,2,4,-1,-2}},{3,6,-3}},
         {0,2,{0},{},{}},{{0,3},{0,3}},{},{}};
@@ -186,9 +179,6 @@ TEST_CASE("registered rectangular rank-deficient residual reaches its nondiffere
     const auto r=accepted(worker->run(context()));
     INFO(r.raw_diagnostics);
 
-    // The first two rows are proportional, so their 2x2 minor is zero; the
-    // third row is their negative and the target is in range. This explicitly
-    // checks the authored, unsquared objective.
     CHECK(1.0*4.0-2.0*2.0==0.0);
     REQUIRE(p.reformulation());
     CHECK(p.reformulation()->transformation()==ObjectiveTransformation::residual_norm_squared);
@@ -214,10 +204,9 @@ TEST_CASE("registered rectangular rank-deficient residual reaches its nondiffere
     CHECK(r.raw_diagnostics.find("norm.subgradient=checked-componentwise-zero")!=std::string::npos);
 }
 TEST_CASE("native zero geometry preserves authored rows and the original optimum") {
-    // Positive authored row counts must exercise the same empty-effective-A boundary.
     for(int fixture:{1,2,3,0}) {
         auto input=parabola();input.identity.program={"zero-geometry-"+std::to_string(fixture)};
-        input.variables={{1,5}}; // Feasibility starts at nonzero x; private activity cannot be assumed zero.
+        input.variables={{1,5}};
         if(fixture==1) {input.constraints={1,1,{0,0},{},{}};input.rows={{0,0}};}
         if(fixture==2) {input.constraints={3,1,{0,0,0,0},{},{}};input.rows={{-2,4},{0,0},{{},{}}};}
         if(fixture==3) {input.constraints={2,1,{0,1,2},{0,0},{0,-0.0}};input.rows={{0,0},{-2,4}};}
@@ -317,7 +306,6 @@ TEST_CASE("pure registered profile boundary uses linear O(n) inputs without nati
             CHECK(d[0].explanation.find("4096")!=std::string::npos);
         }
     }
-    // Independent integer derivation, not a returned production capacity.
     const std::uint64_t c4096=2*(std::uint64_t{4096}+1);
     CHECK(c4096==8194); CHECK(c4096*c4096==67141636);
     CHECK(c4096*c4096*8==537133088); CHECK(c4096*c4096*16==1074266176);

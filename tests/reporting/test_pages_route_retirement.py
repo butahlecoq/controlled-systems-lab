@@ -446,6 +446,29 @@ class PagesRouteRetirementTests(unittest.TestCase):
             self.assertIn("docs/catalogue/module-composition-inventory-v1.json", record["files"])
             self.assertTrue(all((repo / source).is_file() for source in record["files"]))
 
+    def test_catalogue_route_names_report_site_implementation_as_a_producer(self) -> None:
+        repo = Path(__file__).resolve().parents[2]
+        catalogue = json.loads(
+            (repo / "reports/algorithm-results/catalog.json").read_text(encoding="utf-8")
+        )
+        row = next(
+            item
+            for item in catalogue["reports"]
+            if isinstance(item, dict) and isinstance(item.get("report_id"), str)
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            site, _ = self.make_site(Path(temporary))
+            record = retirement._producer_record(
+                site,
+                f"{row['report_id']}/index.html",
+                {row["report_id"]: row},
+                {},
+            )
+        self.assertEqual(record["owner_status"], "exact")
+        self.assertIn("scripts/reports/site.py", record["files"])
+        self.assertIn("scripts/reports/report_site.py", record["files"])
+        self.assertTrue(all((repo / source).is_file() for source in record["files"]))
+
     def test_model_tracks_page_is_owned_by_learning_book_producer(self) -> None:
         repo = Path(__file__).resolve().parents[2]
         with tempfile.TemporaryDirectory() as temporary:

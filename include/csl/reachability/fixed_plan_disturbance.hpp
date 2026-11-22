@@ -27,19 +27,21 @@ struct FixedPlanViolation {
     std::size_t stage;
     Vector violating_successor;
 };
-struct FixedPlanEmpty { std::size_t stage; };
+struct FixedPlanEmpty {
+    std::size_t stage;
+};
 struct FixedPlanTimingSpans {
     // One unique, caller-planned ID for each generated stage V representation.
     std::vector<artifacts::SpanId> stage_materialization;
 };
-using FixedPlanOutcome = std::variant<FixedPlanReachable, FixedPlanViolation,
-    FixedPlanEmpty, Unsupported, OperationStopped>;
+using FixedPlanOutcome = std::variant<FixedPlanReachable, FixedPlanViolation, FixedPlanEmpty,
+                                      Unsupported, OperationStopped>;
 
 // Numerical fixed-plan reference for independent compact V disturbance sets.
 // Every x/w pair is propagated. An unsafe successor rejects the whole plan;
 // no state-set clipping is performed. max_points bounds each generated stage.
-FixedPlanOutcome fixed_plan_disturbance(const FixedPlanRequest& request,
-    std::size_t max_points, const ExecutionContext& context = {},
-    const FixedPlanTimingSpans* timing_spans = nullptr);
+FixedPlanOutcome fixed_plan_disturbance(const FixedPlanRequest &request, std::size_t max_points,
+                                        const ExecutionContext &context = {},
+                                        const FixedPlanTimingSpans *timing_spans = nullptr);
 
 } // namespace csl::reachability

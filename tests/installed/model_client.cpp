@@ -4,6 +4,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <utility>
+#include <vector>
 
 using namespace csl;
 using namespace csl::model;
@@ -14,6 +15,19 @@ template<class T, class... Errors> T accepted(std::variant<T, Errors...> result)
 int main() {
     try {
         const Vector times{0,1,2};
+        const LinearStage singular_stage{{2,2,{1,2,0,0}}, {2,1,{2,-1}}, {2,0,{}}, {1,3}};
+        for (const auto& provider : {Coefficients{singular_stage},
+                                     Coefficients{std::vector{singular_stage,singular_stage}}}) {
+            const auto affine = accepted(snapshot({{{2,1,0},TimeDomain::discrete,provider},{}},times));
+            Vector state{2,-1};
+            Vector control{2};
+            const Vector external{};
+            state = accepted(affine.step({0},state,control,external));
+            if (state != Vector{5,1}) throw std::runtime_error("First singular affine state failed");
+            control = {-1};
+            state = accepted(affine.step({1},state,control,external));
+            if (state != Vector{6,4}) throw std::runtime_error("Second singular affine state failed");
+        }
         const LinearStage maps{{1,1,{3}}, {1,1,{2}}, {1,0,{}}, {-1}};
         for (const auto& provider : {Coefficients{maps}, Coefficients{std::vector{maps,maps}}}) {
             const auto model = accepted(snapshot({{{1,1,0},TimeDomain::discrete,provider},{}},times));
@@ -45,7 +59,7 @@ int main() {
             std::get<std::vector<HybridPath>>(paths).size()!=1 ||
             !std::get<std::vector<HybridPath>>(paths).front().edges.empty())
             throw std::runtime_error("Installed hybrid model client failed");
-        std::cout << "Installed model client: immutable LTI/LTV and scheduled observation literals passed\n";
+        std::cout << "Installed model client: singular, LTI/LTV and scheduled observation literals passed\n";
         return 0;
     } catch (const std::exception& error) {
         std::cerr << error.what() << '\n';

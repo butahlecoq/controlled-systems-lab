@@ -1,5 +1,3 @@
-# Target and installation ownership for contracts. Included from the project root.
-
 csl_add_library(csl_contracts STATIC
   src/contracts/model.cpp
   src/contracts/problem.cpp

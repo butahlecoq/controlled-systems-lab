@@ -74,7 +74,7 @@ class PagesDeployActionBoundaryTests(unittest.TestCase):
         quality_workflow = (ROOT / ".github/workflows/python-quality.yml").read_text(
             encoding="utf-8"
         )
-        self.assertEqual(quality_workflow.count("- '.github/actions/pages-deploy/**'"), 2)
+        self.assertEqual(quality_workflow.count("- '.github/actions/pages-deploy/**'"), 1)
 
     def test_child_bundle_inherits_runtime_inputs_and_step_output(self) -> None:
         bundle = """

@@ -67,14 +67,14 @@ TEST_CASE("budgeted registered cover has exact analytic 2D support") {
     CHECK(admitted.basis==StructuralBasis::generator_axis_cover);
     auto output=take(sets::from_generator_handle(admitted.result.output));
     CHECK(output.id()==SetId{"cover"});
+    CHECK(output.center()==Vector{0,0});
     CHECK(output.factor_ids().size()==2);
     CHECK(output.generators().values==Vector{1.5,0,0,1.5});
-    // Complete 2D cube-corner oracle: every source corner lies in the output
-    // box, whose exact support in direction (1,-1) is 3 versus source 2.
-    for(unsigned mask=0;mask<8;++mask) {
-        const double a=(mask&1)?1.0:-1.0;
-        const double b=(mask&2)?1.0:-1.0;
-        const double c=(mask&4)?1.0:-1.0;
+    CHECK(output.equalities().rows==0);
+    for(unsigned factor_sign_pattern=0;factor_sign_pattern<8;++factor_sign_pattern) {
+        const double a=(factor_sign_pattern&1)?1.0:-1.0;
+        const double b=(factor_sign_pattern&2)?1.0:-1.0;
+        const double c=(factor_sign_pattern&4)?1.0:-1.0;
         const double x=a+0.5*c;
         const double y=b+0.5*c;
         CHECK(x>=-1.5);
@@ -82,15 +82,15 @@ TEST_CASE("budgeted registered cover has exact analytic 2D support") {
         CHECK(y>=-1.5);
         CHECK(y<=1.5);
     }
-    const auto analytic_support=[](const sets::GeneratorSet& set) {
+    const auto support_in_x_minus_y_direction=[](const sets::GeneratorSet& set) {
         double value=set.center()[0]-set.center()[1];
         for(std::size_t factor=0;factor<set.factor_ids().size();++factor)
             value+=std::abs(set.generators().values[factor]-
                 set.generators().values[set.factor_ids().size()+factor]);
         return value;
     };
-    CHECK(analytic_support(source)==2.0);
-    CHECK(analytic_support(output)==3.0);
+    CHECK(support_in_x_minus_y_direction(source)==2.0);
+    CHECK(support_in_x_minus_y_direction(output)==3.0);
     CHECK(admitted.result.evidence.reference.identity==query.identity);
     CHECK(admitted.result.evidence.reference.inputs==std::vector<SetId>{source.id()});
 }

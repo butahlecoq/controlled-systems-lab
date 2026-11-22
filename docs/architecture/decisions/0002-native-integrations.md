@@ -42,6 +42,10 @@ The [probe executable](../../../probes/core-01/dependency_probes.cpp) checks:
 
 For ||Lx−r||₂, squaring preserves minimizers because the norm is nonnegative. Use Q=2LᵀL, q=−2Lᵀr, c=rᵀr in the ½xᵀQx convention, and independently report the original norm. Squaring can worsen conditioning and does not preserve objective gaps in the original units. This is a reformulation decision for a later adapter, not a conic capability or completeness proof. PSD/ill-conditioned/degenerate QP needs proper scaling, validation and failure translation; a successful small probe does not establish general robustness or validated bounds.
 
+The mixed-objective unit fixture adds separately evaluated criteria to show that
+squaring only the norm can reverse pointwise cost ordering. It does not exercise
+or claim a product composite sum-objective API.
+
 ## Platforms actually exercised
 
 Windows x64, MSVC compiler 19.44.35215.0 from VS 2022 Community toolset directory 14.44.35207, Windows SDK 10.0.26100.0, CMake 3.31.6-msvc6, Release. The declared future portability target is Linux x64 with GCC ≥12 or Clang ≥16 and CMake ≥3.31; **Linux is not run in CORE-01**. Upstream support plus standard C++20 gives a reasonable integration target, not a tested portability claim. Cross-platform CI, sanitizer/race coverage and installed consumer targets belong to CORE-02 and test expansions.
@@ -149,3 +153,83 @@ architecture decision. New operations and stronger guarantees require scoped
 implementation and independent review. REVIEW-05 #95 tracks the execution and
 scalability assessment; comparison tickets track equal-output experiments.
 The project license and historical B04 restoration remain separate decisions.
+
+## Build isolation for pinned dependencies
+
+The shared dependency archive cache stores immutable bytes by name and SHA-256. A per-archive lock protects verification and publication when configure processes share that cache. Each build still extracts its own copy through FetchContent and supplies `URL_HASH`, including under CMP0168 NEW. Native probes configure as a separate project so their dependency settings and installation rules stay local to the probe.
+
+Adapters use the pinned native integrations privately. Eigen and nlohmann JSON are consumed as headers. A global include guard gives the pinned JSON FetchContent identity one declaration in this build. The JSON integration adds neither an upstream build nor an exported parser target. Reentrant Qhull is private. Doctest belongs to the test build and its artifacts are excluded from product installation.
+
+HiGHS keeps the original upstream archive pin, and the adapter function scopes its upstream options away from CSL tests and toolchain settings. The verified downstream initialization patch applies after extraction. The clock snapshot postimage carries the scheduler observation accessor, so the thread observation patch accepts that postimage without applying the accessor twice. Static installed consumers need the private archive at final link. The exported archive provides that link dependency while its native headers stay in the producer build.
+
+When the CasADi adapter is enabled, its imported dependency and the core must agree on the libstdc++ string ABI. The adapter passes CSL values containing strings across that boundary. Compile probes check the core and the imported target because an imported compile definition can change the adapter without changing the core.
+
+The pinned HiGHS patch contract reconstructs the upstream header fixture from
+the expected patched postimage instead of shipping a duplicate upstream
+header. Its Windows reconfigure branch copies the already-patched header to
+preserve CRLF bytes; the normal configure path separately exercises patching
+pristine dependency source.
+
+## 2026-11-22 decision: convex QP numerical outcomes and diagnostics
+
+The convex QP preflight does not repair authored Hessians. A materially
+negative eigenvalue is rejected as invalid input; a negative eigenvalue that
+falls within the numerical PSD tolerance remains unresolved and is reported as
+unsupported. Silently clipping that eigenvalue would change the authored
+objective.
+
+HiGHS QP retries append candidate diagnostics to one stream, so
+`objective.original` may occur more than once. Contract tests that inspect the
+final reported objective select the last occurrence. The adapter formats the
+diagnostic at 17 significant digits, while tests compare it with an independent
+objective evaluation using a scaled `1e-12` tolerance to allow for arithmetic
+rounding. This tolerance is a fixture-level comparison policy, not a certified
+error bound for arbitrary QPs.
+
+The convex adapter contract retains several independent test oracles. The
+five-variable lifted integrator uses coordinates `(x0,x1,x2,u0,u1)` with
+`x0=0`, `x1=x0+u0`, `x2=x1+u1`, and `u0,u1 in [0,1]`. Its terminal cost
+`(x2-1)^2` has minimum zero, attained by the continuum `u0+u1=1`; tests check
+the equations and one optimal point without claiming to enumerate controls.
+
+The rectangular residual fixture uses
+`L=[[1,2],[2,4],[-1,-2]]` and `r=[3,6,-3]`. The map has rank one, the target is
+in its image, and zero residual occurs on `x0+2*x1=3`, a segment in
+`[0,3]^2`. The Euclidean norm is nondifferentiable at zero residual. Tests
+check the zero minor, all three residual coordinates, and the authored norm
+separately from the squared quadratic objective.
+
+When a convex quadratic has at least one nonzero translated Hessian
+coefficient but every authored constraint coefficient is zero, the adapter
+adds a private row with a unit entry in the first variable column and unbounded
+row limits. This row does not restrict the feasible variable set or alter the
+objective; it avoids the pinned HiGHS basis empty-transpose invariant. The
+zero-quadratic route does not use this row, though admission conservatively
+includes its possible storage.
+Tests retain positive authored row counts, explicit and implicit zero
+coefficients, and a variable interval `[1,5]` so the private row's activity is
+not assumed zero. They check preservation of authored rows and numerical
+residuals. An authored zero row with equality bound `1` is `0=1`: model
+admission accepts it, then the feasibility solve returns an infeasible result
+before the native QP call.
+
+Capacity boundary arithmetic is checked independently with `c=2(n+1)`. At
+`n=4096`, `c=8194`, `c^2=67,141,636`, `8c^2=537,133,088`, and
+`16c^2=1,074,266,176`. At `n=23169`, `c^2=2,147,395,600`; at `n=23170`,
+`c^2=2,147,580,964`, crossing the signed 32-bit maximum. These calculations
+check derived arithmetic, not a returned or advertised production capacity.
+
+The HiGHS LP contract tests preserve three additional ownership and recovery
+oracles. A prepared plan must remain usable after its temporary provider
+registry and source program have left scope. Cross-query warm-start tests
+interleave independent workspaces and reject one basis installation only after
+the tested workspace has solved earlier queries. The objective is recomputed
+from each returned primal and checked against the expected value, while the
+result bounds remain absent and both results retain the input program identity.
+The retried primal is also checked against a literal expected point; the cold
+and retried primal vectors are not directly compared.
+For concurrent worker construction, the two-party barrier is dropped if the
+second `std::async` launch throws, so stack unwinding cannot wait forever for
+the first worker at the barrier. These are fixture and adapter contract checks;
+they do not establish general HiGHS thread safety or arbitrary warm-start
+performance.

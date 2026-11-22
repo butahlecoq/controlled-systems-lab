@@ -2,333 +2,72 @@ name: Python tooling quality
 
 on:
   pull_request:
-    paths:
-      - '.github/actions/pages-deploy/**'
-      - 'benchmarks/reporting/closed_loop/capabilities.py'
-      - 'benchmarks/reporting/closed_loop/native_strategy_history.py'
-      - 'benchmarks/reporting/closed_loop/history_policy.py'
-      - 'benchmarks/reporting/closed_loop/attempt_records.py'
-      - 'tests/reporting/test_native_strategy_history.py'
-      - 'tests/reporting/test_closed_loop_attempt_records.py'
-      - 'benchmarks/reporting/closed_loop/native_compositions.py'
-      - 'benchmarks/reporting/closed_loop/run_closed_loop.py'
-      - 'benchmarks/reporting/closed_loop/run_campaign.py'
-      - 'tests/reporting/test_native_compositions.py'
-      - 'tests/reporting/test_closed_loop_campaign.py'
-      - 'tests/reporting/test_closed_loop_tracing.py'
-      - 'docs/catalogue/closed-loop-native-compositions-v1.*'
-      - 'benchmarks/reporting/closed_loop/requirements.txt'
-      - 'tests/architecture/check_numeric_dependencies.py'
-      - 'tests/architecture/check_stage_projection_boundaries.py'
-      - 'tests/cmake/test_dependency_archive.py'
-      - 'tests/obs04/perf_control_mock.py'
-      - 'tests/obs04/perf_probe_tests.py'
-      - 'scripts/obs04_perf_probe.py'
-      - 'benchmarks/reporting/closed_loop/check_contracts.py'
-      - 'benchmarks/reporting/closed_loop/validate_contracts.py'
-      - 'benchmarks/reporting/closed_loop/check_episode.py'
-      - 'benchmarks/reporting/closed_loop/check_replay.py'
-      - 'benchmarks/reporting/closed_loop/contracts.py'
-      - 'tests/reporting/test_closed_loop_tasks.py'
-      - 'scripts/ci/**'
-      - 'scripts/reports/await_pages_augmentation_runs.py'
-      - 'tests/reporting/test_pages_augmentation_waiter.py'
-      - 'tests/ci/**'
-      - 'scripts/catalogue/**'
-      - 'reports/algorithm-results/tooling/**'
-      - 'scripts/reports/report_data.py'
-      - 'tests/reporting/test_report_data.py'
-      - 'tests/reporting/test_render.py'
-      - 'tests/reporting/test_publication_policy.py'
-      - 'tests/reporting/test_report_source_identity.py'
-      - 'tests/reporting/test_registered_kinds.py'
-      - 'tests/reporting/test_landing.py'
-      - 'tests/reporting/test_plot.py'
-      - 'scripts/reports/report_source_identity.py'
-      - 'scripts/reports/publication_policy.py'
-      - 'scripts/reports/*_publication_policy.py'
-      - 'scripts/reports/registered_report_policies.py'
-      - 'docs/research/evidence/b04-c-publication-registration-source-v1/**'
-      - 'reports/algorithm-results/b04-c-exact-dyadic-v1/**'
-      - 'scripts/reports/schema3_publication_policies.py'
-      - 'scripts/reports/registered_reports.py'
-      - 'scripts/reports/collector_common.py'
-      - 'scripts/reports/render.py'
-      - 'scripts/reports/site.py'
-      - 'scripts/reports/site_design.py'
-      - 'scripts/reports/preserve_published_routes.py'
-      - 'scripts/reports/audit_published_route_preservation.py'
-      - 'tests/reporting/test_preserve_published_routes.py'
-      - 'tests/reporting/test_published_route_audit_policy.py'
-      - 'tests/fixtures/published-route-baseline/**'
-      - 'scripts/reports/landing.py'
-      - 'scripts/reports/visual_examples.py'
-      - 'scripts/reports/learning_book.py'
-      - 'scripts/reports/learning_closed_loop_toy.py'
-      - 'scripts/reports/learning_geometry_toy.py'
-      - 'scripts/reports/learning_model_tracks.py'
-      - 'docs/catalogue/learning-book-v1.json'
-      - 'tests/reporting/test_learning_book.py'
-      - 'docs/examples/closed-loop/figure-index.json'
-      - 'docs/examples/learning/chapters/orbit-capstone.html'
-      - 'reports/published-route-preservation/manifest.json'
-      - 'docs/examples/closed-loop/figures/lotka-populations.plotted-data.json'
-      - 'docs/examples/closed-loop/figures/earth-orbit.plotted-data.json'
-      - 'docs/examples/closed-loop/figures/fuel-state.plotted-data.json'
-      - 'docs/examples/closed-loop/figures/fuel-fuel-flow.plotted-data.json'
-      - 'reports/algorithm-results/native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip'
-      - 'reports/algorithm-results/native-model-catalogue-v1/three-state.stdout'
-      - 'reports/algorithm-results/native-model-catalogue-v1/four-state.stdout'
-      - 'reports/algorithm-results/native-flexible-pitch-v1/manifest.json'
-      - 'reports/algorithm-results/native-extended-models-v1/slide50/run.txt'
-      - 'reports/algorithm-results/native-extended-models-v1/spatial-flight/run-receipt.txt'
-      - 'scripts/reports/campaign_graph_figures.py'
-      - 'scripts/reports/render_full_profile_campaign.py'
-      - 'docs/examples/closed-loop/campaign-2026-11-18/**'
-      - 'scripts/reports/figure_style.py'
-      - 'scripts/reports/control_figure_data.py'
-      - 'scripts/reports/control_figures.py'
-      - 'scripts/reports/recorded_closed_loop_figures.py'
-      - 'tests/reporting/test_recorded_closed_loop_figures.py'
-      - 'tests/reporting/test_viz03_control_figures.py'
-      - 'scripts/reports/adapt_fuel_record.py'
-      - 'scripts/reports/styles/control-v1.json'
-      - 'reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/scenario.json'
-      - 'reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/geometry.json'
-      - 'reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/raw-runs.jsonl'
-      - 'tests/fixtures/reports/b06-measured-source/b06_finite_minimax.cpp'
-      - 'scripts/reports/plot.py'
-      - 'scripts/reports/b04_c_exact_registered_reports.py'
-      - 'tests/reporting/test_b04_publication_source_snapshot.py'
-      - 'tests/reporting/test_publication_spine_boundaries.py'
-      - 'scripts/reports/stage_ext04.py'
-      - 'scripts/reports/stage_issue944_each_choice.py'
-      - 'scripts/reports/stage_issue944_postfix.py'
-      - 'tests/reporting/test_issue944_each_choice_publication.py'
-      - 'tests/reporting/test_issue944_postfix_publication.py'
-      - 'reports/algorithm-results/issue944-strategy-a-each-choice-v1/**'
-      - 'reports/algorithm-results/issue944-strategy-a-each-choice-postfix-v1/**'
-      - 'scripts/reports/qhull_highs_strategy_a_example.py'
-      - 'docs/examples/qhull-highs-strategy-a-2d-record.json'
-      - 'docs/examples/examples.css'
-      - 'scripts/reports/mathematical_notation.py'
-      - 'scripts/reports/stage_finite_feedback.py'
-      - 'scripts/reports/stage_geo07.py'
-      - 'scripts/reports/environment_report_publication.py'
-      - 'scripts/reports/stage_env717_dubins_car.py'
-      - 'scripts/reports/stage_env717_vanderpol.py'
-      - 'scripts/reports/stage_env717_pendulum_terminal.py'
-      - 'scripts/reports/stage_env717_earth_orbit.py'
-      - 'tests/reporting/test_env717_dubins_car_publication.py'
-      - 'tests/reporting/test_env717_vanderpol_publication.py'
-      - 'tests/reporting/test_env717_earth_orbit_publication.py'
-      - 'tests/reporting/test_stage_env717_pendulum_terminal.py'
-      - 'scripts/reports/env717/check_dubins_car.py'
-      - 'scripts/reports/env717/check_vanderpol.py'
-      - 'scripts/reports/env717/check_pendulum_terminal.py'
-      - 'scripts/reports/env717/check_earth_orbit.py'
-      - 'reports/algorithm-results/env717-dubins-car-pilot-v1/**'
-      - 'reports/algorithm-results/env717-vanderpol-pilot-v1/**'
-      - 'reports/algorithm-results/env717-pendulum-terminal-pilot-v1/**'
-      - 'reports/algorithm-results/env717-earth-orbit-pilot-v1/**'
-      - 'benchmarks/reporting/env717/earth_orbit.cpp'
-      - 'scripts/reports/stage_geo07_port.py'
-      - 'scripts/reports/stage_env717_broken_triangle.py'
-      - 'scripts/reports/stage_env717_multipoint_cost_game.py'
-      - 'tests/reporting/test_env717_stager_publication.py'
-      - 'scripts/reports/env717/check_broken_triangle.py'
-      - 'scripts/reports/env717/check_multipoint_cost_game.py'
-      - 'reports/algorithm-results/env717-broken-triangle-pilot-v1/**'
-      - 'reports/algorithm-results/env717-multipoint-cost-game-pilot-v1/**'
-      - 'scripts/reports/stage_geo07_dependent.py'
-      - 'scripts/reports/stage_env717_cartpole.py'
-      - 'tests/reporting/test_env717_cartpole_publication.py'
-      - 'scripts/reports/env717/check_cartpole.py'
-      - 'scripts/reports/env717/capture_cartpole_report_generation.py'
-      - 'reports/algorithm-results/env717-cartpole-pilot-v1/**'
-      - 'tests/reporting/test_convex_report.py'
-      - 'tests/reporting/test_opt07_collector.py'
-      - 'tests/reporting/test_opt12_collector.py'
-      - 'tests/reporting/test_visual_examples.py'
-      - 'tests/reporting/test_geo07_publication.py'
-      - 'tests/reporting/test_geo07_port_publication.py'
-      - 'tests/reporting/test_geo07_dependent_publication.py'
-      - 'tests/reporting/test_finite_feedback_publication.py'
-      - 'tests/reporting/test_ext04_publication.py'
-      - 'tests/reporting/test_report_lifecycle.py'
-      - 'scripts/reports/requirements.txt'
-      - 'scripts/reports/frozen_native_bundle.py'
-      - 'scripts/reports/stage_native_model_catalogue.py'
-      - 'scripts/reports/stage_native_extended_models.py'
-      - 'scripts/reports/site_additions.py'
-      - 'scripts/reports/*published_route*.py'
-      - 'reports/published-route-preservation/**'
-      - 'scripts/reports/stage_app02.py'
-      - 'tests/reporting/test_site_additions.py'
-      - 'tests/reporting/test_app02_saved.py'
-      - 'scripts/reports/stage_app03.py'
-      - 'scripts/reports/stage_app04.py'
-      - 'tests/reporting/test_app03_saved.py'
-      - 'tests/reporting/test_app04_saved.py'
-      - 'reports/algorithm-results/app03-publications.json'
-      - 'reports/algorithm-results/app03-zonotope-4522855018fa9b0b/**'
-      - 'scripts/reports/app03/render_saved.py'
-      - 'scripts/reports/app03/collect.py'
-      - 'reports/algorithm-results/app04-publications.json'
-      - 'reports/algorithm-results/app04-ellipsoid-fd302c34092f8b19/**'
-      - 'scripts/reports/app04/render_saved.py'
-      - 'scripts/reports/app04/collect.py'
-      - 'reports/algorithm-results/app04-ellipsoid-fd302c34092f8b19.zip'
-      - 'scripts/reports/capture_history_optimizer_native.py'
-      - 'scripts/reports/stage_history_optimizer_native.py'
-      - 'tests/reporting/test_history_optimizer_native.py'
-      - 'reports/algorithm-results/history-optimizer-native-2d-v1/**'
-      - 'scripts/reports/capture_history_membership_2d.py'
-      - 'scripts/reports/stage_history_membership_2d.py'
-      - 'tests/reporting/test_history_membership_2d.py'
-      - 'reports/algorithm-results/history-membership-zonotope-2d-v1/**'
-      - 'scripts/reports/visual_examples.py'
-      - 'scripts/reports/pages_route_retirement.py'
-      - 'tests/reporting/test_pages_route_retirement.py'
-      - 'scripts/reports/audit_visual_routes.py'
-      - 'scripts/reports/audit_mathematical_presentation.py'
-      - 'scripts/reports/augment_pages_bundle.py'
-      - 'tests/reporting/test_pages_augmentation_aggregation.py'
-      - 'tests/reporting/test_mathematical_presentation.py'
-      - 'scripts/reports/check_deploy_head.py'
-      - 'tests/reporting/test_deploy_head.py'
-      - '.github/workflows/pages-augmentation-aggregation.yml'
-      - 'scripts/reports/mathematical-presentation-routes.json'
-      - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
-      - 'scripts/reports/stage_env717.py'
-      - 'scripts/reports/stage_env717_two_points.py'
-      - 'scripts/reports/stage_env717_unequal_game.py'
-      - 'scripts/reports/stage_env717_max_coordinate.py'
-      - 'scripts/reports/stage_env717_point_on_plane.py'
-      - 'tests/reporting/test_env717_publication.py'
-      - 'tests/reporting/test_env717_two_points_publication.py'
-      - 'tests/reporting/test_env717_unequal_game_publication.py'
-      - 'tests/reporting/test_env717_max_coordinate_publication.py'
-      - 'tests/reporting/test_env717_point_on_plane_publication.py'
-      - 'scripts/reports/env717/check_smoke.py'
-      - 'scripts/reports/env717/check_two_points.py'
-      - 'scripts/reports/env717/check_two_points_legacy.py'
-      - 'scripts/reports/env717/check_unequal_game.py'
-      - 'scripts/reports/env717/check_max_coordinate.py'
-      - 'scripts/reports/env717/check_point_on_plane.py'
-      - 'reports/algorithm-results/env717-simple-control-pilot-v1/**'
-      - 'reports/algorithm-results/env717-two-points-pilot-v1/**'
-      - 'reports/algorithm-results/env717-two-points-feedback-v1/**'
-      - 'reports/algorithm-results/env717-unequal-game-pilot-v1/**'
-      - 'reports/algorithm-results/env717-max-coordinate-pilot-v1/**'
-      - 'reports/algorithm-results/env717-point-on-plane-pilot-v1/**'
-      - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
-      - 'scripts/reports/stage_closed_loop_initial_baselines.py'
-      - 'scripts/reports/fixed_tail_example.py'
-      - 'scripts/reports/native_fixed_tail_episode_report.py'
-      - 'scripts/reports/native_fixed_tail_geometry.py'
-      - 'tests/reporting/test_fixed_tail_example.py'
-      - 'tests/reporting/test_native_fixed_tail_episode_report.py'
-      - 'tests/reporting/test_native_fixed_tail_geometry.py'
-      - 'examples/fixed-tail-tiny-a6/**'
-      - 'reports/closed-loop-native-fixed-tail/a6-v1/**'
-      - 'scripts/reports/assets/native-fixed-tail-geometry/**'
-      - 'docs/contracts/closed-loop/syn-nl-lv-01.json'
-      - 'docs/contracts/closed-loop/syn-nl-lv-01.sha256'
-      - 'docs/contracts/closed-loop/syn-nl-fuel-01.json'
-      - 'docs/contracts/closed-loop/syn-nl-fuel-01.sha256'
-      - 'docs/contracts/closed-loop/earth-orbit.json'
-      - 'docs/contracts/closed-loop/earth-orbit.sha256'
-      - 'tests/reporting/test_closed_loop_initial_baselines_publication.py'
-      - 'scripts/reports/stage_discrete_mpc_2d.py'
-      - 'scripts/reports/stage_catalogue_forward_reachability.py'
-      - 'tests/reporting/test_catalogue_forward_publication.py'
-      - 'reports/algorithm-results/catalogue-forward-reachability-v1/**'
-      - 'reports/algorithm-results/catalogue-feasible-history-v1/**'
-      - 'reports/algorithm-results/catalogue-ring-initial-support-v1/**'
-      - 'reports/algorithm-results/catalogue-exact-support-v1/**'
-      - 'reports/algorithm-results/catalogue-backward-reachability-v1/**'
-      - 'reports/algorithm-results/catalogue-constrained-predecessors-v1/**'
-      - 'reports/algorithm-results/catalogue-finite-action-v1/**'
-      - 'scripts/reports/stage_mpc_crossover.py'
-      - 'scripts/reports/stage_native_source_constrained_mpc.py'
-      - 'tests/reporting/test_mpc_crossover_publication.py'
-      - 'tests/reporting/test_native_source_constrained_mpc_publication.py'
-      - 'tests/reporting/native_backward_graph_cases.py'
-      - 'tests/reporting/test_native_vertex_lp_priority_policy.py'
-      - 'reports/algorithm-results/mpc-crossover-6b7308c4/**'
-      - 'reports/algorithm-results/native-source-constrained-mpc-v1/**'
-      - 'scripts/reports/stage_native_history_strategies.py'
-      - 'tests/reporting/test_native_history_strategy_publication.py'
-      - 'reports/algorithm-results/native-history-strategies-d57739b3/**'
-      - 'tests/reporting/test_discrete_mpc_2d.py'
-      - 'scripts/reports/stage_positive_part_budget_2d.py'
-      - 'scripts/reports/stage_four_state_projection_approximations.py'
-      - 'tests/reporting/test_four_state_projection_approximations.py'
-      - 'reports/algorithm-results/four-state-projection-approximations-v1/**'
-      - 'reports/algorithm-results/native-row-scaling-diagnostic-v1/**'
-      - 'reports/closed-loop-initial-baselines-v1/**'
-      - 'reports/closed-loop-initial-baselines-v1.zip'
-      - 'tests/reporting/test_syn03_strategy_a_report.py'
-      - 'tests/reporting/test_syn03_ts02_report.py'
-      - 'tests/reporting/test_opt07_*.py'
-      - 'reports/algorithm-results/catalog.json'
-      - 'reports/algorithm-results/convex-*.zip'
-      - 'reports/algorithm-results/convex-*/**'
-      - 'reports/algorithm-results/legacy-publications.json'
-      - 'reports/algorithm-results/lp-*.zip'
-      - 'reports/algorithm-results/lp-*/**'
-      - 'reports/algorithm-results/opt04-*.zip'
-      - 'reports/algorithm-results/opt04-*/**'
-      - 'reports/algorithm-results/opt07-*.zip'
-      - 'reports/algorithm-results/opt07-*/**'
-      - 'reports/algorithm-results/opt11-*.zip'
-      - 'reports/algorithm-results/opt11-*/**'
-      - 'scripts/reports/opt04/**'
-      - 'scripts/reports/opt04_registered_reports.py'
-      - 'scripts/reports/opt07_registered_reports.py'
-      - 'scripts/reports/opt11_registered_reports.py'
-      - 'tests/reporting/test_opt04_publication.py'
-      - 'tests/reporting/test_opt11_publication.py'
-      - 'pyproject.toml'
-      - 'requirements-quality.txt'
-      - '.github/workflows/python-quality.yml'
   push:
     branches: [main]
     paths:
       - '.github/actions/pages-deploy/**'
-      - 'benchmarks/reporting/closed_loop/capabilities.py'
-      - 'benchmarks/reporting/closed_loop/native_strategy_history.py'
-      - 'benchmarks/reporting/closed_loop/history_policy.py'
-      - 'benchmarks/reporting/closed_loop/attempt_records.py'
+      - 'benchmarks/reporting/closed_loop/**'
+      - 'benchmarks/reporting/mpc11/affine.py'
+      - 'benchmarks/reporting/mpc11/nmpc.py'
+      - 'tests/reporting/test_closed_loop_native_capabilities.py'
+      - 'tests/reporting/test_closed_loop_runner_failures.py'
+      - 'docs/catalogue/closed-loop-*-capabilities-v1.*'
+      - 'tests/reporting/test_history_geometry.py'
+      - 'tests/reporting/test_history_norm_solver.py'
+      - 'tests/reporting/test_native_fixed_tail_policy.py'
+      - 'tests/reporting/test_nominal_tube_source.py'
       - 'tests/reporting/test_native_strategy_history.py'
       - 'tests/reporting/test_closed_loop_attempt_records.py'
-      - 'benchmarks/reporting/closed_loop/native_compositions.py'
-      - 'benchmarks/reporting/closed_loop/run_closed_loop.py'
-      - 'benchmarks/reporting/closed_loop/run_campaign.py'
       - 'tests/reporting/test_native_compositions.py'
       - 'tests/reporting/test_closed_loop_campaign.py'
+      - 'scripts/reports/stage_env717_pendulum.py'
+      - 'scripts/reports/stage_env717_sphere_game.py'
+      - 'scripts/reports/stage_env717_time_sphere.py'
+      - 'scripts/reports/stage_env717_time_sphere_minimax.py'
+      - 'scripts/reports/stage_env717_two_particle_minimax.py'
+      - 'scripts/reports/stage_env717_unlimited_bolza.py'
+      - 'tests/reporting/test_env717_pendulum_publication.py'
+      - 'tests/reporting/test_env717_sphere_game_publication.py'
+      - 'tests/reporting/test_env717_time_sphere_publication.py'
+      - 'tests/reporting/test_env717_time_sphere_minimax_publication.py'
+      - 'tests/reporting/test_env717_two_particle_minimax_publication.py'
+      - 'tests/reporting/test_stage_env717_unlimited_bolza.py'
+      - 'scripts/reports/env717/check_pendulum.py'
+      - 'scripts/reports/env717/check_sphere_game.py'
+      - 'scripts/reports/env717/check_time_sphere.py'
+      - 'scripts/reports/env717/check_time_sphere_minimax.py'
+      - 'scripts/reports/env717/check_two_particle_minimax.py'
+      - 'scripts/reports/env717/check_unlimited_bolza.py'
+      - 'scripts/reports/env717/capture_two_particle_minimax.py'
+      - 'benchmarks/reporting/env717/two_particle_minimax.cpp'
+      - 'benchmarks/scenarios/env717-two-particle-game-pilot-v1.json'
+      - 'benchmarks/scenarios/env717-sphere-game-pilot-v1.json'
+      - 'reports/algorithm-results/env717-pendulum-pilot-v1/**'
+      - 'reports/algorithm-results/env717-sphere-game-pilot-v1/**'
+      - 'reports/algorithm-results/env717-time-sphere-pilot-v1/**'
+      - 'reports/algorithm-results/env717-time-sphere-minimax-v1/**'
+      - 'reports/algorithm-results/env717-two-particle-minimax-v1/**'
+      - 'reports/algorithm-results/env717-unlimited-bolza-pilot-v1/**'
       - 'tests/reporting/test_closed_loop_tracing.py'
       - 'docs/catalogue/closed-loop-native-compositions-v1.*'
-      - 'benchmarks/reporting/closed_loop/requirements.txt'
       - 'tests/architecture/check_numeric_dependencies.py'
       - 'tests/architecture/check_stage_projection_boundaries.py'
-      - 'tests/cmake/test_dependency_archive.py'
+      - 'tests/cmake/**'
       - 'tests/obs04/perf_control_mock.py'
       - 'tests/obs04/perf_probe_tests.py'
       - 'scripts/obs04_perf_probe.py'
-      - 'benchmarks/reporting/closed_loop/check_contracts.py'
-      - 'benchmarks/reporting/closed_loop/validate_contracts.py'
-      - 'benchmarks/reporting/closed_loop/check_episode.py'
-      - 'benchmarks/reporting/closed_loop/check_replay.py'
-      - 'benchmarks/reporting/closed_loop/contracts.py'
       - 'tests/reporting/test_closed_loop_tasks.py'
       - 'scripts/ci/**'
+      - 'tools/legacy-ports/**'
       - 'scripts/reports/await_pages_augmentation_runs.py'
       - 'tests/reporting/test_pages_augmentation_waiter.py'
       - 'tests/ci/**'
       - 'scripts/catalogue/**'
       - 'reports/algorithm-results/tooling/**'
+      - 'scripts/reports/geo06_report.py'
+      - 'tests/reporting/test_geo06_report.py'
+      - 'reports/algorithm-results/geo06-b010fb3df212604b/**'
+      - 'reports/algorithm-results/geo06-b010fb3df212604b.source.zip'
       - 'scripts/reports/report_data.py'
       - 'tests/reporting/test_report_data.py'
       - 'tests/reporting/test_render.py'
@@ -337,30 +76,107 @@ on:
       - 'tests/reporting/test_registered_kinds.py'
       - 'tests/reporting/test_landing.py'
       - 'tests/reporting/test_plot.py'
+      - 'scripts/reports/geo04/**'
+      - 'reports/algorithm-results/geo04-20261012T224946Z-c37852bcc80d/**'
+      - 'reports/algorithm-results/geo04-20261012T224946Z-c37852bcc80d.zip'
       - 'scripts/reports/report_source_identity.py'
+      - 'scripts/reports/stage_issue824_*.py'
+      - 'tests/reporting/test_issue824_*_publication.py'
+      - 'scripts/reports/exp824/check_matched_minimax.py'
+      - 'scripts/reports/exp824/check_nominal.py'
+      - 'scripts/reports/exp824/check_two_points_box.py'
+      - 'scripts/reports/exp824/make_report.py'
+      - 'scripts/reports/mpc05/reference.py'
+      - 'reports/algorithm-results/catalog.json'
+      - 'reports/algorithm-results/issue824-two-points-*/**'
       - 'scripts/reports/publication_policy.py'
       - 'scripts/reports/*_publication_policy.py'
       - 'scripts/reports/registered_report_policies.py'
+      - 'scripts/reports/mpc01/augment_pages.py'
+      - 'tests/reporting/test_mpc01_pages_augmentation.py'
       - 'docs/research/evidence/b04-c-publication-registration-source-v1/**'
       - 'reports/algorithm-results/b04-c-exact-dyadic-v1/**'
+      - 'reports/algorithm-results/b04-c-strategy-a-verification-v1/**'
+      - 'docs/research/tools/check_b04_c_exact_fiber.py'
+      - 'docs/research/evidence/mpc01-*/**'
+      - 'scripts/reports/mpc01/**'
+      - 'scripts/reports/stage_b04_c_strategy_a.py'
+      - 'tests/reporting/test_b04_c_strategy_a_publication.py'
+      - 'tests/reporting/test_mpc01_per_attempt_publication.py'
       - 'scripts/reports/schema3_publication_policies.py'
       - 'scripts/reports/registered_reports.py'
+      - 'scripts/reports/stage_exp06.py'
+      - 'scripts/reports/exp06/**'
+      - 'tests/reporting/test_exp06_pilot.py'
+      - 'reports/algorithm-results/exp06-geometry-pilot-20261029/**'
+      - 'reports/algorithm-results/exp06-it17-paper-reducers-20261029-r3/**'
       - 'scripts/reports/collector_common.py'
+      - 'scripts/reports/stage_history_functional.py'
+      - 'scripts/reports/history_warm_gap_report.py'
+      - 'scripts/reports/native_parallelotope_functional.py'
+      - 'tests/reporting/test_history_warm_gap_publication.py'
+      - 'tests/reporting/test_native_parallelotope_functional.py'
+      - 'scripts/reports/package_history_functional.py'
+      - 'reports/closed-loop-history-functional/**'
       - 'scripts/reports/render.py'
       - 'scripts/reports/site.py'
+      - 'scripts/reports/report_site.py'
       - 'scripts/reports/site_design.py'
+      - 'scripts/reports/stage_catalogue_disturbance_control.py'
+      - 'reports/algorithm-results/catalogue-disturbance-control-v1/**'
+      - 'tests/reporting/test_catalogue_disturbance_publication.py'
+      - 'scripts/reports/stage_catalogue_external_fixed_plan.py'
+      - 'reports/algorithm-results/catalogue-external-fixed-plan-v1/**'
       - 'scripts/reports/preserve_published_routes.py'
       - 'scripts/reports/audit_published_route_preservation.py'
+      - 'scripts/reports/geo05/**'
+      - 'reports/algorithm-results/geo05-*/records.json'
       - 'tests/reporting/test_preserve_published_routes.py'
+      - 'scripts/reports/stage_review05_family_query.py'
+      - 'tests/reporting/test_review05_family_query.py'
+      - 'tests/reporting/test_review05_build_phases.py'
+      - 'tests/reporting/test_review05_capture_tools.py'
+      - 'tests/reporting/test_review05_publication.py'
+      - 'tests/reporting/test_review05_resource_receipt.py'
+      - 'tests/reporting/test_scalar_query_oracle.py'
+      - 'benchmarks/reporting/review05/**'
+      - 'reports/algorithm-results/review05-family-query-20261110-3b98f5b0/**'
+      - 'reports/algorithm-results/review05-build-phases-20261110-468cc0eb/**'
+      - 'reports/algorithm-results/review05-highs-clocks-8abaf50b-20261109/**'
+      - 'reports/algorithm-results/review05-guide-route-retirement-20261112.json'
       - 'tests/reporting/test_published_route_audit_policy.py'
       - 'tests/fixtures/published-route-baseline/**'
       - 'scripts/reports/landing.py'
       - 'scripts/reports/visual_examples.py'
+      - 'scripts/reports/visual_example_geometry.py'
+      - 'scripts/reports/visual_example_hybrid.py'
+      - 'scripts/reports/visual_illustrations.py'
+      - 'reports/algorithm-results/catalog.json'
+      - 'reports/algorithm-results/ext07-*/**'
+      - 'reports/algorithm-results/ext07-publications.json'
+      - 'reports/algorithm-results/geo04-20261012T224946Z-c37852bcc80d/**'
+      - 'reports/algorithm-results/geo04-20261012T224946Z-c37852bcc80d.zip'
+      - 'reports/algorithm-results/geo06-b010fb3df212604b.source.zip'
+      - 'reports/algorithm-results/geo06-b010fb3df212604b/**'
+      - 'scripts/reports/ext07/**'
+      - 'scripts/reports/geo04/**'
+      - 'scripts/reports/geo04_registered_reports.py'
+      - 'scripts/reports/geo06_registered_reports.py'
+      - 'scripts/reports/geo06_report.py'
+      - 'scripts/reports/stage_ext07.py'
+      - 'docs/examples/b04-reference-trajectory-projections.svg'
+      - 'docs/examples/b04-reference-trajectory-projections.html'
       - 'scripts/reports/learning_book.py'
+      - 'tests/reporting/test_mpc06_online.py'
+      - 'scripts/reports/mpc06_online/**'
+      - 'reports/algorithm-results/mpc06-online-anchor-v1/**'
+      - 'reports/algorithm-results/mpc06-online-anchor-portable-v3/**'
       - 'scripts/reports/learning_closed_loop_toy.py'
       - 'scripts/reports/learning_geometry_toy.py'
       - 'scripts/reports/learning_model_tracks.py'
       - 'docs/catalogue/learning-book-v1.json'
+      - 'scripts/reports/algorithm_visual_coverage.json'
+      - 'reports/algorithm-results/catalog.json'
       - 'tests/reporting/test_learning_book.py'
       - 'docs/examples/closed-loop/figure-index.json'
       - 'docs/examples/learning/chapters/orbit-capstone.html'
@@ -369,7 +185,7 @@ on:
       - 'docs/examples/closed-loop/figures/earth-orbit.plotted-data.json'
       - 'docs/examples/closed-loop/figures/fuel-state.plotted-data.json'
       - 'docs/examples/closed-loop/figures/fuel-fuel-flow.plotted-data.json'
-      - 'reports/algorithm-results/native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip'
+      - 'reports/algorithm-results/native-model-tracking-first-pass-v1/**'
       - 'reports/algorithm-results/native-model-catalogue-v1/three-state.stdout'
       - 'reports/algorithm-results/native-model-catalogue-v1/four-state.stdout'
       - 'reports/algorithm-results/native-flexible-pitch-v1/manifest.json'
@@ -382,6 +198,10 @@ on:
       - 'scripts/reports/control_figure_data.py'
       - 'scripts/reports/control_figures.py'
       - 'scripts/reports/recorded_closed_loop_figures.py'
+      - 'scripts/reports/geo03/**'
+      - 'tests/reporting/test_geo03_report.py'
+      - 'reports/algorithm-results/geo03-*/**'
+      - 'reports/algorithm-results/geo03-*.zip'
       - 'tests/reporting/test_recorded_closed_loop_figures.py'
       - 'tests/reporting/test_viz03_control_figures.py'
       - 'scripts/reports/adapt_fuel_record.py'
@@ -391,7 +211,19 @@ on:
       - 'reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/raw-runs.jsonl'
       - 'tests/fixtures/reports/b06-measured-source/b06_finite_minimax.cpp'
       - 'scripts/reports/plot.py'
+      - 'benchmarks/reporting/it17_hull/**'
+      - 'scripts/reports/*it17*.py'
+      - 'scripts/reports/summarize_exp02_hull_ladder.py'
+      - 'tests/reporting/test_exp02_it17_*.py'
+      - 'reports/algorithm-results/exp02-it17-*/**'
+      - 'reports/algorithm-results/exp02-it17-*.zip*'
+      - 'reports/algorithm-results/quickhull-it17-paper-adaptations-*/**'
       - 'scripts/reports/b04_c_exact_registered_reports.py'
+      - 'scripts/reports/issue3/render_saved.py'
+      - 'scripts/reports/issue3_registered_reports.py'
+      - 'tests/reporting/test_issue3_saved_report.py'
+      - 'reports/algorithm-results/issue3-finite-catalogue-b4632ce76510aa4f/**'
+      - 'reports/algorithm-results/catalog.json'
       - 'tests/reporting/test_b04_publication_source_snapshot.py'
       - 'tests/reporting/test_publication_spine_boundaries.py'
       - 'scripts/reports/stage_ext04.py'
@@ -405,6 +237,7 @@ on:
       - 'docs/examples/qhull-highs-strategy-a-2d-record.json'
       - 'docs/examples/examples.css'
       - 'scripts/reports/mathematical_notation.py'
+      - 'tests/reporting/test_mathematical_notation.py'
       - 'scripts/reports/stage_finite_feedback.py'
       - 'scripts/reports/stage_geo07.py'
       - 'scripts/reports/environment_report_publication.py'
@@ -413,6 +246,23 @@ on:
       - 'scripts/reports/stage_env717_pendulum_terminal.py'
       - 'scripts/reports/stage_env717_earth_orbit.py'
       - 'tests/reporting/test_env717_dubins_car_publication.py'
+      - 'scripts/reports/stage_env717_air_to_air.py'
+      - 'scripts/reports/stage_env717_homicidal_chauffeur.py'
+      - 'tests/reporting/test_env717_air_to_air_publication.py'
+      - 'tests/reporting/test_env717_homicidal_chauffeur_publication.py'
+      - 'scripts/reports/stage_env717_broken_triangle.py'
+      - 'scripts/reports/stage_env717_cartpole.py'
+      - 'scripts/reports/stage_env717_multipoint_cost_game.py'
+      - 'scripts/reports/env717/check_broken_triangle.py'
+      - 'scripts/reports/env717/check_cartpole.py'
+      - 'scripts/reports/env717/check_multipoint_cost_game.py'
+      - 'scripts/reports/env717/check_air_to_air.py'
+      - 'scripts/reports/env717/check_homicidal_chauffeur.py'
+      - 'scripts/reports/env717/capture_homicidal_chauffeur.py'
+      - 'benchmarks/reporting/env717/homicidal_chauffeur.cpp'
+      - 'benchmarks/scenarios/env717-homicidal-chauffeur-pilot-v1.json'
+      - 'reports/algorithm-results/env717-air-to-air-pilot-v1/**'
+      - 'reports/algorithm-results/env717-homicidal-chauffeur-v1/**'
       - 'tests/reporting/test_env717_vanderpol_publication.py'
       - 'tests/reporting/test_env717_earth_orbit_publication.py'
       - 'tests/reporting/test_stage_env717_pendulum_terminal.py'
@@ -443,20 +293,105 @@ on:
       - 'tests/reporting/test_opt07_collector.py'
       - 'tests/reporting/test_opt12_collector.py'
       - 'tests/reporting/test_visual_examples.py'
+      - 'scripts/reports/stage_buryatia_dim4.py'
+      - 'scripts/reports/buryatia/capture_dim4.py'
+      - 'scripts/reports/buryatia/check_2d.py'
+      - 'scripts/reports/buryatia/check_dim4.py'
+      - 'scripts/reports/buryatia/render_2d.py'
+      - 'tests/reporting/test_buryatia_2d_provenance.py'
+      - 'tests/reporting/test_buryatia_dim4_capture.py'
+      - 'benchmarks/reporting/buryatia/driver.cpp'
+      - 'benchmarks/reporting/buryatia/ellipse_boundary.hpp'
+      - 'include/csl/geometry/ellipsoidal.hpp'
+      - 'src/geometry/approximation/ellipsoidal_set.cpp'
+      - 'src/geometry/approximation/ellipsoidal.cpp'
+      - 'src/geometry/approximation/policy.cpp'
+      - 'src/geometry/affine_sum.cpp'
+      - 'src/geometry/source_index_hull.cpp'
+      - 'src/geometry/bounded_hull_checker.cpp'
+      - 'src/geometry/hull/quickhull_2d.cpp'
+      - 'src/geometry/generators/generator_sets.cpp'
+      - 'src/geometry/generators/adapter.cpp'
+      - 'src/geometry/approximation/box_parallelotope.cpp'
+      - 'src/geometry/approximation/zonotope.cpp'
+      - 'scripts/reports/stage_buryatia_volterra.py'
+      - 'tests/reporting/test_stage_buryatia_dim4.py'
+      - 'tests/reporting/test_stage_buryatia_volterra.py'
+      - 'docs/examples/buryatia-dim4-*'
+      - 'docs/examples/buryatia-volterra-affine-2d*'
+      - 'benchmarks/scenarios/buryatia-dim4-matlab-literal-affine-v1.json'
       - 'tests/reporting/test_geo07_publication.py'
       - 'tests/reporting/test_geo07_port_publication.py'
       - 'tests/reporting/test_geo07_dependent_publication.py'
+      - 'scripts/reports/stage_exp04.py'
+      - 'scripts/reports/geo08/capture.py'
+      - 'scripts/reports/ext05/capture.py'
+      - 'scripts/reports/opt10/capture.py'
+      - 'scripts/reports/stage_ext05.py'
+      - 'scripts/reports/stage_geo08.py'
+      - 'scripts/reports/stage_opt10.py'
+      - 'tests/reporting/test_exp04.py'
+      - 'tests/reporting/test_ext05_saved.py'
+      - 'tests/reporting/test_geo08_saved.py'
+      - 'tests/reporting/test_opt10_saved.py'
+      - 'scripts/reports/exp04/render_saved.py'
+      - 'scripts/reports/exp04/collect.py'
+      - 'reports/algorithm-results/exp04-publications.json'
+      - 'reports/algorithm-results/exp04-replay-93fe3b87795e1d3a/**'
+      - 'scripts/reports/ext05/render_saved.py'
+      - 'scripts/reports/ext05/collect.py'
+      - 'reports/algorithm-results/ext05-publications.json'
+      - 'reports/algorithm-results/ext05-discretization-a40ba9647cc023dc/**'
+      - 'scripts/reports/geo08/render_saved.py'
+      - 'scripts/reports/geo08/collect.py'
+      - 'reports/algorithm-results/geo08-publications.json'
+      - 'reports/algorithm-results/geo08-lazy-6dbdd6b2f9235837/**'
+      - 'scripts/reports/opt10/render_saved.py'
+      - 'scripts/reports/opt10/collect.py'
+      - 'reports/algorithm-results/opt10-publications.json'
+      - 'reports/algorithm-results/opt10-smooth-188130d94d7bf2de/**'
       - 'tests/reporting/test_finite_feedback_publication.py'
       - 'tests/reporting/test_ext04_publication.py'
+      - 'scripts/reports/stage_ext04_continuous.py'
+      - 'scripts/reports/stage_ext04_affine_synthesis.py'
+      - 'scripts/reports/stage_ext04_h_policy.py'
+      - 'tests/reporting/test_ext04_affine_synthesis_publication.py'
+      - 'reports/algorithm-results/ext04-continuous-publications.json'
+      - 'reports/algorithm-results/ext04-affine-synthesis-publications.json'
+      - 'reports/algorithm-results/ext04-h-policy-publications.json'
+      - 'reports/algorithm-results/ext04-continuous-ebcf879d07ee9157/**'
+      - 'reports/algorithm-results/ext04-affine-synthesis-7eadf7c7ecbb2bbd/**'
+      - 'reports/algorithm-results/ext04-h-policy-0c0a95116ce4642b/**'
       - 'tests/reporting/test_report_lifecycle.py'
       - 'scripts/reports/requirements.txt'
       - 'scripts/reports/frozen_native_bundle.py'
       - 'scripts/reports/stage_native_model_catalogue.py'
+      - 'scripts/reports/stage_native_discrete_models.py'
+      - 'scripts/reports/stage_native_flexible_pitch.py'
+      - 'tests/reporting/test_native_discrete_models.py'
+      - 'tests/reporting/test_stage_native_flexible_pitch.py'
+      - 'scripts/reports/native_discrete_models.py'
+      - 'scripts/reports/native_model_tracking_first_pass.py'
+      - 'scripts/reports/stage_native_model_tracking_first_pass.py'
+      - 'scripts/reports/stage_nominal_quadratic_history.py'
+      - 'reports/algorithm-results/native-discrete-models-v1/**'
+      - 'reports/algorithm-results/native-flexible-pitch-v1/**'
+      - 'docs/examples/native-discrete-models.html'
+      - 'docs/examples/native-quadcopter-mpc.html'
+      - 'docs/examples/native-flexible-pitch.html'
+      - 'examples/nominal_quadratic_history_2d*'
       - 'scripts/reports/stage_native_extended_models.py'
       - 'scripts/reports/site_additions.py'
+      - 'scripts/reports/stage_app01.py'
+      - 'reports/algorithm-results/app01-publications.json'
+      - 'reports/algorithm-results/app01-plan-20261016-22d406fd/**'
       - 'scripts/reports/*published_route*.py'
       - 'reports/published-route-preservation/**'
       - 'scripts/reports/stage_app02.py'
+      - 'scripts/reports/app02/render_saved.py'
+      - 'scripts/reports/app02/collect.py'
+      - 'reports/algorithm-results/app02-publications.json'
+      - 'reports/algorithm-results/app02-box-8ff979de60ea9d22/**'
       - 'tests/reporting/test_site_additions.py'
       - 'tests/reporting/test_app02_saved.py'
       - 'scripts/reports/stage_app03.py'
@@ -478,15 +413,26 @@ on:
       - 'reports/algorithm-results/history-optimizer-native-2d-v1/**'
       - 'scripts/reports/capture_history_membership_2d.py'
       - 'scripts/reports/stage_history_membership_2d.py'
+      - 'scripts/reports/lotka_volterra_sampled.py'
+      - 'scripts/reports/stage_lotka_volterra_sampled.py'
+      - 'tests/reporting/test_lotka_volterra_sampled.py'
+      - 'scripts/reports/lotka_volterra_sampled_frozen_321ac099.py'
+      - 'reports/algorithm-results/lotka-volterra-sampled-20261023/**'
       - 'tests/reporting/test_history_membership_2d.py'
       - 'reports/algorithm-results/history-membership-zonotope-2d-v1/**'
       - 'scripts/reports/visual_examples.py'
       - 'scripts/reports/pages_route_retirement.py'
       - 'tests/reporting/test_pages_route_retirement.py'
       - 'scripts/reports/audit_visual_routes.py'
+      - 'scripts/reports/approx_extension_companions.py'
+      - 'scripts/reports/geometry_figures.py'
+      - 'reports/algorithm-results/**'
+      - 'scripts/reports/visual-route-inventory.json'
       - 'scripts/reports/audit_mathematical_presentation.py'
       - 'scripts/reports/augment_pages_bundle.py'
       - 'tests/reporting/test_pages_augmentation_aggregation.py'
+      - 'tests/reporting/run_controller_publication_checks.py'
+      - 'tests/reporting/test_controller_publication_runner.py'
       - 'tests/reporting/test_mathematical_presentation.py'
       - 'scripts/reports/check_deploy_head.py'
       - 'tests/reporting/test_deploy_head.py'
@@ -517,6 +463,11 @@ on:
       - 'reports/algorithm-results/env717-point-on-plane-pilot-v1/**'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
       - 'scripts/reports/stage_closed_loop_initial_baselines.py'
+      - 'scripts/reports/stage_issue4_volterra.py'
+      - 'scripts/research/issue4_volterra_enclosure.py'
+      - 'tests/reporting/test_issue4_volterra_enclosure.py'
+      - 'scripts/reports/issue4_volterra/render.py'
+      - 'reports/algorithm-results/issue4-volterra-7dce05b47c50c27a/**'
       - 'scripts/reports/fixed_tail_example.py'
       - 'scripts/reports/native_fixed_tail_episode_report.py'
       - 'scripts/reports/native_fixed_tail_geometry.py'
@@ -525,6 +476,13 @@ on:
       - 'tests/reporting/test_native_fixed_tail_geometry.py'
       - 'examples/fixed-tail-tiny-a6/**'
       - 'reports/closed-loop-native-fixed-tail/a6-v1/**'
+      - 'scripts/reports/stage_closed_loop_pilot.py'
+      - 'scripts/reports/native_terminal_cost_example.py'
+      - 'tests/reporting/test_native_terminal_cost_publication.py'
+      - 'reports/closed-loop-pilot/**'
+      - 'reports/algorithm-results/native-terminal-cost-33f907a0/**'
+      - 'reports/algorithm-results/native-terminal-cost-33f907a0.zip*'
+      - 'reports/algorithm-results/catalog.json'
       - 'scripts/reports/assets/native-fixed-tail-geometry/**'
       - 'docs/contracts/closed-loop/syn-nl-lv-01.json'
       - 'docs/contracts/closed-loop/syn-nl-lv-01.sha256'
@@ -533,6 +491,17 @@ on:
       - 'docs/contracts/closed-loop/earth-orbit.json'
       - 'docs/contracts/closed-loop/earth-orbit.sha256'
       - 'tests/reporting/test_closed_loop_initial_baselines_publication.py'
+      - 'scripts/reports/stage_mpc04_max_coordinate.py'
+      - 'scripts/reports/stage_mpc09_output_feedback.py'
+      - 'tests/reporting/test_mpc04_publication.py'
+      - 'tests/reporting/test_mpc09_output_feedback_publication.py'
+      - 'scripts/reports/mpc04/max_coordinate_replanning.py'
+      - 'scripts/reports/mpc04/check_max_coordinate.py'
+      - 'scripts/reports/mpc09/make_report.py'
+      - 'scripts/reports/mpc09/check_output_feedback.py'
+      - 'benchmarks/scenarios/mpc09-two-particle-output-feedback-v1.json'
+      - 'reports/algorithm-results/mpc04-max-coordinate-replanning-pilot-20261030/**'
+      - 'reports/algorithm-results/mpc09-two-particle-output-feedback-v1/**'
       - 'scripts/reports/stage_discrete_mpc_2d.py'
       - 'scripts/reports/stage_catalogue_forward_reachability.py'
       - 'tests/reporting/test_catalogue_forward_publication.py'
@@ -552,8 +521,54 @@ on:
       - 'reports/algorithm-results/mpc-crossover-6b7308c4/**'
       - 'reports/algorithm-results/native-source-constrained-mpc-v1/**'
       - 'scripts/reports/stage_native_history_strategies.py'
+      - 'scripts/reports/stage_mpc03.py'
+      - 'scripts/reports/stage_mpc03_b08.py'
+      - 'scripts/reports/stage_mpc08.py'
+      - 'scripts/reports/stage_mpc08_nonunique.py'
+      - 'tests/reporting/test_stage_mpc03.py'
+      - 'tests/reporting/test_mpc03_b08_report.py'
+      - 'tests/reporting/test_mpc08_publication.py'
+      - 'tests/reporting/test_mpc08_nonunique_publication.py'
+      - 'scripts/reports/stage_mpc08_complete.py'
+      - 'scripts/reports/mpc03/b08_report.py'
+      - 'scripts/reports/mpc03/b08_miqcp.py'
+      - 'scripts/reports/source_snapshots/mpc08-explicit-readme-ea756e66.json'
+      - 'benchmarks/reporting/mpc03/robust_minimax_driver.cpp'
+      - 'benchmarks/reporting/mpc08_explicit/**'
+      - 'benchmarks/reporting/review05/run_horizon_ladder.py'
+      - 'benchmarks/reporting/review05/highs_clock_events.py'
+      - 'reports/algorithm-results/mpc03-open-loop-pilot-v1/**'
+      - 'reports/algorithm-results/mpc03-b08-l04-miQCP-v1/**'
+      - 'reports/algorithm-results/mpc08-explicit-*/**'
+      - 'reports/algorithm-results/mpc08-explicit-*.zip*'
+      - 'reports/algorithm-results/mpc08-exact-regions-79ec2978-20261110/**'
+      - 'reports/algorithm-results/mpc08-horizon-regions-01762505-20261110/**'
       - 'tests/reporting/test_native_history_strategy_publication.py'
       - 'reports/algorithm-results/native-history-strategies-d57739b3/**'
+      - 'scripts/reports/stage_mpc05_causal_tree.py'
+      - 'scripts/reports/stage_mpc06_tube.py'
+      - 'scripts/reports/stage_mpc06_tube_objective.py'
+      - 'tests/reporting/test_mpc05_causal_tree_publication.py'
+      - 'tests/reporting/test_mpc06_tube_publication.py'
+      - 'tests/reporting/test_mpc06_route_policy_sources.py'
+      - 'tests/reporting/test_mpc06_tube_objective.py'
+      - 'tests/reporting/test_mpc06_tube_objective_pages_augmentation.py'
+      - '.github/workflows/mpc06-tube-objective-pages-augmentation.yml'
+      - 'benchmarks/scenarios/mpc06-tube-objective-v1.json'
+      - 'benchmarks/scenarios/mpc06-nilpotent-tube-v1.json'
+      - 'scripts/reports/mpc05/reference.py'
+      - 'scripts/reports/mpc06/check_tube.py'
+      - 'scripts/reports/mpc06/render_tube.py'
+      - 'scripts/reports/mpc06/tube_objective.py'
+      - 'scripts/reports/mpc06/check_tube_objective.py'
+      - 'scripts/reports/mpc06/render_tube_objective.py'
+      - 'scripts/reports/mpc06/build_tube_objective.py'
+      - 'docs/research/evidence/mpc06-tube-objective-source-snapshot/**'
+      - 'reports/algorithm-results/mpc05-causal-tree-pilot-v2/**'
+      - 'reports/algorithm-results/mpc06-nilpotent-tube-pilot-v1/**'
+      - 'reports/algorithm-results/mpc06-tube-objective-v1/**'
+      - 'reports/algorithm-results/env717-two-points-pilot-v1/figure-data.json'
+      - 'reports/algorithm-results/env717-two-points-pilot-v1/projections.svg'
       - 'tests/reporting/test_discrete_mpc_2d.py'
       - 'scripts/reports/stage_positive_part_budget_2d.py'
       - 'scripts/reports/stage_four_state_projection_approximations.py'
@@ -564,6 +579,26 @@ on:
       - 'reports/closed-loop-initial-baselines-v1.zip'
       - 'tests/reporting/test_syn03_strategy_a_report.py'
       - 'tests/reporting/test_syn03_ts02_report.py'
+      - 'scripts/reports/stage_ext02.py'
+      - 'scripts/reports/stage_exp03_two_points_approx.py'
+      - 'scripts/reports/stage_syn03_nominal_exact_example.py'
+      - 'scripts/reports/stage_perf03.py'
+      - 'tests/reporting/test_ext02_report.py'
+      - 'tests/reporting/test_stage_exp03_two_points_approx.py'
+      - 'tests/reporting/test_perf03_publication.py'
+      - 'tests/reporting/test_stage_syn03_nominal_exact_example.py'
+      - 'scripts/reports/exp03/build_comparison_records.py'
+      - 'scripts/reports/exp03/check_two_points_approximation.py'
+      - 'scripts/reports/ext02/collect.py'
+      - 'scripts/reports/ext02/render_saved.py'
+      - 'benchmarks/scenarios/ext02-analytic-two-state-mixed-v1.json'
+      - 'benchmarks/reporting/syn04/strategy_b_measure.cpp'
+      - 'reports/algorithm-results/ext02-publications.json'
+      - 'reports/algorithm-results/ext02-two-state-mixed-v1/**'
+      - 'reports/algorithm-results/ext02-two-state-mixed-v1.zip'
+      - 'reports/algorithm-results/exp03-two-points-approx-pilot-*/**'
+      - 'reports/algorithm-results/syn03-nominal-exact-2d-8b94095/**'
+      - 'reports/algorithm-results/perf03-ts01-single-process-correlation-20261014/**'
       - 'tests/reporting/test_opt07_*.py'
       - 'reports/algorithm-results/catalog.json'
       - 'reports/algorithm-results/convex-*.zip'
@@ -591,29 +626,87 @@ permissions:
   contents: read
 
 jobs:
+  route:
+    uses: ./.github/workflows/validation-routing.yml
+
   python-ci-quality:
+    needs: route
+    if: needs.route.outputs.python_quality == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.12'
       - name: Install pinned quality tools
         run: python -m pip install --disable-pip-version-check -r requirements-quality.txt -r scripts/reports/requirements.txt -r benchmarks/reporting/closed_loop/requirements.txt
       - name: Lint selected maintained Python tooling
         run: ruff check
+      - name: Regenerate and verify the saved issue 3 finite catalogue
+        run: |
+          python -m unittest tests.reporting.test_issue3_saved_report
+          name=issue3-finite-catalogue-b4632ce76510aa4f
+          bundle="reports/algorithm-results/$name"
+          target="$RUNNER_TEMP/$name"
+          mkdir "$target"
+          cp -r "$bundle/evidence" "$target/evidence"
+          python scripts/reports/issue3/render_saved.py --bundle "$target"
+          python scripts/reports/issue3/render_saved.py --bundle "$target" --check
+          diff -r "$bundle" "$target"
+          PYTHONPATH=scripts/reports python - "$target" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          import issue3_registered_reports as publication
+
+          catalogue = json.loads(Path("reports/algorithm-results/catalog.json").read_bytes())
+          expected = next(item for item in catalogue["reports"] if item.get("report_kind") == publication.KIND)
+          if publication.catalogue_entry(Path(sys.argv[1])) != expected:
+              raise ValueError("saved issue 3 public catalogue entry or archive hash differs")
+          PY
       - name: Check formatting
         run: ruff format --check
+      - name: Check the upstream Pages archive extractor
+        run: python -m unittest tests.reporting.test_mpc01_pages_augmentation
       - name: Check types
         run: ty check
+      - name: Reject new prose comments in maintained tooling and CI tests
+        env:
+          COMMENT_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: python scripts/ci/check_comment_ratchet.py check --base "$COMMENT_BASE"
       - name: Check closed-loop task and replay input shapes
         run: python -m unittest tests.reporting.test_closed_loop_tasks
+      - name: Replay both saved EXP-06 hull comparison publishers
+        run: |
+          python -m unittest tests.reporting.test_exp06_pilot
+          site="$RUNNER_TEMP/exp06-saved-site"
+          mkdir "$site"
+          printf '%s\n' '<html><body><ul></ul></body></html>' > "$site/index.html"
+          ordinary=reports/algorithm-results/exp06-geometry-pilot-20261029
+          paper=reports/algorithm-results/exp06-it17-paper-reducers-20261029-r3
+          ordinary_route=$(python scripts/reports/stage_exp06.py --source "$ordinary" --site "$site")
+          paper_route=$(python scripts/reports/stage_exp06.py --source "$paper" --site "$site" --paper-followup)
+          diff -r "$ordinary" "$site/$ordinary_route"
+          diff -r "$paper" "$site/$paper_route"
       - name: Exercise real Git and process behavior
         run: python -m unittest discover -s tests/ci -p 'test_*.py'
+      - name: Verify the saved APP-01 catalogue and offline ZIP
+        run: |
+          catalogue=reports/algorithm-results/app01-publications.json
+          source_id=$(jq -er '.reports[0].source_report_id' "$catalogue")
+          site="$RUNNER_TEMP/app01-saved-site"
+          mkdir "$site"
+          printf '<ul></ul>\n' > "$site/index.html"
+          python scripts/reports/stage_app01.py --source "reports/algorithm-results/$source_id" > "$RUNNER_TEMP/app01-catalogue.json"
+          diff -u <(jq -S . "$catalogue") <(jq -S . "$RUNNER_TEMP/app01-catalogue.json")
+          route=$(python scripts/reports/stage_app01.py --catalog "$catalogue" --site "$site")
+          test "$route" = "$(jq -er '.reports[0].report_id' "$catalogue")"
+          printf '%s  %s\n' "$(jq -er '.reports[0].zip_sha256' "$catalogue")" "$site/$route.zip" | sha256sum --check -
       - name: Exercise site additions and the APP02 staging caller
         run: |
           python -m unittest discover -s tests/reporting -p 'test_site_additions.py'
@@ -636,6 +729,10 @@ jobs:
               cmp "reports/algorithm-results/$route.zip" "$site/$route.zip"
             fi
           done
+      - name: Check the saved GEO-03 report and compatibility entry points
+        run: |
+          python -m unittest tests.reporting.test_geo03_report
+          python reports/algorithm-results/tooling/geo03/validate_report.py reports/algorithm-results/geo03-20261012-3c12ca125831
       - name: Check saved five-family fixed-tail geometry and episodes
         env:
           MPLBACKEND: Agg
@@ -645,11 +742,39 @@ jobs:
           python scripts/reports/native_fixed_tail_geometry.py --output "$RUNNER_TEMP/fixed-tail-geometry-site"
           cmp docs/examples/examples.css "$RUNNER_TEMP/fixed-tail-episode-site/examples/examples.css"
           cmp docs/examples/examples.css "$RUNNER_TEMP/fixed-tail-geometry-site/examples.css"
+      - name: Replay the saved Volterra certificate and offline ZIP
+        run: |
+          python -m unittest tests.reporting.test_issue4_volterra_enclosure
+          site="$RUNNER_TEMP/issue4-volterra-site"
+          bundle=reports/algorithm-results/issue4-volterra-7dce05b47c50c27a
+          mkdir "$site"
+          printf '<ul></ul>\n' > "$site/index.html"
+          python scripts/reports/stage_issue4_volterra.py --source "$bundle" --site "$site"
+          diff -r "$bundle" "$site/${bundle##*/}"
       - name: Exercise the composed Pages route finalizer
         run: python -m unittest tests.reporting.test_pages_route_retirement
+      - name: Check the saved affine-history functional reports
+        env:
+          MPLBACKEND: Agg
+        run: |
+          python -m unittest tests.reporting.test_history_warm_gap_publication tests.reporting.test_native_parallelotope_functional
+          site="$RUNNER_TEMP/affine-history-functional-site"
+          mkdir -p "$site/examples"
+          printf '%s\n' '<html><body><section id="analytic-illustrations"></section></body></html>' > "$site/examples/index.html"
+          python scripts/reports/stage_history_functional.py --site "$site"
+          diff -r reports/closed-loop-history-functional "$site/closed-loop-history-functional"
       - name: Exercise maintained compatibility entry points
         run: |
+          python -m unittest discover -s scripts/reports/geo05 -p 'test_*.py'
+          for report_id in geo05-4dc3c0557570a52e geo05-7fddaba0c7698f72; do
+            records="reports/algorithm-results/$report_id/records.json"
+            output="$RUNNER_TEMP/$report_id"
+            python scripts/reports/geo05/render.py --records "$records" --out "$output"
+            python reports/algorithm-results/tooling/geo05/render.py --records "$records" --out "$output-compat"
+            cmp "$output/index.html" "$output-compat/index.html"
+          done
           python -m unittest discover -s tests/reporting -p 'test_syn03_strategy_a_report.py'
+          python -m unittest tests.reporting.test_review05_build_phases tests.reporting.test_review05_capture_tools tests.reporting.test_review05_family_query tests.reporting.test_review05_publication tests.reporting.test_review05_resource_receipt tests.reporting.test_scalar_query_oracle
           python -m unittest discover -s tests/reporting -p 'test_syn03_ts02_report.py'
       - name: Check six saved environment routes and offline ZIPs
         run: >-
@@ -659,71 +784,423 @@ jobs:
           tests.reporting.test_env717_unequal_game_publication
           tests.reporting.test_env717_max_coordinate_publication
           tests.reporting.test_env717_point_on_plane_publication
+
+      - name: Check the saved QuickHull report
+        run: |
+          python -m unittest tests.reporting.test_geo06_report
+          python scripts/reports/geo06_report.py check --bundle reports/algorithm-results/geo06-b010fb3df212604b
       - name: Check frozen Pages route preservation
         run: python -m unittest tests.reporting.test_preserve_published_routes tests.reporting.test_published_route_audit_policy
+      - name: Check saved MPC-01 and B04-C Strategy A Pages reports
+        run: |
+          python -m unittest tests.reporting.test_mpc01_per_attempt_publication tests.reporting.test_b04_c_strategy_a_publication
+          site="$RUNNER_TEMP/saved-mpc01-b04-c-site"
+          mkdir -p "$site/examples"
+          printf '<html><body>Reports</body></html>\n' > "$site/index.html"
+          printf '<html><body>Examples</body></html>\n' > "$site/examples/index.html"
+          python scripts/reports/mpc01/stage_per_attempt.py --site "$site"
+          python scripts/reports/mpc01/stage_per_attempt.py --site "$site" --check
+          python scripts/reports/stage_b04_c_strategy_a.py --site "$site"
+          (cd "$site" && printf '%s\n' 'f6ca4bf0169e7f1809d8b1159d2803e40f7d8e9b46cdad97365e08b1f0d6bc2a  b04-c-strategy-a-bb5eb77fce5c2cd70b5c.zip' | sha256sum --check)
       - name: Exercise shared publication owners and malformed-input boundaries
         env:
           MPLBACKEND: Agg
         run: |
+          python -m unittest tests.reporting.test_mathematical_notation
           python -m unittest tests.reporting.test_report_data tests.reporting.test_render tests.reporting.test_publication_policy tests.reporting.test_report_source_identity tests.reporting.test_registered_kinds tests.reporting.test_landing tests.reporting.test_learning_book tests.reporting.test_plot tests.reporting.test_b04_publication_source_snapshot tests.reporting.test_publication_spine_boundaries
+      - name: Replay saved MPC replanning and output feedback
+        run: |
+          reports=reports/algorithm-results
+          # Captured commits may be outside main history. Fetch them once for all replays.
+          mpc04_commit=$(jq -er '.source.report_code_commit | select(test("^[a-f0-9]{40}$"))' "$reports/mpc04-max-coordinate-replanning-pilot-20261030/capture.json")
+          mpc09_commit=$(jq -er '.source_commit | select(test("^[a-f0-9]{40}$"))' "$reports/mpc09-two-particle-output-feedback-v1/capture.json")
+          missing=()
+          for commit in "$mpc04_commit" "$mpc09_commit"; do
+            if ! git cat-file -e "$commit^{commit}"; then
+              missing+=("$commit")
+            fi
+          done
+          if (( ${#missing[@]} )); then
+            git fetch --no-tags --depth=1 origin "${missing[@]}"
+          fi
+          python -m unittest tests.reporting.test_mpc04_publication tests.reporting.test_mpc09_output_feedback_publication
+          site=$(mktemp -d "$RUNNER_TEMP/mpc-replanning-feedback.XXXXXXXX")
+          printf '<html><body><ul></ul></body></html>\n' > "$site/index.html"
+          python scripts/reports/stage_mpc04_max_coordinate.py --source "$reports/mpc04-max-coordinate-replanning-pilot-20261030" --site "$site"
+          python scripts/reports/stage_mpc09_output_feedback.py --source "$reports/mpc09-two-particle-output-feedback-v1" --site "$site"
+          cd "$site"
+          # Verify the published offline ZIPs, including compression and metadata.
+          sha256sum --check <<'SHA256'
+          ab5a12359f365d3044743dd9ad74d3ee6279e00f2d68895830c84f8ab59aa965  mpc04-max-coordinate-replanning-9737632b9802b7f5dc32.zip
+          457cd203b245f8d7cfc26a8c3c464155cf20d5ed84e3e77ac04fd5b99079ba20  mpc09-output-feedback-62e43f8e4f58eda35210.zip
+          SHA256
       - name: Check cumulative Pages artifact identity and output
         run: python -m unittest tests.reporting.test_pages_augmentation_waiter
+      - name: Check ITIS17 saved hull reports and summary commands
+        run: |
+          python -m unittest tests.reporting.test_exp02_it17_dyadic_stage tests.reporting.test_exp02_it17_hull3d_publication tests.reporting.test_exp02_it17_hull4d_publication
+          out=$(mktemp -d "$RUNNER_TEMP/it17-replay.XXXXXXXX")
+          reports=reports/algorithm-results
+          preliminary="$reports/quickhull-it17-paper-adaptations-20261024-r1"
+          mkdir "$out/site"
+          printf '<ul></ul>\n' > "$out/site/index.html"
+          python scripts/reports/stage_it17_hull_adaptations.py --source "$preliminary" --site "$out/site"
+          python benchmarks/reporting/it17_hull/summarize.py "$preliminary/raw-capture.jsonl" "$out/preliminary"
+          for file in summary.csv index.html fixture-geometry.svg raw-rows.jsonl; do
+            cmp "$preliminary/$file" "$out/preliminary/$file"
+          done
+          for dimension in 3d 4d; do
+            source="$reports/exp02-it17-hull-$dimension-simplex-20261028-r1"
+            python "benchmarks/reporting/it17_hull/summarize_$dimension.py" --raw "$source/raw/raw-rows.jsonl" --output-dir "$out/$dimension"
+            for file in summary.csv index.html input-projections.svg validated-rows.jsonl; do
+              cmp "$source/$file" "$out/$dimension/$file"
+            done
+          done
+          ladder="$reports/exp02-it17-hull-ladder-20261024-r1"
+          python scripts/reports/summarize_exp02_hull_ladder.py --raw-dir "$ladder/raw" --output-dir "$out/ladder"
+          cmp "$ladder/coverage.json" "$out/ladder/coverage.json"
+          cmp "$ladder/validated-rows.jsonl" "$out/ladder/validated-rows.jsonl"
+          dyadic="$reports/exp02-it17-dyadic-250-20261029-r1"
+          python scripts/reports/summarize_exp02_it17_250.py "$dyadic/raw/raw-rows.jsonl" "$out/dyadic"
+          for file in summary.csv index.html fixture-geometry.svg raw/raw-rows.jsonl; do
+            cmp "$dyadic/$file" "$out/dyadic/$file"
+          done
       - name: Check mathematical presentation and frozen HTML
         run: python -m unittest tests.reporting.test_mathematical_presentation
+      - name: Check required modules in the controller evidence runner
+        run: python -m unittest tests.reporting.test_controller_publication_runner
       - name: Validate recorded control figures
         run: python -m unittest tests.reporting.test_recorded_closed_loop_figures tests.reporting.test_viz03_control_figures
+      - name: Replay archived EXT-04 continuous, affine and H-domain policies
+        env:
+          MPLBACKEND: Agg
+        run: |
+          python -m unittest tests.reporting.test_ext04_affine_synthesis_publication
+          results=reports/algorithm-results
+          site=$(mktemp -d "$RUNNER_TEMP/ext04-policies.XXXXXXXX")
+          printf '<html><body><ul></ul></body></html>\n' > "$site/index.html"
+          for variant in continuous affine-synthesis h-policy; do
+            catalog="$results/ext04-$variant-publications.json"
+            report=$(jq -er '.reports[0].source_report_id' "$catalog")
+            checksum=$(jq -er '.reports[0].zip_sha256' "$catalog")
+            stager="scripts/reports/stage_ext04_${variant//-/_}.py"
+            python "$stager" --source "$results/$report" > "$site/$variant.catalogue.json"
+            cmp "$catalog" "$site/$variant.catalogue.json"
+            python "$stager" --catalog "$catalog" --site "$site"
+            printf '%s  %s\n' "$checksum" "$site/$report.zip" | sha256sum --check
+          done
       - name: Exercise Pages deployment freshness and source identity
         run: python -m unittest tests.reporting.test_deploy_head
+      - name: Check the Buryatia capture protocol and replay the saved geometry
+        run: python -m unittest tests.reporting.test_buryatia_2d_provenance tests.reporting.test_buryatia_dim4_capture
+      - name: Check the frozen Buryatia reachability lessons
+        run: python -m unittest tests.reporting.test_stage_buryatia_dim4 tests.reporting.test_stage_buryatia_volterra
       - name: Exercise saved publication and collector consumer families
         env:
           MPLBACKEND: Agg
         run: |
           python -m unittest tests.reporting.test_convex_report tests.reporting.test_opt07_collector tests.reporting.test_opt12_collector tests.reporting.test_visual_examples tests.reporting.test_geo07_publication tests.reporting.test_geo07_port_publication tests.reporting.test_geo07_dependent_publication tests.reporting.test_finite_feedback_publication tests.reporting.test_ext04_publication tests.reporting.test_report_lifecycle
 
+      - name: Check the saved MPC-06 online evidence and entry points
+        run: |
+          python -m unittest tests.reporting.test_mpc06_online
+          for name in check render study; do
+            python "scripts/reports/mpc06_online/$name.py" --help > "$RUNNER_TEMP/mpc06-$name-direct-help"
+            python -m "scripts.reports.mpc06_online.$name" --help > "$RUNNER_TEMP/mpc06-$name-module-help"
+            cmp "$RUNNER_TEMP/mpc06-$name-direct-help" "$RUNNER_TEMP/mpc06-$name-module-help"
+          done
 
+      - name: Replay the saved closed-loop pilot and terminal-cost routes
+        env:
+          MPLBACKEND: Agg
+        run: |
+          python -m unittest tests.reporting.test_native_terminal_cost_publication
+          site=$(mktemp -d "$RUNNER_TEMP/native-diagnostics.XXXXXXXX")
+          mkdir "$site/examples"
+          printf '<section id="analytic-illustrations"></section>\n' > "$site/examples/index.html"
+          pilot=reports/closed-loop-pilot/closed-loop-pilot-v1
+          cost=reports/algorithm-results/native-terminal-cost-33f907a0
+          python - "$pilot.zip" <<'PY'
+          import sys
+          from zipfile import ZipFile
+
+          with ZipFile(sys.argv[1]) as archive:
+              damaged = archive.testzip()
+              if damaged is not None:
+                  raise ValueError(f"Damaged closed-loop archive member: {damaged}")
+          PY
+          python scripts/reports/native_terminal_cost_example.py --site "$site"
+          python scripts/reports/stage_closed_loop_pilot.py --source "$pilot" --site "$site"
+          for bundle in "$pilot" "$cost"; do
+            route=${bundle##*/}
+            diff -r "$bundle" "$site/$route"
+            cmp "$bundle.zip" "$site/$route.zip"
+          done
       - name: Check both saved Strategy A choice-pipeline publications
         env:
           MPLBACKEND: Agg
         run: python -m unittest tests.reporting.test_issue944_each_choice_publication tests.reporting.test_issue944_postfix_publication
+      - name: Verify saved native model bundles and lesson links
+        env:
+          MPLBACKEND: Agg
+        run: python -m unittest tests.reporting.test_native_discrete_models tests.reporting.test_stage_native_flexible_pitch
       - name: Check the locked source-only native row-scaling publication
         run: python -m unittest discover -s tests/reporting -p 'test_stage_native_row_scaling_diagnostic.py'
+      - name: Replay the ten saved TwoPoints publications
+        run: |
+          # The full checkout includes evidence tags. Fetch the two retained
+          # PR refs for the additional matched-profile source commits.
+          git fetch --no-tags origin refs/pull/846/head refs/pull/849/head
+          python -m unittest discover -s tests/reporting -p 'test_issue824_*_publication.py'
+          site=$(mktemp -d "$RUNNER_TEMP/issue824-replay.XXXXXXXX")
+          printf '<ul></ul>\n' > "$site/index.html"
+          while read -r publisher suffix; do
+            source="reports/algorithm-results/issue824-two-points-$suffix"
+            route=$(python "scripts/reports/stage_issue824_$publisher.py" --source "$source" --site "$site")
+            test "$route" = "${source##*/}"
+            diff -r "$source" "$site/$route"
+          done <<'ROUTES'
+          zonotope zonotope-pilot-v2
+          box_minimax box-pilot-v4
+          zonotope_minimax zonotope-minimax-v1
+          zonotope_minimax zonotope-minimax-v2
+          ellipsoid_minimax ellipsoid-minimax-v1
+          ellipsoid_minimax ellipsoid-minimax-v2
+          nominal nominal-v1
+          nominal nominal-v2
+          matched_minimax matched-minimax-v1
+          limited_minimax matched-minimax-resource-v1
+          ROUTES
       - name: Check the frozen environment report routes and ZIPs
         run: python -m unittest tests.reporting.test_env717_stager_publication
+      - name: Replay the saved causal-tree and tube MPC publications
+        run: |
+          # A separately installed mpc06 package must not shadow the saved tooling.
+          pythonpath=$(mktemp -d "$RUNNER_TEMP/tube-pythonpath.XXXXXXXX")
+          mkdir "$pythonpath/mpc06"
+          touch "$pythonpath/mpc06/__init__.py"
+          PYTHONPATH="$pythonpath" python -m unittest tests.reporting.test_mpc05_causal_tree_publication tests.reporting.test_mpc06_tube_publication tests.reporting.test_mpc06_route_policy_sources tests.reporting.test_mpc06_tube_objective tests.reporting.test_mpc06_tube_objective_pages_augmentation
+          site=$(mktemp -d "$RUNNER_TEMP/causal-tube.XXXXXXXX")
+          printf '<html><body><ul></ul></body></html>\n' > "$site/index.html"
+          reports=reports/algorithm-results
+          python scripts/reports/stage_mpc05_causal_tree.py --source "$reports/mpc05-causal-tree-pilot-v2" --site "$site"
+          python scripts/reports/stage_mpc06_tube.py --source "$reports/mpc06-nilpotent-tube-pilot-v1" --site "$site"
+          PYTHONPATH="$pythonpath" python scripts/reports/stage_mpc06_tube_objective.py --site "$site"
+
+          python - "$site" <<'PYZIP'
+          import hashlib
+          import sys
+          from pathlib import Path
+          from zipfile import ZipFile
+
+          site = Path(sys.argv[1])
+          # SHA-256 of the published archives, independently reproduced at the base commit.
+          archive_hashes = {
+              "mpc05-causal-tree-b3806c9080aea34bf291": "3e37a022cccf75b4472f88e9248da64262fe3f5ba57a7d6f1455e96ce754f4e8",
+              "mpc06-tube-405a8ac4eb2bea7ebec8": "5c1c55429d719a497770a732ae4a7110b583c74e7b0cbeaa2d62618515716b23",
+              "mpc06-tube-cost-7e3fe044f4cecc83a90c": "02d6d5dfa6cd51038361916ae8cacb813da62e85fc7c72f9e61a509812070f64",
+          }
+          for route, expected_hash in archive_hashes.items():
+              archive_path = site / f"{route}.zip"
+              if hashlib.sha256(archive_path.read_bytes()).hexdigest() != expected_hash:
+                  raise ValueError(f"Published archive checksum differs for {route}")
+              members = {f"{route}/{path.name}": path for path in (site / route).iterdir()}
+              with ZipFile(archive_path) as archive:
+                  names = archive.namelist()
+                  if len(names) != len(members) or set(names) != members.keys():
+                      raise ValueError(f"Archive inventory differs for {route}")
+                  for name, source in members.items():
+                      if archive.read(name) != source.read_bytes():
+                          raise ValueError(f"Archive differs from staged asset: {name}")
+          PYZIP
       - name: Check native strategy starts, actuation and retry checkpoints
         env:
           OPENBLAS_NUM_THREADS: '1'
           OMP_NUM_THREADS: '1'
         run: python -m unittest tests.reporting.test_native_strategy_history tests.reporting.test_closed_loop_attempt_records
+      - name: Exercise full-history validation, norms, and fixed-tail receipts
+        env:
+          OPENBLAS_NUM_THREADS: '1'
+          OMP_NUM_THREADS: '1'
+        run: >-
+          python -m unittest tests.reporting.test_history_geometry
+          tests.reporting.test_history_norm_solver
+          tests.reporting.test_native_fixed_tail_policy
+          tests.reporting.test_nominal_tube_source
+      - name: Check standalone closed-loop diagnostic imports
+        run: python benchmarks/reporting/closed_loop/terminal_objective_probe.py --help
       - name: Check the saved native whole-history optimizer route
         run: python -m unittest discover -s tests/reporting -p 'test_history_optimizer_native.py'
+      - name: Replay the saved MPC-03 and MPC-08 publications
+        env:
+          MPLBACKEND: Agg
+        run: |
+          python -m unittest tests.reporting.test_mpc08_publication
+          python -m unittest tests.reporting.test_stage_mpc03 tests.reporting.test_mpc03_b08_report tests.reporting.test_mpc08_nonunique_publication
+          site=$(mktemp -d "$RUNNER_TEMP/saved-mpc.XXXXXXXX")
+          mkdir "$site/examples"
+          printf '<ul></ul>\n' > "$site/index.html"
+          printf '<section id="analytic-illustrations"></section>\n' > "$site/examples/index.html"
+          reports=reports/algorithm-results
+          python scripts/reports/stage_mpc03.py --source "$reports/mpc03-open-loop-pilot-v1" --site "$site"
+          python scripts/reports/stage_mpc08.py --source "$reports/mpc08-explicit-pilot-v1" --site "$site"
+          python scripts/reports/stage_mpc03_b08.py --source "$reports/mpc03-b08-l04-miQCP-v1" --site "$site"
+          python scripts/reports/stage_mpc08_nonunique.py --site "$site"
+          for route in mpc03-open-loop-pilot-v1 mpc03-b08-l04-miQCP-v1 mpc08-explicit-pilot-v1 mpc08-explicit-nonunique-v1; do
+            diff -r "$reports/$route" "$site/$route"
+          done
+          python - "$reports" <<'PYZIP'
+          import sys
+          from pathlib import Path
+          from zipfile import ZipFile
+
+          reports = Path(sys.argv[1])
+          for route in ("mpc08-explicit-pilot-v1", "mpc08-explicit-nonunique-v1"):
+              bundle = reports / route
+              members = {f"{route}/{path.name}": path for path in bundle.iterdir()}
+              with ZipFile(bundle.with_suffix(".zip")) as archive:
+                  names = archive.namelist()
+                  if (len(names) != len(members) or set(names) != members.keys()
+                          or archive.testzip() is not None):
+                      raise ValueError(f"Invalid archive inventory or CRC for {route}")
+                  for name, source in members.items():
+                      if archive.read(name) != source.read_bytes():
+                          raise ValueError(f"Archive differs from saved asset: {name}")
+          PYZIP
+          for route in mpc08-explicit-pilot-v1 mpc08-explicit-nonunique-v1; do
+            cmp "$reports/$route.zip" "$site/$route.zip"
+          done
       - name: Check the frozen CartPole route and offline ZIP
         run: python -m unittest tests.reporting.test_env717_cartpole_publication
+      - name: Check the sampled Lotka–Volterra publication
+        run: python -m unittest tests.reporting.test_lotka_volterra_sampled
       - name: Check the saved typed-membership 2D example
         run: python -m unittest discover -s tests/reporting -p 'test_history_membership_2d.py'
+      - name: Replay saved EXT-02, EXP-03, SYN-03 and PERF-03 reports
+        env:
+          MPLBACKEND: Agg
+        run: |
+          python -m unittest tests.reporting.test_ext02_report tests.reporting.test_stage_exp03_two_points_approx tests.reporting.test_perf03_publication
+          python -m unittest tests.reporting.test_stage_syn03_nominal_exact_example
+          site=$(mktemp -d "$RUNNER_TEMP/saved-report-replay.XXXXXXXX")
+          printf '<ul></ul>\n' > "$site/index.html"
+          reports=reports/algorithm-results
+          route=$(python scripts/reports/stage_ext02.py --catalog "$reports/ext02-publications.json" --site "$site")
+          test "$route" = ext02-two-state-mixed-v1
+          for source_file in "$reports/$route"/*; do
+            cmp "$source_file" "$site/$route/${source_file##*/}"
+          done
+          cmp "$reports/$route.zip" "$site/$route/$route.zip"
+          for revision in v1 v2; do
+            source="$reports/exp03-two-points-approx-pilot-$revision"
+            route=$(python scripts/reports/stage_exp03_two_points_approx.py --source "$source" --site "$site")
+            (cd "$site/$route" && sha256sum -c SHA256SUMS --quiet)
+            for source_file in "$source"/*; do
+              case "${source_file##*/}" in
+                index.html|SHA256SUMS) continue ;;
+              esac
+              cmp "$source_file" "$site/$route/${source_file##*/}"
+            done
+          done
+          source="$reports/syn03-nominal-exact-2d-8b94095"
+          route=$(python scripts/reports/stage_syn03_nominal_exact_example.py --source "$source" --site "$site")
+          diff -r "$source" "$site/$route"
+          source="$reports/perf03-ts01-single-process-correlation-20261014"
+          route=$(python scripts/reports/stage_perf03.py --source "$source" --site "$site")
+          test "$route" = perf03-ts01-single-process-correlation-20261014-365f6e659e316219
+          diff -r "$source" "$site/$route"
       - name: Check the four-state projection approximation report
         run: python -m unittest discover -s tests/reporting -p 'test_four_state_projection_approximations.py'
+      - name: Replay saved EXP-04, EXT-05, GEO-08 and OPT-10 catalogues
+        env:
+          MPLBACKEND: Agg
+        run: |
+          python -m unittest tests.reporting.test_exp04 tests.reporting.test_ext05_saved tests.reporting.test_geo08_saved tests.reporting.test_opt10_saved
+          reports=reports/algorithm-results
+          site=$(mktemp -d "$RUNNER_TEMP/saved-catalogues.XXXXXXXX")
+          printf '<html><body><ul></ul></body></html>\n' > "$site/index.html"
+          for topic in exp04 ext05 geo08 opt10; do
+            catalogue="$reports/$topic-publications.json"
+            id=$(jq -er '.reports[0].report_id' "$catalogue")
+            checksum=$(jq -er '.reports[0].zip_sha256' "$catalogue")
+            stager="scripts/reports/stage_$topic.py"
+            python "$stager" --source "$reports/$id" > "$site/$topic.catalogue.json"
+            jq --sort-keys . "$catalogue" > "$site/$topic.expected.json"
+            jq --sort-keys . "$site/$topic.catalogue.json" | cmp "$site/$topic.expected.json" -
+            python "$stager" --catalog "$catalogue" --site "$site"
+            leaf=bundle.zip
+            if [[ "$topic" == ext05 || "$topic" == opt10 ]]; then leaf="$id.zip"; fi
+            printf '%s  %s\n' "$checksum" "$site/$id/$leaf" | sha256sum --check
+          done
       - name: Check the matched discrete MPC example and visual gallery
         run: |
           python -m unittest discover -s tests/reporting -p 'test_discrete_mpc_2d.py'
-          python -m unittest tests.reporting.test_catalogue_forward_publication
+          python -m unittest tests.reporting.test_catalogue_forward_publication tests.reporting.test_catalogue_disturbance_publication
           python -m unittest tests.reporting.test_mpc_crossover_publication tests.reporting.test_native_source_constrained_mpc_publication tests.reporting.test_native_history_strategy_publication
-          python -m unittest discover -s tests/reporting -p 'test_visual_examples.py'
       - name: Exercise OPT07 and OPT11 collectors, oracles and saved reports
         run: |
           python -m unittest discover -s tests/reporting -p 'test_opt07_*.py'
           python -m unittest discover -s tests/reporting -p 'test_opt11_publication.py'
           python -m unittest discover -s reports/algorithm-results/tooling/opt11 -p 'test_collect.py'
 
+      - name: Check archived Pendulum and five other environment publications
+        run: >-
+          python -m unittest
+          tests.reporting.test_env717_pendulum_publication
+          tests.reporting.test_env717_sphere_game_publication
+          tests.reporting.test_env717_time_sphere_publication
+          tests.reporting.test_env717_time_sphere_minimax_publication
+          tests.reporting.test_env717_two_particle_minimax_publication
+          tests.reporting.test_stage_env717_unlimited_bolza
       - name: Check closed-loop catalogues, campaign resume and common runner failure paths
         run: python -m unittest tests.reporting.test_native_compositions tests.reporting.test_closed_loop_campaign tests.reporting.test_closed_loop_native_capabilities tests.reporting.test_closed_loop_runner_failures tests.reporting.test_closed_loop_tracing tests.reporting.test_native_vertex_lp_priority_policy
+      - name: Verify the saved GEO-04 report export matches its committed bytes
+        run: python -m unittest discover -s scripts/reports/geo04 -p test_report_tools.py
       - name: Check four frozen environment report routes and offline ZIPs
         run: >-
           python -m unittest tests.reporting.test_env717_dubins_car_publication
           tests.reporting.test_env717_vanderpol_publication
           tests.reporting.test_env717_earth_orbit_publication
           tests.reporting.test_stage_env717_pendulum_terminal
+      - name: Check the remaining archived environment report routes
+        run: >-
+          python -m unittest
+          tests.reporting.test_env717_air_to_air_publication
+          tests.reporting.test_env717_homicidal_chauffeur_publication
       - name: Check architecture boundaries and decoded perf sample parsing
         run: |
           python tests/architecture/check_numeric_dependencies.py
           python tests/architecture/check_stage_projection_boundaries.py
           python tests/obs04/perf_probe_tests.py
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.13'
+      - name: Install NumPy for the documented legacy hull runtime
+        run: >-
+          python -m pip install --disable-pip-version-check --only-binary=:all:
+          -r tools/legacy-ports/A29/requirements.txt -r tools/legacy-ports/A33/requirements.txt
+      - name: Exercise the legacy hull ports and their exact oracles
+        env:
+          OPENBLAS_CORETYPE: Haswell
+        run: |
+          python -m unittest discover -s tools/legacy-ports/A29 -p test_port.py
+          python -m unittest discover -s tools/legacy-ports/A33 -p test_port.py
+
+  python-quality-status:
+    name: Python quality validation
+    if: always()
+    needs: [route, python-ci-quality]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require Python quality when its path scope changed
+        env:
+          ROUTE_RESULT: ${{ needs.route.result }}
+          REQUIRED: ${{ needs.route.outputs.python_quality }}
+          QUALITY_RESULT: ${{ needs.python-ci-quality.result }}
+        run: |
+          test "$ROUTE_RESULT" = success
+          if [ "$REQUIRED" = true ]; then
+            test "$QUALITY_RESULT" = success
+          else
+            test "$QUALITY_RESULT" = skipped
+          fi

@@ -8,14 +8,16 @@ import json
 from html import escape
 from pathlib import Path
 
-# Bind the published stager hash to the exact reviewed archive.
-HISTORICAL_REPORT = {
+# Preserve the original tool identities after exact replay of the reviewed bundle.
+HISTORICAL_BUNDLE = {
     "report_id": "app04-ellipsoid-fd302c34092f8b19",
     "manifest_sha256": "f6c23288c3325b260b6cfc797bd0c93f28d705f43d7b802d49cc69bddcc9f1f8",
     "zip_sha256": "6b8e5599db4c7f1c16641d2c5cce1e82e3929263645e79a7b107ab878ebd22bf",
-    "renderer_sha256": "a71856b751f1f14a0758ca03621bda5981d79d5589007c9adbefdd1a96139c0d",
 }
-HISTORICAL_STAGER_SHA256 = "b1667e0188d6c10cc9ca1cc882f0905a3dd2746485d977b6837732f0b5cfd0f0"
+HISTORICAL_PROVENANCE = {
+    "renderer_sha256": "a71856b751f1f14a0758ca03621bda5981d79d5589007c9adbefdd1a96139c0d",
+    "stager_sha256": "b1667e0188d6c10cc9ca1cc882f0905a3dd2746485d977b6837732f0b5cfd0f0",
+}
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location(
@@ -58,8 +60,8 @@ def catalog_entry(bundle: Path) -> dict:
         ),
         "stager_sha256": report.collect.sha(Path(__file__).read_bytes()),
     }
-    if all(entry[key] == value for key, value in HISTORICAL_REPORT.items()):
-        entry["stager_sha256"] = HISTORICAL_STAGER_SHA256
+    if all(entry[key] == value for key, value in HISTORICAL_BUNDLE.items()):
+        entry.update(HISTORICAL_PROVENANCE)
     return entry
 
 

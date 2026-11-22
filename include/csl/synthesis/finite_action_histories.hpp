@@ -13,7 +13,7 @@ namespace csl::synthesis {
 // rows therefore remain distinct histories.
 struct FiniteActionHistory {
     std::vector<std::size_t> catalogue_indices;
-    bool operator==(const FiniteActionHistory&) const = default;
+    bool operator==(const FiniteActionHistory &) const = default;
 };
 
 struct FiniteActionHistoryPrefix {
@@ -29,12 +29,12 @@ class FiniteActionHistoryCursor {
     std::vector<std::size_t> choices_;
     bool complete_{};
 
-    FiniteActionHistoryCursor(std::size_t catalogue_size,std::size_t horizon);
+    FiniteActionHistoryCursor(std::size_t catalogue_size, std::size_t horizon);
     void advance() noexcept;
 
-public:
-    static std::variant<FiniteActionHistoryCursor,Diagnostics> prepare(
-        const FiniteDomain&,std::size_t horizon);
+  public:
+    static std::variant<FiniteActionHistoryCursor, Diagnostics> prepare(const FiniteDomain &,
+                                                                        std::size_t horizon);
 
     bool complete() const noexcept { return complete_; }
     FiniteActionHistoryPrefix take_prefix(std::size_t max_histories);

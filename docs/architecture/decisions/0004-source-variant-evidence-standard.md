@@ -145,6 +145,12 @@ advance a clearly labelled reference without changing the historical record.
 This standard does not close the outstanding recovery issues or authorize
 additional execution.
 
+CI that verifies frozen issue 824 bundles fetches the retained source refs
+`refs/pull/846/head` and `refs/pull/849/head` before checking recorded source
+hashes. The archived bundles identify commits from those historical PR branches;
+the fetched trees let validation verify their source identity without changing
+the frozen bundles or depending on a feature branch name.
+
 ## Alternatives considered
 
 - **Choose the most plausible archived variant.** Rejected because similarity

@@ -40,6 +40,28 @@ class WarmGapPublicationTest(unittest.TestCase):
             {"attempts": 16, "profiles": 15, "complete": 8, "accepted_queries": 304, "figures": 32},
         )
 
+    def test_existing_route_conflict_is_rejected_before_writing(self):
+        import stage_history_functional as publication
+
+        with tempfile.TemporaryDirectory() as directory:
+            site = Path(directory)
+            gallery = site / "examples/index.html"
+            gallery.parent.mkdir()
+            original_html = '<section id="analytic-illustrations"></section>'
+            gallery.write_text(original_html)
+            route = site / publication.REPORT
+            conflict = route / "warm-gap-9540-v1/records.json"
+            conflict.parent.mkdir(parents=True)
+            conflict.write_text("{}")
+            source = ROOT / "reports/closed-loop-history-functional"
+
+            with self.assertRaisesRegex(ValueError, "Existing route differs"):
+                publication.stage(source, site)
+
+            self.assertEqual([path for path in route.rglob("*") if path.is_file()], [conflict])
+            self.assertEqual(conflict.read_text(), "{}")
+            self.assertEqual(gallery.read_text(), original_html)
+
     def test_staging_rejects_rehashed_score_that_disagrees_with_raw_attempt(self):
         import stage_history_functional as publication
 

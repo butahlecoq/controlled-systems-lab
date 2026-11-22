@@ -15,7 +15,6 @@ if((CSL_BUILD_GEO02_REPORT OR CSL_BUILD_GEO03_REPORT OR CSL_BUILD_GEO04_REPORT O
   message(FATAL_ERROR "The selected report requires CSL_ENABLE_QHULL")
 endif()
 
-# Non-installed measurement targets; each option requires the declared adapters.
 
 if(CSL_BUILD_MPC08_REPORT)
 add_executable(csl_mpc08_crossover benchmarks/reporting/mpc08_explicit/crossover_driver.cpp)
@@ -50,10 +49,6 @@ if(MSVC)
 target_compile_options(csl_mpc09_output_feedback_report PRIVATE /W4 /WX /permissive-)
 else()
 target_compile_options(csl_mpc09_output_feedback_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  # GCC 16 misdiagnoses the inactive vector alternative while copying Dynamics' variant.
-  target_compile_options(csl_mpc09_output_feedback_report PRIVATE -Wno-maybe-uninitialized)
-endif()
 endif()
 if(BUILD_TESTING)
 find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)

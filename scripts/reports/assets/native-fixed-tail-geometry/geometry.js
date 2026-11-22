@@ -1,4 +1,3 @@
-/* Read plotted data only; every full-state region was checked by the publisher. */
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);

@@ -2,8 +2,9 @@
 
 import copy
 import hashlib
-import importlib.util
+import importlib
 import io
+import importlib.util
 import json
 import shutil
 import subprocess
@@ -31,7 +32,7 @@ def load(name, path):
 native_tests = load("opt04_fixture_tools", TOOLS / "test_report_tools.py")
 collector = load("opt04_fixture_collector", TOOLS / "collect.py")
 renderer = native_tests.render
-report_site = load("opt04_test_site", ROOT / "scripts/reports/site.py")
+report_site = importlib.import_module("report_site")
 
 
 def make_records():

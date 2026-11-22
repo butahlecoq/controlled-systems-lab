@@ -1,7 +1,6 @@
 """The published archive index explains every report instead of listing opaque IDs."""
 
 import importlib
-import importlib.util
 import json
 import sys
 import tempfile
@@ -12,11 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
 landing = importlib.import_module("landing")
-
-spec = importlib.util.spec_from_file_location("report_site", ROOT / "scripts/reports/site.py")
-assert spec is not None and spec.loader is not None
-site = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(site)
+site = importlib.import_module("report_site")
 
 REPORTS = ROOT / "reports/algorithm-results"
 

@@ -4,6 +4,7 @@
 #include <two_points_fixture.hpp>
 
 #include <algorithm>
+#include <limits>
 
 using namespace csl;
 using namespace csl::optimization;
@@ -144,7 +145,7 @@ TEST_CASE("box minimax preserves scored plans when a later plan stops") {
 
 TEST_CASE("box minimax preserves every plan refused by the corner budget") {
     const auto request = analytic_box_request();
-    const auto outcome = finite_action_box_minimax(request, {3, 2, 2, 1});
+    const auto outcome = finite_action_box_minimax(request, {3, 2, 2, 0});
     REQUIRE(std::holds_alternative<FiniteActionBoxMinimaxResult>(outcome));
     const auto& result = std::get<FiniteActionBoxMinimaxResult>(outcome);
     CHECK(result.candidate_search == CandidateSearchCoverage::incomplete);
@@ -153,4 +154,60 @@ TEST_CASE("box minimax preserves every plan refused by the corner budget") {
         return std::holds_alternative<BoxPlanUnscored>(attempt);
     }));
     CHECK(std::holds_alternative<BoxNoScoredCandidate>(result.selection));
+}
+
+TEST_CASE("separable box scoring fits one corner and agrees with exhaustive evaluation") {
+    const SystemModel model{
+        {{3, 1, 0},
+         TimeDomain::discrete,
+         LinearStage{
+             {3, 3, {1, 0, 0, 0, 1, 0, 0, 0, 1}}, {3, 1, {0, 0, 0}}, {3, 0, {}}, {0, 0, 0}}},
+        {}};
+    const auto system = take_box(model::snapshot(model, Vector{0, 1}));
+    const auto initial = take_box(sets::make_v(
+        {{"asymmetric-initial"}, 3, {}},
+        {take_box(numeric::snapshot(Matrix{4, 3, {-2, -1, 3, 1, -1, 3, -2, 1, 3, 1, 1, 3}})),
+         take_box(numeric::snapshot(Matrix{0, 3, {}}))}));
+    const auto safe = take_box(sets::make_universal({{"asymmetric-safe"}, 3, {}}));
+    const auto outside = take_box(sets::make_singleton(
+        {{"no-external-channel"}, 0, {}}, take_box(numeric::snapshot_vector(Vector{}))));
+    QuadraticTerminal objective{{3, 3, {2, 0, 0, 0, 4, 0, 0, 0, 0}}, {3, 0, -2}, 5};
+    FiniteActionMinimaxRequest request{{"asymmetric-box"},
+                                       {"asymmetric-box-score"},
+                                       system,
+                                       initial,
+                                       {1, {{0}}},
+                                       {outside},
+                                       {safe, safe},
+                                       std::get<Objective>(snapshot(objective))};
+
+    const auto outcome = finite_action_box_minimax(request, {1, 4, 4, 1});
+    REQUIRE(std::holds_alternative<FiniteActionBoxMinimaxResult>(outcome));
+    const auto &result = std::get<FiniteActionBoxMinimaxResult>(outcome);
+    REQUIRE(result.plan_attempts.size() == 1);
+    REQUIRE(std::holds_alternative<BoxPlanScored>(result.plan_attempts.front()));
+    const auto &scored = std::get<BoxPlanScored>(result.plan_attempts.front());
+    const auto &terminal = scored.trace.stages.back();
+    double worst_corner = -std::numeric_limits<double>::infinity();
+    for (const double x : {terminal.lower[0], terminal.upper[0]})
+        for (const double y : {terminal.lower[1], terminal.upper[1]})
+            for (const double z : {terminal.lower[2], terminal.upper[2]})
+                worst_corner = std::max(
+                    worst_corner, std::get<double>(evaluate(request.objective, Vector{x, y, z})));
+    CHECK(scored.terminal_box_maximum == doctest::Approx(worst_corner).epsilon(1e-14));
+    CHECK(worst_corner == doctest::Approx(5.0));
+    CHECK(result.candidate_search == CandidateSearchCoverage::complete);
+    CHECK(std::holds_alternative<BoxPlanSelected>(result.selection));
+
+    objective.Q.values[1] = 0.25;
+    objective.Q.values[3] = 0.25;
+    request.objective = std::get<Objective>(snapshot(objective));
+    const auto coupled = finite_action_box_minimax(request, {1, 4, 4, 1});
+    REQUIRE(std::holds_alternative<FiniteActionBoxMinimaxResult>(coupled));
+    const auto &fallback = std::get<FiniteActionBoxMinimaxResult>(coupled);
+    REQUIRE(fallback.plan_attempts.size() == 1);
+    REQUIRE(std::holds_alternative<BoxPlanUnscored>(fallback.plan_attempts.front()));
+    CHECK(std::get<BoxPlanUnscored>(fallback.plan_attempts.front())
+              .reason.diagnostics.front()
+              .field == "finite_box_minimax.corners");
 }
