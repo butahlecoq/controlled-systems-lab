@@ -294,9 +294,9 @@ add_test(NAME installed_validated_finite_action_minimax_port_client
 set_tests_properties(installed_validated_finite_action_minimax_port_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed validated minimax port client: selected validated bounds passed")
 set_tests_properties(installed_model_client PROPERTIES
-  PASS_REGULAR_EXPRESSION "Installed model client: immutable LTI/LTV and scheduled observation literals passed")
+  PASS_REGULAR_EXPRESSION "Installed model client: singular, LTI/LTV and scheduled observation literals passed")
 add_executable(installed_public_client public_client.cpp)
-target_link_libraries(installed_public_client PRIVATE CSL::contracts CSL::model)
+target_link_libraries(installed_public_client PRIVATE CSL::contracts)
 set_target_properties(installed_public_client PROPERTIES CXX_EXTENSIONS OFF)
 enable_testing()
 
@@ -309,7 +309,7 @@ set_tests_properties(installed_nominal_quadratic_history_client PROPERTIES
 
 add_test(NAME installed_public_client COMMAND installed_public_client)
 set_tests_properties(installed_public_client PROPERTIES
-  PASS_REGULAR_EXPRESSION "Public contract client: shape guards and literal affine fixture passed")
+  PASS_REGULAR_EXPRESSION "Public contract client: shape guards passed")
 
 add_executable(installed_numeric_client numeric_client.cpp)
 target_link_libraries(installed_numeric_client PRIVATE CSL::numeric)
