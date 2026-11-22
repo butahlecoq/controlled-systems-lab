@@ -185,3 +185,18 @@ diagnostic at 17 significant digits, while tests compare it with an independent
 objective evaluation using a scaled `1e-12` tolerance to allow for arithmetic
 rounding. This tolerance is a fixture-level comparison policy, not a certified
 error bound for arbitrary QPs.
+
+The HiGHS LP contract tests preserve three additional ownership and recovery
+oracles. A prepared plan must remain usable after its temporary provider
+registry and source program have left scope. Cross-query warm-start tests
+interleave independent workspaces and reject one basis installation only after
+the tested workspace has solved earlier queries. The objective is recomputed
+from each returned primal and checked against the expected value, while the
+result bounds remain absent and both results retain the input program identity.
+The retried primal is also checked against a literal expected point; the cold
+and retried primal vectors are not directly compared.
+For concurrent worker construction, the two-party barrier is dropped if the
+second `std::async` launch throws, so stack unwinding cannot wait forever for
+the first worker at the barrier. These are fixture and adapter contract checks;
+they do not establish general HiGHS thread safety or arbitrary warm-start
+performance.
