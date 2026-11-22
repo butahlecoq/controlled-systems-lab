@@ -149,3 +149,13 @@ architecture decision. New operations and stronger guarantees require scoped
 implementation and independent review. REVIEW-05 #95 tracks the execution and
 scalability assessment; comparison tickets track equal-output experiments.
 The project license and historical B04 restoration remain separate decisions.
+
+## Build isolation for pinned dependencies
+
+The shared dependency archive cache stores immutable bytes by name and SHA-256. A per-archive lock protects verification and publication when configure processes share that cache. Each build still extracts its own copy through FetchContent and supplies `URL_HASH`, including under CMP0168 NEW. Native probes configure as a separate project so their dependency settings and installation rules stay local to the probe.
+
+Adapters use the pinned native integrations privately. Eigen and nlohmann JSON are consumed as headers. A global include guard gives the pinned JSON FetchContent identity one declaration in this build. The JSON integration adds neither an upstream build nor an exported parser target. Reentrant Qhull is private. Doctest belongs to the test build and its artifacts are excluded from product installation.
+
+HiGHS keeps the original upstream archive pin, and the adapter function scopes its upstream options away from CSL tests and toolchain settings. The verified downstream initialization patch applies after extraction. The clock snapshot postimage carries the scheduler observation accessor, so the thread observation patch accepts that postimage without applying the accessor twice. Static installed consumers need the private archive at final link. The exported archive provides that link dependency while its native headers stay in the producer build.
+
+When the CasADi adapter is enabled, its imported dependency and the core must agree on the libstdc++ string ABI. The adapter passes CSL values containing strings across that boundary. Compile probes check the core and the imported target because an imported compile definition can change the adapter without changing the core.
