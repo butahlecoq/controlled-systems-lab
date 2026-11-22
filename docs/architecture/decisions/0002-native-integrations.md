@@ -165,3 +165,19 @@ the expected patched postimage instead of shipping a duplicate upstream
 header. Its Windows reconfigure branch copies the already-patched header to
 preserve CRLF bytes; the normal configure path separately exercises patching
 pristine dependency source.
+
+## 2026-11-22 decision: convex QP numerical outcomes and diagnostics
+
+The convex QP preflight does not repair authored Hessians. A materially
+negative eigenvalue is rejected as invalid input; a negative eigenvalue that
+falls within the numerical PSD tolerance remains unresolved and is reported as
+unsupported. Silently clipping that eigenvalue would change the authored
+objective.
+
+HiGHS QP retries append candidate diagnostics to one stream, so
+`objective.original` may occur more than once. Contract tests that inspect the
+final reported objective select the last occurrence. The adapter formats the
+diagnostic at 17 significant digits, while tests compare it with an independent
+objective evaluation using a scaled `1e-12` tolerance to allow for arithmetic
+rounding. This tolerance is a fixture-level comparison policy, not a certified
+error bound for arbitrary QPs.
