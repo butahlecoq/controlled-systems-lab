@@ -26,10 +26,12 @@ semantics, and retained storage must remain explicit.
 - Keep known external sequences, exogenous Cartesian factors, and adversarial
   inputs distinct. Reusing the same set identity in two exogenous factors does
   not encode correlation between them. A V representation denotes the convex
-  hull of its vertices, not a nonconvex finite-choice set. Cross-factor
-  restrictions such as a diagonal fixed-parameter relation require a separate
-  relational input model; the current exogenous-factor type does not represent
-  them.
+  hull of its vertices plus the conic hull of its rays,
+  `conv(vertices) + cone(rays)`. The bounded interval fixture has no rays, so
+  its endpoints describe a convex interval rather than a nonconvex finite-choice
+  set. Cross-factor restrictions such as a diagonal fixed-parameter relation
+  require a separate relational input model; the current exogenous-factor type
+  does not represent them.
 - Preserve temporal constraint rows and their coordinate blocks when taking a
   snapshot. A snapshot owns immutable retained data independently of mutable
   producer buffers and remains readable after the producer or outer handle is
