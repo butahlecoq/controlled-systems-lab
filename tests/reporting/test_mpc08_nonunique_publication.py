@@ -1,9 +1,8 @@
 import importlib.util
 import json
+import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
-import unittest
-
 
 SCRIPT = Path(__file__).parents[2] / "scripts/reports/stage_mpc08_nonunique.py"
 SPEC = importlib.util.spec_from_file_location("stage_mpc08_nonunique", SCRIPT)
@@ -19,12 +18,27 @@ class NonuniquePublicationTests(unittest.TestCase):
 
         self.assertEqual(manifest["report_id"], MODULE.REPORT_ID)
         self.assertEqual(set(manifest["files_sha256"]), set(MODULE.FILES) - {"manifest.json"})
-        self.assertTrue(all(MODULE.digest(bundle / name) == checksum
-                            for name, checksum in manifest["files_sha256"].items()))
-        self.assertEqual(len((bundle / "csl-nonunique-observations.jsonl").read_text(encoding="utf-8").splitlines()), 810)
+        self.assertTrue(
+            all(
+                MODULE.digest(bundle / name) == checksum
+                for name, checksum in manifest["files_sha256"].items()
+            )
+        )
+        self.assertEqual(
+            len(
+                (bundle / "csl-nonunique-observations.jsonl")
+                .read_text(encoding="utf-8")
+                .splitlines()
+            ),
+            810,
+        )
         provenance = json.loads((bundle / "build-provenance.json").read_text(encoding="utf-8"))
-        self.assertTrue(all(MODULE.digest(bundle / Path(name).name) == checksum
-                            for name, checksum in provenance["source_sha256"].items()))
+        self.assertTrue(
+            all(
+                MODULE.digest(bundle / Path(name).name) == checksum
+                for name, checksum in provenance["source_sha256"].items()
+            )
+        )
 
     def test_report_staging_adds_archive_and_discoverable_figure_links(self):
         with TemporaryDirectory() as temporary:
@@ -32,11 +46,14 @@ class NonuniquePublicationTests(unittest.TestCase):
             (site / "examples").mkdir()
             (site / "index.html").write_text("<ul></ul>", encoding="utf-8")
             (site / "examples/index.html").write_text(
-                '<section id="analytic-illustrations"></section>', encoding="utf-8")
+                '<section id="analytic-illustrations"></section>', encoding="utf-8"
+            )
 
             MODULE.stage(site)
 
             self.assertTrue((site / MODULE.REPORT_ID / "index.html").is_file())
             self.assertTrue((site / f"{MODULE.REPORT_ID}.zip").is_file())
             self.assertIn(MODULE.REPORT_ID, (site / "index.html").read_text(encoding="utf-8"))
-            self.assertIn(MODULE.REPORT_ID, (site / "examples/index.html").read_text(encoding="utf-8"))
+            self.assertIn(
+                MODULE.REPORT_ID, (site / "examples/index.html").read_text(encoding="utf-8")
+            )

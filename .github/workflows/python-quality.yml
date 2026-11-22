@@ -313,6 +313,28 @@ on:
       - 'reports/algorithm-results/mpc-crossover-6b7308c4/**'
       - 'reports/algorithm-results/native-source-constrained-mpc-v1/**'
       - 'scripts/reports/stage_native_history_strategies.py'
+      - 'scripts/reports/stage_mpc03.py'
+      - 'scripts/reports/stage_mpc03_b08.py'
+      - 'scripts/reports/stage_mpc08.py'
+      - 'scripts/reports/stage_mpc08_nonunique.py'
+      - 'tests/reporting/test_stage_mpc03.py'
+      - 'tests/reporting/test_mpc03_b08_report.py'
+      - 'tests/reporting/test_mpc08_publication.py'
+      - 'tests/reporting/test_mpc08_nonunique_publication.py'
+      - 'scripts/reports/stage_mpc08_complete.py'
+      - 'scripts/reports/mpc03/b08_report.py'
+      - 'scripts/reports/mpc03/b08_miqcp.py'
+      - 'scripts/reports/source_snapshots/mpc08-explicit-readme-ea756e66.json'
+      - 'benchmarks/reporting/mpc03/robust_minimax_driver.cpp'
+      - 'benchmarks/reporting/mpc08_explicit/**'
+      - 'benchmarks/reporting/review05/run_horizon_ladder.py'
+      - 'benchmarks/reporting/review05/highs_clock_events.py'
+      - 'reports/algorithm-results/mpc03-open-loop-pilot-v1/**'
+      - 'reports/algorithm-results/mpc03-b08-l04-miQCP-v1/**'
+      - 'reports/algorithm-results/mpc08-explicit-*/**'
+      - 'reports/algorithm-results/mpc08-explicit-*.zip*'
+      - 'reports/algorithm-results/mpc08-exact-regions-79ec2978-20261110/**'
+      - 'reports/algorithm-results/mpc08-horizon-regions-01762505-20261110/**'
       - 'tests/reporting/test_native_history_strategy_publication.py'
       - 'reports/algorithm-results/native-history-strategies-d57739b3/**'
       - 'tests/reporting/test_discrete_mpc_2d.py'
@@ -663,6 +685,28 @@ on:
       - 'reports/algorithm-results/mpc-crossover-6b7308c4/**'
       - 'reports/algorithm-results/native-source-constrained-mpc-v1/**'
       - 'scripts/reports/stage_native_history_strategies.py'
+      - 'scripts/reports/stage_mpc03.py'
+      - 'scripts/reports/stage_mpc03_b08.py'
+      - 'scripts/reports/stage_mpc08.py'
+      - 'scripts/reports/stage_mpc08_nonunique.py'
+      - 'tests/reporting/test_stage_mpc03.py'
+      - 'tests/reporting/test_mpc03_b08_report.py'
+      - 'tests/reporting/test_mpc08_publication.py'
+      - 'tests/reporting/test_mpc08_nonunique_publication.py'
+      - 'scripts/reports/stage_mpc08_complete.py'
+      - 'scripts/reports/mpc03/b08_report.py'
+      - 'scripts/reports/mpc03/b08_miqcp.py'
+      - 'scripts/reports/source_snapshots/mpc08-explicit-readme-ea756e66.json'
+      - 'benchmarks/reporting/mpc03/robust_minimax_driver.cpp'
+      - 'benchmarks/reporting/mpc08_explicit/**'
+      - 'benchmarks/reporting/review05/run_horizon_ladder.py'
+      - 'benchmarks/reporting/review05/highs_clock_events.py'
+      - 'reports/algorithm-results/mpc03-open-loop-pilot-v1/**'
+      - 'reports/algorithm-results/mpc03-b08-l04-miQCP-v1/**'
+      - 'reports/algorithm-results/mpc08-explicit-*/**'
+      - 'reports/algorithm-results/mpc08-explicit-*.zip*'
+      - 'reports/algorithm-results/mpc08-exact-regions-79ec2978-20261110/**'
+      - 'reports/algorithm-results/mpc08-horizon-regions-01762505-20261110/**'
       - 'tests/reporting/test_native_history_strategy_publication.py'
       - 'reports/algorithm-results/native-history-strategies-d57739b3/**'
       - 'tests/reporting/test_discrete_mpc_2d.py'
@@ -916,6 +960,45 @@ jobs:
         run: python benchmarks/reporting/closed_loop/terminal_objective_probe.py --help
       - name: Check the saved native whole-history optimizer route
         run: python -m unittest discover -s tests/reporting -p 'test_history_optimizer_native.py'
+      - name: Replay the saved MPC-03 and MPC-08 publications
+        env:
+          MPLBACKEND: Agg
+        run: |
+          python -m unittest tests.reporting.test_mpc08_publication
+          python -m unittest tests.reporting.test_stage_mpc03 tests.reporting.test_mpc03_b08_report tests.reporting.test_mpc08_nonunique_publication
+          site=$(mktemp -d "$RUNNER_TEMP/saved-mpc.XXXXXXXX")
+          mkdir "$site/examples"
+          printf '<ul></ul>\n' > "$site/index.html"
+          printf '<section id="analytic-illustrations"></section>\n' > "$site/examples/index.html"
+          reports=reports/algorithm-results
+          python scripts/reports/stage_mpc03.py --source "$reports/mpc03-open-loop-pilot-v1" --site "$site"
+          python scripts/reports/stage_mpc08.py --source "$reports/mpc08-explicit-pilot-v1" --site "$site"
+          python scripts/reports/stage_mpc03_b08.py --source "$reports/mpc03-b08-l04-miQCP-v1" --site "$site"
+          python scripts/reports/stage_mpc08_nonunique.py --site "$site"
+          for route in mpc03-open-loop-pilot-v1 mpc03-b08-l04-miQCP-v1 mpc08-explicit-pilot-v1 mpc08-explicit-nonunique-v1; do
+            diff -r "$reports/$route" "$site/$route"
+          done
+          python - "$reports" <<'PYZIP'
+          import sys
+          from pathlib import Path
+          from zipfile import ZipFile
+
+          reports = Path(sys.argv[1])
+          for route in ("mpc08-explicit-pilot-v1", "mpc08-explicit-nonunique-v1"):
+              bundle = reports / route
+              members = {f"{route}/{path.name}": path for path in bundle.iterdir()}
+              with ZipFile(bundle.with_suffix(".zip")) as archive:
+                  names = archive.namelist()
+                  if (len(names) != len(members) or set(names) != members.keys()
+                          or archive.testzip() is not None):
+                      raise ValueError(f"Invalid archive inventory or CRC for {route}")
+                  for name, source in members.items():
+                      if archive.read(name) != source.read_bytes():
+                          raise ValueError(f"Archive differs from saved asset: {name}")
+          PYZIP
+          for route in mpc08-explicit-pilot-v1 mpc08-explicit-nonunique-v1; do
+            cmp "$reports/$route.zip" "$site/$route.zip"
+          done
       - name: Check the frozen CartPole route and offline ZIP
         run: python -m unittest tests.reporting.test_env717_cartpole_publication
       - name: Check the sampled Lotka–Volterra publication
