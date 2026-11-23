@@ -14,6 +14,23 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class PublicationTests(unittest.TestCase):
+    def test_export_proof_requires_bounded_and_joint_capture_records(self):
+        entries = {
+            "fixed": {"schema": "csl.mpc07.capture/1"},
+            "joint": {"schema": "csl.mpc07.joint-filter.capture/1"},
+        }
+        for missing in ("fixed", "joint"):
+            with (
+                self.subTest(missing=missing),
+                self.assertRaisesRegex(ValueError, "mandatory fixed/joint capture provenance"),
+            ):
+                S.verify_export(
+                    Path("unused"),
+                    {"capture_sources": {k: v for k, v in entries.items() if k != missing}},
+                )
+        with self.assertRaisesRegex(ValueError, "mandatory fixed/joint capture provenance"):
+            S.verify_export(Path("unused"), {})
+
     def test_readme_source_comes_from_the_sealed_capture_bundle(self):
         self.assertEqual(
             hashlib.sha256(mpc07_capture.archived_readme()).hexdigest(),

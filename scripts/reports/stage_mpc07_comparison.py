@@ -669,6 +669,16 @@ def source_export(captures, online=None):
 def verify_export(root, receipt):
     from benchmarks.reporting.mpc07 import source_inventory
 
+    capture_sources = receipt.get("capture_sources")
+    require(
+        isinstance(capture_sources, dict) and set(capture_sources) == {"fixed", "joint"},
+        "mandatory fixed/joint capture provenance differs",
+    )
+    require(
+        capture_sources["fixed"].get("schema") == source_inventory.FIXED_SCHEMA
+        and capture_sources["joint"].get("schema") == source_inventory.JOINT_SCHEMA,
+        "mandatory fixed/joint capture provenance differs",
+    )
     require(set(receipt["helper_sha256"]) == set(HELPERS), "export helper inventory differs")
     revision = receipt["helper_revision"]
     require(re.fullmatch("[0-9a-f]{40}", revision), "invalid helper revision")
@@ -707,7 +717,7 @@ def verify_export(root, receipt):
             == data,
             "export helper Git bytes differ",
         )
-    for capture in receipt.get("capture_sources", {}).values():
+    for capture in capture_sources.values():
         schema = capture["schema"]
         source_commit = capture["source_commit"]
         native = capture["native_source_commit"]
