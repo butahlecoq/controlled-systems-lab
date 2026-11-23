@@ -103,6 +103,47 @@ class Mpc07SourceInventoryTests(unittest.TestCase):
                 self.assertIn("source_inventory.py", files)
                 self.assertEqual(authenticated, selected)
 
+    def test_current_capture_cannot_omit_the_inventory_module(self):
+        revision = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+        ).strip()
+        files, _ = inventory.capture_sources(
+            inventory.FIXED_SCHEMA, revision, NATIVE_REVISION, ROOT
+        )
+        files.pop("source_inventory.py")
+        hashes = {name: hashlib.sha256(content).hexdigest() for name, content in files.items()}
+        with self.assertRaisesRegex(ValueError, "mandatory source inventory"):
+            inventory.authenticate(
+                inventory.FIXED_SCHEMA, hashes, files, revision, NATIVE_REVISION, ROOT
+            )
+
+    def test_current_capture_rejects_readme_from_a_fallback_path(self):
+        revision = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+        ).strip()
+        for schema in (inventory.FIXED_SCHEMA, inventory.JOINT_SCHEMA):
+            with self.subTest(schema=schema):
+                files, _ = inventory.capture_sources(schema, revision, NATIVE_REVISION, ROOT)
+                primary = files["README.md"]
+                alternate = None
+                for location in inventory.locations_for(schema)["README.md"][1:]:
+                    try:
+                        candidate = inventory.read_location(ROOT, revision, location)
+                    except (ValueError, subprocess.CalledProcessError, zipfile.BadZipFile):
+                        continue
+                    if candidate != primary:
+                        alternate = candidate
+                        break
+                assert alternate is not None
+                files["README.md"] = alternate
+                hashes = {
+                    name: hashlib.sha256(content).hexdigest() for name, content in files.items()
+                }
+                with self.assertRaisesRegex(
+                    ValueError, "recorded Git commit or archive: README.md"
+                ):
+                    inventory.authenticate(schema, hashes, files, revision, NATIVE_REVISION, ROOT)
+
     def test_saved_capture_sources_match_their_recorded_commits_and_allowlists(self):
         for folder, prefix in (
             ("bounded-policy-0e821c2a", "mpc07-report"),

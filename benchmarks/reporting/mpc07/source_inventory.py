@@ -109,12 +109,22 @@ def primary_paths(schema: str) -> dict[str, str]:
     return {name: candidates[0].path for name, candidates in locations_for(schema).items()}
 
 
-def locations_for_capture(schema: str, names: set[str]) -> dict[str, tuple[SourceLocation, ...]]:
+def locations_for_capture(
+    schema: str, names: set[str], source_revision: str | None = None, repository=None
+) -> dict[str, tuple[SourceLocation, ...]]:
     inventory = locations_for(schema)
     if names == set(inventory):
         return inventory
     legacy_names = set(inventory) - {"source_inventory.py"}
     if names == legacy_names:
+        if (
+            source_revision is not None
+            and repository is not None
+            and git_path_exists(
+                repository, source_revision, "benchmarks/reporting/mpc07/source_inventory.py"
+            )
+        ):
+            raise ValueError("mandatory source inventory differs")
         return {name: candidates for name, candidates in inventory.items() if name in names}
     raise ValueError("mandatory source inventory differs")
 
@@ -129,6 +139,17 @@ def git_blob(repository, revision: str, path: str) -> bytes:
         cwd=repository,
         stderr=subprocess.DEVNULL,
     )
+
+
+def git_path_exists(repository, revision: str, path: str) -> bool:
+    result = subprocess.run(
+        ["git", "cat-file", "-e", f"{revision}:{path}"],
+        cwd=repository,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    )
+    return result.returncode == 0
 
 
 def read_location(repository, revision: str, location: SourceLocation) -> bytes:
@@ -177,7 +198,7 @@ def authenticate(
         r"[0-9a-f]{40}", native_revision
     ):
         raise ValueError("source revisions must be full pinned hexadecimal commits")
-    inventory = locations_for_capture(schema, set(source_sha256))
+    inventory = locations_for_capture(schema, set(source_sha256), source_revision, repository)
     if set(captured_sources) != set(inventory):
         raise ValueError("mandatory captured source files differ")
 
@@ -188,24 +209,15 @@ def authenticate(
         if hashlib.sha256(captured).hexdigest() != expected_hash:
             raise ValueError("source snapshot hash differs: " + name)
         revision = revision_for(name, source_revision, native_revision)
-        for location in candidates:
-            try:
-                recorded = read_location(repository, revision, location)
-            except (
-                OSError,
-                ValueError,
-                KeyError,
-                RuntimeError,
-                EOFError,
-                subprocess.CalledProcessError,
-                zipfile.BadZipFile,
-            ):
-                continue
-            if hashlib.sha256(recorded).hexdigest() == expected_hash and recorded == captured:
-                selected[name] = location
-                break
-        else:
+        try:
+            location, recorded = available_location(repository, revision, candidates)
+        except ValueError as error:
+            raise ValueError(
+                "source snapshot differs from recorded Git commit or archive: " + name
+            ) from error
+        if hashlib.sha256(recorded).hexdigest() != expected_hash or recorded != captured:
             raise ValueError("source snapshot differs from recorded Git commit or archive: " + name)
+        selected[name] = location
     return selected
 
 
