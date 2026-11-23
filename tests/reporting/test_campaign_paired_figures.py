@@ -33,6 +33,14 @@ SAVED_DATA_RENDERER = ROOT / "scripts/reports/render_campaign_paired_projection.
 
 
 class PairedCampaignFigureTests(unittest.TestCase):
+    def test_campaign_dashboard_distinguishes_graph_and_box_evidence(self):
+        dashboard = (ROOT / "docs/examples/closed-loop/campaign-2026-11-18/index.html").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("Graph-backed representation cards use one completed native graph", dashboard)
+        self.assertIn("Box cards instead show a fixed-plan outer tube", dashboard)
+        self.assertNotIn("Each representation card uses one completed native graph", dashboard)
+
     def test_saved_data_command_recreates_graph_and_box_pairs(self):
         reports = ROOT / "docs/examples/closed-loop/campaign-2026-11-18"
         for representation in ("exact-polytope", "box"):

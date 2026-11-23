@@ -726,7 +726,7 @@ def main() -> int:
         f"<div class='scroll'><table><thead><tr><th>Task</th><th>States · nonlinear model</th><th>Step × horizon</th><th>Finite catalog</th><th>Continuous bounds</th><th>Objective</th><th>Terminal condition</th><th>Affine predictor</th><th>Nonlinear execution</th><th>Information pattern</th><th>Contract</th></tr></thead><tbody>{''.join(model_rows)}</tbody></table></div></section>"
     )
     page.append(
-        "<section><h2>All-stage sets and trajectories by representation</h2><p>Each representation card uses one completed native graph on that task. Its selected plan is computed with the controller’s affine prediction model; the observed replay is a separate execution of the original nonlinear plant. Fuel includes a paired view: x1–x2 plots oxidizer mass against fuel mass, and x3–x4 plots oxidizer flow against fuel flow, using the same stages and attempt. The graph figures show retained forward/backward-viable nodes, plan, and replay. Box cards show the fixed-plan outer tube rather than a full reachable set.</p></section>"
+        "<section><h2>All-stage sets and trajectories by representation</h2><p>Graph-backed representation cards use one completed native graph on that task and show retained forward/backward-viable nodes. Box cards instead show a fixed-plan outer tube, not finite-graph search evidence or the full reachable set. In either case, the selected plan is computed with the controller’s affine prediction model; the observed replay is a separate execution of the original nonlinear plant. Fuel includes a paired view: x1–x2 plots oxidizer mass against fuel mass, and x3–x4 plots oxidizer flow against fuel flow, using the same stages and attempt.</p></section>"
     )
     page.append(task_sections)
     page.append(
