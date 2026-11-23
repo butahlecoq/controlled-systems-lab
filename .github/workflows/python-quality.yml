@@ -194,6 +194,7 @@ on:
       - 'reports/algorithm-results/native-extended-models-v1/spatial-flight/run-receipt.txt'
       - 'scripts/reports/campaign_graph_figures.py'
       - 'scripts/reports/render_full_profile_campaign.py'
+      - 'scripts/reports/render_campaign_paired_projection.py'
       - 'docs/examples/closed-loop/campaign-2026-11-18/**'
       - 'scripts/reports/figure_style.py'
       - 'scripts/reports/control_figure_data.py'
