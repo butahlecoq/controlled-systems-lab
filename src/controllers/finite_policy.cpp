@@ -112,11 +112,8 @@ FinitePolicyFamilyResult replay_finite_policy_family(const model::LinearSystem &
     evidence.scenarios.reserve(request.scenarios.size());
     for (const auto &inputs : request.scenarios) {
         std::optional<Diagnostic> missing_rule;
-        const auto estimator = [&](StageIndex, std::span<const ReleasedObservation>) {
-            return Vector(system.dimensions().state, 0.0);
-        };
-        const auto controller = [&](StageIndex stage, std::span<const ReleasedObservation> history,
-                                    std::span<const double>) {
+        const auto controller = [&](StageIndex stage,
+                                    std::span<const ReleasedObservation> history) {
             const auto index = FinitePolicyEvaluator::find_rule(policy, stage, history);
             if (!index) {
                 missing_rule = invalid(
@@ -127,7 +124,7 @@ FinitePolicyFamilyResult replay_finite_policy_family(const model::LinearSystem &
             used[*index] = true;
             return policy.rules()[*index].action;
         };
-        auto replay = replay_observed_policy(system, inputs, estimator, controller);
+        auto replay = replay_observed_policy(system, inputs, controller);
         if (missing_rule)
             return *missing_rule;
         if (const auto *failure = std::get_if<Diagnostic>(&replay))

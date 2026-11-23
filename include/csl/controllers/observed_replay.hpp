@@ -2,6 +2,7 @@
 
 #include <csl/model/linear_system.hpp>
 #include <functional>
+#include <optional>
 #include <span>
 
 namespace csl::controllers {
@@ -25,11 +26,13 @@ struct ReleasedObservation {
 using Estimator = std::function<Vector(StageIndex, std::span<const ReleasedObservation>)>;
 using Controller = std::function<Vector(StageIndex, std::span<const ReleasedObservation>,
                                         std::span<const double> estimate)>;
+using ObservationController =
+    std::function<Vector(StageIndex, std::span<const ReleasedObservation>)>;
 
 struct DecisionEvidence {
     StageIndex stage;
     std::vector<ReleasedObservation> available;
-    Vector estimate;
+    std::optional<Vector> estimate;
     Vector action;
 };
 
@@ -48,5 +51,10 @@ using ReplayResult = std::variant<ReplayRecord, Diagnostic, OperationStopped>;
 // This is sampled replay; it makes no all-disturbance or optimality claim.
 ReplayResult replay_observed_policy(const model::LinearSystem &, const ReplayInputs &,
                                     const Estimator &, const Controller &);
+
+// This overload gives the controller only the stage and released observation history.
+// Decision evidence leaves estimate empty for this information pattern.
+ReplayResult replay_observed_policy(const model::LinearSystem &, const ReplayInputs &,
+                                    const ObservationController &);
 
 } // namespace csl::controllers

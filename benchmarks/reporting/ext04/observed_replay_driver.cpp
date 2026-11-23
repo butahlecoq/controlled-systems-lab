@@ -155,7 +155,7 @@ json observed(const ReplayRecord& record) {
     for (const auto& decision:record.decisions) {
         value["decision_stages"].push_back(decision.stage.value);
         value["actions"].push_back(decision.action);
-        value["estimates"].push_back(decision.estimate);
+        value["estimates"].push_back(decision.estimate.value());
         value["available_counts"].push_back(decision.available.size());
         json available=json::array();
         json available_events=json::array();
