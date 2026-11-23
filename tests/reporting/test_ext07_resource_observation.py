@@ -1,41 +1,48 @@
 from __future__ import annotations
 
-import importlib.util
 import hashlib
+import importlib
+import importlib.util
 import json
-from pathlib import Path
 import shutil
 import sys
 import tempfile
 import unittest
+from pathlib import Path
+from types import ModuleType
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
 
 
-def load_module(name: str, path: Path):
+def load_module(name: str, path: Path) -> ModuleType:
     spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"cannot load report module from {path}")
     module = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None
     spec.loader.exec_module(module)
     return module
 
 
-resource = load_module("csl_ext07_resource_test", ROOT /
-                       "scripts/reports/ext07/resource_observation.py")
-stager = load_module("csl_ext07_resource_stager_test", ROOT /
-                     "scripts/reports/stage_ext07.py")
+resource = load_module(
+    "csl_ext07_resource_test", ROOT / "scripts/reports/ext07/resource_observation.py"
+)
+stager = load_module("csl_ext07_resource_stager_test", ROOT / "scripts/reports/stage_ext07.py")
 landing = importlib.import_module("landing")
 
 
 class Ext07ResourceObservationTests(unittest.TestCase):
+    bundle: Path
+
     @classmethod
     def setUpClass(cls) -> None:
-        candidates = sorted((ROOT / "reports/algorithm-results").glob(
-            "ext07-resource-observation-*"))
-        cls.bundle = next((path for path in candidates if path.is_dir()), None)
-        if cls.bundle is None:
+        candidates = sorted(
+            (ROOT / "reports/algorithm-results").glob("ext07-resource-observation-*")
+        )
+        bundle = next((path for path in candidates if path.is_dir()), None)
+        if bundle is None:
             raise unittest.SkipTest("EXT-07 resource report is built from saved captures")
+        cls.bundle = bundle
 
     def test_saved_resource_bundle_regenerates_exactly(self) -> None:
         result = resource.render(self.bundle, check=True)
@@ -43,8 +50,12 @@ class Ext07ResourceObservationTests(unittest.TestCase):
         record = resource.read_json(self.bundle / "records.json")
         self.assertEqual(record["profiles"]["one_step"]["measured_calls"], 140)
         self.assertEqual(record["profiles"]["two_parameter"]["measured_calls"], 140)
-        self.assertEqual(record["profiles"]["two_parameter"]["resource_observation"]
-                         ["observed"]["swap_peak_bytes"], 0)
+        self.assertEqual(
+            record["profiles"]["two_parameter"]["resource_observation"]["observed"][
+                "swap_peak_bytes"
+            ],
+            0,
+        )
 
     def test_stager_publishes_nested_resource_receipts(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -55,23 +66,28 @@ class Ext07ResourceObservationTests(unittest.TestCase):
             parent = root / parent_source.name
             shutil.copytree(parent_source, parent)
             catalog = root / "ext07-publications.json"
-            catalog.write_text(resource.encoded({
-                "schema": "csl.ext07-publications/1",
-                "reports": [stager.catalog_entry(bundle), stager.catalog_entry(parent)],
-            }).decode(), encoding="utf-8")
+            catalog.write_text(
+                resource.encoded(
+                    {
+                        "schema": "csl.ext07-publications/1",
+                        "reports": [stager.catalog_entry(bundle), stager.catalog_entry(parent)],
+                    }
+                ).decode(),
+                encoding="utf-8",
+            )
             site = root / "site"
             site.mkdir()
             (site / "index.html").write_text(
-                "<!doctype html><html lang=\"en\"><body><ul></ul></body></html>",
-                encoding="utf-8")
-            self.assertEqual(stager.stage(catalog, site),
-                             self.bundle.name + "," + parent.name)
-            self.assertTrue((site / self.bundle.name / "one_step" /
-                             "resource-observation.json").is_file())
-            self.assertIn("resource-scope.svg", (site / "index.html").read_text(
-                encoding="utf-8"))
-            self.assertNotIn('id="visual-examples-link"',
-                             (site / "index.html").read_text(encoding="utf-8"))
+                '<!doctype html><html lang="en"><body><ul></ul></body></html>', encoding="utf-8"
+            )
+            self.assertEqual(stager.stage(catalog, site), self.bundle.name + "," + parent.name)
+            self.assertTrue(
+                (site / self.bundle.name / "one_step" / "resource-observation.json").is_file()
+            )
+            self.assertIn("resource-scope.svg", (site / "index.html").read_text(encoding="utf-8"))
+            self.assertNotIn(
+                'id="visual-examples-link"', (site / "index.html").read_text(encoding="utf-8")
+            )
             self.assertEqual((site / "index.html").read_text(encoding="utf-8").count("<li>"), 1)
             landing.build(site)
             page = (site / "index.html").read_text(encoding="utf-8")
@@ -84,15 +100,18 @@ class Ext07ResourceObservationTests(unittest.TestCase):
             site = Path(temporary) / "site"
             site.mkdir()
             (site / "index.html").write_text(
-                "<!doctype html><html lang=\"en\"><body><ul></ul></body></html>",
-                encoding="utf-8")
+                '<!doctype html><html lang="en"><body><ul></ul></body></html>', encoding="utf-8"
+            )
             staged = stager.stage(catalog, site)
-            catalog_routes = [entry["report_id"] for entry in
-                              json.loads(catalog.read_text(encoding="utf-8"))["reports"]]
+            catalog_routes = [
+                entry["report_id"]
+                for entry in json.loads(catalog.read_text(encoding="utf-8"))["reports"]
+            ]
             self.assertEqual(staged.split(","), catalog_routes)
             self.assertIn(self.bundle.name, catalog_routes)
-            self.assertTrue((site / self.bundle.name / "two_parameter" /
-                             "resource-observation.json").is_file())
+            self.assertTrue(
+                (site / self.bundle.name / "two_parameter" / "resource-observation.json").is_file()
+            )
 
     def test_resource_report_requires_a_hybrid_profile_route(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -100,15 +119,20 @@ class Ext07ResourceObservationTests(unittest.TestCase):
             bundle = root / self.bundle.name
             shutil.copytree(self.bundle, bundle)
             catalog = root / "ext07-publications.json"
-            catalog.write_text(resource.encoded({
-                "schema": "csl.ext07-publications/1",
-                "reports": [stager.catalog_entry(bundle)],
-            }).decode(), encoding="utf-8")
+            catalog.write_text(
+                resource.encoded(
+                    {
+                        "schema": "csl.ext07-publications/1",
+                        "reports": [stager.catalog_entry(bundle)],
+                    }
+                ).decode(),
+                encoding="utf-8",
+            )
             site = root / "site"
             site.mkdir()
             (site / "index.html").write_text(
-                "<!doctype html><html lang=\"en\"><body><ul></ul></body></html>",
-                encoding="utf-8")
+                '<!doctype html><html lang="en"><body><ul></ul></body></html>', encoding="utf-8"
+            )
             with self.assertRaisesRegex(ValueError, "require a hybrid report route"):
                 stager.stage(catalog, site)
             self.assertEqual([path.name for path in site.iterdir()], ["index.html"])
@@ -123,20 +147,25 @@ class Ext07ResourceObservationTests(unittest.TestCase):
     def test_shared_landing_source_hash_for_frozen_b04_bundle_is_preserved(self) -> None:
         bundle = ROOT / "reports/algorithm-results/b04-c-exact-dyadic-v1"
         manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
-        publisher = load_module("csl_ext07_b04_publication_test", ROOT /
-                                "scripts/reports/b04_c_exact_registered_reports.py")
+        publisher = load_module(
+            "csl_ext07_b04_publication_test",
+            ROOT / "scripts/reports/b04_c_exact_registered_reports.py",
+        )
         source_name = "scripts/reports/landing.py"
         snapshot = ROOT / "docs/research/evidence/b04-c-publication-source-snapshot" / source_name
         self.assertIn(source_name, publisher.SNAPSHOT_FILES)
         self.assertEqual(ROOT / publisher.SNAPSHOT_ROOT / source_name, snapshot)
         expected = manifest["source_files"][source_name]
         self.assertEqual(hashlib.sha256(snapshot.read_bytes()).hexdigest(), expected)
-        self.assertEqual(hashlib.sha256((bundle / "manifest.json").read_bytes()).hexdigest(),
-                         publisher.MANIFEST_SHA256)
+        self.assertEqual(
+            hashlib.sha256((bundle / "manifest.json").read_bytes()).hexdigest(),
+            publisher.MANIFEST_SHA256,
+        )
         publication = publisher.adapt(bundle)
         catalogue = json.loads((bundle.parent / "catalog.json").read_text(encoding="utf-8"))
-        entry = next(row for row in catalogue["reports"]
-                     if row.get("source_report_id") == bundle.name)
+        entry = next(
+            row for row in catalogue["reports"] if row.get("source_report_id") == bundle.name
+        )
         self.assertEqual(publication.report_id, entry["report_id"])
         self.assertEqual(publication.source_report_id, bundle.name)
 
@@ -156,16 +185,15 @@ class Ext07ResourceObservationTests(unittest.TestCase):
             shutil.copytree(self.bundle, bundle)
             record = resource.read_json(bundle / "records.json")
             profile = record["profiles"]["one_step"]
-            profile["resource_observation"]["enforced_limits"][
-                "cpu_quota_per_second_usec"] = 999_999
+            profile["resource_observation"]["enforced_limits"]["cpu_quota_per_second_usec"] = (
+                999_999
+            )
             receipt_path = bundle / "one_step" / "resource-observation.json"
             receipt = resource.read_json(receipt_path)
             receipt["enforced_limits"]["cpu_quota_per_second_usec"] = 999_999
             receipt_path.write_bytes(resource.encoded(receipt))
-            unsigned = {key: value for key, value in record.items()
-                        if key != "report_id"}
-            record["report_id"] = resource.PREFIX + resource.sha(
-                resource.encoded(unsigned))[:16]
+            unsigned = {key: value for key, value in record.items() if key != "report_id"}
+            record["report_id"] = resource.PREFIX + resource.sha(resource.encoded(unsigned))[:16]
             (bundle / "records.json").write_bytes(resource.encoded(record))
             tampered = root / record["report_id"]
             bundle.rename(tampered)
