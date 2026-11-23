@@ -2,6 +2,7 @@
 
 import importlib
 import json
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -21,6 +22,15 @@ def catalogue() -> dict:
 
 
 class LandingTests(unittest.TestCase):
+    def test_package_import_resolves_the_shared_site_design_module(self) -> None:
+        subprocess.run(
+            [sys.executable, "-c", "import scripts.reports.landing"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
     def test_report_site_uses_the_same_landing_module(self) -> None:
         self.assertIs(site.landing, landing)
 
