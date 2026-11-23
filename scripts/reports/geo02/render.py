@@ -204,6 +204,8 @@ def validate(payload):
         for scenario in collect.SCENARIOS
         for repetition in range(warmups_per_scenario)
     }
+    if any(not isinstance(row, dict) or type(row.get("repetition")) is not int for row in warmups):
+        raise ValueError("warmup repetition must be an integer")
     actual_warmups = {
         (row.get("scenario"), row.get("repetition")) for row in warmups if isinstance(row, dict)
     }

@@ -217,6 +217,26 @@ class ContractTests(unittest.TestCase):
         self.assertEqual(receipt["state"], "failed")
         self.assertIn("duplicate JSON key: support_values", receipt["warmup_parse_error"])
 
+    def test_boolean_warmup_repetition_is_rejected_by_collection_and_publication(self):
+        stdout = (SAVED / "raw-driver-output.csv").read_bytes()
+        stderr = (SAVED / "process-stderr.txt").read_bytes()
+        lines = stderr.decode().splitlines(keepends=True)
+        index = next(i for i, line in enumerate(lines) if line.startswith("geo02_warmup="))
+        row = json.loads(lines[index].removeprefix("geo02_warmup="))
+        row["repetition"] = False
+        lines[index] = "geo02_warmup=" + json.dumps(row) + "\n"
+
+        replay, receipt = self.run_saved_driver(stdout, "".join(lines).encode(), 2)
+        self.assertEqual(receipt["state"], "failed")
+        self.assertEqual(receipt["warmup_parse_error"], "warmup repetition must be an integer")
+        self.assertEqual(replay["collection"]["warmup_parse_error"], receipt["warmup_parse_error"])
+
+        payload = collect.fixture_payload("20261013T000000Z")
+        payload["collection"]["warmup_results"][0]["repetition"] = False
+        payload = collect.finalize(payload, "20261013T000000Z")
+        with self.assertRaisesRegex(ValueError, "warmup repetition must be an integer"):
+            render.validate(payload)
+
     def test_out_of_segment_point_fails_the_oracle_in_trials_and_warmups(self):
         with mock.patch.object(sys, "path", [str(HERE.parent), *sys.path]):
             adapter = importlib.import_module("geo02_registered_reports")

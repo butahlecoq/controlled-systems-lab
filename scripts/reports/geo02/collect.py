@@ -389,6 +389,10 @@ def main():
                 warmups.append(
                     json.loads(line[len("geo02_warmup=") :], object_pairs_hook=unique_json_object)
                 )
+        if any(
+            not isinstance(row, dict) or type(row.get("repetition")) is not int for row in warmups
+        ):
+            raise ValueError("warmup repetition must be an integer")
         warmup_keys = {(row["scenario"], row["repetition"]) for row in warmups}
         expected_warmups = {
             (scenario, repetition) for scenario in SCENARIOS for repetition in range(a.warmups)
