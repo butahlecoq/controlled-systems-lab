@@ -524,6 +524,19 @@ on:
       - 'reports/algorithm-results/native-source-constrained-mpc-v1/**'
       - 'scripts/reports/stage_native_history_strategies.py'
       - 'scripts/reports/stage_mpc03.py'
+      - 'benchmarks/reporting/mpc07/capture.py'
+      - 'benchmarks/reporting/mpc07/joint_capture.py'
+      - 'benchmarks/reporting/mpc07/report.py'
+      - 'benchmarks/reporting/mpc07/source_inventory.py'
+      - 'benchmarks/reporting/mpc07/evidence/**'
+      - 'benchmarks/reporting/mpc07/README.md'
+      - 'benchmarks/reporting/mpc07/PLAN.md'
+      - 'benchmarks/reporting/mpc07/JOINT-FILTER.md'
+      - 'scripts/reports/stage_mpc07_comparison.py'
+      - 'tests/reporting/test_mpc07_joint_filter.py'
+      - 'tests/reporting/test_mpc07_policy.py'
+      - 'tests/reporting/test_mpc07_publication.py'
+      - 'tests/reporting/test_mpc07_source_inventory.py'
       - 'scripts/reports/stage_mpc03_b08.py'
       - 'scripts/reports/stage_mpc08.py'
       - 'scripts/reports/stage_mpc08_nonunique.py'
@@ -1072,6 +1085,13 @@ jobs:
           for route in mpc08-explicit-pilot-v1 mpc08-explicit-nonunique-v1; do
             cmp "$reports/$route.zip" "$site/$route.zip"
           done
+      - name: Check the bounded and joint MPC-07 source inventories and offline replay
+        run: >-
+          python -m unittest
+          tests.reporting.test_mpc07_source_inventory
+          tests.reporting.test_mpc07_joint_filter
+          tests.reporting.test_mpc07_policy
+          tests.reporting.test_mpc07_publication
       - name: Check the frozen CartPole route and offline ZIP
         run: python -m unittest tests.reporting.test_env717_cartpole_publication
       - name: Check the sampled Lotka–Volterra publication
