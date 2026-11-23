@@ -29,7 +29,8 @@ ONLINE='online-evaluation-0524f7e4';ONLINE_CURRENT=ONLINE+'-recheck-aed7a98b'
 ONLINE_ANCHORS={ONLINE:'540a04309384a32fb7e51861f78d0361d5d0cb50af1d6acd680ec01a4453373a',ONLINE_CURRENT:'3fe4006cf6d9513e9f94250d3d3cbdb369aa44f6838ca1649de03514db0b02b3'}
 ONLINE_SOURCES={name:ROOT/'benchmarks/reporting/mpc07/evidence'/name for name in ONLINE_ANCHORS}
 HELPERS=['benchmarks/reporting/mpc07/'+name for name in ('capture.py','policy.py','report.py','joint_filter.py','joint_capture.py','source_inventory.py')]+['scripts/reports/stage_mpc07_comparison.py']
-ONLINE_HELPERS=[n for n in HELPERS if n.endswith('.py') and not n.endswith('/source_inventory.py')]+['benchmarks/reporting/mpc07/online/'+n for n in ('capture.py','check.py','controller.py','figures.py','inputs.py','profiles.json')]
+ONLINE_HELPERS=[n for n in HELPERS if n.endswith('.py')]+['benchmarks/reporting/mpc07/online/'+n for n in ('capture.py','check.py','controller.py','figures.py','inputs.py','profiles.json')]
+ONLINE_RECORDED_HELPERS=[n for n in ONLINE_HELPERS if not n.endswith('/source_inventory.py')]
 HELPERS+= [n for n in ONLINE_HELPERS if n not in HELPERS]
 HELPERS+=['scripts/reports/figure_style.py']
 
@@ -134,14 +135,14 @@ def online_inputs(sources=None):
     require(len(packed)==24 and 'capture/SHA256SUMS' in packed and all(n=='SHA256SUMS' or n.startswith('capture/') for n in packed),'online raw member inventory differs')
     raw={n[len('capture/'):]:v for n,v in packed.items() if n.startswith('capture/')}
     environment=json.loads(raw['environment.json']);inputs=json.loads(raw['inputs.json']);reading=json.loads(corrected['verification.json'])
-    require(set(environment['source_sha256'])==set(reading['checking_sources'])==set(ONLINE_HELPERS),'mandatory online helper/source inventory differs')
+    require(set(environment['source_sha256'])==set(reading['checking_sources'])==set(ONLINE_RECORDED_HELPERS),'mandatory online helper/source inventory differs')
     require(raw['inputs.json']==raw['source/benchmarks/reporting/mpc07/online/profiles.json'] and digest(raw['inputs.json'])==environment['input_sha256'],'online committed input binding differs')
     for revision in (environment['source_revision'],reading['checking_revision']):require(isinstance(revision,str) and re.fullmatch('[0-9a-f]{40}',revision),'invalid online source revision')
     qualification=json.loads(corrected['qualification.json'])
     require(qualification['capture_source']==environment['source_revision'] and qualification['checking_source']==reading['checking_revision'],'online qualification source differs')
     require(qualification['original_inventory_sha256']==ONLINE_ANCHORS[ONLINE] and qualification['original_capture_zip_sha256']==digest(original['capture.zip']) and qualification['corrected_verification_sha256']==digest(corrected['verification.json']),'online qualification/archive binding differs')
     source_files=checked_zip(corrected['checking-source.zip'])
-    require(set(source_files)==set(ONLINE_HELPERS)|{'SHA256SUMS'},'online corrected source ZIP inventory differs')
+    require(set(source_files)==set(ONLINE_RECORDED_HELPERS)|{'SHA256SUMS'},'online corrected source ZIP inventory differs')
     for name,checksum in reading['checking_sources'].items():require(digest(source_files[name])==checksum,'online corrected source fingerprint differs')
     old=json.loads(original['verification.json']);stable=lambda value:{k:v for k,v in value.items() if k not in ('checking_revision','checking_sources')}
     require(stable(old)==stable(reading),'online correction changed original numeric reports/inputs/timings')
