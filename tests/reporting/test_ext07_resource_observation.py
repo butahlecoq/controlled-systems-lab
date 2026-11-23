@@ -25,8 +25,7 @@ resource = load_module("csl_ext07_resource_test", ROOT /
                        "scripts/reports/ext07/resource_observation.py")
 stager = load_module("csl_ext07_resource_stager_test", ROOT /
                      "scripts/reports/stage_ext07.py")
-landing = load_module("csl_ext07_resource_landing_test", ROOT /
-                      "scripts/reports/landing.py")
+landing = importlib.import_module("landing")
 
 
 class Ext07ResourceObservationTests(unittest.TestCase):

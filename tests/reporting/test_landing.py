@@ -21,6 +21,9 @@ def catalogue() -> dict:
 
 
 class LandingTests(unittest.TestCase):
+    def test_report_site_uses_the_same_landing_module(self) -> None:
+        self.assertIs(site.landing, landing)
+
     def setUp(self):
         self.catalogue = catalogue()
         self.page = site.catalogue_index(self.catalogue)

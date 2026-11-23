@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 import hashlib
+import importlib
 import importlib.util
 import json
 import shutil
+import sys
 import tempfile
 import unittest
 import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "scripts/reports"))
 SPEC = importlib.util.spec_from_file_location(
     "stage_env717", ROOT / "scripts/reports/stage_env717.py"
 )
@@ -17,13 +20,7 @@ if SPEC is None or SPEC.loader is None:
     raise ImportError("cannot load the environment publication test dependency")
 stage_env717 = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(stage_env717)
-LANDING_SPEC = importlib.util.spec_from_file_location(
-    "report_landing", ROOT / "scripts/reports/landing.py"
-)
-if LANDING_SPEC is None or LANDING_SPEC.loader is None:
-    raise ImportError("cannot load the environment publication test dependency")
-landing = importlib.util.module_from_spec(LANDING_SPEC)
-LANDING_SPEC.loader.exec_module(landing)
+landing = importlib.import_module("landing")
 
 
 class EnvironmentPublicationTests(unittest.TestCase):
