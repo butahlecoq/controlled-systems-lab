@@ -144,7 +144,6 @@ def public_artifacts(bundle: Path, item: common.PublicationRecord) -> dict[str, 
 
 
 def public_zip(report_id: str, files: dict[str, bytes]) -> bytes:
-    # The shared writer repeats the nested page at archive root; its relative links break there.
     landing = (
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
         "<title>Offline GEO-07 port report</title></head><body>"

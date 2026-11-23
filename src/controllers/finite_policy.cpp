@@ -113,9 +113,6 @@ FinitePolicyFamilyResult replay_finite_policy_family(const model::LinearSystem &
     for (const auto &inputs : request.scenarios) {
         std::optional<Diagnostic> missing_rule;
         const auto estimator = [&](StageIndex, std::span<const ReleasedObservation>) {
-            // The finite policy depends on released observations alone. The
-            // replay interface requires an estimate, so supply an unused zero
-            // hypothesis and omit it from the policy-family evidence.
             return Vector(system.dimensions().state, 0.0);
         };
         const auto controller = [&](StageIndex stage, std::span<const ReleasedObservation> history,
