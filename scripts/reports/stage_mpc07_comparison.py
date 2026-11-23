@@ -16,6 +16,8 @@ import zipfile
 import zlib
 
 ROOT=Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:sys.path.insert(0,str(ROOT))
+from benchmarks.reporting.mpc07 import source_inventory
 FIXED='bounded-policy-0e821c2a';FIXED_CURRENT=FIXED+'-recheck-v2'
 JOINT='joint-filter-04369201';JOINT_CURRENT=JOINT+'-recheck-v2'
 ANCHORS={FIXED:'5c50928b1650a5f665df415d7b9cd7750cafd81d8d12e28956b74bc7413b4afe',
@@ -26,7 +28,7 @@ SOURCES={name:ROOT/'benchmarks/reporting/mpc07/evidence'/name for name in ANCHOR
 ONLINE='online-evaluation-0524f7e4';ONLINE_CURRENT=ONLINE+'-recheck-aed7a98b'
 ONLINE_ANCHORS={ONLINE:'540a04309384a32fb7e51861f78d0361d5d0cb50af1d6acd680ec01a4453373a',ONLINE_CURRENT:'3fe4006cf6d9513e9f94250d3d3cbdb369aa44f6838ca1649de03514db0b02b3'}
 ONLINE_SOURCES={name:ROOT/'benchmarks/reporting/mpc07/evidence'/name for name in ONLINE_ANCHORS}
-HELPERS=['benchmarks/reporting/mpc07/'+name for name in ('capture.py','policy.py','report.py','joint_filter.py','joint_capture.py')]+['scripts/reports/stage_mpc07_comparison.py']
+HELPERS=['benchmarks/reporting/mpc07/'+name for name in ('capture.py','policy.py','report.py','joint_filter.py','joint_capture.py','source_inventory.py')]+['scripts/reports/stage_mpc07_comparison.py']
 ONLINE_HELPERS=[n for n in HELPERS if n.endswith('.py')]+['benchmarks/reporting/mpc07/online/'+n for n in ('capture.py','check.py','controller.py','figures.py','inputs.py','profiles.json')]
 HELPERS+= [n for n in ONLINE_HELPERS if n not in HELPERS]
 HELPERS+=['scripts/reports/figure_style.py']
@@ -208,32 +210,33 @@ def helper_revision():
 
 def source_export(captures,online=None):
     revision=helper_revision();require(re.fullmatch('[0-9a-f]{40}',revision),'invalid helper revision')
-    files={};objects=set();sources=[]
+    files={};objects=set();sources=[];capture_sources={}
     for name in HELPERS:
         data=(ROOT/name).read_bytes();committed=subprocess.check_output(['git','show','--end-of-options',revision+':'+name],cwd=ROOT)
         require(data==committed,'helper differs from stable committed source: '+name);files[name]=data
     sources.append((revision,{name:digest(files[name]) for name in HELPERS}))
-    for raw in captures.values():
-        env=json.loads(raw['environment.json']);native=env['native_source_commit']
-        maps={'PLAN.md':'benchmarks/reporting/mpc07/evidence/bounded-policy-0e821c2a/PLAN.md','README.md':'benchmarks/reporting/mpc07/evidence/bounded-policy-0e821c2a/README.md','capture.py':'benchmarks/reporting/mpc07/capture.py','policy.py':'benchmarks/reporting/mpc07/policy.py','report.py':'benchmarks/reporting/mpc07/report.py','native-build-receipt.json':'benchmarks/reporting/mpc07/native-build-receipt.json','test_mpc07_policy.py':'tests/reporting/test_mpc07_policy.py','native-affine_bridge.cpp':'benchmarks/reporting/mpc11/affine_bridge.cpp','native-CMakeLists.txt':'benchmarks/reporting/mpc11/CMakeLists.txt'}
-        if env['schema']=='csl.mpc07.joint-filter.capture/1':
-            maps.update({'JOINT-FILTER.md':'benchmarks/reporting/mpc07/evidence/joint-filter-04369201-recheck-v2/JOINT-FILTER.md','joint_filter.py':'benchmarks/reporting/mpc07/joint_filter.py','joint_capture.py':'benchmarks/reporting/mpc07/joint_capture.py','test_mpc07_joint_filter.py':'tests/reporting/test_mpc07_joint_filter.py','joint-gain-fixture.json':'tests/reporting/fixtures/mpc07-joint-gain-t08.json','figure_style.py':'scripts/reports/figure_style.py'})
-        for name, historical_path in (
-            ('PLAN.md','benchmarks/reporting/mpc07/PLAN.md'),
-            ('JOINT-FILTER.md','benchmarks/reporting/mpc07/JOINT-FILTER.md'),
-        ):
-            if name not in maps or not env['source_sha256'].get(name):
-                continue
-            try:
-                old_bytes=subprocess.check_output(['git','show','--end-of-options',env['source_commit']+':'+historical_path],cwd=ROOT,stderr=subprocess.DEVNULL)
-            except subprocess.CalledProcessError:
-                continue
-            if digest(old_bytes)==env['source_sha256'][name]:
-                maps[name]=historical_path
-        require(set(maps)==set(env['source_sha256']),'export capture source inventory differs')
-        for commit in (env['source_commit'],native):
+    for label,raw in captures.items():
+        env=json.loads(raw['environment.json']);native=env['native_source_commit'];source_commit=env['source_commit']
+        captured={name[len('source/'):]:data for name,data in raw.items() if name.startswith('source/')}
+        selected=source_inventory.authenticate(env['schema'],env['source_sha256'],captured,
+            source_commit,native,ROOT)
+        grouped={}
+        for name,location in selected.items():
+            commit=source_inventory.revision_for(name,source_commit,native)
+            blob=source_inventory.git_blob(ROOT,commit,location.path)
+            grouped.setdefault(commit,{})[location.path]=digest(blob)
+        for commit,paths in grouped.items():
             require(re.fullmatch('[0-9a-f]{40}',commit),'invalid capture source revision')
-            sources.append((commit,{path:env['source_sha256'][name] for name,path in maps.items() if name!='README.md' and (name.startswith('native-') and name!='native-build-receipt.json')==(commit==native)}))
+            sources.append((commit,paths))
+        capture_sources[label]={
+            'schema':env['schema'],
+            'source_commit':source_commit,
+            'native_source_commit':native,
+            'files':{
+                name:{'path':location.path,'member':location.member,'sha256':env['source_sha256'][name]}
+                for name,location in selected.items()
+            },
+        }
     if online is not None:
         environment=online['environment'];reading=online['reading']
         sources.extend([(environment['source_revision'],environment['source_sha256']),
@@ -257,7 +260,8 @@ def source_export(captures,online=None):
             fields=line.split(None,3)
             if fields[1]=='tree':include(fields[2])
     files['.git/config']=b'[core]\nrepositoryformatversion = 0\nbare = false\n';files['.git/HEAD']=b'ref: refs/heads/evidence\n';files['.git/refs/heads/evidence']=(revision+'\n').encode()
-    return files,dict(helper_revision=revision,helper_sha256={name:digest(files[name]) for name in HELPERS},object_count=len(objects))
+    return files,dict(helper_revision=revision,helper_sha256={name:digest(files[name]) for name in HELPERS},
+        object_count=len(objects),capture_sources=capture_sources)
 
 def verify_export(root,receipt):
     require(set(receipt['helper_sha256'])==set(HELPERS),'export helper inventory differs');revision=receipt['helper_revision'];require(re.fullmatch('[0-9a-f]{40}',revision),'invalid helper revision')
@@ -274,6 +278,15 @@ def verify_export(root,receipt):
     require(count==receipt['object_count']<=180,'Git object inventory differs')
     for name,checksum in receipt['helper_sha256'].items():
         data=(root/name).read_bytes();require(digest(data)==checksum,'export helper hash differs');require(subprocess.check_output(['git','show','--end-of-options',revision+':'+name],cwd=root)==data,'export helper Git bytes differ')
+    for capture in receipt.get('capture_sources',{}).values():
+        schema=capture['schema'];source_commit=capture['source_commit'];native=capture['native_source_commit']
+        inventory=source_inventory.locations_for_capture(schema,set(capture['files']))
+        for name,record in capture['files'].items():
+            location=source_inventory.SourceLocation(record['path'],record['member'])
+            require(location in inventory[name],'exported capture source path is not authorized')
+            commit=source_inventory.revision_for(name,source_commit,native)
+            data=source_inventory.read_location(root,commit,location)
+            require(digest(data)==record['sha256'],'exported capture source digest differs')
 
 def _index(path):
     require(path.is_file() and not path.is_symlink(),'regular Pages index required');text=path.read_text();require(len(re.findall(r'<body\b',text,re.I))==1 and text.count('</body>')==1,'one body insertion point required');return text

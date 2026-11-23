@@ -11,12 +11,11 @@ import re
 import statistics
 import shutil
 import sys
-import subprocess
 import tempfile
 import time
 if __package__ in (None,''):
     sys.path.insert(0,str(Path(__file__).resolve().parents[3]))
-from benchmarks.reporting.mpc07 import capture,policy
+from benchmarks.reporting.mpc07 import capture,policy,source_inventory
 
 
 def plain(value):return json.loads(json.dumps(value,default=capture.encode))
@@ -39,17 +38,7 @@ def inventory(root):
     return actual
 
 
-SOURCE_PATHS={
-    'PLAN.md':'benchmarks/reporting/mpc07/evidence/bounded-policy-0e821c2a/PLAN.md',
-    'README.md':'benchmarks/reporting/mpc07/README.md',
-    'capture.py':'benchmarks/reporting/mpc07/capture.py',
-    'policy.py':'benchmarks/reporting/mpc07/policy.py',
-    'report.py':'benchmarks/reporting/mpc07/report.py',
-    'native-build-receipt.json':'benchmarks/reporting/mpc07/native-build-receipt.json',
-    'test_mpc07_policy.py':'tests/reporting/test_mpc07_policy.py',
-    'native-affine_bridge.cpp':'benchmarks/reporting/mpc11/affine_bridge.cpp',
-    'native-CMakeLists.txt':'benchmarks/reporting/mpc11/CMakeLists.txt',
-}
+SOURCE_PATHS=source_inventory.primary_paths(source_inventory.FIXED_SCHEMA)
 NATIVE_REVISION='b3978a98a8bfb30e21841466244ed7f78e987886'
 
 
@@ -57,28 +46,9 @@ def authenticate_sources(root,environment,repository):
     revision=environment.get('source_commit');native=environment.get('native_source_commit')
     if not isinstance(revision,str) or not re.fullmatch('[0-9a-f]{40}',revision) or native!=NATIVE_REVISION:
         raise ValueError('source revisions must be full pinned hexadecimal commits')
-    if set(environment['source_sha256'])!=set(SOURCE_PATHS):raise ValueError('mandatory source snapshot inventory differs')
-    for name,relative in SOURCE_PATHS.items():
-        content=(root/'source'/name).read_bytes()
-        if hashlib.sha256(content).hexdigest()!=environment['source_sha256'][name]:raise ValueError('source snapshot hash differs')
-        if name=='README.md':
-            if hashlib.sha256(content).hexdigest()!='631c84d73f1b228bd6797a0e2ccf5e4d409fafcf6ef9a3cf820be69f89cd40cb':
-                raise ValueError('sealed MPC07 README source hash differs')
-            continue
-        commit=NATIVE_REVISION if name in ('native-affine_bridge.cpp','native-CMakeLists.txt') else revision
-        candidates=[relative]
-        if name=='PLAN.md':candidates.append('benchmarks/reporting/mpc07/PLAN.md')
-        matches=False
-        for candidate in candidates:
-            try:
-                committed=subprocess.check_output(['git','show','--end-of-options',commit+':'+candidate],
-                    cwd=repository,stderr=subprocess.DEVNULL)
-            except subprocess.CalledProcessError:
-                continue
-            if content==committed:
-                matches=True
-                break
-        if not matches:raise ValueError('source snapshot differs from recorded Git commit: '+name)
+    captured_sources={path.name:path.read_bytes() for path in (root/'source').iterdir() if path.is_file()}
+    source_inventory.authenticate(environment['schema'],environment['source_sha256'],captured_sources,
+        revision,native,repository)
     native_receipt=json.loads((root/'source/native-build-receipt.json').read_text())
     if native_receipt['source_revision']!=NATIVE_REVISION or native_receipt['bridge_sha256']!=capture.BRIDGE_SHA:
         raise ValueError('reused native source/build receipt differs')

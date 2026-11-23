@@ -2,7 +2,6 @@
 """Joint-filter saved captures; existing bridge only, no author code or rebuild."""
 import argparse
 import cProfile
-import hashlib
 import io
 import json
 import os
@@ -14,22 +13,12 @@ import sys
 import time
 if __package__ in (None,''):
     sys.path.insert(0,str(Path(__file__).resolve().parents[3]))
-from benchmarks.reporting.mpc07 import capture
+from benchmarks.reporting.mpc07 import capture,source_inventory
 from benchmarks.reporting.mpc07 import joint_filter as J
 
 ROOT=Path(__file__).resolve().parents[3]
 NATIVE='b3978a98a8bfb30e21841466244ed7f78e987886'
-SOURCE_PATHS={name:'benchmarks/reporting/mpc07/'+(
-    'evidence/bounded-policy-0e821c2a/PLAN.md' if name=='PLAN.md' else
-    'evidence/bounded-policy-0e821c2a/README.md' if name=='README.md' else
-    'evidence/joint-filter-04369201-recheck-v2/JOINT-FILTER.md' if name=='JOINT-FILTER.md' else name) for name in
-              ('PLAN.md','README.md','JOINT-FILTER.md','policy.py','capture.py','report.py','joint_filter.py','joint_capture.py','native-build-receipt.json')}
-SOURCE_PATHS.update({'test_mpc07_policy.py':'tests/reporting/test_mpc07_policy.py',
-    'test_mpc07_joint_filter.py':'tests/reporting/test_mpc07_joint_filter.py',
-    'joint-gain-fixture.json':'tests/reporting/fixtures/mpc07-joint-gain-t08.json',
-    'figure_style.py':'scripts/reports/figure_style.py',
-    'native-affine_bridge.cpp':'benchmarks/reporting/mpc11/affine_bridge.cpp',
-    'native-CMakeLists.txt':'benchmarks/reporting/mpc11/CMakeLists.txt'})
+SOURCE_PATHS=source_inventory.primary_paths(source_inventory.JOINT_SCHEMA)
 
 
 def recheck(folder):
@@ -46,22 +35,9 @@ def checked_records(root,repository,hashes):
     if not isinstance(revision,str) or not re.fullmatch('[0-9a-f]{40}',revision) or env['source_status']!='' or \
             env['native_source_commit']!=NATIVE or env['bridge_sha256']!=capture.BRIDGE_SHA:
         raise ValueError('joint source/native identities differ')
-    if set(env['source_sha256'])!=set(SOURCE_PATHS):raise ValueError('joint mandatory source inventory differs')
-    for name,relative in SOURCE_PATHS.items():
-        content=(root/'source'/name).read_bytes();commit=NATIVE if name.startswith('native-') and name!='native-build-receipt.json' else revision
-        if hashlib.sha256(content).hexdigest()!=env['source_sha256'][name]:
-            raise ValueError('joint source snapshot hash differs: '+name)
-        if name=='README.md':
-            if hashlib.sha256(content).hexdigest()!='631c84d73f1b228bd6797a0e2ccf5e4d409fafcf6ef9a3cf820be69f89cd40cb':
-                raise ValueError('sealed MPC07 README source hash differs')
-            continue
-        candidates=[relative]
-        if name=='PLAN.md':candidates.append('benchmarks/reporting/mpc07/PLAN.md')
-        if name=='JOINT-FILTER.md':candidates.append('benchmarks/reporting/mpc07/JOINT-FILTER.md')
-        if not any(content==subprocess.run(['git','show','--end-of-options',commit+':'+candidate],
-                cwd=repository,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,check=False).stdout
-                for candidate in candidates):
-            raise ValueError('joint source differs from recorded Git commit: '+name)
+    captured_sources={path.name:path.read_bytes() for path in (root/'source').iterdir() if path.is_file()}
+    source_inventory.authenticate(env['schema'],env['source_sha256'],captured_sources,
+        revision,NATIVE,repository)
     rows=[];policies={};seen=set()
     for folder in sorted((root/'attempts').iterdir()):
         receipt=json.loads((folder/'receipt.json').read_text());saved=json.loads((folder/'check.json').read_text())
@@ -95,10 +71,9 @@ def run(bridge,output):
     if status:raise ValueError('commit joint source before capture')
     revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
     output.mkdir(parents=True);(output/'attempts').mkdir();(output/'source').mkdir()
-    for name,relative in SOURCE_PATHS.items():
-        commit=NATIVE if name.startswith('native-') and name!='native-build-receipt.json' else revision
-        content=capture.archived_readme() if name=='README.md' else subprocess.check_output(['git','show','--end-of-options',commit+':'+relative],cwd=ROOT)
-        (output/'source'/name).write_bytes(content)
+    source_files,_=source_inventory.capture_sources(source_inventory.JOINT_SCHEMA,
+        revision,NATIVE,ROOT)
+    for name,content in source_files.items():(output/'source'/name).write_bytes(content)
     (output/'native-CMakeCache.txt').write_bytes((bridge.parent/'CMakeCache.txt').read_bytes())
     env=dict(schema='csl.mpc07.joint-filter.capture/1',source_commit=revision,source_status=status,native_source_commit=NATIVE,
         source_sha256={p.name:capture.sha(p) for p in (output/'source').iterdir()},bridge_sha256=capture.sha(bridge),

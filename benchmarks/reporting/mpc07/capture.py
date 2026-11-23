@@ -21,7 +21,7 @@ import zipfile
 from fractions import Fraction as Q
 if __package__ in (None,''):
     sys.path.insert(0,str(Path(__file__).resolve().parents[3]))
-from benchmarks.reporting.mpc07 import policy
+from benchmarks.reporting.mpc07 import policy,source_inventory
 
 ROOT=Path(__file__).resolve().parents[3]
 BRIDGE_SHA='266e1cda61b064b4603ff6499d76dc4db59106e4e673905f585c54caafa9c533'
@@ -126,14 +126,13 @@ def capture(bridge,output,repetitions):
     source_status=subprocess.check_output(['git','status','--porcelain'],cwd=ROOT,text=True)
     if source_status:raise ValueError('capture requires committed clean source')
     output.mkdir(parents=True);(output/'attempts').mkdir();(output/'source').mkdir()
-    for path in Path(__file__).parent.iterdir():
-        if path.is_file() and path.name!='README.md':(output/'source'/path.name).write_bytes(path.read_bytes())
-    (output/'source/README.md').write_bytes(archived_readme())
-    (output/'source/test_mpc07_policy.py').write_bytes((ROOT/'tests/reporting/test_mpc07_policy.py').read_bytes())
+    source_revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
+    native_revision='b3978a98a8bfb30e21841466244ed7f78e987886'
+    source_files,_=source_inventory.capture_sources(source_inventory.FIXED_SCHEMA,
+        source_revision,native_revision,ROOT)
+    for name,content in source_files.items():(output/'source'/name).write_bytes(content)
     (output/'native-CMakeCache.txt').write_bytes((bridge.parent/'CMakeCache.txt').read_bytes())
-    for name in ('affine_bridge.cpp','CMakeLists.txt'):
-        (output/'source'/('native-'+name)).write_bytes(subprocess.check_output(['git','show','--end-of-options','b3978a98a8bfb30e21841466244ed7f78e987886:benchmarks/reporting/mpc11/'+name],cwd=ROOT))
-    environment=dict(schema='csl.mpc07.capture/1',source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
+    environment=dict(schema=source_inventory.FIXED_SCHEMA,source_commit=source_revision,
         source_status=source_status,source_sha256={p.name:sha(p) for p in sorted((output/'source').iterdir())},
         bridge_sha256=sha(bridge),native_source_commit='b3978a98a8bfb30e21841466244ed7f78e987886',
         native_build_scope='reused reviewed Release public CSL ConvexPort bridge; zero Hessian dispatches actual LP',
