@@ -419,7 +419,7 @@ Json evaluate_arm(const AffineStep& map, const std::vector<RunRow>& rows, bool r
             trace.push_back({{"stage", k}, {"state", state},
                 {"relative_position", state.at(0) - state.at(2)},
                 {"available_observations", std::move(observations)},
-                {"estimate", decision.estimate}, {"posterior_size", posterior_sizes.at(k)},
+                {"estimate", decision.estimate.value()}, {"posterior_size", posterior_sizes.at(k)},
                 {"posterior_states", posteriors.at(k)}, {"mhe_residual_cost", residual_costs.at(k)},
                 {"action", decision.action.at(0)}, {"disturbance", inputs.external[k].at(0)}});
         }
@@ -479,7 +479,7 @@ Json record_json(const controllers::ReplayRecord& record) {
                 {"released_stage", sample.released_at.stage.value},
                 {"released_after_decision", sample.released_at.timing == ObservationTiming::after_decision}});
         decisions.push_back({{"stage", decision.stage.value}, {"observations", std::move(observations)},
-            {"estimate", decision.estimate}, {"action", decision.action}});
+            {"estimate", decision.estimate.value()}, {"action", decision.action}});
     }
     Json released = Json::array();
     for(const auto& sample : record.released)
