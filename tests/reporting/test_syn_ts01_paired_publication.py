@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import importlib
 import json
 import shutil
 import sys
@@ -15,8 +16,8 @@ REPORTS = ROOT / "reports" / "algorithm-results"
 SOURCE_ID = "syn-ts01-paired-20261014-b7f1ac0"
 SOURCE = REPORTS / SOURCE_ID
 sys.path.insert(0, str(ROOT / "scripts" / "reports"))
-import syn_ts01_paired_registered_reports as paired
-import report_site as SITE
+paired = importlib.import_module("syn_ts01_paired_registered_reports")
+SITE = importlib.import_module("report_site")
 
 
 class PairedTs01PublicationTests(unittest.TestCase):
