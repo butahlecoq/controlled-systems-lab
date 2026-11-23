@@ -21,16 +21,12 @@ COMMON_LOCATIONS = {
     "capture.py": (SourceLocation("benchmarks/reporting/mpc07/capture.py"),),
     "policy.py": (SourceLocation("benchmarks/reporting/mpc07/policy.py"),),
     "report.py": (SourceLocation("benchmarks/reporting/mpc07/report.py"),),
-    "source_inventory.py": (
-        SourceLocation("benchmarks/reporting/mpc07/source_inventory.py"),
-    ),
+    "source_inventory.py": (SourceLocation("benchmarks/reporting/mpc07/source_inventory.py"),),
     "native-build-receipt.json": (
         SourceLocation("benchmarks/reporting/mpc07/native-build-receipt.json"),
     ),
     "test_mpc07_policy.py": (SourceLocation("tests/reporting/test_mpc07_policy.py"),),
-    "native-affine_bridge.cpp": (
-        SourceLocation("benchmarks/reporting/mpc11/affine_bridge.cpp"),
-    ),
+    "native-affine_bridge.cpp": (SourceLocation("benchmarks/reporting/mpc11/affine_bridge.cpp"),),
     "native-CMakeLists.txt": (SourceLocation("benchmarks/reporting/mpc11/CMakeLists.txt"),),
 }
 
@@ -89,15 +85,11 @@ JOINT_LOCATIONS = {
             "benchmarks/reporting/mpc07/evidence/joint-filter-04369201-recheck-v2/JOINT-FILTER.md"
         ),
         SourceLocation("benchmarks/reporting/mpc07/JOINT-FILTER.md"),
-        SourceLocation(
-            "benchmarks/reporting/mpc07/evidence/joint-filter-04369201/JOINT-FILTER.md"
-        ),
+        SourceLocation("benchmarks/reporting/mpc07/evidence/joint-filter-04369201/JOINT-FILTER.md"),
     ),
     "joint_filter.py": (SourceLocation("benchmarks/reporting/mpc07/joint_filter.py"),),
     "joint_capture.py": (SourceLocation("benchmarks/reporting/mpc07/joint_capture.py"),),
-    "test_mpc07_joint_filter.py": (
-        SourceLocation("tests/reporting/test_mpc07_joint_filter.py"),
-    ),
+    "test_mpc07_joint_filter.py": (SourceLocation("tests/reporting/test_mpc07_joint_filter.py"),),
     "joint-gain-fixture.json": (
         SourceLocation("tests/reporting/fixtures/mpc07-joint-gain-t08.json"),
     ),

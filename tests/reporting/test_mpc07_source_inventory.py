@@ -9,7 +9,6 @@ from pathlib import Path
 
 from benchmarks.reporting.mpc07 import source_inventory as inventory
 
-
 ROOT = Path(__file__).resolve().parents[2]
 NATIVE_REVISION = "b3978a98a8bfb30e21841466244ed7f78e987886"
 
@@ -67,13 +66,19 @@ class Mpc07SourceInventoryTests(unittest.TestCase):
                 "mpc07-joint-report/RAW/source/README.md",
             ),
         )
-        self.assertEqual(hashlib.sha256(fixed_readme_bytes).hexdigest(),
-                         "631c84d73f1b228bd6797a0e2ccf5e4d409fafcf6ef9a3cf820be69f89cd40cb")
+        self.assertEqual(
+            hashlib.sha256(fixed_readme_bytes).hexdigest(),
+            "631c84d73f1b228bd6797a0e2ccf5e4d409fafcf6ef9a3cf820be69f89cd40cb",
+        )
         self.assertEqual(fixed_readme_bytes, joint_readme_bytes)
-        self.assertEqual(hashlib.sha256(fixed_plan_bytes).hexdigest(),
-                         "3791ccdfaa1b068cabaa474eef83263f2e0ec49bcb0e2a338cce5b6ac915b4f8")
-        self.assertEqual(hashlib.sha256(joint_plan_bytes).hexdigest(),
-                         "3791ccdfaa1b068cabaa474eef83263f2e0ec49bcb0e2a338cce5b6ac915b4f8")
+        self.assertEqual(
+            hashlib.sha256(fixed_plan_bytes).hexdigest(),
+            "3791ccdfaa1b068cabaa474eef83263f2e0ec49bcb0e2a338cce5b6ac915b4f8",
+        )
+        self.assertEqual(
+            hashlib.sha256(joint_plan_bytes).hexdigest(),
+            "3791ccdfaa1b068cabaa474eef83263f2e0ec49bcb0e2a338cce5b6ac915b4f8",
+        )
         self.assertNotEqual(fixed_plan, joint_plan)
 
     def test_new_capture_exports_are_complete_and_self_authenticating(self):
@@ -82,12 +87,9 @@ class Mpc07SourceInventoryTests(unittest.TestCase):
         ).strip()
         for schema in (inventory.FIXED_SCHEMA, inventory.JOINT_SCHEMA):
             with self.subTest(schema=schema):
-                files, selected = inventory.capture_sources(
-                    schema, revision, NATIVE_REVISION, ROOT
-                )
+                files, selected = inventory.capture_sources(schema, revision, NATIVE_REVISION, ROOT)
                 hashes = {
-                    name: hashlib.sha256(content).hexdigest()
-                    for name, content in files.items()
+                    name: hashlib.sha256(content).hexdigest() for name, content in files.items()
                 }
                 authenticated = inventory.authenticate(
                     schema,
@@ -117,31 +119,35 @@ class Mpc07SourceInventoryTests(unittest.TestCase):
                     ROOT,
                 )
                 self.assertEqual(set(selected), set(environment["source_sha256"]))
-                self.assertEqual(selected["README.md"].path,
-                                 "benchmarks/reporting/mpc07/README.md")
-                self.assertEqual(selected["PLAN.md"].path,
-                                 "benchmarks/reporting/mpc07/PLAN.md")
+                self.assertEqual(selected["README.md"].path, "benchmarks/reporting/mpc07/README.md")
+                self.assertEqual(selected["PLAN.md"].path, "benchmarks/reporting/mpc07/PLAN.md")
 
     def test_unknown_source_names_and_changed_sources_are_rejected(self):
-        environment, sources = saved_capture(
-            "bounded-policy-0e821c2a", "mpc07-report"
-        )
+        environment, sources = saved_capture("bounded-policy-0e821c2a", "mpc07-report")
         expected = dict(environment["source_sha256"])
         changed = dict(sources)
         expected["../outside.py"] = "0" * 64
         changed["../outside.py"] = b"outside the allowlist"
         with self.assertRaisesRegex(ValueError, "mandatory source inventory"):
             inventory.authenticate(
-                environment["schema"], expected, changed,
-                environment["source_commit"], environment["native_source_commit"], ROOT
+                environment["schema"],
+                expected,
+                changed,
+                environment["source_commit"],
+                environment["native_source_commit"],
+                ROOT,
             )
 
         changed = dict(sources)
         changed["README.md"] += b"tampered"
         with self.assertRaisesRegex(ValueError, "source snapshot hash differs: README.md"):
             inventory.authenticate(
-                environment["schema"], environment["source_sha256"], changed,
-                environment["source_commit"], environment["native_source_commit"], ROOT
+                environment["schema"],
+                environment["source_sha256"],
+                changed,
+                environment["source_commit"],
+                environment["native_source_commit"],
+                ROOT,
             )
 
 
