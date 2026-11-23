@@ -18,6 +18,7 @@ SAVED_REPORTS = ROOT / "reports" / "algorithm-results"
 sys.path.insert(0, str(REPORT_SCRIPTS))
 TOOLING = SAVED_REPORTS / "tooling" / "syn01"
 
+
 def _load_module(name, path):
     spec = importlib.util.spec_from_file_location(name, path)
     assert spec is not None and spec.loader is not None
