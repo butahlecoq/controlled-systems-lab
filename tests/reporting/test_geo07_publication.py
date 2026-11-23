@@ -1,25 +1,27 @@
 """Saved GEO-07 evidence must regenerate without native execution."""
+
 from __future__ import annotations
 
 import hashlib
-from html.parser import HTMLParser
+import importlib
 import io
 import json
-from pathlib import Path
 import shutil
 import sys
 import tempfile
 import unittest
-from unittest import mock
 import zipfile
+from html.parser import HTMLParser
+from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports/geo07"))
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import render_saved as report
-import stage_geo07
-import stage_geo07_dependent
-import stage_geo07_port
+report = importlib.import_module("render_saved")
+stage_geo07 = importlib.import_module("stage_geo07")
+stage_geo07_dependent = importlib.import_module("stage_geo07_dependent")
+stage_geo07_port = importlib.import_module("stage_geo07_port")
 
 SOURCE = ROOT / "reports/algorithm-results/geo07-9ef0d347291774da"
 
@@ -43,7 +45,10 @@ class Geo07PublicationTests(unittest.TestCase):
             hashlib.sha256(legacy).hexdigest(),
             "1c478bd3046e4837041fd18e7e90700a196464b732a2dfb8a93296ae7cc3af47",
         )
-        landing = b'<a href="sample-1/index.html">Open report</a>\n'
+        landing = (
+            b'<!doctype html><html lang="en"><body><a href="sample-1/index.html">Open report</a>'
+            b"</body></html>\n"
+        )
         archive_bytes = stage_geo07.common.publication_zip(
             report_id, files, root_landing_page=landing
         )
@@ -59,6 +64,7 @@ class Geo07PublicationTests(unittest.TestCase):
             b"<a href='elsewhere/index.html'>Open</a>",
             b"<a href='sample-1/index.html'>Open</a><a href='elsewhere'>Else</a>",
             b"<a href='sample-1/index.html'>Open</a><img src='remote.png'>",
+            b"<html lang='en'><body><template><a href='sample-1/index.html'>Hidden</a></template></body></html>",
             b"\xff",
         ):
             with self.subTest(landing=invalid), self.assertRaises(ValueError):
@@ -100,8 +106,9 @@ class Geo07PublicationTests(unittest.TestCase):
 
     def test_saved_bytes_regenerate_page_figure_and_offline_zip(self):
         record = report.validate_native(SOURCE)
-        self.assertEqual((record["source_commit"], record["harness_commit"]),
-                         (report.SOURCE, report.HARNESS))
+        self.assertEqual(
+            (record["source_commit"], record["harness_commit"]), (report.SOURCE, report.HARNESS)
+        )
         report.render(SOURCE, check=True)
         page = (SOURCE / "index.html").read_text(encoding="utf-8")
         self.assertIn("37.555", page)
@@ -110,10 +117,12 @@ class Geo07PublicationTests(unittest.TestCase):
         self.assertIn("inconclusive", page)
         self.assertIn("nlohmann JSON", page)
         with zipfile.ZipFile(io.BytesIO((SOURCE / "bundle.zip").read_bytes())) as archive:
-            self.assertEqual(archive.read(SOURCE.name + "/trials.jsonl"),
-                             (SOURCE / "trials.jsonl").read_bytes())
-            self.assertEqual(archive.read(SOURCE.name + "/index.html"),
-                             (SOURCE / "index.html").read_bytes())
+            self.assertEqual(
+                archive.read(SOURCE.name + "/trials.jsonl"), (SOURCE / "trials.jsonl").read_bytes()
+            )
+            self.assertEqual(
+                archive.read(SOURCE.name + "/index.html"), (SOURCE / "index.html").read_bytes()
+            )
 
     def test_extracted_offline_page_has_no_dead_local_downloads(self):
         with zipfile.ZipFile(io.BytesIO((SOURCE / "bundle.zip").read_bytes())) as archive:
@@ -128,7 +137,9 @@ class Geo07PublicationTests(unittest.TestCase):
     def test_public_zip_root_and_nested_pages_have_live_local_links(self):
         with tempfile.TemporaryDirectory() as directory:
             site = Path(directory)
-            (site / "index.html").write_text('<html><body><ul></ul></body></html>', encoding="utf-8")
+            (site / "index.html").write_text(
+                "<html><body><ul></ul></body></html>", encoding="utf-8"
+            )
             rid = stage_geo07.stage(SOURCE.parent / "geo07-publications.json", site)
             with zipfile.ZipFile(site / (rid + ".zip")) as archive:
                 extracted = site / "extracted"
@@ -146,8 +157,12 @@ class Geo07PublicationTests(unittest.TestCase):
 
     @mock.patch.dict(stage_geo07.common._HISTORICAL_PUBLICATIONS, {}, clear=True)
     def test_unpinned_public_id_binds_all_publisher_modules_with_lf_line_endings(self):
-        publisher_files = ("stage_geo07.py", "geo07/render_saved.py",
-                           "geo07/collect.py", "registered_reports.py")
+        publisher_files = (
+            "stage_geo07.py",
+            "geo07/render_saved.py",
+            "geo07/collect.py",
+            "registered_reports.py",
+        )
         original_id = stage_geo07.validate(SOURCE).report_id
         with tempfile.TemporaryDirectory() as directory:
             fake_root = Path(directory)
@@ -162,7 +177,9 @@ class Geo07PublicationTests(unittest.TestCase):
                 self.assertEqual(stage_geo07.validate(SOURCE).report_id, original_id)
                 for name in publisher_files:
                     target = fake_root / "scripts/reports" / name
-                    target.write_bytes(originals[name].replace(b"\r\n", b"\n").replace(b"\n", b"\r\n"))
+                    target.write_bytes(
+                        originals[name].replace(b"\r\n", b"\n").replace(b"\n", b"\r\n")
+                    )
                 self.assertEqual(stage_geo07.validate(SOURCE).report_id, original_id)
                 for name in publisher_files:
                     target = fake_root / "scripts/reports" / name
@@ -188,7 +205,9 @@ class Geo07PublicationTests(unittest.TestCase):
     def test_extension_stages_new_route_with_exact_source_bytes(self):
         item = stage_geo07.validate(SOURCE)
         self.assertEqual(item.source_report_id, SOURCE.name)
-        catalogue = json.loads((SOURCE.parent / "geo07-publications.json").read_text(encoding="utf-8"))
+        catalogue = json.loads(
+            (SOURCE.parent / "geo07-publications.json").read_text(encoding="utf-8")
+        )
         self.assertEqual(catalogue["reports"], [stage_geo07.catalogue_entry(SOURCE)])
         with tempfile.TemporaryDirectory() as directory:
             site = Path(directory)
@@ -198,12 +217,15 @@ class Geo07PublicationTests(unittest.TestCase):
             rid = stage_geo07.stage(SOURCE.parent / "geo07-publications.json", site)
             self.assertEqual(rid, item.report_id)
             self.assertEqual((site / "existing.txt").read_bytes(), b"old route stays fixed")
-            self.assertEqual((site / rid / "trials.jsonl").read_bytes(),
-                             (SOURCE / "trials.jsonl").read_bytes())
+            self.assertEqual(
+                (site / rid / "trials.jsonl").read_bytes(), (SOURCE / "trials.jsonl").read_bytes()
+            )
             self.assertTrue((site / (rid + ".zip")).is_file())
             self.assertIn(rid, (site / "index.html").read_text(encoding="utf-8"))
-            self.assertEqual(hashlib.sha256((site / rid / "records.json").read_bytes()).hexdigest(),
-                             hashlib.sha256((SOURCE / "records.json").read_bytes()).hexdigest())
+            self.assertEqual(
+                hashlib.sha256((site / rid / "records.json").read_bytes()).hexdigest(),
+                hashlib.sha256((SOURCE / "records.json").read_bytes()).hexdigest(),
+            )
 
 
 if __name__ == "__main__":

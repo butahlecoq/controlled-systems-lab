@@ -872,12 +872,25 @@ def publication_artifacts(bundle, publication, page_bytes=None):
 
 
 class _RootLandingLinks(HTMLParser):
+    allowed_tags = {"a", "body", "h1", "head", "html", "meta", "p", "title"}
+    allowed_attributes = {"a": {"href"}, "html": {"lang"}, "meta": {"charset"}}
+
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.hrefs = []
         self.other_resources = []
+        self.invalid_markup = False
+        self.in_head = False
+        self.in_body = False
+        self.in_title = False
 
     def handle_starttag(self, tag, attrs):
+        if tag not in self.allowed_tags:
+            self.invalid_markup = True
+        allowed = self.allowed_attributes.get(tag, set())
+        names = [name for name, _ in attrs]
+        if len(names) != len(set(names)) or any(name not in allowed for name in names):
+            self.invalid_markup = True
         for name, value in attrs:
             if name == "href" and tag == "a":
                 self.hrefs.append(value)
@@ -892,6 +905,22 @@ class _RootLandingLinks(HTMLParser):
                 "background",
             }:
                 self.other_resources.append((tag, name, value))
+        if tag == "a" and (not self.in_body or self.in_head or self.in_title):
+            self.invalid_markup = True
+        if tag == "head":
+            self.in_head = True
+        elif tag == "body":
+            self.in_body = True
+        elif tag == "title":
+            self.in_title = True
+
+    def handle_endtag(self, tag):
+        if tag == "head":
+            self.in_head = False
+        elif tag == "body":
+            self.in_body = False
+        elif tag == "title":
+            self.in_title = False
 
 
 def publication_zip(report_id, files, *, root_landing_page=None):
@@ -907,7 +936,12 @@ def publication_zip(report_id, files, *, root_landing_page=None):
         links = _RootLandingLinks()
         links.feed(landing_html)
         expected_target = report_id + "/index.html"
-        if links.hrefs != [expected_target] or links.other_resources or "index.html" not in files:
+        if (
+            links.hrefs != [expected_target]
+            or links.other_resources
+            or links.invalid_markup
+            or "index.html" not in files
+        ):
             raise ValueError("root landing page must link only to the nested report page")
         root_page = root_landing_page
     buffer = io.BytesIO()
