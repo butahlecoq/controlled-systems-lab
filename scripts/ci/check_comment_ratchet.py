@@ -16,7 +16,13 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Literal
 
-SCOPES = ("scripts/ci", "scripts/catalogue", "tests/ci", "tests/cmake")
+SCOPES = (
+    "scripts/ci",
+    "scripts/catalogue",
+    "scripts/reports/landing.py",
+    "tests/ci",
+    "tests/cmake",
+)
 CommentKind = Literal["comment_only", "inline", "directive"]
 ENCODING_COOKIE = re.compile(r"^#.*?coding[:=][ \t]*[-\w.]+")
 TYPE_COMMENT = re.compile(r"#\s*type:\s*(\S.*)")
