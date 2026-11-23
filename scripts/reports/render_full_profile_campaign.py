@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import html
 import json
+import subprocess
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -54,6 +55,20 @@ PLANES: dict[str, list[figures.Projection]] = {
         },
     ],
 }
+FUEL_PAIRED_PLANES: list[figures.Projection] = [
+    {
+        "id": "propellant-masses",
+        "indices": [0, 1],
+        "labels": ["Oxidizer mass mₒₓ", "Fuel mass m_f"],
+        "units": ["kg", "kg"],
+    },
+    {
+        "id": "propellant-flows",
+        "indices": [2, 3],
+        "labels": ["Oxidizer flow qₒₓ", "Fuel flow q_f"],
+        "units": ["kg/s", "kg/s"],
+    },
+]
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -79,6 +94,7 @@ def draw_box_tube_svg(
     tubes: list[dict[str, Any]],
     plan: list[list[float]],
     replay: list[list[float]],
+    compact: bool = False,
 ) -> str:
     """Plot authored outer boxes with the plan and observed replay in one projection."""
     i, j = plane["indices"]
@@ -89,8 +105,16 @@ def draw_box_tube_svg(
     ys += [float(point[j]) for point in plan] + [float(point[j]) for point in replay]
     x0, x1 = figures.limits(xs)
     y0, y1 = figures.limits(ys)
-    width, height = 1120, 820
-    left, right, top, bottom = 110, 60, 100, 150
+    if compact:
+        width, height = 620, 500
+        left, right, top, bottom = 145, 22, 82, 155
+        font_size, title_size, axis_size = 9, 19, 14
+        legend_y, x_label_y = height - 55, height - 120
+    else:
+        width, height = 1120, 820
+        left, right, top, bottom = 110, 60, 100, 150
+        font_size, title_size, axis_size = 14, 23, 15
+        legend_y, x_label_y = height - 62, height - 35
     pw, ph = width - left - right, height - top - bottom
 
     def px(x: float) -> float:
@@ -107,7 +131,7 @@ def draw_box_tube_svg(
     out = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" role="img">',
         f'<title>{esc(title)}</title><rect width="100%" height="100%" fill="white"/>',
-        "<style>text{font:14px system-ui,sans-serif;fill:#253047}.title{font-size:23px;font-weight:700}.axis{font-size:15px;font-weight:600}</style>",
+        f"<style>text{{font:{font_size}px system-ui,sans-serif;fill:#253047}}.title{{font-size:{title_size}px;font-weight:700}}.axis{{font-size:{axis_size}px;font-weight:600}}</style>",
         f'<text x="{left}" y="42" class="title">{esc(title)}</text>',
         f'<text x="{left}" y="68">Outer fixed-plan trajectory enclosures · box representation</text>',
     ]
@@ -130,8 +154,8 @@ def draw_box_tube_svg(
     out += [
         f'<polyline points="{points(plan)}" fill="none" stroke="#dc2626" stroke-width="3"/>',
         f'<polyline points="{points(replay)}" fill="none" stroke="#2563eb" stroke-width="3" stroke-dasharray="8 5"/>',
-        f'<text x="{left}" y="{height - 62}">Amber: numerical outer fixed-plan tube · red: selected plan · blue dashed: observed closed-loop replay</text>',
-        f'<text x="{left}" y="{height - 35}" class="axis">{esc(plane["labels"][0])} ({esc(plane["units"][0])})</text>',
+        f'<text x="{left}" y="{legend_y}">Amber: numerical outer fixed-plan tube · red: selected plan · blue dashed: observed closed-loop replay</text>',
+        f'<text x="{left}" y="{x_label_y}" class="axis">{esc(plane["labels"][0])} ({esc(plane["units"][0])})</text>',
         f'<text x="34" y="{top + ph / 2}" class="axis" transform="rotate(-90 34 {top + ph / 2})">{esc(plane["labels"][1])} ({esc(plane["units"][1])})</text></svg>',
     ]
     return "\n".join(out)
@@ -158,6 +182,10 @@ def main() -> int:
         "--output", type=Path, default=ROOT / "docs/examples/closed-loop/campaign-2026-11-18"
     )
     args = parser.parse_args()
+
+    renderer_source_commit = subprocess.check_output(
+        ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
+    ).strip()
 
     freeze = read_json(args.freeze)
     coverage = read_json(args.coverage)
@@ -224,7 +252,11 @@ def main() -> int:
         observed = attempt.get("resource_limits", {}).get("observed", {})
         action_profile = row["graph"]["action_profile_id"]
         case = f"{task}-{representation}"
-        figure_link = f"{case}-{PLANES[task][0]['id']}.html"
+        figure_link = (
+            f"{case}-paired.html"
+            if task == "syn-nl-fuel-01"
+            else f"{case}-{PLANES[task][0]['id']}.html"
+        )
         worker_rss_mib = observed.get("worker_max_rss_kib")
         rss_value = (
             fmt_number(worker_rss_mib / 1024)
@@ -303,8 +335,82 @@ def main() -> int:
             )
             page.append(page_end())
             (args.output / f"{stem}.html").write_text("".join(page), encoding="utf-8")
+            if task != "syn-nl-fuel-01":
+                cards[task].append(
+                    f"<li><a href='{esc(stem)}.html'><img loading='lazy' src='{esc(stem)}.svg' alt='{esc(title)}'><strong>{esc(representation)} · {esc(plane['id'])}</strong></a></li>"
+                )
+
+        if task == "syn-nl-fuel-01":
+            paired_stem = f"{case}-paired"
+            paired_title = f"{task_label} · {representation} · paired projections"
+            paired_svgs: list[tuple[str, str]] = []
+            for plane in FUEL_PAIRED_PLANES:
+                axis_pair = (
+                    "x1–x2 · propellant masses"
+                    if plane["indices"] == [0, 1]
+                    else "x3–x4 · propellant flows"
+                )
+                panel_title = f"{task_label} · {representation} · {axis_pair}"
+                if receipt:
+                    panel_svg = figures.draw_svg(
+                        panel_title,
+                        case,
+                        plane,
+                        receipt["nodes"],
+                        plan,
+                        replay,
+                        final_stage,
+                        compact=True,
+                    )
+                else:
+                    panel_svg = draw_box_tube_svg(
+                        panel_title, plane, response["predicted_sets"], plan, replay, compact=True
+                    )
+                paired_svgs.append((axis_pair, panel_svg))
+            paired_svg = figures.draw_paired_svg(paired_title, paired_svgs)
+            paired_svg_path = args.output / f"{paired_stem}.svg"
+            paired_svg_path.write_text(paired_svg + "\n", encoding="utf-8")
+            pair_record = {
+                "schema": "csl.closed-loop-paired-projection-figure/1",
+                "figure_id": paired_stem,
+                "source_commit": freeze["source_commit"],
+                "renderer_source_commit": renderer_source_commit,
+                "task_name": task,
+                "graph_id": row["graph"]["graph_id"],
+                "attempt_id": row["attempt"]["attempt_id"],
+                "plotted_data": f"raw/plotted-data/{case}.json",
+                "plotted_data_sha256": hashlib.sha256(plot_path.read_bytes()).hexdigest(),
+                "svg_sha256": hashlib.sha256(paired_svg_path.read_bytes()).hexdigest(),
+                "stage_count": final_stage + 1,
+                "search_coverage": receipt.get("search_coverage") if receipt else "not-applicable",
+                "projections": FUEL_PAIRED_PLANES,
+                "terminal_condition": "soft objective reference; no terminal constraint or final set",
+            }
+            (args.output / f"{paired_stem}.json").write_text(
+                json.dumps(pair_record, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
+                encoding="utf-8",
+            )
+            pair_crumb = (
+                ("Examples", "../../index.html"),
+                ("Campaign", "index.html"),
+                (paired_title, ""),
+            )
+            pair_page = [
+                page_start(paired_title, stylesheet_href="../../examples.css", crumbs=pair_crumb)
+            ]
+            pair_page.append(
+                f"<p><a href='index.html'>Campaign dashboard</a> · <a href='raw/plotted-data/{esc(case)}.json'>plotted source data</a> · <a href='{esc(paired_stem)}.json'>figure provenance</a></p><p>{esc(description)}</p><p>Individual projection views: <a href='{esc(case)}-oxidizer.html'>oxidizer mass vs flow</a> · <a href='{esc(case)}-fuel.html'>fuel mass vs flow</a>.</p>"
+            )
+            pair_page.append(
+                f"<object data='{esc(paired_stem)}.svg' type='image/svg+xml' aria-label='Propellant mass and flow projections across the same stages'><a href='{esc(paired_stem)}.svg'>Open paired SVG</a></object>"
+            )
+            pair_page.append(
+                "<aside class='notice'><h2>Reading the paired projections</h2><p>The left panel plots oxidizer mass against fuel mass (x1–x2); the right plots oxidizer flow against fuel flow (x3–x4). Both panels use the same attempt, stage colors, plan and nonlinear replay. Graph marks are retained finite-action states with incomplete search coverage, not continuous reachable-set boundaries. The purple marks indicate terminal-stage graph nodes; the fuel objective is soft and defines no terminal set. For box controllers, amber regions are outer enclosures of the selected fixed plan. Very narrow bounds can visually coincide with the plan and replay at this scale; the saved values remain available in the plotted data.</p></aside>"
+            )
+            pair_page.append(page_end())
+            (args.output / f"{paired_stem}.html").write_text("".join(pair_page), encoding="utf-8")
             cards[task].append(
-                f"<li><a href='{esc(stem)}.html'><img loading='lazy' src='{esc(stem)}.svg' alt='{esc(title)}'><strong>{esc(representation)} · {esc(plane['id'])}</strong></a></li>"
+                f"<li><a href='{esc(paired_stem)}.html'><img loading='lazy' src='{esc(paired_stem)}.svg' alt='{esc(paired_title)}'><strong>{esc(representation)} · masses + flows</strong></a></li>"
             )
 
     # Keep the complete machine-readable disposition and its provenance adjacent to the page.
@@ -534,7 +640,7 @@ def main() -> int:
         f"<div class='scroll'><table><thead><tr><th>Task</th><th>States · nonlinear model</th><th>Step × horizon</th><th>Finite catalog</th><th>Continuous bounds</th><th>Objective</th><th>Terminal condition</th><th>Affine predictor</th><th>Nonlinear execution</th><th>Information pattern</th><th>Contract</th></tr></thead><tbody>{''.join(model_rows)}</tbody></table></div></section>"
     )
     page.append(
-        "<section><h2>All-stage sets and trajectories by representation</h2><p>Each representation card uses one completed native graph on that task. Its selected plan is computed with the controller’s affine prediction model; the observed replay is a separate execution of the original nonlinear plant. Fuel projections follow the authored state order: oxidizer (mass, flow) and fuel (mass, flow). The graph figures show retained forward/backward-viable nodes, plan, and replay. Box cards show the fixed-plan outer tube rather than a full reachable set.</p></section>"
+        "<section><h2>All-stage sets and trajectories by representation</h2><p>Each representation card uses one completed native graph on that task. Its selected plan is computed with the controller’s affine prediction model; the observed replay is a separate execution of the original nonlinear plant. Fuel includes a paired view: x1–x2 plots oxidizer mass against fuel mass, and x3–x4 plots oxidizer flow against fuel flow, using the same stages and attempt. The graph figures show retained forward/backward-viable nodes, plan, and replay. Box cards show the fixed-plan outer tube rather than a full reachable set.</p></section>"
     )
     page.append(task_sections)
     page.append(

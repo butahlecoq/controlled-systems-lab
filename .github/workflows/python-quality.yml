@@ -178,6 +178,7 @@ on:
       - 'scripts/reports/algorithm_visual_coverage.json'
       - 'reports/algorithm-results/catalog.json'
       - 'tests/reporting/test_learning_book.py'
+      - 'tests/reporting/test_campaign_paired_figures.py'
       - 'docs/examples/closed-loop/figure-index.json'
       - 'docs/examples/learning/chapters/orbit-capstone.html'
       - 'reports/published-route-preservation/manifest.json'
@@ -807,7 +808,7 @@ jobs:
           MPLBACKEND: Agg
         run: |
           python -m unittest tests.reporting.test_mathematical_notation
-          python -m unittest tests.reporting.test_report_data tests.reporting.test_render tests.reporting.test_publication_policy tests.reporting.test_report_source_identity tests.reporting.test_registered_kinds tests.reporting.test_landing tests.reporting.test_learning_book tests.reporting.test_plot tests.reporting.test_b04_publication_source_snapshot tests.reporting.test_publication_spine_boundaries
+          python -m unittest tests.reporting.test_report_data tests.reporting.test_render tests.reporting.test_publication_policy tests.reporting.test_report_source_identity tests.reporting.test_registered_kinds tests.reporting.test_landing tests.reporting.test_learning_book tests.reporting.test_campaign_paired_figures tests.reporting.test_plot tests.reporting.test_b04_publication_source_snapshot tests.reporting.test_publication_spine_boundaries
       - name: Replay saved MPC replanning and output feedback
         run: |
           reports=reports/algorithm-results
