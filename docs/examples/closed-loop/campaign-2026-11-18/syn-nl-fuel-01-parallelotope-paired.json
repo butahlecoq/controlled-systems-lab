@@ -44,7 +44,7 @@
     }
   ],
   "renderer": "scripts/reports/render_full_profile_campaign.py",
-  "renderer_source_commit": "65db5ee6b0fec91eea1ab330f0cc165027538754",
+  "renderer_source_commit": "e62cd5689dfc5cbdc04c9e4cd6ec900a803df300",
   "representation": "parallelotope",
   "schema": "csl.closed-loop-paired-projection-figure/1",
   "search_coverage": "incomplete",
