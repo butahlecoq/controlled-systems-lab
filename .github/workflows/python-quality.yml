@@ -530,6 +530,7 @@ on:
       - 'benchmarks/reporting/mpc07/source_inventory.py'
       - 'scripts/reports/stage_mpc07_comparison.py'
       - 'tests/reporting/test_mpc07_joint_filter.py'
+      - 'tests/reporting/test_mpc07_policy.py'
       - 'tests/reporting/test_mpc07_publication.py'
       - 'tests/reporting/test_mpc07_source_inventory.py'
       - 'scripts/reports/stage_mpc03_b08.py'
@@ -1085,6 +1086,7 @@ jobs:
           python -m unittest
           tests.reporting.test_mpc07_source_inventory
           tests.reporting.test_mpc07_joint_filter
+          tests.reporting.test_mpc07_policy
           tests.reporting.test_mpc07_publication
       - name: Check the frozen CartPole route and offline ZIP
         run: python -m unittest tests.reporting.test_env717_cartpole_publication
