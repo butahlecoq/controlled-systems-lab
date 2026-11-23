@@ -65,6 +65,8 @@ class Geo07PublicationTests(unittest.TestCase):
             b"<a href='sample-1/index.html'>Open</a><a href='elsewhere'>Else</a>",
             b"<a href='sample-1/index.html'>Open</a><img src='remote.png'>",
             b"<html lang='en'><body><template><a href='sample-1/index.html'>Hidden</a></template></body></html>",
+            b"<html lang='en'><body><a href='sample-1/index.html'></a></body></html>",
+            b"<html lang='en'><body><a href='sample-1/index.html'> \n </a></body></html>",
             b"\xff",
         ):
             with self.subTest(landing=invalid), self.assertRaises(ValueError):

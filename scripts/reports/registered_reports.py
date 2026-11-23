@@ -883,6 +883,8 @@ class _RootLandingLinks(HTMLParser):
         self.in_head = False
         self.in_body = False
         self.in_title = False
+        self.in_anchor = False
+        self.anchor_text = ""
 
     def handle_starttag(self, tag, attrs):
         if tag not in self.allowed_tags:
@@ -907,6 +909,11 @@ class _RootLandingLinks(HTMLParser):
                 self.other_resources.append((tag, name, value))
         if tag == "a" and (not self.in_body or self.in_head or self.in_title):
             self.invalid_markup = True
+        if tag == "a":
+            if self.in_anchor:
+                self.invalid_markup = True
+            self.in_anchor = True
+            self.anchor_text = ""
         if tag == "head":
             self.in_head = True
         elif tag == "body":
@@ -921,6 +928,14 @@ class _RootLandingLinks(HTMLParser):
             self.in_body = False
         elif tag == "title":
             self.in_title = False
+        elif tag == "a":
+            if not self.in_anchor or not self.anchor_text.strip():
+                self.invalid_markup = True
+            self.in_anchor = False
+
+    def handle_data(self, data):
+        if self.in_anchor:
+            self.anchor_text += data
 
 
 def publication_zip(report_id, files, *, root_landing_page=None):
@@ -940,6 +955,7 @@ def publication_zip(report_id, files, *, root_landing_page=None):
             links.hrefs != [expected_target]
             or links.other_resources
             or links.invalid_markup
+            or links.in_anchor
             or "index.html" not in files
         ):
             raise ValueError("root landing page must link only to the nested report page")
