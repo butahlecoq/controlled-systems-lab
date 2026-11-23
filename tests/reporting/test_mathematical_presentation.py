@@ -10,6 +10,26 @@ from scripts.reports import audit_mathematical_presentation as audit
 
 
 class PresentationTests(unittest.TestCase):
+    def test_all_paired_fuel_pages_have_a_maintained_source_owner(self):
+        registry = json.loads(audit.REGISTRY.read_text(encoding="utf-8"))
+        routes = {entry["route"]: entry for entry in registry["routes"]}
+        for representation in (
+            "box",
+            "ellipsoid",
+            "exact-polytope",
+            "parallelotope",
+            "zonotope",
+        ):
+            route = (
+                "examples/closed-loop/campaign-2026-11-18/"
+                f"syn-nl-fuel-01-{representation}-paired.html"
+            )
+            with self.subTest(route=route):
+                self.assertEqual(routes[route]["disposition"], "maintained")
+                self.assertEqual(
+                    routes[route]["owner"], "scripts/reports/render_full_profile_campaign.py"
+                )
+
     def test_actual_coordinate_table_regression(self):
         # The five old control-witness cards used this exact repeated role.
         html = (
