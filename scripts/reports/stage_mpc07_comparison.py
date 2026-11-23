@@ -29,7 +29,7 @@ ONLINE='online-evaluation-0524f7e4';ONLINE_CURRENT=ONLINE+'-recheck-aed7a98b'
 ONLINE_ANCHORS={ONLINE:'540a04309384a32fb7e51861f78d0361d5d0cb50af1d6acd680ec01a4453373a',ONLINE_CURRENT:'3fe4006cf6d9513e9f94250d3d3cbdb369aa44f6838ca1649de03514db0b02b3'}
 ONLINE_SOURCES={name:ROOT/'benchmarks/reporting/mpc07/evidence'/name for name in ONLINE_ANCHORS}
 HELPERS=['benchmarks/reporting/mpc07/'+name for name in ('capture.py','policy.py','report.py','joint_filter.py','joint_capture.py','source_inventory.py')]+['scripts/reports/stage_mpc07_comparison.py']
-ONLINE_HELPERS=[n for n in HELPERS if n.endswith('.py')]+['benchmarks/reporting/mpc07/online/'+n for n in ('capture.py','check.py','controller.py','figures.py','inputs.py','profiles.json')]
+ONLINE_HELPERS=[n for n in HELPERS if n.endswith('.py') and not n.endswith('/source_inventory.py')]+['benchmarks/reporting/mpc07/online/'+n for n in ('capture.py','check.py','controller.py','figures.py','inputs.py','profiles.json')]
 HELPERS+= [n for n in ONLINE_HELPERS if n not in HELPERS]
 HELPERS+=['scripts/reports/figure_style.py']
 

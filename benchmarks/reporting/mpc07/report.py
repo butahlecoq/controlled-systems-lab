@@ -46,6 +46,9 @@ def authenticate_sources(root,environment,repository):
     revision=environment.get('source_commit');native=environment.get('native_source_commit')
     if not isinstance(revision,str) or not re.fullmatch('[0-9a-f]{40}',revision) or native!=NATIVE_REVISION:
         raise ValueError('source revisions must be full pinned hexadecimal commits')
+    source_sha256=environment.get('source_sha256')
+    if not isinstance(source_sha256,dict) or not source_sha256:raise ValueError('mandatory source inventory differs')
+    source_inventory.locations_for_capture(environment.get('schema'),set(source_sha256))
     captured_sources={path.name:path.read_bytes() for path in (root/'source').iterdir() if path.is_file()}
     source_inventory.authenticate(environment['schema'],environment['source_sha256'],captured_sources,
         revision,native,repository)
