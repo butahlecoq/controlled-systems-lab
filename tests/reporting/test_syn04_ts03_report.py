@@ -79,9 +79,9 @@ class Ts03ReportTests(unittest.TestCase):
 
     def test_complete_catalogue_stages_exact_offline_archive(self):
         sys.path.insert(0, str(ROOT / "scripts/reports"))
+        import report_site as site
         import syn04_ts03_registered_reports as publisher
 
-        import report_site as site
         bundle = ROOT / "reports/algorithm-results" / report.REPORT_ID
         item = publisher.adapt(bundle)
         catalogue = ROOT / "reports/algorithm-results/catalog.json"

@@ -19,10 +19,9 @@ report = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = report
 spec.loader.exec_module(report)
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import report_data  # noqa: E402
-import syn04_strategy_b_registered_reports as publication  # noqa: E402
-
-import report_site
+report_data = importlib.import_module("report_data")
+publication = importlib.import_module("syn04_strategy_b_registered_reports")
+report_site = importlib.import_module("report_site")
 COLLECT_TOOL = ROOT / "reports/algorithm-results/tooling/syn04/collect.py"
 sys.path.insert(0, str(COLLECT_TOOL.parent))
 sys.modules.pop("report", None)
