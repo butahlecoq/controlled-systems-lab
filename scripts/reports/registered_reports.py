@@ -9,6 +9,7 @@ import statistics
 import zipfile
 from dataclasses import dataclass, replace
 from html import escape
+from html.parser import HTMLParser
 from pathlib import Path
 from typing import NotRequired, TypedDict
 
@@ -870,10 +871,48 @@ def publication_artifacts(bundle, publication, page_bytes=None):
     return files
 
 
-def publication_zip(report_id, files):
+class _RootLandingLinks(HTMLParser):
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.hrefs = []
+        self.other_resources = []
+
+    def handle_starttag(self, tag, attrs):
+        for name, value in attrs:
+            if name == "href" and tag == "a":
+                self.hrefs.append(value)
+            elif name in {
+                "href",
+                "src",
+                "srcset",
+                "poster",
+                "data",
+                "action",
+                "formaction",
+                "background",
+            }:
+                self.other_resources.append((tag, name, value))
+
+
+def publication_zip(report_id, files, *, root_landing_page=None):
+    if root_landing_page is None:
+        root_page = files["index.html"]
+    else:
+        if not isinstance(root_landing_page, bytes):
+            raise ValueError("root landing page must be UTF-8 bytes")
+        try:
+            landing_html = root_landing_page.decode("utf-8")
+        except UnicodeDecodeError as error:
+            raise ValueError("root landing page must be UTF-8") from error
+        links = _RootLandingLinks()
+        links.feed(landing_html)
+        expected_target = report_id + "/index.html"
+        if links.hrefs != [expected_target] or links.other_resources or "index.html" not in files:
+            raise ValueError("root landing page must link only to the nested report page")
+        root_page = root_landing_page
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_STORED) as archive:
-        entries = [("index.html", files["index.html"])] + [
+        entries = [("index.html", root_page)] + [
             (report_id + "/" + name, files[name]) for name in sorted(files)
         ]
         for name, content in entries:

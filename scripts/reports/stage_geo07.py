@@ -5,9 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import importlib.util
-import io
 import json
-import zipfile
 from html import escape
 from pathlib import Path
 
@@ -101,7 +99,11 @@ def validate(bundle: Path) -> common.PublicationRecord:
     return common.preserve_historical_publication(
         bundle,
         publication,
-        lambda source, item: public_zip(item.report_id, public_artifacts(source, item)),
+        lambda source, item: common.publication_zip(
+            item.report_id,
+            public_artifacts(source, item),
+            root_landing_page=offline_landing_page(item.report_id),
+        ),
     )
 
 
@@ -143,33 +145,23 @@ def public_artifacts(bundle: Path, item: common.PublicationRecord) -> dict[str, 
     return files
 
 
-def public_zip(report_id: str, files: dict[str, bytes]) -> bytes:
-    landing = (
+def offline_landing_page(report_id: str) -> bytes:
+    return (
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
         "<title>Offline GEO-07 report</title></head><body>"
         '<h1>Offline GEO-07 report</h1><p><a href="'
         + escape(report_id, quote=True)
         + '/index.html">Open saved generator-set report</a></p></body></html>\n'
     ).encode("utf-8")
-    site.OfflineHTML({report_id + "/index.html"}).feed(landing.decode("utf-8"))
-    buffer = io.BytesIO()
-    with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_STORED) as archive:
-        entries = [("index.html", landing)] + [
-            (report_id + "/" + name, files[name]) for name in sorted(files)
-        ]
-        for name, content in entries:
-            info = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
-            info.create_system = 3
-            info.flag_bits = 0
-            info.compress_type = zipfile.ZIP_STORED
-            info.external_attr = 0o100644 << 16
-            archive.writestr(info, content)
-    return buffer.getvalue()
 
 
 def catalogue_entry(bundle: Path) -> dict:
     item = validate(bundle)
-    archive = public_zip(item.report_id, public_artifacts(bundle, item))
+    archive = common.publication_zip(
+        item.report_id,
+        public_artifacts(bundle, item),
+        root_landing_page=offline_landing_page(item.report_id),
+    )
     return {
         "report_id": item.report_id,
         "report_kind": item.kind,
@@ -201,7 +193,9 @@ def stage(catalogue_path: Path, site_dir: Path) -> str:
     require(catalogue["reports"][0] == expected, "GEO-07 extension catalogue differs from source")
     item = validate(bundle)
     files = public_artifacts(bundle, item)
-    archive = public_zip(item.report_id, files)
+    archive = common.publication_zip(
+        item.report_id, files, root_landing_page=offline_landing_page(item.report_id)
+    )
     require(digest(archive) == expected["zip_sha256"], "public ZIP hash differs")
     site.OfflineHTML(set(files)).feed(files["index.html"].decode("utf-8"))
     destination = site_dir / item.report_id

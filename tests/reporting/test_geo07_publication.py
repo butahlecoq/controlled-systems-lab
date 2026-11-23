@@ -18,6 +18,8 @@ sys.path.insert(0, str(ROOT / "scripts/reports/geo07"))
 sys.path.insert(0, str(ROOT / "scripts/reports"))
 import render_saved as report
 import stage_geo07
+import stage_geo07_dependent
+import stage_geo07_port
 
 SOURCE = ROOT / "reports/algorithm-results/geo07-9ef0d347291774da"
 
@@ -33,6 +35,69 @@ class LocalLinks(HTMLParser):
 
 
 class Geo07PublicationTests(unittest.TestCase):
+    def test_shared_publication_zip_preserves_default_and_validates_root_launcher(self):
+        report_id = "sample-1"
+        files = {"index.html": b"<html>nested</html>\n", "records.json": b"{}\n"}
+        legacy = stage_geo07.common.publication_zip(report_id, files)
+        self.assertEqual(
+            hashlib.sha256(legacy).hexdigest(),
+            "1c478bd3046e4837041fd18e7e90700a196464b732a2dfb8a93296ae7cc3af47",
+        )
+        landing = b'<a href="sample-1/index.html">Open report</a>\n'
+        archive_bytes = stage_geo07.common.publication_zip(
+            report_id, files, root_landing_page=landing
+        )
+        with zipfile.ZipFile(io.BytesIO(archive_bytes)) as archive:
+            self.assertEqual(
+                archive.namelist(),
+                ["index.html", "sample-1/index.html", "sample-1/records.json"],
+            )
+            self.assertEqual(archive.read("index.html"), landing)
+            self.assertEqual(archive.read("sample-1/index.html"), files["index.html"])
+            self.assertEqual(archive.read("sample-1/records.json"), files["records.json"])
+        for invalid in (
+            b"<a href='elsewhere/index.html'>Open</a>",
+            b"<a href='sample-1/index.html'>Open</a><a href='elsewhere'>Else</a>",
+            b"<a href='sample-1/index.html'>Open</a><img src='remote.png'>",
+            b"\xff",
+        ):
+            with self.subTest(landing=invalid), self.assertRaises(ValueError):
+                stage_geo07.common.publication_zip(report_id, files, root_landing_page=invalid)
+
+    def test_geo07_public_zip_and_catalogue_hashes_match_prechange_outputs(self):
+        baselines = (
+            (
+                stage_geo07,
+                SOURCE,
+                SOURCE.parent / "geo07-publications.json",
+                "0847d3fe95df1d6481ada90bb523aee5b971afd58d1dc00415c74b579ec2083c",
+                "5bad1e17414a353faa3df50e8e0f4b36829abef03946ba2609f6aea311f17e93",
+            ),
+            (
+                stage_geo07_port,
+                ROOT / "reports/algorithm-results/geo07-port-4dee19cde3d50259",
+                ROOT / "reports/algorithm-results/geo07-port-publications.json",
+                "63a226d6e5a5df0352e2e44ff39dcbc7aa586c1a3b82f4d10effea718cd62fcc",
+                "bb49e7c54d01d573197e65c2cc876c69b65ad16e49bd4386f093924b506ae4b3",
+            ),
+            (
+                stage_geo07_dependent,
+                ROOT / "reports/algorithm-results/geo07-dependent-4dcc5a8fe36f17ed",
+                ROOT / "reports/algorithm-results/geo07-dependent-publications.json",
+                "c046a49dea35dc3c12f77061d92b3166f994c821f9a2f14fb494354541b8fda9",
+                "6543cf41207f36cf501c67ed31213b1b1ddcc863e3c673d1819cfa70b6b05e58",
+            ),
+        )
+        for stage, bundle, catalogue_path, zip_sha256, catalogue_sha256 in baselines:
+            with self.subTest(stage=stage.__name__):
+                entry = stage.catalogue_entry(bundle)
+                self.assertEqual(entry["zip_sha256"], zip_sha256)
+                self.assertEqual(
+                    hashlib.sha256(catalogue_path.read_bytes()).hexdigest(), catalogue_sha256
+                )
+                saved = json.loads(catalogue_path.read_bytes())["reports"][0]
+                self.assertEqual(saved, entry)
+
     def test_saved_bytes_regenerate_page_figure_and_offline_zip(self):
         record = report.validate_native(SOURCE)
         self.assertEqual((record["source_commit"], record["harness_commit"]),
