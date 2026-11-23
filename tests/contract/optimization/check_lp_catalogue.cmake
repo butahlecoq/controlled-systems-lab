@@ -1,4 +1,3 @@
-# Compare all authored oracle data against the actual literals used by the runner.
 if(NOT DEFINED TEST05_EXE OR NOT DEFINED TEST05_CATALOGUE)
   message(FATAL_ERROR "TEST05_EXE and TEST05_CATALOGUE are required")
 endif()

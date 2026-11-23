@@ -7,15 +7,15 @@
 namespace csl::reachability {
 
 struct FinitePlanEllipsoidTrace {
-  static constexpr SetRelation relation = SetRelation::outer;
-  struct Stage {
-    Vector center;
-    // Semiaxes of an axis-aligned ellipsoid. Its coordinate projections are
-    // wider than the stage's axis-aligned box by sqrt(state_dimension).
-    Vector radii;
-  };
-  std::vector<Stage> stages;
-  Assurance assurance{Assurance::numerical};
+    static constexpr SetRelation relation = SetRelation::outer;
+    struct Stage {
+        Vector center;
+        // Semiaxes of an axis-aligned ellipsoid. Its coordinate projections are
+        // wider than the stage's axis-aligned box by sqrt(state_dimension).
+        Vector radii;
+    };
+    std::vector<Stage> stages;
+    Assurance assurance{Assurance::numerical};
 };
 
 using FinitePlanEllipsoidOutcome =
@@ -27,14 +27,14 @@ using FinitePlanEllipsoidOutcome =
 // Each affine image is bounded by ellipsoid support values;
 // its resulting coordinate box is enclosed by a fresh axis-aligned ellipsoid.
 // This is numerical evidence, not a validated-arithmetic certificate.
-FinitePlanEllipsoidOutcome finite_plan_ellipsoid(
-    const FixedPlanRequest& request, const ExecutionContext& context = {});
+FinitePlanEllipsoidOutcome finite_plan_ellipsoid(const FixedPlanRequest &request,
+                                                 const ExecutionContext &context = {});
 
 // One-step image of an axis ellipsoid and the whole control box through B.
 // The fresh axis ellipsoid is an outer cover, not an invertibility assumption.
 std::variant<FinitePlanEllipsoidTrace::Stage, Unsupported, OperationStopped>
-propagate_existential_control_ellipsoid(const model::DynamicsStage&,
-    const FinitePlanEllipsoidTrace::Stage&, const BoxStage& controls,
-    const ExecutionContext&);
+propagate_existential_control_ellipsoid(const model::DynamicsStage &,
+                                        const FinitePlanEllipsoidTrace::Stage &,
+                                        const BoxStage &controls, const ExecutionContext &);
 
 } // namespace csl::reachability

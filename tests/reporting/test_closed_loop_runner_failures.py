@@ -245,8 +245,6 @@ class ClosedLoopRunnerFailureTests(unittest.TestCase):
                     finalize_stage(attempt, 0, {"update_index": 0, "status": "applied-and-observed",
                         "observed_physical": initial, "applied_control": [0.0],
                         "observed_next_physical": initial})
-                    # Match the crash window after the durable stage index append but
-                    # before the worker checkpoints the updated attempt ledger.
                     self.stale_completed_holds = record["completed_holds"]
                     return "", "worker interrupted after final stage record"
 
@@ -423,12 +421,7 @@ class ClosedLoopRunnerFailureTests(unittest.TestCase):
         self.assertEqual(long["distinct_telemetry_stages"], long["stage_count"])
         self.assertGreater(long["stage_json_bytes_written"], 5 * short["stage_json_bytes_written"])
         self.assertLess(long["attempt_json_bytes"], long["stage_json_bytes_written"] // 5)
-        # A 6x longer episode writes 6x as many large stage payloads, but the worker
-        # holds only its current telemetry plus O(n) controls/states. Allow 2 MiB for
-        # one live Python telemetry object, JSON serialization temporaries, and noise.
         self.assertLessEqual(long["traced_peak_bytes"], short["traced_peak_bytes"] + 2 * 1024**2)
-        # ru_maxrss is coarse and includes imported/native runtime pages; keep its
-        # process-only scope separate from Python tracemalloc and allow 16 MiB noise.
         self.assertLessEqual(long["rss_peak_kib"], short["rss_peak_kib"] + 16 * 1024)
         self.assertIn("worker process only", long["rss_scope"])
         self.assertIn("worker Python allocations", long["traced_scope"])
@@ -632,8 +625,6 @@ class ClosedLoopRunnerFailureTests(unittest.TestCase):
         self.assertTrue(unchanged)
 
     def test_phase_event_order_survives_reversed_and_equal_receipt_mtimes(self):
-        # Premise under test: receipt file mtimes do not define retry chronology.
-        # The same append ledger must produce the same phases after copy/reorder.
         cases = [
             (("postcheck-retry", "render-retry"), "failed", "complete"),
             (("render-retry", "postcheck-retry"), "failed", "failed"),

@@ -24,22 +24,34 @@ def verify(register_path: Path, archive_override: Path | None = None) -> list[di
     result = []
     for identity, (relative, expected_bytes, expected_digest) in EXPECTED.items():
         entry = selected[identity]
-        if (entry["path"] != relative or entry["bytes"] != expected_bytes
-                or entry["sha256"] != expected_digest):
+        if (
+            entry["path"] != relative
+            or entry["bytes"] != expected_bytes
+            or entry["sha256"] != expected_digest
+        ):
             raise ValueError(f"{identity}: selected-source register differs from port pin")
         data = (root / relative).read_bytes()
         actual_digest = hashlib.sha256(data).hexdigest()
         if len(data) != expected_bytes or actual_digest != expected_digest:
             raise ValueError(f"{identity}: archive bytes or SHA-256 mismatch")
-        result.append({"source": identity, "relative_path": relative,
-                       "bytes": len(data), "sha256": actual_digest})
+        result.append(
+            {
+                "source": identity,
+                "relative_path": relative,
+                "bytes": len(data),
+                "sha256": actual_digest,
+            }
+        )
     return result
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Verify A29/A30 originals without copying them")
-    parser.add_argument("--register", type=Path,
-                        default=Path(__file__).resolve().parents[3] / "docs/research/archive-selected-sources.json")
+    parser.add_argument(
+        "--register",
+        type=Path,
+        default=Path(__file__).resolve().parents[3] / "docs/research/archive-selected-sources.json",
+    )
     parser.add_argument("--archive-root", type=Path)
     args = parser.parse_args()
     print(json.dumps(verify(args.register, args.archive_root), indent=2))

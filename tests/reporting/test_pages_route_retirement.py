@@ -399,6 +399,44 @@ class PagesRouteRetirementTests(unittest.TestCase):
             root = (site / "index.html").read_text()
             self.assertIn('<a href="learn/index.html">Learning book</a>', root)
 
+    def test_env717_routes_name_their_stager_and_workflow(self) -> None:
+        routes = {
+            "env717-simple-control-65a4341b28e95682f6de": "stage_env717.py",
+            "env717-multipoint-96e7f4fa2a0f7bc543a5": "stage_env717_multipoint_cost_game.py",
+            "env717-cartpole-80ef217d60ba94910d3d": "stage_env717_cartpole.py",
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            site, _ = self.make_site(Path(temporary))
+            for root in routes:
+                directory = site / root
+                directory.mkdir()
+                (directory / "index.html").write_text("<html><body>Saved report</body></html>")
+                (directory / "publication-manifest.json").write_text(
+                    json.dumps({"schema": "csl.env717-publication/1", "report_id": root})
+                )
+            inventory = retirement.inventory(site)
+            for root, stager in routes.items():
+                with self.subTest(route=root):
+                    producer = inventory["html_routes"][f"{root}/index.html"]["producer"]
+                    self.assertEqual(producer["owner_status"], "exact")
+                    self.assertEqual(
+                        producer["files"],
+                        [f"scripts/reports/{stager}", ".github/workflows/algorithm-reports.yml"],
+                    )
+
+    def test_env717_schema_cannot_assign_an_owner_to_an_unpublished_alias(self) -> None:
+        for root in ("multipoint-preview", "env717-multipoint-preview"):
+            with self.subTest(route=root), tempfile.TemporaryDirectory() as temporary:
+                site, _ = self.make_site(Path(temporary))
+                directory = site / root
+                directory.mkdir()
+                (directory / "index.html").write_text("<html><body>Archived report</body></html>")
+                (directory / "publication-manifest.json").write_text(
+                    json.dumps({"schema": "csl.env717-publication/1", "report_id": root})
+                )
+                with self.assertRaisesRegex(ValueError, f"no reviewed producer owner: {root}"):
+                    retirement.inventory(site)
+
     def test_module_catalogue_route_has_a_real_source_owner(self) -> None:
         repo = Path(__file__).resolve().parents[2]
         with tempfile.TemporaryDirectory() as temporary:
@@ -407,6 +445,29 @@ class PagesRouteRetirementTests(unittest.TestCase):
             self.assertIn("scripts/reports/learning_book.py", record["files"])
             self.assertIn("docs/catalogue/module-composition-inventory-v1.json", record["files"])
             self.assertTrue(all((repo / source).is_file() for source in record["files"]))
+
+    def test_catalogue_route_names_report_site_implementation_as_a_producer(self) -> None:
+        repo = Path(__file__).resolve().parents[2]
+        catalogue = json.loads(
+            (repo / "reports/algorithm-results/catalog.json").read_text(encoding="utf-8")
+        )
+        row = next(
+            item
+            for item in catalogue["reports"]
+            if isinstance(item, dict) and isinstance(item.get("report_id"), str)
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            site, _ = self.make_site(Path(temporary))
+            record = retirement._producer_record(
+                site,
+                f"{row['report_id']}/index.html",
+                {row["report_id"]: row},
+                {},
+            )
+        self.assertEqual(record["owner_status"], "exact")
+        self.assertIn("scripts/reports/site.py", record["files"])
+        self.assertIn("scripts/reports/report_site.py", record["files"])
+        self.assertTrue(all((repo / source).is_file() for source in record["files"]))
 
     def test_model_tracks_page_is_owned_by_learning_book_producer(self) -> None:
         repo = Path(__file__).resolve().parents[2]

@@ -1,15 +1,16 @@
 """Package and publish the saved nonunique MPC-08 optimizer-fiber pilot."""
+
 from __future__ import annotations
 
 import argparse
 import hashlib
 import html
 import json
-from pathlib import Path
 import shutil
 import statistics
 import sys
 import zipfile
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORT_ID = "mpc08-explicit-nonunique-v1"
@@ -18,10 +19,16 @@ GENERATED = SOURCE / "generated"
 BUNDLE = ROOT / "reports/algorithm-results" / REPORT_ID
 ARCHIVE = ROOT / "reports/algorithm-results" / f"{REPORT_ID}.zip"
 FILES = (
-    "index.html", "README.md", "record.json", "build-provenance.json",
-    "manifest.json", "explicit-nonunique-double-integrator.json",
-    "explicit-nonunique-queries.csv", "csl-nonunique-observations.jsonl",
-    "optimal-fiber.svg", "mpc08_strategy_comparison.cpp",
+    "index.html",
+    "README.md",
+    "record.json",
+    "build-provenance.json",
+    "manifest.json",
+    "explicit-nonunique-double-integrator.json",
+    "explicit-nonunique-queries.csv",
+    "csl-nonunique-observations.jsonl",
+    "optimal-fiber.svg",
+    "mpc08_strategy_comparison.cpp",
     "explicit_nonunique_double_integrator.py",
 )
 DATA = {
@@ -45,7 +52,7 @@ def read_json(path: Path):
 
 
 def build_readme() -> str:
-    return f"""# MPC-08 nonunique optimizer-fiber pilot
+    return """# MPC-08 nonunique optimizer-fiber pilot
 
 This is a finite, exact two-step double-integrator case for [issue #604](https://github.com/butahlecoq/controlled-systems-lab/issues/604). It complements the separate unique one-step explicit-MPC report. It does not complete #604.
 
@@ -85,33 +92,42 @@ The experiment adds no public API or installed dependency. It uses the existing 
 def render(record: dict) -> str:
     statuses = record["outcomes"]
     table = "".join(
-        f"<tr><th scope=\"row\">{html.escape(name)}</th><td>{value['measured_calls']}</td>"
+        f'<tr><th scope="row">{html.escape(name)}</th><td>{value["measured_calls"]}</td>'
         f"<td>{value['median_elapsed_ns'] / 1e6:.3f} ms</td>"
         f"<td>{value['min_elapsed_ns'] / 1e6:.3f}–{value['max_elapsed_ns'] / 1e6:.3f} ms</td>"
         f"<td>{html.escape(value['result'])}</td></tr>"
         for name, value in statuses.items()
     )
-    return f'''<!doctype html>
+    return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Nonunique explicit-MPC optimizer fiber · MPC-08</title>
 <style>body{{margin:0;background:#282828;color:#ebdbb2;font:16px/1.55 system-ui,sans-serif}}main{{max-width:1050px;margin:auto;padding:2rem 1rem}}section{{background:#32302f;border:1px solid #504945;border-radius:.6rem;padding:1rem;margin:1rem 0}}a{{color:#8ec07c}}img{{width:100%;height:auto;background:white}}table{{border-collapse:collapse;width:100%}}th,td{{text-align:left;padding:.55rem;border-bottom:1px solid #504945;vertical-align:top}}code{{color:#fabd2f}}.limit{{border-left:3px solid #fabd2f;padding-left:.8rem}}</style></head><body><main>
-<p>MPC-08 · exact rational continuation · report source {record['source_commit'][:12]} · measured source {record['measurement_source_commit'][:12]}</p><h1>A nonunique optimal control family</h1>
+<p>MPC-08 · exact rational continuation · report source {record["source_commit"][:12]} · measured source {record["measurement_source_commit"][:12]}</p><h1>A nonunique optimal control family</h1>
 <p>For this two-step double integrator, terminal velocity can be driven to zero from every state in the declared initial domain. The optimizer is a segment for many initial velocities, so one explicit tie-break is only a selector through the full optimal relation.</p>
 <figure><img src="optimal-fiber.svg" alt="Initial-state rectangle colored by the minimum-norm selector, beside the full optimal control segment for zero initial velocity."></figure>
 <section><h2>Exact result</h2><p><code>p_next=p+v</code>, <code>v_next=v+u</code>, <code>u0,u1∈[-1,1]</code>. Over <code>(p0,v0)∈[-3,3]×[-2,2]</code>, the exact minimum of <code>(v0+u0+u1)²</code> is zero.</p><p><code>u0∈[-1,1]∩[-v0-1,-v0+1]</code> and <code>u1=-v0-u0</code> give the complete analytic control fiber. Minimizing <code>u0²+u1²</code> selects <code>u0=u1=-v0/2</code>.</p><p>The figure's left color field encodes the tie-broken first action over the entire initial domain. At <code>(p0,v0)=(0,0)</code>, the right red segment is the whole optimizer fiber and the gold point is its minimum-norm selector.</p></section>
 <section><h2>Current CSL paths</h2><table><thead><tr><th>Path</th><th>Measured calls</th><th>Median</th><th>Range</th><th>Outcome over all 270 calls, including warmups</th></tr></thead><tbody>{table}</tbody></table>
 <p>Each path also had one warmup per query. Elapsed time starts before query-specific problem resolution and ends after result verification. Strategy A/B includes request construction, provider preparation, workspace creation, execution, and candidate-family membership checking. The online QP includes resolution, condensed-program construction, provider selection/preparation, workspace creation, solving, and primal feasibility/value checks. All paths exclude process startup, CSV parsing, registry construction, JSON serialization, rendering, and build time. The paths do different work; no performance winner is claimed.</p>
 <p class="limit">The 45 exact histories are sampled checks. Candidate membership does not establish equality or completeness. Strategy A rejects the rank-deficient QP request; Strategy B leaves its mathematical outcome undetermined. The condensed QP returns one feasible optimal point, not the complete family. Failures and noncompleted statuses remain in the raw records. No limiter or pre-run load was captured, so these descriptive timings do not support a performance-winner claim.</p></section>
-<section><h2>Reproduce and inspect</h2><ul><li><a href="README.md">Methodology and exact commands</a></li><li><a href="explicit-nonunique-double-integrator.json">Exact reference record</a></li><li><a href="explicit-nonunique-queries.csv">Sampled exact histories</a></li><li><a href="csl-nonunique-observations.jsonl">Raw CSL observations</a></li><li><a href="build-provenance.json">Build and hash provenance</a></li><li><a href="manifest.json">Artifact manifest</a></li><li><a href="../{REPORT_ID}.zip">Offline ZIP</a></li><li><a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{record['source_commit']}">Report source commit</a></li><li><a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{record['measurement_source_commit']}">Measured source commit</a></li><li><a href="https://github.com/butahlecoq/controlled-systems-lab/issues/604">Issue #604</a></li></ul></section>
-</main></body></html>\n'''
+<section><h2>Reproduce and inspect</h2><ul><li><a href="README.md">Methodology and exact commands</a></li><li><a href="explicit-nonunique-double-integrator.json">Exact reference record</a></li><li><a href="explicit-nonunique-queries.csv">Sampled exact histories</a></li><li><a href="csl-nonunique-observations.jsonl">Raw CSL observations</a></li><li><a href="build-provenance.json">Build and hash provenance</a></li><li><a href="manifest.json">Artifact manifest</a></li><li><a href="../{REPORT_ID}.zip">Offline ZIP</a></li><li><a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{record["source_commit"]}">Report source commit</a></li><li><a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{record["measurement_source_commit"]}">Measured source commit</a></li><li><a href="https://github.com/butahlecoq/controlled-systems-lab/issues/604">Issue #604</a></li></ul></section>
+</main></body></html>\n"""
 
 
 def package() -> None:
     provenance = read_json(GENERATED / "nonunique-build-provenance.json")
-    require(provenance.get("schema") == "csl.mpc08-nonunique-build-provenance/1", "unknown provenance schema")
+    require(
+        provenance.get("schema") == "csl.mpc08-nonunique-build-provenance/1",
+        "unknown provenance schema",
+    )
     ref = read_json(GENERATED / "explicit-nonunique-double-integrator.json")
-    observations = [json.loads(line) for line in (GENERATED / "csl-nonunique-observations.jsonl").read_text().splitlines()]
-    require(ref["state_sample_count"] == 15 and ref["history_sample_count"] == 45, "exact sample inventory differs")
+    observations = [
+        json.loads(line)
+        for line in (GENERATED / "csl-nonunique-observations.jsonl").read_text().splitlines()
+    ]
+    require(
+        ref["state_sample_count"] == 15 and ref["history_sample_count"] == 45,
+        "exact sample inventory differs",
+    )
     require(len(observations) == 810, "observation inventory differs")
     by_method = {}
     for method in sorted({row["strategy"] for row in observations}):
@@ -125,38 +141,62 @@ def package() -> None:
         else:
             result = "270 online solves return feasible optimal points with exact value zero"
         by_method[method] = {
-            "calls": len(rows), "measured_calls": len(measured), "result": result,
+            "calls": len(rows),
+            "measured_calls": len(measured),
+            "result": result,
             "median_elapsed_ns": int(statistics.median(elapsed)),
-            "min_elapsed_ns": min(elapsed), "max_elapsed_ns": max(elapsed),
+            "min_elapsed_ns": min(elapsed),
+            "max_elapsed_ns": max(elapsed),
         }
-    require(all(row["candidate_contains_exact_reference_history"] is True
-                for row in observations if row["strategy"] != "online-condensed-qp"),
-            "candidate sample membership changed")
+    require(
+        all(
+            row["candidate_contains_exact_reference_history"] is True
+            for row in observations
+            if row["strategy"] != "online-condensed-qp"
+        ),
+        "candidate sample membership changed",
+    )
     a = [row for row in observations if row["strategy"] == "csl.synthesis.reach-back"]
     b = [row for row in observations if row["strategy"] == "csl.synthesis.strategy-b"]
     qp = [row for row in observations if row["strategy"] == "online-condensed-qp"]
     require(len(a) == len(b) == len(qp) == 270, "per-method inventory differs")
-    require(all(row["termination_code"] == 5 for row in a), "Strategy A rejection inventory differs")
-    require(sum(row["termination_code"] != 0 for row in b) == 18, "Strategy B noncompleted count differs")
-    require(all(row["action_and_value_match_exact_reference"] is True for row in qp), "online QP check differs")
-    require(all(row["outcome_code"] == 4 for row in b), "Strategy B mathematical outcome is no longer undetermined")
+    require(
+        all(row["termination_code"] == 5 for row in a), "Strategy A rejection inventory differs"
+    )
+    require(
+        sum(row["termination_code"] != 0 for row in b) == 18,
+        "Strategy B noncompleted count differs",
+    )
+    require(
+        all(row["action_and_value_match_exact_reference"] is True for row in qp),
+        "online QP check differs",
+    )
+    require(
+        all(row["outcome_code"] == 4 for row in b),
+        "Strategy B mathematical outcome is no longer undetermined",
+    )
 
     expected_hashes = provenance["artifact_sha256"]
-    for name, source_name in DATA.items():
+    for source_name in DATA.values():
         path = GENERATED / source_name
-        require(digest(path) == expected_hashes[source_name], f"capture hash differs for {source_name}")
+        require(
+            digest(path) == expected_hashes[source_name], f"capture hash differs for {source_name}"
+        )
     source_commit = provenance["source_commit"]
     record = {
-        "schema": "csl.mpc08-nonunique-report/1", "report_id": REPORT_ID,
+        "schema": "csl.mpc08-nonunique-report/1",
+        "report_id": REPORT_ID,
         "source_commit": source_commit,
         "measurement_source_commit": provenance["measurement_source_commit"],
         "source_url": f"https://github.com/butahlecoq/controlled-systems-lab/tree/{source_commit}/benchmarks/reporting/mpc08_explicit",
         "issue": "https://github.com/butahlecoq/controlled-systems-lab/issues/604",
-        "fixture": ref["problem"], "initial_domain_exact": ref["initial_domain_exact"],
+        "fixture": ref["problem"],
+        "initial_domain_exact": ref["initial_domain_exact"],
         "optimal_value_exact": ref["optimal_value_exact"],
         "complete_optimal_relation": ref["complete_optimal_relation"],
         "tie_break": ref["explicit_tie_break"],
-        "state_samples": 15, "history_samples": 45,
+        "state_samples": 15,
+        "history_samples": 45,
         "outcomes": by_method,
         "timing_scope": {
             "common_start_stop": "Starts immediately before per-query problem resolution; stops after result verification.",
@@ -166,23 +206,45 @@ def package() -> None:
         },
         "evidence_limits": "sample membership is not family completeness; Strategy B mathematical outcomes are undetermined; no timing winner; no robust or minimax claim",
     }
-    require(not BUNDLE.exists() and not ARCHIVE.exists(), "immutable MPC-08 report destination already exists")
+    require(
+        not BUNDLE.exists() and not ARCHIVE.exists(),
+        "immutable MPC-08 report destination already exists",
+    )
     BUNDLE.mkdir(parents=True)
     for name, source_name in DATA.items():
         shutil.copyfile(GENERATED / source_name, BUNDLE / name)
     shutil.copyfile(GENERATED / "nonunique-build-provenance.json", BUNDLE / "build-provenance.json")
-    shutil.copyfile(SOURCE / "mpc08_strategy_comparison.cpp", BUNDLE / "mpc08_strategy_comparison.cpp")
-    shutil.copyfile(SOURCE / "explicit_nonunique_double_integrator.py", BUNDLE / "explicit_nonunique_double_integrator.py")
+    shutil.copyfile(
+        SOURCE / "mpc08_strategy_comparison.cpp", BUNDLE / "mpc08_strategy_comparison.cpp"
+    )
+    shutil.copyfile(
+        SOURCE / "explicit_nonunique_double_integrator.py",
+        BUNDLE / "explicit_nonunique_double_integrator.py",
+    )
     (BUNDLE / "README.md").write_text(build_readme(), encoding="utf-8")
     write_json(BUNDLE / "record.json", record)
     (BUNDLE / "index.html").write_text(render(record), encoding="utf-8")
-    manifest = {"schema": "csl.mpc08-nonunique-manifest/1", "report_id": REPORT_ID,
-                "files_sha256": {name: digest(BUNDLE / name) for name in FILES if name != "manifest.json"}}
+    manifest = {
+        "schema": "csl.mpc08-nonunique-manifest/1",
+        "report_id": REPORT_ID,
+        "files_sha256": {name: digest(BUNDLE / name) for name in FILES if name != "manifest.json"},
+    }
     write_json(BUNDLE / "manifest.json", manifest)
-    with zipfile.ZipFile(ARCHIVE, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
+    with zipfile.ZipFile(
+        ARCHIVE, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9
+    ) as archive:
         for name in FILES:
             archive.write(BUNDLE / name, arcname=f"{REPORT_ID}/{name}")
-    print(json.dumps({"report_id": REPORT_ID, "bundle_sha256": digest(ARCHIVE), "source_commit": source_commit}, sort_keys=True))
+    print(
+        json.dumps(
+            {
+                "report_id": REPORT_ID,
+                "bundle_sha256": digest(ARCHIVE),
+                "source_commit": source_commit,
+            },
+            sort_keys=True,
+        )
+    )
 
 
 def require(condition: bool, message: str) -> None:
@@ -197,7 +259,10 @@ def stage(site: Path) -> None:
     require(BUNDLE.is_dir() and ARCHIVE.is_file(), "packaged report is missing")
     record = read_json(BUNDLE / "record.json")
     manifest = read_json(BUNDLE / "manifest.json")
-    require(set(manifest["files_sha256"]) == set(FILES) - {"manifest.json"}, "bundle file inventory differs")
+    require(
+        set(manifest["files_sha256"]) == set(FILES) - {"manifest.json"},
+        "bundle file inventory differs",
+    )
     for name, expected in manifest["files_sha256"].items():
         require(digest(BUNDLE / name) == expected, f"bundle hash differs for {name}")
     report_data.validate_svg((BUNDLE / "optimal-fiber.svg").read_bytes())
@@ -210,21 +275,25 @@ def stage(site: Path) -> None:
     shutil.copyfile(ARCHIVE, site / f"{REPORT_ID}.zip")
     index = site / "index.html"
     html_text = index.read_text(encoding="utf-8")
-    link = f'{REPORT_ID}/index.html'
+    link = f"{REPORT_ID}/index.html"
     if link not in html_text:
         require("</ul>" in html_text, "archive index insertion point is missing")
-        card = (f'<li><p class="eyebrow">Control synthesis · exact pilot</p><h3><a href="{link}">Nonunique explicit-MPC optimizer fiber</a></h3>'
-                f'<p>Two-step exact double-integrator family, tied selector, Strategy A refusal, Strategy B candidate samples, and online QP checks.</p>'
-                f'<p><a href="{REPORT_ID}/README.md">Methodology</a> · <a href="{REPORT_ID}/optimal-fiber.svg">Figure</a> · <a href="{REPORT_ID}.zip">Offline ZIP</a> · Source <code>{record["source_commit"]}</code></p></li>')
+        card = (
+            f'<li><p class="eyebrow">Control synthesis · exact pilot</p><h3><a href="{link}">Nonunique explicit-MPC optimizer fiber</a></h3>'
+            f"<p>Two-step exact double-integrator family, tied selector, Strategy A refusal, Strategy B candidate samples, and online QP checks.</p>"
+            f'<p><a href="{REPORT_ID}/README.md">Methodology</a> · <a href="{REPORT_ID}/optimal-fiber.svg">Figure</a> · <a href="{REPORT_ID}.zip">Offline ZIP</a> · Source <code>{record["source_commit"]}</code></p></li>'
+        )
         index.write_text(html_text.replace("</ul>", card + "</ul>", 1), encoding="utf-8")
     gallery = site / "examples/index.html"
     gallery_html = gallery.read_text(encoding="utf-8")
     marker = '<section id="analytic-illustrations">'
-    gallery_card = (f'<article class="saved-figure" id="{REPORT_ID}"><p class="eyebrow">Explicit MPC · exact optimal family</p>'
-                    f'<h3>Nonunique double-integrator control fiber</h3><a href="../{REPORT_ID}/index.html">'
-                    f'<img src="../{REPORT_ID}/optimal-fiber.svg" alt="The initial-state rectangle is colored by the minimum-norm selector; the full control optimizer fiber is shown beside it."></a>'
-                    f'<p>Two-step exact case. Candidate membership samples and solver outcomes do not establish full-family equality.</p>'
-                    f'<p><a href="../{REPORT_ID}/index.html">Open the report →</a></p></article>')
+    gallery_card = (
+        f'<article class="saved-figure" id="{REPORT_ID}"><p class="eyebrow">Explicit MPC · exact optimal family</p>'
+        f'<h3>Nonunique double-integrator control fiber</h3><a href="../{REPORT_ID}/index.html">'
+        f'<img src="../{REPORT_ID}/optimal-fiber.svg" alt="The initial-state rectangle is colored by the minimum-norm selector; the full control optimizer fiber is shown beside it."></a>'
+        f"<p>Two-step exact case. Candidate membership samples and solver outcomes do not establish full-family equality.</p>"
+        f'<p><a href="../{REPORT_ID}/index.html">Open the report →</a></p></article>'
+    )
     if f'id="{REPORT_ID}"' not in gallery_html:
         require(marker in gallery_html, "examples gallery insertion point is missing")
         gallery.write_text(gallery_html.replace(marker, gallery_card + marker, 1), encoding="utf-8")

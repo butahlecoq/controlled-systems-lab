@@ -1,4 +1,3 @@
-# Test-only verifier authorities. Never exported or installed.
 
 add_library(csl_verifiers_test STATIC
   src/registry/compiled_verifiers.cpp

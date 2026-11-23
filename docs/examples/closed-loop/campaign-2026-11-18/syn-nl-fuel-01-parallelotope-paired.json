@@ -1,0 +1,61 @@
+{
+  "attempt_id": "syn-nl-fuel-01-20261117T174255Z-3b0d8a2a",
+  "figure_id": "campaign-2026-11-18-fuel-parallelotope-paired",
+  "graph_id": "closed-loop/syn-nl-fuel-01/native-composition/1/cfg-02fdcebf01239da1",
+  "interpretation": "Retained finite-action graph states, backward-viable states, selected plan, and observed nonlinear replay. Search coverage is incomplete; no continuous reachable-set boundary is inferred.",
+  "layer_scopes": [
+    "x1–x2 projected propellant masses",
+    "x3–x4 projected propellant flows",
+    "selected plan and observed nonlinear replay from the same saved attempt",
+    "retained graph nodes and backward viability"
+  ],
+  "plotted_data": "raw/plotted-data/syn-nl-fuel-01-parallelotope.json",
+  "plotted_data_sha256": "85052db0182cba0f63c7b6ff88106a81410da07eb776f27aa23878065fc5a9d7",
+  "projections": [
+    {
+      "id": "propellant-masses",
+      "indices": [
+        0,
+        1
+      ],
+      "labels": [
+        "Oxidizer mass mₒₓ",
+        "Fuel mass m_f"
+      ],
+      "units": [
+        "kg",
+        "kg"
+      ]
+    },
+    {
+      "id": "propellant-flows",
+      "indices": [
+        2,
+        3
+      ],
+      "labels": [
+        "Oxidizer flow qₒₓ",
+        "Fuel flow q_f"
+      ],
+      "units": [
+        "kg/s",
+        "kg/s"
+      ]
+    }
+  ],
+  "renderer": "scripts/reports/render_full_profile_campaign.py",
+  "renderer_source_commit": "30da91aa6683041134e18afb65a13badba90f64e",
+  "representation": "parallelotope",
+  "schema": "csl.closed-loop-paired-projection-figure/1",
+  "search_coverage": "incomplete",
+  "source_commit": "08af99d6f982235c22a15d4e9307fd032dfb1adb",
+  "stage_count": 41,
+  "svg_sha256": "b1246dffb68d1dea130085a73c0fbddd203638f0571f2eafda2312251782c16d",
+  "task_id": "syn-nl-fuel-01/continuous-receding/1",
+  "task_name": "syn-nl-fuel-01",
+  "task_sha256": "3462475a357b6ec8e0c18a6d873b192872bdc012d141a68efe1f07a9d6b70da4",
+  "terminal_condition": "soft objective reference; no terminal constraint or final set",
+  "time_step": 0.5,
+  "timeline_end": 20.0,
+  "transition_count": 40
+}

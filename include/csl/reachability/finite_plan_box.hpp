@@ -18,8 +18,7 @@ struct FinitePlanBoxTrace {
     Assurance assurance{Assurance::numerical};
 };
 
-using FinitePlanBoxOutcome = std::variant<FinitePlanBoxTrace, Unsupported,
-    OperationStopped>;
+using FinitePlanBoxOutcome = std::variant<FinitePlanBoxTrace, Unsupported, OperationStopped>;
 
 // Stagewise interval enclosure for a fixed open-loop control sequence.
 // Supports bounded V/singleton initial and disturbance sets, plus universal,
@@ -30,13 +29,13 @@ using FinitePlanBoxOutcome = std::variant<FinitePlanBoxTrace, Unsupported,
 // arithmetic for external dimension q and control dimension m; it stores
 // O(Hn + sum_k |D_k|q) values, where D_k are disturbance vertices. It keeps
 // one box per stage regardless of the represented trajectory count.
-FinitePlanBoxOutcome finite_plan_box(const FixedPlanRequest& request,
-    const ExecutionContext& context = {});
+FinitePlanBoxOutcome finite_plan_box(const FixedPlanRequest &request,
+                                     const ExecutionContext &context = {});
 
 // One-step image of a state box under the whole continuous control box.
 // B is mapped to the geometric input role with existential semantics.
 std::variant<BoxStage, Unsupported, OperationStopped>
-propagate_existential_control_box(const model::DynamicsStage&, const BoxStage&,
-    const BoxStage& controls, const ExecutionContext&);
+propagate_existential_control_box(const model::DynamicsStage &, const BoxStage &,
+                                  const BoxStage &controls, const ExecutionContext &);
 
 } // namespace csl::reachability

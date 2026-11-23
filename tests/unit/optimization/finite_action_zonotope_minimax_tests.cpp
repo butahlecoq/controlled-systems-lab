@@ -63,7 +63,7 @@ TEST_CASE("analytic scalar selector scores every fixed plan and replays the mini
 }
 
 TEST_CASE("factor corner refusal remains in every candidate row and marks search incomplete") {
-    const auto answer = finite_action_zonotope_minimax(analytic_request(), {3,2,2,4,1});
+    const auto answer = finite_action_zonotope_minimax(analytic_request(), {3,2,2,4,0});
     REQUIRE(std::holds_alternative<FiniteActionZonotopeMinimaxResult>(answer));
     const auto& result = std::get<FiniteActionZonotopeMinimaxResult>(answer);
     CHECK(result.candidate_search == CandidateSearchCoverage::incomplete);
@@ -74,6 +74,28 @@ TEST_CASE("factor corner refusal remains in every candidate row and marks search
         CHECK(std::get<ZonotopePlanUnscored>(attempt).outcome.diagnostics.front().field ==
             "finite_zonotope_minimax.corners");
     }
+}
+
+TEST_CASE("one certified corner gives the same scores as ordinary enumeration") {
+    const auto request = analytic_request();
+    const auto exhaustive = finite_action_zonotope_minimax(request, {3, 2, 2, 4, 16});
+    const auto reduced = finite_action_zonotope_minimax(request, {3, 2, 2, 4, 1});
+    REQUIRE(std::holds_alternative<FiniteActionZonotopeMinimaxResult>(exhaustive));
+    REQUIRE(std::holds_alternative<FiniteActionZonotopeMinimaxResult>(reduced));
+    const auto &regular = std::get<FiniteActionZonotopeMinimaxResult>(exhaustive);
+    const auto &certified = std::get<FiniteActionZonotopeMinimaxResult>(reduced);
+    REQUIRE(certified.plan_attempts.size() == regular.plan_attempts.size());
+    for (std::size_t i = 0; i < regular.plan_attempts.size(); ++i) {
+        const auto *scored = std::get_if<ZonotopePlanScored>(&certified.plan_attempts[i]);
+        REQUIRE(scored);
+        CHECK(scored->score.factor_corners_evaluated == 1);
+        CHECK(scored->score.terminal_factor_corner_maximum ==
+              doctest::Approx(std::get<ZonotopePlanScored>(regular.plan_attempts[i])
+                                  .score.terminal_factor_corner_maximum)
+                  .epsilon(1e-14));
+    }
+    REQUIRE(certified.candidate_search == CandidateSearchCoverage::complete);
+    CHECK(std::get<ZonotopePlanSelected>(certified.selection).candidate_attempt_index == 1);
 }
 
 TEST_CASE("replay history refusal retains candidate scores and its selected attempt index") {

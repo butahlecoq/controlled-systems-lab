@@ -20,9 +20,9 @@ struct ExpectedSynthesisBinding {
 // Independent verifier policy. Its numerical tolerances and assurance are
 // requested for verification only and do not alter the prepared solve claim.
 struct VerificationRequest {
-    NumericalPolicy numerical{1e-8,1e-8};
+    NumericalPolicy numerical{1e-8, 1e-8};
     Assurance assurance{Assurance::numerical};
-    bool operator==(const VerificationRequest&) const = default;
+    bool operator==(const VerificationRequest &) const = default;
 };
 struct TrajectoryRequest {
     Witness witness;
@@ -51,7 +51,7 @@ struct NamedResidual {
 struct TrajectoryReport {
     ProblemId problem;
     TrajectoryRequest input;
-    Verifier verifier{{"csl.trajectory.original"},"1"};
+    Verifier verifier{{"csl.trajectory.original"}, "1"};
     // Compatibility view of verification.numerical in returned reports.
     NumericalPolicy numerical{};
     Termination termination{Termination::completed};
@@ -73,7 +73,7 @@ struct TrajectoryReport {
 };
 // Synchronous borrows; the report owns the witness and supplied evidence. Known
 // external inputs are prescribed by the problem, never read from witness.controls.
-TrajectoryReport verify_trajectory(const problem::ResolvedProblem&, const TrajectoryRequest&,
-    const ExecutionContext& = {},
+TrajectoryReport verify_trajectory(
+    const problem::ResolvedProblem &, const TrajectoryRequest &, const ExecutionContext & = {},
     std::optional<registry::PreparedProvider<registry::LPPort>> membership_provider = std::nullopt);
 } // namespace csl::verification

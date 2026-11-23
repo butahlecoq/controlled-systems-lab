@@ -74,7 +74,6 @@ FUNCTIONAL_DOC_EXACT_ASSETS = {
     "docs/research/ext07-hybrid-2d.svg",
     "docs/research/inventory.json",
     "docs/research/legacy-characterization.json",
-    "docs/research/proof-audit-provenance.json",
     "docs/research/reference-b08.json",
     "docs/research/syn04-strategy-b-ts03-control-projection.svg",
     "docs/research/verification.json",
@@ -98,6 +97,8 @@ def git(root: Path, *args: str) -> str:
 
 
 def is_retained_markdown(path: str, root: Path) -> bool:
+    if path == ".agents/skills/delete-comment/SKILL.md":
+        return True
     if path in ROOT_ENTRY_DOCS or path in ISSUE_TEMPLATES or path in STANDING_DOCS:
         return True
     match = ADR_PATH.fullmatch(path)

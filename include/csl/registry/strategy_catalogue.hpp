@@ -5,7 +5,11 @@
 namespace csl::registry {
 
 enum class CandidateStatus {
-    admitted, incompatible, implementation_missing, backend_unavailable, excluded
+    admitted,
+    incompatible,
+    implementation_missing,
+    backend_unavailable,
+    excluded
 };
 
 struct StrategyCandidateGraph {
@@ -42,19 +46,21 @@ struct StrategyCandidateRow {
 // provider provenance remain pinned in the graph. Empty requirement fields
 // in the two-argument overload derive representation, assurance, and family
 // target from request.family. Explicit requirements are preserved verbatim.
-std::vector<StrategyCandidateRow> enumerate_strategy_candidates(
-    const StrategyRegistry&, const StrategyRequest&);
-std::vector<StrategyCandidateRow> enumerate_strategy_candidates(
-    const StrategyRegistry&, const StrategyRequest&, const Requirements&);
+std::vector<StrategyCandidateRow> enumerate_strategy_candidates(const StrategyRegistry &,
+                                                                const StrategyRequest &);
+std::vector<StrategyCandidateRow> enumerate_strategy_candidates(const StrategyRegistry &,
+                                                                const StrategyRequest &,
+                                                                const Requirements &);
 
 // Re-prepare one generated request before execution. The candidate must match
 // the problem, family and all selected module slots that were enumerated;
 // the two-argument overload derives omitted output requirements from the
 // request family, while the explicit overload preserves caller requirements.
-std::variant<PreparedStrategyCandidate, Rejection> prepare_strategy_candidate(
-    const StrategyRegistry&, const StrategyCandidateGraph&, const StrategyRequest&);
-std::variant<PreparedStrategyCandidate, Rejection> prepare_strategy_candidate(
-    const StrategyRegistry&, const StrategyCandidateGraph&, const StrategyRequest&,
-    const Requirements&);
+std::variant<PreparedStrategyCandidate, Rejection>
+prepare_strategy_candidate(const StrategyRegistry &, const StrategyCandidateGraph &,
+                           const StrategyRequest &);
+std::variant<PreparedStrategyCandidate, Rejection>
+prepare_strategy_candidate(const StrategyRegistry &, const StrategyCandidateGraph &,
+                           const StrategyRequest &, const Requirements &);
 
 } // namespace csl::registry

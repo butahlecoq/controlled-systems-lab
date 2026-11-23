@@ -3,17 +3,19 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
-from pathlib import Path
 import shutil
 import tempfile
 import unittest
 import zipfile
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location(
-    "stage_env717_pendulum", ROOT / "scripts/reports/stage_env717_pendulum.py")
+    "stage_env717_pendulum", ROOT / "scripts/reports/stage_env717_pendulum.py"
+)
+if SPEC is None or SPEC.loader is None:
+    raise ImportError("cannot load the environment publication test dependency")
 publication = importlib.util.module_from_spec(SPEC)
-assert SPEC.loader is not None
 SPEC.loader.exec_module(publication)
 
 
@@ -25,15 +27,24 @@ class PendulumPublicationTests(unittest.TestCase):
             shutil.copytree(publication.SOURCE, source)
             site = base / "site"
             site.mkdir()
-            (site / "index.html").write_text("<!doctype html><html><ul></ul></html>", encoding="utf-8")
+            (site / "index.html").write_text(
+                "<!doctype html><html><ul></ul></html>", encoding="utf-8"
+            )
 
             route_id = publication.stage(source, site)
+            self.assertEqual(route_id, "env717-pendulum-1e596033992c263d451e")
+            self.assertEqual(
+                hashlib.sha256((site / f"{route_id}.zip").read_bytes()).hexdigest(),
+                "9d04cd4f19e65238ac93a24b04a1f02003e8d607dd80826825487ec1bf31fc96",
+            )
 
             self.assertRegex(route_id, r"^env717-pendulum-[0-9a-f]{20}$")
             report = site / route_id
             manifest = json.loads((report / "publication-manifest.json").read_text())
             self.assertEqual(manifest["report_id"], route_id)
-            self.assertEqual(manifest["source_repository_commit"], publication.UPSTREAM_SOURCE_COMMIT)
+            self.assertEqual(
+                manifest["source_repository_commit"], publication.UPSTREAM_SOURCE_COMMIT
+            )
             for name, expected in manifest["published_files"].items():
                 self.assertEqual(hashlib.sha256((report / name).read_bytes()).hexdigest(), expected)
             result = json.loads((report / "result.json").read_text())
@@ -41,9 +52,12 @@ class PendulumPublicationTests(unittest.TestCase):
             self.assertEqual(len(result["finite_catalogue_optimum"]["trajectory"]), 11)
             self.assertEqual(
                 result["finite_catalogue_optimum"]["trajectory"][0]["action_torque_nm"],
-                result["finite_catalogue_optimum"]["selected_actions_torque_nm"][0])
+                result["finite_catalogue_optimum"]["selected_actions_torque_nm"][0],
+            )
             self.assertEqual(result["runtime_measurement"]["measured_repetitions"], 7)
-            self.assertIn("only over this catalogue and horizon", (report / "index.html").read_text())
+            self.assertIn(
+                "only over this catalogue and horizon", (report / "index.html").read_text()
+            )
             self.assertIn("env717-pendulum-pilot-v1", (report / "README.md").read_text())
             with zipfile.ZipFile(site / f"{route_id}.zip") as archive:
                 self.assertIsNone(archive.testzip())

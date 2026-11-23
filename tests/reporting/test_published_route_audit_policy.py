@@ -115,6 +115,8 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
             "learn/closed-loop-semantics.html",
             "learn/controller-composition.html",
             "learn/set-operations.html",
+            "learn/native-substitution-matrix.html",
+            "learn/same-geometry-five-representations.html",
         )
         manifest = json.loads((preservation.SOURCE / "manifest.json").read_text())
         provenance = json.loads((fixture / "source.json").read_text())
@@ -168,6 +170,8 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
                     "learn/controller-composition.html",
                     "learn/set-operations.html",
                     "learn/closed-loop-semantics.html",
+                    "learn/native-substitution-matrix.html",
+                    "learn/same-geometry-five-representations.html",
                 }
                 self.assertEqual(
                     set(result["reviewed_learning_navigation_changes"]),
@@ -221,6 +225,18 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
                         self.assertIn(route, result["unexpected_changed"])
                         path.write_bytes(original)
 
+                for route in (
+                    "learn/native-substitution-matrix.html",
+                    "learn/same-geometry-five-representations.html",
+                ):
+                    with self.subTest(unreviewed_pin=route):
+                        wrong_pin = json.loads(json.dumps(manifest))
+                        wrong_pin["mutable_routes_reviewed_sha256"][route] = "0" * 64
+                        (source / "manifest.json").write_text(json.dumps(wrong_pin))
+                        result = baseline_audit.audit(baseline, site)
+                        self.assertFalse(result["passed"])
+                        self.assertEqual(result["unexpected_changed"], [route])
+
                 wrong_identity = json.loads(json.dumps(manifest))
                 forward_insertion = next(
                     row
@@ -260,11 +276,16 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
             for row in manifest["learning_navigation_insertions_reviewed_separately"]
             if row["chapter_id"] == "native-forward-models"
         )
+        chapters = json.loads(baseline_audit.BOOK_MANIFEST.read_text())["chapters"]
+        adjacent = next(chapter for chapter in chapters if chapter["id"] == "closed-loop-semantics")
+        adjacent_identity = json.dumps(
+            adjacent, sort_keys=True, ensure_ascii=False, separators=(",", ":")
+        )
         manifest["learning_navigation_insertions_reviewed_separately"] = [
             forward,
             {
                 "chapter_id": "closed-loop-semantics",
-                "chapter_sha256": "fb951101429be7caf73b13b72a21ccebe84ee44a03718db45abd7927b88bde8d",
+                "chapter_sha256": preservation.digest(adjacent_identity.encode()),
                 "previous_chapter_id": "native-forward-models",
                 "next_chapter_id": "finite-controller-consumers",
                 "qualification": "ambiguous adjacent insertion",

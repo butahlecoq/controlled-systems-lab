@@ -44,8 +44,7 @@ class Ts03ReportTests(unittest.TestCase):
     def test_complete_catalogue_stages_exact_offline_archive(self):
         sys.path.insert(0,str(ROOT/"scripts/reports"))
         import syn04_ts03_registered_reports as publisher
-        spec=importlib.util.spec_from_file_location("ts03_site",ROOT/"scripts/reports/site.py")
-        site=importlib.util.module_from_spec(spec);spec.loader.exec_module(site)
+        import report_site as site
         bundle=ROOT/"reports/algorithm-results"/report.REPORT_ID
         item=publisher.adapt(bundle)
         archive=publisher.offline_zip(bundle,item)

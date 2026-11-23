@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import html
 import json
+import re
 from pathlib import Path
 from typing import Any, TypedDict
 
@@ -145,9 +146,34 @@ def draw_svg(
     plan: list[list[float]],
     replay: list[list[float]],
     final_stage: int,
+    compact: bool = False,
 ) -> str:
-    width, height = 1240, 900
-    left, right, top, bottom = 145, 80, 140, 250
+    if compact:
+        width, height = 620, 500
+        left, right, top, bottom = 145, 20, 82, 155
+        title_size, note_size, tick_size, axis_size, legend_size, small_size = (
+            20,
+            12,
+            11,
+            14,
+            11,
+            10,
+        )
+        axis_label_y, legend_rows, small_y = height - 120, (height - 55, height - 34), height - 10
+        secondary_legend_x = left + 250
+    else:
+        width, height = 1240, 900
+        left, right, top, bottom = 145, 80, 140, 250
+        title_size, note_size, tick_size, axis_size, legend_size, small_size = (
+            25,
+            14,
+            12,
+            16,
+            14,
+            12,
+        )
+        axis_label_y, legend_rows, small_y = height - 170, (height - 100, height - 65), height - 25
+        secondary_legend_x = left + 470
     plot_width, plot_height = width - left - right, height - top - bottom
     i, j = plane["indices"]
     points = [(float(n["state"][i]), float(n["state"][j])) for n in nodes]
@@ -169,7 +195,7 @@ def draw_svg(
         '<rect width="100%" height="100%" fill="#fff"/>',
         f'<text x="{left}" y="43" class="title">{xml(title)}</text>',
         f'<text x="{left}" y="75" class="note">Retained graph only · beam width 8 · search coverage incomplete · no convex hull inferred</text>',
-        "<style>text{font-family:system-ui,sans-serif;fill:#253047}.title{font-size:25px;font-weight:700}.note{font-size:14px;fill:#8b2d24}.tick{font-size:12px;fill:#475569}.axis{font-size:16px;font-weight:600}.legend{font-size:14px}.small{font-size:12px;fill:#475569}</style>",
+        f"<style>text{{font-family:system-ui,sans-serif;fill:#253047}}.title{{font-size:{title_size}px;font-weight:700}}.note{{font-size:{note_size}px;fill:#8b2d24}}.tick{{font-size:{tick_size}px;fill:#475569}}.axis{{font-size:{axis_size}px;font-weight:600}}.legend{{font-size:{legend_size}px}}.small{{font-size:{small_size}px;fill:#475569}}</style>",
     ]
     for x in ticks(x0, x1):
         X = px(x)
@@ -177,7 +203,7 @@ def draw_svg(
             f'<line x1="{X:.2f}" y1="{top}" x2="{X:.2f}" y2="{top + plot_height}" stroke="#e2e8f0"/>'
         )
         parts.append(
-            f'<text x="{X:.2f}" y="{top + plot_height + 25}" class="tick" text-anchor="middle">{xml(number(x))}</text>'
+            f'<text x="{X:.2f}" y="{top + plot_height + (18 if compact else 25)}" class="tick" text-anchor="middle">{xml(number(x))}</text>'
         )
     for y in ticks(y0, y1):
         Y = py(y)
@@ -238,23 +264,69 @@ def draw_svg(
             )
 
     parts.append(
-        f'<text x="{left + plot_width / 2:.2f}" y="{height - 170}" class="axis" text-anchor="middle">{xml(plane["labels"][0])} ({xml(plane["units"][0])})</text>'
+        f'<text x="{left + plot_width / 2:.2f}" y="{axis_label_y}" class="axis" text-anchor="middle">{xml(plane["labels"][0])} ({xml(plane["units"][0])})</text>'
     )
     parts.append(
         f'<text x="34" y="{top + plot_height / 2:.2f}" class="axis" text-anchor="middle" transform="rotate(-90 34 {top + plot_height / 2:.2f})">{xml(plane["labels"][1])} ({xml(plane["units"][1])})</text>'
     )
-    entries = [
-        (left, height - 100, "#64748b", "Retained forward nodes F_ret[k]"),
-        (left + 470, height - 100, "#d97706", "Backward-viable nodes F_ret[k] ∩ B_ret[k]"),
-        (left, height - 65, "#dc2626", "Selected plan (retained-graph optimum)"),
-        (left + 470, height - 65, "#2563eb", "Observed closed-loop replay"),
-    ]
+    if compact:
+        entries = [
+            (left, legend_rows[0], "#64748b", "Retained graph nodes"),
+            (secondary_legend_x, legend_rows[0], "#d97706", "Backward-viable nodes"),
+            (left, legend_rows[1], "#dc2626", "Selected plan"),
+            (secondary_legend_x, legend_rows[1], "#2563eb", "Observed replay"),
+        ]
+    else:
+        entries = [
+            (left, legend_rows[0], "#64748b", "Retained forward nodes F_ret[k]"),
+            (
+                secondary_legend_x,
+                legend_rows[0],
+                "#d97706",
+                "Backward-viable nodes F_ret[k] ∩ B_ret[k]",
+            ),
+            (left, legend_rows[1], "#dc2626", "Selected plan (retained-graph optimum)"),
+            (secondary_legend_x, legend_rows[1], "#2563eb", "Observed closed-loop replay"),
+        ]
     for x, y, c, label in entries:
         parts.append(f'<circle cx="{x}" cy="{y - 5}" r="5" fill="{c}"/>')
         parts.append(f'<text x="{x + 12}" y="{y}" class="legend">{xml(label)}</text>')
     parts.append(
-        f'<text x="{left}" y="{height - 25}" class="small">Stage color: k=0 to k={final_stage}. Purple diamonds: terminal nodes. Green star: initial state.</text>'
+        f'<text x="{left}" y="{small_y}" class="small">Stage color: k=0 to k={final_stage}. Purple diamonds: terminal nodes. Green star: initial state.</text>'
     )
+    parts.append("</svg>")
+    return "\n".join(parts)
+
+
+def draw_paired_svg(title: str, panels: list[tuple[str, str]]) -> str:
+    """Place two existing projection plots side by side in one accessible SVG."""
+    if len(panels) != 2:
+        raise ValueError("a paired projection figure requires exactly two panels")
+
+    width, height = 2560, 1000
+    panel_width = width // 2
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" role="img" aria-labelledby="paired-title paired-desc">',
+        f'<title id="paired-title">{xml(title)}</title>',
+        '<desc id="paired-desc">Two synchronized projections of the same stages, retained graph, selected plan, and observed replay.</desc>',
+        '<rect width="100%" height="100%" fill="white"/>',
+    ]
+    for index, (label, panel) in enumerate(panels):
+        clean = panel.strip()
+        opening = clean.find(">")
+        closing = clean.rfind("</svg>")
+        if not clean.startswith("<svg") or opening < 0 or closing <= opening:
+            raise ValueError(f"panel {index + 1} is not a complete SVG document")
+        view_box = re.search(r'\bviewBox="([^"]+)"', clean[: opening + 1])
+        if view_box is None:
+            raise ValueError(f"panel {index + 1} has no SVG viewBox")
+        content = clean[opening + 1 : closing]
+        content = content.replace('id="title"', f'id="panel-{index}-title"')
+        content = content.replace('id="desc"', f'id="panel-{index}-desc"')
+        x = index * panel_width
+        parts.append(
+            f'<svg x="{x}" y="0" width="{panel_width}" height="1000" viewBox="{xml(view_box.group(1))}" role="group" aria-label="{xml(label)}">{content}</svg>'
+        )
     parts.append("</svg>")
     return "\n".join(parts)
 

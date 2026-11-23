@@ -164,7 +164,7 @@
     },
     {
       "source": "scripts/reports/campaign_graph_figures.py",
-      "signal_count": 3,
+      "signal_count": 6,
       "asset_name_literals": [],
       "disposition": "saved-data-illustration-renderer",
       "role_and_disposition_reason": "Renders authenticated saved finite-action campaign graph states, backward-viable nodes, selected first-query plans and observed plant replays in four physical 2D projections. It runs no solver, draws no convex hull, and discloses incomplete beam-pruned search coverage and retained-graph-only optimality."
@@ -1323,6 +1323,13 @@
       "disposition": "analytic-reference-checked-saved-run-renderer"
     },
     {
+      "source": "scripts/reports/render_campaign_paired_projection.py",
+      "signal_count": 1,
+      "asset_name_literals": [],
+      "disposition": "saved-data-illustration-renderer",
+      "role_and_disposition_reason": "Renders paired x1–x2 mass and x3–x4 flow projections from a saved fuel campaign record and publishes the task contract, provenance and reproduction command. It runs no campaign or solver; graph marks appear only for graph-backed records, while box records are labeled fixed-plan outer tubes."
+    },
+    {
       "source": "scripts/reports/render_closed_loop_pilot.py",
       "signal_count": 3,
       "asset_name_literals": [
@@ -1335,7 +1342,7 @@
     },
     {
       "source": "scripts/reports/render_full_profile_campaign.py",
-      "signal_count": 5,
+      "signal_count": 9,
       "asset_name_literals": [],
       "disposition": "saved-data-illustration-renderer",
       "role_and_disposition_reason": "Reads the frozen full-profile candidate universe, reconciled outcomes and saved attempt records; publishes all-stage projections, nonlinear replay objectives, worker resource evidence and role dispositions. It runs no solver and makes no timing-winner claim."
@@ -1393,7 +1400,7 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
-      "source": "scripts/reports/site.py",
+      "source": "scripts/reports/report_site.py",
       "signal_count": 7,
       "asset_name_literals": [
         "latency.png",
@@ -1477,6 +1484,22 @@
       ],
       "disposition": "publication-validation-or-frozen-route",
       "role_and_disposition_reason": "Authenticates the frozen v2 manifest and native 35a708df producer identity, then copies all current and superseded two-state affine lesson assets byte exactly into the Pages gallery; no numerical execution or historical relabelling."
+    },
+    {
+      "source": "scripts/reports/stage_catalogue_disturbance_control.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "ev-causal-minimax.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_catalogue_external_fixed_plan.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "queue-outer-projections.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
     },
     {
       "source": "scripts/reports/stage_catalogue_forward_reachability.py",
@@ -2846,6 +2869,18 @@
       "companion_route": "examples/catalogue-constrained-predecessors-v1/index.html"
     },
     {
+      "route": "catalogue-disturbance-control-v1",
+      "source_bundle": "catalogue-disturbance-control-v1",
+      "assets": [
+        "ev-causal-minimax.svg",
+        "puffer-robust-predecessor.svg",
+        "queue-safety-obstruction.svg"
+      ],
+      "index_sha256": "1a195f706cf3ec6d03dba67acd0c6246c620a5ae043bde2a6b3fe1c6e99c842b",
+      "disposition": "reviewed: overlays robust predecessor geometry, finite policy paths and the constrained queue safety obstruction",
+      "companion_route": "examples/catalogue-disturbance-control-v1/index.html"
+    },
+    {
       "route": "catalogue-exact-support-v1",
       "source_bundle": "catalogue-exact-support-v1",
       "assets": [
@@ -2854,6 +2889,17 @@
       "index_sha256": "3ac34047bbaeeabea8ca9e428de5f80cf1ae3d995f197ff7c50a234bbef9d461",
       "disposition": "reviewed: sampled building projections and positive support deficits from exact certificates",
       "companion_route": "examples/catalogue-exact-support-v1/index.html"
+    },
+    {
+      "route": "catalogue-external-fixed-plan-v1",
+      "source_bundle": "catalogue-external-fixed-plan-v1",
+      "assets": [
+        "queue-outer-projections.png",
+        "queue-outer-projections.svg"
+      ],
+      "index_sha256": "a44cdeebcd26cc80548820b7af50f034815e5c27b7e39ac6a90e3facc9aad5c2",
+      "disposition": "reviewed: three stage projections compare the enumerated queue hull and four outer enclosures",
+      "companion_route": "examples/catalogue-external-fixed-plan-v1/index.html"
     },
     {
       "route": "catalogue-feasible-history-v1",
@@ -4454,6 +4500,12 @@
         "positive_part_budget_2d_native-solution.csv",
         "positive_part_budget_2d_run.txt",
         "positive_part_budget_2d_native-example.stdout",
+        "catalogue-disturbance-control-v1/index.html",
+        "catalogue-disturbance-control-v1/ev-causal-minimax.svg",
+        "catalogue-disturbance-control-v1/puffer-robust-predecessor.svg",
+        "catalogue-disturbance-control-v1/queue-safety-obstruction.svg",
+        "catalogue-external-fixed-plan-v1/index.html",
+        "catalogue-external-fixed-plan-v1/queue-outer-projections.svg",
         "catalogue-forward-reachability-v1/index.html",
         "catalogue-forward-reachability-v1/platoon-forward.svg",
         "catalogue-feasible-history-v1/index.html",

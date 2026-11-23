@@ -30,16 +30,6 @@ struct Case {
     std::optional<double> authored_maximum;
     std::optional<DualMultipliers> dual;
 };
-// Independently derived literals: full objective negation, equality substitution,
-// contradictory rows, improving ray and the whole optimal segment. JSON is
-// independently authored; --dump-catalogue exports these actual runner inputs.
-// Triangle: x+2y <= 2(x+y) <= 2; equality requires (0,1). Negating
-// x+2y+7 includes its offset, giving canonical -9 and authored maximum9.
-// y=-2 and 2x-y=6 force x=2, cost7. Scaling the row by1024 changes
-// neither point nor cost; shifting offset11 to-2 changes only cost to-6.
-// x<=0 and x>=1 contradict, even with redundant2x<=0. The ray x=t>=0
-// makes -x unbounded. On the face, 5-x-y>=4, attained for the whole
-// nonnegative segment x+y=1; no selected endpoint or family is required.
 const std::vector<Case>& cases() {
     static const std::vector<Case> data{
         {{{{"test05"},{"triangle"}},{-1,-2},0,{1,2,{0,2},{0,1},{1,1}},{{0,{}},{0,{}}},{{{},1}}},
@@ -76,7 +66,6 @@ bool published_as(const LinearProgram& p,const LinearProgramInput& a) {
         std::ranges::equal(csr.values,a.constraints.values) &&
         same_bounds(p.rows(),a.rows) && same_bounds(p.variables(),a.variables);
 }
-// Independent tiny arithmetic over the public views, not evaluate_primal/multiply.
 struct Primal {double cost; ResidualMeasure rows{0,1},variables{0,1};};
 ResidualMeasure violations(std::span<const double> values,std::span<const Interval> bounds) {
     REQUIRE(values.size()==bounds.size());
@@ -137,8 +126,6 @@ struct Adapter {
     Method method;
     Factory factory;
     bool optimum_dual;
-    // Absence means bounds/basis must be unavailable. A future provider must
-    // supply its independent bound proof and dedicated original-row basis oracle.
     std::function<void(const Case&,const LinearProgram&,const ProgramResult&)> bounds;
     std::function<void(const PreparedPipeline<LPPort>&)> basis;
     Factory limited;
@@ -168,7 +155,7 @@ void attempt(const BoundWorkspace<LPPort>& w,const LinearProgram& p,std::uint64_
     CHECK(w.last_attempt()->stamp.attempt()==number);CHECK(w.last_attempt()->stamp.program().identity()==p.identity());
     CHECK(w.last_attempt()->stamp.workspace()==w.workspace_identity());
 }
-} // namespace
+}
 TEST_CASE("each selected registration satisfies the same eight neutral literal LP cases") {
     for(const auto& a:selected()) for(const auto& c:cases()) {
         INFO(a.method.id.value << " / " << c.input.identity.program.value);
@@ -190,7 +177,6 @@ TEST_CASE("each selected registration satisfies the same eight neutral literal L
             CHECK(std::get<ExactFarkasEvidence>(verified).certificate()==proof.certificate());
         } else CHECK(std::holds_alternative<Unestablished>(result.outcome.support));
         CHECK(check_program_result(result,p,Assurance::numerical).empty());check_candidate(p,result);
-        // Necessary inequalities never replace a provider's independent proof.
         if(c.cost && result.objective.lower) CHECK(result.objective.lower->value<=*c.cost+1e-8);
         if(c.cost && result.objective.upper) CHECK(result.objective.upper->value>=*c.cost-1e-8);
         if(a.bounds) a.bounds(c,p,result);
@@ -288,7 +274,7 @@ bool partial_matches(const LinearProgram& p,const ProgramResult& r) {
         std::ranges::all_of(proof.stationarity,[](double x){return x==0;}) &&
         lower.value==proof.constant && upper.value==witness.cost && lower.value<upper.value;
 }
-} // namespace
+}
 TEST_CASE("literal dyadic candidates detect row and variable violations instead of an always-true oracle") {
     const auto p=take<LinearProgram>(make_linear_program(cases()[0].input));
     for(const auto& probe:probes()) {
@@ -318,8 +304,6 @@ TEST_CASE("six literal dual constants include offset equality scaling and absent
         CHECK(result.residuals.stationarity->violation==0);CHECK(result.residuals.signs->violation==0);
         CHECK_FALSE(result.residuals.complementarity);
         auto wrong=*c.dual;wrong.variable_lower[0]=-1;
-        // The triangle's lower endpoint exists; a negative multiplier is a sign
-        // residual, whereas a nonzero multiplier on free x is invalid input.
         const auto invalid=evaluate_dual(p,wrong,policy,oracle);
         if(p.variables()[0].lower) {
             const auto bad=take<DualEvaluation>(invalid);REQUIRE(bad.residuals.signs);
@@ -432,7 +416,7 @@ std::string catalogue_json() {
         ",\"termination\":\"resource_limit\",\"outcome\":\"undetermined\",\"candidate\":"+numbers(e.point)+
         ",\"lower\":"+number(e.lower)+",\"upper\":"+number(e.upper)+",\"support\":\"fixture-symbolic-argument\"},\"primal_checks\":"+checks+'}';
 }
-} // namespace
+}
 
 int main(int argc,char** argv) {
     if(argc==2 && std::string_view(argv[1])=="--dump-catalogue") {std::cout<<catalogue_json()<<'\n';return 0;}

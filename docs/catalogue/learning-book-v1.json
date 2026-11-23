@@ -797,7 +797,7 @@
       "records": [
         {
           "label": "Analytic five-representation calculation",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/9bbd8cbf0a669c2885ec8b649fc72789386be331/scripts/reports/learning_geometry_toy.py"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/803d8796fd26e60c27fc7440374c1041f04ac8a3/scripts/reports/learning_geometry_toy.py"
         }
       ],
       "example_sources": [
@@ -1220,6 +1220,10 @@
           "href": "../examples/native-extended-models-v1/manifest.json"
         },
         {
+          "label": "Five fixed-plan enclosures under external disturbances",
+          "href": "../examples/catalogue-external-fixed-plan-v1/index.html"
+        },
+        {
           "label": "Three-step forward reachability on all 35 catalogue models",
           "href": "../examples/catalogue-forward-reachability-v1/index.html"
         },
@@ -1296,7 +1300,12 @@
       "intermediate_geometry": "At each update, the one-stage prediction endpoint matches the observed plant state. The trace is one policy-conditioned path in a scalar state coordinate.",
       "support_limits": "This dependency-free discrete example illustrates observation and action timing. It does not invoke a CSL controller or establish full reachability, feasibility for other states, or an enclosure.",
       "figure_ids": [],
-      "records": [],
+      "records": [
+        {
+          "label": "Analytic scalar feedback calculation",
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/803d8796fd26e60c27fc7440374c1041f04ac8a3/scripts/reports/learning_closed_loop_toy.py"
+        }
+      ],
       "example_sources": [
         "scripts/reports/learning_closed_loop_toy.py"
       ],
@@ -2121,6 +2130,10 @@
         {
           "label": "Finite-action control across 35 catalogue models",
           "href": "../examples/catalogue-finite-action-v1/index.html"
+        },
+        {
+          "label": "Disturbance guarantees and finite causal feedback",
+          "href": "../examples/catalogue-disturbance-control-v1/index.html"
         },
         {
           "label": "Model equations, task profiles and outcomes",

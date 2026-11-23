@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
+from fnmatch import fnmatchcase
 from pathlib import Path
 
-# Ownership map: mutable Pages shells, report companions and their presentation
-# tests. These Python renderers read saved inputs but never define native targets.
-# Keep numerical collectors, validators and test drivers outside this list.
+ROOT = Path(__file__).resolve().parents[2]
 PRESENTATION_FILES = {
     "docs/examples/examples.css",
     "docs/examples/continuous-policy-2d.html",
@@ -44,8 +44,6 @@ PRESENTATION_FILES = {
     "tests/reporting/test_viz10_plot_companions.py",
     "tests/reporting/test_landing.py",
 }
-# Pages publication owns composition, archived routes, navigation inventories
-# and byte/hash audits. These files have no native smoke consumer.
 PAGES_PUBLICATION_FILES = {
     "docs/catalogue/learning-book-v1.json",
     "docs/examples/learning/chapters/native-substitution-matrix.html",
@@ -62,11 +60,7 @@ PAGES_PUBLICATION_FILES = {
     "tests/reporting/test_pages_route_retirement.py",
     "tests/reporting/test_pages_augmentation_aggregation.py",
 }
-# The root TOML configures Ruff and ty. Both paths trigger Python tooling
-# quality directly and have no native build or test consumer.
 PYTHON_QUALITY_FILES = {".github/workflows/python-quality.yml", "pyproject.toml"}
-# Saved-episode publication reads contracts/captures and renders/checks records.
-# Shared controller/record-protocol implementations in benchmarks/ remain native.
 SAVED_EPISODE_PUBLICATION_FILES = {
     "scripts/reports/history_warm_gap_report.py",
     "scripts/reports/stage_history_functional.py",
@@ -79,15 +73,22 @@ SAVED_EPISODE_PUBLICATION_FILES = {
     "tests/reporting/test_recorded_closed_loop_figures.py",
     "tests/reporting/test_native_parallelotope_functional.py",
 }
-# These owners carry saved evidence, including inert source/build snapshots.
-# They are not compiler inputs; adding a live driver/build owner elsewhere still
-# requires native validation. Do not generalize to reports/ or scripts/reports/.
 SAVED_PUBLICATION_ROOTS = (
     "reports/published-route-preservation/",
     "reports/closed-loop-history-functional/",
 )
 SAVED_REPORTS = "reports/algorithm-results/"
 EXECUTABLE_REPORT_TOOLS = SAVED_REPORTS + "tooling/"
+SCOPED_VALIDATION_WORKFLOWS = (
+    "python-quality.yml",
+    "research-sdk.yml",
+    "cpp-core-quality.yml",
+)
+ROUTING_FILES = {
+    ".github/workflows/validation-routing.yml",
+    "scripts/ci/route_changes.py",
+    "tests/ci/test_route_changes.py",
+}
 
 
 def classify(paths):
@@ -115,6 +116,44 @@ def classify(paths):
     return native, reports
 
 
+def workflow_path_patterns(workflow_name):
+    """Use the main-branch push filter as the canonical path scope."""
+    text = (ROOT / ".github/workflows" / workflow_name).read_text(encoding="utf-8")
+    event_match = re.search(r"(?ms)^  push:\n(?P<section>.*?)(?=^  [A-Za-z_][^:\n]*:|\Z)", text)
+    if not event_match:
+        raise ValueError(f"{workflow_name} has no push filter")
+    paths_match = re.search(
+        r"(?ms)^    paths:\n(?P<paths>.*?)(?=^    [A-Za-z_][^:\n]*:|\Z)",
+        event_match.group("section"),
+    )
+    if not paths_match:
+        raise ValueError(f"{workflow_name} has no push.paths filter")
+    patterns = [
+        quoted or plain
+        for quoted, plain in re.findall(
+            r"^      - (?:['\"]([^'\"]+)['\"]|([^#\s]+))$",
+            paths_match.group("paths"),
+            re.MULTILINE,
+        )
+    ]
+    if not patterns:
+        raise ValueError(f"{workflow_name} has an empty push path filter")
+    if any(pattern.startswith("!") for pattern in patterns):
+        raise ValueError(f"{workflow_name} uses unsupported negated path filters")
+    return patterns
+
+
+def workflow_scope_matches(paths, workflow_name):
+    """Conservatively match GitHub path filters against the full changed-path list."""
+    if not paths:
+        return True
+    workflow_path = f".github/workflows/{workflow_name}"
+    if workflow_path in paths or ROUTING_FILES.intersection(paths):
+        return True
+    patterns = workflow_path_patterns(workflow_name)
+    return any(fnmatchcase(path, pattern) for path in paths for pattern in patterns)
+
+
 def changed_paths(event_name, event):
     if event_name == "pull_request":
         base = event["pull_request"]["base"]["sha"]
@@ -125,8 +164,6 @@ def changed_paths(event_name, event):
         comparison = f"{base}..{head}"
     else:
         raise ValueError("manual or unknown event requires both gates")
-    # Only object IDs from the event enter the revision expression, never refs
-    # or shell text. Both sides of a rename count as changed paths.
     if any(
         len(sha) != 40 or any(c not in "0123456789abcdef" for c in sha) or sha == "0" * 40
         for sha in (base, head)
@@ -147,18 +184,31 @@ def main():
         event = json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_text(encoding="utf-8"))
         paths = changed_paths(os.environ["GITHUB_EVENT_NAME"], event)
         native, reports = classify(paths)
+        scoped = {
+            workflow_name: workflow_scope_matches(paths, workflow_name)
+            for workflow_name in SCOPED_VALIDATION_WORKFLOWS
+        }
         reason = f"classified {len(paths)} changed paths from the complete Git diff"
     except (KeyError, OSError, TypeError, ValueError, subprocess.CalledProcessError) as error:
         native = reports = True
+        scoped = {workflow_name: True for workflow_name in SCOPED_VALIDATION_WORKFLOWS}
         reason = f"conservative fallback ({type(error).__name__})"
-    output = f"native={str(native).lower()}\nreports={str(reports).lower()}\n"
+    scoped_outputs = "".join(
+        f"{workflow_name.removesuffix('.yml').replace('-', '_')}={str(required).lower()}\n"
+        for workflow_name, required in scoped.items()
+    )
+    output = f"native={str(native).lower()}\nreports={str(reports).lower()}\n" + scoped_outputs
     print(output + reason)
     if os.environ.get("GITHUB_OUTPUT"):
         with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as stream:
             stream.write(output)
     if os.environ.get("GITHUB_STEP_SUMMARY"):
         with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as stream:
-            stream.write(f"Native matrix: **{native}**; reporting: **{reports}**. {reason}.\n")
+            stream.write(
+                f"Native matrix: **{native}**; reporting: **{reports}**; "
+                + "; ".join(f"{name}: **{required}**" for name, required in scoped.items())
+                + f". {reason}.\n"
+            )
 
 
 if __name__ == "__main__":

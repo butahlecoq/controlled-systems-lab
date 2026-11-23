@@ -34,7 +34,6 @@ SystemModel varying() {
 const Vector grid{10,13,29};
 }
 
-// Dropping affine terms, reusing the wrong stage or scaling by dt changes these literals.
 TEST_CASE("each scalar provider gives the fixed trajectory on unit and nonunit grids") {
     for (bool indexed : {false,true}) {
         for (const Vector& times : {Vector{0,1,2},grid}) {
@@ -72,7 +71,6 @@ TEST_CASE("singular autonomous transitions do not impose inverse strategy assump
     CHECK(accepted(system.step({1},x1,{},{})) == Vector{-1,-2});
 }
 
-// A zero map must not erase a positive-dimensional physical port.
 TEST_CASE("absent and present ports require different input vectors") {
     const SystemModel absent{{{1,0,0},TimeDomain::discrete,
         LinearStage{{1,1,{2}},{1,0,{}},{1,0,{}},{1}}}, {}};
@@ -104,7 +102,6 @@ TEST_CASE("absent and present ports require different input vectors") {
     rejected(zero_maps.step({0},Vector{3},Vector{0},{}),"model.step.external");
 }
 
-// Exercise factories and the handle seam; authored variant identities alone prove nothing.
 TEST_CASE("positive dimensional singleton universal and empty representations survive roundtrip") {
     const auto point = accepted(numeric::snapshot_vector(Vector{0}));
     const auto singleton = accepted(sets::from_handle(accepted(sets::make_singleton(
@@ -123,7 +120,6 @@ TEST_CASE("positive dimensional singleton universal and empty representations su
     CHECK(empty.metadata()->set.dimension == 1);
     CHECK(std::holds_alternative<sets::EmptyRepresentation>(empty.representation()));
 
-    // The model does not receive or enforce a domain: storing {0} does not erase the port.
     const auto system = accepted(snapshot(scalar_model(),grid));
     CHECK(system.dimensions().control == singleton.metadata()->set.dimension);
     CHECK(accepted(system.step({0},Vector{2},Vector{0},{})) == Vector{5});

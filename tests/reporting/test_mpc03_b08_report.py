@@ -1,18 +1,20 @@
 """Validate the saved B08 MIQCP report and deterministic projections."""
+
 import json
 import os
-from pathlib import Path
 import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports"))
-from mpc03.b08_report import render_html, render_svg
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
 import stage_mpc03_b08
+from mpc03.b08_report import render_html, render_svg
+
+ROOT = Path(__file__).resolve().parents[2]
 
 
 class Mpc03B08ReportTests(unittest.TestCase):
@@ -27,16 +29,21 @@ class Mpc03B08ReportTests(unittest.TestCase):
         examples.mkdir(parents=True)
         (examples / "index.html").write_text(
             '<html><body><section id="analytic-illustrations">Examples</section></body></html>',
-            encoding="utf-8")
+            encoding="utf-8",
+        )
 
     def test_saved_report_and_all_five_projected_tubes_are_record_rendered(self):
         record = json.loads((self.source / "record.json").read_text(encoding="utf-8"))
-        self.assertEqual([len(stage["points"]) for stage in record["result"]["projected_tube"]],
-                         [1, 4, 16, 64, 256])
-        self.assertEqual(render_html(record),
-                         (self.source / "index.html").read_text(encoding="utf-8"))
-        self.assertEqual(render_svg(record),
-                         (self.source / "disturbance-tube.svg").read_text(encoding="utf-8"))
+        self.assertEqual(
+            [len(stage["points"]) for stage in record["result"]["projected_tube"]],
+            [1, 4, 16, 64, 256],
+        )
+        self.assertEqual(
+            render_html(record), (self.source / "index.html").read_text(encoding="utf-8")
+        )
+        self.assertEqual(
+            render_svg(record), (self.source / "disturbance-tube.svg").read_text(encoding="utf-8")
+        )
         svg = render_svg(record)
         self.assertIn("worst-cost terminal", svg)
         self.assertIn("projected target at stage 4", svg)
@@ -45,18 +52,23 @@ class Mpc03B08ReportTests(unittest.TestCase):
         page = render_html(future_record)
         self.assertIn(
             "blob/d71402ba339043226cedb452efb74a0e2c50dabd/"
-            "docs/research/b08-displayed-exact-audit.md", page)
+            "docs/research/b08-displayed-exact-audit.md",
+            page,
+        )
         self.assertIn(
             "blob/4d812d3e3f0e9b84a7508ddcb83e32b1d32a43fe/"
             "docs/research/b08-displayed-exact-audit.md",
-            render_html(record))
+            render_html(record),
+        )
 
     def test_stage_adds_report_and_gallery_card_idempotently(self):
         stage_mpc03_b08.stage(self.source, self.site)
         stage_mpc03_b08.stage(self.source, self.site)
         route = self.site / stage_mpc03_b08.REPORT_ID
-        self.assertEqual(json.loads((route / "record.json").read_text())["case_id"],
-                         "b08-l04-displayed-rounded-open-loop")
+        self.assertEqual(
+            json.loads((route / "record.json").read_text())["case_id"],
+            "b08-l04-displayed-rounded-open-loop",
+        )
         self.assertTrue((route / "index.html").is_file())
         self.assertTrue((route / "disturbance-tube.svg").is_file())
         gallery = (self.site / "examples/index.html").read_text(encoding="utf-8")
@@ -64,16 +76,25 @@ class Mpc03B08ReportTests(unittest.TestCase):
         self.assertIn("../mpc03-b08-l04-miQCP-v1/index.html", gallery)
 
     def test_historical_stage_is_independent_of_git_object_availability(self):
-        bundle_before = {path.name: path.read_bytes() for path in self.source.iterdir() if path.is_file()}
-        with tempfile.TemporaryDirectory() as empty_objects, patch.dict(
-                os.environ, {"GIT_OBJECT_DIRECTORY": empty_objects}):
+        bundle_before = {
+            path.name: path.read_bytes() for path in self.source.iterdir() if path.is_file()
+        }
+        with (
+            tempfile.TemporaryDirectory() as empty_objects,
+            patch.dict(os.environ, {"GIT_OBJECT_DIRECTORY": empty_objects}),
+        ):
             unavailable = subprocess.run(
                 ["git", "cat-file", "-e", "4d812d3e3f0e9b84a7508ddcb83e32b1d32a43fe"],
-                cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                cwd=ROOT,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
             self.assertNotEqual(unavailable.returncode, 0)
             stage_mpc03_b08.stage(self.source, self.site)
-        self.assertEqual(bundle_before,
-                         {path.name: path.read_bytes() for path in self.source.iterdir() if path.is_file()})
+        self.assertEqual(
+            bundle_before,
+            {path.name: path.read_bytes() for path in self.source.iterdir() if path.is_file()},
+        )
         for name, content in bundle_before.items():
             self.assertEqual((self.site / stage_mpc03_b08.REPORT_ID / name).read_bytes(), content)
 
@@ -86,8 +107,10 @@ class Mpc03B08ReportTests(unittest.TestCase):
 
     def test_stage_rejects_changed_geometry_before_writing(self):
         path = self.source / "disturbance-tube.svg"
-        path.write_text(path.read_text(encoding="utf-8").replace("B08 L04 disturbance tube", "changed"),
-                        encoding="utf-8")
+        path.write_text(
+            path.read_text(encoding="utf-8").replace("B08 L04 disturbance tube", "changed"),
+            encoding="utf-8",
+        )
         with self.assertRaisesRegex(ValueError, "SVG differs from deterministic"):
             stage_mpc03_b08.stage(self.source, self.site)
         self.assertFalse((self.site / stage_mpc03_b08.REPORT_ID).exists())

@@ -1,5 +1,3 @@
-# Target and installation ownership for problem. Included from the project root.
-
 csl_add_library(csl_problem STATIC src/problem/domains.cpp src/problem/constraints.cpp src/problem/initial_information.cpp)
 
 target_link_libraries(csl_problem PUBLIC CSL::model CSL::sets)

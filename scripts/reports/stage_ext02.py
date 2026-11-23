@@ -1,19 +1,27 @@
 """Verify and stage the saved EXT-02 finite/mixed-control report."""
+
 from __future__ import annotations
 
 import argparse
 import hashlib
-from html import escape
 import json
-from pathlib import Path
 import shutil
-
+from html import escape
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORT_ID = "ext02-two-state-mixed-v1"
 BUNDLE = ROOT / "reports/algorithm-results" / REPORT_ID
-FILES = {"README.md", "SHA256SUMS", "figure.svg", "index.html", "measurement.json",
-         "raw.jsonl", "stderr.txt", "trials.csv"}
+FILES = {
+    "README.md",
+    "SHA256SUMS",
+    "figure.svg",
+    "index.html",
+    "measurement.json",
+    "raw.jsonl",
+    "stderr.txt",
+    "trials.csv",
+}
 
 
 def digest(data: bytes) -> str:
@@ -34,11 +42,17 @@ def verified_bundle(bundle: Path) -> dict[str, bytes]:
         raise ValueError("EXT-02 report checksum mismatch")
     record = json.loads(files["measurement.json"])
     summary = record.get("summary", {})
-    if (record.get("schema") != "csl.ext02-portfolio-record/1" or
-            record.get("scenario_sha256") is None or record.get("executable_sha256") is None or
-            summary.get("trials") != 7 or summary.get("failures") != 0 or
-            summary.get("horizon") != 1 or summary.get("catalogue_size") != 3 or
-            summary.get("history_count") != 3 or summary.get("retained_relation_rows", 0) <= 0):
+    if (
+        record.get("schema") != "csl.ext02-portfolio-record/1"
+        or record.get("scenario_sha256") is None
+        or record.get("executable_sha256") is None
+        or summary.get("trials") != 7
+        or summary.get("failures") != 0
+        or summary.get("horizon") != 1
+        or summary.get("catalogue_size") != 3
+        or summary.get("history_count") != 3
+        or summary.get("retained_relation_rows", 0) <= 0
+    ):
         raise ValueError("EXT-02 report evidence is incomplete")
     return files
 
@@ -49,17 +63,22 @@ def catalog_entry(bundle: Path = BUNDLE) -> dict:
     zip_path = bundle.with_suffix(".zip")
     if not zip_path.is_file() or zip_path.is_symlink():
         raise ValueError("EXT-02 offline ZIP is missing")
-    return {"report_id": REPORT_ID, "source_commit": record["source_commit"],
-            "scenario_sha256": record["scenario_sha256"],
-            "measurement_sha256": digest(files["measurement.json"]),
-            "zip_sha256": digest(zip_path.read_bytes()),
-            "measured_scope": "Seven solve calls on one analytic two-state, one-stage mixed-control fixture",
-            "evidence_limits": "One binary64 fixture; no comparator, performance winner, hard RSS bound, or general scalability claim"}
+    return {
+        "report_id": REPORT_ID,
+        "source_commit": record["source_commit"],
+        "scenario_sha256": record["scenario_sha256"],
+        "measurement_sha256": digest(files["measurement.json"]),
+        "zip_sha256": digest(zip_path.read_bytes()),
+        "measured_scope": "Seven solve calls on one analytic two-state, one-stage mixed-control fixture",
+        "evidence_limits": "One binary64 fixture; no comparator, performance winner, hard RSS bound, or general scalability claim",
+    }
 
 
 def stage(catalog: Path, site: Path) -> str:
     data = json.loads(catalog.read_text(encoding="utf-8"))
-    if data.get("schema") != "csl.ext02-publications/1" or not isinstance(data.get("reports"), list):
+    if data.get("schema") != "csl.ext02-publications/1" or not isinstance(
+        data.get("reports"), list
+    ):
         raise ValueError("EXT-02 publication catalog differs")
     expected = catalog_entry(BUNDLE)
     if data["reports"] != [expected]:
@@ -74,14 +93,18 @@ def stage(catalog: Path, site: Path) -> str:
     destination = site / REPORT_ID
     if destination.exists() or destination.is_symlink():
         raise ValueError("EXT-02 Pages route must be fresh")
-    route = (f'<li><a href="{REPORT_ID}/index.html">EXT-02 finite/mixed branch portfolio</a>'
-             f' · <a href="{REPORT_ID}/figure.svg">2D branch geometry</a>'
-             f' · <a href="{REPORT_ID}/measurement.json">saved measurements</a>'
-             f' · <a href="{REPORT_ID}/{REPORT_ID}.zip">offline ZIP</a>'
-             '<p class="card-scope"><strong>What was measured.</strong> '
-             + escape(expected["measured_scope"]) + '</p><details><summary>Evidence limits</summary><p>'
-             + escape(expected["evidence_limits"]) + '</p></details><p class="card-provenance">'
-             'source commit<code>' + escape(expected["source_commit"]) + '</code></p></li>')
+    route = (
+        f'<li><a href="{REPORT_ID}/index.html">EXT-02 finite/mixed branch portfolio</a>'
+        f' · <a href="{REPORT_ID}/figure.svg">2D branch geometry</a>'
+        f' · <a href="{REPORT_ID}/measurement.json">saved measurements</a>'
+        f' · <a href="{REPORT_ID}/{REPORT_ID}.zip">offline ZIP</a>'
+        '<p class="card-scope"><strong>What was measured.</strong> '
+        + escape(expected["measured_scope"])
+        + "</p><details><summary>Evidence limits</summary><p>"
+        + escape(expected["evidence_limits"])
+        + '</p></details><p class="card-provenance">'
+        "source commit<code>" + escape(expected["source_commit"]) + "</code></p></li>"
+    )
     destination.mkdir()
     for name, content in files.items():
         (destination / name).write_bytes(content)
@@ -97,8 +120,13 @@ if __name__ == "__main__":
     parser.add_argument("--site", type=Path)
     args = parser.parse_args()
     if args.source and args.catalog is None and args.site is None:
-        print(json.dumps({"schema": "csl.ext02-publications/1", "reports": [catalog_entry()]},
-                         indent=2, sort_keys=True))
+        print(
+            json.dumps(
+                {"schema": "csl.ext02-publications/1", "reports": [catalog_entry()]},
+                indent=2,
+                sort_keys=True,
+            )
+        )
     elif not args.source and args.catalog is not None and args.site is not None:
         print(stage(args.catalog, args.site))
     else:

@@ -38,7 +38,6 @@ void rejected(const Result<T>& result, DiagnosticCode code, const char* field) {
 const Vector input{7, 11, 13};
 }
 
-// Wrong indexing, square-only loops, or ignoring padding must break this oracle.
 TEST_CASE("dense layouts multiply the non-square literal oracle") {
     Vector storage;
     DenseInput descriptor{};
@@ -129,7 +128,6 @@ TEST_CASE("empty shapes preserve dimensions and zero-control multiplication") {
         auto matrix = accepted(snapshot(DenseInput{{}, 2, 0, 0, 0, DenseLayout::strided}));
         CHECK(accepted(multiply(matrix, accepted(snapshot_vector({})))) == Vector{0, 0});
     }
-    // Empty behavior accompanies nonempty behavior, rather than absence alone.
     CHECK(accepted(multiply(accepted(snapshot(Matrix{1, 1, {3}})),
                             accepted(snapshot_vector(Vector{2})))) == Vector{6});
 }
@@ -190,7 +188,6 @@ TEST_CASE("coprime strided layout accepts the exact nonoverlap boundary") {
     CHECK(accepted(multiply(matrix, accepted(snapshot_vector(Vector{7, 11})))) == Vector{29, 65, 101});
 }
 
-// Adapters map storage once; wrong spans/strides or an extra snapshot copy must fail.
 TEST_CASE("coarse const storage descriptors support adapters without another snapshot copy") {
     const auto vector = accepted(snapshot_vector(input));
     CHECK(vector.values()[2] == 13);
@@ -211,7 +208,7 @@ TEST_CASE("coarse const storage descriptors support adapters without another sna
         CHECK(dense.row_stride == 3);
         CHECK(dense.column_stride == 2);
         CHECK(dense.layout == DenseLayout::strided);
-        CHECK(dense.storage.size() == 8); // trailing producer data is not retained.
+        CHECK(dense.storage.size() == 8);
         CHECK(dense.storage.data() == std::get<DenseInput>(MatrixView(matrix).descriptor()).storage.data());
         auto worker = std::async(std::launch::async, [matrix, vector] {
             const auto retained = std::get<DenseInput>(matrix.descriptor());
@@ -315,7 +312,6 @@ TEST_CASE("retained snapshots survive producer scope mutable aliases and detache
     CHECK(sparse(1, 2) == 6);
     CHECK(vector[2] == 13);
 
-    // The detached worker is gated until all producer handles have gone away.
     std::promise<void> release;
     auto gate = release.get_future();
     std::promise<Result<Vector>> completion;

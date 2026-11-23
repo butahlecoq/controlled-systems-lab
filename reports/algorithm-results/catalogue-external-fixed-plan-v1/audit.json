@@ -1,0 +1,1451 @@
+{
+  "coverage": {
+    "box/complete": 35,
+    "ellipsoid/complete": 35,
+    "parallelotope/complete": 35,
+    "polytope/complete": 35,
+    "zonotope/complete": 35
+  },
+  "models": [
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 54,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 54,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 54,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 1.4298326832293682e-16,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 54,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-1/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 1.8286394725529235e-16,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-2/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 0.0,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-3/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 54,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 54,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 54,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 0.0,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 54,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-4/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 13,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 13,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 13,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 0.0,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-5/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 54,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 54,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 54,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 1.5904880408955895e-16,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 54,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-6/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 5.604556177589455e-16,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-7/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 1.9002490925010624e-16,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-8/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 54,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 54,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 54,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 6.728624391667616e-17,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 54,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-9/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 54,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 54,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 54,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 6.993530863780514e-17,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 54,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-10/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 1.5247698192276828e-16,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-11/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 13,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 13,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 13,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 0.0,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-12/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 13,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 13,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 13,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 4.55205317884122e-17,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-13/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 13,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 13,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 13,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 2.2226687179682815e-17,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-14/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 1.4250691336757812e-16,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-15/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 2.1093450090961198e-16,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-16/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 1.798006188380441e-16,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-17/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 0.0,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-18/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 0.0,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-19/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 1.6406060671112143e-16,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 24,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-20/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 144,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 144,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 144,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 1.4765966227514558e-19,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 144,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-21/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 144,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 144,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 144,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 0.0,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 144,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-22/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 120,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 120,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 120,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 0.0,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 120,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-23/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 144,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 144,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 144,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 0.0,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 144,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-24/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 144,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 144,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 144,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 0.0,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 144,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-25/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 252,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 252,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 252,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 6.868455682634069e-17,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 252,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-26/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 192,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 192,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 192,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 6.28756926360246e-17,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 192,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-27/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 312,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 312,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 312,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 7.903078144379313e-16,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 312,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-28/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 264,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 264,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 264,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 1.7455008882150297e-16,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 264,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-29/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 252,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 252,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 252,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 2.9445947595949576e-17,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 252,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-30/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 216,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 216,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 216,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 1.094539242573176e-16,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 216,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-31/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 360,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 360,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 360,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 1.4298326832293682e-16,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 360,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-32/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 168,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 168,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 168,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 1.0831444142684454e-16,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 168,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-33/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 216,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 216,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 216,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 1.4298326832293682e-16,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 216,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-34/1"
+    },
+    {
+      "families": {
+        "box": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 216,
+          "status": "complete"
+        },
+        "ellipsoid": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 216,
+          "status": "complete"
+        },
+        "parallelotope": {
+          "all_vertex_checks": 31,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 216,
+          "status": "complete"
+        },
+        "polytope": {
+          "max_scaled_point_error": 1.0058620603103919e-16,
+          "status": "complete"
+        },
+        "zonotope": {
+          "all_vertex_checks": 0,
+          "exact_support_deficits": 0,
+          "exterior_vertices": 0,
+          "max_scaled_support_deficit": 0.0,
+          "sampled_direction_checks": 216,
+          "status": "complete"
+        }
+      },
+      "model_id": "catalogue-2026/model-35/1"
+    }
+  ],
+  "schema": "csl.catalogue-external-fixed-plan-audit/1",
+  "zero_external_maps": [
+    "catalogue-2026/model-5/1",
+    "catalogue-2026/model-13/1"
+  ]
+}

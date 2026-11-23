@@ -16,14 +16,11 @@ import report
 import publication_map
 import syn01_registered_reports as adapter
 import registered_reports
+import report_site
 
 COLLECT_SPEC = importlib.util.spec_from_file_location("csl_syn01_test_collect", TOOLING / "collect.py")
 collect = importlib.util.module_from_spec(COLLECT_SPEC)
 COLLECT_SPEC.loader.exec_module(collect)
-
-SITE_SPEC = importlib.util.spec_from_file_location("csl_syn01_test_site", ROOT / "scripts" / "reports" / "site.py")
-report_site = importlib.util.module_from_spec(SITE_SPEC)
-SITE_SPEC.loader.exec_module(report_site)
 
 SOURCE = "a" * 40
 HARNESS = "b" * 40

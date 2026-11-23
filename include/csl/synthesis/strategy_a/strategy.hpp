@@ -33,18 +33,19 @@ struct CandidateHistory final : JointRelationPayload {
     JointHistoryRelation history;
     reachability::ForwardTube forward;
     std::optional<TerminalMinimizers> terminal;
-    CandidateHistory(PreimageTarget,JointHistoryRelation,reachability::ForwardTube,
-        std::optional<TerminalMinimizers>);
+    CandidateHistory(PreimageTarget, JointHistoryRelation, reachability::ForwardTube,
+                     std::optional<TerminalMinimizers>);
 };
 // Prefix rows describe forward stages. The original H relation describes
 // each terminal-feasible stage projection using the same history carrier.
 struct LiftedCandidateHistory final : JointRelationPayload {
     LiftedHistoryProjections projections;
     explicit LiftedCandidateHistory(LiftedHistoryProjections);
-    const sets::SetData* h_relation_for_recording() const noexcept override;
+    const sets::SetData *h_relation_for_recording() const noexcept override;
 };
-using Providers = registry::CheckedProviders<registry::GeometryPort,
-    registry::GeometryPort,registry::ConversionPort,registry::LPPort,registry::ConvexPort>;
+using Providers =
+    registry::CheckedProviders<registry::GeometryPort, registry::GeometryPort,
+                               registry::ConversionPort, registry::LPPort, registry::ConvexPort>;
 
 // Provider order: equivalent H projection, equivalent V affine/sum, equivalent
 // H conversion, LP, convex. Borrows checked registrations until strategy prepare

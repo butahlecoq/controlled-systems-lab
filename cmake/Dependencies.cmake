@@ -1,6 +1,5 @@
 include(FetchContent)
 include(${CMAKE_CURRENT_LIST_DIR}/DependencyArchive.cmake)
-# Test-only dependency. Excluded from product installation.
 set(DOCTEST_WITH_TESTS OFF CACHE BOOL "Disable doctest's own tests" FORCE)
 set(DOCTEST_WITH_MAIN_IN_STATIC_LIB ON CACHE BOOL "Build the shared doctest test entry point" FORCE)
 set(csl_doctest_archive_sha256 632ed2c05a7f53fa961381497bf8069093f0d6628c5f26286161fbd32a560186)
@@ -14,8 +13,6 @@ FetchContent_Declare(doctest
 FetchContent_MakeAvailable(doctest)
 
 if(CSL_DEPENDENCY_PROBES)
-  # Keep native dependencies and their install rules in an isolated project.
-  # ADR 0002 archive pins remain authoritative in probes/core-01/CMakeLists.txt.
   include(ExternalProject)
   ExternalProject_Add(core01_native_probes
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/probes/core-01

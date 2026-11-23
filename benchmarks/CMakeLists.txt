@@ -5,7 +5,6 @@ include(CTest)
 set(CSL_RESEARCH_SDK_VERSION "0.1.1" CACHE STRING "Exact SDK package version for this research build")
 find_package(CSL "${CSL_RESEARCH_SDK_VERSION}" EXACT CONFIG REQUIRED)
 
-# The SDK's JSON parser is private. Research drivers supply their own dependency.
 include(FetchContent)
 FetchContent_Declare(research_json
   URL https://codeload.github.com/nlohmann/json/tar.gz/refs/tags/v3.11.3

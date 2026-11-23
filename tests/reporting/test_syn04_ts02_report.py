@@ -42,8 +42,7 @@ class Ts02ReportTests(unittest.TestCase):
     def test_complete_catalogue_stages_exact_offline_archive(self):
         sys.path.insert(0,str(ROOT/"scripts/reports"))
         import syn04_ts02_registered_reports as publisher
-        spec=importlib.util.spec_from_file_location("ts02_site",ROOT/"scripts/reports/site.py")
-        site=importlib.util.module_from_spec(spec);spec.loader.exec_module(site)
+        import report_site as site
         item=publisher.adapt(ROOT/"reports/algorithm-results"/report.REPORT_ID)
         with tempfile.TemporaryDirectory() as temporary:
             output=site.stage(ROOT/"reports/algorithm-results/catalog.json",Path(temporary)/"site",check=True)

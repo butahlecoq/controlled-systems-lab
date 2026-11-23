@@ -20,13 +20,7 @@ collector = importlib.import_module("collector_common")
 figure_style = importlib.import_module("figure_style")
 site_design = importlib.import_module("site_design")
 visual_examples = importlib.import_module("visual_examples")
-site_spec = importlib.util.spec_from_file_location(
-    "spine_report_site", ROOT / "scripts/reports/site.py"
-)
-if site_spec is None or site_spec.loader is None:
-    raise ImportError("report site helper is unavailable")
-report_site = importlib.util.module_from_spec(site_spec)
-site_spec.loader.exec_module(report_site)
+report_site = importlib.import_module("report_site")
 
 
 HISTORICAL_OWNERS = (
@@ -40,6 +34,12 @@ HISTORICAL_OWNERS = (
 
 
 class PublicationSpineBoundaryTests(unittest.TestCase):
+    def test_site_compatibility_module_reexports_report_site_api(self) -> None:
+        from scripts.reports import site
+
+        self.assertIs(site.catalogue_index, report_site.catalogue_index)
+        self.assertIs(site.register_publication_policies, report_site.register_publication_policies)
+
     def test_breadcrumbs_accept_one_shot_iterators_and_omit_empty_navigation(self) -> None:
         self.assertEqual(
             site_design.page_start("Title", crumbs=iter(())), site_design.page_start("Title")

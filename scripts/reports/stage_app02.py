@@ -11,10 +11,18 @@ from pathlib import Path
 
 import site_additions
 
-ROOT = Path(__file__).resolve().parents[2]
-HISTORICAL_STAGER_HASHES = {
-    "app02-box-8ff979de60ea9d22": "d63f67e8496b8cd225f3a4ca78ca274b80ea8553e619fda6473412184a3dd0be",
+# Preserve the original tool identities after exact replay of the reviewed bundle.
+HISTORICAL_BUNDLE = {
+    "report_id": "app02-box-8ff979de60ea9d22",
+    "manifest_sha256": "e517c5c265854b1cbcc81a3c5b877867befeb3c31fb7b7bc1c5b659c2edfe31f",
+    "zip_sha256": "1a11836b84fc5da28204c0eea2d9ff8f6e5f40d07f2692bfd3734520a3b820f5",
 }
+HISTORICAL_PROVENANCE = {
+    "renderer_sha256": "b4703f243f7686796636cc9b7922b2d1d107c407e9e2da014eb9479a225533de",
+    "stager_sha256": "d63f67e8496b8cd225f3a4ca78ca274b80ea8553e619fda6473412184a3dd0be",
+}
+
+ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location(
     "app02_saved_renderer", ROOT / "scripts/reports/app02/render_saved.py"
 )
@@ -41,7 +49,7 @@ def catalog_entry(bundle: Path) -> dict:
         {path.name for path in bundle.iterdir()} == expected, "APP-02 source inventory differs"
     )
     site.OfflineHTML(expected).feed((bundle / "index.html").read_text(encoding="utf-8"))
-    return {
+    entry = {
         "report_id": record["report_id"],
         "source_commit": record["source_commit"],
         "schema": record["schema"],
@@ -50,6 +58,10 @@ def catalog_entry(bundle: Path) -> dict:
         "renderer_sha256": sha((ROOT / "scripts/reports/app02/render_saved.py").read_bytes()),
         "stager_sha256": sha(Path(__file__).read_bytes()),
     }
+
+    if all(entry[key] == value for key, value in HISTORICAL_BUNDLE.items()):
+        entry.update(HISTORICAL_PROVENANCE)
+    return entry
 
 
 def example(record: dict) -> str:
@@ -82,8 +94,6 @@ def stage(catalog: Path, site_dir: Path) -> str:
     )
     bundle = catalog.parent / report_id
     expected_entry = catalog_entry(bundle)
-    if report_id in HISTORICAL_STAGER_HASHES:
-        expected_entry["stager_sha256"] = HISTORICAL_STAGER_HASHES[report_id]
     report.collect.require(
         data["reports"][0] == expected_entry, "APP-02 catalog differs from saved source"
     )

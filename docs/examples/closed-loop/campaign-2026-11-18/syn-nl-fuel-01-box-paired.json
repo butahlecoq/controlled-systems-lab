@@ -1,0 +1,61 @@
+{
+  "attempt_id": "syn-nl-fuel-01-20261117T172909Z-14ced0fb",
+  "figure_id": "campaign-2026-11-18-fuel-box-paired",
+  "graph_id": "closed-loop/syn-nl-fuel-01/native-box-fixed-plan-mpc/1/cfg-207644b199ef43e2",
+  "interpretation": "Outer fixed-plan box enclosures, selected plan, and observed nonlinear replay. The enclosures are not the full reachable set.",
+  "layer_scopes": [
+    "x1–x2 projected propellant masses",
+    "x3–x4 projected propellant flows",
+    "selected plan and observed nonlinear replay from the same saved attempt",
+    "outer fixed-plan box enclosures"
+  ],
+  "plotted_data": "raw/plotted-data/syn-nl-fuel-01-box.json",
+  "plotted_data_sha256": "dd10401ffd571e7bcfb4bea0a97d89286cf2462ba10098dc120fbe78349fd081",
+  "projections": [
+    {
+      "id": "propellant-masses",
+      "indices": [
+        0,
+        1
+      ],
+      "labels": [
+        "Oxidizer mass mₒₓ",
+        "Fuel mass m_f"
+      ],
+      "units": [
+        "kg",
+        "kg"
+      ]
+    },
+    {
+      "id": "propellant-flows",
+      "indices": [
+        2,
+        3
+      ],
+      "labels": [
+        "Oxidizer flow qₒₓ",
+        "Fuel flow q_f"
+      ],
+      "units": [
+        "kg/s",
+        "kg/s"
+      ]
+    }
+  ],
+  "renderer": "scripts/reports/render_full_profile_campaign.py",
+  "renderer_source_commit": "30da91aa6683041134e18afb65a13badba90f64e",
+  "representation": "box",
+  "schema": "csl.closed-loop-paired-projection-figure/1",
+  "search_coverage": "not-applicable",
+  "source_commit": "08af99d6f982235c22a15d4e9307fd032dfb1adb",
+  "stage_count": 41,
+  "svg_sha256": "4fade8e266c10e956239cd595e142a470a360c3a9a43a167254e9d94ce1c6a14",
+  "task_id": "syn-nl-fuel-01/continuous-receding/1",
+  "task_name": "syn-nl-fuel-01",
+  "task_sha256": "3462475a357b6ec8e0c18a6d873b192872bdc012d141a68efe1f07a9d6b70da4",
+  "terminal_condition": "soft objective reference; no terminal constraint or final set",
+  "time_step": 0.5,
+  "timeline_end": 20.0,
+  "transition_count": 40
+}

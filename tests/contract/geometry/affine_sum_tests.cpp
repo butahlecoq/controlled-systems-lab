@@ -330,8 +330,6 @@ TEST_CASE("fixed-seed integer rectangles have independently enumerated affine su
             static_cast<double>(draw(-2, 2))}};
         Vector shift{static_cast<double>(draw(-3, 3)), static_cast<double>(draw(-3, 3))};
 
-        // The oracle enumerates the four rational rectangle corners and applies
-        // the integer map directly, without using production geometry helpers.
         std::array<std::array<int, 2>, 4> image{};
         for (std::size_t i = 0; i < corners.size(); ++i) {
             image[i][0] = static_cast<int>(map.values[0]) * corners[i][0] +
@@ -356,7 +354,6 @@ TEST_CASE("fixed-seed integer rectangles have independently enumerated affine su
 
 TEST_CASE("affine reflection and translation of the unit box match rational support oracles") {
     const auto box=vertices("unit-box-rational-oracle",2,{0,0,1,0,0,1,1,1},4,{"x","y"});
-    // (x,y) -> (2-x, y-1), so the image is [1,2] x [-1,0].
     const auto req=request(AffineImage{box,{2,2,{-1,0,0,1}},{2,-1}},
         "reflected-translated-unit-box");
     const auto result=take(run(req,dependencies()));
@@ -800,8 +797,6 @@ TEST_CASE("rectangular and singular affine maps retain their actual ambient spac
     CHECK(support(result.output,{1,2})==doctest::Approx(7));
     CHECK(support(result.output,{1,0})==doctest::Approx(5));
     const auto square=vertices("square",2,{0,0,1,0,1,1,0,1},4);
-    // The rational map (x,y) -> (x,0) sends the unit square to the
-    // one-dimensional segment [(0,0),(1,0)] in a two-dimensional ambient space.
     auto singular=request(AffineImage{square,{2,2,{1,0,0,0}},{0,0}});
     result=take(run(singular,dependencies()));
     CHECK(result.output.metadata.dimension==2);
@@ -809,7 +804,8 @@ TEST_CASE("rectangular and singular affine maps retain their actual ambient spac
     CHECK(support(result.output,{-1,0})==0.0);
     CHECK(support(result.output,{0,1})==0.0);
     CHECK(support(result.output,{0,-1})==0.0);
-    const auto singular_rep=take(sets::from_handle(result.output)).representation();
+    const auto singular_data=take(sets::from_handle(result.output));
+    const auto singular_rep=singular_data.representation();
     REQUIRE(std::holds_alternative<sets::VRepresentation>(singular_rep));
     const auto& segment=std::get<sets::VRepresentation>(singular_rep);
     REQUIRE(segment.vertices.rows()>=2);
@@ -829,11 +825,8 @@ TEST_CASE("rectangular and singular affine maps retain their actual ambient spac
         break;
     }
     REQUIRE(observed_affine_rank.has_value());
-    constexpr std::size_t expected_affine_rank=1; // (x,y) -> (x,0) maps the square to a segment.
+    constexpr std::size_t expected_affine_rank=1;
     CHECK(*observed_affine_rank==expected_affine_rank);
-    const auto singular_data=take(sets::from_handle(result.output));
-    // Affine-dimension metadata is intentionally absent: missing claims mean
-    // unknown by the set-data contract, so rank is derived from returned points.
     CHECK_FALSE(singular_data.metadata()->affine_dimension.has_value());
     bool has_left=false;
     bool has_right=false;
@@ -1003,8 +996,6 @@ TEST_CASE("generic affine-sum provider preserves exact four-dimensional cube sum
     const auto representation=std::get<sets::SetData>(imported).representation();
     REQUIRE(std::holds_alternative<sets::VRepresentation>(representation));
     const auto& hull=std::get<sets::VRepresentation>(representation);
-    // V-to-V affine sums may retain redundant candidates.  The public set
-    // contract is exact support, not minimal vertex materialization.
     CHECK(hull.vertices.rows()>=16);
     CHECK(hull.vertices.cols()==4);
     for(std::size_t row=0;row<hull.vertices.rows();++row)
@@ -1065,9 +1056,6 @@ TEST_CASE("public geometry operation preserves near-extreme support under loose 
 }
 
 TEST_CASE("affine-image evidence outwardly bounds cancellation against exact stored-dyadic inputs") {
-    // The stored inputs are all exact binary64 integers. Their real-valued
-    // affine image is 10^16 + 1 - 10^16 = 1, but left-to-right binary64
-    // accumulation rounds away the one before subtracting 10^16.
     const auto input=vertices("cancellation-singleton",3,{1e16,1,-1e16},1);
     auto selected=dependencies(false,false);
     selected.hull=provider(make_keep_all_hull_registration());

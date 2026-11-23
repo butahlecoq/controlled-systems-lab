@@ -144,8 +144,6 @@ def public_artifacts(bundle: Path, item: common.PublicationRecord) -> dict[str, 
 
 
 def public_zip(report_id: str, files: dict[str, bytes]) -> bytes:
-    # The shared ZIP writer duplicates the nested page at the root, where its
-    # relative evidence links do not resolve. Keep the nested page intact.
     landing = (
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
         "<title>Offline GEO-07 report</title></head><body>"

@@ -2,38 +2,6 @@ name: C++ core, nominal reachability, numeric and set data tooling quality
 
 on:
   pull_request:
-    paths:
-      - 'include/csl/core/**'
-      - 'include/csl/evidence/**'
-      - 'src/contracts/**'
-      - 'include/csl/numeric/data.hpp'
-      - 'src/numeric/data.cpp'
-      - 'src/numeric/Module.cmake'
-      - 'src/numeric/Tests.cmake'
-      - 'include/csl/sets/contracts.hpp'
-      - 'include/csl/sets/data.hpp'
-      - 'src/sets/data.cpp'
-      - 'src/sets/Module.cmake'
-      - 'src/sets/Tests.cmake'
-      - 'include/csl/reachability/nominal_forward.hpp'
-      - 'include/csl/reachability/nominal_predecessor.hpp'
-      - 'include/csl/reachability/nominal_tube.hpp'
-      - 'src/reachability/nominal_forward.cpp'
-      - 'src/reachability/nominal_predecessor.cpp'
-      - 'src/reachability/nominal_tube.cpp'
-      - 'src/reachability/Module.cmake'
-      - 'src/reachability/Tests.cmake'
-      - 'src/geometry/Module.cmake'
-      - 'benchmarks/reporting/mpc01/**'
-      - 'tests/benchmarks/mpc01_model_tests.cpp'
-      - 'cmake/**'
-      - 'CMakeLists.txt'
-      - 'CMakePresets.json'
-      - '.clang-format'
-      - '.clang-tidy'
-      - 'requirements-cpp-quality.txt'
-      - 'scripts/ci/check_cpp_core.cmake'
-      - '.github/workflows/cpp-core-quality.yml'
   push:
     branches: [main]
     paths:
@@ -73,14 +41,19 @@ permissions:
   contents: read
 
 jobs:
+  route:
+    uses: ./.github/workflows/validation-routing.yml
+
   cpp-core-quality:
+    needs: route
+    if: needs.route.outputs.cpp_core_quality == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.12'
       - name: Install pinned development tools
@@ -108,3 +81,22 @@ jobs:
         run: >-
           ctest --test-dir build/cpp-quality --output-on-failure
           -R '^(contract_tests|public_client|projection_predecessor_tests|projection_predecessor_public_client|numeric_tests|numeric_buffer_views_tests|public_headers_client|public_headers_lp_first_client|numeric_dependency_direction|sets_tests|sets_public_client|mpc01_model_contract)$'
+
+  cpp-core-quality-status:
+    name: C++ core quality validation
+    if: always()
+    needs: [route, cpp-core-quality]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require core quality when its path scope changed
+        env:
+          ROUTE_RESULT: ${{ needs.route.result }}
+          REQUIRED: ${{ needs.route.outputs.cpp_core_quality }}
+          QUALITY_RESULT: ${{ needs.cpp-core-quality.result }}
+        run: |
+          test "$ROUTE_RESULT" = success
+          if [ "$REQUIRED" = true ]; then
+            test "$QUALITY_RESULT" = success
+          else
+            test "$QUALITY_RESULT" = skipped
+          fi

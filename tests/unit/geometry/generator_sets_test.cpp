@@ -23,7 +23,6 @@ GeneratorSet interval(std::string id, double generator, std::string factor) {
         {{std::move(factor)}}, {0,1,{}}, {}, {}}));
 }
 
-// Independent H-polyhedron membership query over the lifted factor space.
 bool in_factor_polyhedron(const GeneratorSet& set, const Vector& factors) {
     const auto lift = accepted(factor_polyhedron(set));
     const auto h = std::get<HRepresentation>(lift.factors.representation());
@@ -41,7 +40,6 @@ bool in_factor_polyhedron(const GeneratorSet& set, const Vector& factors) {
     return true;
 }
 
-// Independently authored physical H reference, not derived from a generator set.
 bool in_reference_h(const HRepresentation& h, const Vector& point) {
     if (point.size()!=h.inequalities.cols()) return false;
     for (std::size_t i=0;i<h.inequalities.rows();++i) {
@@ -100,7 +98,6 @@ TEST_CASE("box affine image keeps factor IDs and agrees with H-polyhedron corner
         CHECK(map_lift(lifted,factors)==physical);
         CHECK_FALSE(in_reference_h(output_h,physical));
     }
-    // Noninjectivity: an inadmissible factor tuple can map to an admitted point.
     CHECK_FALSE(in_factor_polyhedron(image,{2,-1}));
     CHECK(map_lift(lifted,{2,-1})==Vector{8});
     CHECK(in_reference_h(output_h,{8}));
@@ -112,8 +109,6 @@ TEST_CASE("box affine image keeps factor IDs and agrees with H-polyhedron corner
             +image.generators().values[1]*((y-2)/3);
         CHECK(via_image==x+y+4);
     }
-    // The independent box H oracle gives x in [-1,3], y in [-1,5].
-    // Its four corners mapped by x+y+4 have extrema 2 and 12.
     CHECK(image.center()[0]-std::abs(image.generators().values[0])-
         std::abs(image.generators().values[1])==2);
     CHECK(image.center()[0]+std::abs(image.generators().values[0])+
@@ -161,8 +156,10 @@ TEST_CASE("constrained equalities survive image and dependent sum") {
     CHECK(sum.equalities().rows==2);
     CHECK(sum.equalities().values==Vector{1,-1,0,1,0,1});
     CHECK(in_factor_polyhedron(sum,{1,1,-1}));
-    CHECK_FALSE(in_factor_polyhedron(sum,{1,1,0})); // left only
-    CHECK_FALSE(in_factor_polyhedron(sum,{1,0,-1})); // right only
+    const Vector satisfies_left_only{1,1,0};
+    const Vector satisfies_right_only{1,0,-1};
+    CHECK_FALSE(in_factor_polyhedron(sum,satisfies_left_only));
+    CHECK_FALSE(in_factor_polyhedron(sum,satisfies_right_only));
     const auto joined=accepted(factor_polyhedron(sum));
     CHECK(joined.factor_ids==std::vector<FactorId>{{"u"},{"v"},{"w"}});
     const auto physical_h=h_reference({0,2,{}},{},{2,2,{1,0,0,1}},{0,0});

@@ -1,0 +1,61 @@
+{
+  "attempt_id": "syn-nl-fuel-01-20261117T173448Z-0b9001e2",
+  "figure_id": "campaign-2026-11-18-fuel-ellipsoid-paired",
+  "graph_id": "closed-loop/syn-nl-fuel-01/native-composition/1/cfg-002685e4439d4266",
+  "interpretation": "Retained finite-action graph states, backward-viable states, selected plan, and observed nonlinear replay. Search coverage is incomplete; no continuous reachable-set boundary is inferred.",
+  "layer_scopes": [
+    "x1–x2 projected propellant masses",
+    "x3–x4 projected propellant flows",
+    "selected plan and observed nonlinear replay from the same saved attempt",
+    "retained graph nodes and backward viability"
+  ],
+  "plotted_data": "raw/plotted-data/syn-nl-fuel-01-ellipsoid.json",
+  "plotted_data_sha256": "4e6b7c23509bae7fd9abe62c1540c4e3b1924e61b943ceca6f4b74f8a6c8e75c",
+  "projections": [
+    {
+      "id": "propellant-masses",
+      "indices": [
+        0,
+        1
+      ],
+      "labels": [
+        "Oxidizer mass mₒₓ",
+        "Fuel mass m_f"
+      ],
+      "units": [
+        "kg",
+        "kg"
+      ]
+    },
+    {
+      "id": "propellant-flows",
+      "indices": [
+        2,
+        3
+      ],
+      "labels": [
+        "Oxidizer flow qₒₓ",
+        "Fuel flow q_f"
+      ],
+      "units": [
+        "kg/s",
+        "kg/s"
+      ]
+    }
+  ],
+  "renderer": "scripts/reports/render_full_profile_campaign.py",
+  "renderer_source_commit": "30da91aa6683041134e18afb65a13badba90f64e",
+  "representation": "ellipsoid",
+  "schema": "csl.closed-loop-paired-projection-figure/1",
+  "search_coverage": "incomplete",
+  "source_commit": "08af99d6f982235c22a15d4e9307fd032dfb1adb",
+  "stage_count": 41,
+  "svg_sha256": "6dbcfe08be26789bfacec150b2f9247b4afab48f70c707843c86566829934915",
+  "task_id": "syn-nl-fuel-01/continuous-receding/1",
+  "task_name": "syn-nl-fuel-01",
+  "task_sha256": "3462475a357b6ec8e0c18a6d873b192872bdc012d141a68efe1f07a9d6b70da4",
+  "terminal_condition": "soft objective reference; no terminal constraint or final set",
+  "time_step": 0.5,
+  "timeline_end": 20.0,
+  "transition_count": 40
+}

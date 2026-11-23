@@ -22,7 +22,6 @@ archive without an explanation.
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import json
 import re
 from collections.abc import Iterable
@@ -31,20 +30,10 @@ from html.parser import HTMLParser
 from pathlib import Path
 from typing import NamedTuple
 
-try:
+if __package__:
+    from . import site_design
+else:
     import site_design
-except ModuleNotFoundError as error:
-    if error.name != "site_design":
-        raise
-    # A few publication validators load this file by path, outside the
-    # scripts/reports import context. Resolve the helper beside this file so
-    # those standalone imports use the same canonical page framing.
-    design_path = Path(__file__).with_name("site_design.py")
-    design_spec = importlib.util.spec_from_file_location("site_design", design_path)
-    if design_spec is None or design_spec.loader is None:
-        raise ImportError(f"cannot load shared page design from {design_path}") from error
-    site_design = importlib.util.module_from_spec(design_spec)
-    design_spec.loader.exec_module(site_design)
 
 
 class Family(NamedTuple):
@@ -117,6 +106,19 @@ FAMILIES = {
         "Reports one analytic two-state portfolio fixture with finite and mixed-control branches, "
         "aggregate branch limits, and stop-status propagation. Its saved measurements describe this "
         "single case and do not establish a general performance comparison.",
+    ),
+    "catalogue-disturbance-control-v1": Family(
+        r"examples/catalogue-disturbance-control-v1",
+        "geometry",
+        "Disturbance guarantees and feedback",
+        "Compares robust terminal predecessors and finite minimax policies with and without the saved constraints.",
+    ),
+    "catalogue-external-fixed-plan-v1": Family(
+        r"examples/catalogue-external-fixed-plan-v1",
+        "geometry",
+        "Fixed-plan reachability with external disturbances",
+        "Compares five representations under the same fixed controls and authored external sets. "
+        "The queue figure shows full-state propagation projected onto two coordinates.",
     ),
     "catalogue-forward-reachability-v1": Family(
         r"examples/catalogue-forward-reachability-v1",
@@ -1304,6 +1306,42 @@ def build(site: Path) -> None:
                     ("Sampled supports", forward + "/support.csv"),
                     ("Independent audit", forward + "/support-audit.json"),
                     ("Offline example", forward + "/catalogue-forward-reachability-v1.zip"),
+                ),
+            )
+        )
+    external = "examples/catalogue-external-fixed-plan-v1"
+    if (site / external / "index.html").is_file():
+        manifest = json.loads((site / external / "manifest.json").read_text(encoding="utf-8"))
+        detailed = [entry for entry in detailed if entry.report_id != external]
+        detailed.append(
+            Entry(
+                report_id=external,
+                scope="175 native fixed-plan results from 35 models and five set representations.",
+                limits="Two transitions with authored disturbances. Zonotope checks sample directions.",
+                commit=manifest["source_commit"],
+                links=(
+                    ("Independent audit", external + "/audit.json"),
+                    ("Offline evidence", external + "/catalogue-external-fixed-plan-v1.zip"),
+                ),
+            )
+        )
+    disturbance = "examples/catalogue-disturbance-control-v1"
+    if (site / disturbance / "index.html").is_file():
+        manifest = json.loads((site / disturbance / "manifest.json").read_text(encoding="utf-8"))
+        detailed = [entry for entry in detailed if entry.report_id != disturbance]
+        detailed.append(
+            Entry(
+                report_id=disturbance,
+                scope="Exact predecessor checks and numerical finite minimax replay on 35 models.",
+                limits="Two transitions with authored disturbances. The constrained replay retains its domain labels.",
+                commit=manifest["source_commit"],
+                links=(
+                    ("Independent minimax audit", disturbance + "/minimax-audit.json"),
+                    (
+                        "Constrained replay",
+                        disturbance + "/catalogue-constrained-minimax-evidence.zip",
+                    ),
+                    ("Offline evidence", disturbance + "/catalogue-disturbance-control-v1.zip"),
                 ),
             )
         )

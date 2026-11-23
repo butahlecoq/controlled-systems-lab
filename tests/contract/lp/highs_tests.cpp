@@ -275,8 +275,6 @@ TEST_CASE("interleaved warm workspaces and rejected bases preserve literal optim
     std::vector<ProgramResult> history;
     for (std::size_t i=0; i<queries.size(); ++i) {
         const auto& query=queries[i];
-        // Reject one installation after left has already solved two queries.
-        // The fallback must preserve the mathematical answer and its identity.
         if (i==2) test_support::reject_next_warm_basis_installation();
         const auto result=accepted(left->solve(query.program,context()));
         compare_optimal(cold_result(query.program),result,query.program,query.optimum);
@@ -514,7 +512,7 @@ TEST_CASE("exclusive workspaces retain identity across model changes and own his
 }
 
 TEST_CASE("prepared ownership survives producers and independent workspaces solve concurrently") {
-    auto plan = prepare(triangle()); // registry and producer have already gone
+    auto plan = prepare(triangle());
     auto [left] = plan.create();
     auto [right] = plan.create();
     CHECK_FALSE(left->workspace_identity() == right->workspace_identity());
@@ -531,7 +529,6 @@ TEST_CASE("prepared ownership survives producers and independent workspaces solv
     auto b = [&] {
         try { return launch(right); }
         catch (...) {
-            // Release the first worker before its future joins during unwinding.
             start.arrive_and_drop();
             throw;
         }

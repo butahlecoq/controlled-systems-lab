@@ -1,21 +1,23 @@
 from __future__ import annotations
 
 import importlib.util
-from pathlib import Path
 import shutil
+import sys
 import tempfile
 import unittest
+from pathlib import Path
 from zipfile import ZipFile
 
 ROOT = Path(__file__).resolve().parents[2]
-LANDING_SPEC = importlib.util.spec_from_file_location("landing", ROOT / "scripts/reports/landing.py")
-landing = importlib.util.module_from_spec(LANDING_SPEC)
-assert LANDING_SPEC.loader is not None
-LANDING_SPEC.loader.exec_module(landing)
+sys.path.insert(0, str(ROOT / "scripts/reports"))
+landing = importlib.import_module("landing")
+
 SPEC = importlib.util.spec_from_file_location(
-    "stage_mpc05_causal_tree_test", ROOT / "scripts/reports/stage_mpc05_causal_tree.py")
+    "stage_mpc05_causal_tree_test", ROOT / "scripts/reports/stage_mpc05_causal_tree.py"
+)
+if SPEC is None or SPEC.loader is None:
+    raise ImportError("Cannot load the saved report dependency")
 stage_report = importlib.util.module_from_spec(SPEC)
-assert SPEC.loader is not None
 SPEC.loader.exec_module(stage_report)
 
 
@@ -28,7 +30,9 @@ class Mpc05PublicationTests(unittest.TestCase):
             shutil.copytree(source, bundle)
             site = root / "site"
             site.mkdir()
-            (site / "index.html").write_text("<!doctype html><ul></ul><body></body>", encoding="utf-8")
+            (site / "index.html").write_text(
+                "<!doctype html><ul></ul><body></body>", encoding="utf-8"
+            )
 
             report_id = stage_report.stage(bundle, site)
             landing.build(site)

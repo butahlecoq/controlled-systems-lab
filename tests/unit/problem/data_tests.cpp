@@ -53,7 +53,6 @@ std::vector<AdmissibleSet> states(std::size_t n=1, std::size_t t=2) {
 }
 }
 
-// Normalizing elementary sets would erase the empty versus R^0 distinction.
 TEST_CASE("zero ports retain elementary and finite action identities") {
     const auto model = system({1,0,0});
     ControlDomain input = ContinuousDomain{{UniversalSet{0},Singleton{{}}}};
@@ -75,7 +74,6 @@ TEST_CASE("zero ports retain elementary and finite action identities") {
     CHECK(std::get<Singleton>(std::get<ContinuousDomain>(*zero).stages[0]).point==Vector{0});
 }
 
-// An off-by-one or interleaved x/u layout breaks these independent offsets.
 TEST_CASE("state and control stages have literal joint offsets and checked boundaries") {
     const auto model = system({2,1,0});
     auto data=accepted(snapshot_constraints(states(2),std::nullopt,model));
@@ -106,7 +104,6 @@ TEST_CASE("state and control stages have literal joint offsets and checked bound
     rejected(snapshot_constraints(states(0),{},huge),"problem.temporal.coordinates");
 }
 
-// Producer mutation, deduplication, convexification or a wrong mixed split breaks this.
 TEST_CASE("finite and mixed domains retain catalogue order and explicit dimensions") {
     ControlDomain producer=FiniteDomain{1,{{-1},{1},{-1}}};
     const auto retained=accepted(snapshot_controls(std::move(producer),system())).description();
@@ -149,7 +146,6 @@ TEST_CASE("initial information retains point versus quantified singleton after p
     rejected(snapshot_initial(InitialSet{Singleton{{std::numeric_limits<double>::infinity()}},SetQuantifier::universal},system()),"problem.initial.point");
 }
 
-// Full, partial or missing observation data must not convert a set into knowledge.
 TEST_CASE("observation channels do not redefine initial information") {
     for (const auto channels : {0,1,2}) {
         auto raw=authored({2,0,0});
@@ -211,7 +207,6 @@ TEST_CASE("malformed external information is distinguished from unsupported prof
     rejected(snapshot_external(AdversarialExternalInput{{UniversalSet{1},UniversalSet{1}},SetQuantifier::universal,{}},model),"problem.external.semantics_reference");
 }
 
-// Reused factor identity is not correlation; V endpoints are not a nonconvex set.
 TEST_CASE("exogenous Cartesian factors retain endpoints and unknown unbounded bounded metadata") {
     const auto unknown=accepted(sets::make_h({{"unknown"},1,{}},{
         accepted(numeric::snapshot(Matrix{0,1,{}})),accepted(numeric::snapshot_vector({})),
@@ -238,12 +233,11 @@ TEST_CASE("exogenous Cartesian factors retain endpoints and unknown unbounded bo
         Vector endpoint_differences;
         for (std::size_t i=0;i<2;++i) for (std::size_t j=0;j<2;++j) endpoint_differences.push_back(a(i,0)-b(j,0));
         CHECK(endpoint_differences==Vector{0,-2,2,0});
-        // Diagonal fixed-parameter restriction is different data, not represented here.
-        CHECK(Vector{a(0,0)-b(0,0),a(1,0)-b(1,0)}==Vector{0,0});
+        const Vector diagonal_differences{a(0,0)-b(0,0),a(1,0)-b(1,0)};
+        CHECK(diagonal_differences==Vector{0,0});
     }
 }
 
-// Dropping nonadjacent rows, aliasing producer CSR or mixing coordinate blocks fails.
 TEST_CASE("temporal full history and row bounds outlive every producer and outer handle") {
     auto owners=[] {
         auto input=history();
@@ -307,7 +301,6 @@ TEST_CASE("native set import preserves evidence and rejects mutable foreign payl
     rejected(snapshot_initial(InitialSet{handle,SetQuantifier::universal},system({2,0,0})),"problem.initial.sets.handle.payload",DiagnosticCode::unsupported);
 }
 
-// Each reader owns retained storage; producer/outer owners are already destroyed.
 TEST_CASE("copied moved and assigned handles keep independent immutable reader ownership") {
     auto owners=[] {
         ControlDomain raw=FiniteDomain{1,{{-1},{1}}};

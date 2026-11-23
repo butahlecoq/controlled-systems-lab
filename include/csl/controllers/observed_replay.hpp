@@ -2,6 +2,7 @@
 
 #include <csl/model/linear_system.hpp>
 #include <functional>
+#include <optional>
 #include <span>
 
 namespace csl::controllers {
@@ -24,12 +25,14 @@ struct ReleasedObservation {
 // The estimate is a caller-defined state hypothesis, not a verified state.
 using Estimator = std::function<Vector(StageIndex, std::span<const ReleasedObservation>)>;
 using Controller = std::function<Vector(StageIndex, std::span<const ReleasedObservation>,
-    std::span<const double> estimate)>;
+                                        std::span<const double> estimate)>;
+using ObservationController =
+    std::function<Vector(StageIndex, std::span<const ReleasedObservation>)>;
 
 struct DecisionEvidence {
     StageIndex stage;
     std::vector<ReleasedObservation> available;
-    Vector estimate;
+    std::optional<Vector> estimate;
     Vector action;
 };
 
@@ -46,7 +49,12 @@ using ReplayResult = std::variant<ReplayRecord, Diagnostic, OperationStopped>;
 // choose u_k. Apply the supplied external sample, advance state and release
 // after(k) observations. before(T) releases terminal observations only.
 // This is sampled replay; it makes no all-disturbance or optimality claim.
-ReplayResult replay_observed_policy(const model::LinearSystem&, const ReplayInputs&,
-    const Estimator&, const Controller&);
+ReplayResult replay_observed_policy(const model::LinearSystem &, const ReplayInputs &,
+                                    const Estimator &, const Controller &);
+
+// This overload gives the controller only the stage and released observation history.
+// Decision evidence leaves estimate empty for this information pattern.
+ReplayResult replay_observed_policy(const model::LinearSystem &, const ReplayInputs &,
+                                    const ObservationController &);
 
 } // namespace csl::controllers

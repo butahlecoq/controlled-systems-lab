@@ -80,6 +80,8 @@ TEST_CASE("finite universal policy reuses one action for indistinguishable initi
     REQUIRE(evidence.scenarios.size() == 2);
     CHECK(evidence.scenarios[0].inputs.initial_state == Vector{0,2});
     CHECK(evidence.scenarios[1].inputs.initial_state == Vector{0,9});
+    CHECK(evidence.scenarios[0].states == std::vector<Vector>{{0,2},{0,2}});
+    CHECK(evidence.scenarios[1].states == std::vector<Vector>{{0,9},{0,9}});
     CHECK(evidence.scenarios[0].decisions[0].action == Vector{4});
     CHECK(evidence.scenarios[1].decisions[0].action == Vector{4});
     CHECK(evidence.scenarios[0].decisions[0].available[0].value.values == Vector{0});
@@ -102,6 +104,8 @@ TEST_CASE("finite policy may branch after a released observation distinguishes s
     const auto& evidence = std::get<FinitePolicyFamilyEvidence>(result);
     CHECK(evidence.initial_quantifier == SetQuantifier::universal);
     REQUIRE(evidence.scenarios.size() == 2);
+    CHECK(evidence.scenarios[0].states == std::vector<Vector>{{1},{1}});
+    CHECK(evidence.scenarios[1].states == std::vector<Vector>{{5},{5}});
     CHECK(evidence.scenarios[0].decisions[0].action == Vector{-2});
     CHECK(evidence.scenarios[1].decisions[0].action == Vector{7});
 }

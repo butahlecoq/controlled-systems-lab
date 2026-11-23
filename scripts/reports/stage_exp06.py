@@ -1,26 +1,30 @@
 """Stage the saved bounded EXP-06 geometry pilot on the algorithm report site."""
+
 from __future__ import annotations
 
 import argparse
 import hashlib
-from html import escape
 import importlib.util
-import json
-from pathlib import Path
 import shutil
 import sys
+from html import escape
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
 spec = importlib.util.spec_from_file_location(
-    "exp06_saved_renderer", ROOT / "scripts/reports/exp06/render_saved.py")
+    "exp06_saved_renderer", ROOT / "scripts/reports/exp06/render_saved.py"
+)
+if spec is None or spec.loader is None:
+    raise RuntimeError("EXP-06 saved renderer could not be loaded")
 report = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(report)
 site_spec = importlib.util.spec_from_file_location(
-    "exp06_site_validator", Path(__file__).with_name("site.py"))
+    "exp06_site_validator", Path(__file__).with_name("site.py")
+)
+if site_spec is None or site_spec.loader is None:
+    raise RuntimeError("EXP-06 site validator could not be loaded")
 site = importlib.util.module_from_spec(site_spec)
-assert site_spec.loader is not None
 site_spec.loader.exec_module(site)
 
 
@@ -35,12 +39,22 @@ def validate_bundle(bundle: Path, renderer=report) -> str:
             raise ValueError("saved EXP-06 renderer differs: " + name)
     manifest = report.strict_json(bundle / "manifest.json")
     expected = {name: sha(data) for name, data in rendered.items()}
-    for name in ("comparison-record.json", "capture.json", "pack-request.json", "packer.stdout", "packer.stderr"):
+    for name in (
+        "comparison-record.json",
+        "capture.json",
+        "pack-request.json",
+        "packer.stdout",
+        "packer.stderr",
+    ):
         expected[name] = sha((bundle / name).read_bytes())
     for directory in ("raw-attempts", "fixture"):
         for path in sorted((bundle / directory).glob("*")):
             expected[directory + "/" + path.name] = sha(path.read_bytes())
-    if manifest != {"schema": "csl.exp06-report-manifest/1", "report_id": report_id, "files": expected}:
+    if manifest != {
+        "schema": "csl.exp06-report-manifest/1",
+        "report_id": report_id,
+        "files": expected,
+    }:
         raise ValueError("EXP-06 file hash manifest differs")
     inventory = set(expected) | {"manifest.json"}
     actual = {path.relative_to(bundle).as_posix() for path in bundle.rglob("*") if path.is_file()}
@@ -56,16 +70,19 @@ def stage(source: Path, site_dir: Path, renderer=report) -> str:
     destination = site_dir / report_id
     if not site_dir.is_dir() or site_dir.is_symlink() or destination.exists():
         raise ValueError("EXP-06 route must be staged into a fresh site directory")
-    shutil.copytree(source, destination)
     index_path = site_dir / "index.html"
     index = index_path.read_text(encoding="utf-8")
     if index.count("</ul>") != 1 or report_id in index:
         raise ValueError("algorithm report index insertion point differs")
-    link = (f'<li><a href="{escape(report_id)}/index.html">EXP-06 bounded geometry pilot</a>'
-            f' · <a href="{escape(report_id)}/hulls.svg">2D hull illustration</a>'
-            f' · <a href="{escape(report_id)}/comparison-record.json">paired record</a></li>')
-    site.OfflineHTML({report_id + "/index.html", report_id + "/hulls.svg",
-                      report_id + "/comparison-record.json"}).feed(link)
+    link = (
+        f'<li><a href="{escape(report_id)}/index.html">EXP-06 bounded geometry pilot</a>'
+        f' · <a href="{escape(report_id)}/hulls.svg">2D hull illustration</a>'
+        f' · <a href="{escape(report_id)}/comparison-record.json">paired record</a></li>'
+    )
+    site.OfflineHTML(
+        {report_id + "/index.html", report_id + "/hulls.svg", report_id + "/comparison-record.json"}
+    ).feed(link)
+    shutil.copytree(source, destination)
     index_path.write_text(index.replace("</ul>", link + "</ul>"), encoding="utf-8")
     return report_id
 
@@ -74,13 +91,17 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--site", type=Path, required=True)
-    parser.add_argument("--paper-followup", action="store_true",
-        help="validate the expanded A43/A44 method set using render_paper_saved.py")
+    parser.add_argument(
+        "--paper-followup",
+        action="store_true",
+        help="validate the expanded A43/A44 method set using render_paper_saved.py",
+    )
     args = parser.parse_args()
     selected_renderer = report
     if args.paper_followup:
         paper_spec = importlib.util.spec_from_file_location(
-            "exp06_paper_saved_renderer", ROOT / "scripts/reports/exp06/render_paper_saved.py")
+            "exp06_paper_saved_renderer", ROOT / "scripts/reports/exp06/render_paper_saved.py"
+        )
         if paper_spec is None or paper_spec.loader is None:
             raise RuntimeError("paper-followup renderer could not be loaded")
         selected_renderer = importlib.util.module_from_spec(paper_spec)

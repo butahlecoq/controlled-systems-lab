@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Disturbance guarantees and feedback</title>
+<link rel="stylesheet" href="examples.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to lesson</a>
+<main id="main" class="page-content">
+<h1>Disturbance guarantees and feedback</h1>
+<p>Two experiments use the same two-transition external-set fixture on 35 discrete models. The Puffer buffer illustrates whether a committed plan guarantees a terminal target. EV charging shows what changes when the second action can use the observed state.</p>
+<ul>
+<li><a href="#predecessor">Compute a robust terminal predecessor</a></li>
+<li><a href="#feedback">Compare fixed actions with finite causal feedback</a></li>
+<li><a href="#constraints">Apply the saved state and actuator constraints</a></li>
+<li><a href="#replay">Replay the experiments offline</a></li>
+</ul>
+
+<section id="predecessor">
+<h2>Compute a robust terminal predecessor</h2>
+<p>For the two-state Puffer buffer, use x₀ = (8, 2)ᵀ, zero control and two transitions of 2.002 s. The update is xₖ₊₁ = A xₖ + E wₖ. The affine offset is zero.</p>
+<pre aria-label="Puffer transition and disturbance matrices">    ⎡ 1  0.08 ⎤       ⎡ −1  0 ⎤
+A = ⎣ 0  0.7  ⎦   E = ⎣  0  1 ⎦</pre>
+<p>At each transition wₖ ranges independently over the convex hull of five vertices. Start at the centre (2.002, 0.4)ᵀ and add each of 0, (±0.2002, 0)ᵀ and (0, ±0.1)ᵀ to the centre. The displayed coefficients are rounded decimals. The replay uses the stored binary64 inputs. The nominal terminal state is (4.3, 1.66)ᵀ. Centre the target box there and take 10% of the larger of one and each absolute centre coordinate as its half-width.</p>
+<p>For each terminal coordinate, write the additive contribution from the remaining disturbances as an interval [m, M] of extrema. A target interval [ℓ, h] then requires the corresponding coordinate of A<sup>2−k</sup>xₖ to lie in [ℓ−m, h−M]. If an interval reverses, the predecessor is empty. The Puffer stage-zero interval for the second coordinate has signed width approximately −0.008 Mbit. A nominal trajectory reaches the target centre, but no initial state can guarantee this target under the same fixed controls and disturbances.</p>
+<figure>
+<img src="puffer-robust-predecessor.svg" alt="Forward disturbance sets and dashed backward outlines at stages one and two, with shaded same-stage intersections. The initial robust predecessor is empty.">
+<figcaption>The forward sets grow out of the initial point. The dashed outlines show the stage-one robust predecessor and the terminal target. Their shaded intersections are with the forward sets at the same stage. The dark line follows the nominal disturbance. <a href="puffer-robust-predecessor.svg">Open the full-size Puffer figure</a>.</figcaption>
+</figure>
+<table id="predecessor-coverage">
+<caption>Models with an empty predecessor, out of 35</caption>
+<thead><tr><th scope="col">Target half-width</th><th scope="col">Stage 0</th><th scope="col">Stage 1</th><th scope="col">Stage 2</th></tr></thead>
+<tbody>
+<tr><th scope="row">10%</th><td>13</td><td>11</td><td>0</td></tr>
+<tr><th scope="row">1%</th><td>31</td><td>25</td><td>0</td></tr>
+</tbody>
+</table>
+<p>An independent exact-rational checker enumerated 1,013 suffix words and verified all 2,334 interval certificates. Every reported nonempty set contains its nominal stage state.</p>
+</section>
+
+<section id="feedback">
+<h2>Compare fixed actions with finite causal feedback</h2>
+<p>The EV model has three energy states. Use A = E = I₃, B = diag(−0.225, −0.2375, −0.23), zero affine offset and x₀ = (12, 18, 25)ᵀ kWh. There are two transitions of 15 minutes. At each transition the action is (a, 0, 0)ᵀ with a ∈ {0, −0.1, 0.1}. The disturbance independently takes one of the five values 0, (±0.1, 0, 0)ᵀ, (0, ±0.1, 0)ᵀ.</p>
+<p>The intended terminal cost is the sum of squared changes scaled by the squared initial energy in each coordinate. The replay uses the saved quadratic ½xᵀQx + ℓᵀx + 3, with the original binary64 coefficients in the input files.</p>
+<p>Both policies choose the first action before the first disturbance. The fixed plan also commits to the second action at that time. The causal policy chooses its second action after observing x₁, then the second disturbance acts. This gives the causal policy the decision order min<sub>u₀</sub> max<sub>w₀</sub> min<sub>u₁</sub> max<sub>w₁</sub>.</p>
+<figure>
+<img src="ev-causal-minimax.svg" alt="EV charging phase projection with the initial point, common first observations, both finite terminal clouds and the worst-case path for each selected policy.">
+<figcaption>Projection onto remaining energy for the first two vehicles. Both policies share the plotted first observations. The causal policy pulls the farthest terminal points toward the centre in e₁. Lines trace one exact worst-case word for each selected policy. <a href="ev-causal-minimax.svg">Open the full-size EV figure</a>.</figcaption>
+</figure>
+<table id="minimax-costs">
+<caption>Models with a strict reduction in worst terminal cost</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Fixed plan</th><th scope="col">Causal feedback</th></tr></thead>
+<tbody>
+<tr><th scope="row">EV charging</th><td>0.00027777778</td><td>0.00021879340</td></tr>
+<tr><th scope="row">Thirty-bank ring</th><td>0.03988894635</td><td>0.03986116015</td></tr>
+</tbody>
+</table>
+<p>The other 33 models tied in exact arithmetic. The oracle checked 315 fixed plans, 485 second-decision states and all 70 initial values. The largest absolute discrepancy from the numerical SDK results was 2.58 × 10<sup>−14</sup>.</p>
+<p>Both fixtures use universal intermediate state domains and authored actions or disturbances. The causal comparison is for the finite vertex game. The fixed plan also attains its maximum on these vertices for convex-hull uncertainty because the dynamics are affine and the terminal cost is convex. The results carry no physical calibration or performance claim.</p>
+</section>
+
+<section id="constraints">
+<h2>Apply the saved state and actuator constraints</h2>
+<p>Keep the same finite actions, disturbance vertices, and terminal quadratic. Use the first two stages of the saved feasible-history constraint profiles and apply their terminal rows at the new deadline. One variant keeps only the component state and actuator bounds. The other includes mixed rows, positive-part actuator budgets, and terminal rows. The 29 source-continuous, three continuous-relaxation, and three authored-domain labels stay with the records.</p>
+<p>Both fixed and causal policies are feasible on 33 models under either variant. The IP/SDN queues and warehouse/store models violate a lower state bound at the terminal stage. In the queue model every actuator-admitted plan has q₃ = −6 Mbit at that stage. The lower bound is q₃ ≥ 0.</p>
+<figure>
+<img src="queue-safety-obstruction.svg" alt="Discrete projections of queue states at stages zero, one and two. Every stage-two point has third-queue content of minus six below the zero bound.">
+<figcaption>Exact projection onto the first and third queue contents. All stage-two points fall below the admissible range for q₃. The first-queue coordinate can move with the action and disturbance. <a href="queue-safety-obstruction.svg">Open the full-size queue figure</a>.</figcaption>
+</figure>
+<table id="constrained-costs">
+<caption>Worst terminal cost with all retained rows</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Fixed plan</th><th scope="col">Causal feedback</th></tr></thead>
+<tbody>
+<tr><th scope="row">EV charging</th><td>0.00027777778</td><td>0.00027777778</td></tr>
+<tr><th scope="row">Thirty-bank ring</th><td>0.03988894635</td><td>0.03986116015</td></tr>
+</tbody>
+</table>
+<p>The EV actuator bound excludes the negative action that provided the earlier causal gain. The thirty-bank policy retains its advantage. The additional rows do not change the outcomes for this particular action menu.</p>
+<p>To pass the problem to the SDK, encode each complete fixed plan as one first-stage decision. For causal control retain two stages and share the second decision between exactly equal observations. Unsafe transitions lead to rejected nodes. The SDK and exact enumeration agree on all 140 feasibility statuses and all 132 costs for feasible policies. The largest absolute value difference is 6.98 × 10<sup>−16</sup>. Both results concern finite external vertices.</p>
+<p><a href="catalogue-constrained-minimax-evidence.zip">Download the constrained C++ replay, exact ledger, inputs, and figure</a>.</p>
+</section>
+
+<section id="replay">
+<h2>Replay the experiments offline</h2>
+<p>Download the <a href="catalogue-disturbance-evidence.zip">C++ clients, replay instructions, inputs, raw results and independent checkers</a>. Use the bundled CMake project with <a href="https://github.com/butahlecoq/csl-sdk/tree/806738c9d1c8f1d9ebd8885b7bb605b5a698b1af">the pinned SDK source</a>, then run the two clients and the certificate verifiers as described in the included REPLAY.md.</p>
+<p><a href="minimax-audit.json">Per-model minimax audit</a> · <a href="manifest.json">Sources and checksums</a></p>
+</section>
+</main>
+</body>
+</html>

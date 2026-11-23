@@ -10,4 +10,4 @@ struct Diagnostic {
     std::string field, explanation;
 };
 using Diagnostics = std::vector<Diagnostic>;
-} // namespace csl
+}

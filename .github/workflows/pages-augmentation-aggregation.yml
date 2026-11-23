@@ -19,11 +19,11 @@ jobs:
       upstream_run_id: ${{ steps.wait.outputs.upstream_run_id }}
       upstream_sha: ${{ steps.wait.outputs.upstream_sha }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: ${{ github.workflow_sha }}
           persist-credentials: false
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.12'
       - name: Wait for every single-route artifact for this source revision
@@ -52,16 +52,16 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: ${{ needs.await.outputs.upstream_sha }}
           persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.12'
       - name: Download the complete reviewed Pages artifact
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           name: github-pages
           run-id: ${{ needs.await.outputs.upstream_run_id }}
@@ -69,7 +69,7 @@ jobs:
           path: build/pages-download
       - name: Select the qualified optional report interpreter
         id: mpc_python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.11.14'
           update-environment: false
@@ -113,7 +113,7 @@ jobs:
           python scripts/reports/pages_route_retirement.py --site build/report-site
           python scripts/reports/audit_mathematical_presentation.py --site-root build/report-site --json-output build/mathematical-presentation-audit.json
       - name: Check out the pinned official Pages deployer
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: actions/deploy-pages
           ref: 368f82528645a54fb793d4d04e342629a3f51346
@@ -129,10 +129,10 @@ jobs:
         run: python3 scripts/reports/check_deploy_head.py
       - name: Upload the complete augmented Pages site
         if: steps.head.outputs.current == 'true'
-        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9
         with:
           path: build/report-site
-      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d
         if: steps.head.outputs.current == 'true'
       - name: Deploy the complete augmented report site
         if: steps.head.outputs.current == 'true'

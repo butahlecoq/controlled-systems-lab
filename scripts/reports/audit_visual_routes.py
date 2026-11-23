@@ -256,6 +256,10 @@ SAVED_DATA_ILLUSTRATION_RENDERERS = {
         "Renders authenticated saved finite-action campaign graph states, backward-viable nodes, selected first-query "
         "plans and observed plant replays in four physical 2D projections. It runs no solver, draws no convex hull, "
         "and discloses incomplete beam-pruned search coverage and retained-graph-only optimality."),
+    "scripts/reports/render_campaign_paired_projection.py": (
+        "Renders paired x1–x2 mass and x3–x4 flow projections from a saved fuel campaign record and publishes "
+        "the task contract, provenance and reproduction command. It runs no campaign or solver; graph marks appear "
+        "only for graph-backed records, while box records are labeled fixed-plan outer tubes."),
     "scripts/reports/render_full_profile_campaign.py": (
         "Reads the frozen full-profile candidate universe, reconciled outcomes and saved attempt records; "
         "publishes all-stage projections, nonlinear replay objectives, worker resource evidence and role dispositions. "
@@ -280,6 +284,8 @@ SAVED_DATA_COMPANION_RENDERERS = {
     "benchmarks/reporting/review05/render_constraint_ladder.py",
 }
 FROZEN_COMPANIONS = {
+    "catalogue-disturbance-control-v1": "examples/catalogue-disturbance-control-v1/index.html",
+    "catalogue-external-fixed-plan-v1": "examples/catalogue-external-fixed-plan-v1/index.html",
     "catalogue-ring-initial-support-v1": "examples/catalogue-ring-initial-support-v1/index.html",
     "catalogue-forward-reachability-v1": "examples/catalogue-forward-reachability-v1/index.html",
     "catalogue-feasible-history-v1": "examples/catalogue-feasible-history-v1/index.html",
@@ -329,6 +335,10 @@ FROZEN_REVIEWED_ROUTES = {
         "reviewed: physical and centred coordinates show the same stagewise platoon projection",
     "mpc-crossover-6b7308c4":
         "reviewed: saved plots distinguish feasible and infeasible states, show the three-step trajectory and compare paired deployment timings",
+    "catalogue-disturbance-control-v1":
+        "reviewed: overlays robust predecessor geometry, finite policy paths and the constrained queue safety obstruction",
+    "catalogue-external-fixed-plan-v1":
+        "reviewed: three stage projections compare the enumerated queue hull and four outer enclosures",
     "review05-family-query-20261110-3b98f5b0":
         "reviewed: root inspected the shared-policy scalar control projection and recorded state paths; exact family coverage is checked separately",
     "exp02-paired-profiles-20261027-r1":
@@ -476,7 +486,7 @@ def source_inventory(root: Path) -> list[dict]:
                 disposition = "gallery-composition-and-route"
             elif ("registered_reports.py" in path.name or path.name.startswith(("stage_", "validate_"))
                   or "publication_policy" in path.name
-                  or path.name in {"site.py", "report_data.py", "registered_report_policies.py",
+                  or path.name in {"site.py", "report_site.py", "report_data.py", "registered_report_policies.py",
                                    "learning_model_tracks.py",
                                    "schema3_publication_policies.py"}):
                 disposition = "publication-validation-or-frozen-route"
@@ -548,6 +558,12 @@ def build(root: Path = ROOT) -> dict:
                     "positive-part-budget-2d.json", "positive_part_budget_2d_vertices.csv",
                     "positive_part_budget_2d_native-solution.csv", "positive_part_budget_2d_run.txt",
                     "positive_part_budget_2d_native-example.stdout",
+                    "catalogue-disturbance-control-v1/index.html",
+                    "catalogue-disturbance-control-v1/ev-causal-minimax.svg",
+                    "catalogue-disturbance-control-v1/puffer-robust-predecessor.svg",
+                    "catalogue-disturbance-control-v1/queue-safety-obstruction.svg",
+                    "catalogue-external-fixed-plan-v1/index.html",
+                    "catalogue-external-fixed-plan-v1/queue-outer-projections.svg",
                     "catalogue-forward-reachability-v1/index.html",
                     "catalogue-forward-reachability-v1/platoon-forward.svg",
                     "catalogue-feasible-history-v1/index.html",

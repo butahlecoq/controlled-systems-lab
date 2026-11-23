@@ -1,6 +1,7 @@
 """Literal exact-dyadic oracle for the authored scalar query fixtures."""
-from fractions import Fraction
+
 import math
+from fractions import Fraction
 
 
 def number(value):
@@ -21,7 +22,7 @@ def verify_history(states, controls, reported_objective, horizon, terminal_coeff
     if x[0] != 0:
         raise ValueError("initial state must be zero")
     for k in range(horizon):
-        if not 0 <= u[k] <= 1 or x[k+1] != x[k] + u[k]:
+        if not 0 <= u[k] <= 1 or x[k + 1] != x[k] + u[k]:
             raise ValueError("literal dynamics or control bounds violated")
     objective = terminal_coefficient * x[-1]
     if number(reported_objective) != objective:

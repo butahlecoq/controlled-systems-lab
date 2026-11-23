@@ -55,8 +55,6 @@ OperationOutcome project(const OperationRequest& request,geometry::polyhedral::P
     auto prepared=take(selected.prepare(request));
     return std::get<0>(prepared.create())->run({});
 }
-// Independent row evaluation observes membership; it does not compute an
-// expected projection or use elimination helpers from production.
 bool contains(const SetHandle& handle,Vector point) {
     auto data=take(sets::from_handle(handle));
     auto rep=data.representation();
@@ -86,7 +84,6 @@ reachability::NominalPredecessorResult run(const reachability::NominalPredecesso
 }
 
 TEST_CASE("integrator predecessor includes existential controls and clips X") {
-    // x+=x+u+1, u in [-1,1], target [2,3] => x in [0,3]; X=[-5,2.5].
     auto request=predecessor(interval("X",-5,2.5,"x").as_handle(),
         interval("U",-1,1,"u").as_handle(),interval("S",2,3,"x").as_handle(),
         {1,1,{1}},{1,1,{1}},{1});
@@ -153,7 +150,6 @@ TEST_CASE("one-step target predecessor has explicit control witnesses and reject
 }
 
 TEST_CASE("singular A keeps its unconstrained state direction and target equality") {
-    // x+=(x0+u, 0), S={(2,0)}, u in [-1,1] => 1<=x0<=3; x1 is free.
     auto x=take(sets::make_universal({{"X"},2,{"x0","x1"}}));
     auto s=h("S",2,{0,2,{}},{},{2,2,{1,0,0,1}},{2,0},{"x0","x1"});
     auto result=run(predecessor(x.as_handle(),interval("U",-1,1).as_handle(),s.as_handle(),
@@ -179,13 +175,12 @@ TEST_CASE("unreachable target remains empty after singular predecessor projectio
             zero=zero && rows->inequalities(row,column)==0;
         contradiction=contradiction || (zero && rows->upper_bounds[row]<0);
     }
-    CHECK(contradiction); // No physical state satisfies 0 <= a negative bound.
+    CHECK(contradiction);
     CHECK_FALSE(contains(result.result.output,{0,0}));
     CHECK_FALSE(contains(result.result.output,{100,-100}));
 }
 
 TEST_CASE("H projection preserves surviving equalities and coordinate ordering") {
-    // z=2x, x+y=3, 0<=y<=1; ordered [z,x] gives 4<=z<=6 and z=2x.
     auto joint=h("joint",3,{2,3,{0,1,0,0,-1,0}},{1,0},
         {2,3,{-2,0,1,1,1,0}},{0,3},{"x","y","z"});
     auto request=projection(joint.as_handle(),{2,0});
@@ -207,7 +202,6 @@ TEST_CASE("projection of the unit-square slice x+y=1 is the exact interval [0,1]
         {1,2,{1,1}},{1});
     auto result=take(project(projection(slice.as_handle(),{0}),
         geometry::polyhedral::ProjectionOutput::h));
-    // Rational parameterization (x,y)=(t,1-t), 0<=t<=1.
     CHECK(contains(result.output,{0}));
     CHECK(contains(result.output,{0.5}));
     CHECK(contains(result.output,{1}));
@@ -223,8 +217,6 @@ TEST_CASE("projection of the unit-square slice x+y=1 is the exact interval [0,1]
     for (std::size_t row=0;row<projected.inequalities.rows();++row) {
         const auto coefficient=projected.inequalities(row,0);
         const auto bound=projected.upper_bounds[row];
-        // Duplicate rows are allowed; every row must be one of the exact
-        // endpoint inequalities defining [0,1].
         const bool lower=coefficient==-1.0 && bound==0.0;
         const bool upper=coefficient==1.0 && bound==1.0;
         CHECK((lower || upper));
@@ -236,7 +228,6 @@ TEST_CASE("projection of the unit-square slice x+y=1 is the exact interval [0,1]
 }
 
 TEST_CASE("projection of the rational unit-square triangle is the exact interval [0,1]") {
-    // The triangle has vertices (0,0), (1,0), and (0,1). Its x projection is [0,1].
     auto triangle=h("unit-square-lower-triangle",2,
         {5,2,{1,0,-1,0,0,1,0,-1,1,1}},{1,0,1,0,1},
         {0,2,{}},{});
@@ -375,7 +366,6 @@ TEST_CASE("projection fails explicitly at caller row limit without publishing a 
 }
 
 TEST_CASE("zero-control predecessor preserves a lower-dimensional equality set") {
-    // x+=(2*x0,x1), no controls, S={x0=4}; predecessor x0=2, x1 arbitrary.
     auto x=take(sets::make_universal({{"X"},2,{}}));
     auto u=take(sets::make_universal({{"U"},0,{}}));
     auto s=h("S",2,{0,2,{}},{},{1,2,{1,0}},{4});
@@ -402,7 +392,6 @@ TEST_CASE("projection onto R0 distinguishes nonempty and empty existential fiber
 }
 
 TEST_CASE("duplicate H rows keep the tightest bound before projection pairing") {
-    // x+y <= 5, y >= 2, x >= -1. Eliminating y gives [-1, 3].
     Matrix rows{17, 2, {}};
     Vector bounds;
     for (double slack : {3., 1., 0., 2., 4., 7., 5., 6.}) {
@@ -421,7 +410,6 @@ TEST_CASE("duplicate H rows keep the tightest bound before projection pairing") 
 }
 
 TEST_CASE("one-sided eliminated variable does not introduce a bound on remaining coordinates") {
-    // exists y: x+y<=1 for every real x, since y has no lower bound.
     auto joint=h("joint",2,{1,2,{1,1}},{1},{0,2,{}},{});
     auto result=take(project(projection(joint.as_handle(),{0}),geometry::polyhedral::ProjectionOutput::h));
     CHECK(contains(result.output,{-1e100}));
@@ -592,10 +580,6 @@ TEST_CASE("unsupported triangle intersection request retains both operands and r
 }
 
 TEST_CASE("projection provider rejects the unbounded preimage of y=0 instead of returning finite vertices") {
-    // For f(x,y)=y and target {0}, f^{-1}({0})={(x,0): x in R}.
-    // The rational points (-2,0), (0,0), and (3,0) lie in the expected line;
-    // it is unbounded in both x directions and cannot be represented by finitely
-    // many vertices without rays.
     const auto target=h("zero-target",1,{0,1,{}},{},{1,1,{1}},{0}).as_handle();
     const OperationRequest request{{{"test08"},{"unbounded-preimage"},{"unbounded-line"}},
         {"csl.geometry.polyhedral-projection"},
