@@ -636,6 +636,8 @@ on:
       - 'scripts/reports/ext02/collect.py'
       - 'scripts/reports/ext02/render_saved.py'
       - 'scripts/reports/syn04/**'
+      - 'scripts/reports/syn04_ts02/**'
+      - 'scripts/reports/syn04_ts03/**'
       - 'scripts/reports/syn04*_registered_reports.py'
       - 'scripts/reports/syn04*_publication_policy.py'
       - 'reports/algorithm-results/tooling/syn04/**'
