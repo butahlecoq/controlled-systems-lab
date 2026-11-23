@@ -716,9 +716,14 @@ def verify_export(root, receipt):
         )
         for name, record in capture["files"].items():
             location = source_inventory.SourceLocation(record["path"], record["member"])
-            require(location in inventory[name], "exported capture source path is not authorized")
             commit = source_inventory.revision_for(name, source_commit, native)
-            data = source_inventory.read_location(root, commit, location)
+            expected_location, data = source_inventory.available_location(
+                root, commit, inventory[name]
+            )
+            require(
+                location == expected_location,
+                "exported capture source path differs from revision inventory",
+            )
             require(digest(data) == record["sha256"], "exported capture source digest differs")
 
 
