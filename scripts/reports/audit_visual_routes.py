@@ -256,6 +256,10 @@ SAVED_DATA_ILLUSTRATION_RENDERERS = {
         "Renders authenticated saved finite-action campaign graph states, backward-viable nodes, selected first-query "
         "plans and observed plant replays in four physical 2D projections. It runs no solver, draws no convex hull, "
         "and discloses incomplete beam-pruned search coverage and retained-graph-only optimality."),
+    "scripts/reports/render_campaign_paired_projection.py": (
+        "Renders paired x1–x2 mass and x3–x4 flow projections from a saved fuel campaign record and publishes "
+        "the task contract, provenance and reproduction command. It runs no campaign or solver; graph marks appear "
+        "only for graph-backed records, while box records are labeled fixed-plan outer tubes."),
     "scripts/reports/render_full_profile_campaign.py": (
         "Reads the frozen full-profile candidate universe, reconciled outcomes and saved attempt records; "
         "publishes all-stage projections, nonlinear replay objectives, worker resource evidence and role dispositions. "

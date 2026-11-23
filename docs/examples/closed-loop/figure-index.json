@@ -3256,6 +3256,329 @@
         }
       ],
       "reproduction_command": "python scripts/reports/campaign_graph_figures.py --campaign-root reports/closed-loop-composition-campaign-v2"
+    },
+    {
+      "id": "campaign-2026-11-18-fuel-box-paired",
+      "availability": "ready",
+      "href": "examples/closed-loop/campaign-2026-11-18/syn-nl-fuel-01-box-paired.html",
+      "svg_href": "examples/closed-loop/campaign-2026-11-18/syn-nl-fuel-01-box-paired.svg",
+      "plotted_data_href": "examples/closed-loop/campaign-2026-11-18/raw/plotted-data/syn-nl-fuel-01-box.json",
+      "title": "Fuel transfer · box · paired projections",
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "task_sha256": "3462475a357b6ec8e0c18a6d873b192872bdc012d141a68efe1f07a9d6b70da4",
+      "geometry_source_commit": "08af99d6f982235c22a15d4e9307fd032dfb1adb",
+      "renderer_source_commit": "65db5ee6b0fec91eea1ab330f0cc165027538754",
+      "stage_count": 41,
+      "transition_count": 40,
+      "time_step": 0.5,
+      "timeline_end": 20.0,
+      "coordinate_transform": {
+        "projections": [
+          {
+            "id": "propellant-masses",
+            "indices": [
+              0,
+              1
+            ],
+            "labels": [
+              "Oxidizer mass mₒₓ",
+              "Fuel mass m_f"
+            ],
+            "units": [
+              "kg",
+              "kg"
+            ]
+          },
+          {
+            "id": "propellant-flows",
+            "indices": [
+              2,
+              3
+            ],
+            "labels": [
+              "Oxidizer flow qₒₓ",
+              "Fuel flow q_f"
+            ],
+            "units": [
+              "kg/s",
+              "kg/s"
+            ]
+          }
+        ],
+        "description": "Physical state projections x1–x2 (propellant masses) and x3–x4 (propellant flows); no scaling or convexification.",
+        "source_values_are_physical": true,
+        "scale_applied_to_source_values": false
+      },
+      "layer_scopes": [
+        "x1–x2 projected propellant masses",
+        "x3–x4 projected propellant flows",
+        "selected plan and observed nonlinear replay from the same saved attempt",
+        "outer fixed-plan box enclosures"
+      ],
+      "missing_layers": [
+        "full reachable-set union",
+        "continuous-control reachable-set boundary"
+      ]
+    },
+    {
+      "id": "campaign-2026-11-18-fuel-exact-polytope-paired",
+      "availability": "ready",
+      "href": "examples/closed-loop/campaign-2026-11-18/syn-nl-fuel-01-exact-polytope-paired.html",
+      "svg_href": "examples/closed-loop/campaign-2026-11-18/syn-nl-fuel-01-exact-polytope-paired.svg",
+      "plotted_data_href": "examples/closed-loop/campaign-2026-11-18/raw/plotted-data/syn-nl-fuel-01-exact-polytope.json",
+      "title": "Fuel transfer · exact-polytope · paired projections",
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "task_sha256": "3462475a357b6ec8e0c18a6d873b192872bdc012d141a68efe1f07a9d6b70da4",
+      "geometry_source_commit": "08af99d6f982235c22a15d4e9307fd032dfb1adb",
+      "renderer_source_commit": "65db5ee6b0fec91eea1ab330f0cc165027538754",
+      "stage_count": 41,
+      "transition_count": 40,
+      "time_step": 0.5,
+      "timeline_end": 20.0,
+      "coordinate_transform": {
+        "projections": [
+          {
+            "id": "propellant-masses",
+            "indices": [
+              0,
+              1
+            ],
+            "labels": [
+              "Oxidizer mass mₒₓ",
+              "Fuel mass m_f"
+            ],
+            "units": [
+              "kg",
+              "kg"
+            ]
+          },
+          {
+            "id": "propellant-flows",
+            "indices": [
+              2,
+              3
+            ],
+            "labels": [
+              "Oxidizer flow qₒₓ",
+              "Fuel flow q_f"
+            ],
+            "units": [
+              "kg/s",
+              "kg/s"
+            ]
+          }
+        ],
+        "description": "Physical state projections x1–x2 (propellant masses) and x3–x4 (propellant flows); no scaling or convexification.",
+        "source_values_are_physical": true,
+        "scale_applied_to_source_values": false
+      },
+      "layer_scopes": [
+        "x1–x2 projected propellant masses",
+        "x3–x4 projected propellant flows",
+        "selected plan and observed nonlinear replay from the same saved attempt",
+        "retained graph nodes and backward viability"
+      ],
+      "missing_layers": [
+        "complete unpruned action reachability (search coverage is incomplete; beam width is 8)",
+        "continuous-control reachable-set boundaries; points are retained graph states, with no convex hull drawn",
+        "validated-arithmetic certificates for predecessor and membership checks",
+        "globally optimal causal feedback policy"
+      ]
+    },
+    {
+      "id": "campaign-2026-11-18-fuel-zonotope-paired",
+      "availability": "ready",
+      "href": "examples/closed-loop/campaign-2026-11-18/syn-nl-fuel-01-zonotope-paired.html",
+      "svg_href": "examples/closed-loop/campaign-2026-11-18/syn-nl-fuel-01-zonotope-paired.svg",
+      "plotted_data_href": "examples/closed-loop/campaign-2026-11-18/raw/plotted-data/syn-nl-fuel-01-zonotope.json",
+      "title": "Fuel transfer · zonotope · paired projections",
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "task_sha256": "3462475a357b6ec8e0c18a6d873b192872bdc012d141a68efe1f07a9d6b70da4",
+      "geometry_source_commit": "08af99d6f982235c22a15d4e9307fd032dfb1adb",
+      "renderer_source_commit": "65db5ee6b0fec91eea1ab330f0cc165027538754",
+      "stage_count": 41,
+      "transition_count": 40,
+      "time_step": 0.5,
+      "timeline_end": 20.0,
+      "coordinate_transform": {
+        "projections": [
+          {
+            "id": "propellant-masses",
+            "indices": [
+              0,
+              1
+            ],
+            "labels": [
+              "Oxidizer mass mₒₓ",
+              "Fuel mass m_f"
+            ],
+            "units": [
+              "kg",
+              "kg"
+            ]
+          },
+          {
+            "id": "propellant-flows",
+            "indices": [
+              2,
+              3
+            ],
+            "labels": [
+              "Oxidizer flow qₒₓ",
+              "Fuel flow q_f"
+            ],
+            "units": [
+              "kg/s",
+              "kg/s"
+            ]
+          }
+        ],
+        "description": "Physical state projections x1–x2 (propellant masses) and x3–x4 (propellant flows); no scaling or convexification.",
+        "source_values_are_physical": true,
+        "scale_applied_to_source_values": false
+      },
+      "layer_scopes": [
+        "x1–x2 projected propellant masses",
+        "x3–x4 projected propellant flows",
+        "selected plan and observed nonlinear replay from the same saved attempt",
+        "retained graph nodes and backward viability"
+      ],
+      "missing_layers": [
+        "complete unpruned action reachability (search coverage is incomplete; beam width is 8)",
+        "continuous-control reachable-set boundaries; points are retained graph states, with no convex hull drawn",
+        "validated-arithmetic certificates for predecessor and membership checks",
+        "globally optimal causal feedback policy"
+      ]
+    },
+    {
+      "id": "campaign-2026-11-18-fuel-parallelotope-paired",
+      "availability": "ready",
+      "href": "examples/closed-loop/campaign-2026-11-18/syn-nl-fuel-01-parallelotope-paired.html",
+      "svg_href": "examples/closed-loop/campaign-2026-11-18/syn-nl-fuel-01-parallelotope-paired.svg",
+      "plotted_data_href": "examples/closed-loop/campaign-2026-11-18/raw/plotted-data/syn-nl-fuel-01-parallelotope.json",
+      "title": "Fuel transfer · parallelotope · paired projections",
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "task_sha256": "3462475a357b6ec8e0c18a6d873b192872bdc012d141a68efe1f07a9d6b70da4",
+      "geometry_source_commit": "08af99d6f982235c22a15d4e9307fd032dfb1adb",
+      "renderer_source_commit": "65db5ee6b0fec91eea1ab330f0cc165027538754",
+      "stage_count": 41,
+      "transition_count": 40,
+      "time_step": 0.5,
+      "timeline_end": 20.0,
+      "coordinate_transform": {
+        "projections": [
+          {
+            "id": "propellant-masses",
+            "indices": [
+              0,
+              1
+            ],
+            "labels": [
+              "Oxidizer mass mₒₓ",
+              "Fuel mass m_f"
+            ],
+            "units": [
+              "kg",
+              "kg"
+            ]
+          },
+          {
+            "id": "propellant-flows",
+            "indices": [
+              2,
+              3
+            ],
+            "labels": [
+              "Oxidizer flow qₒₓ",
+              "Fuel flow q_f"
+            ],
+            "units": [
+              "kg/s",
+              "kg/s"
+            ]
+          }
+        ],
+        "description": "Physical state projections x1–x2 (propellant masses) and x3–x4 (propellant flows); no scaling or convexification.",
+        "source_values_are_physical": true,
+        "scale_applied_to_source_values": false
+      },
+      "layer_scopes": [
+        "x1–x2 projected propellant masses",
+        "x3–x4 projected propellant flows",
+        "selected plan and observed nonlinear replay from the same saved attempt",
+        "retained graph nodes and backward viability"
+      ],
+      "missing_layers": [
+        "complete unpruned action reachability (search coverage is incomplete; beam width is 8)",
+        "continuous-control reachable-set boundaries; points are retained graph states, with no convex hull drawn",
+        "validated-arithmetic certificates for predecessor and membership checks",
+        "globally optimal causal feedback policy"
+      ]
+    },
+    {
+      "id": "campaign-2026-11-18-fuel-ellipsoid-paired",
+      "availability": "ready",
+      "href": "examples/closed-loop/campaign-2026-11-18/syn-nl-fuel-01-ellipsoid-paired.html",
+      "svg_href": "examples/closed-loop/campaign-2026-11-18/syn-nl-fuel-01-ellipsoid-paired.svg",
+      "plotted_data_href": "examples/closed-loop/campaign-2026-11-18/raw/plotted-data/syn-nl-fuel-01-ellipsoid.json",
+      "title": "Fuel transfer · ellipsoid · paired projections",
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "task_sha256": "3462475a357b6ec8e0c18a6d873b192872bdc012d141a68efe1f07a9d6b70da4",
+      "geometry_source_commit": "08af99d6f982235c22a15d4e9307fd032dfb1adb",
+      "renderer_source_commit": "65db5ee6b0fec91eea1ab330f0cc165027538754",
+      "stage_count": 41,
+      "transition_count": 40,
+      "time_step": 0.5,
+      "timeline_end": 20.0,
+      "coordinate_transform": {
+        "projections": [
+          {
+            "id": "propellant-masses",
+            "indices": [
+              0,
+              1
+            ],
+            "labels": [
+              "Oxidizer mass mₒₓ",
+              "Fuel mass m_f"
+            ],
+            "units": [
+              "kg",
+              "kg"
+            ]
+          },
+          {
+            "id": "propellant-flows",
+            "indices": [
+              2,
+              3
+            ],
+            "labels": [
+              "Oxidizer flow qₒₓ",
+              "Fuel flow q_f"
+            ],
+            "units": [
+              "kg/s",
+              "kg/s"
+            ]
+          }
+        ],
+        "description": "Physical state projections x1–x2 (propellant masses) and x3–x4 (propellant flows); no scaling or convexification.",
+        "source_values_are_physical": true,
+        "scale_applied_to_source_values": false
+      },
+      "layer_scopes": [
+        "x1–x2 projected propellant masses",
+        "x3–x4 projected propellant flows",
+        "selected plan and observed nonlinear replay from the same saved attempt",
+        "retained graph nodes and backward viability"
+      ],
+      "missing_layers": [
+        "complete unpruned action reachability (search coverage is incomplete; beam width is 8)",
+        "continuous-control reachable-set boundaries; points are retained graph states, with no convex hull drawn",
+        "validated-arithmetic certificates for predecessor and membership checks",
+        "globally optimal causal feedback policy"
+      ]
     }
   ],
   "schema": "csl.closed-loop.figure-index/1",
