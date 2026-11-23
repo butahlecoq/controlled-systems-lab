@@ -75,6 +75,7 @@ on:
       - 'tests/reporting/test_report_source_identity.py'
       - 'tests/reporting/test_registered_kinds.py'
       - 'tests/reporting/test_landing.py'
+      - 'tests/reporting/test_ext07_resource_observation.py'
       - 'tests/reporting/test_plot.py'
       - 'scripts/reports/geo04/**'
       - 'reports/algorithm-results/geo04-20261012T224946Z-c37852bcc80d/**'
@@ -915,6 +916,9 @@ jobs:
           MPLBACKEND: Agg
         run: |
           python -m unittest tests.reporting.test_convex_report tests.reporting.test_opt07_collector tests.reporting.test_opt12_collector tests.reporting.test_visual_examples tests.reporting.test_geo07_publication tests.reporting.test_geo07_port_publication tests.reporting.test_geo07_dependent_publication tests.reporting.test_finite_feedback_publication tests.reporting.test_ext04_publication tests.reporting.test_report_lifecycle
+
+      - name: Replay the saved EXT-07 resource observation route
+        run: python -m unittest tests.reporting.test_ext07_resource_observation
 
       - name: Check the saved MPC-06 online evidence and entry points
         run: |

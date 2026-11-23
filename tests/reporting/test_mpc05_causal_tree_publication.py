@@ -2,19 +2,16 @@ from __future__ import annotations
 
 import importlib.util
 import shutil
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 from zipfile import ZipFile
 
 ROOT = Path(__file__).resolve().parents[2]
-LANDING_SPEC = importlib.util.spec_from_file_location(
-    "landing", ROOT / "scripts/reports/landing.py"
-)
-if LANDING_SPEC is None or LANDING_SPEC.loader is None:
-    raise ImportError("Cannot load the saved report dependency")
-landing = importlib.util.module_from_spec(LANDING_SPEC)
-LANDING_SPEC.loader.exec_module(landing)
+sys.path.insert(0, str(ROOT / "scripts/reports"))
+landing = importlib.import_module("landing")
+
 SPEC = importlib.util.spec_from_file_location(
     "stage_mpc05_causal_tree_test", ROOT / "scripts/reports/stage_mpc05_causal_tree.py"
 )
