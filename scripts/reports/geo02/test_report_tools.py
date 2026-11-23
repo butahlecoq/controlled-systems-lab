@@ -119,6 +119,12 @@ class ContractTests(unittest.TestCase):
         self.assertFalse(
             render.check_oracle("singular_map_box_segment", [[0, 0], [1, 2], [2, 3], [2, 4]])
         )
+        self.assertFalse(
+            render.check_oracle(
+                "singular_map_box_segment",
+                [[0, 0], [2, 4], [sys.float_info.max, -sys.float_info.max]],
+            )
+        )
         self.assertTrue(render.check_supports("scalar_interval_affine_image", [2, 2]))
         self.assertFalse(render.check_supports("scalar_interval_affine_image", [2, 1.999]))
 
