@@ -1,5 +1,6 @@
 #include <csl/controllers/observed_replay.hpp>
 #include <cmath>
+#include <utility>
 
 namespace csl::controllers {
 namespace {
@@ -17,10 +18,16 @@ bool same(ObservationPoint left, ObservationPoint right) {
 }
 }
 
-ReplayResult replay_observed_policy(const model::LinearSystem &system, const ReplayInputs &inputs,
-                                    const Estimator &estimator, const Controller &controller) {
-    if (!estimator || !controller)
+namespace {
+ReplayResult replay_observed_policy_impl(const model::LinearSystem &system,
+                                         const ReplayInputs &inputs, const Estimator *estimator,
+                                         const Controller *controller,
+                                         const ObservationController *observation_controller) {
+    if (estimator && (!*estimator || !controller || !*controller))
         return invalid("controllers.callbacks", "Estimator and controller callbacks are required.");
+    if (!estimator && (!observation_controller || !*observation_controller))
+        return invalid("controllers.callbacks",
+                       "An observation-only controller callback is required.");
     const auto dimensions = system.dimensions();
     const auto horizon = system.horizon();
     if (inputs.initial_state.size() != dimensions.state || !finite(inputs.initial_state))
@@ -95,15 +102,22 @@ ReplayResult replay_observed_policy(const model::LinearSystem &system, const Rep
     for (std::size_t stage = 0; stage < horizon; ++stage) {
         if (auto failure = release({{stage}, ObservationTiming::before_decision}))
             return std::move(*failure);
-        auto estimate = estimator({stage}, record.released);
-        if (estimate.size() != dimensions.state || !finite(estimate))
-            return invalid("controllers.estimate",
-                           "State hypothesis must be finite with the model state dimension.");
-        auto action = controller({stage}, record.released, estimate);
+        std::optional<Vector> estimate;
+        Vector action;
+        if (estimator) {
+            auto value = (*estimator)({stage}, record.released);
+            if (value.size() != dimensions.state || !finite(value))
+                return invalid("controllers.estimate",
+                               "State hypothesis must be finite with the model state dimension.");
+            estimate = std::move(value);
+            action = (*controller)({stage}, record.released, *estimate);
+        } else {
+            action = (*observation_controller)({stage}, record.released);
+        }
         if (action.size() != dimensions.control || !finite(action))
             return invalid("controllers.action",
                            "Selected action must be finite with the model control dimension.");
-        record.decisions.push_back({{stage}, record.released, estimate, action});
+        record.decisions.push_back({{stage}, record.released, std::move(estimate), action});
         controls.push_back(std::move(action));
         auto next =
             system.step({stage}, record.states.back(), controls.back(), inputs.external[stage]);
@@ -118,5 +132,16 @@ ReplayResult replay_observed_policy(const model::LinearSystem &system, const Rep
     if (auto failure = release({{horizon}, ObservationTiming::before_decision}))
         return std::move(*failure);
     return record;
+}
+} // namespace
+
+ReplayResult replay_observed_policy(const model::LinearSystem &system, const ReplayInputs &inputs,
+                                    const Estimator &estimator, const Controller &controller) {
+    return replay_observed_policy_impl(system, inputs, &estimator, &controller, nullptr);
+}
+
+ReplayResult replay_observed_policy(const model::LinearSystem &system, const ReplayInputs &inputs,
+                                    const ObservationController &controller) {
+    return replay_observed_policy_impl(system, inputs, nullptr, nullptr, &controller);
 }
 } // namespace csl::controllers

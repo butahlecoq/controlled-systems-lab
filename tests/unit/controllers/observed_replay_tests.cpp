@@ -57,6 +57,26 @@ TEST_CASE("pre-decision estimates consume only released partial noisy history") 
     CHECK(record.inputs.measurement_errors[0][0] == Vector{3});
 }
 
+TEST_CASE("observation-only replay exposes history without fabricating an estimate") {
+    const auto system = system_with_partial_noisy_and_delayed_samples();
+    const ReplayInputs inputs{{1, 7}, {{}, {}}, {{{3}}, {{}}}};
+    const auto decide = [](StageIndex stage, std::span<const ReleasedObservation> history) {
+        CHECK(history.size() == (stage.value == 0 ? 1u : 2u));
+        return Vector{history.back().value.values[0]};
+    };
+    const auto result = replay_observed_policy(system, inputs, decide);
+    REQUIRE(std::holds_alternative<ReplayRecord>(result));
+    const auto &record = std::get<ReplayRecord>(result);
+    CHECK(record.states == std::vector<Vector>{{1, 7}, {5, 7}, {12, 7}});
+    REQUIRE(record.decisions.size() == 2);
+    CHECK(record.decisions[0].action == Vector{4});
+    CHECK(record.decisions[1].action == Vector{7});
+    CHECK_FALSE(record.decisions[0].estimate.has_value());
+    CHECK_FALSE(record.decisions[1].estimate.has_value());
+    CHECK(record.decisions[0].available.size() == 1);
+    CHECK(record.decisions[1].available.size() == 2);
+}
+
 // The one-output sensor sees x[0] only. The hand-computed sampled trajectory is
 // (2,9) -> (5,9) -> (11,9); changing the hidden initial coordinate leaves the
 // observation history and actions identical, so this replay identifies neither
