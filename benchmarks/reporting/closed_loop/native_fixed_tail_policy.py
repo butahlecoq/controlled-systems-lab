@@ -161,7 +161,13 @@ class NativeFixedTailPolicy:
             }.items()
         ):
             raise ValueError("native fixed-tail response identity differs")
-        if response.get("build_backend_profile") != self.options["build_backend_profile"]:
+        actual_profile = response.get("build_backend_profile")
+        expected_profile = self.options["build_backend_profile"]
+        if (
+            not isinstance(actual_profile, dict)
+            or actual_profile.get("CSL_ENABLE_CASADI") is not True
+            or any(actual_profile.get(key) != value for key, value in expected_profile.items())
+        ):
             raise ValueError("native fixed-tail binary differs from the admitted build profile")
         calls = [
             {
