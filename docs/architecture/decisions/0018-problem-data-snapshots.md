@@ -36,6 +36,10 @@ semantics, and retained storage must remain explicit.
   snapshot. A snapshot owns immutable retained data independently of mutable
   producer buffers and remains readable after the producer or outer handle is
   destroyed.
+- Treat temporal rows as restrictions on the full state/control history,
+  including initial command memory and couplings between adjacent controls.
+  Any projection must preserve equivalent feasible histories; contradictory
+  rows remain infeasible rather than being dropped or reset.
 
 ## Consequences
 
