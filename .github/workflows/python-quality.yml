@@ -858,7 +858,6 @@ jobs:
       - name: Replay saved MPC replanning and output feedback
         run: |
           reports=reports/algorithm-results
-          # Captured commits may be outside main history. Fetch them once for all replays.
           mpc04_commit=$(jq -er '.source.report_code_commit | select(test("^[a-f0-9]{40}$"))' "$reports/mpc04-max-coordinate-replanning-pilot-20261030/capture.json")
           mpc09_commit=$(jq -er '.source_commit | select(test("^[a-f0-9]{40}$"))' "$reports/mpc09-two-particle-output-feedback-v1/capture.json")
           missing=()
@@ -876,7 +875,6 @@ jobs:
           python scripts/reports/stage_mpc04_max_coordinate.py --source "$reports/mpc04-max-coordinate-replanning-pilot-20261030" --site "$site"
           python scripts/reports/stage_mpc09_output_feedback.py --source "$reports/mpc09-two-particle-output-feedback-v1" --site "$site"
           cd "$site"
-          # Verify the published offline ZIPs, including compression and metadata.
           sha256sum --check <<'SHA256'
           ab5a12359f365d3044743dd9ad74d3ee6279e00f2d68895830c84f8ab59aa965  mpc04-max-coordinate-replanning-9737632b9802b7f5dc32.zip
           457cd203b245f8d7cfc26a8c3c464155cf20d5ed84e3e77ac04fd5b99079ba20  mpc09-output-feedback-62e43f8e4f58eda35210.zip
@@ -998,8 +996,6 @@ jobs:
         run: python -m unittest discover -s tests/reporting -p 'test_stage_native_row_scaling_diagnostic.py'
       - name: Replay the ten saved TwoPoints publications
         run: |
-          # The full checkout includes evidence tags. Fetch the two retained
-          # PR refs for the additional matched-profile source commits.
           git fetch --no-tags origin refs/pull/846/head refs/pull/849/head
           python -m unittest discover -s tests/reporting -p 'test_issue824_*_publication.py'
           site=$(mktemp -d "$RUNNER_TEMP/issue824-replay.XXXXXXXX")
@@ -1040,7 +1036,6 @@ jobs:
           from zipfile import ZipFile
 
           site = Path(sys.argv[1])
-          # SHA-256 of the published archives, independently reproduced at the base commit.
           archive_hashes = {
               "mpc05-causal-tree-b3806c9080aea34bf291": "3e37a022cccf75b4472f88e9248da64262fe3f5ba57a7d6f1455e96ce754f4e8",
               "mpc06-tube-405a8ac4eb2bea7ebec8": "5c1c55429d719a497770a732ae4a7110b583c74e7b0cbeaa2d62618515716b23",
