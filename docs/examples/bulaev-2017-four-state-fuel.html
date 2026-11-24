@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>A four-state fuel-control model from a 2017 paper</title>
+<link rel="stylesheet" href="examples.css">
+<style>
+.equation-row{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:1rem;margin:1.25rem 0}
+.diagram{padding:1rem;border:1px solid var(--line);background:var(--surface)}
+.diagram svg{display:block;width:100%;height:auto}
+.source-hash{overflow-wrap:anywhere}
+.data-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,22rem),1fr));gap:1rem}
+.data-grid>section{min-width:0;padding:1rem;border:1px solid var(--line);background:var(--surface)}
+.data-grid h3{margin-top:0}
+.warning{border-left:3px solid var(--warm);padding:.75rem 1rem;background:var(--surface)}
+@media print{.diagram{break-inside:avoid}.equation-row{justify-content:flex-start}}
+</style>
+</head>
+<body>
+<main class="page-content">
+<nav class="breadcrumbs" aria-label="Breadcrumb"><ol><li><a href="native-model-catalogue.html">Native model catalogue</a></li><li aria-current="page">Paper-derived fuel model</li></ol></nav>
+<p class="eyebrow">Model candidate · four states · one scalar input · ten transitions</p>
+<h1>A four-state fuel-control model from a 2017 paper</h1>
+<p>This lesson transcribes the final numerical example in Bulaev, Goranov, and Kalev’s paper on open-loop control of a launch vehicle’s third stage. The paper supplies a discrete affine model, flow bounds, and a convex terminal objective. The repository has not yet implemented this model in its C++ catalogue.</p>
+
+<section>
+<h2>How the four states interact</h2>
+<p>The scalar control changes both propellant flows. Each tank mass then decreases by its corresponding flow.</p>
+<figure class="diagram">
+<svg viewBox="0 0 920 300" role="img" aria-labelledby="system-title system-desc">
+<title id="system-title">Control and state coupling in the four-state fuel model</title>
+<desc id="system-desc">One scalar control changes oxidizer and fuel flows. Each flow determines the next tank mass.</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#66d9ef"/></marker></defs>
+<g fill="#303129" stroke="#a6e22e" stroke-width="2">
+<rect x="35" y="115" width="145" height="68" rx="8"/><rect x="260" y="35" width="170" height="68" rx="8"/><rect x="260" y="195" width="170" height="68" rx="8"/><rect x="635" y="35" width="220" height="68" rx="8"/><rect x="635" y="195" width="220" height="68" rx="8"/>
+</g>
+<g fill="#f8f8f2" font-family="system-ui,sans-serif" text-anchor="middle">
+<text x="107" y="145" font-size="18">scalar control</text><text x="107" y="169" font-size="20">u(t) ∈ [−1,1]</text>
+<text x="345" y="64" font-size="19">oxidizer flow</text><text x="345" y="88" font-size="20">x₁(t)</text>
+<text x="345" y="224" font-size="19">fuel flow</text><text x="345" y="248" font-size="20">x₃(t)</text>
+<text x="745" y="64" font-size="19">oxidizer tank mass</text><text x="745" y="88" font-size="20">x₂(t)</text>
+<text x="745" y="224" font-size="19">fuel tank mass</text><text x="745" y="248" font-size="20">x₄(t)</text>
+</g>
+<g fill="none" stroke="#66d9ef" stroke-width="3" marker-end="url(#arrow)">
+<path d="M180 132L260 83"/><path d="M180 166L260 215"/><path d="M430 69L635 69"/><path d="M430 229L635 229"/>
+</g>
+<g fill="#d5c4a1" font-family="system-ui,sans-serif" font-size="16" text-anchor="middle"><text x="532" y="55">x₂(t+1)=x₂(t)−x₁(t)</text><text x="532" y="215">x₄(t+1)=x₄(t)−x₃(t)</text></g>
+<text x="532" y="116" fill="#d5c4a1" font-family="system-ui,sans-serif" font-size="15" text-anchor="middle">x₁(t+1)=x₁(t)+(5/12)u(t)</text>
+<text x="532" y="185" fill="#d5c4a1" font-family="system-ui,sans-serif" font-size="15" text-anchor="middle">x₃(t+1)=x₃(t)−(1/3)u(t)</text>
+</svg>
+<figcaption>The diagram shows the printed state dependencies. It does not show a computed reachable set or a control solution.</figcaption>
+</figure>
+</section>
+
+<section>
+<h2>The printed discrete model</h2>
+<p>For ten control steps, the state obeys <math><mrow><mi>x</mi><mo>(</mo><mi>t</mi><mo>+</mo><mn>1</mn><mo>)</mo><mo>=</mo><mi>A</mi><mi>x</mi><mo>(</mo><mi>t</mi><mo>)</mo><mo>+</mo><mi>B</mi><mi>u</mi><mo>(</mo><mi>t</mi><mo>)</mo></mrow></math>, where <math><mrow><mi>t</mi><mo>=</mo><mn>0</mn><mo>,</mo><mo>…</mo><mo>,</mo><mn>9</mn></mrow></math>.</p>
+<div class="equation-row">
+<math display="block"><mrow><mi>A</mi><mo>=</mo><mo>[</mo><mtable columnalign="right right right right"><mtr><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mo>−</mo><mn>1</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mo>−</mo><mn>1</mn></mtd><mtd><mn>1</mn></mtd></mtr></mtable><mo>]</mo></mrow></math>
+<math display="block"><mrow><mi>B</mi><mo>=</mo><mo>[</mo><mtable columnalign="right"><mtr><mtd><mfrac><mn>5</mn><mn>12</mn></mfrac></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mo>−</mo><mfrac><mn>1</mn><mn>3</mn></mfrac></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr></mtable><mo>]</mo></mrow></math>
+</div>
+<div class="data-grid">
+<section><h3>Initial state</h3><math display="block"><mrow><mi>x</mi><mo>(</mo><mn>0</mn><mo>)</mo><mo>=</mo><mo>[</mo><mtable columnalign="right"><mtr><mtd><mn>25.14</mn></mtd></mtr><mtr><mtd><mn>247</mn></mtd></mtr><mtr><mtd><mn>19.915</mn></mtd></mtr><mtr><mtd><mn>199.92</mn></mtd></mtr></mtable><mo>]</mo></mrow></math></section>
+<section><h3>Flow and control constraints</h3><p><math><mrow><msub><mi>x</mi><mn>1</mn></msub><mo>(</mo><mi>t</mi><mo>)</mo><mo>∈</mo><mo>[</mo><mn>24.167</mn><mo>,</mo><mn>25.833</mn><mo>]</mo></mrow></math>, <math><mrow><msub><mi>x</mi><mn>3</mn></msub><mo>(</mo><mi>t</mi><mo>)</mo><mo>∈</mo><mo>[</mo><mn>19.33</mn><mo>,</mo><mn>20.66</mn><mo>]</mo></mrow></math>, and <math><mrow><mi>u</mi><mo>(</mo><mi>t</mi><mo>)</mo><mo>∈</mo><mo>[</mo><mo>−</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>]</mo></mrow></math>. The paper does not state whether the flow bounds include both endpoint stages.</p></section>
+</div>
+<p>The state coordinates are oxidizer flow, oxidizer tank mass, fuel flow, and fuel tank mass. The source gives no physical units or sampling duration. It describes the displayed parameter values as scaled for presentation.</p>
+</section>
+
+<section>
+<h2>Forward geometry before state constraints</h2>
+<p>This figure propagates the printed initial point under the scalar input bound. Dashed lines mark the paper’s flow bounds, but the plot does not intersect the reachable sets with those bounds. It shows the input-bounded zonotope projections as a reference for a later constrained implementation.</p>
+<figure><a href="bulaev-2017-fuel-forward-projections.svg"><img src="bulaev-2017-fuel-forward-projections.svg" alt="All stages zero through ten projected onto oxidizer flow and mass, and fuel flow and mass. Orange dashed lines mark flow bounds that have not been applied."></a><figcaption>All stages 0–10. These binary64 projections do not reproduce the paper’s constrained forward and backward sets.</figcaption></figure>
+</section>
+
+<section>
+<h2>The terminal objective and printed result</h2>
+<math display="block"><mrow><mi>Φ</mi><mo>(</mo><mi>x</mi><mo>(</mo><mn>10</mn><mo>)</mo><mo>)</mo><mo>=</mo><msup><mrow><mo>(</mo><mn>25</mn><mo>−</mo><msub><mi>x</mi><mn>1</mn></msub><mo>)</mo></mrow><mn>2</mn></msup><mo>+</mo><msup><msub><mi>x</mi><mn>2</mn></msub><mn>2</mn></msup><mo>+</mo><msup><mrow><mo>(</mo><mn>20</mn><mo>−</mo><msub><mi>x</mi><mn>3</mn></msub><mo>)</mo></mrow><mn>2</mn></msup><mo>+</mo><msup><msub><mi>x</mi><mn>4</mn></msub><mn>2</mn></msup><mo>+</mo><msup><mrow><mo>(</mo><msub><mi>x</mi><mn>2</mn></msub><mo>−</mo><msub><mi>x</mi><mn>4</mn></msub><mo>)</mo></mrow><mn>2</mn></msup></mrow></math>
+<p>The paper reports a minimum value of 4.6608 at <math><mrow><mi>x</mi><mo>(</mo><mn>10</mn><mo>)</mo><mo>=</mo><mo>(</mo><mn>25.013</mn><mo>,</mo><mo>−</mo><mn>1.4669</mn><mo>,</mo><mn>20.016</mn><mo>,</mo><mo>−</mo><mn>1.5798</mn><mo>)</mo></mrow></math>. The negative terminal tank masses follow from the printed solution. The example supplies no tank-mass constraints, so this result is a scaled mathematical example, not a physically admissible propellant plan.</p>
+</section>
+
+<section>
+<h2>What the paper computes</h2>
+<p>The authors describe forward reachable sets, minimization over the reachable terminal set, backward reachable sets, and intersections that define feasible trajectories. They then recover a set of optimal control sequences with a linear program. They use Chernikova’s method for vertex-to-facet and facet-to-vertex conversion.</p>
+<p>Figure 1 shows two-dimensional projections of forward and backward sets and their intersections. Figure 2 shows optimal trajectories. See pages 24–25 in the <a href="https://vestnik.susu.ru/ctcr/article/download/6924/5803#page=5">publisher PDF</a>. The paper does not provide machine-readable vertices, numerical control sequences, run time, or vertex counts. This repository has not reproduced those figures or computed the constrained reachable sets.</p>
+<p class="warning">A direct quadratic-program solution could return an optimal witness. It would not reproduce the paper’s reachable-set geometry or its set of all optimal controls.</p>
+</section>
+
+<section>
+<h2>Source identity and limits</h2>
+<p>The source is V. V. Bulaev, A. Yu. Goranov, and V. I. Kalev, “The Optimal Open-Loop Control Construction of Complex Mechanical Plants Motion,” <i>Bulletin of the South Ural State University. Ser. Computer Technologies, Automatic Control, Radio Electronics</i>, 17(4), 20–28 (2017), DOI <a href="https://doi.org/10.14529/ctcr170403">10.14529/ctcr170403</a>. The <a href="https://vestnik.susu.ru/ctcr/article/view/6924">journal record</a> links the publisher PDF.</p>
+<p>The two supplied Word files with the name “Статья бугорка.doc” are different papers. The NPOA 2017 file matches this fuel-control article by title and abstract. The UralENIN 2017 file is a separate article on a modified recursive algebraic method for reachable sets. Text extraction did not expose embedded equations, so it cannot establish whether the two papers reuse any model equations. The files are private and are not copied into this repository.</p>
+<ul>
+<li>NPOA file SHA-256: <code class="source-hash">a8ed876c8a34d4eb798c031c6ede02a662e771b73cbead65cc42be8ff6132dc0</code>.</li>
+<li>UralENIN file SHA-256: <code class="source-hash">565ae84cf2c2661df47ce98a7a3d6c2ffa5cc9f220bf81a54f3b8a64c73a1c2a</code>.</li>
+</ul>
+<p>This is a source-qualified model candidate for the broader <a href="https://github.com/butahlecoq/controlled-systems-lab/issues/1012">issue 1012 model catalogue</a>. It has no native C++ constructor or saved numerical output yet.</p>
+</section>
+<footer class="provenance">CSL · Source-derived model candidate · four-state terminal control</footer>
+</main>
+</body>
+</html>
