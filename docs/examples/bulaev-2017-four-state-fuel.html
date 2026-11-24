@@ -81,6 +81,12 @@
 </section>
 
 <section>
+<h2>Consistency check on the reported terminal state</h2>
+<p>The flow updates conserve 4x₁(t) + 5x₃(t) = 200.135 because 4(5/12) − 5(1/3) = 0. The tank mass updates therefore decrease 4x₂(t) + 5x₄(t) by 200.135 at every step, regardless of the control sequence.</p>
+<p>At stage 10 the displayed initial point gives 4(247) + 5(199.92) − 10(200.135) = −13.7500. The reported terminal masses give −13.7666. The difference of 0.0166 exceeds the maximum of 0.00045 from rounding both terminal masses to four decimal places. Unreported precision in the initial data could account for the difference. Treat the printed terminal vector as a source reference. A reproduction that uses the displayed inputs exactly must satisfy the invariant above.</p>
+</section>
+
+<section>
 <h2>What the paper computes</h2>
 <p>The authors describe forward reachable sets, minimization over the reachable terminal set, backward reachable sets, and intersections that define feasible trajectories. They then recover a set of optimal control sequences with a linear program. They use Chernikova’s method for vertex-to-facet and facet-to-vertex conversion.</p>
 <p>Figure 1 shows two-dimensional projections of forward and backward sets and their intersections. Figure 2 shows optimal trajectories. See pages 24–25 in the <a href="https://vestnik.susu.ru/ctcr/article/download/6924/5803#page=5">publisher PDF</a>. The paper does not provide machine-readable vertices, numerical control sequences, run time, or vertex counts. This repository has not reproduced those figures or computed the constrained reachable sets.</p>
