@@ -256,12 +256,13 @@ def validate(payload):
             row.get("support_checks"),
             "warmup",
         )
-        if row["status"] == "passed" and (
-            not row["oracle_passed"]
-            or not check_oracle(row["scenario"], row.get("output_points"))
+        if row["oracle_passed"] and (
+            not check_oracle(row["scenario"], row.get("output_points"))
             or not check_supports(row["scenario"], row.get("support_values"))
             or row.get("support_checks") != len(collect.SCENARIOS[row["scenario"]]["directions"])
         ):
+            raise ValueError("warmup claiming oracle success fails its independent oracle")
+        if row["status"] == "passed" and not row["oracle_passed"]:
             raise ValueError("successful warmup fails its independent oracle")
     observed_warmup_failures = sum(
         row["status"] != "passed" or row["oracle_passed"] is not True for row in warmups

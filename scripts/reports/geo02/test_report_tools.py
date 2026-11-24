@@ -237,6 +237,20 @@ class ContractTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "warmup repetition must be an integer"):
             render.validate(payload)
 
+    def test_failed_warmup_cannot_claim_a_passing_oracle_with_wrong_supports(self):
+        payload = collect.fixture_payload("20261013T000000Z")
+        warmup = payload["collection"]["warmup_results"][0]
+        warmup["status"] = "oracle_failed"
+        warmup["oracle_passed"] = True
+        warmup["support_values"] = list(warmup["support_values"])
+        warmup["support_values"][0] += 1.0
+        payload["collection"]["state"] = "failed"
+        payload["collection"]["warmup_failures"] = 1
+        payload = collect.finalize(payload, "20261013T000000Z")
+
+        with self.assertRaisesRegex(ValueError, "warmup claiming oracle success"):
+            render.validate(payload)
+
     def test_out_of_segment_point_fails_the_oracle_in_trials_and_warmups(self):
         with mock.patch.object(sys, "path", [str(HERE.parent), *sys.path]):
             adapter = importlib.import_module("geo02_registered_reports")
