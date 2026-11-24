@@ -983,10 +983,13 @@ Json feedback_export(const problem::ResolvedProblem& resolved, const Json& in,
     std::vector<StrictCoordinateLowerBound> strict;
     if(in.at("task_id") == "env717-earth-orbit/continuous-receding/1") strict.push_back({0, 0});
     const auto history_method = in.value("polytope_history", std::string{"stagewise"});
-    if(history_method != "stagewise" && history_method != "certified_whole_history")
+    auto polytope_history = FeedbackPolytopeHistory::stagewise;
+    if(history_method == "certified_whole_history")
+        polytope_history = FeedbackPolytopeHistory::certified_whole_history;
+    else if(history_method == "certified_stagewise")
+        polytope_history = FeedbackPolytopeHistory::certified_stagewise;
+    else if(history_method != "stagewise")
         throw std::runtime_error("unknown polytope history method");
-    const auto polytope_history = history_method == "certified_whole_history"
-        ? FeedbackPolytopeHistory::certified_whole_history : FeedbackPolytopeHistory::stagewise;
     auto outcome = feedback_geometry(resolved, {in.at("request_id").get<std::string>()},
         terminal.as_handle(), found->second, strict,
         {{forward, intersection}, feedback_provider(lp, "csl.program-result.v1"), max_generators}, polytope_history, {});
@@ -994,6 +997,8 @@ Json feedback_export(const problem::ResolvedProblem& resolved, const Json& in,
     const auto& geometry = failure ? failure->prefix : std::get<FeedbackGeometry>(outcome);
     Json result{{"family", name}, {"scope", "forward_relevant_from_observation"},
         {"status", failure ? "stopped" : "complete"}, {"stages", Json::array()}};
+    if(polytope_history == FeedbackPolytopeHistory::certified_stagewise)
+        result["polytope_history"] = history_method;
     for(const auto& row : geometry.stages) result["stages"].push_back(feedback_stage_json(row, n));
     if(failure) {
         result["stop_stage"] = failure->stage.value;
