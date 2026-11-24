@@ -271,7 +271,10 @@ class HistoryPolicy:
             self.native_strategy is not None and self.geometry_family == "polytope"
         )
         self.certified_stagewise = controller_id == CERTIFIED_STAGEWISE_CONTROLLER
-        if self.certified_stagewise and task["model"]["case_id"] != "ENV717-EARTH-ORBIT-CONTINUOUS-01":
+        if (
+            self.certified_stagewise
+            and task["model"]["case_id"] != "ENV717-EARTH-ORBIT-CONTINUOUS-01"
+        ):
             raise ValueError("certified stagewise history is registered for Earth orbit")
         self.history_solver = (
             "casadi-ipopt"

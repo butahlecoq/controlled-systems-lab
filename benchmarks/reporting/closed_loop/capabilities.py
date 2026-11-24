@@ -661,7 +661,9 @@ def _history_definitions() -> list[dict]:
                 certified["controller"]["control_semantics"] = (
                     "full-history MPC with certified stagewise outer H memberships"
                 )
-                certified["role_bindings"]["reachable_set_method"] = {"id": CERTIFIED_STAGEWISE_METHOD}
+                certified["role_bindings"]["reachable_set_method"] = {
+                    "id": CERTIFIED_STAGEWISE_METHOD
+                }
                 certified["admission"]["basis"] = (
                     "Earth orbit stored affine-history IPOPT with certified stagewise H enclosures"
                 )
@@ -673,7 +675,9 @@ def _history_definitions() -> list[dict]:
                 certified["source_files"].append(
                     {
                         "path": enclosure_header,
-                        "sha256": hashlib.sha256((ROOT / enclosure_header).read_bytes()).hexdigest(),
+                        "sha256": hashlib.sha256(
+                            (ROOT / enclosure_header).read_bytes()
+                        ).hexdigest(),
                     }
                 )
                 certified["source_files"].sort(key=lambda entry: entry["path"])
