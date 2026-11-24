@@ -599,10 +599,10 @@ enclosure::Interval exact_interval(double lo, double hi, enclosure::Budget &budg
     return interval;
 }
 
-std::vector<enclosure::Interval>
-exact_successor_box(const model::DynamicsStage &dynamics,
-                    std::span<const enclosure::Interval> states,
-                    std::span<const enclosure::Interval> controls, enclosure::Budget &budget) {
+std::vector<enclosure::Interval> exact_successor_box(const model::DynamicsStage &dynamics,
+                                                     std::span<const enclosure::Interval> states,
+                                                     std::span<const enclosure::Interval> controls,
+                                                     enclosure::Budget &budget) {
     std::vector<enclosure::Interval> result;
     result.reserve(states.size());
     for (std::size_t i = 0; i < states.size(); ++i) {
@@ -620,8 +620,8 @@ exact_successor_box(const model::DynamicsStage &dynamics,
     return result;
 }
 
-std::optional<std::vector<enclosure::Interval>>
-exact_unit_normal_box(const SetHandle &input, enclosure::Budget &budget) {
+std::optional<std::vector<enclosure::Interval>> exact_unit_normal_box(const SetHandle &input,
+                                                                      enclosure::Budget &budget) {
     const auto data = import(input);
     const auto representation = data.representation();
     const auto *h = std::get_if<sets::HRepresentation>(&representation);
@@ -654,19 +654,17 @@ exact_unit_normal_box(const SetHandle &input, enclosure::Budget &budget) {
     std::vector<enclosure::Interval> box;
     box.reserve(dimension);
     for (std::size_t axis = 0; axis < dimension; ++axis) {
-        if (!std::isfinite(lower[axis]) || !std::isfinite(upper[axis]) ||
-            lower[axis] > upper[axis])
+        if (!std::isfinite(lower[axis]) || !std::isfinite(upper[axis]) || lower[axis] > upper[axis])
             return std::nullopt;
         box.push_back(exact_interval(lower[axis], upper[axis], budget));
     }
     return box;
 }
 
-double exact_prefix_support(
-    std::span<const model::DynamicsStage> dynamics,
-    std::span<const std::vector<enclosure::Interval>> controls,
-    std::span<const double> initial, std::span<const double> normal,
-    const ExecutionContext &context) {
+double exact_prefix_support(std::span<const model::DynamicsStage> dynamics,
+                            std::span<const std::vector<enclosure::Interval>> controls,
+                            std::span<const double> initial, std::span<const double> normal,
+                            const ExecutionContext &context) {
     enclosure::Budget budget;
     const auto decode = [&](double value) {
         enclosure::Rational result;
@@ -707,18 +705,19 @@ double exact_prefix_support(
     for (std::size_t i = 0; i < initial.size(); ++i)
         accumulate(support, direction[i], decode(initial[i]));
     const auto bracket = exact_h::bracket_binary64(
-        {support.numerator, support.denominator, support.binary_exponent},
-        budget.max_integer_bits);
+        {support.numerator, support.denominator, support.binary_exponent}, budget.max_integer_bits);
     if (bracket.status != exact_h::Binary64BracketStatus::finite)
         exact_history_limit("Exact support could not be enclosed in binary64.");
     return bracket.upper;
 }
 
-bool affine_box_history_geometry(
-    FeedbackGeometry &output, Runner &run, const model::LinearSystem &system,
-    const std::vector<SetHandle> &states, const std::vector<SetHandle> &controls,
-    const SetHandle &terminal, const Vector &initial, const std::vector<std::string> &labels,
-    const std::vector<StrictCoordinateLowerBound> &strict, StageIndex &active) {
+bool affine_box_history_geometry(FeedbackGeometry &output, Runner &run,
+                                 const model::LinearSystem &system,
+                                 const std::vector<SetHandle> &states,
+                                 const std::vector<SetHandle> &controls, const SetHandle &terminal,
+                                 const Vector &initial, const std::vector<std::string> &labels,
+                                 const std::vector<StrictCoordinateLowerBound> &strict,
+                                 StageIndex &active) {
     const auto unrestricted = [](const SetHandle &set) {
         const auto data = import(set);
         const auto representation = data.representation();
@@ -748,8 +747,8 @@ bool affine_box_history_geometry(
         Rows rows(n);
         const auto add_support = [&](Vector normal) {
             const auto bound =
-                exact_prefix_support(std::span{stages}.first(k), std::span{boxes}.first(k),
-                                     initial, normal, run.context);
+                exact_prefix_support(std::span{stages}.first(k), std::span{boxes}.first(k), initial,
+                                     normal, run.context);
             rows.append(std::move(normal), bound);
         };
         for (std::size_t axis = 0; axis < n; ++axis) {
@@ -814,8 +813,7 @@ bool affine_box_history_geometry(
     return true;
 }
 
-OperationResult certified_history_projection(Runner &run, const Rows &source,
-                                             std::size_t first,
+OperationResult certified_history_projection(Runner &run, const Rows &source, std::size_t first,
                                              std::span<const enclosure::Interval> box,
                                              const std::vector<std::string> &labels,
                                              const char *role, std::vector<SetId> inputs) {
@@ -1079,8 +1077,8 @@ FeedbackGeometryOutcome feedback_geometry(const problem::ResolvedProblem &resolv
             bad("feedback.polytope-history",
                 "Certified stagewise projection requires the polytope family.");
         if (certified_stagewise &&
-            affine_box_history_geometry(output, run, system, states, controls, terminal_h,
-                                        initial, labels, strict, active))
+            affine_box_history_geometry(output, run, system, states, controls, terminal_h, initial,
+                                        labels, strict, active))
             return output;
         std::vector<Vector> lower(horizon + 1), upper(horizon + 1);
         std::vector<SetHandle> forward_embeddings;
@@ -1122,15 +1120,15 @@ FeedbackGeometryOutcome feedback_geometry(const problem::ResolvedProblem &resolv
                     for (std::size_t i = 0; i < n; ++i) {
                         const auto &lo = exact_box[i].lower;
                         const auto &hi = exact_box[i].upper;
-                        carrier_lo[i] = outward_lower(
-                            {lo.numerator, lo.denominator, lo.binary_exponent},
-                            budget.max_integer_bits);
+                        carrier_lo[i] =
+                            outward_lower({lo.numerator, lo.denominator, lo.binary_exponent},
+                                          budget.max_integer_bits);
                         auto negative_hi = hi.numerator;
                         if (!negative_hi.words.empty())
                             negative_hi.negative = !negative_hi.negative;
-                        carrier_hi[i] = -outward_lower(
-                            {negative_hi, hi.denominator, hi.binary_exponent},
-                            budget.max_integer_bits);
+                        carrier_hi[i] =
+                            -outward_lower({negative_hi, hi.denominator, hi.binary_exponent},
+                                           budget.max_integer_bits);
                     }
                 } else {
                     auto box = propagate_existential_control_box(dynamics, {carrier_lo, carrier_hi},
@@ -1161,9 +1159,11 @@ FeedbackGeometryOutcome feedback_geometry(const problem::ResolvedProblem &resolv
                         joint.append(std::move(row), dynamics.offset[i], true);
                     }
                     if (certified_stagewise) {
-                        selected_h = certified_history_projection(
-                            run, joint, n + m, exact_box, labels, "certified-stagewise-forward",
-                            {selected_h.id, controls[k - 1].id}).output;
+                        selected_h =
+                            certified_history_projection(run, joint, n + m, exact_box, labels,
+                                                         "certified-stagewise-forward",
+                                                         {selected_h.id, controls[k - 1].id})
+                                .output;
                     } else {
                         auto relation = joint.finish({run.id("forward-joint")}, {});
                         std::vector<std::size_t> axes(n);
@@ -1290,7 +1290,8 @@ FeedbackGeometryOutcome feedback_geometry(const problem::ResolvedProblem &resolv
                         throw Failure{Unsupported{*e}};
                     if (auto *e = std::get_if<registry::Rejection>(&prep))
                         throw Failure{Unsupported{e->diagnostics}};
-                    auto result = std::get<PreparedNominalPredecessor>(std::move(prep)).run(context);
+                    auto result =
+                        std::get<PreparedNominalPredecessor>(std::move(prep)).run(context);
                     if (auto *e = std::get_if<NominalPredecessorFailure>(&result)) {
                         run.requests.push_back(e->predecessor);
                         run.requests.push_back(e->projection);
