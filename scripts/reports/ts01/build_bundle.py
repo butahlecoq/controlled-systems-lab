@@ -229,7 +229,6 @@ def build(out=None, measurement_dir=None):
             "canonical_relation": record["canonical_relation"],
         },
     )
-    # The published Windows bundle uses CRLF for this sidecar.
     (out / "environment.json").write_text(
         json.dumps(measurement["environment"], indent=2) + "\n",
         encoding="utf-8",
