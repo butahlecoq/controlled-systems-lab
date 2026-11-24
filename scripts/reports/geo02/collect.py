@@ -475,7 +475,8 @@ def main():
     for trial in trials:
         case = SCENARIOS[trial["scenario"]]
         if (
-            not render.check_candidate_reduction(trial["scenario"], trial)
+            not trial["oracle_passed"]
+            or not render.check_candidate_reduction(trial["scenario"], trial)
             or not render.check_oracle(trial["scenario"], trial["output_points"])
             or trial["support_checks"] != len(case["directions"])
             or not render.check_supports(trial["scenario"], trial["support_values"])

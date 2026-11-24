@@ -145,6 +145,27 @@ class ContractTests(unittest.TestCase):
                 self.assertIn(field, receipt[error_key])
                 self.assertEqual(receipt[error_key], replay["collection"][error_key])
 
+    def test_false_driver_oracle_claim_is_saved_as_explicit_failure(self):
+        with (SAVED / "raw-driver-output.csv").open(encoding="utf-8") as saved_csv:
+            rows = list(csv.DictReader(saved_csv))
+        rows[0]["oracle_passed"] = "false"
+        output = io.StringIO()
+        writer = csv.DictWriter(output, fieldnames=collect.FIELDS)
+        writer.writeheader()
+        writer.writerows(rows)
+
+        replay, receipt = self.run_saved_driver(
+            output.getvalue().encode(),
+            (SAVED / "process-stderr.txt").read_bytes(),
+            2,
+        )
+
+        failed = replay["trials"][0]
+        self.assertEqual(receipt["state"], "failed")
+        self.assertEqual(failed["status"], "oracle_failed")
+        self.assertFalse(failed["oracle_passed"])
+        render.validate(replay)
+
     def test_collector_preserves_valid_rows_from_timed_out_partial_csv(self):
         root = HERE.parents[2]
         saved = root / "reports" / "algorithm-results" / "geo02-20261013T061151Z-338ff7d1d63c"
