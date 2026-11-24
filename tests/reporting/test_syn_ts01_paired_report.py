@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import importlib
 import json
 import shutil
 import subprocess
@@ -14,7 +15,7 @@ TOOL_DIR = ROOT / "scripts" / "reports" / "syn_ts01_paired"
 REPORT_DIR = ROOT / "reports" / "algorithm-results" / "syn-ts01-paired-20261014-b7f1ac0"
 REPRODUCTION_CLI = REPORT_DIR.parent / "tooling" / "syn_ts01_paired" / "regenerate_bundle.py"
 sys.path.insert(0, str(ROOT / "scripts" / "reports"))
-from syn_ts01_paired import report as REPORT
+REPORT = importlib.import_module("syn_ts01_paired.report")
 
 
 class PairedTs01ReportTests(unittest.TestCase):
