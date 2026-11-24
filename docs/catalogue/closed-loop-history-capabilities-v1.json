@@ -7252,8 +7252,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "9a1aef10e0a9ffba1ee29714a3a70a63c065409954f30f0f52159dbbf2a4198d",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-certified-stagewise-polytope-ipopt/1/cfg-9a1aef10e0a9ffba",
+      "graph_fingerprint": "796a89085e7d38ee9238d2e8a20deaab387c8b336a8853477ef70c4cd2ddc835",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-certified-stagewise-polytope-ipopt/1/cfg-796a89085e7d38ee",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -7270,7 +7270,9 @@
         "representation": {
           "id": "polytope"
         },
-        "support_lp": "not_used",
+        "support_lp": {
+          "id": "csl.lp.highs"
+        },
         "vertex_lp": "not_used"
       },
       "source_files": [

@@ -144,6 +144,7 @@ class HistoryNormSolverTest(unittest.TestCase):
         self.assertEqual(len(certified), 1)
         self.assertEqual(certified[0]["task_id"], load_task("earth-orbit")["task_id"])
         self.assertEqual(certified[0]["role_bindings"]["reachable_set_method"]["id"], CERTIFIED_STAGEWISE_METHOD)
+        self.assertEqual(certified[0]["role_bindings"]["support_lp"], {"id": "csl.lp.highs"})
         strategy_graphs = [row for row in graphs if row["controller"]["id"] in NATIVE_STRATEGY_IDS]
         self.assertEqual(len(strategy_graphs), 30)
         for row in strategy_graphs:

@@ -662,7 +662,6 @@ def _history_definitions() -> list[dict]:
                     "full-history MPC with certified stagewise outer H memberships"
                 )
                 certified["role_bindings"]["reachable_set_method"] = {"id": CERTIFIED_STAGEWISE_METHOD}
-                certified["role_bindings"]["support_lp"] = "not_used"
                 certified["admission"]["basis"] = (
                     "Earth orbit stored affine-history IPOPT with certified stagewise H enclosures"
                 )
