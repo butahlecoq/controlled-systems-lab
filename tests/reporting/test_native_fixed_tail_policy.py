@@ -30,6 +30,49 @@ class NativeFixedTailTests(unittest.TestCase):
                 self.assertIn('src/adapters/nlp/casadi_fixed_tail.cpp', paths)
                 self.assertNotIn('benchmarks/reporting/closed_loop/history_norm_solver.py', paths)
 
+    def test_fixed_tail_bridge_checks_required_build_capabilities(self):
+        import io
+        import json
+
+        from native_fixed_tail_policy import NativeFixedTailPolicy
+
+        policy = NativeFixedTailPolicy.__new__(NativeFixedTailPolicy)
+        policy.task = {"task_id": "test-task"}
+        policy.task_sha256 = "test-hash"
+        policy.controller_id = "native-fixed-tail-box-ipopt/1"
+        policy.action_profile_id = "continuous"
+        policy.family = "box"
+        policy.receipt = None
+        policy.previous_history = None
+        policy.query_capture_callback = None
+        expected = {"build_type": "Release", "CSL_ENABLE_HIGHS": True, "CSL_ENABLE_QHULL": True}
+        policy.options = {"wall_seconds": 60, "build_backend_profile": expected}
+
+        with mock.patch("native_fixed_tail_policy.make_request", return_value={}):
+            for changes, allowed in (
+                ({"CSL_ENABLE_CASADI": True}, True),
+                ({}, False),
+                ({"CSL_ENABLE_CASADI": False}, False),
+                ({"CSL_ENABLE_CASADI": True, "build_type": "Debug"}, False),
+            ):
+                with self.subTest(changes=changes):
+                    response = {
+                        "task_id": "test-task",
+                        "task_sha256": policy.task_sha256,
+                        "action_profile_id": policy.action_profile_id,
+                        "policy_id": policy.controller_id,
+                        "build_backend_profile": expected | changes,
+                        "status": "infeasible",
+                    }
+                    policy.process = mock.Mock(
+                        stdin=io.StringIO(), stdout=io.StringIO(json.dumps(response) + "\n")
+                    )
+                    if allowed:
+                        self.assertEqual(policy.query("test-task", [], 0)["reason"], "infeasible")
+                    else:
+                        with self.assertRaisesRegex(ValueError, "admitted build profile"):
+                            policy.query("test-task", [], 0)
+
     def test_native_stderr_survives_supervised_mid_query_kill(self):
         from run_closed_loop import run_limited
         marker = b'native-query-started-before-supervisor-kill\n'
