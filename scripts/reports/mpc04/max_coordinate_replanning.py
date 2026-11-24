@@ -208,7 +208,6 @@ def causal_fixture_value(initial: tuple, action_sets: tuple[tuple, ...],
 
 
 def check_policy_gap_fixtures() -> dict:
-    # Exact authored fixtures in docs/research/finite-policy-class-reference.md.
     def vector_transition(_stage: int, state: tuple[int, int], action: int, disturbance: int) -> tuple[int, int]:
         x, y = state
         return (x + action + disturbance, x + y - disturbance)
