@@ -22,6 +22,7 @@ SCOPES = (
     "scripts/reports/landing.py",
     "scripts/reports/ext05/render_saved.py",
     "scripts/reports/app02/render_saved.py",
+    "scripts/reports/stage_issue824_ellipsoid_minimax.py",
     "tests/ci",
     "tests/cmake",
 )
