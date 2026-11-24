@@ -290,6 +290,33 @@ class ContractTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "digest mismatch"):
             render.validate(q)
 
+    def test_failed_saved_rows_still_reject_malformed_geometry(self):
+        for stage in ("trial", "warmup"):
+            with self.subTest(stage=stage):
+                payload = collect.fixture_payload("malformed-failure")
+                if stage == "trial":
+                    row = payload["trials"][0]
+                    row["status"] = "oracle_failed"
+                    row["oracle_passed"] = False
+                    row["output_points"] = [None] * len(row["output_points"])
+                    payload["collection"]["state"] = "failed"
+                    payload["collection"]["failures"] += 1
+                    payload["collection"]["process_return_code"] = 2
+                    payload["summary"] = collect.summarize(payload["trials"], False)
+                else:
+                    row = payload["collection"]["warmup_results"][0]
+                    row["status"] = "oracle_failed"
+                    row["oracle_passed"] = False
+                    row["output_points"] = [None] * len(row["output_points"])
+                    payload["collection"]["state"] = "failed"
+                    payload["summary"] = collect.summarize(payload["trials"], False)
+                    payload["collection"]["warmup_failures"] = 1
+                    payload["collection"]["process_return_code"] = 2
+                collect.finalize(payload, "malformed-failure")
+
+                with self.assertRaisesRegex(ValueError, "malformed geometry"):
+                    render.validate(payload)
+
     def test_summaries_recompute_from_all_trials_and_fail_closed(self):
         rows = [
             {
