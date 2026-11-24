@@ -10,7 +10,10 @@ FAMILIES = ("polytope", "box", "zonotope", "parallelotope", "ellipsoid")
 LIFTED_POLYTOPE_CONTROLLER = "native-continuous-history-lifted-polytope-ipopt/1"
 LIFTED_POLYTOPE_IMPLEMENTATION = "csl.synthesis.lifted-history-projection"
 GEOMETRY_IDS = {f"native-continuous-history-{family}-ipopt/1": family for family in FAMILIES}
+CERTIFIED_STAGEWISE_CONTROLLER = "native-continuous-history-certified-stagewise-polytope-ipopt/1"
+CERTIFIED_STAGEWISE_METHOD = "csl.reachability.certified-stagewise-history"
 GEOMETRY_IDS[LIFTED_POLYTOPE_CONTROLLER] = "polytope"
+GEOMETRY_IDS[CERTIFIED_STAGEWISE_CONTROLLER] = "polytope"
 NATIVE_STRATEGY_IDS = {
     f"native-strategy-{strategy.lower()}-history-{family}/1": (family, strategy)
     for family in FAMILIES
@@ -267,6 +270,9 @@ class HistoryPolicy:
         self.lifted_polytope = controller_id == LIFTED_POLYTOPE_CONTROLLER or (
             self.native_strategy is not None and self.geometry_family == "polytope"
         )
+        self.certified_stagewise = controller_id == CERTIFIED_STAGEWISE_CONTROLLER
+        if self.certified_stagewise and task["model"]["case_id"] != "ENV717-EARTH-ORBIT-CONTINUOUS-01":
+            raise ValueError("certified stagewise history is registered for Earth orbit")
         self.history_solver = (
             "casadi-ipopt"
             if self.geometry_family is not None
@@ -315,6 +321,8 @@ class HistoryPolicy:
             self.preparation_receipt["native_strategy"] = self.native_strategy
         if self.lifted_polytope:
             self.preparation_receipt["polytope_history"] = "lifted_whole_history"
+        elif self.certified_stagewise:
+            self.preparation_receipt["polytope_history"] = "certified_stagewise"
 
     def set_query_capture_callback(self, callback):
         self.query_capture_callback = callback
@@ -352,6 +360,8 @@ class HistoryPolicy:
         request["controller_id"] = self.controller_id
         if self.lifted_polytope:
             request["polytope_history"] = "lifted_whole_history"
+        elif self.certified_stagewise:
+            request["polytope_history"] = "certified_stagewise"
         initial, warm_start = initial_history(request, self.previous_history)
         request["initial_primal"] = initial.tolist()
         request["warm_start"] = warm_start
@@ -503,6 +513,19 @@ class HistoryPolicy:
         if response["status"] != expected_status:
             raise ValueError(
                 "native history response does not match the explicitly selected solver route"
+            )
+        if self.certified_stagewise:
+            if response.get("geometry", {}).get("polytope_history") != "certified_stagewise":
+                raise ValueError("native history response omitted the selected certified geometry")
+            result.setdefault("geometry_invocations", []).append(
+                {
+                    "operation": "feedback.geometry",
+                    "actual_method_id": CERTIFIED_STAGEWISE_METHOD,
+                    "version": "1",
+                    "role": "reachable_set_method",
+                    "absolute_stage": absolute_update_index,
+                    "request_id": request["request_id"],
+                }
             )
         relation, compiled = response["history_relation"], response["history_objective"]
         memberships = (

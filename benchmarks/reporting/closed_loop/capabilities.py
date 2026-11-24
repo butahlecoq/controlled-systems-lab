@@ -455,6 +455,8 @@ def build_native_manifest() -> dict:
 
 def _history_definitions() -> list[dict]:
     from history_policy import (
+        CERTIFIED_STAGEWISE_CONTROLLER,
+        CERTIFIED_STAGEWISE_METHOD,
         LIFTED_POLYTOPE_CONTROLLER,
         LIFTED_POLYTOPE_IMPLEMENTATION,
         NATIVE_STRATEGY_IDS,
@@ -651,6 +653,38 @@ def _history_definitions() -> list[dict]:
                 )
                 rows.append(family_graph)
                 strategy_templates[family] = family_graph
+            if task_name == "earth-orbit":
+                certified = copy.deepcopy(strategy_templates["polytope"])
+                certified.pop("graph_id")
+                certified.pop("graph_fingerprint")
+                certified["controller"]["id"] = CERTIFIED_STAGEWISE_CONTROLLER
+                certified["controller"]["control_semantics"] = (
+                    "full-history MPC with certified stagewise outer H memberships"
+                )
+                certified["role_bindings"]["reachable_set_method"] = {"id": CERTIFIED_STAGEWISE_METHOD}
+                certified["role_bindings"]["support_lp"] = "not_used"
+                certified["admission"]["basis"] = (
+                    "Earth orbit stored affine-history IPOPT with certified stagewise H enclosures"
+                )
+                certified["geometry_work"]["claim"] = (
+                    "outer stagewise forward, forward-relevant backward and intersection H sets"
+                )
+                enclosure_header = "src/synthesis/exact_h_enclosure.hpp"
+                certified["controller"]["source_files"].append(enclosure_header)
+                certified["source_files"].append(
+                    {
+                        "path": enclosure_header,
+                        "sha256": hashlib.sha256((ROOT / enclosure_header).read_bytes()).hexdigest(),
+                    }
+                )
+                certified["source_files"].sort(key=lambda entry: entry["path"])
+                certified_fingerprint = canonical_sha256(certified)
+                certified["graph_fingerprint"] = certified_fingerprint
+                certified["graph_id"] = (
+                    f"closed-loop/{task_name}/continuous-history-certified-stagewise-polytope-ipopt/1/"
+                    f"cfg-{certified_fingerprint[:16]}"
+                )
+                rows.append(certified)
             lifted = copy.deepcopy(geometry)
             lifted.pop("graph_id")
             lifted.pop("graph_fingerprint")
