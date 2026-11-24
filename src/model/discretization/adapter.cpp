@@ -111,4 +111,4 @@ DiscretizationResult discretize(const ContinuousAffineModel &source,
         SystemModel{{source.dimensions, TimeDomain::discrete, std::move(stages)}, {}}, source.times,
         std::move(receipt)};
 }
-} // namespace csl::model
+}

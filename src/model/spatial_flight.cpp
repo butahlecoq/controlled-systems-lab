@@ -305,4 +305,4 @@ std::variant<Linearization, Diagnostics> Model::linearize(const State &x, const 
     }
     return result;
 }
-} // namespace csl::model::spatial_flight
+}

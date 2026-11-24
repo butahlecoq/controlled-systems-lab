@@ -94,7 +94,7 @@ std::variant<std::array<double, 9>, Diagnostics> rk4(const Model &model,
     return out;
 }
 
-} // namespace
+}
 
 std::span<const CaseInfo> spatial_flight_cases() noexcept { return entries; }
 
@@ -207,4 +207,4 @@ SpatialFlightResult<SpatialFlightCase> make_spatial_flight_case(std::string_view
          reference_substeps, evaluations}};
 }
 
-} // namespace csl::model::catalogue
+}

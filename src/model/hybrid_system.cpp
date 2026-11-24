@@ -1232,7 +1232,7 @@ compose_hybrid_path_relation_impl(const HybridSystem &system, const HybridReques
         return stopped();
     return std::get<sets::SetData>(std::move(made));
 }
-} // namespace
+}
 
 HybridRelationResult compose_hybrid_path_relation(const HybridSystem &system,
                                                   const HybridRequest &request,
@@ -1326,4 +1326,4 @@ HybridObjectiveLiftResult lift_hybrid_terminal_objective(const HybridSystem &sys
         objective->objective);
 }
 
-} // namespace csl::model
+}
