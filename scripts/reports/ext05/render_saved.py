@@ -106,7 +106,6 @@ def validate(bundle: Path) -> dict:
 
 
 def figure() -> bytes:
-    # Physical axes: position horizontally, velocity vertically.
     points = [(0, 0), (1, 2), (3, 0)]
     xy = [(110 + 160 * x, 330 - 110 * y) for x, y in points]
     circles = "\n".join(
