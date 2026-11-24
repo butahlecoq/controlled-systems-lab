@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import hashlib
-import importlib.util
 import json
 import shutil
 import subprocess
@@ -14,10 +13,8 @@ ROOT = Path(__file__).resolve().parents[2]
 TOOL_DIR = ROOT / "scripts" / "reports" / "syn_ts01_paired"
 REPORT_DIR = ROOT / "reports" / "algorithm-results" / "syn-ts01-paired-20261014-b7f1ac0"
 REPRODUCTION_CLI = REPORT_DIR.parent / "tooling" / "syn_ts01_paired" / "regenerate_bundle.py"
-SPEC = importlib.util.spec_from_file_location("syn_ts01_paired_report", TOOL_DIR / "report.py")
-assert SPEC is not None and SPEC.loader is not None
-REPORT = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(REPORT)
+sys.path.insert(0, str(ROOT / "scripts" / "reports"))
+from syn_ts01_paired import report as REPORT
 
 
 class PairedTs01ReportTests(unittest.TestCase):

@@ -93,6 +93,7 @@ on:
       - 'reports/algorithm-results/geo02-*.zip'
       - 'scripts/reports/syn_ts01_paired/report.py'
       - 'scripts/reports/syn_ts01_paired/regenerate_bundle.py'
+      - 'scripts/reports/syn_ts01_paired_publication_policy.py'
       - 'scripts/reports/syn_ts01_paired_registered_reports.py'
       - 'tests/reporting/test_syn_ts01_paired_report.py'
       - 'tests/reporting/test_syn_ts01_paired_publication.py'

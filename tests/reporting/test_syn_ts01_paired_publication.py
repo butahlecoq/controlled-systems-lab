@@ -62,9 +62,6 @@ class PairedTs01PublicationTests(unittest.TestCase):
                 committed_zip.write_bytes(b"changed publication archive")
                 with self.assertRaisesRegex(ValueError, "committed offline ZIP differs"):
                     SITE.stage(catalog_path, root / "changed-archive", check=True)
-                committed_zip.write_bytes(b"changed publication archive")
-                with self.assertRaisesRegex(ValueError, "committed offline ZIP differs"):
-                    SITE.stage(catalog_path, root / "changed-archive", check=True)
 
             site_index = (staged / "index.html").read_text(encoding="utf-8")
             self.assertIn(item.report_id + "/index.html", site_index)
