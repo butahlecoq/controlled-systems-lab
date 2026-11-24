@@ -17280,8 +17280,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "680ec98a999db6d80e71bb1ba5d2b6fbc24d9b18aa88ba33a8287992b57af81c",
-      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-polytope-ipopt/1/cfg-680ec98a999db6d8",
+      "graph_fingerprint": "9e361c662708c528370266e7dba264c405a86c02e8ab09322ce51e87de694711",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-polytope-ipopt/1/cfg-9e361c662708c528",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -17324,7 +17324,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "1bc9fd23c6a01a551b3cd084809176e38817b84bc94f5d1d1b5914ac3c21810e"
+          "sha256": "0297d93ad2fb17921cec7dbd81de69ec267d1ed0edd1831e749ee79db984c574"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -17490,8 +17490,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "62db97c303952335d97fee8f8bc89777ec7dee302d7c5cf9abc8c8f730ec287c",
-      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-box-ipopt/1/cfg-62db97c303952335",
+      "graph_fingerprint": "28cc2454bb25ccd7d5a4df9f536b42d592756b4e549849fb9770e248f16703f9",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-box-ipopt/1/cfg-28cc2454bb25ccd7",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -17534,7 +17534,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "1bc9fd23c6a01a551b3cd084809176e38817b84bc94f5d1d1b5914ac3c21810e"
+          "sha256": "0297d93ad2fb17921cec7dbd81de69ec267d1ed0edd1831e749ee79db984c574"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -17700,8 +17700,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "cddaa76f4dfee00bfb312354be81d80151251f5794158505a0215346a5227a83",
-      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-zonotope-ipopt/1/cfg-cddaa76f4dfee00b",
+      "graph_fingerprint": "e971b0c35e94fd721ebedc7216ca139aad30bb16f39f633b63fb63268ecfebfa",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-zonotope-ipopt/1/cfg-e971b0c35e94fd72",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -17744,7 +17744,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "1bc9fd23c6a01a551b3cd084809176e38817b84bc94f5d1d1b5914ac3c21810e"
+          "sha256": "0297d93ad2fb17921cec7dbd81de69ec267d1ed0edd1831e749ee79db984c574"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -17910,8 +17910,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "82b403ce679df39c7960e748ee91743e129e2c247cfb69a88716669436bb13c1",
-      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-parallelotope-ipopt/1/cfg-82b403ce679df39c",
+      "graph_fingerprint": "572515fdb84f44d75b4ba6d04aac94f05b53804279f1049130624027f3226df2",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-parallelotope-ipopt/1/cfg-572515fdb84f44d7",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -17954,7 +17954,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "1bc9fd23c6a01a551b3cd084809176e38817b84bc94f5d1d1b5914ac3c21810e"
+          "sha256": "0297d93ad2fb17921cec7dbd81de69ec267d1ed0edd1831e749ee79db984c574"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -18120,8 +18120,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "ba163a3481c18f76d836a80a7c27ff2120e8cd7b7031e962663117a195adbc9e",
-      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-ellipsoid-ipopt/1/cfg-ba163a3481c18f76",
+      "graph_fingerprint": "aebdabf66cb62a5d0612b7adbb7dcc81d6cad15ea59209e3a214dce67dce1d7b",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-ellipsoid-ipopt/1/cfg-aebdabf66cb62a5d",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -18164,7 +18164,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "1bc9fd23c6a01a551b3cd084809176e38817b84bc94f5d1d1b5914ac3c21810e"
+          "sha256": "0297d93ad2fb17921cec7dbd81de69ec267d1ed0edd1831e749ee79db984c574"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -18330,8 +18330,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "6dd02db9998428051803df583e7bc72980db1ee8443485ea452ea51d98d6bf3a",
-      "graph_id": "closed-loop/earth-orbit/fixed-tail-polytope-ipopt/1/cfg-6dd02db999842805",
+      "graph_fingerprint": "213d4292ff207164ddedf61f50514743c36e66427055b801965495b6a2434020",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-polytope-ipopt/1/cfg-213d4292ff207164",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -18374,7 +18374,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "1bc9fd23c6a01a551b3cd084809176e38817b84bc94f5d1d1b5914ac3c21810e"
+          "sha256": "0297d93ad2fb17921cec7dbd81de69ec267d1ed0edd1831e749ee79db984c574"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -18536,8 +18536,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "96fe0e0f20337006d413da9b2cda01b3c55aa88773c463f21a3bc0a83b87182c",
-      "graph_id": "closed-loop/earth-orbit/fixed-tail-box-ipopt/1/cfg-96fe0e0f20337006",
+      "graph_fingerprint": "f44757f28ae477e7dab0d52f3d1b15607c48aa3b11244aaaf802013bfae553dd",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-box-ipopt/1/cfg-f44757f28ae477e7",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -18580,7 +18580,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "1bc9fd23c6a01a551b3cd084809176e38817b84bc94f5d1d1b5914ac3c21810e"
+          "sha256": "0297d93ad2fb17921cec7dbd81de69ec267d1ed0edd1831e749ee79db984c574"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -18742,8 +18742,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "ba293e2b5ed4d9329fd49f1531ae2721276423e492a2bf23ad21b7ab917185c0",
-      "graph_id": "closed-loop/earth-orbit/fixed-tail-zonotope-ipopt/1/cfg-ba293e2b5ed4d932",
+      "graph_fingerprint": "6779f4c9e302901f83e6aeed17c73c566dd6906087646e7c3d01965259a4ae62",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-zonotope-ipopt/1/cfg-6779f4c9e302901f",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -18786,7 +18786,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "1bc9fd23c6a01a551b3cd084809176e38817b84bc94f5d1d1b5914ac3c21810e"
+          "sha256": "0297d93ad2fb17921cec7dbd81de69ec267d1ed0edd1831e749ee79db984c574"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -18948,8 +18948,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "b7eebc15f1849b690c9b972702fa5f9e5cc37f94c4e5747fcbe6ce39a509eabb",
-      "graph_id": "closed-loop/earth-orbit/fixed-tail-parallelotope-ipopt/1/cfg-b7eebc15f1849b69",
+      "graph_fingerprint": "b1c040d912cf372429c3734f25e2b982d755eecd150d9f9b1fae6198625327a3",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-parallelotope-ipopt/1/cfg-b1c040d912cf3724",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -18992,7 +18992,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "1bc9fd23c6a01a551b3cd084809176e38817b84bc94f5d1d1b5914ac3c21810e"
+          "sha256": "0297d93ad2fb17921cec7dbd81de69ec267d1ed0edd1831e749ee79db984c574"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -19154,8 +19154,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "af6e8b60ead00304585e9667a49e86f8957d0c7193fcfe9d79ddb8e40b08f409",
-      "graph_id": "closed-loop/earth-orbit/fixed-tail-ellipsoid-ipopt/1/cfg-af6e8b60ead00304",
+      "graph_fingerprint": "f96bfac059214f09908d63bc648d9ff803c787bc61a225ea70f38adaa031a35a",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-ellipsoid-ipopt/1/cfg-f96bfac059214f09",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -19198,7 +19198,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "1bc9fd23c6a01a551b3cd084809176e38817b84bc94f5d1d1b5914ac3c21810e"
+          "sha256": "0297d93ad2fb17921cec7dbd81de69ec267d1ed0edd1831e749ee79db984c574"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -19360,8 +19360,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "38750d143e2fe1ca8fffbed0519484290c30ecb8e54c6dd54cc09f5be72ff2b4",
-      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-polytope-ipopt/1/cfg-38750d143e2fe1ca",
+      "graph_fingerprint": "107302ad880746458fe03de90a428c892458af78754b8ee415e5d9c4f188f1cd",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-polytope-ipopt/1/cfg-107302ad88074645",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -19404,7 +19404,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "1bc9fd23c6a01a551b3cd084809176e38817b84bc94f5d1d1b5914ac3c21810e"
+          "sha256": "0297d93ad2fb17921cec7dbd81de69ec267d1ed0edd1831e749ee79db984c574"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -19570,8 +19570,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "acf92ee236396c90cab89541625362d3787730f80a70648273cad9a54d39e6cc",
-      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-box-ipopt/1/cfg-acf92ee236396c90",
+      "graph_fingerprint": "05f886b7de8349ee257969b6f1d8239ed7114d2b0e70a55ae47ee880e22e2eaf",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-box-ipopt/1/cfg-05f886b7de8349ee",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -19614,7 +19614,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "1bc9fd23c6a01a551b3cd084809176e38817b84bc94f5d1d1b5914ac3c21810e"
+          "sha256": "0297d93ad2fb17921cec7dbd81de69ec267d1ed0edd1831e749ee79db984c574"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -19780,8 +19780,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "18347586389dbf1deb141e5c48bd860d95c9c79434d53f5e7486c34a66063644",
-      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-zonotope-ipopt/1/cfg-18347586389dbf1d",
+      "graph_fingerprint": "aa85a6c1d28d635c1caa9b58ee9c5516503f3217e109fdcfaf7fccf8cef60399",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-zonotope-ipopt/1/cfg-aa85a6c1d28d635c",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -19824,7 +19824,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "1bc9fd23c6a01a551b3cd084809176e38817b84bc94f5d1d1b5914ac3c21810e"
+          "sha256": "0297d93ad2fb17921cec7dbd81de69ec267d1ed0edd1831e749ee79db984c574"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -19990,8 +19990,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "3457e464b9a580d97c0543f9a6b70a00473ce1da53efa9c64582170fa600b3e1",
-      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-parallelotope-ipopt/1/cfg-3457e464b9a580d9",
+      "graph_fingerprint": "f61c6672960393d3fc0481183e60d67be14c9493140d58048d0c2a4bbc9e78e4",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-parallelotope-ipopt/1/cfg-f61c6672960393d3",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -20034,7 +20034,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "1bc9fd23c6a01a551b3cd084809176e38817b84bc94f5d1d1b5914ac3c21810e"
+          "sha256": "0297d93ad2fb17921cec7dbd81de69ec267d1ed0edd1831e749ee79db984c574"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -20200,8 +20200,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "550ea878bcfa749a2002506d173a024a2092cd73a28f1e38e907d1eb7970da26",
-      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-ellipsoid-ipopt/1/cfg-550ea878bcfa749a",
+      "graph_fingerprint": "296d9b4cff39b8ea17c6bde9bdc130ffa325bb5ec1206244f8e427a340704271",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-ellipsoid-ipopt/1/cfg-296d9b4cff39b8ea",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -20244,7 +20244,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "1bc9fd23c6a01a551b3cd084809176e38817b84bc94f5d1d1b5914ac3c21810e"
+          "sha256": "0297d93ad2fb17921cec7dbd81de69ec267d1ed0edd1831e749ee79db984c574"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
