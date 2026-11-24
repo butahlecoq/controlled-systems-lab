@@ -2015,6 +2015,10 @@ Json query(const Json& in) {
         {"optimality_scope", in.contains("candidate_action_indices") ?
             "declared full-horizon candidate histories only; coverage against the complete action product is reported separately; no nonlinear global-feedback claim" :
             "finite action catalogue and declared numerical affine predictor; no nonlinear global-feedback claim"}};
+    if (const auto *plan_score = std::get_if<optimization::NominalPlanScored>(
+            &selected->attempts.at(selected->selected_attempt));
+        plan_score && !plan_score->terminal_scorer.empty())
+        base["selector"]["terminal_scorer"] = std::string(plan_score->terminal_scorer);
     base["query_receipt"] = {{"schema", "csl.closed-loop.native-policy-query-receipt/1"},
         {"task_id", in.at("task_id")}, {"task_sha256", in.at("task_sha256")},
         {"source_model_id", in.at("source_model_id")}, {"predictor_model_id", in.at("predictor_model_id")},
