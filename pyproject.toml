@@ -162,7 +162,7 @@ include = [
     "scripts/reports/mpc06_online/render.py",
     "scripts/reports/mpc06_online/study.py",
     "scripts/reports/mpc06_online/evidence.py",
-    "scripts/reports/mpc06_online/model.py",
+    # model.py is byte-pinned by retained MPC-06 reports; changes require a superseding capture.
     "tests/reporting/test_mpc06_online.py",
     "scripts/reports/learning_closed_loop_toy.py",
     "scripts/reports/learning_geometry_toy.py",
@@ -480,7 +480,6 @@ include = [
     "scripts/reports/mpc06_online/render.py",
     "scripts/reports/mpc06_online/study.py",
     "scripts/reports/mpc06_online/evidence.py",
-    "scripts/reports/mpc06_online/model.py",
     "tests/reporting/test_mpc06_online.py",
     "scripts/reports/learning_closed_loop_toy.py",
     "scripts/reports/learning_geometry_toy.py",
@@ -696,6 +695,8 @@ include = [
     "scripts/reports/stage_four_state_projection_approximations.py",
     "tests/reporting/test_four_state_projection_approximations.py",
 ]
+# The imported legacy model is authenticated through its frozen source snapshot instead.
+exclude = ["scripts/reports/mpc06_online/model.py"]
 
 [tool.ty.terminal]
 error-on-warning = true
