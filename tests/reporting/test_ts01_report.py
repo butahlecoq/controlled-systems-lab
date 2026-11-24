@@ -173,8 +173,10 @@ class Ts01SavedReportTests(unittest.TestCase):
             (0, b"invalid JSONL\n", "measurement executable emitted invalid JSONL", None),
             (0, (self.bundle / "measurement-events.jsonl").read_bytes(), None, None),
             (0, (self.bundle / "measurement-events.jsonl").read_bytes(), None, "receipt"),
+            (0, (self.bundle / "measurement-events.jsonl").read_bytes(), None, "prepare-receipt"),
             (0, (self.bundle / "measurement-events.jsonl").read_bytes(), None, "collection"),
-            (0, (self.bundle / "measurement-events.jsonl").read_bytes(), None, "output"),
+            (0, (self.bundle / "measurement-events.jsonl").read_bytes(), None, "output-empty"),
+            (0, (self.bundle / "measurement-events.jsonl").read_bytes(), None, "output-nonempty"),
         )
         for returncode, stdout, reason, fail_at in attempts:
             with (
@@ -263,14 +265,15 @@ class Ts01SavedReportTests(unittest.TestCase):
                     else self.assertRaisesRegex(SystemExit, reason)
                 )
                 replace = Path.replace
-                rename = Path.rename
+                mkdir = Path.mkdir
 
                 def reject_accepted_receipt(path, target, *, failure=fail_at, replace_path=replace):
-                    if failure == "receipt" and (
-                        path.name == "attempt.tmp"
-                        and json.loads(path.read_text(encoding="utf-8"))["status"] == "accepted"
-                    ):
-                        raise OSError("simulated accepted receipt write failure")
+                    if failure in {"receipt", "prepare-receipt"} and path.name == "attempt.tmp":
+                        status = json.loads(path.read_text(encoding="utf-8"))["status"]
+                        if failure == "receipt" and status == "accepted":
+                            raise OSError("simulated accepted receipt write failure")
+                        if failure == "prepare-receipt" and status == "ready_to_publish":
+                            raise OSError("simulated ready receipt write failure")
                     if (
                         failure == "collection"
                         and path.name == "collection.json.tmp"
@@ -279,23 +282,24 @@ class Ts01SavedReportTests(unittest.TestCase):
                         raise OSError("simulated collection publish failure")
                     return replace_path(path, target)
 
-                def replace_output_before_publish(
-                    path,
-                    target,
-                    *,
-                    failure=fail_at,
-                    rename_path=rename,
-                    output_path=output,
-                    **kwargs,
+                def create_competing_output_before_publish(
+                    path, *args, failure=fail_at, mkdir_path=mkdir, output_path=output, **kwargs
                 ):
-                    if failure == "output" and target == output_path:
-                        output_path.mkdir(parents=True, exist_ok=False)
-                        (output_path / "collection.json").write_bytes(b"another collector's result")
+                    if (
+                        isinstance(failure, str)
+                        and failure.startswith("output")
+                        and path == output_path
+                    ):
+                        mkdir_path(path, parents=True, exist_ok=False)
+                        if failure == "output-nonempty":
+                            (output_path / "collection.json").write_bytes(
+                                b"another collector's result"
+                            )
                         try:
-                            return rename_path(path, target)
+                            return mkdir_path(path, *args, **kwargs)
                         except OSError as error:
                             raise OSError(f"simulated output publish failure: {error}") from error
-                    return rename_path(path, target, **kwargs)
+                    return mkdir_path(path, *args, **kwargs)
 
                 with (
                     patch.object(sys, "argv", argv),
@@ -307,7 +311,10 @@ class Ts01SavedReportTests(unittest.TestCase):
                         Path, "replace", autospec=True, side_effect=reject_accepted_receipt
                     ),
                     patch.object(
-                        Path, "rename", autospec=True, side_effect=replace_output_before_publish
+                        Path,
+                        "mkdir",
+                        autospec=True,
+                        side_effect=create_competing_output_before_publish,
                     ),
                     redirect_stdout(io.StringIO()),
                     redirect_stderr(io.StringIO()),
@@ -324,11 +331,15 @@ class Ts01SavedReportTests(unittest.TestCase):
                 self.assertEqual(receipt["harness_commit"], "a" * 40)
                 self.assertEqual(receipt["stdout_sha256"], hashlib.sha256(stdout).hexdigest())
                 self.assertEqual(receipt["stderr_sha256"], hashlib.sha256(stderr).hexdigest())
-                if fail_at == "output":
+                if fail_at and fail_at.startswith("output"):
                     self.assertEqual(receipt["status"], "failed")
-                    self.assertEqual(
-                        (output / "collection.json").read_bytes(), b"another collector's result"
-                    )
+                    if fail_at == "output-empty":
+                        self.assertEqual(list(output.iterdir()), [])
+                    else:
+                        self.assertEqual(
+                            (output / "collection.json").read_bytes(),
+                            b"another collector's result",
+                        )
                     self.assertEqual(list(build_root.glob(".measurement-attempt.incomplete-*")), [])
                     continue
                 if fail_at == "receipt":
@@ -337,6 +348,13 @@ class Ts01SavedReportTests(unittest.TestCase):
                         json.loads((output / "collection.json").read_bytes())["raw_stdout_sha256"],
                         hashlib.sha256(stdout).hexdigest(),
                     )
+                    continue
+                if fail_at == "prepare-receipt":
+                    self.assertEqual(receipt["status"], "failed")
+                    self.assertEqual(receipt["reason"], "simulated ready receipt write failure")
+                    self.assertEqual(len(receipt["collection_sha256"]), 64)
+                    self.assertFalse(output.exists())
+                    self.assertEqual(list(build_root.glob(".measurement-attempt.incomplete-*")), [])
                     continue
                 if fail_at is not None:
                     self.assertEqual(receipt["status"], "failed")

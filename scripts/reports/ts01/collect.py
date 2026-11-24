@@ -106,7 +106,12 @@ def measurement_attempt(build_root, executable, binary_sha256, harness_commit):
             raise OSError("measurement attempt streams are missing")
         result.stdout = stdout_bytes
         result.stderr = stderr_bytes
-        yield result, cpu_after
+
+        def prepare_publication(collection_sha256):
+            receipt.update(status="ready_to_publish", collection_sha256=collection_sha256)
+            write_receipt()
+
+        yield result, cpu_after, prepare_publication
     except KeyboardInterrupt:
         receipt.update(status="cancelled", reason="measurement interrupted")
         print(f"Raw measurement evidence: {attempt}", file=sys.stderr)
@@ -262,6 +267,7 @@ def main():
         measurement_attempt(build_root, executable, sha(binary), harness_commit) as (
             result,
             cpu_after,
+            prepare_publication,
         ),
     ):
         if result.returncode:
@@ -459,7 +465,11 @@ def main():
             newline="\n",
         )
         pending.replace(staged_output / "collection.json")
-        staged_output.rename(out)
+        prepare_publication(sha((staged_output / "collection.json").read_bytes()))
+        out.mkdir(exist_ok=False)
+        for name in ("events.jsonl", "stderr.txt", "command.txt", "collection.json"):
+            (staged_output / name).rename(out / name)
+        staged_output.rmdir()
     print(json.dumps(measurement, ensure_ascii=False, sort_keys=True))
 
 
