@@ -218,6 +218,44 @@ class ContractTests(unittest.TestCase):
             with zipfile.ZipFile(archive) as z:
                 self.assertEqual(set(z.namelist()), {x.name for x in output.iterdir()})
 
+    def test_bundle_preserves_malformed_csv_failure_diagnostics(self):
+        payload = collect.fixture_payload("malformed")
+        payload["collection"].update(
+            {
+                "state": "failed",
+                "actual_trials": 0,
+                "failures": payload["collection"]["expected_trials"],
+                "process_return_code": 0,
+                "parse_error": "<script>alert(1)</script>",
+            }
+        )
+        payload["trials"] = []
+        payload["summary"] = collect.summarize([], complete=False)
+        collect.finalize(payload, "malformed")
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            collection = root / "collection"
+            collection.mkdir()
+            (collection / "records.json").write_text(json.dumps(payload), encoding="utf8")
+            for name in render.COLLECTION_FILES - {"records.json"}:
+                (collection / name).write_text("fixture\n", encoding="utf8")
+            output = root / "bundle"
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(HERE / "render.py"),
+                    "--collection",
+                    str(collection),
+                    "--out",
+                    str(output),
+                ],
+                check=True,
+            )
+            page = (output / "index.html").read_text(encoding="utf8")
+            self.assertIn("Collection state: failed", page)
+            self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", page)
+            self.assertNotIn("<script>alert(1)</script>", page)
+
     def test_provenance_allows_only_pinned_report_paths_and_cmake_delta(self):
         provenance.validate_harness_paths(
             ["reports/algorithm-results/tooling/geo02/collect.py", "scripts/reports/site.py"]

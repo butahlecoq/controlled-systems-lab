@@ -128,13 +128,18 @@ def validate(payload):
     ):
         raise ValueError("scenario catalog differs from pinned catalog")
     collection = payload.get("collection", {})
+    state = collection.get("state")
+    if state not in ("complete", "failed"):
+        raise ValueError("invalid collection state")
     reps = collection.get("measured_repetitions")
     if type(reps) is not int or reps < 1:
         raise ValueError("invalid repetition count")
     trials = payload.get("trials", [])
     wanted = {(s, r) for s in collect.SCENARIOS for r in range(reps)}
     actual = {(t.get("scenario"), t.get("repetition")) for t in trials}
-    if len(actual) != len(trials) or actual != wanted:
+    if len(actual) != len(trials) or (
+        state == "complete" and actual != wanted
+    ) or (state == "failed" and not actual.issubset(wanted)):
         raise ValueError("scenario/repetition matrix mismatch")
     for t in trials:
         name = t["scenario"]
@@ -156,7 +161,6 @@ def validate(payload):
             or t.get("support_checks") != len(case["directions"])
         ):
             raise ValueError("saved output fails independent point/support oracle")
-    state = collection.get("state")
     actual_count = collection.get("actual_trials")
     expected_count = collection.get("expected_trials")
     failures = collection.get("failures")
@@ -265,6 +269,19 @@ def render_svg(payload):
 
 
 def render_html(payload):
+    collection = payload["collection"]
+    failure_notice = ""
+    if collection["state"] == "failed":
+        details = [
+            collection.get("parse_error"),
+            collection.get("warmup_parse_error"),
+        ]
+        details = [html.escape(detail) for detail in details if detail]
+        failure_notice = (
+            '<p role="status">Collection state: failed. '
+            + " ".join(details)
+            + "</p>"
+        )
     rows = "".join(
         "<tr><td>"
         + html.escape(t["scenario"])
@@ -317,7 +334,9 @@ def render_html(payload):
     return (
         '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GEO-02 affine-sum report</title></head><body><h1>GEO-02 affine-sum report</h1><p>'
         + html.escape(scope)
-        + "</p><h2>Timing scope</h2>"
+        + "</p>"
+        + failure_notice
+        + "<h2>Timing scope</h2>"
         + timing
         + '<p><a href="timings.svg">Open timing chart (SVG)</a></p><h2>Warmup checks</h2><table><thead><tr><th>Scenario</th><th>Warmup</th><th>Status</th><th>Oracle</th><th>Detail</th></tr></thead><tbody>'
         + warmup_rows
