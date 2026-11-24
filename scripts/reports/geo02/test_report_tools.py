@@ -149,9 +149,9 @@ class ContractTests(unittest.TestCase):
         root = HERE.parents[2]
         saved = root / "reports" / "algorithm-results" / "geo02-20261013T061151Z-338ff7d1d63c"
         records = json.loads((saved / "records.json").read_bytes())
-        raw_rows = (saved / "raw-driver-output.csv").read_text(encoding="utf-8").splitlines()
-        partial_output = "\n".join(raw_rows[:2]) + "\n"
-        stderr = (saved / "process-stderr.txt").read_text(encoding="utf-8")
+        raw_rows = (saved / "raw-driver-output.csv").read_bytes().splitlines()
+        partial_output = b"\n".join(raw_rows[:2]) + b"\n"
+        stderr = (saved / "process-stderr.txt").read_bytes()
         with tempfile.TemporaryDirectory() as directory:
             scratch = Path(directory)
             exe = scratch / "driver.exe"
@@ -204,8 +204,9 @@ class ContractTests(unittest.TestCase):
             self.assertEqual(replay["collection"]["parse_error"], "missing/duplicate trial rows")
             self.assertEqual(len(replay["trials"]), 1)
             self.assertEqual(events, replay["trials"])
-            self.assertEqual((output / "raw-driver-output.csv").read_text(), partial_output)
+            self.assertEqual((output / "raw-driver-output.csv").read_bytes(), partial_output)
             render.validate(replay)
+
     def test_duplicate_warmup_geometry_key_is_rejected_before_validation(self):
         stdout = (SAVED / "raw-driver-output.csv").read_bytes()
         stderr = (SAVED / "process-stderr.txt").read_bytes()
