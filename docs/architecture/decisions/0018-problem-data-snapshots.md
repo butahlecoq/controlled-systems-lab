@@ -38,8 +38,11 @@ semantics, and retained storage must remain explicit.
   destroyed.
 - Treat temporal rows as restrictions on the full state/control history,
   including initial command memory and couplings between adjacent controls.
-  Any projection must preserve equivalent feasible histories; contradictory
-  rows remain infeasible rather than being dropped or reset.
+  Under projection, retain a point exactly when at least one full history
+  extending it satisfies every temporal row. A terminal point is excluded if
+  every history reaching it violates an adjacent-control slew bound, even when
+  it satisfies the endpoint rows. Contradictory temporal rows make the history
+  set and every projection of it empty.
 
 ## Consequences
 
