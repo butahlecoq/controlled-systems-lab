@@ -109,7 +109,6 @@ def validate(bundle: Path) -> dict:
 
 
 def figure(record: dict) -> bytes:
-    # These coordinates map the literal (x,y) fixtures; paths are explanatory.
     def xy(point: Sequence[float]) -> str:
         return f"{270 + 90 * point[0]},{270 - 90 * point[1]}"
 
