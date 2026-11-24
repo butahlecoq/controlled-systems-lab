@@ -37,6 +37,8 @@ class NativePublicationTests(unittest.TestCase):
             "native-four-state-reachability.html",
             "bulaev-2017-four-state-fuel.html",
             "bulaev-2017-fuel-forward-projections.svg",
+            "bulaev-2017-fuel-constrained-projections.svg",
+            "bulaev-2017-fuel-constrained-rational.json",
         ):
             shutil.copyfile(ROOT / "docs/examples" / page, self.root / "docs/examples" / page)
 
@@ -91,6 +93,12 @@ class NativePublicationTests(unittest.TestCase):
         links.feed(files[lesson].decode())
         self.assertIn(figure, links.links)
         self.assertEqual(files[figure], (ROOT / "docs/examples" / figure).read_bytes())
+        for asset in (
+            "bulaev-2017-fuel-constrained-projections.svg",
+            "bulaev-2017-fuel-constrained-rational.json",
+        ):
+            self.assertIn(asset, links.links)
+            self.assertEqual(files[asset], (ROOT / "docs/examples" / asset).read_bytes())
         self.assertEqual(native.build(self.root), (files, entries, cards))
 
     def test_modified_raw_capture_is_rejected(self):
