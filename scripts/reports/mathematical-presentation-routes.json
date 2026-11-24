@@ -395,6 +395,11 @@
       "owner": "docs/examples/b04-reference-trajectory-projections.html"
     },
     {
+      "route": "examples/bulaev-2017-four-state-fuel.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/bulaev-2017-four-state-fuel.html"
+    },
+    {
       "route": "examples/buryatia-dim4-literal-affine-v1/index.html",
       "disposition": "maintained",
       "owner": "scripts/reports/stage_buryatia_dim4.py"

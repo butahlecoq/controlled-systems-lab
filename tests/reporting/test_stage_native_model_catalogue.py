@@ -32,7 +32,12 @@ class NativePublicationTests(unittest.TestCase):
         self.bundle = self.root / "reports/algorithm-results" / native.ROUTE
         shutil.copytree(ROOT / "reports/algorithm-results" / native.ROUTE, self.bundle)
         (self.root / "docs/examples").mkdir(parents=True)
-        for page in ("native-model-catalogue.html", "native-four-state-reachability.html"):
+        for page in (
+            "native-model-catalogue.html",
+            "native-four-state-reachability.html",
+            "bulaev-2017-four-state-fuel.html",
+            "bulaev-2017-fuel-forward-projections.svg",
+        ):
             shutil.copyfile(ROOT / "docs/examples" / page, self.root / "docs/examples" / page)
 
     def test_same_payload_repack_with_recomputed_sidecar_is_rejected(self):
@@ -80,6 +85,12 @@ class NativePublicationTests(unittest.TestCase):
             for link in links.links:
                 if ":" not in link and not link.startswith("#") and link not in {"index.html", "examples.css"}:
                     self.assertIn(link, linked_files)
+        lesson = "bulaev-2017-four-state-fuel.html"
+        figure = "bulaev-2017-fuel-forward-projections.svg"
+        links = Links()
+        links.feed(files[lesson].decode())
+        self.assertIn(figure, links.links)
+        self.assertEqual(files[figure], (ROOT / "docs/examples" / figure).read_bytes())
         self.assertEqual(native.build(self.root), (files, entries, cards))
 
     def test_modified_raw_capture_is_rejected(self):
