@@ -55,7 +55,6 @@ class Entry(NamedTuple):
     links: tuple
 
 
-# Reading order of the archive. Each entry is (key, heading, introduction).
 GROUPS = (
     (
         "research",
@@ -96,8 +95,6 @@ GROUPS = (
 )
 
 
-# Report family -> description. The pattern matches the whole published route,
-# so a new route shape has to be registered here on purpose.
 FAMILIES = {
     "ext02-two-state-mixed": Family(
         r"ext02-two-state-mixed-v1",
@@ -1092,7 +1089,6 @@ VOID = {
     "wbr",
 }
 
-# Separators used by the staging scripts between the parts of an index entry.
 SEPARATORS = re.compile(r"^[\s\u00b7\u2014\u2013\-,;.:]+|[\s\u00b7\u2014\u2013\-,;.:]+$")
 
 
@@ -1187,7 +1183,6 @@ def entry_of(item: Node) -> Entry:
         scope, _, limits = description.partition("; limits: ")
         limits = SEPARATORS.sub("", limits)
         if not scope and reports[0][1] and reports[0][1] != report_id:
-            # Some staged routes carry their description in the link label itself.
             scope = reports[0][1]
     return Entry(
         report_id=report_id,

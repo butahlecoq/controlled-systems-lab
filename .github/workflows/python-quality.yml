@@ -691,7 +691,7 @@ jobs:
         run: python -m unittest tests.reporting.test_mpc01_pages_augmentation
       - name: Check types
         run: ty check
-      - name: Reject new prose comments in maintained tooling and CI tests
+      - name: Reject new prose comments in maintained Python scopes
         env:
           COMMENT_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: python scripts/ci/check_comment_ratchet.py check --base "$COMMENT_BASE"

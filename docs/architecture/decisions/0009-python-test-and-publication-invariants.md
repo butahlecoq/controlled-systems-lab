@@ -33,6 +33,12 @@ find across related tests.
   identity includes source archive bytes: repacking identical admitted entries
   changes the publication identity while retaining the same source report and
   payload identity.
+- The archive landing accepts compact list items whose scope is available only
+  in the first report link label. It falls back to that label when no explicit
+  scope text exists; remove the fallback only after all stage producers supply
+  a dedicated scope field. Each report family is registered against its full
+  route pattern, so unknown route shapes fail instead of receiving a broad
+  prefix classification.
 
 ## Verification
 

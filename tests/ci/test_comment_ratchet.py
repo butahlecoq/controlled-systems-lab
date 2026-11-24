@@ -115,6 +115,15 @@ class CommentRatchetTests(unittest.TestCase):
         for path in paths:
             self.assertIn(f"{path}:1: # New prose", result.stderr)
 
+    def test_checks_the_report_landing_source_scope(self):
+        source = self.root / "scripts/reports/landing.py"
+        source.parent.mkdir(parents=True, exist_ok=True)
+        source.write_text("# New report source prose\n")
+        self.git("add", ".")
+        result = self.checker("check", "--base", "HEAD")
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("scripts/reports/landing.py:1: # New report source prose", result.stderr)
+
     def test_inventory_reads_the_requested_commit_and_counts_physically_removable_lines(self):
         self.file.write_text('# comment only\nx = "#"  # inline\n')
         self.git("commit", "-qam", "Change comment inventory")
