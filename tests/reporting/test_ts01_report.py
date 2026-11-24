@@ -167,6 +167,28 @@ class Ts01SavedReportTests(unittest.TestCase):
                 receipt["stderr_sha256"], hashlib.sha256(b"partial stderr").hexdigest()
             )
 
+    def test_failed_output_cleanup_preserves_a_replacement_directory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "measurement"
+            moved_output = Path(directory) / "attempt-owned-output"
+            diagnostics = io.StringIO()
+            with redirect_stderr(diagnostics):
+                with self.assertRaisesRegex(OSError, "simulated write failure"):
+                    with collector.remove_output_on_attempt_failure(output) as claim_output:
+                        output.mkdir()
+                        claim_output()
+                        output.rename(moved_output)
+                        output.mkdir()
+                        sentinel = output / "collection.json"
+                        sentinel.write_bytes(b"another collector's result")
+                        raise OSError("simulated write failure")
+
+            self.assertTrue(moved_output.is_dir())
+            self.assertIn("Not retracting replaced measurement output", diagnostics.getvalue())
+            self.assertEqual(
+                (output / "collection.json").read_bytes(), b"another collector's result"
+            )
+
     def test_collector_records_native_attempts_and_exports_only_accepted_results(self):
         attempts = (
             (7, b"partial native output\r\n", "measurement executable failed with status 7"),

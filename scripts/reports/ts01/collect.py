@@ -8,6 +8,8 @@ import importlib
 import json
 import os
 import platform
+import shutil
+import stat
 import statistics
 import subprocess
 import sys
@@ -34,6 +36,35 @@ def run(command, *, capture=True):
         detail = result.stderr.decode("utf-8", errors="replace")[-4000:] if capture else ""
         raise SystemExit(f"command failed ({result.returncode}): {command!r}\n{detail}")
     return result
+
+
+@contextmanager
+def remove_output_on_attempt_failure(path):
+    output_identity = None
+
+    def claim_output_directory():
+        nonlocal output_identity
+        created = path.lstat()
+        if not stat.S_ISDIR(created.st_mode):
+            raise OSError(f"measurement output is not a directory: {path}")
+        output_identity = (created.st_dev, created.st_ino)
+
+    try:
+        yield claim_output_directory
+    except BaseException:
+        if output_identity is not None:
+            try:
+                current = path.lstat()
+                if (
+                    not stat.S_ISDIR(current.st_mode)
+                    or (current.st_dev, current.st_ino) != output_identity
+                ):
+                    print(f"Not retracting replaced measurement output {path}", file=sys.stderr)
+                else:
+                    shutil.rmtree(path)
+            except OSError as error:
+                print(f"Could not retract incomplete output {path}: {error}", file=sys.stderr)
+        raise
 
 
 def git(root, *args):
