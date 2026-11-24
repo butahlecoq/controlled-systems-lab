@@ -256,6 +256,23 @@ class ContractTests(unittest.TestCase):
             self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", page)
             self.assertNotIn("<script>alert(1)</script>", page)
 
+    def test_saved_source_accepts_malformed_warmup_diagnostics(self):
+        payload = collect.fixture_payload("warmup-malformed")
+        payload["collection"].update(
+            {
+                "state": "failed",
+                "warmup_results": [],
+                "warmup_failures": len(collect.SCENARIOS),
+                "warmup_parse_error": "malformed warmup CSV",
+            }
+        )
+        payload["summary"] = collect.summarize(payload["trials"], complete=False)
+        collect.finalize(payload, "warmup-malformed")
+        render.validate(payload)
+        page = render.render_html(payload)
+        self.assertIn("Collection state: failed", page)
+        self.assertIn("malformed warmup CSV", page)
+
     def test_provenance_allows_only_pinned_report_paths_and_cmake_delta(self):
         provenance.validate_harness_paths(
             ["reports/algorithm-results/tooling/geo02/collect.py", "scripts/reports/site.py"]

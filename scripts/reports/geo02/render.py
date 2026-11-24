@@ -205,7 +205,9 @@ def validate(payload):
     actual_warmups = {
         (row.get("scenario"), row.get("repetition")) for row in warmups if isinstance(row, dict)
     }
-    if len(actual_warmups) != len(warmups) or actual_warmups != expected_warmups:
+    if len(actual_warmups) != len(warmups) or (
+        state == "complete" and actual_warmups != expected_warmups
+    ) or (state == "failed" and not actual_warmups.issubset(expected_warmups)):
         raise ValueError("warmup scenario/repetition matrix mismatch")
     for row in warmups:
         if (
@@ -228,12 +230,15 @@ def validate(payload):
     observed_warmup_failures = sum(
         row["status"] != "passed" or row["oracle_passed"] is not True for row in warmups
     )
-    if (
-        type(warmup_failures) is not int
-        or warmup_failures != observed_warmup_failures
-        or (warmup_parse_error is not None and not isinstance(warmup_parse_error, str))
+    if type(warmup_failures) is not int or (
+        warmup_parse_error is not None and not isinstance(warmup_parse_error, str)
     ):
         raise ValueError("warmup failure metadata differs from warmup outcomes")
+    if warmup_parse_error is None:
+        if warmup_failures != observed_warmup_failures:
+            raise ValueError("warmup failure metadata differs from warmup outcomes")
+    elif warmup_failures != len(expected_warmups) or warmups:
+        raise ValueError("warmup parse failure metadata differs from missing warmup rows")
     if state == "complete" and (
         expected_count != len(wanted)
         or failures != 0
