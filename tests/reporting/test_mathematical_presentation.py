@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -163,6 +164,51 @@ class PresentationTests(unittest.TestCase):
                 },
             )
 
+    def test_content_addressed_mpc07_routes_match_only_the_registered_family(self):
+        route_root = "mpc07-comparison-51413c6cb372052a"
+        routes = (
+            route_root + "/index.html",
+            route_root + "/evidence/bounded-policy-0e821c2a/index.html",
+            route_root + "/evidence/bounded-policy-0e821c2a-recheck-v2/index.html",
+            route_root + "/evidence/joint-filter-04369201/index.html",
+            route_root + "/evidence/joint-filter-04369201-recheck-v2/index.html",
+        )
+        ledger = json.loads(audit.REGISTRY.read_text(encoding="utf-8"))
+        self.assertEqual(len(ledger["route_families"]), 1)
+        family = ledger["route_families"][0]
+        test_ledger = {"routes": [], "route_families": [family]}
+        with tempfile.TemporaryDirectory() as directory:
+            site = Path(directory)
+            for route in routes:
+                path = site / route
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("<p>V = I</p>")
+            result = audit.audit_site(site, test_ledger)
+            self.assertTrue(result["passed"], result["findings"])
+
+            unowned = site / route_root / "evidence/unreviewed/index.html"
+            unowned.parent.mkdir(parents=True, exist_ok=True)
+            unowned.write_text("<p>V = I</p>")
+            findings = audit.audit_site(site, test_ledger)["findings"]
+            self.assertIn(
+                (
+                    "mpc07-comparison-51413c6cb372052a/evidence/unreviewed/index.html",
+                    "unclassified-route",
+                ),
+                {(finding["route"], finding["kind"]) for finding in findings},
+            )
+            malformed = site / "mpc07-comparison-not-a-digest/index.html"
+            malformed.parent.mkdir(parents=True, exist_ok=True)
+            malformed.write_text("<p>V = I</p>")
+            findings = audit.audit_site(site, test_ledger)["findings"]
+            self.assertIn(
+                (
+                    "mpc07-comparison-not-a-digest/index.html",
+                    "unclassified-route",
+                ),
+                {(finding["route"], finding["kind"]) for finding in findings},
+            )
+
     def test_gallery_and_book_discovery_cannot_hide_new_lessons(self):
         with tempfile.TemporaryDirectory() as directory:
             site = Path(directory)
@@ -231,11 +277,17 @@ class PresentationTests(unittest.TestCase):
         ledger = json.loads(audit.REGISTRY.read_text())
         routes = [entry["route"] for entry in ledger["routes"]]
         self.assertEqual(len(routes), len(set(routes)))
+        root = Path(audit.__file__).resolve().parents[2]
         for entry in ledger["routes"]:
             self.assertTrue(entry["owner"])
             if entry["disposition"] == "frozen":
                 self.assertRegex(entry["sha256"], r"^[0-9a-f]{64}$")
                 self.assertTrue(entry["witness"])
+        for family in ledger.get("route_families", []):
+            self.assertEqual(family["disposition"], "maintained")
+            self.assertTrue(re.fullmatch(r"[A-Za-z0-9_./-]+", family["owner"]))
+            self.assertTrue((root / family["owner"]).is_file())
+            re.compile(family["pattern"])
 
 
 if __name__ == "__main__":
