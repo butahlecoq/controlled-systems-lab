@@ -39,10 +39,12 @@ semantics, and retained storage must remain explicit.
 - Treat temporal rows as restrictions on the full state/control history,
   including initial command memory and couplings between adjacent controls.
   Under projection, retain a point exactly when at least one full history
-  extending it satisfies every temporal row. A terminal point is excluded if
-  every history reaching it violates an adjacent-control slew bound, even when
-  it satisfies the endpoint rows. Contradictory temporal rows make the history
-  set and every projection of it empty.
+  extending it satisfies all other problem feasibility conditions, including
+  the model dynamics, initial-state set, and control domains, together with
+  every temporal row. A terminal point satisfying its endpoint rows is still
+  excluded if every history satisfying those other conditions reaches it only
+  by violating an adjacent-control slew row. Contradictory temporal rows make
+  the feasible-history set and every projection of it empty.
 
 ## Consequences
 
