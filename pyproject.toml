@@ -140,6 +140,12 @@ include = [
     "scripts/reports/visual_illustrations.py",
     "scripts/reports/visual_examples.py",
     "scripts/reports/approx_extension_companions.py",
+    "scripts/reports/mpc06_delivery/reference.py",
+    "scripts/reports/mpc06_delivery/records.py",
+    "scripts/reports/mpc06_delivery/figures.py",
+    "scripts/reports/stage_mpc06_delivery.py",
+    "tests/reporting/test_mpc06_delivery.py",
+    "tests/reporting/test_mpc06_delivery_publication.py",
     "scripts/reports/stage_buryatia_dim4.py",
     "scripts/reports/buryatia/capture_dim4.py",
     "scripts/reports/buryatia/check_2d.py",
@@ -155,6 +161,8 @@ include = [
     "scripts/reports/mpc06_online/check.py",
     "scripts/reports/mpc06_online/render.py",
     "scripts/reports/mpc06_online/study.py",
+    "scripts/reports/mpc06_online/evidence.py",
+    # model.py is byte-pinned by retained MPC-06 reports; changes require a superseding capture.
     "tests/reporting/test_mpc06_online.py",
     "scripts/reports/learning_closed_loop_toy.py",
     "scripts/reports/learning_geometry_toy.py",
@@ -450,6 +458,12 @@ include = [
     "scripts/reports/visual_illustrations.py",
     "scripts/reports/visual_examples.py",
     "scripts/reports/approx_extension_companions.py",
+    "scripts/reports/mpc06_delivery/reference.py",
+    "scripts/reports/mpc06_delivery/records.py",
+    "scripts/reports/mpc06_delivery/figures.py",
+    "scripts/reports/stage_mpc06_delivery.py",
+    "tests/reporting/test_mpc06_delivery.py",
+    "tests/reporting/test_mpc06_delivery_publication.py",
     "scripts/reports/stage_buryatia_dim4.py",
     "scripts/reports/buryatia/capture_dim4.py",
     "scripts/reports/buryatia/check_2d.py",
@@ -465,6 +479,7 @@ include = [
     "scripts/reports/mpc06_online/check.py",
     "scripts/reports/mpc06_online/render.py",
     "scripts/reports/mpc06_online/study.py",
+    "scripts/reports/mpc06_online/evidence.py",
     "tests/reporting/test_mpc06_online.py",
     "scripts/reports/learning_closed_loop_toy.py",
     "scripts/reports/learning_geometry_toy.py",
@@ -680,6 +695,8 @@ include = [
     "scripts/reports/stage_four_state_projection_approximations.py",
     "tests/reporting/test_four_state_projection_approximations.py",
 ]
+# The imported legacy model is authenticated through its frozen source snapshot instead.
+exclude = ["scripts/reports/mpc06_online/model.py"]
 
 [tool.ty.terminal]
 error-on-warning = true
