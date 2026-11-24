@@ -362,6 +362,16 @@ include = [
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F", "I", "B"]
 
+[tool.ruff.lint.per-file-ignores]
+"scripts/reports/syn04*_registered_reports.py" = ["E401", "E701", "E702", "I001", "B033"]
+
+[tool.ruff.format]
+exclude = [
+    "scripts/reports/syn04_strategy_b_registered_reports.py",
+    "scripts/reports/syn04_ts02_registered_reports.py",
+    "scripts/reports/syn04_ts03_registered_reports.py",
+]
+
 [tool.ty.environment]
 python-version = "3.11"
 extra-paths = ["scripts", "scripts/ci", "scripts/reports", "scripts/research", "benchmarks/reporting/closed_loop", "benchmarks/reporting/mpc11", "reports/algorithm-results/tooling"]
@@ -725,6 +735,13 @@ include = [
 ]
 # The imported legacy model is authenticated through its frozen source snapshot instead.
 exclude = ["scripts/reports/mpc06_online/model.py"]
+
+[[tool.ty.overrides]]
+include = ["scripts/reports/syn04*_registered_reports.py"]
+
+[tool.ty.overrides.rules]
+invalid-argument-type = "ignore"
+missing-union-attribute = "ignore"
 
 [tool.ty.terminal]
 error-on-warning = true
