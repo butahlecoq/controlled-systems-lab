@@ -45,6 +45,8 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
             "All sixteen four-state reachable sets projected onto x1 and x2",
         ),
     )
+    for asset in ("bulaev-2017-four-state-fuel.html", "bulaev-2017-fuel-forward-projections.svg"):
+        outputs[asset] = _file(repository_root / "docs/examples", asset).read_bytes()
     for anchor, title, image, summary, alt in lessons:
         page = anchor + ".html"
         outputs[page] = _file(repository_root / "docs/examples", page).read_bytes()
