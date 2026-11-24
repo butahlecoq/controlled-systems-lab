@@ -907,11 +907,9 @@ class _RootLandingLinks(HTMLParser):
                 "background",
             }:
                 self.other_resources.append((tag, name, value))
-        if tag == "a" and (not self.in_body or self.in_head or self.in_title):
+        if self.in_anchor or (tag == "a" and (not self.in_body or self.in_head or self.in_title)):
             self.invalid_markup = True
         if tag == "a":
-            if self.in_anchor:
-                self.invalid_markup = True
             self.in_anchor = True
             self.anchor_text = ""
         if tag == "head":
