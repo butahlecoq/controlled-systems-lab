@@ -1,4 +1,5 @@
 """Regenerate the paired T-S01 HTML, figure, CSV and manifest from a saved bundle."""
+
 from __future__ import annotations
 
 import argparse
@@ -9,14 +10,12 @@ from pathlib import Path
 import report
 
 
-def pretty(value):
-    return (json.dumps(value, ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False) + "\n").encode("utf-8")
-
-
 def regenerate(source: Path, out: Path):
     record = report.validate_bundle(source)
     if out.exists():
         raise ValueError("refusing to overwrite regenerated bundle")
+    if out.name != record["report_id"]:
+        raise ValueError(f"output directory must be named {record['report_id']}")
     out.mkdir(parents=True)
     derived = {"index.html", "performance.svg", "trials.csv", "manifest.json"}
     for name in sorted(report.BUNDLE_FILES - derived):
@@ -28,14 +27,20 @@ def regenerate(source: Path, out: Path):
     (out / "manifest.json").write_bytes(report.bundle_manifest_bytes(record, files))
     report.validate_bundle(out)
     manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
-    print(json.dumps({
-        "report_id": record["report_id"],
-        "out": str(out),
-        "files": len(report.BUNDLE_FILES),
-        "manifest_sha256": hashlib.sha256((out / "manifest.json").read_bytes()).hexdigest(),
-        "events_sha256": manifest["files"]["measurement-events.jsonl"],
-        "solver_ran": False,
-    }, sort_keys=True, indent=2))
+    print(
+        json.dumps(
+            {
+                "report_id": record["report_id"],
+                "out": str(out),
+                "files": len(report.BUNDLE_FILES),
+                "manifest_sha256": hashlib.sha256((out / "manifest.json").read_bytes()).hexdigest(),
+                "events_sha256": manifest["files"]["measurement-events.jsonl"],
+                "solver_ran": False,
+            },
+            sort_keys=True,
+            indent=2,
+        )
+    )
 
 
 def main():
