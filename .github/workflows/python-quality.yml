@@ -91,6 +91,13 @@ on:
       - 'scripts/reports/geo02/**'
       - 'reports/algorithm-results/geo02-*/**'
       - 'reports/algorithm-results/geo02-*.zip'
+      - 'scripts/reports/syn_ts01_paired/report.py'
+      - 'scripts/reports/syn_ts01_paired/regenerate_bundle.py'
+      - 'scripts/reports/syn_ts01_paired_registered_reports.py'
+      - 'tests/reporting/test_syn_ts01_paired_report.py'
+      - 'tests/reporting/test_syn_ts01_paired_publication.py'
+      - 'reports/algorithm-results/syn-ts01-paired-*/**'
+      - 'reports/algorithm-results/syn-ts01-paired-*.zip'
       - 'reports/algorithm-results/catalog.json'
       - 'reports/algorithm-results/index.html'
       - 'reports/algorithm-results/legacy-publications.json'
@@ -857,6 +864,8 @@ jobs:
         run: |
           python -m unittest scripts.reports.geo02.test_report_tools
           python -m unittest discover -s reports/algorithm-results/tooling/geo02 -p test_report_tools.py
+      - name: Replay the saved paired T-S01 report and offline ZIP
+        run: python -m unittest tests.reporting.test_syn_ts01_paired_report tests.reporting.test_syn_ts01_paired_publication
       - name: Replay saved MPC replanning and output feedback
         run: |
           reports=reports/algorithm-results
