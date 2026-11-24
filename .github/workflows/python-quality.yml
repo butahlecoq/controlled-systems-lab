@@ -861,7 +861,9 @@ jobs:
       - name: Replay the saved analytic T-S01 report and verify its catalogue
         run: python -m unittest tests.reporting.test_ts01_report
       - name: Replay the saved GEO-02 collection and renderer
-        run: python -m unittest discover -s reports/algorithm-results/tooling/geo02 -p test_report_tools.py
+        run: |
+          python -m unittest scripts.reports.geo02.test_report_tools
+          python -m unittest discover -s reports/algorithm-results/tooling/geo02 -p test_report_tools.py
       - name: Replay the saved paired T-S01 report and offline ZIP
         run: python -m unittest tests.reporting.test_syn_ts01_paired_report tests.reporting.test_syn_ts01_paired_publication
       - name: Replay saved MPC replanning and output feedback

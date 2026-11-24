@@ -87,22 +87,16 @@ class Mpc02FourTrackIndependentOracleTests(unittest.TestCase):
 
     def test_intermediate_violation_is_not_hidden_by_physical_endpoint(self) -> None:
         """A physical-state-only recurrence admits a history rejected by slew."""
-        # x0=0, x1=x0+u0, x2=x1+u1; require x1=1 and |u1-u0| <= 1/4.
-        u0 = Fraction(1)  # x1=1 fixes the first control exactly.
+        u0 = Fraction(1)
         admissible_u1 = (Fraction(3, 4), Fraction(1))
         terminal_interval = (u0 + admissible_u1[0], u0 + admissible_u1[1])
         self.assertEqual(terminal_interval, (Fraction(7, 4), Fraction(2)))
 
-        # Dropping the remembered u0 and propagating with an independent [-1,1]
-        # second-stage domain falsely admits the same endpoint x2=0.
         falsely_admitted = (u0, Fraction(-1))
         self.assertEqual(sum(falsely_admitted), Fraction(0))
         self.assertGreater(abs(falsely_admitted[1] - falsely_admitted[0]), Fraction(1, 4))
 
     def test_incompatible_initial_memory_makes_first_slew_step_infeasible(self) -> None:
-        # A declared previous command p0=2 is incompatible with u0 in [-1,1]
-        # when |u0-p0| <= 1/4.  This is a constraint contradiction, not a
-        # solver failure and not permission to silently drop the first row.
         p0 = Fraction(2)
         control_lower, control_upper = Fraction(-1), Fraction(1)
         slew = Fraction(1, 4)
@@ -111,10 +105,6 @@ class Mpc02FourTrackIndependentOracleTests(unittest.TestCase):
         self.assertGreater(compatible_lower, compatible_upper)
 
     def test_temporal_rows_can_make_the_complete_history_empty(self) -> None:
-        # The box alone permits every pair in [-1,1]^2.  These are literal rows
-        # in x0,...,xT,u0,u1 order: u0 <= -3 and -u0 <= 2 (u0 >= -2).
-        # No complete history can satisfy them; endpoint projection must not
-        # manufacture a witness.
         lower, upper = Fraction(-1), Fraction(1)
         history_upper = Fraction(-3)
         history_lower = Fraction(-2)
