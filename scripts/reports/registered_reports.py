@@ -9,6 +9,7 @@ import statistics
 import zipfile
 from dataclasses import dataclass, replace
 from html import escape
+from html.parser import HTMLParser
 from pathlib import Path
 from typing import NotRequired, TypedDict
 
@@ -870,10 +871,96 @@ def publication_artifacts(bundle, publication, page_bytes=None):
     return files
 
 
-def publication_zip(report_id, files):
+class _RootLandingLinks(HTMLParser):
+    allowed_tags = {"a", "body", "h1", "head", "html", "meta", "p", "title"}
+    allowed_attributes = {"a": {"href"}, "html": {"lang"}, "meta": {"charset"}}
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.hrefs = []
+        self.other_resources = []
+        self.invalid_markup = False
+        self.in_head = False
+        self.in_body = False
+        self.in_title = False
+        self.in_anchor = False
+        self.anchor_text = ""
+
+    def handle_starttag(self, tag, attrs):
+        if tag not in self.allowed_tags:
+            self.invalid_markup = True
+        allowed = self.allowed_attributes.get(tag, set())
+        names = [name for name, _ in attrs]
+        if len(names) != len(set(names)) or any(name not in allowed for name in names):
+            self.invalid_markup = True
+        for name, value in attrs:
+            if name == "href" and tag == "a":
+                self.hrefs.append(value)
+            elif name in {
+                "href",
+                "src",
+                "srcset",
+                "poster",
+                "data",
+                "action",
+                "formaction",
+                "background",
+            }:
+                self.other_resources.append((tag, name, value))
+        if self.in_anchor or (tag == "a" and (not self.in_body or self.in_head or self.in_title)):
+            self.invalid_markup = True
+        if tag == "a":
+            self.in_anchor = True
+            self.anchor_text = ""
+        if tag == "head":
+            self.in_head = True
+        elif tag == "body":
+            self.in_body = True
+        elif tag == "title":
+            self.in_title = True
+
+    def handle_endtag(self, tag):
+        if tag == "head":
+            self.in_head = False
+        elif tag == "body":
+            self.in_body = False
+        elif tag == "title":
+            self.in_title = False
+        elif tag == "a":
+            if not self.in_anchor or not self.anchor_text.strip():
+                self.invalid_markup = True
+            self.in_anchor = False
+
+    def handle_data(self, data):
+        if self.in_anchor:
+            self.anchor_text += data
+
+
+def publication_zip(report_id, files, *, root_landing_page=None):
+    if root_landing_page is None:
+        root_page = files["index.html"]
+    else:
+        if not isinstance(root_landing_page, bytes):
+            raise ValueError("root landing page must be UTF-8 bytes")
+        try:
+            landing_html = root_landing_page.decode("utf-8")
+        except UnicodeDecodeError as error:
+            raise ValueError("root landing page must be UTF-8") from error
+        links = _RootLandingLinks()
+        links.feed(landing_html)
+        expected_target = report_id + "/index.html"
+        if (
+            links.hrefs != [expected_target]
+            or links.other_resources
+            or links.invalid_markup
+            or links.in_anchor
+            or "index.html" not in files
+        ):
+            raise ValueError("root landing page must link only to the nested report page")
+        root_page = root_landing_page
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_STORED) as archive:
-        entries = [("index.html", files["index.html"])] + [
+        entries = [("index.html", root_page)] + [
             (report_id + "/" + name, files[name]) for name in sorted(files)
         ]
         for name, content in entries:
