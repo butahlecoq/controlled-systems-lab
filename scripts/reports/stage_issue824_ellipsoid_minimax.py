@@ -67,7 +67,6 @@ def verified_bundle(source: Path) -> dict[str, bytes]:
         ROOT, capture.get("source_commit", ""), capture.get("source_files_sha256", {})
     ):
         raise ValueError("issue #824 ellipsoid source files differ from the captured commit")
-    # The companion page must also be valid UTF-8.
     files["planar-example.html"].decode("utf-8")
     planar_ellipse = files["ellipsoid-planar-example.html"].decode("utf-8")
     if "all four exact vertices" not in planar_ellipse or "A=[[2,0],[0,1]]" not in planar_ellipse:

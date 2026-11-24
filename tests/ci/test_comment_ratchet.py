@@ -148,6 +148,18 @@ class CommentRatchetTests(unittest.TestCase):
             result.stderr,
         )
 
+    def test_checks_the_issue824_ellipsoid_minimax_stager_scope(self):
+        source = self.root / "scripts/reports/stage_issue824_ellipsoid_minimax.py"
+        source.parent.mkdir(parents=True, exist_ok=True)
+        source.write_text("# New issue824 stager prose\n")
+        self.git("add", ".")
+        result = self.checker("check", "--base", "HEAD")
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn(
+            "scripts/reports/stage_issue824_ellipsoid_minimax.py:1: # New issue824 stager prose",
+            result.stderr,
+        )
+
     def test_inventory_reads_the_requested_commit_and_counts_physically_removable_lines(self):
         self.file.write_text('# comment only\nx = "#"  # inline\n')
         self.git("commit", "-qam", "Change comment inventory")
