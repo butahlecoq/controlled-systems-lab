@@ -167,6 +167,31 @@ class Ts01SavedReportTests(unittest.TestCase):
                 receipt["stderr_sha256"], hashlib.sha256(b"partial stderr").hexdigest()
             )
 
+    def test_atomic_output_publication_can_retry_after_destination_conflict(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            staged = root / ".measurement.incomplete-test"
+            destination = root / "measurement"
+            staged.mkdir()
+            (staged / "events.jsonl").write_bytes(b"events")
+            (staged / "collection.json").write_bytes(b"collection")
+            destination.mkdir()
+
+            with self.assertRaises(FileExistsError):
+                collector.publish_directory_no_replace(staged, destination)
+
+            self.assertEqual(
+                {path.name: path.read_bytes() for path in staged.iterdir()},
+                {"events.jsonl": b"events", "collection.json": b"collection"},
+            )
+            self.assertEqual(list(destination.iterdir()), [])
+            destination.rmdir()
+            collector.publish_directory_no_replace(staged, destination)
+            self.assertEqual(
+                {path.name: path.read_bytes() for path in destination.iterdir()},
+                {"events.jsonl": b"events", "collection.json": b"collection"},
+            )
+
     def test_collector_records_native_attempts_and_exports_only_accepted_results(self):
         attempts = (
             (7, b"partial native output\r\n", "measurement executable failed with status 7", None),
@@ -265,7 +290,7 @@ class Ts01SavedReportTests(unittest.TestCase):
                     else self.assertRaisesRegex(SystemExit, reason)
                 )
                 replace = Path.replace
-                mkdir = Path.mkdir
+                publish = collector.publish_directory_no_replace
 
                 def reject_accepted_receipt(path, target, *, failure=fail_at, replace_path=replace):
                     if failure in {"receipt", "prepare-receipt"} and path.name == "attempt.tmp":
@@ -283,23 +308,27 @@ class Ts01SavedReportTests(unittest.TestCase):
                     return replace_path(path, target)
 
                 def create_competing_output_before_publish(
-                    path, *args, failure=fail_at, mkdir_path=mkdir, output_path=output, **kwargs
+                    source,
+                    destination,
+                    failure=fail_at,
+                    publish_directory=publish,
+                    output_path=output,
                 ):
                     if (
                         isinstance(failure, str)
                         and failure.startswith("output")
-                        and path == output_path
+                        and destination == output_path
                     ):
-                        mkdir_path(path, parents=True, exist_ok=False)
+                        output_path.mkdir(parents=True, exist_ok=False)
                         if failure == "output-nonempty":
                             (output_path / "collection.json").write_bytes(
                                 b"another collector's result"
                             )
                         try:
-                            return mkdir_path(path, *args, **kwargs)
+                            return publish_directory(source, destination)
                         except OSError as error:
                             raise OSError(f"simulated output publish failure: {error}") from error
-                    return mkdir_path(path, *args, **kwargs)
+                    return publish_directory(source, destination)
 
                 with (
                     patch.object(sys, "argv", argv),
@@ -311,9 +340,8 @@ class Ts01SavedReportTests(unittest.TestCase):
                         Path, "replace", autospec=True, side_effect=reject_accepted_receipt
                     ),
                     patch.object(
-                        Path,
-                        "mkdir",
-                        autospec=True,
+                        collector,
+                        "publish_directory_no_replace",
                         side_effect=create_competing_output_before_publish,
                     ),
                     redirect_stdout(io.StringIO()),
@@ -333,6 +361,7 @@ class Ts01SavedReportTests(unittest.TestCase):
                 self.assertEqual(receipt["stderr_sha256"], hashlib.sha256(stderr).hexdigest())
                 if fail_at and fail_at.startswith("output"):
                     self.assertEqual(receipt["status"], "failed")
+                    self.assertEqual(len(receipt["collection_sha256"]), 64)
                     if fail_at == "output-empty":
                         self.assertEqual(list(output.iterdir()), [])
                     else:
@@ -343,10 +372,10 @@ class Ts01SavedReportTests(unittest.TestCase):
                     self.assertEqual(list(build_root.glob(".measurement-attempt.incomplete-*")), [])
                     continue
                 if fail_at == "receipt":
-                    self.assertEqual(receipt["status"], "failed")
+                    self.assertEqual(receipt["status"], "ready_to_publish")
+                    collection_bytes = (output / "collection.json").read_bytes()
                     self.assertEqual(
-                        json.loads((output / "collection.json").read_bytes())["raw_stdout_sha256"],
-                        hashlib.sha256(stdout).hexdigest(),
+                        receipt["collection_sha256"], hashlib.sha256(collection_bytes).hexdigest()
                     )
                     continue
                 if fail_at == "prepare-receipt":

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import ctypes
 import hashlib
 import importlib
 import json
@@ -27,6 +28,30 @@ except ImportError:
 
 def sha(data):
     return hashlib.sha256(data).hexdigest()
+
+
+def publish_directory_no_replace(source, destination):
+    """Atomically publish a directory without replacing an existing destination."""
+    if os.name == "nt":
+        os.rename(source, destination)
+        return
+    if sys.platform != "linux":
+        raise OSError("atomic no-replace directory publication is unsupported on this platform")
+    libc = ctypes.CDLL(None, use_errno=True)
+    renameat2 = getattr(libc, "renameat2", None)
+    if renameat2 is None:
+        raise OSError("renameat2 is unavailable; cannot safely publish measurement output")
+    renameat2.argtypes = (
+        ctypes.c_int,
+        ctypes.c_char_p,
+        ctypes.c_int,
+        ctypes.c_char_p,
+        ctypes.c_uint,
+    )
+    renameat2.restype = ctypes.c_int
+    if renameat2(-100, os.fsencode(source), -100, os.fsencode(destination), 1) != 0:
+        error = ctypes.get_errno()
+        raise OSError(error, os.strerror(error), os.fspath(destination))
 
 
 def run(command, *, capture=True):
@@ -123,7 +148,19 @@ def measurement_attempt(build_root, executable, binary_sha256, harness_commit):
     else:
         receipt["status"] = "accepted"
     finally:
-        write_receipt()
+        try:
+            write_receipt()
+        except Exception as error:
+            if receipt.get("status") == "accepted" and receipt.get("collection_sha256"):
+                print(f"Raw measurement evidence: {attempt}", file=sys.stderr)
+                raise
+            receipt.update(status="failed", reason=f"attempt receipt write failed: {error}")
+            try:
+                write_receipt()
+            except Exception:
+                pass
+            print(f"Raw measurement evidence: {attempt}", file=sys.stderr)
+            raise
 
 
 def main():
@@ -466,10 +503,7 @@ def main():
         )
         pending.replace(staged_output / "collection.json")
         prepare_publication(sha((staged_output / "collection.json").read_bytes()))
-        out.mkdir(exist_ok=False)
-        for name in ("events.jsonl", "stderr.txt", "command.txt", "collection.json"):
-            (staged_output / name).rename(out / name)
-        staged_output.rmdir()
+        publish_directory_no_replace(staged_output, out)
     print(json.dumps(measurement, ensure_ascii=False, sort_keys=True))
 
 
