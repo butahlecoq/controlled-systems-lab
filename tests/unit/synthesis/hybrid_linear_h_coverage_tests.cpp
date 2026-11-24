@@ -92,7 +92,7 @@ HybridFamilyVerificationReport verify(const Fixture &f) {
       verifier, f.system, f.request, f.programs, f.candidates, {1, 4},
       HybridVerifierInvocation{context}));
 }
-} // namespace
+}
 TEST_CASE("exact H coverage aggregation preserves established and unsupported "
           "proofs") {
   auto f = fixture();

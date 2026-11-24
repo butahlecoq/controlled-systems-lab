@@ -255,4 +255,4 @@ TEST_CASE("Strategy A rejects an exact T-S01 receipt bound to a different select
         }));
 }
 
-} // namespace
+}
