@@ -286,6 +286,11 @@ class VisualRouteInventoryTests(unittest.TestCase):
             history["route"], exact["route"], backward["route"],
             finite_action["route"], ring["route"], constrained["route"],
         }
+        backends = routes["native-catalogue-convex-backends-v1"]
+        self.assertEqual(backends["assets"], ["bicycle-row-scaling.svg", "twenty-zone-ipopt.svg"])
+        self.assertTrue(backends["disposition"].startswith("reviewed:"))
+        self.assertNotIn("follow_up_issue", backends)
+        reviewed_routes.add(backends["route"])
         self.assertTrue(all(entry["disposition"].startswith("deferred: original frozen route-level readability")
                             for entry in routes.values() if entry["route"] not in reviewed_routes | {external["route"], disturbance["route"]}))
         self.assertTrue(all(entry["follow_up_issue"] ==
@@ -371,6 +376,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "native-source-constrained-mpc-v1/index.html", "native-source-constrained-mpc-v1/platoon.svg",
             "native-history-strategies-d57739b3/index.html",
             "native-history-strategies-d57739b3/figures/lotka-polytope.svg",
+            "native-catalogue-convex-backends-v1/index.html",
+            "native-catalogue-convex-backends-v1/bicycle-row-scaling.svg", "native-catalogue-convex-backends-v1/twenty-zone-ipopt.svg",
             "mpc-crossover-6b7308c4/deployment-time.svg",
             "discrete-mpc-2d.html", "discrete-mpc-2d.svg", "discrete-mpc-2d.json",
             "discrete_mpc_2d-output.csv", "discrete_mpc_2d-output.txt",

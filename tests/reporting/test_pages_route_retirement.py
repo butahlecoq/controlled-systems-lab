@@ -469,6 +469,28 @@ class PagesRouteRetirementTests(unittest.TestCase):
         self.assertIn("scripts/reports/report_site.py", record["files"])
         self.assertTrue(all((repo / source).is_file() for source in record["files"]))
 
+    def test_convex_backend_gallery_route_names_its_frozen_producer(self) -> None:
+        repo = Path(__file__).resolve().parents[2]
+        with tempfile.TemporaryDirectory() as temporary:
+            site, _ = self.make_site(Path(temporary))
+            record = retirement._producer_record(
+                site,
+                "examples/native-catalogue-convex-backends-v1/index.html",
+                {},
+                {},
+            )
+        self.assertIn("scripts/reports/stage_native_source_constrained_mpc.py", record["files"])
+        self.assertIn("scripts/reports/frozen_native_bundle.py", record["files"])
+        self.assertIn(
+            "reports/algorithm-results/native-catalogue-convex-backends-v1/index.html",
+            record["files"],
+        )
+        self.assertIn(
+            "reports/algorithm-results/native-catalogue-convex-backends-v1/native-catalogue-convex-backends-v1.zip",
+            record["files"],
+        )
+        self.assertTrue(all((repo / source).is_file() for source in record["files"]))
+
     def test_model_tracks_page_is_owned_by_learning_book_producer(self) -> None:
         repo = Path(__file__).resolve().parents[2]
         with tempfile.TemporaryDirectory() as temporary:

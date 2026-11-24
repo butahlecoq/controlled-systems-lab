@@ -549,6 +549,7 @@ on:
       - 'tests/reporting/test_native_vertex_lp_priority_policy.py'
       - 'reports/algorithm-results/mpc-crossover-6b7308c4/**'
       - 'reports/algorithm-results/native-source-constrained-mpc-v1/**'
+      - 'reports/algorithm-results/native-catalogue-convex-backends-v1/**'
       - 'scripts/reports/stage_native_history_strategies.py'
       - 'scripts/reports/stage_mpc03.py'
       - 'benchmarks/reporting/mpc07/capture.py'

@@ -165,6 +165,13 @@ FAMILIES = {
         "Compares the two policies on matched deterministic three-step tasks and illustrates "
         "the results with the last vehicle and headway margins of a ten-car platoon.",
     ),
+    "native-catalogue-convex-backends": Family(
+        r"examples/native-catalogue-convex-backends-v1",
+        "synthesis",
+        "Convex solvers for the same catalogue control tasks",
+        "Compares completed episodes for released HiGHS, bounded row scaling, and installed Ipopt. "
+        "The figures show recovered bicycle and twenty-zone thermal trajectories.",
+    ),
     "mpc08-explicit-pilot": Family(
         r"mpc08-explicit-pilot-v1",
         "synthesis",
@@ -1442,6 +1449,25 @@ def build(site: Path) -> None:
                 links=(
                     ("Independent audit", matched + "/independent-audit.json"),
                     ("Offline study", matched + "/native-source-constrained-mpc-v1.zip"),
+                ),
+            )
+        )
+    backends = "examples/native-catalogue-convex-backends-v1"
+    if (site / backends / "index.html").is_file():
+        manifest = json.loads((site / backends / "manifest.json").read_text(encoding="utf-8"))
+        detailed = [entry for entry in detailed if entry.report_id != backends]
+        detailed.append(
+            Entry(
+                report_id=backends,
+                scope="Three convex providers on the same 35 open-loop and observed-state MPC tasks.",
+                limits="Coverage and original-coordinate numerical checks on three-transition deterministic tasks.",
+                commit=manifest["source_commit"],
+                links=(
+                    (
+                        "Installed Ipopt replay",
+                        backends + "/catalogue-installed-ipopt-evidence.zip",
+                    ),
+                    ("Offline comparison", backends + "/native-catalogue-convex-backends-v1.zip"),
                 ),
             )
         )

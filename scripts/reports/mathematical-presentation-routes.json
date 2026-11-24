@@ -844,6 +844,13 @@
       "witness": "Byte-identical HTML in the native-history-strategies-d57739b3 offline archive"
     },
     {
+      "route": "examples/native-catalogue-convex-backends-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/native-catalogue-convex-backends-v1/index.html",
+      "sha256": "da0f6b352e141d32f3f0f9f836cab12911b4610ad8a11207935b157cadbf3f32",
+      "witness": "Frozen companion archive and SHA-256 inventory in reports/algorithm-results/native-catalogue-convex-backends-v1"
+    },
+    {
       "route": "examples/native-discrete-models.html",
       "disposition": "maintained",
       "owner": "docs/examples/native-discrete-models.html"

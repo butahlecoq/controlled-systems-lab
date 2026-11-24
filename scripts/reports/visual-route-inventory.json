@@ -2089,9 +2089,10 @@
     },
     {
       "source": "scripts/reports/stage_native_source_constrained_mpc.py",
-      "signal_count": 1,
+      "signal_count": 2,
       "asset_name_literals": [
-        "platoon.svg"
+        "platoon.svg",
+        "twenty-zone-ipopt.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
     },
@@ -4202,6 +4203,16 @@
       "follow_up_issue": 605
     },
     {
+      "route": "native-catalogue-convex-backends-v1",
+      "source_bundle": "native-catalogue-convex-backends-v1",
+      "assets": [
+        "bicycle-row-scaling.svg",
+        "twenty-zone-ipopt.svg"
+      ],
+      "index_sha256": "da0f6b352e141d32f3f0f9f836cab12911b4610ad8a11207935b157cadbf3f32",
+      "disposition": "reviewed: recovered episode figures show all four labelled states and both replay policies"
+    },
+    {
       "route": "native-row-scaling-diagnostic-v1",
       "source_bundle": "native-row-scaling-diagnostic-v1",
       "assets": [
@@ -4528,6 +4539,9 @@
         "native-source-constrained-mpc-v1/platoon.svg",
         "native-history-strategies-d57739b3/index.html",
         "native-history-strategies-d57739b3/figures/lotka-polytope.svg",
+        "native-catalogue-convex-backends-v1/index.html",
+        "native-catalogue-convex-backends-v1/bicycle-row-scaling.svg",
+        "native-catalogue-convex-backends-v1/twenty-zone-ipopt.svg",
         "mpc-crossover-6b7308c4/feedback-geometry.svg",
         "mpc-crossover-6b7308c4/deployment-time.svg",
         "discrete-mpc-2d.html",
