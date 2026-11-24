@@ -76,6 +76,68 @@ class ContractTests(unittest.TestCase):
             self.assertEqual(replay["summary"], records["summary"])
             render.validate(replay)
 
+    def test_collector_preserves_valid_rows_from_timed_out_partial_csv(self):
+        root = HERE.parents[2]
+        saved = root / "reports" / "algorithm-results" / "geo02-20261013T061151Z-338ff7d1d63c"
+        records = json.loads((saved / "records.json").read_bytes())
+        raw_rows = (saved / "raw-driver-output.csv").read_text(encoding="utf-8").splitlines()
+        partial_output = "\n".join(raw_rows[:2]) + "\n"
+        stderr = (saved / "process-stderr.txt").read_text(encoding="utf-8")
+        with tempfile.TemporaryDirectory() as directory:
+            scratch = Path(directory)
+            exe = scratch / "driver.exe"
+            exe.write_bytes(b"simulated GEO-02 driver")
+            note = scratch / "note.txt"
+            note.write_text("simulated collection", encoding="utf-8")
+            output = scratch / "collection"
+            argv = [
+                "collect.py",
+                "--exe",
+                str(exe),
+                "--build-dir",
+                str(scratch),
+                "--source-commit",
+                records["algorithm"]["source_commit"],
+                "--harness-commit",
+                records["algorithm"]["harness_commit"],
+                "--concurrent-work",
+                str(note),
+                "--profile-evidence",
+                str(note),
+                "--out",
+                str(output),
+                "--reviewed",
+            ]
+            with (
+                mock.patch.object(sys, "argv", argv),
+                mock.patch.object(
+                    subprocess,
+                    "run",
+                    side_effect=subprocess.TimeoutExpired(
+                        [str(exe)], 600, output=partial_output, stderr=stderr
+                    ),
+                ),
+                mock.patch.object(provenance, "git", return_value=str(root)),
+                mock.patch.object(provenance, "require_clean_tracked_tree"),
+                mock.patch.object(
+                    provenance, "final_build_provenance", return_value=({}, "", "", "")
+                ),
+            ):
+                self.assertEqual(collect.main(), 2)
+            replay = json.loads((output / "records.json").read_bytes())
+            events = [
+                json.loads(line)
+                for line in (output / "raw-events.jsonl").read_text(encoding="utf-8").splitlines()
+            ]
+            self.assertEqual(replay["collection"]["state"], "failed")
+            self.assertTrue(replay["collection"]["aborted_or_timed_out"])
+            self.assertEqual(replay["collection"]["actual_trials"], 1)
+            self.assertEqual(replay["collection"]["parse_error"], "missing/duplicate trial rows")
+            self.assertEqual(len(replay["trials"]), 1)
+            self.assertEqual(events, replay["trials"])
+            self.assertEqual((output / "raw-driver-output.csv").read_text(), partial_output)
+            render.validate(replay)
+
     def test_signed_payload_hash_and_tamper_detection(self):
         p = collect.fixture_payload("20261013T000000Z")
         self.assertEqual(p["schema"], "csl.geo02-affine-sum-report/2")

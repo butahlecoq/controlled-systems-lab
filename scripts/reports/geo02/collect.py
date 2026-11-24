@@ -395,11 +395,11 @@ def main():
         warmup_parse_error = str(error)
     else:
         warmup_parse_error = None
+    trials: list[Trial] = []
     try:
         reader = csv.DictReader(stdout.splitlines())
         if tuple(reader.fieldnames or ()) != FIELDS:
             raise ValueError("unexpected driver CSV header")
-        trials: list[Trial] = []
         for row in reader:
             repetition = int(row["repetition"])
             durations = {phase: int(row[phase]) for phase in PHASES}
@@ -443,7 +443,6 @@ def main():
             raise ValueError("missing/duplicate trial rows")
         parse_error = None
     except Exception as error:
-        trials = []
         parse_error = str(error)
     for trial in trials:
         case = SCENARIOS[trial["scenario"]]
