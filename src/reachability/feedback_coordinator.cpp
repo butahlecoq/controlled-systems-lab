@@ -620,6 +620,200 @@ exact_successor_box(const model::DynamicsStage &dynamics,
     return result;
 }
 
+std::optional<std::vector<enclosure::Interval>>
+exact_unit_normal_box(const SetHandle &input, enclosure::Budget &budget) {
+    const auto data = import(input);
+    const auto representation = data.representation();
+    const auto *h = std::get_if<sets::HRepresentation>(&representation);
+    if (!h || h->equalities.rows() != 0)
+        return std::nullopt;
+
+    const auto dimension = h->inequalities.cols();
+    Vector lower(dimension, -std::numeric_limits<double>::infinity());
+    Vector upper(dimension, std::numeric_limits<double>::infinity());
+    for (std::size_t row = 0; row < h->inequalities.rows(); ++row) {
+        std::size_t axis = dimension;
+        double sign = 0;
+        for (std::size_t column = 0; column < dimension; ++column) {
+            const auto coefficient = h->inequalities(row, column);
+            if (coefficient == 0)
+                continue;
+            if (axis != dimension || (coefficient != 1 && coefficient != -1))
+                return std::nullopt;
+            axis = column;
+            sign = coefficient;
+        }
+        if (axis == dimension)
+            return std::nullopt;
+        if (sign > 0)
+            upper[axis] = std::min(upper[axis], h->upper_bounds[row]);
+        else
+            lower[axis] = std::max(lower[axis], -h->upper_bounds[row]);
+    }
+
+    std::vector<enclosure::Interval> box;
+    box.reserve(dimension);
+    for (std::size_t axis = 0; axis < dimension; ++axis) {
+        if (!std::isfinite(lower[axis]) || !std::isfinite(upper[axis]) ||
+            lower[axis] > upper[axis])
+            return std::nullopt;
+        box.push_back(exact_interval(lower[axis], upper[axis], budget));
+    }
+    return box;
+}
+
+double exact_prefix_support(
+    std::span<const model::DynamicsStage> dynamics,
+    std::span<const std::vector<enclosure::Interval>> controls,
+    std::span<const double> initial, std::span<const double> normal,
+    const ExecutionContext &context) {
+    enclosure::Budget budget;
+    const auto decode = [&](double value) {
+        enclosure::Rational result;
+        if (!rational::from_binary64(value, result, budget))
+            exact_history_limit("Exact support input exceeded the arithmetic budget.");
+        return result;
+    };
+    const auto accumulate = [&](enclosure::Rational &sum, const enclosure::Rational &left,
+                                const enclosure::Rational &right) {
+        enclosure::Rational value;
+        if (!rational::multiply(left, right, value, budget) ||
+            !rational::add(sum, value, sum, budget))
+            exact_history_limit("Exact support evaluation exceeded the arithmetic budget.");
+    };
+    std::vector<enclosure::Rational> direction;
+    for (const auto value : normal)
+        direction.push_back(decode(value));
+    enclosure::Rational support;
+    for (std::size_t k = dynamics.size(); k > 0; --k) {
+        check_exact_history_stop(context);
+        const auto &stage = dynamics[k - 1];
+        std::vector<enclosure::Rational> prior(direction.size());
+        for (std::size_t i = 0; i < direction.size(); ++i) {
+            accumulate(support, direction[i], decode(stage.offset[i]));
+            for (std::size_t j = 0; j < direction.size(); ++j)
+                accumulate(prior[j], direction[i], decode(stage.A(i, j)));
+        }
+        for (std::size_t j = 0; j < controls[k - 1].size(); ++j) {
+            enclosure::Rational coefficient;
+            for (std::size_t i = 0; i < direction.size(); ++i)
+                accumulate(coefficient, direction[i], decode(stage.B(i, j)));
+            const auto &interval = controls[k - 1][j];
+            accumulate(support, coefficient,
+                       coefficient.numerator.negative ? interval.lower : interval.upper);
+        }
+        direction = std::move(prior);
+    }
+    for (std::size_t i = 0; i < initial.size(); ++i)
+        accumulate(support, direction[i], decode(initial[i]));
+    const auto bracket = exact_h::bracket_binary64(
+        {support.numerator, support.denominator, support.binary_exponent},
+        budget.max_integer_bits);
+    if (bracket.status != exact_h::Binary64BracketStatus::finite)
+        exact_history_limit("Exact support could not be enclosed in binary64.");
+    return bracket.upper;
+}
+
+bool affine_box_history_geometry(
+    FeedbackGeometry &output, Runner &run, const model::LinearSystem &system,
+    const std::vector<SetHandle> &states, const std::vector<SetHandle> &controls,
+    const SetHandle &terminal, const Vector &initial, const std::vector<std::string> &labels,
+    const std::vector<StrictCoordinateLowerBound> &strict, StageIndex &active) {
+    const auto unrestricted = [](const SetHandle &set) {
+        const auto data = import(set);
+        const auto representation = data.representation();
+        const auto *h = std::get_if<sets::HRepresentation>(&representation);
+        return h && h->inequalities.rows() == 0 && h->equalities.rows() == 0;
+    };
+    if (!unrestricted(terminal) || !std::all_of(states.begin(), states.end(), unrestricted))
+        return false;
+
+    enclosure::Budget budget;
+    std::vector<std::vector<enclosure::Interval>> boxes;
+    std::vector<model::DynamicsStage> stages;
+    for (std::size_t k = 0; k < controls.size(); ++k) {
+        check_exact_history_stop(run.context);
+        auto box = exact_unit_normal_box(controls[k], budget);
+        if (!box)
+            return false;
+        boxes.push_back(std::move(*box));
+        stages.push_back(take<model::DynamicsStage>(system.stage({k})));
+    }
+
+    const auto n = initial.size();
+    std::vector<Rows> marginals;
+    for (std::size_t k = 0; k <= stages.size(); ++k) {
+        active = {k};
+        run.stage = k;
+        Rows rows(n);
+        const auto add_support = [&](Vector normal) {
+            const auto bound =
+                exact_prefix_support(std::span{stages}.first(k), std::span{boxes}.first(k),
+                                     initial, normal, run.context);
+            rows.append(std::move(normal), bound);
+        };
+        for (std::size_t axis = 0; axis < n; ++axis) {
+            Vector normal(n, 0);
+            normal[axis] = -1;
+            add_support(normal);
+            const auto lower = -rows.b.back();
+            for (const auto &predicate : strict)
+                if (predicate.coordinate == axis && lower <= predicate.lower_bound)
+                    return false;
+            normal[axis] = 1;
+            add_support(std::move(normal));
+        }
+        for (std::size_t axis = 0; axis + 1 < n; axis += 2) {
+            Vector normal(n, 0);
+            normal[axis] = 1;
+            normal[axis + 1] = 1;
+            add_support(normal);
+            normal[axis] = -1;
+            normal[axis + 1] = -1;
+            add_support(std::move(normal));
+        }
+        marginals.push_back(std::move(rows));
+    }
+
+    for (std::size_t k = 0; k < marginals.size(); ++k) {
+        active = {k};
+        run.stage = k;
+        auto &stage = output.stages[k];
+        const auto assign = [&](const char *role, const char *statement,
+                                std::optional<OperationResult> &geometry,
+                                std::optional<FeedbackSet> &member) {
+            const auto key = run.id(role);
+            auto set = marginals[k].finish({key + "/set"}, labels);
+            GeometryEvidence evidence{
+                {{run.problem, {key}, {key + "/mathematical-marginal"}}, run.source_ids},
+                GeometryClaimScope::set_relation,
+                SymbolicArgument{statement,
+                                 "Exact affine input-box support and outward binary64 rounding"},
+                {"The closed state and terminal sets are universal.",
+                 "All stagewise strict source predicates hold on the affine input histories."},
+                {}};
+            run.requests.push_back(evidence.reference);
+            run.lineage.push_back(evidence);
+            geometry = OperationResult{set, SetRelation::outer, std::move(evidence)};
+            member = record(run, FeedbackFamily::polytope, FeedbackHMembership{set, {}}, strict,
+                            {set.id});
+            member->assurance = Assurance::validated;
+            member->construction = {statement};
+        };
+        assign("affine-box-forward", "Outer H template of the affine forward marginal.",
+               stage.forward_h, stage.forward);
+        assign("affine-box-backward",
+               "Every forward history has an admissible continuation to the universal terminal.",
+               stage.backward_h, stage.backward);
+        assign("affine-box-intersection",
+               "The forward-relevant intersection equals the affine forward marginal.",
+               stage.intersection_h, stage.intersection);
+        stage.forward_embedding_h = stage.forward_h->output;
+        stage.backward_embedding_h = stage.backward_h->output;
+    }
+    return true;
+}
+
 OperationResult certified_history_projection(Runner &run, const Rows &source,
                                              std::size_t first,
                                              std::span<const enclosure::Interval> box,
@@ -884,6 +1078,10 @@ FeedbackGeometryOutcome feedback_geometry(const problem::ResolvedProblem &resolv
         if (certified_stagewise && family != FeedbackFamily::polytope)
             bad("feedback.polytope-history",
                 "Certified stagewise projection requires the polytope family.");
+        if (certified_stagewise &&
+            affine_box_history_geometry(output, run, system, states, controls, terminal_h,
+                                        initial, labels, strict, active))
+            return output;
         std::vector<Vector> lower(horizon + 1), upper(horizon + 1);
         std::vector<SetHandle> forward_embeddings;
         forward_embeddings.reserve(horizon + 1);
