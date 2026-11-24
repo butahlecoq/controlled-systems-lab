@@ -74,6 +74,13 @@ on:
       - 'tests/reporting/test_publication_policy.py'
       - 'tests/reporting/test_report_source_identity.py'
       - 'tests/reporting/test_registered_kinds.py'
+      - 'scripts/reports/ts01/**'
+      - 'scripts/reports/ts01_registered_reports.py'
+      - 'tests/reporting/test_ts01_report.py'
+      - 'reports/algorithm-results/syn07-ts01-*/**'
+      - 'reports/algorithm-results/catalog.json'
+      - 'reports/algorithm-results/index.html'
+      - 'reports/algorithm-results/legacy-publications.json'
       - 'tests/reporting/test_landing.py'
       - 'tests/reporting/test_ext07_resource_observation.py'
       - 'tests/reporting/test_plot.py'
@@ -830,6 +837,8 @@ jobs:
         run: |
           python -m unittest tests.reporting.test_mathematical_notation
           python -m unittest tests.reporting.test_report_data tests.reporting.test_render tests.reporting.test_publication_policy tests.reporting.test_report_source_identity tests.reporting.test_registered_kinds tests.reporting.test_landing tests.reporting.test_learning_book tests.reporting.test_campaign_paired_figures tests.reporting.test_plot tests.reporting.test_b04_publication_source_snapshot tests.reporting.test_publication_spine_boundaries
+      - name: Replay the saved analytic T-S01 report and verify its catalogue
+        run: python -m unittest tests.reporting.test_ts01_report
       - name: Replay saved MPC replanning and output feedback
         run: |
           reports=reports/algorithm-results
