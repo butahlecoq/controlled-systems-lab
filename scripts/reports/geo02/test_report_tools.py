@@ -291,30 +291,53 @@ class ContractTests(unittest.TestCase):
             render.validate(q)
 
     def test_failed_saved_rows_still_reject_malformed_geometry(self):
-        for stage in ("trial", "warmup"):
-            with self.subTest(stage=stage):
+        cases = (
+            ("trial", "nonnumeric point"),
+            ("trial", "empty points"),
+            ("trial", "wrong point dimension"),
+            ("trial", "wrong support count"),
+            ("trial", "wrong support check count"),
+            ("warmup", "nonnumeric point"),
+            ("warmup", "empty points"),
+            ("warmup", "wrong point dimension"),
+            ("warmup", "wrong support count"),
+            ("warmup", "wrong support check count"),
+        )
+        for stage, defect in cases:
+            with self.subTest(stage=stage, defect=defect):
                 payload = collect.fixture_payload("malformed-failure")
-                if stage == "trial":
-                    row = payload["trials"][0]
-                    row["status"] = "oracle_failed"
-                    row["oracle_passed"] = False
+                row = (
+                    payload["trials"][0]
+                    if stage == "trial"
+                    else payload["collection"]["warmup_results"][0]
+                )
+                row["status"] = "oracle_failed"
+                row["oracle_passed"] = False
+                if defect == "nonnumeric point":
                     row["output_points"] = [None] * len(row["output_points"])
+                elif defect == "empty points":
+                    row["output_points"] = []
+                    row["materialized_output_point_count"] = 0
+                    row["reduction_status"] = "reduced"
+                elif defect == "wrong point dimension":
+                    row["output_points"] = [[1, 2]] * len(row["output_points"])
+                elif defect == "wrong support count":
+                    row["support_values"] = []
+                else:
+                    row["support_checks"] = 0
+                if stage == "trial":
                     payload["collection"]["state"] = "failed"
                     payload["collection"]["failures"] += 1
                     payload["collection"]["process_return_code"] = 2
                     payload["summary"] = collect.summarize(payload["trials"], False)
                 else:
-                    row = payload["collection"]["warmup_results"][0]
-                    row["status"] = "oracle_failed"
-                    row["oracle_passed"] = False
-                    row["output_points"] = [None] * len(row["output_points"])
                     payload["collection"]["state"] = "failed"
                     payload["summary"] = collect.summarize(payload["trials"], False)
                     payload["collection"]["warmup_failures"] = 1
                     payload["collection"]["process_return_code"] = 2
                 collect.finalize(payload, "malformed-failure")
 
-                with self.assertRaisesRegex(ValueError, "malformed geometry"):
+                with self.assertRaisesRegex(ValueError, "geometry"):
                     render.validate(payload)
 
     def test_summaries_recompute_from_all_trials_and_fail_closed(self):

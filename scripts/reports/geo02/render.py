@@ -97,6 +97,26 @@ def check_candidate_reduction(scenario, row):
     return row.get("reduction_status") == expected_status
 
 
+def validate_saved_geometry(scenario, points, support_values, support_checks, kind):
+    case = collect.SCENARIOS[scenario]
+    point_dimension = len(case["outputs"][0])
+    support_count = len(case["directions"])
+    if (
+        not isinstance(points, list)
+        or not points
+        or any(not isinstance(point, list) or len(point) != point_dimension for point in points)
+        or not isinstance(support_values, list)
+        or len(support_values) != support_count
+        or type(support_checks) is not int
+        or support_checks != support_count
+    ):
+        raise ValueError(f"saved {kind} geometry shape mismatch")
+    try:
+        collect.require_driver_geometry(points, support_values)
+    except ValueError as error:
+        raise ValueError(f"saved {kind} has malformed geometry") from error
+
+
 def validate(payload):
     if (
         payload.get("schema") != collect.SCHEMA
@@ -157,12 +177,9 @@ def validate(payload):
             raise ValueError(
                 "candidate reduction evidence does not match the generated and materialized clouds"
             )
-        try:
-            collect.require_driver_geometry(t.get("output_points"), t.get("support_values"))
-        except ValueError as error:
-            raise ValueError("saved trial has malformed geometry") from error
-        if type(t.get("support_checks")) is not int or t["support_checks"] < 0:
-            raise ValueError("invalid saved trial support check count")
+        validate_saved_geometry(
+            name, t.get("output_points"), t.get("support_values"), t.get("support_checks"), "trial"
+        )
         if t.get("oracle_passed") is True and (
             not check_oracle(name, t.get("output_points"))
             or not check_supports(name, t.get("support_values"))
@@ -232,12 +249,13 @@ def validate(payload):
             raise ValueError(
                 "warmup candidate reduction evidence does not match the generated and materialized clouds"
             )
-        try:
-            collect.require_driver_geometry(row.get("output_points"), row.get("support_values"))
-        except ValueError as error:
-            raise ValueError("saved warmup has malformed geometry") from error
-        if type(row.get("support_checks")) is not int or row["support_checks"] < 0:
-            raise ValueError("invalid saved warmup support check count")
+        validate_saved_geometry(
+            row["scenario"],
+            row.get("output_points"),
+            row.get("support_values"),
+            row.get("support_checks"),
+            "warmup",
+        )
         if row["status"] == "passed" and (
             not row["oracle_passed"]
             or not check_oracle(row["scenario"], row.get("output_points"))
