@@ -21,6 +21,7 @@ SCOPES = (
     "scripts/catalogue",
     "scripts/reports/landing.py",
     "scripts/reports/ext05/render_saved.py",
+    "scripts/reports/app02/render_saved.py",
     "tests/ci",
     "tests/cmake",
 )
