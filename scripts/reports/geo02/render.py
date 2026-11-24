@@ -137,9 +137,11 @@ def validate(payload):
     trials = payload.get("trials", [])
     wanted = {(s, r) for s in collect.SCENARIOS for r in range(reps)}
     actual = {(t.get("scenario"), t.get("repetition")) for t in trials}
-    if len(actual) != len(trials) or (
-        state == "complete" and actual != wanted
-    ) or (state == "failed" and not actual.issubset(wanted)):
+    if (
+        len(actual) != len(trials)
+        or (state == "complete" and actual != wanted)
+        or (state == "failed" and not actual.issubset(wanted))
+    ):
         raise ValueError("scenario/repetition matrix mismatch")
     for t in trials:
         name = t["scenario"]
@@ -205,9 +207,11 @@ def validate(payload):
     actual_warmups = {
         (row.get("scenario"), row.get("repetition")) for row in warmups if isinstance(row, dict)
     }
-    if len(actual_warmups) != len(warmups) or (
-        state == "complete" and actual_warmups != expected_warmups
-    ) or (state == "failed" and not actual_warmups.issubset(expected_warmups)):
+    if (
+        len(actual_warmups) != len(warmups)
+        or (state == "complete" and actual_warmups != expected_warmups)
+        or (state == "failed" and not actual_warmups.issubset(expected_warmups))
+    ):
         raise ValueError("warmup scenario/repetition matrix mismatch")
     for row in warmups:
         if (
@@ -282,11 +286,7 @@ def render_html(payload):
             collection.get("warmup_parse_error"),
         ]
         details = [html.escape(detail) for detail in details if detail]
-        failure_notice = (
-            '<p role="status">Collection state: failed. '
-            + " ".join(details)
-            + "</p>"
-        )
+        failure_notice = '<p role="status">Collection state: failed. ' + " ".join(details) + "</p>"
     rows = "".join(
         "<tr><td>"
         + html.escape(t["scenario"])
