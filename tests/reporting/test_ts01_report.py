@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import hashlib
 import importlib.util
+import io
 import json
 import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import nullcontext, redirect_stderr, redirect_stdout
 from pathlib import Path
+from unittest.mock import Mock, patch
 
 ROOT = Path(__file__).resolve().parents[2]
 TOOLS = ROOT / "reports" / "algorithm-results" / "tooling" / "ts01"
@@ -24,6 +27,8 @@ def load_tool(name):
 
 
 report = load_tool("report")
+with patch.dict(sys.modules, {"report": report}):
+    collector = load_tool("collect")
 publication_map = load_tool("publication_map")
 build_bundle = load_tool("build_bundle")
 ts01_registered_reports = importlib.import_module("ts01_registered_reports")
@@ -128,6 +133,282 @@ class Ts01SavedReportTests(unittest.TestCase):
             )
             for path in self.bundle.iterdir():
                 self.assertEqual((output / path.name).read_bytes(), path.read_bytes(), path.name)
+
+    def test_interrupted_measurement_retains_flushed_output(self):
+        with tempfile.TemporaryDirectory() as directory:
+            build_root = Path(directory)
+
+            def interrupted_process(command, **outputs):
+                if "stdout" in outputs:
+                    outputs["stdout"].write(b"partial stdout")
+                    outputs["stderr"].write(b"partial stderr")
+                raise KeyboardInterrupt
+
+            with (
+                patch.object(collector, "subprocess", Mock(run=interrupted_process)),
+                redirect_stderr(io.StringIO()),
+                self.assertRaises(KeyboardInterrupt),
+                collector.measurement_attempt(
+                    build_root, build_root / "driver.exe", "b" * 64, "a" * 40
+                ),
+            ):
+                self.fail("interrupted process has no result")
+
+            (attempt,) = build_root.glob("measurement-attempt.*")
+            self.assertEqual((attempt / "stdout.bin").read_bytes(), b"partial stdout")
+            self.assertEqual((attempt / "stderr.bin").read_bytes(), b"partial stderr")
+            receipt = json.loads((attempt / "attempt.json").read_bytes())
+            self.assertEqual(receipt["status"], "cancelled")
+            self.assertIsNone(receipt["returncode"])
+            self.assertEqual(
+                receipt["stdout_sha256"], hashlib.sha256(b"partial stdout").hexdigest()
+            )
+            self.assertEqual(
+                receipt["stderr_sha256"], hashlib.sha256(b"partial stderr").hexdigest()
+            )
+
+    def test_atomic_output_publication_can_retry_after_destination_conflict(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            staged = root / ".measurement.incomplete-test"
+            destination = root / "measurement"
+            staged.mkdir()
+            (staged / "events.jsonl").write_bytes(b"events")
+            (staged / "collection.json").write_bytes(b"collection")
+            destination.mkdir()
+
+            with self.assertRaises(FileExistsError):
+                collector.publish_directory_no_replace(staged, destination)
+
+            self.assertEqual(
+                {path.name: path.read_bytes() for path in staged.iterdir()},
+                {"events.jsonl": b"events", "collection.json": b"collection"},
+            )
+            self.assertEqual(list(destination.iterdir()), [])
+            destination.rmdir()
+            collector.publish_directory_no_replace(staged, destination)
+            self.assertEqual(
+                {path.name: path.read_bytes() for path in destination.iterdir()},
+                {"events.jsonl": b"events", "collection.json": b"collection"},
+            )
+
+    def test_collector_records_native_attempts_and_exports_only_accepted_results(self):
+        attempts = (
+            (7, b"partial native output\r\n", "measurement executable failed with status 7", None),
+            (0, b"invalid JSONL\n", "measurement executable emitted invalid JSONL", None),
+            (0, (self.bundle / "measurement-events.jsonl").read_bytes(), None, None),
+            (0, (self.bundle / "measurement-events.jsonl").read_bytes(), None, "receipt"),
+            (0, (self.bundle / "measurement-events.jsonl").read_bytes(), None, "prepare-receipt"),
+            (0, (self.bundle / "measurement-events.jsonl").read_bytes(), None, "collection"),
+            (0, (self.bundle / "measurement-events.jsonl").read_bytes(), None, "output-empty"),
+            (0, (self.bundle / "measurement-events.jsonl").read_bytes(), None, "output-nonempty"),
+        )
+        for returncode, stdout, reason, fail_at in attempts:
+            with (
+                self.subTest(
+                    returncode=returncode,
+                    reason=reason,
+                    fail_at=fail_at,
+                ),
+                tempfile.TemporaryDirectory() as directory,
+            ):
+                scratch = Path(directory)
+                cmake = scratch / "cmake"
+                cmake.touch()
+                build_root = scratch / "build"
+                output = build_root / "measurement-attempt"
+                stderr = b"native diagnostic\r\n"
+
+                def build_step(command, build_root=build_root):
+                    if "--build" in command:
+                        build = build_root / "release-build"
+                        build.mkdir()
+                        (build / "CMakeCache.txt").write_text(
+                            "CMAKE_GENERATOR:INTERNAL=Visual Studio 17 2022\n"
+                            "CMAKE_GENERATOR_PLATFORM:INTERNAL=x64\n",
+                            encoding="utf-8",
+                        )
+                        (build / "csl_syn07_ts01_report.vcxproj").write_text(
+                            '<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">'
+                            '<ItemDefinitionGroup Condition="Release|x64"><ClCompile>'
+                            "<LanguageStandard>stdcpp20</LanguageStandard>"
+                            "<Optimization>MaxSpeed</Optimization>"
+                            "<PreprocessorDefinitions>NDEBUG</PreprocessorDefinitions>"
+                            "</ClCompile></ItemDefinitionGroup></Project>",
+                            encoding="utf-8",
+                        )
+                        executable = build / "Release" / "csl_syn07_ts01_report.exe"
+                        executable.parent.mkdir()
+                        executable.write_bytes(b"simulated executable")
+                        config = build / "CMakeFiles" / "stub" / "CMakeCXXCompiler.cmake"
+                        config.parent.mkdir(parents=True)
+                        config.write_text(
+                            'set(CMAKE_CXX_COMPILER "stub")\n'
+                            'set(CMAKE_CXX_COMPILER_VERSION "1.0")\n',
+                            encoding="utf-8",
+                        )
+                    if "--version" in command:
+                        return subprocess.CompletedProcess(command, 0, b"cmake simulator\n", b"")
+                    return subprocess.CompletedProcess(command, 0, b"", b"")
+
+                def git_response(root, *args, build_root=build_root):
+                    if args == ("status", "--porcelain"):
+                        return ""
+                    return (
+                        report.SOURCE_COMMIT if root == build_root / "solver-source" else "a" * 40
+                    )
+
+                argv = [
+                    "collect.py",
+                    "--cmake",
+                    str(cmake),
+                    "--build-root",
+                    str(build_root),
+                    "--out",
+                    str(output),
+                ]
+
+                def run_driver(
+                    command,
+                    *,
+                    stdout,
+                    stderr,
+                    check,
+                    raw_stdout=stdout,
+                    raw_stderr=stderr,
+                    status=returncode,
+                ):
+                    stdout.write(raw_stdout)
+                    stderr.write(raw_stderr)
+                    return subprocess.CompletedProcess(command, status)
+
+                expected = (
+                    self.assertRaisesRegex(OSError, "simulated .* failure")
+                    if fail_at is not None
+                    else nullcontext()
+                    if reason is None
+                    else self.assertRaisesRegex(SystemExit, reason)
+                )
+                replace = Path.replace
+                publish = collector.publish_directory_no_replace
+
+                def reject_accepted_receipt(path, target, *, failure=fail_at, replace_path=replace):
+                    if failure in {"receipt", "prepare-receipt"} and path.name == "attempt.tmp":
+                        status = json.loads(path.read_text(encoding="utf-8"))["status"]
+                        if failure == "receipt" and status == "accepted":
+                            raise OSError("simulated accepted receipt write failure")
+                        if failure == "prepare-receipt" and status == "ready_to_publish":
+                            raise OSError("simulated ready receipt write failure")
+                    if (
+                        failure == "collection"
+                        and path.name == "collection.json.tmp"
+                        and target.name == "collection.json"
+                    ):
+                        raise OSError("simulated collection publish failure")
+                    return replace_path(path, target)
+
+                def create_competing_output_before_publish(
+                    source,
+                    destination,
+                    failure=fail_at,
+                    publish_directory=publish,
+                    output_path=output,
+                ):
+                    if (
+                        isinstance(failure, str)
+                        and failure.startswith("output")
+                        and destination == output_path
+                    ):
+                        output_path.mkdir(parents=True, exist_ok=False)
+                        if failure == "output-nonempty":
+                            (output_path / "collection.json").write_bytes(
+                                b"another collector's result"
+                            )
+                        try:
+                            return publish_directory(source, destination)
+                        except OSError as error:
+                            raise OSError(f"simulated output publish failure: {error}") from error
+                    return publish_directory(source, destination)
+
+                with (
+                    patch.object(sys, "argv", argv),
+                    patch.object(collector, "git", side_effect=git_response),
+                    patch.object(collector, "run", side_effect=build_step),
+                    patch.object(collector, "psutil", None),
+                    patch.object(collector, "subprocess", Mock(run=run_driver)),
+                    patch.object(
+                        Path, "replace", autospec=True, side_effect=reject_accepted_receipt
+                    ),
+                    patch.object(
+                        collector,
+                        "publish_directory_no_replace",
+                        side_effect=create_competing_output_before_publish,
+                    ),
+                    redirect_stdout(io.StringIO()),
+                    redirect_stderr(io.StringIO()),
+                    expected,
+                ):
+                    collector.main()
+
+                (attempt,) = build_root.glob("measurement-attempt.*")
+                self.assertEqual((attempt / "stdout.bin").read_bytes(), stdout)
+                self.assertEqual((attempt / "stderr.bin").read_bytes(), stderr)
+                receipt = json.loads((attempt / "attempt.json").read_bytes())
+                self.assertEqual(receipt["returncode"], returncode)
+                self.assertEqual(receipt["source_commit"], report.SOURCE_COMMIT)
+                self.assertEqual(receipt["harness_commit"], "a" * 40)
+                self.assertEqual(receipt["stdout_sha256"], hashlib.sha256(stdout).hexdigest())
+                self.assertEqual(receipt["stderr_sha256"], hashlib.sha256(stderr).hexdigest())
+                if fail_at and fail_at.startswith("output"):
+                    self.assertEqual(receipt["status"], "failed")
+                    self.assertEqual(len(receipt["collection_sha256"]), 64)
+                    if fail_at == "output-empty":
+                        self.assertEqual(list(output.iterdir()), [])
+                    else:
+                        self.assertEqual(
+                            (output / "collection.json").read_bytes(),
+                            b"another collector's result",
+                        )
+                    self.assertEqual(list(build_root.glob(".measurement-attempt.incomplete-*")), [])
+                    continue
+                if fail_at == "receipt":
+                    self.assertEqual(receipt["status"], "ready_to_publish")
+                    collection_bytes = (output / "collection.json").read_bytes()
+                    self.assertEqual(
+                        receipt["collection_sha256"], hashlib.sha256(collection_bytes).hexdigest()
+                    )
+                    continue
+                if fail_at == "prepare-receipt":
+                    self.assertEqual(receipt["status"], "failed")
+                    self.assertEqual(receipt["reason"], "simulated ready receipt write failure")
+                    self.assertEqual(len(receipt["collection_sha256"]), 64)
+                    self.assertFalse(output.exists())
+                    self.assertEqual(list(build_root.glob(".measurement-attempt.incomplete-*")), [])
+                    continue
+                if fail_at is not None:
+                    self.assertEqual(receipt["status"], "failed")
+                    self.assertIn("simulated", receipt["reason"])
+                    self.assertFalse(output.exists())
+                    if fail_at in {"receipt", "collection"}:
+                        output.mkdir()
+                        output.rmdir()
+                    continue
+                if reason is None:
+                    self.assertEqual(receipt["status"], "accepted")
+                    self.assertNotIn("reason", receipt)
+                    self.assertCountEqual(
+                        [path.name for path in output.iterdir()],
+                        ["events.jsonl", "stderr.txt", "collection.json", "command.txt"],
+                    )
+                    self.assertEqual((output / "events.jsonl").read_bytes(), stdout)
+                    self.assertEqual((output / "stderr.txt").read_bytes(), stderr)
+                    collection = json.loads((output / "collection.json").read_bytes())
+                    self.assertEqual(collection["counts"]["failed"], 0)
+                    self.assertEqual(collection["raw_stdout_sha256"], receipt["stdout_sha256"])
+                else:
+                    self.assertEqual(receipt["status"], "failed")
+                    self.assertEqual(receipt["reason"], reason)
+                    self.assertFalse(output.exists())
 
     def test_registered_adapter_checks_bundle_and_creates_offline_archive(self):
         publication = ts01_registered_reports.adapt(self.bundle)
