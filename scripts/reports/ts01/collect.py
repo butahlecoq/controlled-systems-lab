@@ -9,7 +9,6 @@ import json
 import os
 import platform
 import shutil
-import stat
 import statistics
 import subprocess
 import sys
@@ -39,31 +38,18 @@ def run(command, *, capture=True):
 
 
 @contextmanager
-def remove_output_on_attempt_failure(path):
-    output_identity = None
-
-    def claim_output_directory():
-        nonlocal output_identity
-        created = path.lstat()
-        if not stat.S_ISDIR(created.st_mode):
-            raise OSError(f"measurement output is not a directory: {path}")
-        output_identity = (created.st_dev, created.st_ino)
-
+def remove_staged_output_on_attempt_failure(staged_output):
     try:
-        yield claim_output_directory
+        yield
     except BaseException:
-        if output_identity is not None:
+        if staged_output.exists():
             try:
-                current = path.lstat()
-                if (
-                    not stat.S_ISDIR(current.st_mode)
-                    or (current.st_dev, current.st_ino) != output_identity
-                ):
-                    print(f"Not retracting replaced measurement output {path}", file=sys.stderr)
-                else:
-                    shutil.rmtree(path)
+                shutil.rmtree(staged_output)
             except OSError as error:
-                print(f"Could not retract incomplete output {path}: {error}", file=sys.stderr)
+                print(
+                    f"Could not retract incomplete output {staged_output}: {error}",
+                    file=sys.stderr,
+                )
         raise
 
 
@@ -269,9 +255,14 @@ def main():
     executable = build_dir / "Release" / "csl_syn07_ts01_report.exe"
     binary = executable.read_bytes()
     cpu_before = psutil.cpu_percent(interval=1.0) if psutil is not None else None
-    with measurement_attempt(build_root, executable, sha(binary), harness_commit) as (
-        result,
-        cpu_after,
+    out.parent.mkdir(parents=True, exist_ok=True)
+    staged_output = Path(tempfile.mkdtemp(prefix=f".{out.name}.incomplete-", dir=out.parent))
+    with (
+        remove_staged_output_on_attempt_failure(staged_output),
+        measurement_attempt(build_root, executable, sha(binary), harness_commit) as (
+            result,
+            cpu_after,
+        ),
     ):
         if result.returncode:
             raise SystemExit(f"measurement executable failed with status {result.returncode}")
@@ -449,10 +440,9 @@ def main():
             "raw_stdout_sha256": sha(result.stdout),
             "raw_stderr_sha256": sha(result.stderr),
         }
-        out.mkdir(parents=True, exist_ok=False)
-        (out / "events.jsonl").write_bytes(result.stdout)
-        (out / "stderr.txt").write_bytes(result.stderr)
-        (out / "command.txt").write_text(
+        (staged_output / "events.jsonl").write_bytes(result.stdout)
+        (staged_output / "stderr.txt").write_bytes(result.stderr)
+        (staged_output / "command.txt").write_text(
             json.dumps(
                 {"configure": configure_command, "build": build_command, "run": [executable]},
                 indent=2,
@@ -462,13 +452,14 @@ def main():
             encoding="utf-8",
             newline="\n",
         )
-        pending = out / "collection.json.tmp"
+        pending = staged_output / "collection.json.tmp"
         pending.write_text(
             json.dumps(measurement, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
             encoding="utf-8",
             newline="\n",
         )
-        pending.replace(out / "collection.json")
+        pending.replace(staged_output / "collection.json")
+        staged_output.rename(out)
     print(json.dumps(measurement, ensure_ascii=False, sort_keys=True))
 
 

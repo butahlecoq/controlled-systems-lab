@@ -167,37 +167,22 @@ class Ts01SavedReportTests(unittest.TestCase):
                 receipt["stderr_sha256"], hashlib.sha256(b"partial stderr").hexdigest()
             )
 
-    def test_failed_output_cleanup_preserves_a_replacement_directory(self):
-        with tempfile.TemporaryDirectory() as directory:
-            output = Path(directory) / "measurement"
-            moved_output = Path(directory) / "attempt-owned-output"
-            diagnostics = io.StringIO()
-            with redirect_stderr(diagnostics):
-                with self.assertRaisesRegex(OSError, "simulated write failure"):
-                    with collector.remove_output_on_attempt_failure(output) as claim_output:
-                        output.mkdir()
-                        claim_output()
-                        output.rename(moved_output)
-                        output.mkdir()
-                        sentinel = output / "collection.json"
-                        sentinel.write_bytes(b"another collector's result")
-                        raise OSError("simulated write failure")
-
-            self.assertTrue(moved_output.is_dir())
-            self.assertIn("Not retracting replaced measurement output", diagnostics.getvalue())
-            self.assertEqual(
-                (output / "collection.json").read_bytes(), b"another collector's result"
-            )
-
     def test_collector_records_native_attempts_and_exports_only_accepted_results(self):
         attempts = (
-            (7, b"partial native output\r\n", "measurement executable failed with status 7"),
-            (0, b"invalid JSONL\n", "measurement executable emitted invalid JSONL"),
-            (0, (self.bundle / "measurement-events.jsonl").read_bytes(), None),
+            (7, b"partial native output\r\n", "measurement executable failed with status 7", None),
+            (0, b"invalid JSONL\n", "measurement executable emitted invalid JSONL", None),
+            (0, (self.bundle / "measurement-events.jsonl").read_bytes(), None, None),
+            (0, (self.bundle / "measurement-events.jsonl").read_bytes(), None, "receipt"),
+            (0, (self.bundle / "measurement-events.jsonl").read_bytes(), None, "collection"),
+            (0, (self.bundle / "measurement-events.jsonl").read_bytes(), None, "output"),
         )
-        for returncode, stdout, reason in attempts:
+        for returncode, stdout, reason, fail_at in attempts:
             with (
-                self.subTest(returncode=returncode, reason=reason),
+                self.subTest(
+                    returncode=returncode,
+                    reason=reason,
+                    fail_at=fail_at,
+                ),
                 tempfile.TemporaryDirectory() as directory,
             ):
                 scratch = Path(directory)
@@ -271,14 +256,59 @@ class Ts01SavedReportTests(unittest.TestCase):
                     return subprocess.CompletedProcess(command, status)
 
                 expected = (
-                    nullcontext() if reason is None else self.assertRaisesRegex(SystemExit, reason)
+                    self.assertRaisesRegex(OSError, "simulated .* failure")
+                    if fail_at is not None
+                    else nullcontext()
+                    if reason is None
+                    else self.assertRaisesRegex(SystemExit, reason)
                 )
+                replace = Path.replace
+                rename = Path.rename
+
+                def reject_accepted_receipt(path, target, *, failure=fail_at, replace_path=replace):
+                    if failure == "receipt" and (
+                        path.name == "attempt.tmp"
+                        and json.loads(path.read_text(encoding="utf-8"))["status"] == "accepted"
+                    ):
+                        raise OSError("simulated accepted receipt write failure")
+                    if (
+                        failure == "collection"
+                        and path.name == "collection.json.tmp"
+                        and target.name == "collection.json"
+                    ):
+                        raise OSError("simulated collection publish failure")
+                    return replace_path(path, target)
+
+                def replace_output_before_publish(
+                    path,
+                    target,
+                    *,
+                    failure=fail_at,
+                    rename_path=rename,
+                    output_path=output,
+                    **kwargs,
+                ):
+                    if failure == "output" and target == output_path:
+                        output_path.mkdir(parents=True, exist_ok=False)
+                        (output_path / "collection.json").write_bytes(b"another collector's result")
+                        try:
+                            return rename_path(path, target)
+                        except OSError as error:
+                            raise OSError(f"simulated output publish failure: {error}") from error
+                    return rename_path(path, target, **kwargs)
+
                 with (
                     patch.object(sys, "argv", argv),
                     patch.object(collector, "git", side_effect=git_response),
                     patch.object(collector, "run", side_effect=build_step),
                     patch.object(collector, "psutil", None),
                     patch.object(collector, "subprocess", Mock(run=run_driver)),
+                    patch.object(
+                        Path, "replace", autospec=True, side_effect=reject_accepted_receipt
+                    ),
+                    patch.object(
+                        Path, "rename", autospec=True, side_effect=replace_output_before_publish
+                    ),
                     redirect_stdout(io.StringIO()),
                     redirect_stderr(io.StringIO()),
                     expected,
@@ -294,6 +324,28 @@ class Ts01SavedReportTests(unittest.TestCase):
                 self.assertEqual(receipt["harness_commit"], "a" * 40)
                 self.assertEqual(receipt["stdout_sha256"], hashlib.sha256(stdout).hexdigest())
                 self.assertEqual(receipt["stderr_sha256"], hashlib.sha256(stderr).hexdigest())
+                if fail_at == "output":
+                    self.assertEqual(receipt["status"], "failed")
+                    self.assertEqual(
+                        (output / "collection.json").read_bytes(), b"another collector's result"
+                    )
+                    self.assertEqual(list(build_root.glob(".measurement-attempt.incomplete-*")), [])
+                    continue
+                if fail_at == "receipt":
+                    self.assertEqual(receipt["status"], "failed")
+                    self.assertEqual(
+                        json.loads((output / "collection.json").read_bytes())["raw_stdout_sha256"],
+                        hashlib.sha256(stdout).hexdigest(),
+                    )
+                    continue
+                if fail_at is not None:
+                    self.assertEqual(receipt["status"], "failed")
+                    self.assertIn("simulated", receipt["reason"])
+                    self.assertFalse(output.exists())
+                    if fail_at in {"receipt", "collection"}:
+                        output.mkdir()
+                        output.rmdir()
+                    continue
                 if reason is None:
                     self.assertEqual(receipt["status"], "accepted")
                     self.assertNotIn("reason", receipt)
