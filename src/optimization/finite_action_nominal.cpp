@@ -434,7 +434,7 @@ NominalTrackOutcome zonotope_track(const FiniteActionNominalRequest &nominal,
                         "Zonotope terminal estimate or combined source score is non-finite; the plan is not ranked.")};
             attempts.emplace_back(NominalPlanScored{scored->action_indices, terminal + running,
                                                     approximate_score_kind(nominal), terminal,
-                                                    running});
+                                                    running, scored->score.terminal_scorer});
         } else if (const auto *unscored = std::get_if<ZonotopePlanUnscored>(&attempt))
             attempts.emplace_back(NominalPlanUnscored{unscored->action_indices, unscored->outcome});
         else {
