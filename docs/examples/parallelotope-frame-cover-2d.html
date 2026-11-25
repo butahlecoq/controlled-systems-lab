@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A rotated frame can enclose a diamond exactly</title>
+<style>
+  :root{color-scheme:light dark;--fg:#202832;--muted:#536273;--panel:#f4f7fa;--line:#a9b5c2;--accent:#a73434;--ok:#287357}
+  @media(prefers-color-scheme:dark){:root{--fg:#e5eaf0;--muted:#aab8c7;--panel:#202933;--line:#566574;--accent:#ff8585;--ok:#6ec49c}}
+  body{font:16px/1.55 system-ui,sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem;color:var(--fg)}
+  h1,h2{line-height:1.2} .callout{border-left:4px solid var(--ok);padding:.75rem 1rem;background:var(--panel)}
+  figure{margin:1.5rem 0}svg{display:block;width:min(100%,760px);height:auto;background:var(--panel);border:1px solid var(--line)}
+  table{border-collapse:collapse;font-variant-numeric:tabular-nums}th,td{padding:.35rem .7rem;border-bottom:1px solid var(--line);text-align:right}th:first-child,td:first-child{text-align:left}
+  code{background:var(--panel);padding:.12rem .3rem;border-radius:3px;overflow-wrap:anywhere} .muted{color:var(--muted)}
+</style>
+<main>
+<h1>A rotated frame can enclose a diamond exactly</h1>
+<p>A certified parallelotope membership is <code>x = frame&nbsp;&middot;&nbsp;factor</code> with one independently certified interval per frame column. The frame rule chooses those columns. On the diamond <code>|x+y|&nbsp;&le;&nbsp;1</code>, <code>|x&minus;y|&nbsp;&le;&nbsp;1</code>, the identity frame can only produce the bounding box, while the fixed 45&deg; frame aligns its columns with the facet normals and the cover collapses onto the set itself.</p>
+<figure>
+<svg id="plot" viewBox="0 0 760 430" role="img" aria-labelledby="plot-title plot-desc">
+<title id="plot-title">The 45-degree frame cover equals the diamond; the axis frame cover is its bounding box</title>
+<desc id="plot-desc">A square panel with coordinate axes from minus 1.4 to 1.4. The diamond with vertices at plus or minus 1 on each axis is drawn solid green. The dashed red square from minus 1 to 1 on both axes is the axis frame cover. Two arrows from the origin show the rotated frame columns u1 along the diagonal to the upper right and u2 to the upper left. The four regions inside the square but outside the diamond mark the axis cover rounding.</desc>
+<rect x="0" y="0" width="760" height="430" fill="transparent"/>
+<text x="42" y="34" font-family="system-ui,sans-serif" font-size="16" font-weight="650" fill="currentColor">Certified covers of |x&plusmn;y| &le; 1</text>
+<line x1="380" y1="60" x2="380" y2="395" stroke="currentColor" stroke-width="1" opacity=".35"/>
+<line x1="150" y1="228" x2="610" y2="228" stroke="currentColor" stroke-width="1" opacity=".35"/>
+<text x="616" y="233" font-family="system-ui,sans-serif" font-size="14" fill="currentColor">x1</text>
+<text x="368" y="52" font-family="system-ui,sans-serif" font-size="14" fill="currentColor">x2</text>
+<polygon points="380,138 480,228 380,318 280,228" fill="#287357" fill-opacity=".14" stroke="#287357" stroke-width="3"/>
+<rect x="280" y="128" width="200" height="200" fill="none" stroke="#a73434" stroke-width="2" stroke-dasharray="7 5"/>
+<line x1="380" y1="228" x2="465" y2="143" stroke="#287357" stroke-width="3"/>
+<polygon points="465,143 452,145 463,156" fill="#287357"/>
+<text x="470" y="138" font-family="system-ui,sans-serif" font-size="14" fill="#287357">u1</text>
+<line x1="380" y1="228" x2="295" y2="143" stroke="#287357" stroke-width="3"/>
+<polygon points="295,143 308,145 297,156" fill="#287357"/>
+<text x="272" y="138" font-family="system-ui,sans-serif" font-size="14" fill="#287357">u2</text>
+<circle cx="480" cy="228" r="5" fill="#287357"/><circle cx="280" cy="228" r="5" fill="#287357"/>
+<circle cx="380" cy="138" r="5" fill="#287357"/><circle cx="380" cy="318" r="5" fill="#287357"/>
+<text x="60" y="380" font-family="system-ui,sans-serif" font-size="13" fill="#a73434">dashed: axis frame cover, factor bounds &plusmn;1 &times; &plusmn;1</text>
+<text x="60" y="402" font-family="system-ui,sans-serif" font-size="13" fill="#287357">solid: 45&deg; frame cover, factor bounds &plusmn;1/&radic;2 &times; &plusmn;1/&radic;2</text>
+</svg>
+</figure>
+<p>Both covers come from <code>bounded_h_frame_cover</code>: each frame column and side is one support LP solve over the same bounded H intersection, so a cover costs <code>2&middot;dimension</code> solves and the deterministic <code>support-selected</code> rule that measures both candidates costs <code>4&middot;dimension</code>. The certificate for every bound is the dual-feasible support optimum with its residual correction; nothing here is sampled.</p>
+<table>
+<thead><tr><th>Frame</th><th>Factor bounds</th><th>Factor widths</th><th>Width product</th></tr></thead>
+<tbody>
+<tr><td>axis (identity)</td><td>&plusmn;1 &times; &plusmn;1</td><td>2, 2</td><td>4</td></tr>
+<tr><td>fixed 45&deg; rotation</td><td>&plusmn;0.7071067811865476 &times; &plusmn;0.7071067811865476</td><td>&radic;2, &radic;2</td><td>2</td></tr>
+</tbody>
+</table>
+<p class="muted">The width product is the enclosure volume for orthonormal frames, which is the selection measure. On this set the rotated cover wins <code>2&nbsp;&lt;&nbsp;4</code>; <code>select_parallelotope_frame</code> keeps candidate zero, the axis frame, whenever the products tie, so a rotation is never forced when the axis frame is already tight. On an axis-aligned box the same rule retains the axis frame.</p>
+<p class="muted">Record: <code>parallelotope-frame-cover-2d.json</code>. Frames: <code>src/reachability/parallelotope_frame.cpp</code>; cover: <code>src/reachability/bounded_h_support.cpp</code>; exactness asserted in <code>tests/unit/reachability/bounded_h_support_tests.cpp</code>.</p>
+</main>

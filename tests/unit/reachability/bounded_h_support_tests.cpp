@@ -9,8 +9,11 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <array>
+#include <limits>
 #include <memory>
 #include <source_location>
+#include <string>
 #include <variant>
 
 void check(bool condition, std::source_location where = std::source_location::current()) {
@@ -206,6 +209,78 @@ int main() {
     check(std::holds_alternative<SupportUpperBound>(fixed_bound));
     check(std::get<SupportUpperBound>(fixed_bound).value>=1);
     check(std::get<SupportUpperBound>(fixed_bound).value<1.00000001);
+
+    // A diamond |x+y|<=1, |x-y|<=1 over the carrier [-2,2]^2. The 45-degree
+    // frame columns align with the facets, so the frame cover is exact while
+    // the identity frame reproduces the coarser axis box [-1,1]^2.
+    BoundedHSupportInput diamond{{4,2,{1,1, -1,-1, 1,-1, -1,1}}, {1,1,1,1},
+        {0,2,{}}, {}, {-2,-2}, {2,2}, {1,1}};
+    const auto rotate = fixed_rotation_45_frame(2);
+    const double half = std::sqrt(0.5);
+    auto axis_cover = bounded_h_axis_cover(diamond, {{"test"},{"diamond-axis"}},
+        std::get<csl::registry::PreparedProvider<csl::registry::LPPort>>(prepared),{});
+    check(std::holds_alternative<BoundedHAxisCover>(axis_cover));
+    const auto& axis_box = std::get<BoundedHAxisCover>(axis_cover);
+    check(axis_box.lower[0] <= -1 && axis_box.upper[0] >= 1 && axis_box.upper[0] < 1.00000001);
+    check(axis_box.lower[1] <= -1 && axis_box.upper[1] >= 1 && axis_box.upper[1] < 1.00000001);
+    auto frame_cover = bounded_h_frame_cover(diamond, rotate, {{"test"},{"diamond-frame"}},
+        std::get<csl::registry::PreparedProvider<csl::registry::LPPort>>(prepared),{});
+    check(std::holds_alternative<BoundedHAxisCover>(frame_cover));
+    const auto& framed_box = std::get<BoundedHAxisCover>(frame_cover);
+    for (std::size_t i = 0; i < 2; ++i) {
+        check(framed_box.lower[i] <= -half && framed_box.lower[i] > -half - 1e-9);
+        check(framed_box.upper[i] >= half && framed_box.upper[i] < half + 1e-9);
+    }
+    check(framed_box.lp_calls.size()==4 && framed_box.certificates.size()==4);
+    check(framed_box.certificates[0].direction[0]==-rotate.values[0] &&
+        framed_box.certificates[0].direction[1]==-rotate.values[2]);
+    check(framed_box.certificates[1].direction[0]==rotate.values[0] &&
+        framed_box.certificates[1].direction[1]==rotate.values[2]);
+    auto identity_cover = bounded_h_frame_cover(diamond, identity_parallelotope_frame(2),
+        {{"test"},{"diamond-identity"}},
+        std::get<csl::registry::PreparedProvider<csl::registry::LPPort>>(prepared),{});
+    check(std::holds_alternative<BoundedHAxisCover>(identity_cover));
+    const auto& identity_box = std::get<BoundedHAxisCover>(identity_cover);
+    check(identity_box.lower[0] <= -1 && identity_box.upper[0] >= 1 &&
+        identity_box.upper[0] < 1.00000001);
+    // Frame selection: the smallest excess wins, numerical ties and absent
+    // data keep candidate zero, which callers reserve for the axis frame.
+    const std::array<double,0> no_excess{};
+    const std::array<double,3> tied{3.0,3.0,3.0}, first_smaller{5.0,3.0,3.0},
+        middle_smallest{4.0,1.0,2.0};
+    const std::array<double,2> nonfinite{std::numeric_limits<double>::infinity(),2.0};
+    check(select_parallelotope_frame(no_excess)==0);
+    check(select_parallelotope_frame(tied)==0);
+    check(select_parallelotope_frame(first_smaller)==1);
+    check(select_parallelotope_frame(middle_smallest)==1);
+    check(select_parallelotope_frame(nonfinite)==1);
+    check(std::string(parallelotope_frame_rule_name(ParallelotopeFrameRule::axis))=="axis");
+    check(std::string(parallelotope_frame_rule_name(
+        ParallelotopeFrameRule::fixed_rotation_45))=="fixed-rotation-45");
+    // Frame API: identity basis, orthonormal 45-degree blocks and the odd
+    // trailing identity row for every tested dimension.
+    for (std::size_t dimension = 1; dimension <= 5; ++dimension) {
+        const auto eye = identity_parallelotope_frame(dimension);
+        check(eye.rows==dimension && eye.cols==dimension);
+        for (std::size_t i = 0; i < dimension; ++i)
+            for (std::size_t j = 0; j < dimension; ++j)
+                check(eye.values[i*dimension+j] == (i==j ? 1.0 : 0.0));
+        const auto spun = fixed_rotation_45_frame(dimension);
+        for (std::size_t a = 0; a < dimension; ++a)
+            for (std::size_t b = 0; b < dimension; ++b) {
+                double dot = 0;
+                for (std::size_t r = 0; r < dimension; ++r)
+                    dot += spun.values[r*dimension+a] * spun.values[r*dimension+b];
+                check(std::abs(dot - (a==b ? 1.0 : 0.0)) < 1e-12);
+            }
+        if (dimension % 2 == 1)
+            check(spun.values[(dimension-1)*dimension + (dimension-1)] == 1.0);
+        const auto axis_frame = parallelotope_frame(ParallelotopeFrameRule::axis, dimension);
+        check(axis_frame.matrix.values == eye.values && axis_frame.angle_degrees == 0);
+        const auto rotated_frame =
+            parallelotope_frame(ParallelotopeFrameRule::fixed_rotation_45, dimension);
+        check(rotated_frame.matrix.values == spun.values && rotated_frame.angle_degrees == 45);
+    }
 }
 
 // The production LP entry point accepts a registered provider and returns

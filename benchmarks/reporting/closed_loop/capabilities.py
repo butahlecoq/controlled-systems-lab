@@ -460,6 +460,8 @@ def _history_definitions() -> list[dict]:
         LIFTED_POLYTOPE_CONTROLLER,
         LIFTED_POLYTOPE_IMPLEMENTATION,
         NATIVE_STRATEGY_IDS,
+        PARALLELOTOPE_ROTATED_CONTROLLER,
+        PARALLELOTOPE_SELECTED_CONTROLLER,
         provider_profiles,
     )
 
@@ -578,9 +580,11 @@ def _history_definitions() -> list[dict]:
             geometry_sources = [
                 "include/csl/reachability/feedback_geometry.hpp",
                 "include/csl/reachability/bounded_h_support.hpp",
+                "include/csl/reachability/parallelotope_frame.hpp",
                 "src/reachability/feedback_coordinator.cpp",
                 "src/reachability/feedback_geometry.cpp",
                 "src/reachability/bounded_h_support.cpp",
+                "src/reachability/parallelotope_frame.cpp",
                 "src/reachability/nominal_tube.cpp",
                 "src/reachability/nominal_forward.cpp",
                 "src/reachability/finite_plan_box.cpp",
@@ -653,6 +657,53 @@ def _history_definitions() -> list[dict]:
                 )
                 rows.append(family_graph)
                 strategy_templates[family] = family_graph
+            rotated = copy.deepcopy(strategy_templates["parallelotope"])
+            rotated.pop("graph_id")
+            rotated.pop("graph_fingerprint")
+            rotated["controller"]["id"] = PARALLELOTOPE_ROTATED_CONTROLLER
+            rotated["controller"]["control_semantics"] = (
+                "full-history MPC with full-state F/B/I parallelotope memberships in the "
+                "fixed 45-degree frame"
+            )
+            rotated["role_bindings"]["representation"] = {
+                "id": "parallelotope",
+                "frame": "fixed-rotation-45",
+            }
+            rotated["admission"]["basis"] = (
+                "source-bound full-history IPOPT with numerical F/B/I parallelotope "
+                "memberships certified in the fixed 45-degree frame"
+            )
+            rotated_fingerprint = canonical_sha256(rotated)
+            rotated["graph_fingerprint"] = rotated_fingerprint
+            rotated["graph_id"] = (
+                f"closed-loop/{task_name}/continuous-history-parallelotope-rotated-ipopt/1/"
+                f"cfg-{rotated_fingerprint[:16]}"
+            )
+            rows.append(rotated)
+            selected = copy.deepcopy(strategy_templates["parallelotope"])
+            selected.pop("graph_id")
+            selected.pop("graph_fingerprint")
+            selected["controller"]["id"] = PARALLELOTOPE_SELECTED_CONTROLLER
+            selected["controller"]["control_semantics"] = (
+                "full-history MPC with full-state F/B/I parallelotope memberships in the "
+                "support-selected frame"
+            )
+            selected["role_bindings"]["representation"] = {
+                "id": "parallelotope",
+                "frame": "support-selected",
+            }
+            selected["admission"]["basis"] = (
+                "source-bound full-history IPOPT with numerical F/B/I parallelotope "
+                "memberships certified in the support-selected frame, which retains the "
+                "axis frame whenever its factor-width product is not larger"
+            )
+            selected_fingerprint = canonical_sha256(selected)
+            selected["graph_fingerprint"] = selected_fingerprint
+            selected["graph_id"] = (
+                f"closed-loop/{task_name}/continuous-history-parallelotope-selected-ipopt/1/"
+                f"cfg-{selected_fingerprint[:16]}"
+            )
+            rows.append(selected)
             if task_name == "earth-orbit":
                 certified = copy.deepcopy(strategy_templates["polytope"])
                 certified.pop("graph_id")
