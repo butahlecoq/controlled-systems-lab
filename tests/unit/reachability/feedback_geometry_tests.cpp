@@ -486,6 +486,76 @@ int main() {
             if (!plain || plain->parallelotope_frame || plain->parallelotope_frame_bounds)
                 return 57;
         }
+        // Deterministic support selection. The wide-control diamond problem
+        // makes the 45-degree frame tighter for the backward and intersection
+        // enclosures while the forward rollout stays axis aligned; the
+        // axis-aligned terminal problem retains the identity frame.
+        {
+            const auto wide_model = std::make_shared<const SystemModel>(SystemModel{{{2,2,0},
+                TimeDomain::discrete,
+                std::vector<LinearStage>{{{2,2,{1,0,0,1}}, {2,2,{1,0,0,1}},
+                    {2,0,{}}, {0,0}}}}, {}});
+            Problem wide{{"wide-diamond"},wide_model,{0,1},KnownInitial{{0.2,0.4}},
+                ContinuousDomain{{box("wide-u",{-2,-2},{2,2})}},
+                {box("W0",{-3,-3},{3,3}),box("W1",{-3,-3},{3,3})}, {},{},
+                InformationPattern::nominal_open_loop,
+                QuadraticTerminal{{2,2,{2,0,0,2}},{0,0},0}};
+            const auto resolved_wide = take(problem::resolve(wide,
+                {problem::UncertaintyStructure::stage_product_uncoupled,{}, {}}));
+            auto diamond_terminal = take(sets::make_h({{"diamond-terminal"},2,state_labels},
+                {take(numeric::snapshot(Matrix{4,2,{1,1, -1,-1, 1,-1, -1,1}})),
+                 take(numeric::snapshot_vector(Vector{1,1,1,1})),
+                 take(numeric::snapshot(Matrix{0,2,{}})),
+                 take(numeric::snapshot_vector(Vector{}))})).as_handle();
+            auto selection = reachability::feedback_geometry(resolved_wide,{"selected-frame"},
+                diamond_terminal, reachability::FeedbackFamily::parallelotope, {},
+                {{forward,intersection},selected(lp,"csl.program-result.v1"),1000},
+                reachability::FeedbackGeometryOptions{
+                    reachability::FeedbackPolytopeHistory::stagewise,
+                    reachability::ParallelotopeFrameRule::support_selected},{});
+            if (!std::holds_alternative<reachability::FeedbackGeometry>(selection)) return 58;
+            const auto& selection_geometry = std::get<reachability::FeedbackGeometry>(selection);
+            const auto& terminal_stage = selection_geometry.stages[1];
+            const auto frame_of = [](const reachability::FeedbackMembership& membership) {
+                return std::get<reachability::FeedbackHMembership>(membership)
+                    .parallelotope_frame->values;
+            };
+            const auto note_of = [](const reachability::FeedbackSet& shape) {
+                for (const auto& line : shape.construction)
+                    if (line.find("selected ")==0) return line;
+                return std::string{};
+            };
+            if (frame_of(terminal_stage.forward->membership) !=
+                reachability::identity_parallelotope_frame(2).values) return 59;
+            if (note_of(*terminal_stage.forward).find("selected axis")==std::string::npos)
+                return 60;
+            if (frame_of(terminal_stage.backward->membership) != rotate.values) return 61;
+            if (note_of(*terminal_stage.backward).find("selected fixed-rotation-45")==
+                std::string::npos) return 62;
+            // The intersection encloses the axis embedding of the framed
+            // backward membership, which is the diamond's outer box, so the
+            // axis frame is the tighter cover there.
+            if (frame_of(terminal_stage.intersection->membership) !=
+                reachability::identity_parallelotope_frame(2).values) return 63;
+            if (note_of(*terminal_stage.intersection).find("selected axis")==std::string::npos)
+                return 64;
+            auto axis_terminal_selection = reachability::feedback_geometry(resolved,
+                {"selected-axis-terminal"},
+                box("physical-terminal",{0.0,0.1},{0.8,0.9}),
+                reachability::FeedbackFamily::parallelotope,{},
+                {{forward,intersection},selected(lp,"csl.program-result.v1"),1000},
+                reachability::FeedbackGeometryOptions{
+                    reachability::FeedbackPolytopeHistory::stagewise,
+                    reachability::ParallelotopeFrameRule::support_selected},{});
+            if (!std::holds_alternative<reachability::FeedbackGeometry>(axis_terminal_selection))
+                return 65;
+            const auto& axis_geometry = std::get<reachability::FeedbackGeometry>(axis_terminal_selection);
+            const auto& axis_terminal_stage = axis_geometry.stages[1];
+            if (frame_of(axis_terminal_stage.backward->membership) !=
+                reachability::identity_parallelotope_frame(2).values) return 66;
+            if (note_of(*axis_terminal_stage.backward).find("selected axis")==std::string::npos)
+                return 67;
+        }
         std::cout << "Five-family feedback geometry: full-state and family membership passed\n";
         return 0;
     } catch (const std::exception& error) {

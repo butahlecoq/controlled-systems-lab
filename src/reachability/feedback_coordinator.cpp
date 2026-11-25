@@ -1129,18 +1129,52 @@ FeedbackGeometryOutcome feedback_geometry(const problem::ResolvedProblem &resolv
                     "Certified whole-history projection requires the polytope family.");
             preflight_exact_history(n, m, horizon, source->states, continuous->stages, terminal);
         }
+        // Frame shaping for the forward, backward and intersection
+        // enclosures. A fixed rule uses its single candidate; the support
+        // selected rule covers both candidates and keeps the smaller
+        // factor-width product, which for orthonormal frames is the
+        // enclosure volume. Ties retain the axis candidate.
         const auto framed_member =
             [&](const SetHandle &input, const Vector &lo, const Vector &hi, const char *role)
-            -> std::optional<FeedbackMembership> {
+            -> std::optional<std::pair<FeedbackMembership, std::string>> {
             if (family != FeedbackFamily::parallelotope ||
                 options.parallelotope_frame == ParallelotopeFrameRule::axis)
                 return std::nullopt;
-            const auto frame = parallelotope_frame(options.parallelotope_frame, n).matrix;
-            const auto cover = run.cover_frame(input, frame, lo, hi);
-            auto shaped = frame_enclosure({run.id(role)}, frame, cover.lower, cover.upper, labels);
+            const auto candidates =
+                parallelotope_frame_candidates(options.parallelotope_frame, n);
+            std::vector<Vector> lowers, uppers;
+            std::vector<double> excess;
+            for (const auto &candidate : candidates) {
+                const auto cover = run.cover_frame(input, candidate.matrix, lo, hi);
+                lowers.push_back(cover.lower);
+                uppers.push_back(cover.upper);
+                double product = 1;
+                for (std::size_t i = 0; i < cover.lower.size(); ++i) {
+                    const auto width = cover.upper[i] - cover.lower[i];
+                    if (!std::isfinite(width)) {
+                        product = std::numeric_limits<double>::infinity();
+                        break;
+                    }
+                    product *= width;
+                }
+                excess.push_back(product);
+            }
+            const auto selected = select_parallelotope_frame(excess);
+            const auto &frame = candidates[selected].matrix;
+            auto shaped =
+                frame_enclosure({run.id(role)}, frame, lowers[selected], uppers[selected], labels);
             if (auto *error = std::get_if<Diagnostics>(&shaped))
                 throw Failure{Unsupported{*error}};
-            return std::get<FeedbackMembership>(std::move(shaped));
+            std::string note;
+            if (options.parallelotope_frame == ParallelotopeFrameRule::support_selected) {
+                note = "selected ";
+                note += parallelotope_frame_rule_name(candidates[selected].rule);
+                note += " by factor-width products axis=";
+                note += std::to_string(excess[0]);
+                note += " fixed-rotation-45=";
+                note += std::to_string(excess[1]);
+            }
+            return std::make_pair(std::get<FeedbackMembership>(std::move(shaped)), std::move(note));
         };
         std::vector<SetHandle> states, controls;
         for (const auto &item : source->states)
@@ -1307,12 +1341,14 @@ FeedbackGeometryOutcome feedback_geometry(const problem::ResolvedProblem &resolv
                 upper[k] = std::move(bounds.upper);
             }
             bool framed_forward = false;
+            std::string forward_frame_note;
             auto framed = framed_member(clipped.output, lower[k], upper[k], "clipped-frame");
             if (family == FeedbackFamily::polytope) {
                 selected = FeedbackHMembership{clipped.output, {}, {}};
                 selected_h = clipped.output;
             } else if (framed) {
-                selected = std::move(*framed);
+                selected = std::move(framed->first);
+                forward_frame_note = std::move(framed->second);
                 selected_h = std::get<FeedbackHMembership>(selected).set;
                 framed_forward = true;
             } else if (!box_inside(states[k], carrier_lo, carrier_hi)) {
@@ -1325,11 +1361,14 @@ FeedbackGeometryOutcome feedback_geometry(const problem::ResolvedProblem &resolv
             stage.forward_embedding_h = selected_h;
             forward_embeddings.push_back(selected_h);
             stage.forward = record(run, family, selected, strict, {clipped.output.id});
-            if (framed_forward)
+            if (framed_forward) {
                 stage.forward->construction.push_back(
                     "parallelotope frame rule=" +
                     std::string(parallelotope_frame_rule_name(options.parallelotope_frame)) +
                     " with support bounds in frame coordinates.");
+                if (!forward_frame_note.empty())
+                    stage.forward->construction.push_back(std::move(forward_frame_note));
+            }
             if (previous_forward)
                 stage.forward->source_sets.push_back(*previous_forward);
             previous_forward = stage.forward->id;
@@ -1428,14 +1467,17 @@ FeedbackGeometryOutcome feedback_geometry(const problem::ResolvedProblem &resolv
             }
             stage.backward_h = backward;
             auto bounds = run.cover(backward.output, lower[k], upper[k]);
-            std::optional<FeedbackMembership> framed_backward;
+            std::optional<std::pair<FeedbackMembership, std::string>> framed_backward;
+            std::string backward_frame_note;
             if (family != FeedbackFamily::polytope)
                 framed_backward =
                     framed_member(backward.output, lower[k], upper[k], "backward-frame");
             auto member = framed_backward
-                              ? std::move(*framed_backward)
+                              ? std::move(framed_backward->first)
                               : shape(family, backward.output, bounds.lower, bounds.upper,
                                       {run.id("backward-family")}, labels);
+            if (framed_backward)
+                backward_frame_note = std::move(framed_backward->second);
             if (family == FeedbackFamily::polytope)
                 next_backward = backward.output;
             else {
@@ -1455,6 +1497,8 @@ FeedbackGeometryOutcome feedback_geometry(const problem::ResolvedProblem &resolv
                 : family == FeedbackFamily::polytope
                     ? "Projected full-state H predecessor with forward-relevant carrier."
                     : "Projected full-state H predecessor enclosed by a coarse axis family cover within the forward-relevant carrier.");
+            if (!backward_frame_note.empty())
+                stage.backward->construction.push_back(std::move(backward_frame_note));
             phase = FeedbackGeometryPhase::intersection;
             auto full_intersection =
                 run.intersect(forward_embeddings[k], next_backward, "full-state-intersection");
@@ -1462,15 +1506,18 @@ FeedbackGeometryOutcome feedback_geometry(const problem::ResolvedProblem &resolv
                 run.intersect(full_intersection.output, carrier, "intersection-carrier");
             stage.intersection_h = intersection;
             auto overlap = run.cover(intersection.output, lower[k], upper[k]);
-            std::optional<FeedbackMembership> framed_intersection;
+            std::optional<std::pair<FeedbackMembership, std::string>> framed_intersection;
+            std::string intersection_frame_note;
             if (family != FeedbackFamily::polytope)
                 framed_intersection =
                     framed_member(intersection.output, lower[k], upper[k], "intersection-frame");
             auto intersection_shape =
                 framed_intersection
-                    ? std::move(*framed_intersection)
+                    ? std::move(framed_intersection->first)
                     : shape(family, intersection.output, overlap.lower, overlap.upper,
                             {run.id("intersection-family")}, labels);
+            if (framed_intersection)
+                intersection_frame_note = std::move(framed_intersection->second);
             stage.intersection = record(run, family, std::move(intersection_shape), strict,
                                         {forward_embeddings[k].id, next_backward.id, carrier.id,
                                          stage.forward->id, stage.backward->id});
@@ -1479,6 +1526,8 @@ FeedbackGeometryOutcome feedback_geometry(const problem::ResolvedProblem &resolv
                     ? "Full-state forward and backward H embeddings intersected with the explicit "
                       "forward-relevant carrier before selected-frame support enclosure."
                     : "Full-state forward and backward H embeddings intersected with the explicit forward-relevant carrier before family enclosure.");
+            if (!intersection_frame_note.empty())
+                stage.intersection->construction.push_back(std::move(intersection_frame_note));
         }
         return output;
     } catch (const Failure &failure) {

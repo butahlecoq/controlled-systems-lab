@@ -11,6 +11,8 @@ std::string_view parallelotope_frame_rule_name(ParallelotopeFrameRule rule) noex
         return "axis";
     case ParallelotopeFrameRule::fixed_rotation_45:
         return "fixed-rotation-45";
+    case ParallelotopeFrameRule::support_selected:
+        return "support-selected";
     }
     return "unknown";
 }
@@ -40,8 +42,22 @@ ParallelotopeFrame parallelotope_frame(ParallelotopeFrameRule rule, std::size_t 
         return {identity_parallelotope_frame(dimension), rule, 0};
     case ParallelotopeFrameRule::fixed_rotation_45:
         return {fixed_rotation_45_frame(dimension), rule, 45};
+    case ParallelotopeFrameRule::support_selected:
+        break;
     }
     return {identity_parallelotope_frame(dimension), ParallelotopeFrameRule::axis, 0};
+}
+
+std::vector<ParallelotopeFrame> parallelotope_frame_candidates(ParallelotopeFrameRule rule,
+                                                               std::size_t dimension) {
+    std::vector<ParallelotopeFrame> candidates;
+    if (rule == ParallelotopeFrameRule::support_selected) {
+        candidates.push_back(parallelotope_frame(ParallelotopeFrameRule::axis, dimension));
+        candidates.push_back(parallelotope_frame(ParallelotopeFrameRule::fixed_rotation_45, dimension));
+    } else {
+        candidates.push_back(parallelotope_frame(rule, dimension));
+    }
+    return candidates;
 }
 
 std::size_t select_parallelotope_frame(std::span<const double> excess) noexcept {

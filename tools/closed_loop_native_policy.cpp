@@ -1356,6 +1356,8 @@ Json feedback_export(const problem::ResolvedProblem &resolved, const Json &in,
     auto frame_rule = ParallelotopeFrameRule::axis;
     if (frame_rule_name == "fixed-rotation-45")
         frame_rule = ParallelotopeFrameRule::fixed_rotation_45;
+    else if (frame_rule_name == "support-selected")
+        frame_rule = ParallelotopeFrameRule::support_selected;
     else if (frame_rule_name != "axis")
         throw std::runtime_error("unknown parallelotope frame rule");
     auto outcome = feedback_geometry(
