@@ -2143,6 +2143,24 @@ def build(catalog, site):
         '<p><a href="kpabep-near-collinear-20261115.html">Open the complete plotted reproduction →</a> · '
         '<a href="kpabep-near-collinear-20261115.json">Evidence record</a></p></article>'
     )
+    parallelotope_card = (
+        '<article class="saved-figure" id="parallelotope-frame-cover-2d">'
+        '<p class="eyebrow">Feedback geometry · parallelotope frames</p>'
+        '<h3><a href="parallelotope-frame-cover-2d.html">A rotated frame can enclose a diamond exactly</a></h3>'
+        '<a href="parallelotope-frame-cover-2d.html" aria-label="Open the parallelotope frame cover example">'
+        '<svg viewBox="0 0 300 120" role="img" aria-labelledby="parallelotope-card-title parallelotope-card-desc">'
+        '<title id="parallelotope-card-title">A rotated frame cover equals a diamond</title>'
+        '<desc id="parallelotope-card-desc">A green diamond lies inside a dashed red axis-aligned square. Two green arrows show the rotated frame columns.</desc>'
+        '<rect x="75" y="10" width="150" height="100" fill="none" stroke="#a73434" stroke-width="2" stroke-dasharray="6 4"/>'
+        '<polygon points="150,15 205,60 150,105 95,60" fill="#287357" fill-opacity=".14" stroke="#287357" stroke-width="3"/>'
+        '<line x1="150" y1="60" x2="184" y2="26" stroke="#287357" stroke-width="3"/>'
+        '<line x1="150" y1="60" x2="116" y2="26" stroke="#287357" stroke-width="3"/>'
+        '<text x="188" y="26" fill="#287357" font-size="12">u1</text>'
+        '<text x="98" y="26" fill="#287357" font-size="12">u2</text></svg></a>'
+        "<p>On |x+y| ≤ 1 and |x−y| ≤ 1, the 45° frame has factor bounds ±1/√2 and width product 2; the identity frame keeps the bounding box with product 4.</p>"
+        '<p><a href="parallelotope-frame-cover-2d.html">Open the complete plotted reproduction →</a> · '
+        '<a href="parallelotope-frame-cover-2d.json">Evidence record</a></p></article>'
+    )
     body = (
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
@@ -2182,6 +2200,7 @@ def build(catalog, site):
         '<div class="saved-grid">'
         + visual_illustrations.cards(analytic_inventory)
         + kpabep_card
+        + parallelotope_card
         + "</div></section>"
         + '<section id="algorithm-coverage"><p class="eyebrow">Implementation map</p>'
         "<h2>Algorithm families and 2D limits</h2><p>This map follows the current framework composition document and published report catalog. "
