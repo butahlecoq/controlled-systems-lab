@@ -389,6 +389,173 @@ int main() {
         if(!stopped || stopped->stage.value!=1 || stopped->prefix.stages.empty() || !stopped->prefix.stages[0].forward) return 13;
         const auto* limit=std::get_if<OperationStopped>(&stopped->cause);
         if(!limit || limit->reason!=StopReason::resource_limit) return 14;
+
+        // Nonaxis parallelotope frames: the direct enclosure API, the rotated
+        // profile through the coordinator, and the preserved axis profile.
+        const double root_half = std::sqrt(0.5);
+        const auto rotate = reachability::fixed_rotation_45_frame(2);
+        auto shaped = reachability::frame_enclosure({"frame-enclosure-test"}, rotate,
+            {-0.5,-0.25}, {0.5,0.25}, state_labels);
+        if (!std::holds_alternative<reachability::FeedbackMembership>(shaped)) return 42;
+        const auto& framed = std::get<reachability::FeedbackMembership>(shaped);
+        const auto* framed_member = std::get_if<reachability::FeedbackHMembership>(&framed);
+        if (!framed_member || !framed_member->parallelotope_frame ||
+            !framed_member->parallelotope_frame_bounds) return 43;
+        if (framed_member->parallelotope_frame->values != rotate.values) return 44;
+        {
+            const auto& [frame_lo, frame_hi] = *framed_member->parallelotope_frame_bounds;
+            if (frame_lo.size()!=2 || frame_hi.size()!=2 ||
+                std::abs(frame_lo[0]+0.5)>1e-12 || std::abs(frame_hi[0]-0.5)>1e-12 ||
+                std::abs(frame_lo[1]+0.25)>1e-12 || std::abs(frame_hi[1]-0.25)>1e-12) return 45;
+        }
+        {
+            auto framed_data = take(sets::from_handle(framed_member->set));
+            auto framed_repr = framed_data.representation();
+            const auto* framed_h = std::get_if<sets::HRepresentation>(&framed_repr);
+            if (!framed_h || framed_h->inequalities.rows()!=4) return 46;
+            // The H rows are the frame columns, so frame-box corners are
+            // members while a point past the certified bounds is not.
+            if (!contains(*framed_h, {0.75*root_half, 0.25*root_half}) ||
+                !contains(*framed_h, {-0.75*root_half, -0.25*root_half}) ||
+                contains(*framed_h, {0.62*root_half, 0.62*root_half})) return 47;
+        }
+        if (!std::holds_alternative<Diagnostics>(
+                reachability::frame_enclosure({"frame-inverted"}, rotate, {0.5,0.25},
+                    {-0.5,-0.25}, state_labels))) return 48;
+        if (!std::holds_alternative<Diagnostics>(
+                reachability::frame_enclosure({"frame-zero"}, Matrix{2,2,Vector(4,0)},
+                    {-1,-1}, {1,1}, state_labels))) return 49;
+        const Vector witness{0.2,0.4};
+        for (auto rule : {reachability::ParallelotopeFrameRule::axis,
+                reachability::ParallelotopeFrameRule::fixed_rotation_45}) {
+            auto outcome_rule = reachability::feedback_geometry(resolved,{"frame-rule"},
+                box("physical-terminal",{0.0,0.1},{0.8,0.9}),
+                reachability::FeedbackFamily::parallelotope,{},
+                {{forward,intersection},selected(lp,"csl.program-result.v1"),1000},
+                reachability::FeedbackGeometryOptions{
+                    reachability::FeedbackPolytopeHistory::stagewise, rule},{});
+            if (!std::holds_alternative<reachability::FeedbackGeometry>(outcome_rule)) return 50;
+            const auto& rule_geometry = std::get<reachability::FeedbackGeometry>(outcome_rule);
+            const auto& expected_frame =
+                rule==reachability::ParallelotopeFrameRule::axis
+                    ? reachability::identity_parallelotope_frame(2) : rotate;
+            for (const auto& stage : rule_geometry.stages) {
+                for (const auto* member : {&stage.forward, &stage.backward, &stage.intersection}) {
+                    if (!*member) return 51;
+                    const auto* shaped_h = std::get_if<reachability::FeedbackHMembership>(
+                        &(*member)->membership);
+                    if (!shaped_h || !shaped_h->parallelotope_frame ||
+                        !shaped_h->parallelotope_frame_bounds ||
+                        shaped_h->parallelotope_frame->values != expected_frame.values) return 52;
+                    const auto& [lo, hi] = *shaped_h->parallelotope_frame_bounds;
+                    for (std::size_t i = 0; i < 2; ++i)
+                        if (!(std::isfinite(lo[i]) && std::isfinite(hi[i]) && lo[i] <= hi[i]))
+                            return 53;
+                }
+                // The intersection membership contains the observation in
+                // frame coordinates: factor = frame^T * state within bounds.
+                const auto* intersection_h = std::get_if<reachability::FeedbackHMembership>(
+                    &stage.intersection->membership);
+                const auto& [lo, hi] = *intersection_h->parallelotope_frame_bounds;
+                for (std::size_t i = 0; i < 2; ++i) {
+                    double factor = 0;
+                    for (std::size_t j = 0; j < 2; ++j)
+                        factor += expected_frame.values[j*2+i] * witness[j];
+                    if (factor < lo[i]-1e-9 || factor > hi[i]+1e-9) return 54;
+                }
+                if (rule==reachability::ParallelotopeFrameRule::fixed_rotation_45) {
+                    bool framed_note = false;
+                    for (const auto& note : stage.forward->construction)
+                        if (note.find("fixed-rotation-45")!=std::string::npos) framed_note = true;
+                    if (!framed_note) return 55;
+                }
+            }
+        }
+        auto polytope_rotated = reachability::feedback_geometry(resolved,{"polytope-frame-rule"},
+            box("physical-terminal",{0.0,0.1},{0.8,0.9}),
+            reachability::FeedbackFamily::polytope,{},
+            {{forward,intersection},selected(lp,"csl.program-result.v1"),1000},
+            reachability::FeedbackGeometryOptions{
+                reachability::FeedbackPolytopeHistory::stagewise,
+                reachability::ParallelotopeFrameRule::fixed_rotation_45},{});
+        if (!std::holds_alternative<reachability::FeedbackGeometry>(polytope_rotated)) return 56;
+        const auto& polytope_geometry = std::get<reachability::FeedbackGeometry>(polytope_rotated);
+        for (const auto& stage : polytope_geometry.stages) {
+            const auto* plain = std::get_if<reachability::FeedbackHMembership>(
+                &stage.intersection->membership);
+            if (!plain || plain->parallelotope_frame || plain->parallelotope_frame_bounds)
+                return 57;
+        }
+        // Deterministic support selection. The wide-control diamond problem
+        // makes the 45-degree frame tighter for the backward and intersection
+        // enclosures while the forward rollout stays axis aligned; the
+        // axis-aligned terminal problem retains the identity frame.
+        {
+            const auto wide_model = std::make_shared<const SystemModel>(SystemModel{{{2,2,0},
+                TimeDomain::discrete,
+                std::vector<LinearStage>{{{2,2,{1,0,0,1}}, {2,2,{1,0,0,1}},
+                    {2,0,{}}, {0,0}}}}, {}});
+            Problem wide{{"wide-diamond"},wide_model,{0,1},KnownInitial{{0.2,0.4}},
+                ContinuousDomain{{box("wide-u",{-2,-2},{2,2})}},
+                {box("W0",{-3,-3},{3,3}),box("W1",{-3,-3},{3,3})}, {},{},
+                InformationPattern::nominal_open_loop,
+                QuadraticTerminal{{2,2,{2,0,0,2}},{0,0},0}};
+            const auto resolved_wide = take(problem::resolve(wide,
+                {problem::UncertaintyStructure::stage_product_uncoupled,{}, {}}));
+            auto diamond_terminal = take(sets::make_h({{"diamond-terminal"},2,state_labels},
+                {take(numeric::snapshot(Matrix{4,2,{1,1, -1,-1, 1,-1, -1,1}})),
+                 take(numeric::snapshot_vector(Vector{1,1,1,1})),
+                 take(numeric::snapshot(Matrix{0,2,{}})),
+                 take(numeric::snapshot_vector(Vector{}))})).as_handle();
+            auto selection = reachability::feedback_geometry(resolved_wide,{"selected-frame"},
+                diamond_terminal, reachability::FeedbackFamily::parallelotope, {},
+                {{forward,intersection},selected(lp,"csl.program-result.v1"),1000},
+                reachability::FeedbackGeometryOptions{
+                    reachability::FeedbackPolytopeHistory::stagewise,
+                    reachability::ParallelotopeFrameRule::support_selected},{});
+            if (!std::holds_alternative<reachability::FeedbackGeometry>(selection)) return 58;
+            const auto& selection_geometry = std::get<reachability::FeedbackGeometry>(selection);
+            const auto& terminal_stage = selection_geometry.stages[1];
+            const auto frame_of = [](const reachability::FeedbackMembership& membership) {
+                return std::get<reachability::FeedbackHMembership>(membership)
+                    .parallelotope_frame->values;
+            };
+            const auto note_of = [](const reachability::FeedbackSet& shape) {
+                for (const auto& line : shape.construction)
+                    if (line.find("selected ")==0) return line;
+                return std::string{};
+            };
+            if (frame_of(terminal_stage.forward->membership) !=
+                reachability::identity_parallelotope_frame(2).values) return 59;
+            if (note_of(*terminal_stage.forward).find("selected axis")==std::string::npos)
+                return 60;
+            if (frame_of(terminal_stage.backward->membership) != rotate.values) return 61;
+            if (note_of(*terminal_stage.backward).find("selected fixed-rotation-45")==
+                std::string::npos) return 62;
+            // The intersection encloses the axis embedding of the framed
+            // backward membership, which is the diamond's outer box, so the
+            // axis frame is the tighter cover there.
+            if (frame_of(terminal_stage.intersection->membership) !=
+                reachability::identity_parallelotope_frame(2).values) return 63;
+            if (note_of(*terminal_stage.intersection).find("selected axis")==std::string::npos)
+                return 64;
+            auto axis_terminal_selection = reachability::feedback_geometry(resolved,
+                {"selected-axis-terminal"},
+                box("physical-terminal",{0.0,0.1},{0.8,0.9}),
+                reachability::FeedbackFamily::parallelotope,{},
+                {{forward,intersection},selected(lp,"csl.program-result.v1"),1000},
+                reachability::FeedbackGeometryOptions{
+                    reachability::FeedbackPolytopeHistory::stagewise,
+                    reachability::ParallelotopeFrameRule::support_selected},{});
+            if (!std::holds_alternative<reachability::FeedbackGeometry>(axis_terminal_selection))
+                return 65;
+            const auto& axis_geometry = std::get<reachability::FeedbackGeometry>(axis_terminal_selection);
+            const auto& axis_terminal_stage = axis_geometry.stages[1];
+            if (frame_of(axis_terminal_stage.backward->membership) !=
+                reachability::identity_parallelotope_frame(2).values) return 66;
+            if (note_of(*axis_terminal_stage.backward).find("selected axis")==std::string::npos)
+                return 67;
+        }
         std::cout << "Five-family feedback geometry: full-state and family membership passed\n";
         return 0;
     } catch (const std::exception& error) {
