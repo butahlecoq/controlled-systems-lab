@@ -1,7 +1,5 @@
 #include <csl/geometry/quickhull_2d.hpp>
 
-// Reuse only the private exact dyadic integer arithmetic. The hull algorithm
-// never constructs a membership LP or invokes an LP workspace.
 #include "../exact_dyadic.hpp"
 
 #include <algorithm>
@@ -39,7 +37,6 @@ Integer orientation(const Vector &a, const Vector &b, const Vector &c) {
         assert(accepted);
         static_cast<void>(accepted);
     };
-    // (b-a) x (c-a), expanded to avoid rounded coordinate differences.
     term(b[0], c[1], false);
     term(b[1], a[0], false);
     term(a[1], c[0], false);
@@ -75,7 +72,6 @@ void append_chain(std::span<const Vector> points, std::size_t left, std::size_t 
             greatest = std::move(distance);
             farthest = candidate;
         }
-        // Equal-area ties keep the first candidate in lexicographic order.
     }
 
     std::vector<std::size_t> before;
