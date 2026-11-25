@@ -97,23 +97,44 @@ def actuation_error(control, bounds):
     )
 
 
-def _axis_witness_residual(member, chosen, coefficients, family):
+def _membership_witness_residual(member, chosen, coefficients, family):
+    """Residual of a membership witness in its own factor frame.
+
+    Parallelotope memberships carry their certified factor bounds whenever the
+    producer exports a nonaxis frame; the witness then lives in that
+    orthonormal frame. Without exported frame bounds the legacy axis profile
+    is reconstructed from axis-aligned H rows.
+    """
     dimension = len(chosen)
-    lower, upper = np.full(dimension, -np.inf), np.full(dimension, np.inf)
-    for rows, rhs, equal in (
-        ("inequalities", "upper_bounds", False),
-        ("equalities", "equality_values", True),
-    ):
-        for row, value in zip(member[rows], member[rhs], strict=True):
-            (index,) = np.flatnonzero(row)
-            multiplier = row[index]
-            bound = value / multiplier
-            if equal or multiplier < 0:
-                lower[index] = max(lower[index], bound)
-            if equal or multiplier > 0:
-                upper[index] = min(upper[index], bound)
-    if not np.isfinite(lower).all() or not np.isfinite(upper).all() or np.any(lower > upper):
-        raise ValueError("Native axis membership has invalid physical bounds.")
+    frame = None
+    if family == "parallelotope" and "parallelotope_frame_lower" in member:
+        frame = np.asarray(member["parallelotope_frame"], dtype=float)
+        if frame.shape != (dimension, dimension):
+            raise ValueError("Native parallelotope membership frame has the wrong shape.")
+        if not np.allclose(frame.T @ frame, np.eye(dimension), atol=1e-9, rtol=0.0):
+            raise ValueError("Native parallelotope membership uses a non-orthonormal frame.")
+        lower = np.asarray(member["parallelotope_frame_lower"], dtype=float)
+        upper = np.asarray(member["parallelotope_frame_upper"], dtype=float)
+        if lower.shape != (dimension,) or upper.shape != (dimension,):
+            raise ValueError("Native parallelotope membership frame bounds have the wrong shape.")
+        if not np.isfinite(lower).all() or not np.isfinite(upper).all() or np.any(lower > upper):
+            raise ValueError("Native parallelotope membership has invalid frame bounds.")
+    else:
+        lower, upper = np.full(dimension, -np.inf), np.full(dimension, np.inf)
+        for rows, rhs, equal in (
+            ("inequalities", "upper_bounds", False),
+            ("equalities", "equality_values", True),
+        ):
+            for row, value in zip(member[rows], member[rhs], strict=True):
+                (index,) = np.flatnonzero(row)
+                multiplier = row[index]
+                bound = value / multiplier
+                if equal or multiplier < 0:
+                    lower[index] = max(lower[index], bound)
+                if equal or multiplier > 0:
+                    upper[index] = min(upper[index], bound)
+        if not np.isfinite(lower).all() or not np.isfinite(upper).all() or np.any(lower > upper):
+            raise ValueError("Native axis membership has invalid physical bounds.")
     factor = np.asarray(coefficients, dtype=float)
     if factor.shape != chosen.shape or not np.isfinite(factor).all():
         raise ValueError("Native axis membership witness has invalid shape or values.")
@@ -123,9 +144,10 @@ def _axis_witness_residual(member, chosen, coefficients, family):
         lifted = center + radius * factor
         bounds_error = np.max(np.abs(factor) - 1, initial=0.0)
     else:
-        frame = np.asarray(member["parallelotope_frame"], dtype=float)
-        if not np.array_equal(frame, np.eye(dimension)):
-            raise ValueError("Native parallelotope membership uses an unsupported frame.")
+        if frame is None:
+            frame = np.asarray(member["parallelotope_frame"], dtype=float)
+            if not np.array_equal(frame, np.eye(dimension)):
+                raise ValueError("Native parallelotope membership uses an unsupported frame.")
         lifted = frame @ factor
         bounds_error = max(np.max(lower - factor, initial=0.0), np.max(factor - upper, initial=0.0))
     return float(max(np.max(np.abs(chosen - lifted), initial=0.0), bounds_error))
@@ -161,7 +183,7 @@ def verify_native_geometry_receipt(geometry, primal, receipt):
     for member, factor in zip(members, receipt["geometry_factors"], strict=True):
         if family in {"box", "parallelotope"}:
             residual = max(
-                residual, _axis_witness_residual(member, z[member["indices"]], factor, family)
+                residual, _membership_witness_residual(member, z[member["indices"]], factor, family)
             )
         elif member["kind"] in {"h", "lifted-h"} and factor != []:
             raise ValueError("Native H memberships expect an empty latent witness.")
