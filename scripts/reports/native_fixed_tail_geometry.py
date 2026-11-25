@@ -429,7 +429,6 @@ def _plot_image(task, plane_index):
         from figure_style import configure_numeric_axis
     fig, ax = plt.subplots(figsize=(10, 7), layout="constrained")
     indices = task["planes"][plane_index]["indices"]
-    # The static export keeps the same roles as the interactive view.
     cmap = LinearSegmentedColormap.from_list("saved-stage", ["#8156a8", "#177a96", "#a96010"])
     norm = Normalize(0, task["horizon"])
     for color, run in zip(

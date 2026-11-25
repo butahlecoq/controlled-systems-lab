@@ -85,7 +85,7 @@ def _load_payloads(source: Path, manifest: dict) -> dict[str, bytes]:
                 record = archive["members"][route]
                 if entry.file_size != record["size"]:
                     raise ValueError("preserved member size differs")
-                content = checked(bundle.read(entry), record)  # Also checks ZIP CRC.
+                content = checked(bundle.read(entry), record)
                 if record["publish"]:
                     if ".git" in safe(route).parts or not route.startswith(name[:-4] + "/"):
                         raise ValueError("invalid published member scope")
@@ -126,7 +126,6 @@ def stage(site: Path, source: Path = SOURCE) -> dict:
     assets = _load_payloads(source, manifest)
     aliases = manifest["aliases"]
     replacements = {a["route"]: a.get("replaces_sha256") for a in aliases}
-    # Validate the entire input and destination before changing any output.
     for route, data in assets.items():
         path = destination(site, route)
         if path.exists():

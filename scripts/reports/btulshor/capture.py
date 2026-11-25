@@ -415,7 +415,6 @@ def capture(driver: Path, output: Path, *, render_python: Path | None = None,
             env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
         for cache in temp.rglob("__pycache__"):
             shutil.rmtree(cache)
-        # Renderer supports only HTML and SVG as outputs. Copy generated figure manifest, when present.
         for candidate in temp.glob("figure-export.json"):
             candidate.rename(temp / "raw" / candidate.name)
         changed = {name: sha256((root / name).read_bytes()) for name in REPO_SOURCES}

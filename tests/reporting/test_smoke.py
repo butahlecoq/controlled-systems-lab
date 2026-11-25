@@ -50,7 +50,6 @@ class SmokeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             render.render(view,Path(temp)/"smoke")
             self.assertTrue((Path(temp)/"smoke/index.html").is_file())
-        # Input errors exercise CLI admission without running any profile/calibration.
         for args in (["--profile","--rounds","1000001"],["--measure","--repetitions","1"],
                      ["--smoke","--rounds","1000"],["--unknown"]):
             invalid=subprocess.run([EXE,*args],capture_output=True,timeout=10)

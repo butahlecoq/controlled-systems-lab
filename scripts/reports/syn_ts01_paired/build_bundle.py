@@ -238,7 +238,6 @@ def write_bundle(args):
         "The event file is the exact binary JSONL sidecar. The original Windows stdout bytes and stderr bytes are retained. The collector wrapper exited 1 because it compared CRLF stdout with the LF JSONL sidecar byte-for-byte. Algorithm exit code was 0, and both streams match after CRLF-to-LF normalization. The failed wrapper attempt is explicitly retained in process and validation metadata.\n\n"
         "The selector request parameters are copied from source commit `b7f1ac0a9800326c825b6d8e35a8f23656496682`, pinned by the measurement source file SHA-256 in `records.json`. Each event retains its actual family/objective identity and module provenance. The live complete-family proof payload is not serialized.\n\n"
         "Rebuild and regeneration commands are in `commands.json`. Regenerating this bundle uses saved measurement outputs only; it does not rerun the algorithm. Live GitHub Pages publication remains pending review and main-branch deployment. This partial report does not close OBS-04/#83.\n").encode("utf-8")
-    # The renderer uses the saved typed record only; it never launches an algorithm.
     files["performance.svg"] = report.render_svg(record).encode("utf-8")
     files["index.html"] = report.render_html(record).encode("utf-8")
     files["trials.csv"] = report.trials_csv_bytes(record)

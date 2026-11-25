@@ -216,7 +216,6 @@ def run(args):
         raise RuntimeError("convex-control lower bound exceeds the exact finite optimum")
     if relaxed.get("relaxed_controls"):
         controls = relaxed["relaxed_controls"]
-        # Re-evaluate the relaxed control on each independently generated corner row.
         states = []
         for base in bases:
             terminal = tuple(base[k] + sum(impacts[t][k] * controls[t] for t in range(HORIZON))

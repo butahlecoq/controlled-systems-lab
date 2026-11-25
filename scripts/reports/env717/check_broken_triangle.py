@@ -280,7 +280,6 @@ def svg_figure(data: dict) -> str:
         out.append(f'<line x1="{left}" y1="{y:.2f}" x2="{right}" y2="{y:.2f}" stroke="#e5e7eb"/><text x="{left-12}" y="{y+4:.2f}" text-anchor="end" font-family="sans-serif" font-size="11">{value:.1f}</text>')
     polygon = " ".join(f"{sx(x):.2f},{sy(y):.2f}" for x, y in data["target_polygon"])
     out.append(f'<polygon points="{polygon}" fill="#fecaca" fill-opacity=".45" stroke="#dc2626" stroke-width="2.5"><title>terminal target M</title></polygon>')
-    # Forward reachable nodes, stage by stage.
     for stage, layer in enumerate(data["forward_layers"]):
         for x, y in layer:
             out.append(f'<circle cx="{sx(x):.2f}" cy="{sy(y):.2f}" r="4.2" fill="{colors[stage]}" fill-opacity=".7"><title>R{stage}: ({x:g}, {y:g})</title></circle>')

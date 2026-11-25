@@ -42,7 +42,6 @@ def main(output: str) -> None:
         stage_base.append(base)
         stage_sens.append(sens)
 
-    # State phase box applies to x1 and x3 at stages 0 through 16.
     rows, lower, upper = [], [], []
     for state, lo, hi in ((0, F(1176), F(1224)), (2, F(432), F(468))):
         for k in range(17):

@@ -145,7 +145,6 @@ def feedback_oracle(saved: dict) -> dict:
     assert feedback["information_pattern"] == "action selected from current exact state before disturbance vertex"
     assert "not cost-optimal" in feedback["selector"]
 
-    # Replay every rectangular table cell, including unsafe padding.
     assert feedback["transition_table"] == transitions
     for t in range(HORIZON):
         for i in range(n):
