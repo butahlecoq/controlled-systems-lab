@@ -44,8 +44,7 @@
     "issue3-finite-catalogue-timings.svg": "331531a25b23e78af65a3739d9df6de6e1310c7f7d889d1b41c48eaf9ab83f47",
     "issue4-volterra-error-boxes-export.json": "d3b9ff5739494a0a55d71d02d0da886d98023191f26b14ede8605a98d941bb7a",
     "issue4-volterra-error-boxes.png": "af121fd67fe44632652e2a92e55d9ba586bf3d3a639730e0cc0c635d9ffc54ae",
-    "issue4-volterra-error-boxes.svg": "151f1e98eb34218ae01e80111a14fb2db6168fc9859f40d54a34e7308b45d968",
-    "manifest.json": "f53fabeeb53df51e0f79f9fc115acc853ec7753e66758fefd81ce99774174c78"
+    "issue4-volterra-error-boxes.svg": "151f1e98eb34218ae01e80111a14fb2db6168fc9859f40d54a34e7308b45d968"
   },
   "index_sha256": "5de506e45b3a006352b1aad8045ca1307d7fa60ce54cfaf6460ca0c78fa1e855",
   "inputs": {
