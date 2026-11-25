@@ -44,7 +44,7 @@ SweepPhaseResources resources() {
         SweepMemorySupport::active_and_retained_reservations, "executor reservations"};
     return result;
 }
-} // namespace
+}
 
 TEST_CASE("scenario sweep embeds validated runs and round-trips canonically") {
     const auto spec = content("{\"scenario_ids\":[\"scenario-a\"],\"schema\":\"csl.scenario-sweep-spec/1\"}");

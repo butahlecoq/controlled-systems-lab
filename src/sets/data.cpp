@@ -10,7 +10,7 @@ struct Storage final : SetPayload {
     Metadata metadata;
     Representation representation;
 };
-} // namespace csl::sets::detail
+}
 
 namespace csl::sets {
 namespace {
@@ -147,4 +147,4 @@ Result<SetData> from_handle(const SetHandle &handle) {
                        "SetHandle envelope does not match its immutable native payload.");
     return SetData(std::move(storage));
 }
-} // namespace csl::sets
+}

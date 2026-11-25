@@ -18,7 +18,7 @@ const std::vector<Vector> square{{0,0}, {2,0}, {2,2}, {0,2},
 SourceIndexHull hull(std::vector<std::size_t> indices) {
     return {std::get<HullInputDigest>(digest_hull_input(square)), std::move(indices)};
 }
-} // namespace
+}
 
 TEST_CASE("exact source hull accepts all corners and redundant retained points") {
     const auto minimal = check_source_index_hull(square, hull({0,1,2,3}));

@@ -57,4 +57,4 @@ template <class T, class... R> T canonical(std::variant<T, R...> value, const st
     throw InputFailure{InputCategory::field,   path, diagnostic.explanation,
                        "valid canonical data", {},   diagnostic};
 }
-} // namespace csl::input::detail
+}

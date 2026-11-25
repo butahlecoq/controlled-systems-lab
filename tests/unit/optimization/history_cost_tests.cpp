@@ -41,7 +41,7 @@ double residual_value(const optimization::WeightedHistoryResidualNorm& term,
     return term.coefficient * norm;
 }
 
-} // namespace
+}
 
 TEST_CASE("history cost compiles the original terminal and absolute-stage quadratic source formulas") {
     const auto history = relation(2, 1, 2);

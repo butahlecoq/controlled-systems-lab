@@ -198,4 +198,4 @@ make_discrete_reachability_case(std::string_view id) {
                                     std::move(inputs)};
 }
 
-} // namespace csl::model::catalogue
+}

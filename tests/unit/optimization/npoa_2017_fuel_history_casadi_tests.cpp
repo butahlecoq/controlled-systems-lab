@@ -102,7 +102,7 @@ optimization::HistoryOptimizationRequest programmed_fuel_request() {
             std::move(cost),
             optimization::SuppliedStart{std::move(start), {}}};
 }
-} // namespace
+}
 
 TEST_CASE("CasADi/IPOPT solves the source-bound four-state programmed-fuel history") {
     auto request = programmed_fuel_request();

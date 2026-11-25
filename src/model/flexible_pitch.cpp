@@ -307,4 +307,4 @@ FlexiblePitchResult<FlexiblePitchCase> make_flexible_pitch_case(std::string_view
                              std::move(discrete.receipt)};
 }
 
-} // namespace csl::model::catalogue
+}

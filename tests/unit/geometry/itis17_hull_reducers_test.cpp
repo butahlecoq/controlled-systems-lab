@@ -35,7 +35,7 @@ protected:
 geometry::PointCloud square_cloud() {
     return {{"itis17-square"}, {{0,0}, {2,0}, {2,2}, {0,2}, {1,1}, {1,0}, {0,0}}};
 }
-} // namespace
+}
 
 TEST_CASE("ITIS17 reducer registrations preserve distinct method identities") {
     const auto a43 = geometry::make_itis17_a43_hull_reducer_registration();

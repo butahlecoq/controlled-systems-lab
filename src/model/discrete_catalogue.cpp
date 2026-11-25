@@ -6101,7 +6101,7 @@ const std::vector<DiscreteModelData> &records() {
                      {"w22", "normalized"}, {"w23", "normalized"}, {"w24", "normalized"}}}};
     return values;
 }
-} // namespace
+}
 
 SystemModel DiscreteModelData::system_model() const {
     return {{{coefficients.A.rows, coefficients.B.cols, coefficients.E.cols},
@@ -6131,4 +6131,4 @@ std::variant<DiscreteModelData, Diagnostics> make_discrete_model(std::string_vie
     return *selected;
 }
 
-} // namespace csl::model::catalogue
+}

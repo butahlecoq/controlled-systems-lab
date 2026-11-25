@@ -20,7 +20,7 @@ struct MatrixStorage {
 struct VectorStorage {
     Vector values;
 };
-} // namespace csl::numeric::detail
+}
 
 namespace csl::numeric {
 namespace {
@@ -89,7 +89,7 @@ Result<detail::DenseStorage> parse_dense(DenseInput input) {
     return detail::DenseStorage{
         input.rows, input.cols, rs, cs, input.layout, Vector(addressed.begin(), addressed.end())};
 }
-} // namespace
+}
 
 MatrixView::MatrixView(std::shared_ptr<const detail::MatrixStorage> storage)
     : storage_(std::move(storage)) {}
@@ -227,4 +227,4 @@ Result<Vector> multiply(const MatrixView &matrix, const VectorView &vector) {
                        "Multiplication produced a nonfinite result.");
     return result;
 }
-} // namespace csl::numeric
+}

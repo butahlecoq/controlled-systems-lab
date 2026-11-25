@@ -13,4 +13,4 @@ IntegrationResult integrate_stage(const LinearStage &start, const LinearStage &e
                                   Dimensions dimensions, double t0, double t1,
                                   const IntegrationOptions &options);
 
-} // namespace csl::model::detail
+}
