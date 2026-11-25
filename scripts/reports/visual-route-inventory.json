@@ -2423,7 +2423,7 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 98,
+      "signal_count": 99,
       "asset_name_literals": [
         "adaptive-ode-replay.svg",
         "app01-plan-timing-v1.svg",
@@ -4631,6 +4631,8 @@
         "source-index-geometry-2d-records.json",
         "kpabep-near-collinear-20261115.html",
         "kpabep-near-collinear-20261115.json",
+        "parallelotope-frame-cover-2d.html",
+        "parallelotope-frame-cover-2d.json",
         "history-membership-zonotope-2d-v1/index.html",
         "history-membership-zonotope-2d-v1/history.svg",
         "history-membership-zonotope-2d-v1/history.csv",

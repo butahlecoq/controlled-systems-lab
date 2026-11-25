@@ -650,6 +650,8 @@ def build(root: Path = ROOT) -> dict:
                     "source-index-geometry-2d-records.json",
                     "kpabep-near-collinear-20261115.html",
                     "kpabep-near-collinear-20261115.json",
+                    "parallelotope-frame-cover-2d.html",
+                    "parallelotope-frame-cover-2d.json",
                     "history-membership-zonotope-2d-v1/index.html",
                     "history-membership-zonotope-2d-v1/history.svg",
                     "history-membership-zonotope-2d-v1/history.csv",

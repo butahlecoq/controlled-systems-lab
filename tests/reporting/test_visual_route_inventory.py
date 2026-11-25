@@ -386,6 +386,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "source-index-geometry-2d.html", "source-index-geometry-2d.svg",
             "source-index-geometry-2d-records.json",
             "kpabep-near-collinear-20261115.html", "kpabep-near-collinear-20261115.json",
+            "parallelotope-frame-cover-2d.html", "parallelotope-frame-cover-2d.json",
             "fuel-b06-viz06-export.json", "fuel-b06-viz03.html", "fuel-b06-viz06-before.svg",
             "fuel-b06-viz06-flow.svg", "fuel-b06-viz06-flow.png",
             "fuel-b06-viz06-stock.svg", "fuel-b06-viz06-stock.png",
