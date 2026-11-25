@@ -14,6 +14,11 @@ CERTIFIED_STAGEWISE_CONTROLLER = "native-continuous-history-certified-stagewise-
 CERTIFIED_STAGEWISE_METHOD = "csl.reachability.certified-stagewise-history"
 GEOMETRY_IDS[LIFTED_POLYTOPE_CONTROLLER] = "polytope"
 GEOMETRY_IDS[CERTIFIED_STAGEWISE_CONTROLLER] = "polytope"
+# The axis frame stays the default parallelotope profile; the rotated
+# controller is a distinct registration that requests certified frame bounds.
+PARALLELOTOPE_ROTATED_CONTROLLER = "native-continuous-history-parallelotope-rotated-ipopt/1"
+PARALLELOTOPE_FRAME_RULES = {PARALLELOTOPE_ROTATED_CONTROLLER: "fixed-rotation-45"}
+GEOMETRY_IDS[PARALLELOTOPE_ROTATED_CONTROLLER] = "parallelotope"
 NATIVE_STRATEGY_IDS = {
     f"native-strategy-{strategy.lower()}-history-{family}/1": (family, strategy)
     for family in FAMILIES
@@ -267,6 +272,7 @@ class HistoryPolicy:
             controller_id,
             (GEOMETRY_IDS.get(controller_id), None),
         )
+        self.parallelotope_frame_rule = PARALLELOTOPE_FRAME_RULES.get(controller_id, "axis")
         self.lifted_polytope = controller_id == LIFTED_POLYTOPE_CONTROLLER or (
             self.native_strategy is not None and self.geometry_family == "polytope"
         )
@@ -326,6 +332,8 @@ class HistoryPolicy:
             self.preparation_receipt["polytope_history"] = "lifted_whole_history"
         elif self.certified_stagewise:
             self.preparation_receipt["polytope_history"] = "certified_stagewise"
+        if self.parallelotope_frame_rule != "axis":
+            self.preparation_receipt["parallelotope_frame_rule"] = self.parallelotope_frame_rule
 
     def set_query_capture_callback(self, callback):
         self.query_capture_callback = callback
@@ -365,6 +373,8 @@ class HistoryPolicy:
             request["polytope_history"] = "lifted_whole_history"
         elif self.certified_stagewise:
             request["polytope_history"] = "certified_stagewise"
+        if self.parallelotope_frame_rule != "axis":
+            request["parallelotope_frame_rule"] = self.parallelotope_frame_rule
         initial, warm_start = initial_history(request, self.previous_history)
         request["initial_primal"] = initial.tolist()
         request["warm_start"] = warm_start
