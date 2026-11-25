@@ -81,6 +81,7 @@ int main() {
         if (!executed || executed->provider.actual->id.value != "csl.lp.highs") return 7;
     }
 
+    // Exercise the installed OPT-06 public header and its phase-one dependency
     // through the exported CSL::hull target. The same registered LP workspace
     // remains available for the reducer's conservative fallback path.
     registry::Registry<registry::HullReducerPort> basis_registry;
