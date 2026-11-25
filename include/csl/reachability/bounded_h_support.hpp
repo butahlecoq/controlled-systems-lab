@@ -74,4 +74,13 @@ BoundedHAxisOutcome bounded_h_axis_cover(const BoundedHSupportInput &, ProgramId
                                          const registry::PreparedProvider<registry::LPPort> &,
                                          const ExecutionContext &);
 
+// Support bounds in the columns of a frame: result.lower/upper are bounds on
+// z when x = frame * z. The frame must have one finite, nonzero column per
+// input coordinate. The bound remains an outer certificate for the same H
+// intersection and carrier; orthonormality is not required by the solver.
+BoundedHAxisOutcome bounded_h_frame_cover(const BoundedHSupportInput &, const Matrix &frame,
+                                          ProgramIdentity,
+                                          const registry::PreparedProvider<registry::LPPort> &,
+                                          const ExecutionContext &);
+
 } // namespace csl::reachability

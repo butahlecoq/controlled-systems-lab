@@ -4,6 +4,7 @@
 #include <csl/sets/generator_sets.hpp>
 #include <csl/registry/provider.hpp>
 #include <csl/reachability/bounded_h_support.hpp>
+#include <csl/reachability/parallelotope_frame.hpp>
 
 namespace csl::reachability {
 
@@ -15,6 +16,8 @@ enum class FeedbackScope { forward_relevant_from_observation, global_source_doma
 struct FeedbackHMembership {
     SetHandle set;
     std::optional<Matrix> parallelotope_frame;
+    // Frame-coordinate bounds for x = frame * factor when the frame is present.
+    std::optional<std::pair<Vector, Vector>> parallelotope_frame_bounds;
 };
 // x = center + generators * factors, each factor independently in [-1,1].
 struct FeedbackZonotopeMembership {
@@ -102,6 +105,25 @@ struct FeedbackGeometryDependencies {
 std::variant<FeedbackMembership, Diagnostics>
 axis_enclosure(FeedbackFamily, SetId, const Vector &lower, const Vector &upper,
                const std::vector<std::string> &coordinate_labels);
+
+// Rotated parallelotope H membership: x = frame * factor, factor in [lower,
+// upper]. The frame columns are the factor basis. The caller supplies bounds
+// certified against the bounded H relation in those directions.
+std::variant<FeedbackMembership, Diagnostics>
+frame_enclosure(SetId, const Matrix &frame, const Vector &lower, const Vector &upper,
+                const std::vector<std::string> &coordinate_labels);
+
+struct FeedbackGeometryOptions {
+    FeedbackPolytopeHistory polytope_history{FeedbackPolytopeHistory::stagewise};
+    ParallelotopeFrameRule parallelotope_frame{ParallelotopeFrameRule::axis};
+};
+
+FeedbackGeometryOutcome
+feedback_geometry(const problem::ResolvedProblem &, RequestId,
+                  const SetHandle &terminal_feasibility, FeedbackFamily,
+                  const std::vector<StrictCoordinateLowerBound> &strict_source_domain,
+                  const FeedbackGeometryDependencies &options_dependencies,
+                  const FeedbackGeometryOptions &, const ExecutionContext &);
 
 FeedbackGeometryOutcome
 feedback_geometry(const problem::ResolvedProblem &, RequestId,
