@@ -1,0 +1,47 @@
+{
+  "schema": "csl.parallelotope-frame-cover-2d/1",
+  "status": "educational-example",
+  "bounded_h_set": {
+    "description": "The diamond |x+y| <= 1, |x-y| <= 1 in R^2.",
+    "inequalities": [[1, 1], [-1, -1], [1, -1], [-1, 1]],
+    "upper_bounds": [1, 1, 1, 1],
+    "equalities": [],
+    "equality_values": []
+  },
+  "carrier": {
+    "lower": [-2, -2],
+    "upper": [2, 2]
+  },
+  "axis_frame": {
+    "matrix": [[1, 0], [0, 1]],
+    "factor_lower": [-1, -1],
+    "factor_upper": [1, 1],
+    "factor_widths_binary64": [2, 2],
+    "factor_width_product_exact": "4",
+    "cover": "The axis-aligned bounding box of the diamond; it rounds all four facets."
+  },
+  "fixed_rotation_45_frame": {
+    "matrix": [[0.7071067811865476, -0.7071067811865476], [0.7071067811865476, 0.7071067811865476]],
+    "factor_lower": [-0.7071067811865476, -0.7071067811865476],
+    "factor_upper": [0.7071067811865476, 0.7071067811865476],
+    "factor_widths_exact": ["sqrt(2)", "sqrt(2)"],
+    "factor_widths_binary64": [1.4142135623730951, 1.4142135623730951],
+    "factor_width_product_exact": "2",
+    "cover": "Every frame direction is a facet normal of the diamond, so the certified cover equals the set exactly."
+  },
+  "selection": {
+    "candidates": ["axis", "fixed-rotation-45"],
+    "excess_measure": "factor-width product over the certified cover bounds",
+    "excess_exact": [4, 2],
+    "selected": "fixed-rotation-45",
+    "tie_policy": "select_parallelotope_frame keeps candidate zero, the axis frame, on numerical ties",
+    "rule": "support-selected"
+  },
+  "support_solves": "Each cover costs one support LP solve per frame column and side: 2 * dimension solves per candidate, 4 * dimension for the selection.",
+  "sources": {
+    "frame_rules": "src/reachability/parallelotope_frame.cpp",
+    "frame_cover": "src/reachability/bounded_h_support.cpp",
+    "selection": "include/csl/reachability/parallelotope_frame.hpp",
+    "test": "tests/unit/reachability/bounded_h_support_tests.cpp"
+  }
+}

@@ -1634,6 +1634,18 @@ def build(catalog, site):
         outputs[name] = (
             source.read_bytes() if source.suffix != ".html" else source.read_text(encoding="utf-8")
         )
+    for name in (
+        "parallelotope-frame-cover-2d.html",
+        "parallelotope-frame-cover-2d.json",
+    ):
+        source = adaptive_assets / name
+        require(
+            source.is_file() and not source.is_symlink(),
+            "missing parallelotope frame cover example asset: " + name,
+        )
+        outputs[name] = (
+            source.read_bytes() if source.suffix != ".html" else source.read_text(encoding="utf-8")
+        )
     with tempfile.TemporaryDirectory(prefix="csl-gallery-geometry-") as temporary:
         geometry_root = Path(temporary) / "examples"
         _, geometry_inventory, geometry_assets = geometry_opt_companions.build(geometry_root)
@@ -1702,6 +1714,18 @@ def build(catalog, site):
             "figure": "kpabep-near-collinear-20261115.html",
             "source_page": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c741260362092c988fdb4aa4ee6a793575a59e4/examples/geometry/kpabep_near_collinear.cpp",
             "raw_record": "kpabep-near-collinear-20261115.json",
+        }
+    )
+    gallery_inventory.append(
+        {
+            "family": "Feedback geometry · parallelotope frames",
+            "title": "A rotated frame can enclose a diamond exactly",
+            "status": "educational-example",
+            "anchor": "parallelotope-frame-cover-2d",
+            "page": "parallelotope-frame-cover-2d.html",
+            "figure": "parallelotope-frame-cover-2d.html",
+            "source_page": "https://github.com/butahlecoq/controlled-systems-lab/blob/main/src/reachability/parallelotope_frame.cpp",
+            "raw_record": "parallelotope-frame-cover-2d.json",
         }
     )
     qhull_example_source = qhull_highs_strategy_a_example.load_record()["source_commit"]
