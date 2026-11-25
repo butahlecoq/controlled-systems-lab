@@ -224,4 +224,4 @@ public:
     explicit CounterFixture(int base) : base_(base) {}
     int evaluate(const CounterRequest& r) override { return base_ + r.value + ++calls_; }
 };
-} // namespace registry_fixtures
+}

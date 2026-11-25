@@ -21,7 +21,7 @@ std::string replace_json_field(std::string text, const std::string& field,
     text.replace(begin, end - begin, value);
     return text;
 }
-} // namespace
+}
 
 TEST_CASE("bounded checker statuses and evidence survive canonical record encoding") {
     const std::vector<Vector> square{{0,0}, {2,0}, {2,2}, {0,2}, {1,1}};

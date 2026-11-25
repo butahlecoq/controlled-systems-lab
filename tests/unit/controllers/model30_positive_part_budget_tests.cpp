@@ -68,7 +68,7 @@ MpcEpisodeEvidence run(const NominalMpcTask &task, EpisodePolicy policy,
         "model30-positive-part-budget"};
     return execute_nominal_episode(task, policy, *workspace, context);
 }
-} // namespace
+}
 
 TEST_CASE("model 30 positive-part budgets survive native open-loop and observed-state MPC") {
     const auto task = make_model30_task();

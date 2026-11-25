@@ -55,7 +55,7 @@ sets::SetData wide_four_state_domain() {
                                      0, 0, 1, 0, 0,  0, -1, 0, 0, 0, 0, 1, 0, 0,  0, -1}},
                              Vector(8, 100));
 }
-} // namespace
+}
 
 TEST_CASE(
     "fixed non-axis frame encloses every finite TwoPoints reachable state") {
