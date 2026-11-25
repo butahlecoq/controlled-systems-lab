@@ -11,10 +11,10 @@ namespace {
 std::optional<Stopped> interruption(const Limits &limits) {
     if (limits.cancellation.stop_requested())
         return Stopped{StopReason::cancelled,
-                       "BTULSHOR execution cancelled at cooperative checkpoint"};
+                       "Legacy source-index geometry routines (BTULSHOR) execution cancelled at cooperative checkpoint"};
     if (limits.deadline && std::chrono::steady_clock::now() >= *limits.deadline)
         return Stopped{StopReason::deadline_expired,
-                       "BTULSHOR deadline expired at cooperative checkpoint"};
+                       "Legacy source-index geometry routines (BTULSHOR) deadline expired at cooperative checkpoint"};
     return std::nullopt;
 }
 
@@ -59,21 +59,21 @@ Outcome<ModifResult> run_modif(const ModifRequest &request, const Limits &limits
     const auto n = request.a.cols;
     std::size_t entries{};
     if (!checked_product(m, n, entries))
-        return stopped(StopReason::capacity_limit, "MODIF matrix dimensions overflow");
+        return stopped(StopReason::capacity_limit, "Simplex pivot oracle (MODIF) matrix dimensions overflow");
     std::size_t basis_entries{};
     if (!checked_product(m, m, basis_entries))
-        return stopped(StopReason::capacity_limit, "MODIF basis dimensions overflow");
+        return stopped(StopReason::capacity_limit, "Simplex pivot oracle (MODIF) basis dimensions overflow");
     if (m < 3 || m > static_cast<std::size_t>(std::numeric_limits<int>::max()) ||
         n > static_cast<std::size_t>(std::numeric_limits<int>::max()) || request.x.size() != m ||
         request.a.values.size() != entries || !finite(request.a.values) || !finite(request.x) ||
         !std::isfinite(request.epsilon) ||
         (request.initial_status != 0 && request.initial_status != 1)) {
         return stopped(StopReason::invalid_input,
-                       "MODIF requires rows >= 3, matching finite data, and status 0 or 1");
+                       "Simplex pivot oracle (MODIF) requires rows >= 3, matching finite data, and status 0 or 1");
     }
     if (entries > limits.max_dense_entries || basis_entries > limits.max_dense_entries) {
         return stopped(StopReason::capacity_limit,
-                       "MODIF dense matrix exceeds configured capacity");
+                       "Simplex pivot oracle (MODIF) dense matrix exceeds configured capacity");
     }
 
     // Pascal A is column-major and passed by value. Build that private copy.
@@ -151,7 +151,7 @@ Outcome<ModifResult> run_modif(const ModifRequest &request, const Limits &limits
             }
             if (!std::isfinite(delta))
                 return stopped(StopReason::non_finite_arithmetic,
-                               "MODIF entering scan became nonfinite");
+                               "Simplex pivot oracle (MODIF) entering scan became nonfinite");
             if (ne == 3 && std::abs(delta) >= request.epsilon) {
                 continue;
             } else if (ne == 3) {
@@ -160,7 +160,7 @@ Outcome<ModifResult> run_modif(const ModifRequest &request, const Limits &limits
                     second += u[(m - 2) + m * i] * a[i + m * j];
                 if (!std::isfinite(second))
                     return stopped(StopReason::non_finite_arithmetic,
-                                   "MODIF phase scan became nonfinite");
+                                   "Simplex pivot oracle (MODIF) phase scan became nonfinite");
                 delta = second;
             }
             if (delta < minimum) {
@@ -171,7 +171,7 @@ Outcome<ModifResult> run_modif(const ModifRequest &request, const Limits &limits
 
         if (!std::isfinite(minimum))
             return stopped(StopReason::non_finite_arithmetic,
-                           "MODIF entering scan became nonfinite");
+                           "Simplex pivot oracle (MODIF) entering scan became nonfinite");
         if (minimum >= -request.epsilon) {
             if (ne > 1) {
                 if (p != 1)
@@ -201,7 +201,7 @@ Outcome<ModifResult> run_modif(const ModifRequest &request, const Limits &limits
                 delta += u[i + m * j] * a[j + m * k];
             if (!std::isfinite(delta))
                 return stopped(StopReason::non_finite_arithmetic,
-                               "MODIF pivot column became nonfinite");
+                               "Simplex pivot oracle (MODIF) pivot column became nonfinite");
             xk[i] = delta;
         }
         double theta = 1E11;
@@ -213,7 +213,7 @@ Outcome<ModifResult> run_modif(const ModifRequest &request, const Limits &limits
                 const double delta = x[i] / xk[i];
                 if (!std::isfinite(delta))
                     return stopped(StopReason::non_finite_arithmetic,
-                                   "MODIF ratio became nonfinite");
+                                   "Simplex pivot oracle (MODIF) ratio became nonfinite");
                 if (delta < theta) {
                     theta = delta;
                     l = i;
@@ -225,7 +225,7 @@ Outcome<ModifResult> run_modif(const ModifRequest &request, const Limits &limits
             break;
         }
         if (pivots == limits.max_pivots)
-            return stopped(StopReason::pivot_limit, "MODIF pivot budget exhausted");
+            return stopped(StopReason::pivot_limit, "Simplex pivot oracle (MODIF) pivot budget exhausted");
 
         const double pivot = xk[l];
         for (std::size_t j = 0; j < m - 2; ++j)
@@ -246,7 +246,7 @@ Outcome<ModifResult> run_modif(const ModifRequest &request, const Limits &limits
         ++pivots;
         record_pivot({k + 1, l + 1, ne, theta});
         if (!finite(x) || !finite(u) || !finite(xk))
-            return stopped(StopReason::non_finite_arithmetic, "MODIF arithmetic became nonfinite");
+            return stopped(StopReason::non_finite_arithmetic, "Simplex pivot oracle (MODIF) arithmetic became nonfinite");
     }
 
     return ModifResult{
@@ -273,28 +273,28 @@ Outcome<KpabepResult> kpabep(std::span<const Vector> points, const ModifPort &mo
     const std::size_t m = points.size();
     if (n == 0 || !modif_port.run || modif_port.id.empty())
         return stopped(StopReason::invalid_input,
-                       "KPABEP requires nonempty point dimensions and a named MODIF port");
+                       "Candidate-elimination hull reducer (KPABEP) requires nonempty point dimensions and a named MODIF port");
     for (const auto &point : points) {
         if (auto stop = interruption(limits))
             return *stop;
         if (point.size() != n || !finite(point))
             return stopped(StopReason::invalid_input,
-                           "KPABEP points must have one finite shared dimension");
+                           "Candidate-elimination hull reducer (KPABEP) points must have one finite shared dimension");
     }
     std::size_t stride{};
     if (!checked_sum(n, 3, stride) ||
         m > static_cast<std::size_t>(std::numeric_limits<int>::max()) ||
         n > static_cast<std::size_t>(std::numeric_limits<int>::max()))
         return stopped(StopReason::capacity_limit,
-                       "KPABEP source dimensions exceed integer indexing");
+                       "Candidate-elimination hull reducer (KPABEP) source dimensions exceed integer indexing");
     std::size_t columns{};
     if (!checked_sum(m, 1, columns))
         return stopped(StopReason::capacity_limit,
-                       "KPABEP candidate count overflows its source layout");
+                       "Candidate-elimination hull reducer (KPABEP) candidate count overflows its source layout");
     std::size_t cells{};
     if (!checked_product(stride, columns, cells) || cells > limits.max_dense_entries)
         return stopped(StopReason::capacity_limit,
-                       "KPABEP working matrix exceeds configured capacity");
+                       "Candidate-elimination hull reducer (KPABEP) working matrix exceeds configured capacity");
 
     // Pascal's A is private and column-major with n+3 rows. Point identities
     // move with each column; this does not participate in any numeric choice.
@@ -372,10 +372,10 @@ Outcome<KpabepResult> kpabep(std::span<const Vector> points, const ModifPort &mo
                 outcome.x.size() != stride || outcome.basis.size() != stride ||
                 !finite(outcome.x) || outcome.pivots > limits.max_pivots)
                 return stopped(StopReason::invalid_dependency_result,
-                               "MODIF port returned a malformed result");
+                               "Simplex pivot oracle (MODIF) port returned a malformed result");
             std::size_t next_pivots{};
             if (!checked_sum(pivot_count, outcome.pivots, next_pivots))
-                return stopped(StopReason::capacity_limit, "KPABEP pivot counter overflowed");
+                return stopped(StopReason::capacity_limit, "Candidate-elimination hull reducer (KPABEP) pivot counter overflowed");
             pivot_count = next_pivots;
             trace_candidate(ids[j - 1], outcome.original_status, outcome.pivots);
             if (outcome.original_status == 2) {
@@ -442,23 +442,23 @@ Outcome<ReachResult> reach(const ReachRequest &request, const KpabepPort &kpabep
         request.b.values.size() != b_entries || nr > n || !kpabep_port.run ||
         kpabep_port.id.empty() || !modif_port.run || modif_port.id.empty())
         return stopped(StopReason::invalid_input,
-                       "REACH dimensions, ports, or literal BEP stride are invalid");
+                       "Affine reachability vertex generator (REACH) dimensions, ports, or literal BEP stride are invalid");
     for (const auto &point : request.initial_points)
         if (point.size() != n || !finite(point))
             return stopped(StopReason::invalid_input,
-                           "REACH initial points have invalid coordinates");
+                           "Affine reachability vertex generator (REACH) initial points have invalid coordinates");
     for (const auto &point : request.control_points)
         if (point.size() != nr || !finite(point))
             return stopped(StopReason::invalid_input,
-                           "REACH control points have invalid coordinates");
+                           "Affine reachability vertex generator (REACH) control points have invalid coordinates");
     if (!finite(request.a.values) || !finite(request.b.values))
-        return stopped(StopReason::invalid_input, "REACH matrices must be finite");
+        return stopped(StopReason::invalid_input, "Affine reachability vertex generator (REACH) matrices must be finite");
 
     std::size_t initial_count{}, control_count{};
     if (!checked_product(n, nx, initial_count) || !checked_product(n, np, control_count) ||
         initial_count > limits.max_dense_entries || control_count > limits.max_dense_entries)
         return stopped(StopReason::capacity_limit,
-                       "REACH working arrays exceed configured capacity");
+                       "Affine reachability vertex generator (REACH) working arrays exceed configured capacity");
 
     // Pascal BEP has n rows and n stride even when B has only nr columns.
     Vector bep(n * np, 0.0), berg(n * nx, 0.0);
@@ -469,7 +469,7 @@ Outcome<ReachResult> reach(const ReachRequest &request, const KpabepPort &kpabep
                 sum += request.b.values[row * nr + col] * request.control_points[point][col];
             if (!std::isfinite(sum))
                 return stopped(StopReason::non_finite_arithmetic,
-                               "REACH control transform became nonfinite");
+                               "Affine reachability vertex generator (REACH) control transform became nonfinite");
             bep[row + n * point] = sum;
         }
     }
@@ -480,7 +480,7 @@ Outcome<ReachResult> reach(const ReachRequest &request, const KpabepPort &kpabep
                 sum += request.a.values[row * n + col] * request.initial_points[point][col];
             if (!std::isfinite(sum))
                 return stopped(StopReason::non_finite_arithmetic,
-                               "REACH initial transform became nonfinite");
+                               "Affine reachability vertex generator (REACH) initial transform became nonfinite");
             berg[row + n * point] = sum;
         }
     }
@@ -504,18 +504,18 @@ Outcome<ReachResult> reach(const ReachRequest &request, const KpabepPort &kpabep
         const auto &output = std::get<KpabepResult>(filtered);
         if (!valid_selection(transformed, output, n))
             return stopped(StopReason::invalid_dependency_result,
-                           "KPABEP port returned malformed points");
+                           "Candidate-elimination hull reducer (KPABEP) port returned malformed points");
         std::size_t next_modif_calls{}, next_pivots{}, filtered_entries{};
         if (!checked_sum(result.modif_calls, output.modif_calls, next_modif_calls) ||
             !checked_sum(result.pivots, output.pivots, next_pivots))
-            return stopped(StopReason::capacity_limit, "REACH dependency counters overflowed");
+            return stopped(StopReason::capacity_limit, "Affine reachability vertex generator (REACH) dependency counters overflowed");
         result.modif_calls = next_modif_calls;
         result.pivots = next_pivots;
         nx = output.points.size();
         if (!checked_product(n, nx, filtered_entries) ||
             filtered_entries > limits.max_dense_entries)
             return stopped(StopReason::capacity_limit,
-                           "REACH filtered vertices exceed configured capacity");
+                           "Affine reachability vertex generator (REACH) filtered vertices exceed configured capacity");
         initial_ids = output.retained_indices;
         berg.assign(filtered_entries, 0.0);
         for (std::size_t point = 0; point < nx; ++point)
@@ -527,7 +527,7 @@ Outcome<ReachResult> reach(const ReachRequest &request, const KpabepPort &kpabep
     if (!checked_product(nx, np, reach_count) || reach_count > limits.max_dense_entries ||
         !checked_product(n, reach_count, reach_entries) || reach_entries > limits.max_dense_entries)
         return stopped(StopReason::capacity_limit,
-                       "REACH translated vertices exceed configured capacity");
+                       "Affine reachability vertex generator (REACH) translated vertices exceed configured capacity");
     berg.resize(reach_entries);
     const std::size_t working_nx = nx;
     for (std::size_t control = 0; control < np; ++control) {
@@ -537,7 +537,7 @@ Outcome<ReachResult> reach(const ReachRequest &request, const KpabepPort &kpabep
                 const double sum = berg[row + n * point] + bep[row + n * control];
                 if (!std::isfinite(sum))
                     return stopped(StopReason::non_finite_arithmetic,
-                                   "REACH translation became nonfinite");
+                                   "Affine reachability vertex generator (REACH) translation became nonfinite");
                 berg[row + n * (base + point)] = sum;
             }
     }
@@ -561,14 +561,14 @@ Outcome<ReachResult> reach(const ReachRequest &request, const KpabepPort &kpabep
         const auto &output = std::get<KpabepResult>(filtered);
         if (!valid_selection(result.points, output, n))
             return stopped(StopReason::invalid_dependency_result,
-                           "KPABEP port returned malformed points");
+                           "Candidate-elimination hull reducer (KPABEP) port returned malformed points");
         std::size_t next_modif_calls{}, next_pivots{}, filtered_entries{};
         if (!checked_sum(result.modif_calls, output.modif_calls, next_modif_calls) ||
             !checked_sum(result.pivots, output.pivots, next_pivots) ||
             !checked_product(n, output.points.size(), filtered_entries) ||
             filtered_entries > limits.max_dense_entries)
             return stopped(StopReason::capacity_limit,
-                           "REACH filtered result exceeds configured bounds");
+                           "Affine reachability vertex generator (REACH) filtered result exceeds configured bounds");
         result.modif_calls = next_modif_calls;
         result.pivots = next_pivots;
         result.points = output.points;

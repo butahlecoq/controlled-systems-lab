@@ -6,6 +6,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <variant>
 
@@ -72,10 +73,26 @@ void emit_result(std::string_view operation,const OperationRequest& request,
 
 int main(int argc,char** argv) try {
     using namespace csl;
+    constexpr std::string_view usage=
+        "usage: source_index_geometry_2d [quickhull|candidate-elimination]\n"
+        "\n"
+        "quickhull: QuickHull2D exact source-index hull\n"
+        "candidate-elimination: Candidate-elimination hull reducer from the\n"
+        "  legacy source-index geometry routines (historical BTULSHOR/KPABEP)\n"
+        "  aliases: btulshor, candidate-elimination-hull-reducer, legacy-source-index\n";
+    if(argc==2&&(std::string_view{argv[1]}=="--help"||std::string_view{argv[1]}=="-h")) {
+        std::cout<<usage;
+        return 0;
+    }
     const std::string method=argc==2?argv[1]:"quickhull";
-    if(argc>2||(method!="quickhull"&&method!="btulshor"))
-        throw std::runtime_error("usage: source_index_geometry_2d [quickhull|btulshor]");
-    auto source=method=="quickhull"?geometry::make_quickhull_source_index_registration():
+    const bool quickhull=method=="quickhull";
+    const bool reducer=method=="btulshor"||method=="candidate-elimination"||
+        method=="candidate-elimination-hull-reducer"||method=="legacy-source-index";
+    if(argc>2||(!quickhull&&!reducer)) {
+        std::cerr<<usage;
+        throw std::runtime_error("unknown source-index hull method: "+method);
+    }
+    auto source=quickhull?geometry::make_quickhull_source_index_registration():
         geometry::make_legacy_kpabep_source_index_registration();
     auto hull=select(std::move(source));
     geometry::SourceIndexAffineSumDependencies dependencies{hull,{},
@@ -87,7 +104,7 @@ int main(int argc,char** argv) try {
     Requirements requirements;
     requirements.output.representation={"csl.polyhedron.v"};
     requirements.output.relation=SetRelation::equivalent;
-    const auto method_name=method=="quickhull"?"csl.hull.source.quickhull-2d":"csl.hull.source.btulshor-kpabep";
+    const auto method_name=quickhull?"csl.hull.source.quickhull-2d":"csl.hull.source.btulshor-kpabep";
     const auto provider=registry::prepare_provider(registry::select_provider(registry,operation_method,requirements));
     if(!std::holds_alternative<PreparedProvider<GeometryPort>>(provider))
         throw std::runtime_error("affine-sum provider selection failed");
@@ -131,7 +148,7 @@ int main(int argc,char** argv) try {
     std::cout<<',';
     emit_result("control_minkowski_sum",sum_request,sum,method_name);
     std::cout<<"],\"raw_failures\":[";
-    if(method=="btulshor") {
+    if(reducer) {
         const auto near_tolerance=vertices("legacy-near-tolerance-cloud",
             Matrix{5,2,{0,0,1,0,1,1,0,1,0.5,1.00000001}});
         const Matrix identity_map{2,2,{1,0,0,1}};

@@ -110,7 +110,7 @@ TEST_CASE("catalogue resolves every expected vertex reducer and selected LP prov
     CHECK(admitted_graphs == expected_hull_methods.size() * vertex_lp_methods().size());
 }
 
-TEST_CASE("source-index catalogue exposes QuickHull and faithful BTULSHOR on their actual 2D port") {
+TEST_CASE("source-index catalogue exposes QuickHull and the candidate-elimination hull reducer on their actual 2D port") {
     auto providers=geometry::make_source_index_hull_catalogue();
     const auto identities=providers.identities();
     REQUIRE(identities.size()==2);

@@ -2,7 +2,7 @@
 <html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Near-collinear KPABEP inclusion failure</title>
+<title>When tolerance removes a true hull vertex</title>
 <style>
   :root{color-scheme:light dark;--fg:#202832;--muted:#536273;--panel:#f4f7fa;--line:#a9b5c2;--accent:#a73434;--ok:#287357}
   @media(prefers-color-scheme:dark){:root{--fg:#e5eaf0;--muted:#aab8c7;--panel:#202933;--line:#566574;--accent:#ff8585;--ok:#6ec49c}}
@@ -13,8 +13,8 @@
   code{background:var(--panel);padding:.12rem .3rem;border-radius:3px;overflow-wrap:anywhere} .muted{color:var(--muted)}
 </style>
 <main>
-<h1>A tolerance can remove a true hull vertex</h1>
-<p>This saved run uses the source-faithful BTULSHOR KPABEP/MODIF reducer on three represented binary64 points. The middle point is a true vertex of their convex hull: the exact orientation determinant is nonzero. With the historical MODIF tolerance <code>epsilon = 1e-5</code>, KPABEP returns only source IDs 2 and 0.</p>
+<h1>When tolerance removes a true hull vertex</h1>
+<p>This saved run uses the candidate-elimination hull reducer (KPABEP), driven by the simplex pivot oracle (MODIF) in the legacy source-index geometry routines (historical BTULSHOR), on three represented binary64 points. The middle point is a true vertex of their convex hull: the exact orientation determinant is nonzero. With the historical simplex pivot oracle tolerance <code>epsilon = 1e-5</code>, the candidate-elimination hull reducer returns only source IDs 2 and 0.</p>
 <figure>
 <svg id="plot" viewBox="0 0 760 300" role="img" aria-labelledby="plot-title plot-desc">
 <title id="plot-title">The omitted point lies 3.55 femtometres from the returned endpoint segment in coordinate units</title>

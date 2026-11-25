@@ -1001,13 +1001,13 @@
         "symbol": "csl::geometry::legacy_btulshor::modif"
       },
       "route": "faithful_simplex_variant",
-      "input": "legacy MODIF matrix and initial vector",
+      "input": "simplex pivot oracle (MODIF) matrix and initial vector",
       "output": "legacy pivot result",
       "dimension": "explicit limits in legacy_btulshor::Limits",
       "assurance": "source-faithful binary64 implementation with retained trace/capacity stops",
       "relation": "source reference; do not treat as a registered HullReducerPort",
       "operations": [
-        "MODIF pivot routine"
+        "Simplex pivot oracle (MODIF) pivot routine"
       ],
       "dependencies": [
         "legacy_btulshor::source_modif_port and/or source_kpabep_port as required"
@@ -1033,13 +1033,13 @@
         "symbol": "csl::geometry::legacy_btulshor::kpabep"
       },
       "route": "faithful_vertex_reducer_variant",
-      "input": "finite point sequence plus MODIF port",
+      "input": "finite point sequence plus simplex pivot oracle (MODIF) port",
       "output": "retained source-index points",
       "dimension": "explicit limits in legacy_btulshor::Limits",
       "assurance": "source-faithful binary64 implementation with retained trace/capacity stops",
       "relation": "source reference; do not treat as a registered HullReducerPort",
       "operations": [
-        "KPABEP source reduction"
+        "Candidate-elimination hull reducer (KPABEP) source reduction"
       ],
       "dependencies": [
         "legacy_btulshor::source_modif_port and/or source_kpabep_port as required"
@@ -1071,7 +1071,7 @@
       "assurance": "source-faithful binary64 implementation with retained trace/capacity stops",
       "relation": "source reference; do not treat as a registered HullReducerPort",
       "operations": [
-        "REACH composition of KPABEP and MODIF"
+        "Affine reachability vertex generator (REACH) composition of the candidate-elimination hull reducer (KPABEP) and simplex pivot oracle (MODIF)"
       ],
       "dependencies": [
         "legacy_btulshor::source_modif_port and/or source_kpabep_port as required"
@@ -1132,17 +1132,17 @@
       },
       "role": "source_faithful_vertex_reference",
       "input": "ordered finite binary64 2D point cloud",
-      "output": "proposed retained original positional IDs and raw KPABEP/MODIF trace",
+      "output": "proposed retained original positional IDs and raw candidate-elimination hull reducer (KPABEP) / simplex pivot oracle (MODIF) trace",
       "dimension": "2 only; no implicit projection",
-      "assurance": "source-faithful Pascal KPABEP/MODIF profile with original order, pivots, epsilon and stops; independent exact dyadic all-input checker gates application",
+      "assurance": "source-faithful Pascal candidate-elimination hull reducer (KPABEP) / simplex pivot oracle (MODIF) profile with original order, pivots, epsilon and stops; independent exact dyadic all-input checker gates application",
       "relation": "equivalent finite hull when the selected IDs pass the bounded checker; source failures remain outcomes",
       "operations": [
-        "source KPABEP reduction",
-        "source MODIF pivot sequence",
+        "candidate-elimination hull reducer (KPABEP) source reduction",
+        "simplex pivot oracle (MODIF) source pivot sequence",
         "independent bounded all-input check inside affine-sum operation"
       ],
       "dependencies": [
-        "selected source MODIF and KPABEP ports",
+        "selected simplex pivot oracle (MODIF) and candidate-elimination hull reducer (KPABEP) ports",
         "selected bounded hull-check budget"
       ],
       "build": "CSL core",
