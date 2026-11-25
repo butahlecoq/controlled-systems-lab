@@ -77,6 +77,7 @@ residual_corrected_support(const BoundedHSupportInput &in, const Vector &lambda,
         return invalid("Residual bound overflowed.");
     return SupportUpperBound{sum.hi, SupportBoundMethod::dual_candidate, lambda, mu};
 }
+
 } // namespace csl::reachability
 
 #include <csl/optimization/linear_program.hpp>
@@ -263,6 +264,93 @@ bounded_h_axis_cover(const BoundedHSupportInput &input, ProgramIdentity identity
         return BoundedHAxisFailure{
             std::move(cover), active_coordinate, active_upper,
             OperationStopped{StopReason::resource_limit, "Axis cover capacity exceeded."}};
+    }
+}
+} // namespace csl::reachability
+
+namespace csl::reachability {
+BoundedHAxisOutcome
+bounded_h_frame_cover(const BoundedHSupportInput &input, const Matrix &frame,
+                      ProgramIdentity identity,
+                      const registry::PreparedProvider<registry::LPPort> &provider,
+                      const ExecutionContext &context) {
+    BoundedHAxisCover cover;
+    std::size_t active_coordinate = 0;
+    bool active_upper = false;
+    try {
+        const auto n = input.direction.size();
+        if (frame.rows != n || frame.cols != n || frame.values.size() != n * n)
+            return BoundedHAxisFailure{
+                std::move(cover), 0, false,
+                Diagnostics{{DiagnosticCode::invalid_input, "feedback.frame",
+                             "Frame shape must match the bounded-H dimension."}}};
+        for (std::size_t j = 0; j < n; ++j) {
+            bool nonzero = false;
+            for (std::size_t i = 0; i < n; ++i) {
+                const auto value = frame.values[i * n + j];
+                if (!std::isfinite(value))
+                    return BoundedHAxisFailure{
+                        std::move(cover), j, false,
+                        Diagnostics{{DiagnosticCode::invalid_input, "feedback.frame",
+                                     "Frame entries must be finite."}}};
+                nonzero = nonzero || value != 0;
+            }
+            if (!nonzero)
+                return BoundedHAxisFailure{
+                    std::move(cover), j, false,
+                    Diagnostics{{DiagnosticCode::invalid_input, "feedback.frame",
+                                 "A frame column must be nonzero."}}};
+        }
+        cover.lower.reserve(n);
+        cover.upper.reserve(n);
+        auto validation = residual_corrected_support(input, Vector(input.upper_bounds.size(), 0),
+                                                     Vector(input.equality_values.size(), 0));
+        if (auto *diagnostics = std::get_if<Diagnostics>(&validation))
+            return BoundedHAxisFailure{std::move(cover), 0, false, *diagnostics};
+        auto query = input;
+        for (std::size_t j = 0; j < n; ++j) {
+            for (bool upper : {false, true}) {
+                active_coordinate = j;
+                active_upper = upper;
+                query.direction.assign(n, 0);
+                for (std::size_t i = 0; i < n; ++i)
+                    query.direction[i] = (upper ? 1 : -1) * frame.values[i * n + j];
+                ProgramIdentity id = identity;
+                id.program.value += "/frame/" + std::to_string(j) + (upper ? "/upper" : "/lower");
+                auto answer = bounded_h_support(query, std::move(id), provider, context);
+                if (auto *failure = std::get_if<BoundedHSupportFailure>(&answer)) {
+                    cover.lp_calls.insert(cover.lp_calls.end(), failure->lp_calls.begin(),
+                                          failure->lp_calls.end());
+                    return BoundedHAxisFailure{std::move(cover), j, upper,
+                                               std::move(failure->cause)};
+                }
+                auto result = std::get<BoundedHSupportResult>(std::move(answer));
+                cover.lp_calls.insert(cover.lp_calls.end(), result.lp_calls.begin(),
+                                      result.lp_calls.end());
+                cover.methods.push_back(result.bound.method);
+                cover.certificates.push_back(
+                    {{}, query.direction, query.lower, query.upper, result.bound});
+                if (upper)
+                    cover.upper.push_back(result.bound.value);
+                else
+                    cover.lower.push_back(-result.bound.value);
+            }
+            if (cover.lower.back() > cover.upper.back())
+                return BoundedHAxisFailure{
+                    std::move(cover), j, true,
+                    OperationStopped{
+                        StopReason::numerical_failure,
+                        "Frame bounds are inconsistent; no emptiness conclusion is drawn."}};
+        }
+        return cover;
+    } catch (const std::bad_alloc &) {
+        return BoundedHAxisFailure{
+            std::move(cover), active_coordinate, active_upper,
+            OperationStopped{StopReason::resource_limit, "Frame cover allocation failed."}};
+    } catch (const std::length_error &) {
+        return BoundedHAxisFailure{
+            std::move(cover), active_coordinate, active_upper,
+            OperationStopped{StopReason::resource_limit, "Frame cover capacity exceeded."}};
     }
 }
 } // namespace csl::reachability
