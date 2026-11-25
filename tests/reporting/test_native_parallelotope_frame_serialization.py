@@ -296,7 +296,6 @@ class NativeParallelotopeFrameSerializationTests(unittest.TestCase):
                 self.assertAlmostEqual(max(actual), max(expected), places=9)
 
             if render_cli:
-                # The actual public CLI can select this fresh, referenced capture.
                 output = capture_root / "rendered"
                 script = Path(figures.__file__).resolve()
                 subprocess.run(
