@@ -87,9 +87,17 @@
 </section>
 
 <section>
+<h2>Constrained sets and an exact optimal trajectory</h2>
+<p>At each stage, all four coordinates are affine functions of cumulative control <i>s</i><sub>k</sub> and its running sum <i>w</i><sub>k</sub>. Their updates are <i>s</i><sub>k+1</sub> = <i>s</i><sub>k</sub> + <i>u</i><sub>k</sub> and <i>w</i><sub>k+1</sub> = <i>w</i><sub>k</sub> + <i>s</i><sub>k</sub>. Applying both displayed flow bounds at all eleven stages gives −2.235 ≤ <i>s</i><sub>k</sub> ≤ 1.6632.</p>
+<p>The two terminal invariants give an objective lower bound of 465138219/100040000 ≈ 4.649522381. A ten-control history attains the bound while satisfying the displayed interval and flow constraints. Its largest absolute control is about 0.340.</p>
+<figure><a href="bulaev-2017-fuel-constrained-projections.svg"><img src="bulaev-2017-fuel-constrained-projections.svg" alt="Eleven constrained forward, backward and intersection sets in both flow–mass planes, overlaid with the exact optimal trajectory, initial state and final target."></a><figcaption>The backward sets start at the exact optimum for the displayed parameters. The witness lies in every corresponding forward and backward intersection.</figcaption></figure>
+<p>An independent lifted LP checked twelve directions at each stage for each set role. All 396 support comparisons agreed within 3.56 × 10<sup>−15</sup> in the reduced coordinates. <a href="bulaev-2017-fuel-constrained-rational.json">Download the exact vertices and witness</a> or read the <a href="https://github.com/butahlecoq/controlled-systems-lab/issues/1012#issuecomment-7142317109">derivation and capture record</a>.</p>
+</section>
+
+<section>
 <h2>What the paper computes</h2>
 <p>The authors describe forward reachable sets, minimization over the reachable terminal set, backward reachable sets, and intersections that define feasible trajectories. They then recover a set of optimal control sequences with a linear program. They use Chernikova’s method for vertex-to-facet and facet-to-vertex conversion.</p>
-<p>Figure 1 shows two-dimensional projections of forward and backward sets and their intersections. Figure 2 shows optimal trajectories. See pages 24–25 in the <a href="https://vestnik.susu.ru/ctcr/article/download/6924/5803#page=5">publisher PDF</a>. The paper does not provide machine-readable vertices, numerical control sequences, run time, or vertex counts. This repository has not reproduced those figures or computed the constrained reachable sets.</p>
+<p>Figure 1 shows two-dimensional projections of forward and backward sets and their intersections. Figure 2 shows optimal trajectories. See pages 24–25 in the <a href="https://vestnik.susu.ru/ctcr/article/download/6924/5803#page=5">publisher PDF</a>. The paper does not provide machine-readable vertices, numerical control sequences, run time, or vertex counts. The constrained figure uses the disclosed endpoint convention and an independently derived optimal endpoint.</p>
 <p class="warning">A direct quadratic-program solution could return an optimal witness. It would not reproduce the paper’s reachable-set geometry or its set of all optimal controls.</p>
 </section>
 
@@ -101,7 +109,7 @@
 <li>NPOA file SHA-256: <code class="source-hash">a8ed876c8a34d4eb798c031c6ede02a662e771b73cbead65cc42be8ff6132dc0</code>.</li>
 <li>UralENIN file SHA-256: <code class="source-hash">565ae84cf2c2661df47ce98a7a3d6c2ffa5cc9f220bf81a54f3b8a64c73a1c2a</code>.</li>
 </ul>
-<p>This is a source-qualified model candidate for the broader <a href="https://github.com/butahlecoq/controlled-systems-lab/issues/1012">issue 1012 model catalogue</a>. It has no native C++ constructor or saved numerical output yet.</p>
+<p>This is a source-qualified model candidate for the broader <a href="https://github.com/butahlecoq/controlled-systems-lab/issues/1012">issue 1012 model catalogue</a>. The <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/d28b516d7/examples/npoa_2017_programmed_fuel.cpp">native C++ example</a> reaches the same optimum with a different feasible control sequence. It produces two constrained forward projections and CSV traces.</p>
 </section>
 <footer class="provenance">CSL · Source-derived model candidate · four-state terminal control</footer>
 </main>
