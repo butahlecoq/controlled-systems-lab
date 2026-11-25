@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string_view>
+
 #include <csl/optimization/finite_action_minimax.hpp>
 #include <csl/reachability/finite_plan_zonotope.hpp>
 
@@ -19,9 +21,13 @@ struct FiniteActionZonotopeMinimaxLimits {
 struct ZonotopeCandidateScore {
     double terminal_factor_corner_maximum;
     std::size_t terminal_generators;
-    // One numerical evaluation when a certificate selects the corner.
+    // Numerical corner evaluations performed. A planar boundary sweep counts
+    // one visit per candidate vertex; a certified corner counts one.
     std::size_t factor_corners_evaluated;
     reachability::FinitePlanZonotopeTrace trace;
+    // Identifier of the terminal scorer that produced the value. Empty when
+    // no terminal score was produced.
+    std::string_view terminal_scorer{};
 };
 
 struct ZonotopePlanScored {

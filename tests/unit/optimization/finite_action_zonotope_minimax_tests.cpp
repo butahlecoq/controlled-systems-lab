@@ -34,6 +34,30 @@ FiniteActionMinimaxRequest analytic_request() {
     return {{"analytic-scalar-zonotope"}, {"analytic-scalar-zonotope-run"}, system, initial,
         {1, {{-1}, {0}, {1}}}, {disturbance}, std::move(safe), objective};
 }
+
+sets::SetData vertices(std::string id, std::size_t dimension, Matrix points) {
+    return take_zono(sets::make_v({{std::move(id)}, dimension, {}},
+        {take_zono(numeric::snapshot(std::move(points))),
+         take_zono(numeric::snapshot(Matrix{0, dimension, {}}))}));
+}
+
+FiniteActionMinimaxRequest residual_request(Matrix map) {
+    constexpr std::size_t horizon = 2;
+    const SystemModel authored{{{2,1,2}, TimeDomain::discrete,
+        LinearStage{{2,2,{1,0.5,0,1}}, {2,1,{1,0}}, {2,2,{0,0,0,0}}, {0,0}}}, {}};
+    const auto system = take_zono(model::snapshot(authored, Vector{0,1,2}));
+    std::vector<sets::SetData> disturbances(horizon,
+        vertices("planar-disturbance", 2, Matrix{4,2,{-1,-1,-1,1,1,-1,1,1}}));
+    std::vector<sets::SetData> safe;
+    for(std::size_t stage = 0; stage <= horizon; ++stage)
+        safe.push_back(take_zono(sets::make_universal({{"planar-safe"},2,{}})));
+    const auto rows = map.rows;
+    const auto objective = std::get<Objective>(snapshot(ResidualNormTerminal{
+        std::move(map), Vector(rows, 1.0), std::vector<double>(rows, 0.5)}));
+    return {{"planar-residual"}, {"planar-residual-run"}, system,
+        vertices("planar-initial", 2, Matrix{1,2,{0.25,-0.5}}), {1, {{0}, {0}, {1}}},
+        std::move(disturbances), std::move(safe), objective};
+}
 }
 
 TEST_CASE("analytic scalar selector scores every fixed plan and replays the minimizer") {
@@ -215,4 +239,59 @@ TEST_CASE("pinned TwoPoints selected plan is replayed over the full finite distu
     const auto exact_score = worst_case_vertex(selected.replay.terminal_catalogue, request.objective, 27);
     REQUIRE(std::holds_alternative<WorstCaseValue>(exact_score));
     CHECK(std::abs(std::get<WorstCaseValue>(exact_score).value - selected.replay.worst_value) < 1e-12);
+}
+
+TEST_CASE("planar residual terminal sweep matches exhaustive factor enumeration") {
+    const auto request = residual_request({2,2,{1,0,0,1}});
+    const auto exhaustive = finite_action_zonotope_minimax(request, {9,512,512,64,4096});
+    const auto planar = finite_action_zonotope_minimax(request, {9,512,512,64,32});
+    REQUIRE(std::holds_alternative<FiniteActionZonotopeMinimaxResult>(exhaustive));
+    REQUIRE(std::holds_alternative<FiniteActionZonotopeMinimaxResult>(planar));
+    const auto& full = std::get<FiniteActionZonotopeMinimaxResult>(exhaustive);
+    const auto& swept = std::get<FiniteActionZonotopeMinimaxResult>(planar);
+    REQUIRE(full.plan_attempts.size() == 9);
+    REQUIRE(swept.plan_attempts.size() == full.plan_attempts.size());
+    CHECK(swept.candidate_search == CandidateSearchCoverage::complete);
+    for(std::size_t index = 0; index < full.plan_attempts.size(); ++index) {
+        REQUIRE(std::holds_alternative<ZonotopePlanScored>(full.plan_attempts[index]));
+        REQUIRE(std::holds_alternative<ZonotopePlanScored>(swept.plan_attempts[index]));
+        const auto& ordinary = std::get<ZonotopePlanScored>(full.plan_attempts[index]).score;
+        const auto& reduced = std::get<ZonotopePlanScored>(swept.plan_attempts[index]).score;
+        CHECK(ordinary.terminal_scorer == "factor-corner-enumeration/1");
+        CHECK(reduced.terminal_scorer == "exact-planar-residual-sweep/1");
+        CHECK(reduced.factor_corners_evaluated == 2 * reduced.terminal_generators + 1);
+        CHECK(reduced.terminal_factor_corner_maximum >= ordinary.terminal_factor_corner_maximum);
+        CHECK(reduced.terminal_factor_corner_maximum ==
+              doctest::Approx(ordinary.terminal_factor_corner_maximum).epsilon(1e-14));
+    }
+    REQUIRE(std::holds_alternative<ZonotopePlanSelected>(full.selection));
+    REQUIRE(std::holds_alternative<ZonotopePlanSelected>(swept.selection));
+    CHECK(std::get<ZonotopePlanSelected>(swept.selection).candidate_attempt_index ==
+          std::get<ZonotopePlanSelected>(full.selection).candidate_attempt_index);
+}
+
+TEST_CASE("nonplanar residual image preserves the factor-corner refusal") {
+    const auto answer = finite_action_zonotope_minimax(
+        residual_request({3,2,{1,0,0,1,0.5,0.5}}), {9,512,512,64,32});
+    REQUIRE(std::holds_alternative<FiniteActionZonotopeMinimaxResult>(answer));
+    const auto& result = std::get<FiniteActionZonotopeMinimaxResult>(answer);
+    CHECK(result.candidate_search == CandidateSearchCoverage::incomplete);
+    REQUIRE(result.plan_attempts.size() == 9);
+    for(const auto& attempt : result.plan_attempts) {
+        REQUIRE(std::holds_alternative<ZonotopePlanUnscored>(attempt));
+        CHECK(std::get<ZonotopePlanUnscored>(attempt).outcome.diagnostics.front().field ==
+            "finite_zonotope_minimax.corners");
+    }
+}
+
+TEST_CASE("planar vertex budget exhaustion preserves the resource refusal") {
+    const auto answer = finite_action_zonotope_minimax(
+        residual_request({2,2,{1,0,0,1}}), {9,512,512,64,4});
+    REQUIRE(std::holds_alternative<FiniteActionZonotopeMinimaxResult>(answer));
+    const auto& result = std::get<FiniteActionZonotopeMinimaxResult>(answer);
+    CHECK(result.candidate_search == CandidateSearchCoverage::incomplete);
+    REQUIRE(result.plan_attempts.size() == 1);
+    REQUIRE(std::holds_alternative<ZonotopePlanStopped>(result.plan_attempts.front()));
+    CHECK(std::get<ZonotopePlanStopped>(result.plan_attempts.front()).outcome.reason ==
+          StopReason::resource_limit);
 }
