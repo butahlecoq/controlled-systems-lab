@@ -15,10 +15,16 @@ CERTIFIED_STAGEWISE_METHOD = "csl.reachability.certified-stagewise-history"
 GEOMETRY_IDS[LIFTED_POLYTOPE_CONTROLLER] = "polytope"
 GEOMETRY_IDS[CERTIFIED_STAGEWISE_CONTROLLER] = "polytope"
 # The axis frame stays the default parallelotope profile; the rotated
-# controller is a distinct registration that requests certified frame bounds.
+# controller requests a fixed frame and the selected controller measures both
+# candidates per enclosure, retaining the axis frame when it is tighter.
 PARALLELOTOPE_ROTATED_CONTROLLER = "native-continuous-history-parallelotope-rotated-ipopt/1"
-PARALLELOTOPE_FRAME_RULES = {PARALLELOTOPE_ROTATED_CONTROLLER: "fixed-rotation-45"}
+PARALLELOTOPE_SELECTED_CONTROLLER = "native-continuous-history-parallelotope-selected-ipopt/1"
+PARALLELOTOPE_FRAME_RULES = {
+    PARALLELOTOPE_ROTATED_CONTROLLER: "fixed-rotation-45",
+    PARALLELOTOPE_SELECTED_CONTROLLER: "support-selected",
+}
 GEOMETRY_IDS[PARALLELOTOPE_ROTATED_CONTROLLER] = "parallelotope"
+GEOMETRY_IDS[PARALLELOTOPE_SELECTED_CONTROLLER] = "parallelotope"
 NATIVE_STRATEGY_IDS = {
     f"native-strategy-{strategy.lower()}-history-{family}/1": (family, strategy)
     for family in FAMILIES

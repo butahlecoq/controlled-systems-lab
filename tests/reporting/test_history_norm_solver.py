@@ -137,12 +137,13 @@ class HistoryNormSolverTest(unittest.TestCase):
         manifest = build_history_manifest()
         self.assertEqual(validate_manifest(manifest_path=HISTORY_MANIFEST), manifest)
         graphs = manifest["graphs"]
-        self.assertEqual(len(graphs), 72)
+        self.assertEqual(len(graphs), 75)
         from history_policy import (
             CERTIFIED_STAGEWISE_CONTROLLER,
             CERTIFIED_STAGEWISE_METHOD,
             NATIVE_STRATEGY_IDS,
             PARALLELOTOPE_ROTATED_CONTROLLER,
+            PARALLELOTOPE_SELECTED_CONTROLLER,
         )
 
         rotated = [row for row in graphs if row["controller"]["id"] == PARALLELOTOPE_ROTATED_CONTROLLER]
@@ -152,6 +153,15 @@ class HistoryNormSolverTest(unittest.TestCase):
         for row in rotated:
             self.assertEqual(row["role_bindings"]["representation"],
                              {"id": "parallelotope", "frame": "fixed-rotation-45"})
+            self.assertEqual(row["role_bindings"]["support_lp"], {"id": "csl.lp.highs"})
+            self.assertEqual(row["controller"]["policy_factory"], "history_policy:create_policy")
+        selected = [row for row in graphs if row["controller"]["id"] == PARALLELOTOPE_SELECTED_CONTROLLER]
+        self.assertEqual(len(selected), 3)
+        self.assertEqual({row["task_id"] for row in selected},
+                         {load_task(name)["task_id"] for name in ("syn-nl-lv-01", "earth-orbit", "syn-nl-fuel-01")})
+        for row in selected:
+            self.assertEqual(row["role_bindings"]["representation"],
+                             {"id": "parallelotope", "frame": "support-selected"})
             self.assertEqual(row["role_bindings"]["support_lp"], {"id": "csl.lp.highs"})
             self.assertEqual(row["controller"]["policy_factory"], "history_policy:create_policy")
 

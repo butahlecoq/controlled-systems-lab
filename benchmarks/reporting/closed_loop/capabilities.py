@@ -461,6 +461,7 @@ def _history_definitions() -> list[dict]:
         LIFTED_POLYTOPE_IMPLEMENTATION,
         NATIVE_STRATEGY_IDS,
         PARALLELOTOPE_ROTATED_CONTROLLER,
+        PARALLELOTOPE_SELECTED_CONTROLLER,
         provider_profiles,
     )
 
@@ -679,6 +680,30 @@ def _history_definitions() -> list[dict]:
                 f"cfg-{rotated_fingerprint[:16]}"
             )
             rows.append(rotated)
+            selected = copy.deepcopy(strategy_templates["parallelotope"])
+            selected.pop("graph_id")
+            selected.pop("graph_fingerprint")
+            selected["controller"]["id"] = PARALLELOTOPE_SELECTED_CONTROLLER
+            selected["controller"]["control_semantics"] = (
+                "full-history MPC with full-state F/B/I parallelotope memberships in the "
+                "support-selected frame"
+            )
+            selected["role_bindings"]["representation"] = {
+                "id": "parallelotope",
+                "frame": "support-selected",
+            }
+            selected["admission"]["basis"] = (
+                "source-bound full-history IPOPT with numerical F/B/I parallelotope "
+                "memberships certified in the support-selected frame, which retains the "
+                "axis frame whenever its factor-width product is not larger"
+            )
+            selected_fingerprint = canonical_sha256(selected)
+            selected["graph_fingerprint"] = selected_fingerprint
+            selected["graph_id"] = (
+                f"closed-loop/{task_name}/continuous-history-parallelotope-selected-ipopt/1/"
+                f"cfg-{selected_fingerprint[:16]}"
+            )
+            rows.append(selected)
             if task_name == "earth-orbit":
                 certified = copy.deepcopy(strategy_templates["polytope"])
                 certified.pop("graph_id")

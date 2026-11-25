@@ -141,6 +141,47 @@ class HistoryBridgeTest(unittest.TestCase):
         finally:
             policy.close()
 
+    def test_selected_parallelotope_controller_reports_its_selected_frame_choices(self):
+        import math
+        import sys
+        from pathlib import Path
+        sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "benchmarks/reporting/closed_loop"))
+        from contracts import load_task, manifest_sha256
+        from history_policy import HistoryPolicy, PARALLELOTOPE_SELECTED_CONTROLLER
+        root = math.sqrt(0.5)
+        task = load_task("syn-nl-lv-01")
+        policy = HistoryPolicy(task, manifest_sha256(task), PARALLELOTOPE_SELECTED_CONTROLLER,
+                               task["control_domains"]["continuous"]["problem_id"])
+        observed = [row["initial"] for row in task["model"]["states"]]
+        try:
+            self.assertEqual(policy.preparation_receipt.get("parallelotope_frame_rule"), "support-selected")
+            result = policy.query(task["task_id"], observed, 0)
+            self.assertEqual(result["status"], "accepted", result)
+            request = policy.last_query_capture["request"]
+            self.assertEqual(request["parallelotope_frame_rule"], "support-selected")
+            geometry = policy.last_query_capture["parsed_response"]["geometry"]
+            self.assertEqual(geometry["parallelotope_frame_rule"], "support-selected")
+            framed = 0
+            notes = []
+            for stage in geometry["stages"]:
+                for member in stage["memberships"]:
+                    for line in member.get("construction", []):
+                        if line.startswith("selected "):
+                            notes.append(line)
+                    if "parallelotope_frame" not in member:
+                        continue
+                    self.assertIn(member["parallelotope_frame"],
+                                  [[[1, 0], [0, 1]], [[root, -root], [root, root]]])
+                    lower, upper = member["parallelotope_frame_lower"], member["parallelotope_frame_upper"]
+                    self.assertTrue(all(a <= b for a, b in zip(lower, upper, strict=True)))
+                    framed += 1
+            self.assertGreater(framed, 0)
+            self.assertTrue(notes, "no frame selection notes exported")
+            for note in notes:
+                self.assertIn(note.split(" by ")[0], ("selected axis", "selected fixed-rotation-45"))
+        finally:
+            policy.close()
+
     def test_continuous_quadratic_tradeoff_uses_full_feasible_relation(self):
         request = analytic_request()
         result = subprocess.run([os.environ["CSL_NATIVE_POLICY_BRIDGE"]], input=json.dumps(request) + "\n",
