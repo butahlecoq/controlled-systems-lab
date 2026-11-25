@@ -1,4 +1,4 @@
-"""Check maintained HTML mathematics and exact historical-route exemptions."""
+"""Check maintained HTML mathematics and declared generated or historical routes."""
 
 from __future__ import annotations
 
@@ -239,6 +239,9 @@ def audit_site(
 ) -> dict:
     site = site.resolve()
     entries = {entry["route"]: entry for entry in ledger["routes"]}
+    route_families = [
+        (re.compile(family["pattern"]), family) for family in ledger.get("route_families", [])
+    ]
     findings = []
     for inventory in ledger.get("required_inventories", []):
         if not (site / inventory).is_file():
@@ -270,6 +273,21 @@ def audit_site(
         )
     for route in sorted(actual | required):
         entry = entries.get(route)
+        if entry is None:
+            family_matches = [
+                family for pattern, family in route_families if pattern.fullmatch(route)
+            ]
+            if len(family_matches) == 1:
+                entry = family_matches[0]
+            elif len(family_matches) > 1:
+                findings.append(
+                    {
+                        "route": route,
+                        "kind": "ambiguous-route-family",
+                        "message": "A maintained route must match at most one registered family.",
+                    }
+                )
+                continue
         if not entry or not entry.get("owner"):
             findings.append(
                 {

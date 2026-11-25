@@ -2062,8 +2062,10 @@
     },
     {
       "source": "scripts/reports/stage_native_model_catalogue.py",
-      "signal_count": 2,
+      "signal_count": 4,
       "asset_name_literals": [
+        "bulaev-2017-fuel-constrained-projections.svg",
+        "bulaev-2017-fuel-forward-projections.svg",
         "stages-8-x1-x2-screen.svg",
         "stages-x1-x2-screen.svg"
       ],

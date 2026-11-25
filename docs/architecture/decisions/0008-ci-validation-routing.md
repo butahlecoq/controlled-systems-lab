@@ -15,6 +15,14 @@ Saved-episode publication functions can read captures and contracts and check or
 
 The native workflow runs for pushes to `main`, pull-request updates, and explicit manual dispatches. Feature-branch pushes do not need a second native run because pull-request synchronization validates that branch. A newer run supersedes an older run for the same pull request; main and manual runs keep distinct run-specific groups and are not canceled by later runs.
 
+CI replay of saved publications resolves source commits from capture provenance.
+If a recorded commit is missing from the checkout, fetch that commit or the
+specific retained pull-request refs needed for the replay; do not substitute a
+moving branch name. Verify published offline archives against SHA-256 values
+reproduced from their recorded base revision. The digest covers the complete
+archive bytes, including the payload, compression stream and metadata, without
+rewriting the frozen artifact.
+
 ## Verification
 
 The ownership lists and fallback are implemented in `scripts/ci/route_changes.py`. The tests exercise mixed changes, archive paths, and Git history. The original split is tracked in [PR #488](https://github.com/butahlecoq/controlled-systems-lab/pull/488).

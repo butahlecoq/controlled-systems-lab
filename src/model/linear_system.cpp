@@ -17,7 +17,7 @@ struct SystemStorage {
     std::variant<DynamicsStage, std::vector<DynamicsStage>> coefficients;
     std::vector<ChannelStorage> observations;
 };
-} // namespace detail
+}
 namespace {
 Diagnostic invalid(const char *field, const char *explanation) {
     return {DiagnosticCode::invalid_input, field, explanation};
@@ -216,7 +216,7 @@ EvaluationResult<Vector> evaluate(const numeric::VectorView &offset,
     }
     return result;
 }
-} // namespace
+}
 
 LinearSystem::LinearSystem(std::shared_ptr<const detail::SystemStorage> storage)
     : storage_(std::move(storage)) {}
@@ -327,4 +327,4 @@ Result<LinearSystem> snapshot(const SystemModel &authored, std::span<const doubl
         std::get<std::variant<DynamicsStage, std::vector<DynamicsStage>>>(std::move(provider)),
         std::move(channels)})};
 }
-} // namespace csl::model
+}

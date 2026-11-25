@@ -39,7 +39,7 @@ double at(const csl::mpc01::CscMatrix &matrix, std::size_t row, std::size_t colu
     return 0.0;
 }
 
-} // namespace
+}
 
 int main(int argc, char **argv) {
     using namespace csl::mpc01;

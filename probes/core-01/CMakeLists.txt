@@ -3,7 +3,6 @@ project(csl_core01_probes LANGUAGES C CXX)
 include(FetchContent)
 include(${CMAKE_CURRENT_LIST_DIR}/../../cmake/DependencyArchive.cmake)
 
-# Isolated integration project; CORE-02 owns the future product build.
 set(BUILD_TESTING OFF CACHE BOOL "Disable dependency tests" FORCE)
 set(BUILD_CXX_EXE OFF CACHE BOOL "Library only" FORCE)
 set(BUILD_EXAMPLES OFF CACHE BOOL "Disable dependency examples" FORCE)

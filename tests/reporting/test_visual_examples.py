@@ -1419,7 +1419,7 @@ class GalleryTests(unittest.TestCase):
                 self.assertTrue((self.site / "examples" / link.split("#")[0]).is_file(), link)
         figures = list((self.site / "examples").glob("*.svg"))
         self.assertEqual(
-            len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 32
+            len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 34
         )
         self.assertIn('id="saved-feedback-geometry-2d"', page)
         self.assertIn('id="native-fixed-tail-2d"', page)

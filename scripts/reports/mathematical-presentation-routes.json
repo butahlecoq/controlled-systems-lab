@@ -1,6 +1,13 @@
 {
   "schema": "csl.mathematical-presentation-routes/1",
-  "scope": "Every HTML route in the composed site must be explicitly maintained or match an exact frozen HTML witness. New producer inventory routes require source ownership; absent optional source assets are not publication failures. Scientific JSON/ZIP bytes are checked separately by published-route preservation.",
+  "scope": "Every HTML route in the composed site must be explicitly maintained, match one narrowly declared generated-route family with a source owner, or match an exact frozen HTML witness. New producer inventory routes require source ownership; absent optional source assets are not publication failures. Scientific JSON/ZIP bytes are checked separately by published-route preservation.",
+  "route_families": [
+    {
+      "pattern": "mpc07-comparison-[0-9a-f]{16}/(?:index\\.html|evidence/(?:bounded-policy-0e821c2a(?:-recheck-v2)?|joint-filter-04369201(?:-recheck-v2)?)/index\\.html)",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_mpc07_comparison.py"
+    }
+  ],
   "routes": [
     {
       "route": "app01-plan-20261016-969e78e97747c512b0b406eb3329365da3c8d648521a13242cf56fa78c23a578/index.html",
@@ -386,6 +393,11 @@
       "route": "examples/b04-reference-trajectory-projections.html",
       "disposition": "maintained",
       "owner": "docs/examples/b04-reference-trajectory-projections.html"
+    },
+    {
+      "route": "examples/bulaev-2017-four-state-fuel.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/bulaev-2017-four-state-fuel.html"
     },
     {
       "route": "examples/buryatia-dim4-literal-affine-v1/index.html",

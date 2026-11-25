@@ -259,4 +259,4 @@ TEST_CASE("recursive root uses two isolated subtrees under the common resource p
     check_hull_equivalent(cloud, serial, parallel, *oracle);
 }
 
-} // namespace
+}

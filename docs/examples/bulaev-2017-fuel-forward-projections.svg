@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 680" role="img" aria-labelledby="title desc">
+<title id="title">Input-bounded forward reachable projections for the four-state fuel model</title>
+<desc id="desc">Both panels show all stages zero through ten. These are projections of the unconstrained reachable zonotopes using only the scalar input bound. Orange dashed lines mark source flow limits, which are not intersected.</desc>
+<rect width="1120" height="680" fill="#272822"/>
+<text x="48" y="42" fill="#a6e22e" font-family="system-ui,sans-serif" font-size="23">Forward projections from the printed initial state</text>
+<text x="48" y="68" fill="#d5c4a1" font-family="system-ui,sans-serif" font-size="15">Input bounds applied · source flow constraints shown but not intersected · stages 0–10</text>
+<circle cx="52" cy="100" r="6" fill="#c899ff"/>
+<text x="62" y="105" fill="#f8f8f2" font-family="system-ui,sans-serif" font-size="13">0</text>
+<circle cx="107" cy="100" r="6" fill="#a98adf"/>
+<text x="117" y="105" fill="#f8f8f2" font-family="system-ui,sans-serif" font-size="13">1</text>
+<circle cx="162" cy="100" r="6" fill="#3e4989"/>
+<text x="172" y="105" fill="#f8f8f2" font-family="system-ui,sans-serif" font-size="13">2</text>
+<circle cx="217" cy="100" r="6" fill="#31688e"/>
+<text x="227" y="105" fill="#f8f8f2" font-family="system-ui,sans-serif" font-size="13">3</text>
+<circle cx="272" cy="100" r="6" fill="#26828e"/>
+<text x="282" y="105" fill="#f8f8f2" font-family="system-ui,sans-serif" font-size="13">4</text>
+<circle cx="327" cy="100" r="6" fill="#1f9e89"/>
+<text x="337" y="105" fill="#f8f8f2" font-family="system-ui,sans-serif" font-size="13">5</text>
+<circle cx="382" cy="100" r="6" fill="#35b779"/>
+<text x="392" y="105" fill="#f8f8f2" font-family="system-ui,sans-serif" font-size="13">6</text>
+<circle cx="437" cy="100" r="6" fill="#6ece58"/>
+<text x="447" y="105" fill="#f8f8f2" font-family="system-ui,sans-serif" font-size="13">7</text>
+<circle cx="492" cy="100" r="6" fill="#b5de2b"/>
+<text x="502" y="105" fill="#f8f8f2" font-family="system-ui,sans-serif" font-size="13">8</text>
+<circle cx="547" cy="100" r="6" fill="#d8e219"/>
+<text x="557" y="105" fill="#f8f8f2" font-family="system-ui,sans-serif" font-size="13">9</text>
+<circle cx="602" cy="100" r="6" fill="#fde725"/>
+<text x="612" y="105" fill="#f8f8f2" font-family="system-ui,sans-serif" font-size="13">10</text>
+<text x="110" y="167" fill="#f8f8f2" font-family="system-ui,sans-serif" font-size="18">Oxidizer flow and tank mass</text>
+<path d="M110 189V532M110 532H520" stroke="#504945" stroke-width="1"/>
+<text x="110" y="554" fill="#b7b7af" font-family="system-ui,sans-serif" font-size="12" text-anchor="middle">20.97</text>
+<text x="102" y="536" fill="#b7b7af" font-family="system-ui,sans-serif" font-size="12" text-anchor="end">-23.15</text>
+<path d="M212.5 189V532M110 446.25000000000006H520" stroke="#504945" stroke-width="1"/>
+<text x="212.5" y="554" fill="#b7b7af" font-family="system-ui,sans-serif" font-size="12" text-anchor="middle">23.06</text>
+<text x="102" y="450.25000000000006" fill="#b7b7af" font-family="system-ui,sans-serif" font-size="12" text-anchor="end">44.39</text>
+<path d="M315 189V532M110 360.5H520" stroke="#504945" stroke-width="1"/>
+<text x="315" y="554" fill="#b7b7af" font-family="system-ui,sans-serif" font-size="12" text-anchor="middle">25.14</text>
+<text x="102" y="364.5" fill="#b7b7af" font-family="system-ui,sans-serif" font-size="12" text-anchor="end">111.9</text>
+<path d="M417.5 189V532M110 274.75000000000006H520" stroke="#504945" stroke-width="1"/>
+<text x="417.5" y="554" fill="#b7b7af" font-family="system-ui,sans-serif" font-size="12" text-anchor="middle">27.22</text>
+<text x="102" y="278.75000000000006" fill="#b7b7af" font-family="system-ui,sans-serif" font-size="12" text-anchor="end">179.5</text>
+<path d="M520 189V532M110 189.00000000000003H520" stroke="#504945" stroke-width="1"/>
+<text x="520" y="554" fill="#b7b7af" font-family="system-ui,sans-serif" font-size="12" text-anchor="middle">29.31</text>
+<text x="102" y="193.00000000000003" fill="#b7b7af" font-family="system-ui,sans-serif" font-size="12" text-anchor="end">247.0</text>
+<path d="M267.12840000000017 189V532" stroke="#fd971f" stroke-width="2" stroke-dasharray="7 5"/>
+<path d="M349.09559999999976 189V532" stroke="#fd971f" stroke-width="2" stroke-dasharray="7 5"/>
+<path d="M110 189V532H520" fill="none" stroke="#d5c4a1" stroke-width="1.5"/>
+<path d="M274.00 252.31L315.00 253.37L356.00 253.37L315.00 252.31Z" fill="#3e4989" fill-opacity="0.12" stroke="#3e4989" stroke-width="1.8" stroke-opacity="0.92"/>
+<path d="M253.50 283.17L294.50 285.29L335.50 286.35L376.50 286.35L335.50 284.23L294.50 283.17Z" fill="#31688e" fill-opacity="0.12" stroke="#31688e" stroke-width="1.8" stroke-opacity="0.92"/>
+<path d="M233.00 313.50L274.00 316.68L315.00 318.79L356.00 319.85L397.00 319.85L356.00 316.68L315.00 314.56L274.00 313.50Z" fill="#26828e" fill-opacity="0.12" stroke="#26828e" stroke-width="1.8" stroke-opacity="0.92"/>
+<path d="M212.50 343.31L253.50 347.54L294.50 350.71L335.50 352.83L376.50 353.89L417.50 353.89L376.50 349.65L335.50 346.48L294.50 344.36L253.50 343.31Z" fill="#1f9e89" fill-opacity="0.12" stroke="#1f9e89" stroke-width="1.8" stroke-opacity="0.92"/>
+<path d="M192.00 372.58L233.00 377.87L274.00 382.10L315.00 385.28L356.00 387.39L397.00 388.45L438.00 388.45L397.00 383.16L356.00 378.93L315.00 375.76L274.00 373.64L233.00 372.58Z" fill="#35b779" fill-opacity="0.12" stroke="#35b779" stroke-width="1.8" stroke-opacity="0.92"/>
+<path d="M171.50 401.33L212.50 407.67L253.50 412.96L294.50 417.20L335.50 420.37L376.50 422.49L417.50 423.55L458.50 423.55L417.50 417.20L376.50 411.91L335.50 407.67L294.50 404.50L253.50 402.38L212.50 401.33Z" fill="#6ece58" fill-opacity="0.12" stroke="#6ece58" stroke-width="1.8" stroke-opacity="0.92"/>
+<path d="M151.00 429.54L192.00 436.95L233.00 443.30L274.00 448.59L315.00 452.82L356.00 455.99L397.00 458.11L438.00 459.17L479.00 459.17L438.00 451.76L397.00 445.41L356.00 440.12L315.00 435.89L274.00 432.72L233.00 430.60L192.00 429.54Z" fill="#b5de2b" fill-opacity="0.12" stroke="#b5de2b" stroke-width="1.8" stroke-opacity="0.92"/>
+<path d="M130.50 457.23L171.50 465.69L212.50 473.10L253.50 479.45L294.50 484.74L335.50 488.97L376.50 492.15L417.50 494.26L458.50 495.32L499.50 495.32L458.50 486.85L417.50 479.45L376.50 473.10L335.50 467.81L294.50 463.58L253.50 460.40L212.50 458.29L171.50 457.23Z" fill="#d8e219" fill-opacity="0.12" stroke="#d8e219" stroke-width="1.8" stroke-opacity="0.92"/>
+<path d="M110.00 484.39L151.00 493.91L192.00 502.37L233.00 509.78L274.00 516.13L315.00 521.42L356.00 525.65L397.00 528.83L438.00 530.94L479.00 532.00L520.00 532.00L479.00 522.48L438.00 514.01L397.00 506.61L356.00 500.26L315.00 494.97L274.00 490.74L233.00 487.56L192.00 485.45L151.00 484.39Z" fill="#fde725" fill-opacity="0.12" stroke="#fde725" stroke-width="1.8" stroke-opacity="0.92"/>
+<circle cx="315" cy="189" r="4" fill="#c899ff"/>
+<path d="M294.5 220.92H335.5" stroke="#a98adf" stroke-width="2"/>
+<text x="120" y="578" fill="#f8f8f2" font-family="system-ui,sans-serif" font-size="13">x₁: oxidizer flow  →</text>
+<text x="60" y="279" fill="#f8f8f2" font-family="system-ui,sans-serif" font-size="13" transform="rotate(-90 60 279)">x₂: oxidizer tank mass</text>
+<text x="267.12840000000017" y="182" fill="#fd971f" font-family="system-ui,sans-serif" font-size="11">flow bounds</text>
+<text x="645" y="167" fill="#f8f8f2" font-family="system-ui,sans-serif" font-size="18">Fuel flow and tank mass</text>
+<path d="M645 189V532M645 532H1055" stroke="#504945" stroke-width="1"/>
+<text x="645" y="554" fill="#b7b7af" font-family="system-ui,sans-serif" font-size="12" text-anchor="middle">16.58</text>
+<text x="637" y="536" fill="#b7b7af" font-family="system-ui,sans-serif" font-size="12" text-anchor="end">-14.23</text>
+<path d="M747.5 189V532M645 446.25H1055" stroke="#504945" stroke-width="1"/>
+<text x="747.5" y="554" fill="#b7b7af" font-family="system-ui,sans-serif" font-size="12" text-anchor="middle">18.25</text>
+<text x="637" y="450.25" fill="#b7b7af" font-family="system-ui,sans-serif" font-size="12" text-anchor="end">39.31</text>
+<path d="M850 189V532M645 360.5H1055" stroke="#504945" stroke-width="1"/>
+<text x="850" y="554" fill="#b7b7af" font-family="system-ui,sans-serif" font-size="12" text-anchor="middle">19.91</text>
+<text x="637" y="364.5" fill="#b7b7af" font-family="system-ui,sans-serif" font-size="12" text-anchor="end">92.84</text>
+<path d="M952.5 189V532M645 274.75H1055" stroke="#504945" stroke-width="1"/>
+<text x="952.5" y="554" fill="#b7b7af" font-family="system-ui,sans-serif" font-size="12" text-anchor="middle">21.58</text>
+<text x="637" y="278.75" fill="#b7b7af" font-family="system-ui,sans-serif" font-size="12" text-anchor="end">146.4</text>
+<path d="M1055 189V532M645 189H1055" stroke="#504945" stroke-width="1"/>
+<text x="1055" y="554" fill="#b7b7af" font-family="system-ui,sans-serif" font-size="12" text-anchor="middle">23.25</text>
+<text x="637" y="193" fill="#b7b7af" font-family="system-ui,sans-serif" font-size="12" text-anchor="end">199.9</text>
+<path d="M814.0224999999998 189V532" stroke="#fd971f" stroke-width="2" stroke-dasharray="7 5"/>
+<path d="M895.8175000000002 189V532" stroke="#fd971f" stroke-width="2" stroke-dasharray="7 5"/>
+<path d="M645 189V532H1055" fill="none" stroke="#d5c4a1" stroke-width="1.5"/>
+<path d="M809.00 252.26L850.00 253.33L891.00 253.33L850.00 252.26Z" fill="#3e4989" fill-opacity="0.12" stroke="#3e4989" stroke-width="1.8" stroke-opacity="0.92"/>
+<path d="M788.50 283.09L829.50 285.23L870.50 286.29L911.50 286.29L870.50 284.16L829.50 283.09Z" fill="#31688e" fill-opacity="0.12" stroke="#31688e" stroke-width="1.8" stroke-opacity="0.92"/>
+<path d="M768.00 313.39L809.00 316.59L850.00 318.73L891.00 319.79L932.00 319.79L891.00 316.59L850.00 314.45L809.00 313.39Z" fill="#26828e" fill-opacity="0.12" stroke="#26828e" stroke-width="1.8" stroke-opacity="0.92"/>
+<path d="M747.50 343.15L788.50 347.42L829.50 350.62L870.50 352.76L911.50 353.83L952.50 353.83L911.50 349.56L870.50 346.35L829.50 344.22L788.50 343.15Z" fill="#1f9e89" fill-opacity="0.12" stroke="#1f9e89" stroke-width="1.8" stroke-opacity="0.92"/>
+<path d="M727.00 372.38L768.00 377.72L809.00 381.99L850.00 385.19L891.00 387.33L932.00 388.39L973.00 388.39L932.00 383.05L891.00 378.78L850.00 375.58L809.00 373.44L768.00 372.38Z" fill="#35b779" fill-opacity="0.12" stroke="#35b779" stroke-width="1.8" stroke-opacity="0.92"/>
+<path d="M706.50 401.07L747.50 407.48L788.50 412.82L829.50 417.09L870.50 420.29L911.50 422.43L952.50 423.49L993.50 423.49L952.50 417.09L911.50 411.75L870.50 407.48L829.50 404.27L788.50 402.14L747.50 401.07Z" fill="#6ece58" fill-opacity="0.12" stroke="#6ece58" stroke-width="1.8" stroke-opacity="0.92"/>
+<path d="M686.00 429.23L727.00 436.71L768.00 443.11L809.00 448.45L850.00 452.72L891.00 455.93L932.00 458.06L973.00 459.13L1014.00 459.13L973.00 451.65L932.00 445.25L891.00 439.91L850.00 435.64L809.00 432.43L768.00 430.30L727.00 429.23Z" fill="#b5de2b" fill-opacity="0.12" stroke="#b5de2b" stroke-width="1.8" stroke-opacity="0.92"/>
+<path d="M665.50 456.86L706.50 465.40L747.50 472.87L788.50 479.28L829.50 484.62L870.50 488.89L911.50 492.09L952.50 494.23L993.50 495.30L1034.50 495.30L993.50 486.76L952.50 479.28L911.50 472.87L870.50 467.54L829.50 463.26L788.50 460.06L747.50 457.92L706.50 456.86Z" fill="#d8e219" fill-opacity="0.12" stroke="#d8e219" stroke-width="1.8" stroke-opacity="0.92"/>
+<path d="M645.00 483.95L686.00 493.56L727.00 502.10L768.00 509.58L809.00 515.98L850.00 521.32L891.00 525.59L932.00 528.80L973.00 530.93L1014.00 532.00L1055.00 532.00L1014.00 522.39L973.00 513.85L932.00 506.37L891.00 499.97L850.00 494.63L809.00 490.36L768.00 487.15L727.00 485.02L686.00 483.95Z" fill="#fde725" fill-opacity="0.12" stroke="#fde725" stroke-width="1.8" stroke-opacity="0.92"/>
+<circle cx="850" cy="189" r="4" fill="#c899ff"/>
+<path d="M829.5 220.90H870.5" stroke="#a98adf" stroke-width="2"/>
+<text x="655" y="578" fill="#f8f8f2" font-family="system-ui,sans-serif" font-size="13">x₃: fuel flow  →</text>
+<text x="595" y="279" fill="#f8f8f2" font-family="system-ui,sans-serif" font-size="13" transform="rotate(-90 595 279)">x₄: fuel tank mass</text>
+<text x="814.0224999999998" y="182" fill="#fd971f" font-family="system-ui,sans-serif" font-size="11">flow bounds</text>
+<text x="48" y="625" fill="#d5c4a1" font-family="system-ui,sans-serif" font-size="14">Each polygon is the 2D projection of the input-bounded affine reachable set at that stage. The source flow bounds are not enforced.</text>
+<text x="48" y="649" fill="#b7b7af" font-family="system-ui,sans-serif" font-size="12">Binary64 corner propagation for the plot. This figure is an unconstrained reference, not a reproduction of the paper’s constrained forward/backward sets.</text>
+</svg>

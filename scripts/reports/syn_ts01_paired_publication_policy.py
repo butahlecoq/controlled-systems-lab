@@ -9,5 +9,6 @@ POLICY = register(
         r"syn-ts01-paired-20261014-b7f1ac0",
         publisher,
         figure_name="performance.svg",
+        committed_archive=True,
     )
 )

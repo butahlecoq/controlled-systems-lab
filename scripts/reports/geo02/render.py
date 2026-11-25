@@ -97,6 +97,26 @@ def check_candidate_reduction(scenario, row):
     return row.get("reduction_status") == expected_status
 
 
+def validate_saved_geometry(scenario, points, support_values, support_checks, kind):
+    case = collect.SCENARIOS[scenario]
+    point_dimension = len(case["outputs"][0])
+    support_count = len(case["directions"])
+    if (
+        not isinstance(points, list)
+        or not points
+        or any(not isinstance(point, list) or len(point) != point_dimension for point in points)
+        or not isinstance(support_values, list)
+        or len(support_values) != support_count
+        or type(support_checks) is not int
+        or support_checks != support_count
+    ):
+        raise ValueError(f"saved {kind} geometry shape mismatch")
+    try:
+        collect.require_driver_geometry(points, support_values)
+    except ValueError as error:
+        raise ValueError(f"saved {kind} has malformed geometry") from error
+
+
 def validate(payload):
     if (
         payload.get("schema") != collect.SCHEMA
@@ -157,6 +177,9 @@ def validate(payload):
             raise ValueError(
                 "candidate reduction evidence does not match the generated and materialized clouds"
             )
+        validate_saved_geometry(
+            name, t.get("output_points"), t.get("support_values"), t.get("support_checks"), "trial"
+        )
         if t.get("oracle_passed") is True and (
             not check_oracle(name, t.get("output_points"))
             or not check_supports(name, t.get("support_values"))
@@ -204,6 +227,8 @@ def validate(payload):
         for scenario in collect.SCENARIOS
         for repetition in range(warmups_per_scenario)
     }
+    if any(not isinstance(row, dict) or type(row.get("repetition")) is not int for row in warmups):
+        raise ValueError("warmup repetition must be an integer")
     actual_warmups = {
         (row.get("scenario"), row.get("repetition")) for row in warmups if isinstance(row, dict)
     }
@@ -224,12 +249,20 @@ def validate(payload):
             raise ValueError(
                 "warmup candidate reduction evidence does not match the generated and materialized clouds"
             )
-        if row["status"] == "passed" and (
-            not row["oracle_passed"]
-            or not check_oracle(row["scenario"], row.get("output_points"))
+        validate_saved_geometry(
+            row["scenario"],
+            row.get("output_points"),
+            row.get("support_values"),
+            row.get("support_checks"),
+            "warmup",
+        )
+        if row["oracle_passed"] and (
+            not check_oracle(row["scenario"], row.get("output_points"))
             or not check_supports(row["scenario"], row.get("support_values"))
             or row.get("support_checks") != len(collect.SCENARIOS[row["scenario"]]["directions"])
         ):
+            raise ValueError("warmup claiming oracle success fails its independent oracle")
+        if row["status"] == "passed" and not row["oracle_passed"]:
             raise ValueError("successful warmup fails its independent oracle")
     observed_warmup_failures = sum(
         row["status"] != "passed" or row["oracle_passed"] is not True for row in warmups

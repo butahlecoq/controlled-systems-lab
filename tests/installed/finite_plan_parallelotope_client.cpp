@@ -52,7 +52,7 @@ reachability::FixedPlanRequest request(const sets::SetData &safe) {
             {safe, safe},
             {"installed-four-state-H"}};
 }
-} // namespace
+}
 
 int main() try {
     for (const bool bounded : {false, true}) {

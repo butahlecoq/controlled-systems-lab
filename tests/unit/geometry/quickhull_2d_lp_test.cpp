@@ -29,7 +29,7 @@ std::vector<Vector> ordered_coordinates(const geometry::PointCloud& cloud,
     std::sort(result.begin(), result.end());
     return result;
 }
-} // namespace
+}
 
 TEST_CASE("geometric hull equals the independent LP hull on exact analytic clouds") {
     const std::vector<geometry::PointCloud> fixtures{

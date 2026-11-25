@@ -177,4 +177,4 @@ IntegrationResult integrate_stage(const LinearStage &start, const LinearStage &e
     }
     return IntegratedStage{std::move(output), receipt};
 }
-} // namespace csl::model::detail
+}

@@ -37,4 +37,4 @@ LoadResult load_scenario_file(const std::filesystem::path &path, const LoadOptio
         return s;
     }
 }
-} // namespace csl::input
+}

@@ -18,7 +18,7 @@ const std::vector<Vector> square{{0,0}, {2,0}, {2,2}, {0,2},
 SourceIndexHull hull(std::vector<std::size_t> indices) {
     return {std::get<HullInputDigest>(digest_hull_input(square)), std::move(indices)};
 }
-} // namespace
+}
 
 TEST_CASE("exact source hull accepts all corners and redundant retained points") {
     const auto minimal = check_source_index_hull(square, hull({0,1,2,3}));
@@ -37,6 +37,17 @@ TEST_CASE("omitted true corner yields a concrete source point counterexample") {
     REQUIRE(result.counterexample_index.has_value());
     CHECK(*result.counterexample_index == 3);
     CHECK(result.reason == "input point lies outside reported convex hull");
+}
+
+TEST_CASE("the stored Lotka stage-zero cloud excludes its middle point from the proposed segment") {
+    const std::vector<Vector> cloud{{0x1.e7cd3aca65817p+6, 0x1.e80ec5aec6e88p+5},
+                                    {0x1.e6cd6f34f2cd9p+6, 0x1.e8027d367ae12p+5},
+                                    {0x1.e5cda39f8019bp+6, 0x1.e7f634be2ed9bp+5}};
+    const auto digest = std::get<HullInputDigest>(digest_hull_input(cloud));
+    const auto proposal = check_source_index_hull(cloud, {digest, {2, 0}});
+    CHECK(proposal.status == HullCheckStatus::incorrect);
+    CHECK(proposal.counterexample_index == 1);
+    CHECK(check_source_index_hull(cloud, {digest, {2, 0, 1}}).status == HullCheckStatus::verified);
 }
 
 TEST_CASE("source indices are unique, in range, and bound to exact ordered bytes") {
