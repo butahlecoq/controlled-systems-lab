@@ -929,8 +929,8 @@ LoadResult load_bytes(std::span<const std::byte> bytes, const LoadOptions &optio
         return s;
     }
 }
-} // namespace detail
+}
 LoadResult load_scenario(std::span<const std::byte> bytes, const LoadOptions &options) {
     return detail::load_bytes(bytes, options, {});
 }
-} // namespace csl::input
+}

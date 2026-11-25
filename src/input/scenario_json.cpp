@@ -216,4 +216,4 @@ Json parse(std::span<const std::byte> bytes, const LoadOptions &options) {
         fail("", "parse stopped", "strict JSON", InputCategory::syntax);
     return std::move(builder.root);
 }
-} // namespace csl::input::detail
+}

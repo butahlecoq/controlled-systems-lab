@@ -216,4 +216,4 @@ ContinuousModelLoadResult load_continuous_model(std::span<const std::byte> bytes
         return stopped;
     }
 }
-} // namespace csl::input
+}
