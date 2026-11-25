@@ -82,9 +82,63 @@ axis_enclosure(FeedbackFamily family, SetId id, const Vector &lower, const Vecto
                            std::get<numeric::MatrixView>(e), std::get<numeric::VectorView>(f)});
     if (auto *error = std::get_if<Diagnostic>(&h))
         return Diagnostics{*error};
-    return FeedbackMembership{FeedbackHMembership{std::get<sets::SetData>(h).as_handle(),
-                                                  family == FeedbackFamily::parallelotope
-                                                      ? std::optional<Matrix>{std::move(diagonal)}
-                                                      : std::nullopt}};
+    if (family == FeedbackFamily::parallelotope)
+        return FeedbackMembership{
+            FeedbackHMembership{std::get<sets::SetData>(h).as_handle(), std::move(diagonal),
+                                std::make_pair(lower, upper)}};
+    return FeedbackMembership{FeedbackHMembership{std::get<sets::SetData>(h).as_handle(), {}, {}}};
+}
+std::variant<FeedbackMembership, Diagnostics>
+frame_enclosure(SetId id, const Matrix &frame, const Vector &lower, const Vector &upper,
+                const std::vector<std::string> &labels) {
+    const auto n = lower.size();
+    if (id.value.empty() || upper.size() != n || (!labels.empty() && labels.size() != n) ||
+        frame.rows != n || frame.cols != n || frame.values.size() != n * n ||
+        n > std::numeric_limits<std::size_t>::max() / n / 2)
+        return bad("A nonempty ID, matching square frame and bounded dimensions are required.");
+    for (std::size_t i = 0; i < n; ++i) {
+        if (!std::isfinite(lower[i]) || !std::isfinite(upper[i]) || lower[i] > upper[i])
+            return bad("Frame bounds must be finite and ordered.");
+        bool nonzero = false;
+        for (std::size_t j = 0; j < n; ++j) {
+            const auto value = frame.values[j * n + i];
+            if (!std::isfinite(value))
+                return bad("Frame entries must be finite.");
+            nonzero = nonzero || value != 0;
+        }
+        if (!nonzero)
+            return bad("A frame column must be nonzero.");
+    }
+    Matrix rows{2 * n, n, Vector(2 * n * n, 0)};
+    Matrix equalities{0, n, {}};
+    Vector bounds(2 * n);
+    for (std::size_t i = 0; i < n; ++i) {
+        for (std::size_t j = 0; j < n; ++j) {
+            const auto value = frame.values[j * n + i];
+            rows.values[(2 * i) * n + j] = value;
+            rows.values[(2 * i + 1) * n + j] = -value;
+        }
+        bounds[2 * i] = upper[i];
+        bounds[2 * i + 1] = -lower[i];
+    }
+    auto a = numeric::snapshot(rows);
+    auto b = numeric::snapshot_vector(bounds);
+    auto e = numeric::snapshot(equalities);
+    auto f = numeric::snapshot_vector({});
+    if (auto *error = std::get_if<Diagnostic>(&a))
+        return Diagnostics{*error};
+    if (auto *error = std::get_if<Diagnostic>(&b))
+        return Diagnostics{*error};
+    if (auto *error = std::get_if<Diagnostic>(&e))
+        return Diagnostics{*error};
+    if (auto *error = std::get_if<Diagnostic>(&f))
+        return Diagnostics{*error};
+    auto h = sets::make_h({std::move(id), n, labels},
+                          {std::get<numeric::MatrixView>(a), std::get<numeric::VectorView>(b),
+                           std::get<numeric::MatrixView>(e), std::get<numeric::VectorView>(f)});
+    if (auto *error = std::get_if<Diagnostic>(&h))
+        return Diagnostics{*error};
+    return FeedbackMembership{FeedbackHMembership{std::get<sets::SetData>(h).as_handle(), frame,
+                                                  std::make_pair(lower, upper)}};
 }
 } // namespace csl::reachability
