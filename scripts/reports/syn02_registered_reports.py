@@ -473,6 +473,8 @@ def adapt(bundle):
         source_hashes = {
             name: hashlib.sha256((bundle / name).read_bytes()).hexdigest() for name in files
         }
+        zip_name, zip_digest = common.source_zip_identity(bundle, files)
+        source_hashes[zip_name] = zip_digest
         public_id = _map_module().public_report_id(
             record["report_id"], source_hashes, publisher_bytes
         )

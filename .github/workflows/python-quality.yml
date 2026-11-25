@@ -889,6 +889,8 @@ jobs:
       - name: Replay the nominal-forward and terminal-minimizer saved reports
         run: |
           python -m unittest tests.reporting.test_syn01_publication tests.reporting.test_syn02_publication
+          python -m unittest discover -s scripts/reports/syn01 -p 'test_*.py'
+          python -m unittest discover -s scripts/reports/syn02 -p 'test_*.py'
           python -m unittest discover -s reports/algorithm-results/tooling/syn02 -p 'test_report.py'
       - name: Replay saved MPC replanning and output feedback
         run: |

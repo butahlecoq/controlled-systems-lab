@@ -194,7 +194,60 @@ class Syn01PublicationTests(unittest.TestCase):
             },
         }
         (bundle / "manifest.json").write_bytes(collect.canonical(manifest) + b"\n")
+        collect.zip_bundle(bundle, bundle.with_suffix(".zip"))
         return bundle
+
+    def _rewrite_source_zip(self, bundle, *, compression, date_time, comment):
+        path = bundle.with_suffix(".zip")
+        path.unlink()
+        with zipfile.ZipFile(path, "w", compression=compression) as archive:
+            archive.comment = comment
+            archive.writestr("index.html", b"offline source page")
+            for member in sorted(bundle.iterdir()):
+                if member.is_file():
+                    info = zipfile.ZipInfo(f"{bundle.name}/{member.name}", date_time=date_time)
+                    info.compress_type = compression
+                    archive.writestr(info, member.read_bytes())
+
+    def test_source_zip_bytes_are_bound_into_new_publication_identity(self):
+        with tempfile.TemporaryDirectory() as directory:
+            first = self.make_bundle(Path(directory) / "first" / "reports")
+            second = self.make_bundle(Path(directory) / "second" / "reports")
+            original = adapter.adapt(first).report_id
+            self.assertEqual(original, adapter.adapt(second).report_id)
+            self._rewrite_source_zip(
+                first,
+                compression=zipfile.ZIP_STORED,
+                date_time=(2026, 1, 2, 0, 0, 0),
+                comment=b"first repack",
+            )
+            self._rewrite_source_zip(
+                second,
+                compression=zipfile.ZIP_DEFLATED,
+                date_time=(2026, 1, 3, 0, 0, 0),
+                comment=b"second repack",
+            )
+            self.assertNotEqual(original, adapter.adapt(first).report_id)
+            self.assertNotEqual(adapter.adapt(first).report_id, adapter.adapt(second).report_id)
+
+    def test_source_zip_inventory_and_presence_are_revalidated(self):
+        with tempfile.TemporaryDirectory() as directory:
+            missing = self.make_bundle(Path(directory) / "missing" / "reports")
+            missing.with_suffix(".zip").unlink()
+            with self.assertRaisesRegex(ValueError, "source ZIP"):
+                adapter.adapt(missing)
+            extra = self.make_bundle(Path(directory) / "extra" / "reports")
+            with zipfile.ZipFile(extra.with_suffix(".zip"), "a") as archive:
+                archive.writestr(extra.name + "/unlisted.txt", b"extra")
+            with self.assertRaisesRegex(ValueError, "source ZIP inventory"):
+                adapter.adapt(extra)
+
+    def test_historical_saved_report_retains_its_pinned_publication_id(self):
+        source = SAVED_REPORTS / "syn01-nominal-20261013-f7ba310d-48a679cfc0d4"
+        self.assertEqual(
+            "syn01-6e207b2ee1f300929f054e679c8cd5707f979c02b173292660520e403ebf2852",
+            adapter.adapt(source).report_id,
+        )
 
     def test_valid_bundle_projects_schema3_envelope_and_deterministic_zip(self):
         with tempfile.TemporaryDirectory() as directory:

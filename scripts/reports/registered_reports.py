@@ -1257,6 +1257,40 @@ _HISTORICAL_PUBLICATIONS: dict[str, _HistoricalPublicationPin] = {
 }
 
 
+def source_zip_identity(
+    bundle: Path, members: set[str] | list[str], *, index_root: bool = False, prefixed: bool = False
+) -> tuple[str, str]:
+    """Validate a sibling source ZIP and return its stable identity name and digest."""
+    bundle = Path(bundle)
+    name = bundle.name + ".zip"
+    path = bundle.parent / name
+    expected = set(members)
+    if prefixed:
+        expected = {f"{bundle.name}/{member}" for member in expected}
+    if index_root:
+        expected.add("index.html")
+    if Path(name).name != name or path.is_symlink() or not path.is_file():
+        raise ValueError("source ZIP is missing or unsafe: " + name)
+    try:
+        with zipfile.ZipFile(path) as archive:
+            infos = archive.infolist()
+            names = [info.filename for info in infos]
+            if len(names) != len(set(names)) or set(names) != expected:
+                raise ValueError("source ZIP inventory differs from the validated bundle")
+            for info in infos:
+                content = archive.read(info)
+                if info.filename == "index.html":
+                    continue
+                member = info.filename.split("/", 1)[1] if prefixed else info.filename
+                if content != (bundle / member).read_bytes():
+                    raise ValueError(
+                        "source ZIP member differs from the validated bundle: " + member
+                    )
+    except (OSError, RuntimeError, NotImplementedError, zipfile.BadZipFile) as exc:
+        raise ValueError("invalid source ZIP: " + name) from exc
+    return name, hashlib.sha256(path.read_bytes()).hexdigest()
+
+
 def preserve_historical_publication(bundle, publication, archive_builder):
     pin = _HISTORICAL_PUBLICATIONS.get(publication.source_report_id)
     if pin is None:

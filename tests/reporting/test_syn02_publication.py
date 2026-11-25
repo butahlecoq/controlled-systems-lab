@@ -130,6 +130,20 @@ def _csv_value(value):
     return json.dumps(value, separators=(",", ":")) if isinstance(value, list) else value
 
 
+def _write_source_zip(
+    bundle, *, compression=zipfile.ZIP_STORED, date_time=(2026, 1, 1, 0, 0, 0), comment=b""
+):
+    path = bundle.with_suffix(".zip")
+    path.unlink(missing_ok=True)
+    with zipfile.ZipFile(path, "w", compression=compression) as archive:
+        archive.comment = comment
+        for member in sorted(bundle.iterdir()):
+            if member.is_file():
+                info = zipfile.ZipInfo(member.name, date_time=date_time)
+                info.compress_type = compression
+                archive.writestr(info, member.read_bytes())
+
+
 class Syn02PublicationTests(unittest.TestCase):
     def test_saved_renderer_retains_the_archived_numerical_failure(self):
         source = SAVED_REPORTS / "syn02-terminal-20261013-c234a1a0-35de886a7fb4"
@@ -308,6 +322,7 @@ class Syn02PublicationTests(unittest.TestCase):
         (bundle / "manifest.json").write_text(
             json.dumps(manifest, sort_keys=True, indent=2) + "\n", encoding="utf-8"
         )
+        _write_source_zip(bundle)
         return bundle
 
     def test_valid_bundle_stages_registered_page_envelope_manifest_and_zip(self):
@@ -440,6 +455,47 @@ class Syn02PublicationTests(unittest.TestCase):
         ).hexdigest()
         (bundle / "manifest.json").write_text(
             json.dumps(manifest, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+        )
+        _write_source_zip(bundle)
+
+    def test_source_zip_bytes_are_bound_into_new_publication_identity(self):
+        with tempfile.TemporaryDirectory() as directory:
+            first = self.make_bundle(Path(directory) / "first")
+            second = self.make_bundle(Path(directory) / "second")
+            original = syn02.adapt(first).report_id
+            self.assertEqual(original, syn02.adapt(second).report_id)
+            _write_source_zip(
+                first,
+                compression=zipfile.ZIP_DEFLATED,
+                date_time=(2026, 1, 2, 0, 0, 0),
+                comment=b"first repack",
+            )
+            _write_source_zip(
+                second,
+                compression=zipfile.ZIP_STORED,
+                date_time=(2026, 1, 3, 0, 0, 0),
+                comment=b"second repack",
+            )
+            self.assertNotEqual(original, syn02.adapt(first).report_id)
+            self.assertNotEqual(syn02.adapt(first).report_id, syn02.adapt(second).report_id)
+
+    def test_source_zip_inventory_and_presence_are_revalidated(self):
+        with tempfile.TemporaryDirectory() as directory:
+            missing = self.make_bundle(Path(directory) / "missing")
+            missing.with_suffix(".zip").unlink()
+            with self.assertRaisesRegex(ValueError, "source ZIP"):
+                syn02.adapt(missing)
+            extra = self.make_bundle(Path(directory) / "extra")
+            with zipfile.ZipFile(extra.with_suffix(".zip"), "a") as archive:
+                archive.writestr("unlisted.txt", b"extra")
+            with self.assertRaisesRegex(ValueError, "source ZIP inventory"):
+                syn02.adapt(extra)
+
+    def test_historical_saved_report_retains_its_pinned_publication_id(self):
+        source = SAVED_REPORTS / "syn02-terminal-20261013-c234a1a0-35de886a7fb4"
+        self.assertEqual(
+            "syn02-1b07970d73d90c79c4bba2c65d429ba05bd798751d885146cb21d8a876a067c3",
+            syn02.adapt(source).report_id,
         )
 
     def test_rejects_native_hash_and_unlisted_inventory_corruption(self):
