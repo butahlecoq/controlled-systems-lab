@@ -172,7 +172,6 @@ TEST_CASE("QuickHull matches an independent monotone chain across degeneracies a
 
 TEST_CASE("historical hull variants preserve literal support and exact certificates under tied input orders") {
     const auto provider=highs(true);
-    // One warm workspace deliberately spans unrelated problems and dimensions.
     auto shared=provider.factory(seed()); REQUIRE(shared);
     bool exercised_grouping=false;
     std::size_t fixture_id=0;

@@ -326,7 +326,7 @@ TEST_CASE("snapshots and coefficient records survive mutable aliases and produce
         auto local = system;
         return std::pair{accepted(local.stage({0})), accepted(local.observation({0},{0}))};
     }();
-    auto copy = std::move(system); // source remains a valid retaining handle
+    auto copy = std::move(system);
     system = accepted(snapshot(authored(),grid));
     CHECK(records.first.A(0,0) == 3);
     CHECK(records.second.maps.external_map(0,0) == 5);
