@@ -88,7 +88,7 @@ struct FeedbackGeometryFailure {
     std::vector<SetHandle> pending_input_carriers;
 };
 using FeedbackGeometryOutcome = std::variant<FeedbackGeometry, FeedbackGeometryFailure>;
-enum class FeedbackPolytopeHistory { stagewise, certified_whole_history };
+enum class FeedbackPolytopeHistory { stagewise, certified_whole_history, certified_stagewise };
 
 struct FeedbackGeometryDependencies {
     NominalTubeDependencies geometry;

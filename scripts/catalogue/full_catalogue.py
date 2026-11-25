@@ -871,7 +871,7 @@ def main() -> int:
     group1_references = group1_reference_graphs(contracts, task_hashes, inventory)
     group4_functions = group4_function_graphs(contracts, task_hashes, inventory)
     assert historical_controller_count == 3318
-    assert len(controllers) == 3416
+    assert len(controllers) == 3417
     assert len(predecessors) == 45
     current_source_commit = subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=root, text=True

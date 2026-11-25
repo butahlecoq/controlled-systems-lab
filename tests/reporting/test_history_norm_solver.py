@@ -137,8 +137,14 @@ class HistoryNormSolverTest(unittest.TestCase):
         manifest = build_history_manifest()
         self.assertEqual(validate_manifest(manifest_path=HISTORY_MANIFEST), manifest)
         graphs = manifest["graphs"]
-        self.assertEqual(len(graphs), 68)
-        from history_policy import NATIVE_STRATEGY_IDS
+        self.assertEqual(len(graphs), 69)
+        from history_policy import CERTIFIED_STAGEWISE_CONTROLLER, CERTIFIED_STAGEWISE_METHOD, NATIVE_STRATEGY_IDS
+
+        certified = [row for row in graphs if row["controller"]["id"] == CERTIFIED_STAGEWISE_CONTROLLER]
+        self.assertEqual(len(certified), 1)
+        self.assertEqual(certified[0]["task_id"], load_task("earth-orbit")["task_id"])
+        self.assertEqual(certified[0]["role_bindings"]["reachable_set_method"]["id"], CERTIFIED_STAGEWISE_METHOD)
+        self.assertEqual(certified[0]["role_bindings"]["support_lp"], {"id": "csl.lp.highs"})
         strategy_graphs = [row for row in graphs if row["controller"]["id"] in NATIVE_STRATEGY_IDS]
         self.assertEqual(len(strategy_graphs), 30)
         for row in strategy_graphs:
