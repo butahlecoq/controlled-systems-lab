@@ -343,7 +343,7 @@ def main() -> int:
                                         "executed_step": stage,
                                         "coordinates": json.dumps(state, separators=(",", ":"))})
             checks[ident] = result
-        except Exception as error:
+        except Exception as error:  # preserve each check outcome and continue through all cases
             checks[ident] = {"status": "checker_error", "message": str(error)}
 
     with (analysis / "full_state_trajectory_checked.csv").open("w", newline="", encoding="utf-8") as stream:

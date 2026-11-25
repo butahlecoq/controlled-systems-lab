@@ -150,6 +150,7 @@ def check(record_path: Path) -> dict:
     if [parse(x) for x in record["optimality"]["terminal_state"]] != list(terminal):
         raise ValueError("terminal witness differs from exact replay")
 
+    # Reconstruct the objective as a weighted sum of exact affine features.
     features = tuple(multiply(row, terminal) + shift for row, shift in zip(feature, feature_offset))
     squared = sum((w * z * z for w, z in zip(weights, features)), F(0))
     if parse(record["optimality"]["squared_objective"]) != squared:

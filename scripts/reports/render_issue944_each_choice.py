@@ -204,6 +204,7 @@ def main() -> int:
     renderer = importlib.util.module_from_spec(spec)
     assert spec.loader
     spec.loader.exec_module(renderer)
+    # Existing renderer takes paths through argv; render to the current bundle.
     old_argv = sys.argv
     try:
         sys.argv = [str(renderer_path), str(bundle / "records.json"), str(bundle / "pipeline-2d.svg")]

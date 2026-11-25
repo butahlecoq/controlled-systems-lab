@@ -46,6 +46,7 @@ def _certificate(target: tuple[Fraction, ...], candidates: Sequence[tuple[int, t
             if budget[0] >= limit:
                 return None, False
             budget[0] += 1
+            # The first equation is sum(lambda)=1; remaining equations reconstruct x.
             rows = [[Fraction(1) for _ in support]]
             rows.extend([[point[k] for _, point in support] for k in range(d)])
             rhs = [Fraction(1), *target]

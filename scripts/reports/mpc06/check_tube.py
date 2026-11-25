@@ -64,6 +64,7 @@ def check_record(record: dict) -> dict:
     assert record["nominal_plan_tightened_feasible"]
     assert record["empty_tightening_edge_case"]["empty_verified_by_support"]
 
+    # Enumerate all disturbance vertices under the same fixed zero nominal plan.
     worst_state = q(0)
     worst_input = q(0)
     path_count = 0

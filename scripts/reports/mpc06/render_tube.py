@@ -13,6 +13,7 @@ def figure(record: dict) -> tuple[dict, str]:
     state_bounds = [[-1.0, 1.0], [-1.0, 1.0]]
     tightened = record["tightened_state_bounds"]
     generator_radius = record["rpi_generator_radius"]
+    # Vertices from the exact zonotope generator coefficients in result.json.
     r = generator_radius
     tube = [[r, 0.0], [-r, r * 2], [-r, 0.0], [r, -r * 2]]
     data = {

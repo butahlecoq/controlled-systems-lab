@@ -26,6 +26,7 @@ ALLOWLIST = {
  "reports/algorithm-results/tooling/syn02/publication_map.py",
 }
 
+# Maintained counterparts of the original explicitly reviewed harness paths.
 ALLOWLIST |= {
     'benchmarks/reporting/syn02/terminal_driver.cpp',
     'scripts/reports/syn02/README.md',

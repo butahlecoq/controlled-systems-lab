@@ -26,6 +26,7 @@ def episode(data,repetition):
     phase='construction'
     try:
         begin=time.perf_counter_ns();artifact=builder.construct(data);result['construction_ns']=time.perf_counter_ns()-begin
+        # The same artifact is consumed by the existing nominal-QP constructor.
         phase='certificate-and-consumer-check';begin=time.perf_counter_ns();checked=builder.verify(data,artifact);result['certificate_and_consumer_check_ns']=time.perf_counter_ns()-begin
         phase='artifact-serialization';begin=time.perf_counter_ns();serialized=builder.encoded(artifact);result['artifact_serialization_ns']=time.perf_counter_ns()-begin
         result.update(status='completed',artifact_json=serialized.decode(),artifact_sha256=sha(serialized),verification=checked)

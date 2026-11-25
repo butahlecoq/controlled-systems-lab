@@ -76,7 +76,7 @@ def main():
                 try:
                     run_once(args.executable.resolve(), args.checker.resolve(), args.profile.resolve(),
                              evidence_path, destination)
-                except Exception as exception:
+                except Exception as exception:  # retain every failed attempt in the record
                     status, error = "failed", f"{type(exception).__name__}: {exception}"
                 elapsed = time.perf_counter_ns() - started
                 shutil.rmtree(destination, ignore_errors=True)
