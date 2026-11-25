@@ -3,6 +3,7 @@
 #include "exact_dyadic_sum.hpp"
 #include "finite_action_plans.hpp"
 #include "finite_action_replay.hpp"
+#include "planar_zonotope_score.hpp"
 #include "zonotope_corner_certificate.hpp"
 
 #include <algorithm>
@@ -175,9 +176,25 @@ namespace {
 struct CornerScore {
     double maximum;
     std::size_t evaluated;
+    std::string_view method;
 };
 
 using CornerScoreOutcome = std::variant<CornerScore, Unsupported, OperationStopped>;
+
+std::optional<CornerScoreOutcome>
+try_planar_score(const reachability::FinitePlanZonotopeTrace::Stage &terminal,
+                 const Objective &objective, std::size_t limit, const ExecutionContext &context) {
+    const auto outcome = detail::try_planar_zonotope_score(terminal, objective, limit, [&] {
+        if (const auto reason = scoring_stop(context))
+            throw *reason;
+    });
+    if (!outcome)
+        return std::nullopt;
+    if (const auto *stop = std::get_if<OperationStopped>(&*outcome))
+        return *stop;
+    const auto &score = std::get<detail::PlanarTerminalScore>(*outcome);
+    return CornerScore{score.value, score.visits, score.method};
+}
 
 CornerScoreOutcome score_corners(const reachability::FinitePlanZonotopeTrace::Stage &terminal,
                                  const Objective &objective, std::size_t corner_limit,
@@ -218,9 +235,12 @@ CornerScoreOutcome score_corners(const reachability::FinitePlanZonotopeTrace::St
                     return *error;
                 if (const auto *stop = std::get_if<OperationStopped>(&value))
                     return *stop;
-                return CornerScore{std::get<double>(value), 1};
+                return CornerScore{std::get<double>(value), 1, "certified-factor-corner/1"};
             }
         }
+        if (corner_limit > 0)
+            if (auto planar = try_planar_score(terminal, objective, corner_limit, context))
+                return std::move(*planar);
         return unsupported("finite_zonotope_minimax.corners",
                            count == 0
                                ? "Terminal generator count exceeds corner enumeration capacity."
@@ -242,7 +262,7 @@ CornerScoreOutcome score_corners(const reachability::FinitePlanZonotopeTrace::St
     if (!std::isfinite(maximum))
         return unsupported("finite_zonotope_minimax.score",
                            "Terminal factor corners produced no finite score.");
-    return CornerScore{maximum, count};
+    return CornerScore{maximum, count, "factor-corner-enumeration/1"};
 }
 }
 
@@ -339,7 +359,7 @@ finite_action_zonotope_minimax(const FiniteActionMinimaxRequest &request,
         attempts.emplace_back(
             ZonotopePlanScored{choices,
                                {score.maximum, trace.stages.back().generators.cols, score.evaluated,
-                                std::move(trace)}});
+                                std::move(trace), score.method}});
         if (score.maximum < minimum) {
             minimum = score.maximum;
             selected_index = plan_index;

@@ -8,6 +8,7 @@
 #include <csl/reachability/finite_plan_zonotope.hpp>
 
 #include <string>
+#include <string_view>
 #include <optional>
 
 namespace csl::optimization {
@@ -60,6 +61,9 @@ struct NominalPlanScored {
     NominalScoreKind score_kind;
     double terminal_score{};
     double exact_running_cost{};
+    // Terminal scorer actually used for this plan; empty when no terminal
+    // score was produced.
+    std::string_view terminal_scorer{};
 };
 struct NominalPlanRejected {
     std::vector<std::size_t> action_indices;
