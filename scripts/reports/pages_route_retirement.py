@@ -156,6 +156,9 @@ EXAMPLE_ROUTE_PRODUCERS = {
     "examples/kpabep-near-collinear-20261115.html": [
         "docs/examples/kpabep-near-collinear-20261115.html"
     ],
+    "examples/parallelotope-frame-cover-2d.html": [
+        "docs/examples/parallelotope-frame-cover-2d.html"
+    ],
     "examples/app01-plan-timing-v1.html": ["scripts/reports/approx_extension_companions.py"],
     "examples/app02-diamond-v1.html": ["scripts/reports/approx_extension_companions.py"],
     "examples/app03-zonotope-v1.html": ["scripts/reports/approx_extension_companions.py"],
