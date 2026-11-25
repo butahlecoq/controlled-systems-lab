@@ -26,12 +26,12 @@ class FullCatalogueDiscoveryTests(unittest.TestCase):
     def test_discovers_current_factories_without_claiming_runtime_preparation(self) -> None:
         candidates = source_bound_capability_candidates(ROOT)
 
-        self.assertEqual(len(candidates), 98)
+        self.assertEqual(len(candidates), 99)
         self.assertEqual(
             sum(row["controller_route"] == "native_graph_policy" for row in candidates), 30
         )
         self.assertEqual(
-            sum(row["controller_route"] == "continuous_history" for row in candidates), 53
+            sum(row["controller_route"] == "continuous_history" for row in candidates), 54
         )
         self.assertEqual(
             sum(row["controller_route"] == "native_fixed_tail" for row in candidates), 15
@@ -66,7 +66,7 @@ class FullCatalogueDiscoveryTests(unittest.TestCase):
         self.assertTrue(
             all(row["catalogue_source"]["runtime_binary"] == "not_inspected" for row in candidates)
         )
-        self.assertEqual(len({row["graph_fingerprint"] for row in candidates}), 98)
+        self.assertEqual(len({row["graph_fingerprint"] for row in candidates}), 99)
         self.assertEqual(
             len(
                 {
@@ -80,7 +80,7 @@ class FullCatalogueDiscoveryTests(unittest.TestCase):
                     for row in candidates
                 }
             ),
-            98,
+            99,
         )
 
     def test_discovers_every_native_strategy_task_and_set_representation(self) -> None:
@@ -152,7 +152,7 @@ class FullCatalogueDiscoveryTests(unittest.TestCase):
         combined = controller_catalogue(original, ROOT)
 
         self.assertEqual(combined[: len(original)], original)
-        self.assertEqual(len(combined), 3416)
+        self.assertEqual(len(combined), 3417)
         self.assertEqual(
             {row["controller_route"] for row in original},
             {

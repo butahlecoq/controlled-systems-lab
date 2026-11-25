@@ -312,6 +312,45 @@ int main() {
            axis_membership_contains(infeasible->stages[0].intersection->membership,{0.2,0.4}))
             return 34;
 
+        auto affine_box_source = source;
+        affine_box_source.id = {"affine-box-history"};
+        affine_box_source.initial = KnownInitial{{0.5, 0.5}};
+        affine_box_source.states = {UniversalSet{2}, UniversalSet{2}};
+        affine_box_source.controls = ContinuousDomain{{box("dyadic-controls", {-0.25, -0.125},
+                                                           {0.25, 0.125})}};
+        const auto affine_box_resolved = take(problem::resolve(
+            affine_box_source, {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}));
+        const auto universal = take(sets::make_universal({{"universal-terminal"}, 2, {}})).as_handle();
+        const auto affine_box_mode = reachability::FeedbackPolytopeHistory::certified_stagewise;
+        const auto affine_box = reachability::feedback_geometry(
+            affine_box_resolved, {"affine-box-history"}, universal,
+            reachability::FeedbackFamily::polytope, {{0, 0}}, certified_deps, affine_box_mode, {});
+        const auto* affine_box_geometry = std::get_if<reachability::FeedbackGeometry>(&affine_box);
+        if (!affine_box_geometry || affine_box_geometry->stages.size() != 2)
+            return 37;
+        const auto& affine_box_terminal = affine_box_geometry->stages.back();
+        for (const auto* set : {&affine_box_terminal.forward, &affine_box_terminal.backward,
+                                &affine_box_terminal.intersection}) {
+            if (!*set || (*set)->assurance != Assurance::validated ||
+                (*set)->relation != SetRelation::outer)
+                return 38;
+            for (const double x : {0.25, 0.75})
+                for (const double y : {0.375, 0.625})
+                    if (!axis_membership_contains((*set)->membership, {x, y}))
+                        return 39;
+            if (axis_membership_contains((*set)->membership, {0.875, 0.5}))
+                return 40;
+        }
+        const auto affine_box_impossible = reachability::feedback_geometry(
+            affine_box_resolved, {"affine-box-impossible"}, box("disjoint-terminal", {2, 2}, {3, 3}),
+            reachability::FeedbackFamily::polytope, {{0, 0}}, certified_deps, affine_box_mode, {});
+        const auto* affine_box_infeasible =
+            std::get_if<reachability::FeedbackGeometry>(&affine_box_impossible);
+        if (!affine_box_infeasible || !affine_box_infeasible->stages.front().intersection ||
+            axis_membership_contains(affine_box_infeasible->stages.front().intersection->membership,
+                                     {0.5, 0.5}))
+            return 41;
+
         const auto too_many_rows = take(sets::make_h({{"oversized-terminal"},2,state_labels},
             {take(numeric::snapshot(Matrix{4097,2,Vector(8194,0)})),
              take(numeric::snapshot_vector(Vector(4097,1))),
