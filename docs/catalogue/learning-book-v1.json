@@ -2256,7 +2256,8 @@
       "records": [
         {
           "label": "docs/contracts/closed-loop/earth-orbit.json",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/docs/contracts/closed-loop/earth-orbit.json"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/docs/contracts/closed-loop/earth-orbit.json",
+          "source_sha256": "d1461fc7ffe0ecbd14a67492cbc494fce6542ac33f4c89c6f536cfe99ec5f5ac"
         },
         {
           "label": "Published three-task closed-loop pilot report",
