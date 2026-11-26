@@ -552,6 +552,28 @@ void compare_profile(const std::string& profile) {
         escaped_measurement.push_back(character);
     }
     CHECK(record_wire.find(escaped_measurement)!=std::string::npos);
+    // Closed-loop paired timing events report the one-based measured repetition
+    // and carry no native-attempt attachment; they must still validate.
+    auto closed_loop_attempts=measured_attempts;
+    closed_loop_attempts.at(0).measurement_payload=
+        "{\"end_to_end_wall_seconds\":1.5,\"instrumentation\":\"disabled\",\"order_index\":0,"
+        "\"repetition\":1,\"schema\":\"csl.closed-loop-paired-timing-event/1\","
+        "\"status\":\"passed\",\"strategy\":\"csl.synthesis.reach-back\",\"warmup\":false,"
+        "\"worker_wall_seconds\":1.0}";
+    closed_loop_attempts.at(1).measurement_payload=
+        "{\"end_to_end_wall_seconds\":1.6,\"instrumentation\":\"enabled\",\"order_index\":1,"
+        "\"repetition\":1,\"schema\":\"csl.closed-loop-paired-timing-event/1\","
+        "\"status\":\"passed\",\"strategy\":\"csl.synthesis.reach-back\",\"warmup\":false,"
+        "\"worker_wall_seconds\":1.1}";
+    const auto closed_loop_record=take_artifact(
+        ar::encode_recorded_comparison(record_spec,closed_loop_attempts),
+        "encode_recorded_comparison closed-loop paired timing");
+    const auto closed_loop_wire=std::string(
+        reinterpret_cast<const char*>(closed_loop_record.content().bytes().data()),
+        closed_loop_record.content().bytes().size());
+    const auto closed_loop_restored=take_artifact(ar::decode_recorded_comparison(closed_loop_wire),
+        "decode_recorded_comparison closed-loop paired timing");
+    CHECK(closed_loop_restored.content().digest()==closed_loop_record.content().digest());
     auto version_three_spec_json=nlohmann::json::parse(record_spec_text);
     version_three_spec_json["environment"]=sample_obs04_environment();
     version_three_spec_json["schema"]="csl.comparison-spec/3";
