@@ -134,7 +134,6 @@ TEST_CASE("program evidence is retained without asserting global problem optimum
     auto r=solve(LinearTerminal{{1,0},7},{0,0},7);REQUIRE(r.optimum);REQUIRE(r.optimization);CHECK(std::holds_alternative<Unestablished>(r.optimum->optimum.support));REQUIRE(r.optimum->bounds.upper);CHECK(std::holds_alternative<Unestablished>(r.optimum->bounds.upper->evidence.support));CHECK(std::holds_alternative<SymbolicArgument>(r.optimization->objective.upper->evidence.support));
 }
 
-// ---- Issue #69 [TEST-11]: independently designed oracle expansions ----
 
 TEST_CASE("linear cost x on [0,1]^2 gives the whole edge x=0") {
     // Independent oracle: minimize c'x with c=(1,0) on [0,1]^2.

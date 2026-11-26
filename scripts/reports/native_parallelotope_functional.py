@@ -91,7 +91,6 @@ def check_source_frame(bundle):
         raise ValueError("four-state frame differs from source")
     if "Matrix{n, n, {1.0, 0.0, 0.0, 1.0}}" not in text:
         raise ValueError("planar identity frame differs from source")
-    # Both frames are initialized once before propagation and never reassigned.
     if text.count("trace.frame") != 5:
         raise ValueError("review source frame assignments before accepting a new source")
 

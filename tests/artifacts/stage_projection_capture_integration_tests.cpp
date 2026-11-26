@@ -52,7 +52,6 @@ std::vector<Point> hull(std::vector<Point> points) {
 }
 
 sets::SetData correlated_simplex() {
-    // Relation storage is deliberately ordered x2, x0, x3, x1.
     Matrix vertices{6, 4, {
         0, 0, 0, 0,
         1, 0, 0, 0,

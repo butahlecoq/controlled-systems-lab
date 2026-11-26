@@ -329,7 +329,6 @@ class PerAttemptPublicationTests(unittest.TestCase):
             self.assertIn("TwoPoints environment report", report_page)
             stage_module.validate(site)
 
-            # All local links in the route page resolve inside the staged Pages tree.
             import re
 
             for reference in re.findall(r'(?:href|src)="([^"]+)"', report_page):

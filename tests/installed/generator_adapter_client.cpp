@@ -38,7 +38,6 @@ int main() {
     const auto image=take(sets::from_generator_handle(image_result.output));
     if(image.center()!=Vector{7} || image.generators().values!=Vector{2,3} ||
        image.factor_ids()!=std::vector<sets::FactorId>{{"horizontal"},{"vertical"}}) return 2;
-    // Literal physical H oracle: x<=12 and -x<=-2.
     for(double x:Vector{2,7,12}) if(x>12 || -x>-2) return 3;
     for(double x:Vector{1,13}) if(x<=12 && -x<=-2) return 4;
     if(image.center()[0]-image.generators().values[0]-image.generators().values[1]!=2 ||
