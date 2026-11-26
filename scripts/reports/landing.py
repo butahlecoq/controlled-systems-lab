@@ -602,6 +602,17 @@ FAMILIES = {
         "inner boxes, checking every stored inclusion relation on exact binary64 examples. A "
         "two-dimensional example shows the shapes.",
     ),
+    "app02-nonaxis-ab": Family(
+        r"app02-nonaxis-ab-[0-9a-f]{16}",
+        "extensions",
+        "Nonaxis parallelotope frames in closed-loop history control",
+        "Compares the admitted axis parallelotope profile with a fixed 45 degree frame and a "
+        "deterministic support-selected frame on three observed-state tasks, publishing projection "
+        "figures, sampled directional support excess, certified frame-direction margins and per-attempt "
+        "budgets. The selected rule retained the axis frame throughout, and the rotated Earth-orbit "
+        "profile exported frame bounds above 1e37 in five attempts, so no nonaxis benefit or speed "
+        "winner is claimed.",
+    ),
     "app03-zonotope": Family(
         r"app03-zonotope-[0-9a-f]{16}",
         "extensions",

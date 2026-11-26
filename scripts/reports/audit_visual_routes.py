@@ -319,6 +319,8 @@ FROZEN_COMPANIONS = {
     "lotka-volterra-sampled-20261023": "examples/lotka-volterra-sampled-v1.html",
 }
 FROZEN_REVIEWED_ROUTES = {
+    "app02-nonaxis-ab-0c77ee6e5c221655":
+        "reviewed: three observed-state tasks compare the axis, fixed-45 and support-selected nonaxis frames with projection figures, sampled support excess and budgeted cost outcomes",
     "catalogue-ring-initial-support-v1":
         "reviewed: projected feasible zero-control history and fixed stage-zero support line",
     "catalogue-backward-reachability-v1":

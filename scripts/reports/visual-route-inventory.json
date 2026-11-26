@@ -1433,6 +1433,15 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_app02_nonaxis_ab.py",
+      "signal_count": 6,
+      "asset_name_literals": [
+        "-projections.svg",
+        "-support-excess.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_app03.py",
       "signal_count": 4,
       "asset_name_literals": [
@@ -2736,6 +2745,22 @@
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669,
       "companion_route": "examples/app02-diamond-v1.html"
+    },
+    {
+      "route": "app02-nonaxis-ab-0c77ee6e5c221655",
+      "source_bundle": "app02-nonaxis-ab-0c77ee6e5c221655",
+      "assets": [
+        "earth-orbit-motion-support-excess.svg",
+        "earth-orbit-position-support-excess.svg",
+        "earth-orbit-projections.svg",
+        "syn-nl-fuel-01-flows-support-excess.svg",
+        "syn-nl-fuel-01-masses-support-excess.svg",
+        "syn-nl-fuel-01-projections.svg",
+        "syn-nl-lv-01-populations-support-excess.svg",
+        "syn-nl-lv-01-projections.svg"
+      ],
+      "index_sha256": "d127562021a8fb6b63ec483e0d3c08896b2cef8e1ef57556c045b68a88377ee6",
+      "disposition": "reviewed: three observed-state tasks compare the axis, fixed-45 and support-selected nonaxis frames with projection figures, sampled support excess and budgeted cost outcomes"
     },
     {
       "route": "app03-zonotope-4522855018fa9b0b",

@@ -2286,6 +2286,11 @@
       "owner": "reports/published-route-preservation/manifest.json",
       "sha256": "bf6b18d8a47066eb5a67dcb2ef2e0880adea0a1de24b04fb0a0915a90175c631",
       "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "app02-nonaxis-ab-0c77ee6e5c221655/index.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_app02_nonaxis_ab.py"
     }
   ],
   "required_inventories": [

@@ -291,6 +291,23 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertTrue(backends["disposition"].startswith("reviewed:"))
         self.assertNotIn("follow_up_issue", backends)
         reviewed_routes.add(backends["route"])
+        campaign = routes["app02-nonaxis-ab-0c77ee6e5c221655"]
+        self.assertEqual(
+            campaign["assets"],
+            [
+                "earth-orbit-motion-support-excess.svg",
+                "earth-orbit-position-support-excess.svg",
+                "earth-orbit-projections.svg",
+                "syn-nl-fuel-01-flows-support-excess.svg",
+                "syn-nl-fuel-01-masses-support-excess.svg",
+                "syn-nl-fuel-01-projections.svg",
+                "syn-nl-lv-01-populations-support-excess.svg",
+                "syn-nl-lv-01-projections.svg",
+            ],
+        )
+        self.assertTrue(campaign["disposition"].startswith("reviewed: three observed-state tasks"))
+        self.assertNotIn("follow_up_issue", campaign)
+        reviewed_routes.add(campaign["route"])
         self.assertTrue(all(entry["disposition"].startswith("deferred: original frozen route-level readability")
                             for entry in routes.values() if entry["route"] not in reviewed_routes | {external["route"], disturbance["route"]}))
         self.assertTrue(all(entry["follow_up_issue"] ==
