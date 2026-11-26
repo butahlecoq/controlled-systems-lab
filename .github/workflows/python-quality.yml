@@ -1264,6 +1264,12 @@ jobs:
           diff -r "$source" "$site/$route"
       - name: Replay the saved MPC-06 completion report and archive
         run: python -m unittest tests.reporting.test_mpc06_delivery tests.reporting.test_mpc06_delivery_publication
+      - name: Verify the saved geometry publication adapters
+        run: >-
+          python -m unittest
+          tests.reporting.test_geo02_publication
+          tests.reporting.test_geo05_publication
+          tests.reporting.test_geo06_publication
       - name: Replay the saved MPC-06 offline-cost study and archive
         run: python -m unittest tests.reporting.test_mpc06_offline
       - name: Replay all three saved Strategy B profiles

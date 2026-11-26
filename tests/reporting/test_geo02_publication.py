@@ -13,11 +13,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "reports"))
 import geo02_registered_reports as geo02
-import report_site
 
-TOOLING = (
-    Path(__file__).resolve().parents[2] / "reports" / "algorithm-results" / "tooling" / "geo02"
-)
+ROOT = Path(__file__).resolve().parents[2]
+REPORTS = ROOT / "scripts" / "reports"
+TOOLING = ROOT / "reports" / "algorithm-results" / "tooling" / "geo02"
 
 
 def load(name: str, path: Path):
@@ -29,6 +28,7 @@ def load(name: str, path: Path):
     return module
 
 
+report_site = load("csl_geo02_test_site", REPORTS / "site.py")
 collect = load("csl_geo02_test_collector", TOOLING / "collect.py")
 geo02_renderer = load("csl_geo02_test_renderer", TOOLING / "render.py")
 
