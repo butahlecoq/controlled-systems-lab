@@ -119,7 +119,7 @@ TEST_CASE("metadata and typed numeric data survive producer and set destruction"
         auto desc = plane();
         auto set = accepted(make_v(desc, {vertices, matrix(0, 2, {})}, dimension(1)));
         auto info = set.metadata();
-        CHECK(info.get() == set.metadata().get()); // metadata query retains, it does not copy.
+        CHECK(info.get() == set.metadata().get());
         auto data = std::get<VRepresentation>(set.representation());
         CHECK(std::get<numeric::DenseInput>(vertices.descriptor()).storage.data() ==
               std::get<numeric::DenseInput>(data.vertices.descriptor()).storage.data());

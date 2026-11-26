@@ -314,7 +314,7 @@ TEST_CASE("two-stage mixed branch enumeration agrees with a one-hot MILP") {
     // Independent two-stage MIP: x[k + 1] = x[k] + u[k] + d[z[k]], with
     // one continuous input and one catalogue choice at each stage.
     HighsLp lp;
-    lp.num_col_ = 10; // u[0..1], z[0][0..2], z[1][0..2], x[1..2]
+    lp.num_col_ = 10;
     lp.num_row_ = 4;
     lp.sense_ = ObjSense::kMinimize;
     lp.col_cost_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0};
@@ -430,7 +430,7 @@ TEST_CASE("finite-only affine enumeration agrees with a one-hot MILP and preserv
     // Independent two-stage MILP for x[k + 1] = x[k] + u[k] and one-hot
     // catalogue actions {-1, +1, -1}; identical values keep distinct indices.
     HighsLp lp;
-    lp.num_col_ = 8; // z[stage 0][0..2], z[stage 1][0..2], x[1..2]
+    lp.num_col_ = 8;
     lp.num_row_ = 4;
     lp.sense_ = ObjSense::kMinimize;
     lp.col_cost_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0};

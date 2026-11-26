@@ -94,7 +94,7 @@ TEST_CASE("all catalogued fixed plans are robustly infeasible under a narrow saf
 
 TEST_CASE("later unsupported data takes precedence over an earlier robust violation") {
     auto plan=request(3);
-    plan.admissible_states[0]=safe(1,2); // x0=0 already violates this set.
+    plan.admissible_states[0]=safe(1,2);
     plan.disturbances[1]=take(sets::make_v({{"unbounded-w1"},1,{"w"}},
         {take(numeric::snapshot(Matrix{1,1,{0}})),
          take(numeric::snapshot(Matrix{1,1,{1}}))}));

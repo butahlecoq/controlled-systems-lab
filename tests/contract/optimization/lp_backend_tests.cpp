@@ -89,7 +89,7 @@ TEST_CASE("program evidence preserves partial and unestablished outcomes and rej
         rejected(check_program_result(r,p,Assurance::numerical),DiagnosticCode::evidence_mismatch);
     }
     auto r=candidate(p); r.outcome.value=MathematicalOutcome::infeasible;
-    CHECK(check_program_result(r,p,Assurance::numerical).empty()); // raw candidate is not a feasible assertion
+    CHECK(check_program_result(r,p,Assurance::numerical).empty());
     r.outcome.support=SymbolicArgument{"contradiction","literal rows"}; r.objective.upper=bound(p,-2);
     rejected(check_program_result(r,p,Assurance::numerical),DiagnosticCode::invalid_claim);
     r=candidate(p); r.outcome={p.identity(),MathematicalOutcome::unbounded,SymbolicArgument{"ray","literal fixture"},{}};

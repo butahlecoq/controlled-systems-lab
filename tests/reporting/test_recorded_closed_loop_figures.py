@@ -190,7 +190,6 @@ class RecordedClosedLoopFigureTests(unittest.TestCase):
         shape = {"representation": "parallelotope", "frame": frame, "lower": lower, "upper": upper}
         projected = figures.project_shape(shape, (0, 1))
 
-        # Enumerate the defining input box independently, then apply x = frame * y.
         assert projected is not None
         corners = [
             [sum(frame[i][j] * y[j] for j in range(2)) for i in range(2)]

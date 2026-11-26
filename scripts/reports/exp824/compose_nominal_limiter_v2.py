@@ -122,7 +122,6 @@ def main() -> None:
     capture_path = output / "capture.json"
     capture = json.loads(capture_path.read_text(encoding="utf-8"))
     capture["source_commit"] = "62f65dcbe2a56a209f997ca54f6ad26167c91043"
-    # Use Git's blob content through Python for the same files tracked by the run commit.
     root = Path(__file__).resolve().parents[3]
     source_names = json.loads((source / "capture.json").read_text(encoding="utf-8"))["source_files_sha256"]
     capture["source_files_sha256"] = {

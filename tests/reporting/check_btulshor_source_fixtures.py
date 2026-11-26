@@ -139,7 +139,6 @@ def run(driver):
         for index, record in enumerate(fixtures):
             case = record["case"]
             path = Path(directory) / f"case-{index}.json"
-            # Only the input crosses the executable boundary, never the oracle outcome.
             path.write_text(json.dumps(case) + "\n")
             output = None
             try:

@@ -66,11 +66,11 @@ TEST_CASE("history compiler preserves stage blocks, cross terms and source polyn
     CHECK(qp.hessian()(7, 2) == doctest::Approx(0.25));
     CHECK(qp.hessian()(6, 6) == doctest::Approx(0.4));
     CHECK(qp.hessian()(7, 7) == doctest::Approx(0.4));
-    CHECK(qp.hessian()(4, 4) == 0.0);    // terminal state cost is separate
-    CHECK(qp.constraints().rows() == 9); // initial, transitions, stage bounds, temporal slew
+    CHECK(qp.hessian()(4, 4) == 0.0);
+    CHECK(qp.constraints().rows() == 9);
     CHECK(qp.rows()[2].lower == doctest::Approx(0.5));
     CHECK(qp.rows()[4].lower == doctest::Approx(-0.25));
-    CHECK(qp.rows()[8].lower == doctest::Approx(-0.8)); // u[1] - u[0]
+    CHECK(qp.rows()[8].lower == doctest::Approx(-0.8));
     const auto objective =
         evaluate_primal(program, Vector{0.4, -0.2, 1.2, -0.2, 1.65, -0.4, 0.3, -0.5},
                         {1e-10, 1e-10}, {{"history-test-literal"}, "1"});
@@ -159,7 +159,7 @@ TEST_CASE("positive-part budgets use private epigraph columns after the canonica
         CHECK(objective_linear[auxiliary] == 0.0);
         CHECK(qp.variables()[auxiliary].lower == 0.0);
     }
-    REQUIRE(qp.constraints().rows() == 6); // x0, dynamics, 3 epigraph rows, budget
+    REQUIRE(qp.constraints().rows() == 6);
     const std::vector<std::size_t> source_controls{4, 2, 3};
     for (std::size_t term = 0; term < source_controls.size(); ++term) {
         const auto row = term + 2;

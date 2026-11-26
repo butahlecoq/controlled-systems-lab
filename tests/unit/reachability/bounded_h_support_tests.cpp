@@ -291,7 +291,6 @@ void lp_api_must_exist(const csl::reachability::BoundedHSupportInput& input,
     (void)csl::reachability::bounded_h_support(input, {{"support"},{"dual"}}, lp, {});
 }
 
-// API compilation gate for the staged full-state recurrence.
 void coordinator_api_must_exist(const csl::problem::ResolvedProblem& problem,
     const csl::SetHandle& terminal,
     const csl::reachability::FeedbackGeometryDependencies& providers) {
