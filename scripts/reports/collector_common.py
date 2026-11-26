@@ -788,7 +788,6 @@ def main(profile=LP):
     return collect(args, profile)
 
 
-# Filesystem/process lifecycle shared by the standalone geometry collectors.
 def git_paths(*args: str) -> list[str]:
     output = subprocess.check_output(["git", *args])
     return [path.decode("utf-8", errors="surrogateescape") for path in output.split(b"\0") if path]

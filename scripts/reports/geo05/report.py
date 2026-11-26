@@ -32,7 +32,6 @@ HARNESS_PATH_ALLOWLIST = {
     "reports/algorithm-results/tooling/geo05/test_fresh_build.py",
 }
 
-# Maintained counterparts of the original explicitly reviewed harness paths.
 HARNESS_PATH_ALLOWLIST |= {
     "benchmarks/reporting/geo05/projection_predecessor_driver.cpp",
     "benchmarks/reporting/geo05/test_driver_outcomes.cpp",

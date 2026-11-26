@@ -542,7 +542,7 @@ TEST_CASE("hybrid joint relation retains flow, controls, resets, and mode-local 
     const auto representation=data.representation();
     REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
     const auto h=std::get<sets::HRepresentation>(representation);
-    CHECK(h.equalities.rows()==7); // initial, control, flow, guard, and rectangular reset witness
+    CHECK(h.equalities.rows()==7);
     CHECK(h.equalities.cols()==5);
     const Matrix expected_equalities{7,5,{
          1,0,0,0,0,
