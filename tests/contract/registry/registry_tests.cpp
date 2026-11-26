@@ -1710,9 +1710,13 @@ TEST_CASE("runtime strategy extension adds a different typed dependency tuple wi
         explicit CustomStrategy(std::unique_ptr<BoundWorkspace<CounterPort>> w) : counter(std::move(w)) {}
         SynthesisResult solve(const csl::problem::ResolvedProblem& p,const FamilyRequest&,const ExecutionContext& c) override {
             const auto id=p.identity();
-            SynthesisResult result{Termination::resource_limit,{id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
-                {{{id,{}, {},static_cast<double>(counter->run(c))},
-                    {id,SymbolicArgument{"fixture", "counter sample"}}}}, {}};
+            SynthesisResult result{Termination::resource_limit,
+                                   {id, MathematicalOutcome::undetermined, Unestablished{}, {}},
+                                   {},
+                                   {},
+                                   {{{id, {{0}, {0}}, {{0}}, static_cast<double>(counter->run(c))},
+                                     {id, SymbolicArgument{"fixture", "counter sample"}}}},
+                                   {}};
             result.stop=ScopedOperationStopped{{StopReason::resource_limit,"counter fixture"},
                 RequestProvenance{{"fixture/custom"},"strategy",{"custom-strategy"},std::string{"7"},
                     ModuleId{"custom-strategy"},std::string{"7"}},{false,false,1,false}};
@@ -1747,13 +1751,68 @@ TEST_CASE("runtime strategy extension adds a different typed dependency tuple wi
         return result;
     }();
     const std::array<double,2> expected{-1,31};
+    REQUIRE(prepared.size() == expected.size());
     for (std::size_t i=0;i<prepared.size();++i) {
         auto workspace = prepared[i].create();
-        const auto answer = std::get<SynthesisResult>(workspace->run(context()));
-        CHECK(answer.incumbents[0].witness.original_objective == expected[i]);
+        const auto answer = workspace->run(context());
+        REQUIRE(std::holds_alternative<SynthesisResult>(answer));
+        const auto &result = std::get<SynthesisResult>(answer);
+        CHECK(result.termination ==
+              (i == 0 ? Termination::completed : Termination::resource_limit));
+        REQUIRE(result.incumbents.size() == 1);
+        CHECK(result.incumbents[0].witness.original_objective == expected[i]);
     }
+    REQUIRE(prepared[1].provenance().size() >= 2);
+    REQUIRE(prepared[1].provenance()[1].actual.has_value());
     CHECK(prepared[1].provenance()[1].actual->id.value == "counter");
     CHECK(prepared[1].provenance()[1].actual->version == "3");
+}
+
+TEST_CASE("public prepared strategy rejects a runtime incumbent without a canonical history") {
+    struct MalformedStrategy final : SynthesisWorkspace {
+        SynthesisResult solve(const csl::problem::ResolvedProblem &p, const FamilyRequest &,
+                              const ExecutionContext &) override {
+            const auto id = p.identity();
+            return {Termination::completed,
+                    {id, MathematicalOutcome::undetermined, Unestablished{}, {}},
+                    {},
+                    {},
+                    {{{id, {}, {}, 31},
+                      {id, SymbolicArgument{"fixture", "missing canonical history"}}}},
+                    {}};
+        }
+    };
+    StrategyRegistry strategies;
+    REQUIRE_FALSE(strategies.add(
+        {{{"malformed-history"}, "1"},
+         [](const StrategyRequest &, const Requirements &) -> Capability { return Offer{}; },
+         [](const StrategyRequest &,
+            const Requirements &) -> std::variant<StrategyPlan, Rejection> {
+             auto checked = check_pipeline();
+             if (auto *rejected = std::get_if<Rejection>(&checked))
+                 return *rejected;
+             return compose_strategy(std::get<CheckedPipeline<>>(std::move(checked)),
+                                     [](auto, const StrategyRequest &, const Requirements &) {
+                                         return std::make_unique<MalformedStrategy>();
+                                     });
+         }}));
+    auto request = strategy_request();
+    request.configuration.strategy = {"malformed-history"};
+    const auto prepared = strategies.prepare(request);
+    REQUIRE(std::holds_alternative<PreparedStrategy>(prepared));
+    const auto answer = std::get<PreparedStrategy>(prepared).create()->run(context());
+    REQUIRE(std::holds_alternative<SynthesisResult>(answer));
+    const auto &result = std::get<SynthesisResult>(answer);
+    CHECK(result.termination == Termination::contract_rejected);
+    CHECK(result.incumbents.empty());
+    REQUIRE(std::holds_alternative<ContractValidationFailure>(result.stop));
+    const auto &failure = std::get<ContractValidationFailure>(result.stop);
+    CHECK(failure.retained.incumbents == 0);
+    CHECK(std::any_of(failure.diagnostics.begin(), failure.diagnostics.end(),
+                      [](const auto &diagnostic) {
+                          return diagnostic.code == DiagnosticCode::evidence_mismatch &&
+                                 diagnostic.field == "result.incumbents";
+                      }));
 }
 
 TEST_CASE("preflight never copies a factory numeric configuration before a downstream rejection") {
