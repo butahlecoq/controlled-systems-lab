@@ -1452,7 +1452,7 @@
     },
     {
       "candidate_id": "native-composition/f1166a373362606afa97d4609c834072c9ad630bebc603fac6030479e3ccbfb8",
-      "canonical_graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-27121d1d6afbfeb6",
+      "canonical_graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-600345a5264006d3",
       "canonicalization": "distinct-active-provider-tuple",
       "controller_id": "native-exact-polytope-backward-graph/1",
       "dimension": 2,
@@ -1497,7 +1497,7 @@
     },
     {
       "candidate_id": "native-composition/52bf9913dffc8c7f8afd2dd67be9cb543a16fd44a90990272cdcbe35513187d4",
-      "canonical_graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-61bc8420a0035f88",
+      "canonical_graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-897d69e0cef151fd",
       "canonicalization": "distinct-active-provider-tuple",
       "controller_id": "native-exact-polytope-backward-graph/1",
       "dimension": 2,
@@ -2992,7 +2992,7 @@
     },
     {
       "candidate_id": "native-composition/a037f4c03bd579f3e12ada52342d6a29eb04ee0adac32ac10370b5b5ab1eefe7",
-      "canonical_graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-6ded424bd398437c",
+      "canonical_graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-627dfd3d804cdab6",
       "canonicalization": "distinct-active-provider-tuple",
       "controller_id": "native-box-mpc/1",
       "dimension": 2,
@@ -3037,7 +3037,7 @@
     },
     {
       "candidate_id": "native-composition/b185be2c471cc55e0e99e7e5c49997effae6159b7d5bb92a7b4edc6172b9d197",
-      "canonical_graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-ec0ab1cdbd48b697",
+      "canonical_graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-e26d2e60d47ed0b7",
       "canonicalization": "distinct-active-provider-tuple",
       "controller_id": "native-box-mpc/1",
       "dimension": 2,
@@ -4532,7 +4532,7 @@
     },
     {
       "candidate_id": "native-composition/3f6885cc20a7eba59727f0cd3465e171bc86c74bdd48688ce01fc29bf7645e95",
-      "canonical_graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-dd774606668fe63f",
+      "canonical_graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-a1101cf3792e8632",
       "canonicalization": "distinct-active-provider-tuple",
       "controller_id": "native-zonotope-mpc/1",
       "dimension": 2,
@@ -4577,7 +4577,7 @@
     },
     {
       "candidate_id": "native-composition/0e712759953952dd3a55c1ec704c260b81251602f3a9e539fdb8b807c97e2cf1",
-      "canonical_graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-16b6a61b42aa9a61",
+      "canonical_graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-d1cae4e6b0b0a74e",
       "canonicalization": "distinct-active-provider-tuple",
       "controller_id": "native-zonotope-mpc/1",
       "dimension": 2,
@@ -6072,7 +6072,7 @@
     },
     {
       "candidate_id": "native-composition/e6d3304946d57b18c0b98f30615ec2ff7d513e9b73bbe0666d35de741c19664c",
-      "canonical_graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-a73ee79498984953",
+      "canonical_graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-353e92cf803f2b97",
       "canonicalization": "distinct-active-provider-tuple",
       "controller_id": "native-parallelotope-mpc/1",
       "dimension": 2,
@@ -6117,7 +6117,7 @@
     },
     {
       "candidate_id": "native-composition/cc145442a5d787e82622f9a1fb361a9a5ab5068c479c7fef4e47f00c759f22e2",
-      "canonical_graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-39d269010d8e49ec",
+      "canonical_graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-05501e17701d8eb3",
       "canonicalization": "distinct-active-provider-tuple",
       "controller_id": "native-parallelotope-mpc/1",
       "dimension": 2,
@@ -7612,7 +7612,7 @@
     },
     {
       "candidate_id": "native-composition/ec92fa9e6213c6690f8931ebf2cc33c420372095bb3c8f634e6e19a93aafd9a9",
-      "canonical_graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-066556aa737c62b1",
+      "canonical_graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-9f3dc0cb477eac92",
       "canonicalization": "distinct-active-provider-tuple",
       "controller_id": "native-ellipsoid-mpc/1",
       "dimension": 2,
@@ -7657,7 +7657,7 @@
     },
     {
       "candidate_id": "native-composition/92a00d7038d94097f1aa4c0466cf4837861707de1326f97a36878f88c5291d44",
-      "canonical_graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-58b60cf2e986fe64",
+      "canonical_graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-031ba7c22df4a741",
       "canonicalization": "distinct-active-provider-tuple",
       "controller_id": "native-ellipsoid-mpc/1",
       "dimension": 2,
@@ -30070,8 +30070,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "27121d1d6afbfeb6a4fc423246b23728ff768b968067f8a143f2768b56cb0f91",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-27121d1d6afbfeb6",
+      "graph_fingerprint": "600345a5264006d32e0b9cd4fa2e87c5d28fbbdab7f145bf3480648c019e88b8",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-600345a5264006d3",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -30171,7 +30171,7 @@
         },
         {
           "path": "src/geometry/source_index_hull.cpp",
-          "sha256": "af49470f8b95c5e408ed6640c6bf79708ed09722442d59fc5c05d916478f0ae5"
+          "sha256": "e85e18ac82db60481d6bceb0c28d9297d02a6b8a4e18b12c278dfe5d1985698d"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
@@ -30286,8 +30286,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "61bc8420a0035f88f842c76f0a13ff2bebb099bcaa48894f628da97b0284c4cb",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-61bc8420a0035f88",
+      "graph_fingerprint": "897d69e0cef151fd88bb90a3ed5e04471c46893989082a39e2536433abf85acf",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-897d69e0cef151fd",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -30387,7 +30387,7 @@
         },
         {
           "path": "src/geometry/source_index_hull.cpp",
-          "sha256": "af49470f8b95c5e408ed6640c6bf79708ed09722442d59fc5c05d916478f0ae5"
+          "sha256": "e85e18ac82db60481d6bceb0c28d9297d02a6b8a4e18b12c278dfe5d1985698d"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
@@ -38104,8 +38104,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "6ded424bd398437cb58ebd3eb82a0fa592e1a99a6ed826827cc90895ded7e6a5",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-6ded424bd398437c",
+      "graph_fingerprint": "627dfd3d804cdab6797a863ed1157479dc0b34ea38f9c42d7e063b6198705f04",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-627dfd3d804cdab6",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -38218,7 +38218,7 @@
         },
         {
           "path": "src/geometry/source_index_hull.cpp",
-          "sha256": "af49470f8b95c5e408ed6640c6bf79708ed09722442d59fc5c05d916478f0ae5"
+          "sha256": "e85e18ac82db60481d6bceb0c28d9297d02a6b8a4e18b12c278dfe5d1985698d"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
@@ -38346,8 +38346,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "ec0ab1cdbd48b697e30be2520ecf7f1dcbcb6b03c53fd8a37797e300d2e8f549",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-ec0ab1cdbd48b697",
+      "graph_fingerprint": "e26d2e60d47ed0b7be448c2b82838b573996e35c44113ec33d28da8e7834baaf",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-e26d2e60d47ed0b7",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -38460,7 +38460,7 @@
         },
         {
           "path": "src/geometry/source_index_hull.cpp",
-          "sha256": "af49470f8b95c5e408ed6640c6bf79708ed09722442d59fc5c05d916478f0ae5"
+          "sha256": "e85e18ac82db60481d6bceb0c28d9297d02a6b8a4e18b12c278dfe5d1985698d"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
@@ -46185,8 +46185,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "dd774606668fe63ff9f9a7ee72fd54c45479ae49804f28b6175868e0c56b2ae3",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-dd774606668fe63f",
+      "graph_fingerprint": "a1101cf3792e86327cdd20552f02c1c7db340bbd0662d73e68aeb66836626e58",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-a1101cf3792e8632",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -46299,7 +46299,7 @@
         },
         {
           "path": "src/geometry/source_index_hull.cpp",
-          "sha256": "af49470f8b95c5e408ed6640c6bf79708ed09722442d59fc5c05d916478f0ae5"
+          "sha256": "e85e18ac82db60481d6bceb0c28d9297d02a6b8a4e18b12c278dfe5d1985698d"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
@@ -46427,8 +46427,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "16b6a61b42aa9a6134a71a2315d9fc5f5b0da46783d24d9b7691ba5e14fafffb",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-16b6a61b42aa9a61",
+      "graph_fingerprint": "d1cae4e6b0b0a74ee5038d2697ae073ca8442b34c208e7aadf63dafa99d508ee",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-d1cae4e6b0b0a74e",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -46541,7 +46541,7 @@
         },
         {
           "path": "src/geometry/source_index_hull.cpp",
-          "sha256": "af49470f8b95c5e408ed6640c6bf79708ed09722442d59fc5c05d916478f0ae5"
+          "sha256": "e85e18ac82db60481d6bceb0c28d9297d02a6b8a4e18b12c278dfe5d1985698d"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
@@ -54266,8 +54266,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "a73ee79498984953fa93ff758bb2eec343f0b40ab2ee1c2eac113487da11344e",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-a73ee79498984953",
+      "graph_fingerprint": "353e92cf803f2b97c7f9fcda861197382756f2c28908e41ac90b9f6895133b99",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-353e92cf803f2b97",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -54380,7 +54380,7 @@
         },
         {
           "path": "src/geometry/source_index_hull.cpp",
-          "sha256": "af49470f8b95c5e408ed6640c6bf79708ed09722442d59fc5c05d916478f0ae5"
+          "sha256": "e85e18ac82db60481d6bceb0c28d9297d02a6b8a4e18b12c278dfe5d1985698d"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
@@ -54508,8 +54508,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "39d269010d8e49ec745ee4b573ab55dab99816aa67679bccc4efb1ef5425faa3",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-39d269010d8e49ec",
+      "graph_fingerprint": "05501e17701d8eb35b99eee2924a800ecf6f5c6b24f145f4e89ec4b8a59044ef",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-05501e17701d8eb3",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -54622,7 +54622,7 @@
         },
         {
           "path": "src/geometry/source_index_hull.cpp",
-          "sha256": "af49470f8b95c5e408ed6640c6bf79708ed09722442d59fc5c05d916478f0ae5"
+          "sha256": "e85e18ac82db60481d6bceb0c28d9297d02a6b8a4e18b12c278dfe5d1985698d"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
@@ -62347,8 +62347,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "066556aa737c62b18631e06f29494f771c8f196f234472780ef77f54de0e89e8",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-066556aa737c62b1",
+      "graph_fingerprint": "9f3dc0cb477eac924a3c8526ecfc608109e4eda181407e05f4c16783d6d4db1e",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-9f3dc0cb477eac92",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -62461,7 +62461,7 @@
         },
         {
           "path": "src/geometry/source_index_hull.cpp",
-          "sha256": "af49470f8b95c5e408ed6640c6bf79708ed09722442d59fc5c05d916478f0ae5"
+          "sha256": "e85e18ac82db60481d6bceb0c28d9297d02a6b8a4e18b12c278dfe5d1985698d"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
@@ -62589,8 +62589,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "58b60cf2e986fe644971d1de37f5bd7ab7933aa1931937b9e163a665ce867624",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-58b60cf2e986fe64",
+      "graph_fingerprint": "031ba7c22df4a741e4c3d464897752c4b27fb3576255724941b8db6eb901b8d5",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-composition/1/cfg-031ba7c22df4a741",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -62703,7 +62703,7 @@
         },
         {
           "path": "src/geometry/source_index_hull.cpp",
-          "sha256": "af49470f8b95c5e408ed6640c6bf79708ed09722442d59fc5c05d916478f0ae5"
+          "sha256": "e85e18ac82db60481d6bceb0c28d9297d02a6b8a4e18b12c278dfe5d1985698d"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
