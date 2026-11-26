@@ -1,0 +1,14 @@
+{
+  "schema": "csl.app02-nonaxis-publications/1",
+  "reports": [
+    {
+      "report_id": "app02-nonaxis-ab-b6a4479fad2ac722",
+      "source_commit": "3c3c694331497f2f3e991dbe7c1a6e328052af56",
+      "schema": "csl.app02-nonaxis-campaign/1",
+      "manifest_sha256": "43d73a69a3b6ec99e72ef8ed2df729701be79cc94a62a2287e5bbd31c6e28516",
+      "zip_sha256": "5eb1a9ad363fd6e876decbc4b66d9ecafb3b7ab3c5a82b5335897d2634bca693",
+      "builder_sha256": "ad3965c06125ac6e6e79dad7cbf9be804ab2831eb269592d142fffd6e1d2a615",
+      "stager_sha256": "ad3965c06125ac6e6e79dad7cbf9be804ab2831eb269592d142fffd6e1d2a615"
+    }
+  ]
+}

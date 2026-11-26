@@ -500,6 +500,30 @@ comparator, source-mapped limiter, speedup, finite approximation error bound or
 validated real-arithmetic claim. Independent saved-result review, main-only
 Pages deployment and live-byte verification remain publication gates.
 
+## APP-02 nonaxis parallelotope frames
+
+Issue [APP-02 #1096](https://github.com/butahlecoq/controlled-systems-lab/issues/1096)
+has a saved [paired A/B campaign](../../reports/algorithm-results/app02-nonaxis-ab-b6a4479fad2ac722/)
+at source commit `3c3c694331497f2f3e991dbe7c1a6e328052af56`. The campaign runs the
+admitted axis profile against the fixed 45° frame and against the deterministic
+support-selected rule on Lotka–Volterra, Earth orbit and fuel transfer, with one
+excluded warmup and five alternating measured repetitions per side (60 measured
+attempts, all complete). The saved bundle keeps the projection figures, sampled
+directional support excess for 32 directions per 2D plane, certified
+frame-direction margins, per-attempt budgets, and the machine-readable summaries.
+Framed memberships and independent geometry receipts passed 5,580/5,580, and all
+certified frame-direction margins were non-negative within floating-point noise.
+
+Two limits stay explicit. The support-selected rule retained the axis frame for
+all 1,395 selected memberships, so axis vs selected is a numerical near-control
+rather than a second nonaxis treatment; the fixed 45° profile is the only realized
+nonaxis orientation. On Earth orbit that rotated profile exported frame bounds up
+to `3.7e37` and five numeric blow-up attempts, so it is a conditioning finding,
+not a successful nonaxis result. Sampled excess remains a diagnostic, not a uniform
+error bound, and the timings support no speed winner. Independent saved-result
+review, main-only Pages deployment and live-byte verification remain publication
+gates.
+
 ## APP-03 zonotope reduction and enclosure
 
 Issue [APP-03 #42](https://github.com/butahlecoq/controlled-systems-lab/issues/42)
