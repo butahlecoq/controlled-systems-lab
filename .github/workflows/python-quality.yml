@@ -79,6 +79,16 @@ on:
       - 'scripts/reports/mpc06_online/model.py'
       - 'reports/algorithm-results/mpc06-completion-v2/**'
       - 'reports/algorithm-results/mpc06-online-anchor-portable-v3/**'
+      - 'scripts/reports/mpc03/b08_report.py'
+      - 'scripts/reports/mpc03/b08_miqcp.py'
+      - 'scripts/reports/mpc05/reference.py'
+      - 'scripts/reports/stage_mpc03_b08.py'
+      - 'scripts/reports/stage_mpc05_causal_tree.py'
+      - 'tests/reporting/test_mpc03_b08_report.py'
+      - 'tests/reporting/test_mpc05_causal_tree_publication.py'
+      - 'tests/reporting/test_mpc05_reference.py'
+      - 'reports/algorithm-results/mpc03-b08-l04-miQCP-v1/**'
+      - 'reports/algorithm-results/mpc05-causal-tree-pilot-v2/**'
       - 'tests/reporting/test_report_data.py'
       - 'tests/reporting/test_render.py'
       - 'tests/reporting/test_publication_policy.py'
@@ -1249,6 +1259,8 @@ jobs:
         run: python -m unittest tests.reporting.test_mpc06_delivery tests.reporting.test_mpc06_delivery_publication
       - name: Replay all three saved Strategy B profiles
         run: python -m unittest tests.reporting.test_syn04_strategy_b_report tests.reporting.test_syn04_ts02_report tests.reporting.test_syn04_ts03_report
+      - name: Replay the MPC-03 B08 and MPC-05 causal-tree saved reports
+        run: python -m unittest tests.reporting.test_mpc03_b08_report tests.reporting.test_mpc05_causal_tree_publication tests.reporting.test_mpc05_reference
       - name: Check the four-state projection approximation report
         run: python -m unittest discover -s tests/reporting -p 'test_four_state_projection_approximations.py'
       - name: Replay saved EXP-04, EXT-05, GEO-08 and OPT-10 catalogues
