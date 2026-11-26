@@ -383,6 +383,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "discrete_mpc_2d-output.csv", "discrete_mpc_2d-output.txt",
             "adaptive-ode-replay.csv", "adaptive-ode-replay.html",
             "adaptive-ode-replay.json", "adaptive-ode-replay.svg",
+            "source-index-geometry-2d.html", "source-index-geometry-2d.svg",
+            "source-index-geometry-2d-records.json",
             "kpabep-near-collinear-20261115.html", "kpabep-near-collinear-20261115.json",
             "parallelotope-frame-cover-2d.html", "parallelotope-frame-cover-2d.json",
             "fuel-b06-viz06-export.json", "fuel-b06-viz03.html", "fuel-b06-viz06-before.svg",

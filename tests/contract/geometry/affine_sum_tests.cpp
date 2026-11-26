@@ -574,7 +574,7 @@ TEST_CASE("built-in source-index QuickHull rechecks cancellation and deadline af
     CHECK(deadline_result.stop_reason=="deadline_expired_during_kernel");
 }
 
-TEST_CASE("source-index BTULSHOR propagates cooperative interruption through bounded legacy loops") {
+TEST_CASE("source-index candidate-elimination hull reducer propagates cooperative interruption through bounded legacy loops") {
     std::vector<Vector> points;
     points.reserve(100000);
     for(std::size_t i=0;i<100000;++i)

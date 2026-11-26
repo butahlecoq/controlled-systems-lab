@@ -1,0 +1,176 @@
+{
+  "schema": "csl.source-index-geometry-display-names/1",
+  "description": "Canonical user-facing names for the recovered legacy source-index geometry routines. Display names and descriptive aliases do not change provider IDs, public C++ symbols, paths, saved keys, report routes, hashes, ZIPs or numerical behavior. Legacy names remain accepted compatibility and provenance aliases.",
+  "family": {
+    "key": "legacy-source-index-geometry",
+    "display_name": "Legacy source-index geometry routines",
+    "legacy_aliases": ["BTULSHOR", "btulshor", "legacy-btulshor"],
+    "provider_ids": [
+      "csl.hull.source.btulshor-kpabep",
+      "csl.legacy.btulshor.kpabep.source-v1",
+      "csl.legacy.btulshor.modif.source-v1",
+      "csl.legacy.btulshor.reach.source-v1"
+    ],
+    "namespaces": ["csl::geometry::legacy_btulshor"],
+    "public_symbols": [
+      "csl::geometry::LegacyKpabepOptions",
+      "csl::geometry::make_legacy_kpabep_source_index_registration",
+      "csl::geometry::make_source_index_hull_catalogue"
+    ],
+    "paths": [
+      "include/csl/geometry/legacy_btulshor.hpp",
+      "include/csl/geometry/source_index_hull.hpp",
+      "src/geometry/legacy_btulshor.cpp",
+      "src/geometry/source_index_hull.cpp",
+      "examples/source_index_geometry_2d.cpp",
+      "examples/geometry/kpabep_near_collinear.cpp"
+    ]
+  },
+  "routines": [
+    {
+      "key": "kpabep",
+      "display_name": "Candidate-elimination hull reducer",
+      "legacy_aliases": ["KPABEP", "kpabep"],
+      "descriptive_aliases": ["candidate-elimination", "candidate-elimination-hull-reducer"],
+      "cli_aliases": [
+        "btulshor",
+        "candidate-elimination",
+        "candidate-elimination-hull-reducer",
+        "legacy-source-index"
+      ],
+      "provider_ids": [
+        "csl.hull.source.btulshor-kpabep",
+        "csl.legacy.btulshor.kpabep.source-v1"
+      ],
+      "public_symbols": [
+        "csl::geometry::legacy_btulshor::KpabepCandidateStep",
+        "csl::geometry::legacy_btulshor::KpabepResult",
+        "csl::geometry::legacy_btulshor::KpabepPort",
+        "csl::geometry::legacy_btulshor::kpabep",
+        "csl::geometry::legacy_btulshor::source_kpabep_port",
+        "csl::geometry::make_legacy_kpabep_source_index_registration"
+      ],
+      "meaning": "Repeatedly queries the simplex pivot oracle to eliminate candidate points and returns retained original point IDs. The result can be an inner approximation when tolerance removes a true vertex."
+    },
+    {
+      "key": "modif",
+      "display_name": "Simplex pivot oracle",
+      "legacy_aliases": ["MODIF", "modif"],
+      "descriptive_aliases": ["simplex-pivot", "simplex-pivot-oracle"],
+      "cli_aliases": [],
+      "provider_ids": ["csl.legacy.btulshor.modif.source-v1"],
+      "public_symbols": [
+        "csl::geometry::legacy_btulshor::ModifRequest",
+        "csl::geometry::legacy_btulshor::ModifResult",
+        "csl::geometry::legacy_btulshor::ModifPort",
+        "csl::geometry::legacy_btulshor::modif",
+        "csl::geometry::legacy_btulshor::source_modif_port"
+      ],
+      "meaning": "Dense simplex pivot and feasibility oracle with raw source statuses, trace and tolerance."
+    },
+    {
+      "key": "reach",
+      "display_name": "Affine reachability vertex generator",
+      "legacy_aliases": ["REACH", "reach"],
+      "descriptive_aliases": ["affine-reachability", "affine-reachability-vertex-generator"],
+      "cli_aliases": [],
+      "provider_ids": ["csl.legacy.btulshor.reach.source-v1"],
+      "public_symbols": [
+        "csl::geometry::legacy_btulshor::ReachRequest",
+        "csl::geometry::legacy_btulshor::ReachResult",
+        "csl::geometry::legacy_btulshor::ReachVertexSource",
+        "csl::geometry::legacy_btulshor::reach"
+      ],
+      "meaning": "Generates affine images and translated initial/control vertex pairs, then applies the candidate-elimination hull reducer."
+    }
+  ],
+  "examples": [
+    {
+      "key": "source-index-geometry-2d",
+      "display_name": "Legacy source-index geometry routines in a 2D pipeline",
+      "legacy_aliases": ["BTULSHOR", "KPABEP", "MODIF"],
+      "route": "examples/source-index-geometry-2d.html",
+      "figure_route": "examples/source-index-geometry-2d.svg",
+      "record_route": "examples/source-index-geometry-2d-records.json",
+      "owner": "docs/examples/source-index-geometry-2d.html",
+      "saved_record": "docs/examples/source-index-geometry-2d-records.json"
+    },
+    {
+      "key": "near-tolerance",
+      "display_name": "When tolerance removes a true hull vertex",
+      "legacy_aliases": [
+        "Near-collinear KPABEP inclusion failure",
+        "KPABEP near-collinear",
+        "near-collinear KPABEP"
+      ],
+      "route": "examples/kpabep-near-collinear-20261115.html",
+      "record_route": "examples/kpabep-near-collinear-20261115.json",
+      "owner": "docs/examples/kpabep-near-collinear-20261115.html",
+      "saved_record": "docs/examples/kpabep-near-collinear-20261115.json"
+    }
+  ],
+  "report_families": [
+    {
+      "key": "btulshor-source-faithful",
+      "display_name": "Legacy source-index geometry routines: saved hull comparison",
+      "legacy_aliases": [
+        "BTULSHOR source-faithful hull comparison",
+        "Source-faithful BTULSHOR hull comparison"
+      ],
+      "route_pattern": "btulshor-source-faithful-[0-9a-f]{64}",
+      "source_report_id": "btulshor-source-faithful-20261110-v1",
+      "gallery_anchor": "saved-figure-btulshor-source-faithful"
+    }
+  ],
+  "stable_routes": [
+    "examples/source-index-geometry-2d.html",
+    "examples/source-index-geometry-2d.svg",
+    "examples/source-index-geometry-2d-records.json",
+    "examples/kpabep-near-collinear-20261115.html",
+    "examples/kpabep-near-collinear-20261115.json",
+    "btulshor-source-faithful-4adbb0ed60b8c2f2d5f83ebef2ee1bb75e0dcb8c627f369e18f7826e438e8d39/index.html",
+    "btulshor-source-faithful-4adbb0ed60b8c2f2d5f83ebef2ee1bb75e0dcb8c627f369e18f7826e438e8d39.zip"
+  ],
+  "saved_evidence": [
+    {
+      "path": "docs/examples/source-index-geometry-2d-records.json",
+      "sha256": "d52d76290115a99bc5e949d3a1e0e727ed3d70b99df2f0fdfdbdf1a1e45fb581"
+    },
+    {
+      "path": "docs/examples/kpabep-near-collinear-20261115.json",
+      "sha256": "c1f9393fc22dc0d7e9836ba5eb7010ff121d2326743482798398fe1cbbd02385"
+    },
+    {
+      "path": "docs/research/evidence/btulshor-near-tolerance-observations.json",
+      "sha256": "772c7d4fb43e8701d45fffa5d2b879b8c81375dd96d89978174051a7940d0752"
+    },
+    {
+      "path": "docs/research/evidence/btulshor-original-body-recovery.json",
+      "sha256": "e3d5176f4760d9f3ed699578ed9f7f8206790360534fa833ffccc5de007d992e"
+    },
+    {
+      "path": "docs/research/evidence/btulshor-source-operation-counts.json",
+      "sha256": "7be9008d83e8fba903636a29d4219246575ec1fd2343b3a21c1428011bb72840"
+    },
+    {
+      "path": "docs/research/evidence/btulshor-source-oracle-fixtures.json",
+      "sha256": "298cbc5e178fc0fe8ef81c00365bf47b58df7ef5372d6ade7080da67c3abe212"
+    },
+    {
+      "path": "reports/algorithm-results/btulshor-source-faithful-20261110-v1/SHA256SUMS",
+      "sha256": "462be4a456a05cdf349e643517a63fe66e1af4436757b3d72bf133bfe2c6987d"
+    },
+    {
+      "path": "reports/algorithm-results/btulshor-source-faithful-20261110-v1/manifest.json",
+      "sha256": "8d3bc25fb8dfd75b1c43bfffe86b794750e2f16dd712d9be84aa141a9c1c6a05"
+    },
+    {
+      "path": "reports/algorithm-results/btulshor-source-faithful-20261110-v1/btulshor-source-faithful-20261110-v1.zip",
+      "sha256": "22edd7aaf7c7333d5a480fc71e7189069bfeaa7abedbd64f78463567b1ad1aa0"
+    },
+    {
+      "path": "reports/algorithm-results/btulshor-source-faithful-4adbb0ed60b8c2f2d5f83ebef2ee1bb75e0dcb8c627f369e18f7826e438e8d39.zip",
+      "sha256": "304e58d437ee80860c3d7e3ce52929ccdcd91fee2258a3515ebef496b851fe0b"
+    }
+  ]
+}
