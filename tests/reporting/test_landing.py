@@ -97,6 +97,12 @@ class LandingTests(unittest.TestCase):
         self.assertIn("single case", family.summary)
         self.assertIn("do not establish a general performance comparison", family.summary)
 
+    def test_nonaxis_campaign_route_has_a_bounded_extensions_description(self):
+        family = landing.FAMILIES[landing.family_for("app02-nonaxis-ab-b6a4479fad2ac722")]
+        self.assertEqual(family.group, "extensions")
+        self.assertIn("retained the axis frame", family.summary)
+        self.assertIn("no nonaxis benefit or speed winner", family.summary)
+
     def test_repeated_it17_dyadic_pilot_has_a_geometry_family_description(self):
         family = landing.FAMILIES[landing.family_for("exp02-it17-dyadic-interior-20261027-r1")]
         self.assertEqual(family.group, "geometry")
