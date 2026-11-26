@@ -149,8 +149,6 @@ inline std::variant<double, std::string> certify_h_box(const sets::HRepresentati
         if (!is_corner || corner_expanded[corner])
             continue;
         corner_expanded[corner] = true;
-        // A degenerate coordinate is both endpoints, so one V point covers
-        // every distinct corner mask that differs only on those axes.
         const std::size_t expansions = std::size_t{1} << degenerate_axes.size();
         for (std::size_t choice = 0; choice < expansions; ++choice) {
             std::size_t mask = corner;

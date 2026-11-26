@@ -97,8 +97,6 @@ std::string identity(const registry::Provenance &provenance) {
     return provenance.actual->id.value + "@" + provenance.actual->version;
 }
 std::string lp_query_problem_id(const GeometryRequestIdentity &request) {
-    // Length-prefix each field so distinct concurrent geometry requests never
-    // alias the problem IDs used by the registered hull-membership LP queries.
     const auto field = [](const std::string &value) {
         return std::to_string(value.size()) + ":" + value;
     };
@@ -400,8 +398,6 @@ bool valid_reduction(const PointCloud &cloud, const HullReduction &reduction,
         if (!std::isfinite(weight_sums[point]) ||
             std::abs(weight_sums[point] - 1.0L) > normalization_tolerance)
             return false;
-        // Compute each local reconstruction residual from the original candidate
-        // coordinates; subsequent certificate dependencies are handled below.
         for (std::size_t coordinate = 0; coordinate < cloud.points[point].size(); ++coordinate) {
             long double reconstructed = 0.0L;
             for (const auto &term : certificate.combination)
@@ -414,9 +410,6 @@ bool valid_reduction(const PointCloud &cloud, const HullReduction &reduction,
             error_bounds[point] = std::max(error_bounds[point], residual);
         }
     }
-    // A certificate for x_i may refer to another removed point x_j. Propagate
-    // conservative infinity-norm residual bounds from final retained points
-    // through this DAG in linear memory and time in the certificate edge count.
     for (std::size_t point = 0; point < count; ++point)
         if (certificates[point] && remaining_children[point] == 0)
             ready.push_back(point);

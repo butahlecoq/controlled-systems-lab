@@ -125,9 +125,6 @@ compose_to_retained(std::size_t candidate, const std::vector<unsigned char> &is_
     std::vector<std::size_t> indegree(count, 0);
     std::vector<std::size_t> nodes{candidate};
     reachable[candidate] = 1;
-    // Collect only this certificate's dependency graph. The subsequent
-    // topological pass composes it using O(number of input points) workspace,
-    // without retaining a dense expansion for every removed point.
     for (std::size_t index = 0; index < nodes.size(); ++index) {
         const auto point = nodes[index];
         const auto *certificate = certificate_by_point[point];
@@ -231,8 +228,6 @@ void restore_certificates_outside_policy(const PointCloud &cloud, HullReduction 
             const auto candidate = it->removed;
             auto combination = compose_to_retained(candidate, is_retained, certificate_by_point);
             if (!combination || !within_policy(cloud, candidate, *combination, policy)) {
-                // Restoring the latest failed support point can make earlier
-                // dependent certificates valid on the next pass.
                 latest_invalid = candidate;
                 break;
             }
