@@ -24,8 +24,6 @@ inline bool independent_directions(const Matrix &rows) {
         negative.negative = !negative.negative;
         return add_product(determinant, negative, decode(rows.values[2])) && !is_zero(determinant);
     }
-    // Elimination only proposes a binary64 inverse. Admission below proves
-    // nonsingularity exactly, independently of pivot growth or working precision.
     const auto n = rows.rows;
     Vector work = rows.values;
     Vector inverse(n * n, 0.0);
@@ -70,9 +68,6 @@ inline bool independent_directions(const Matrix &rows) {
                      [](double value) { return std::isfinite(value); }))
         return false;
 
-    // ||I - B A||_infinity < 1 implies B A, hence square A, is invertible
-    // (Neumann series). Each residual and absolute row sum uses exact dyadics
-    // of the original A and candidate B, with no rounded norm comparison.
     Integer one;
     if (!add_dyadic(one, decode(1.0)))
         return false;
