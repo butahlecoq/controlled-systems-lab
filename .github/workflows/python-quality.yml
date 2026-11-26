@@ -79,6 +79,13 @@ on:
       - 'scripts/reports/mpc06_online/model.py'
       - 'reports/algorithm-results/mpc06-completion-v2/**'
       - 'reports/algorithm-results/mpc06-online-anchor-portable-v3/**'
+      - 'scripts/reports/mpc06_offline/**'
+      - 'scripts/reports/stage_mpc06_offline_costs.py'
+      - 'tests/reporting/test_mpc06_offline.py'
+      - 'reports/algorithm-results/mpc06-online-anchor-v1/result.json'
+      - 'reports/algorithm-results/mpc06-completion-v2/invariant-tightenings.svg'
+      - 'reports/algorithm-results/mpc06-offline-costs-8f58473d-20261110/**'
+      - 'reports/published-route-preservation/mpc06-offline-costs-*.zip'
       - 'scripts/reports/mpc03/b08_report.py'
       - 'scripts/reports/mpc03/b08_miqcp.py'
       - 'scripts/reports/mpc05/reference.py'
@@ -1257,6 +1264,8 @@ jobs:
           diff -r "$source" "$site/$route"
       - name: Replay the saved MPC-06 completion report and archive
         run: python -m unittest tests.reporting.test_mpc06_delivery tests.reporting.test_mpc06_delivery_publication
+      - name: Replay the saved MPC-06 offline-cost study and archive
+        run: python -m unittest tests.reporting.test_mpc06_offline
       - name: Replay all three saved Strategy B profiles
         run: python -m unittest tests.reporting.test_syn04_strategy_b_report tests.reporting.test_syn04_ts02_report tests.reporting.test_syn04_ts03_report
       - name: Replay the MPC-03 B08 and MPC-05 causal-tree saved reports

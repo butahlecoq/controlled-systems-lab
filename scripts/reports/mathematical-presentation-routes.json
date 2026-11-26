@@ -1794,6 +1794,11 @@
       "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
     },
     {
+      "route": "mpc06-offline-costs-f099fc3168c7976288e4/index.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_mpc06_offline_costs.py"
+    },
+    {
       "route": "mpc06-offline-costs-ff0186caf3e1ac2f4425/index.html",
       "disposition": "frozen",
       "owner": "reports/published-route-preservation/manifest.json",
