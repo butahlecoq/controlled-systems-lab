@@ -1108,6 +1108,14 @@ class _HistoricalPublicationPin(TypedDict):
 
 
 _HISTORICAL_PUBLICATIONS: dict[str, _HistoricalPublicationPin] = {
+    "opt12-7b732a53716c": {
+        "report_id": "opt12-warm-start-b45c68fc3a6b164919ba3dac5e863688fd39cbb867dcc06c75f1e124c94b1386",
+        "inventory_sha256": "2d3186d04ab0aec0d411fcd609f0dd9e52cab41076043a8ca8f3d6156565b23f",
+        "identity_files_sha256": {
+            "opt12-7b732a53716c.zip": "10c245099268e77fcc2ecfba31f5cca9cbf5cf247d782fc058f66f0a5ea75e7e"
+        },
+        "zip_sha256": "116a0a1dd5b1551f1ef37591da88af10682dfe822a782c9b1b6d0a63366a85ed",
+    },
     "geo02-20261012T235755Z-6b1f504ad3db": {
         "identity_files_sha256": {
             "geo02-20261012T235755Z-6b1f504ad3db.zip": "faa9ec723875f6ab9072b38aaa0f3d0d4be30eb7732b887f1c9aa99f46d00b40"
@@ -1141,6 +1149,14 @@ _HISTORICAL_PUBLICATIONS: dict[str, _HistoricalPublicationPin] = {
         "inventory_sha256": "4e01fdca414522270a70b80818273c1e7b8baf80a223d4e76514936a4cb46f1c",
         "report_id": "geo05-8918ad3ac4b0b3d1ff9c8b807d6b509f324ef3e9b11716be496c8e6e437f6795",
         "zip_sha256": "51826297b765b011423ca58fb3160fbdd4884c176d73adaf5eabc5f2508fefba",
+    },
+    "geo06-b010fb3df212604b": {
+        "identity_files_sha256": {
+            "geo06-b010fb3df212604b.source.zip": "6aa7302c1f50f57006d66af5b5833dc9e7944c0a263513e529f1e924138f093b"
+        },
+        "inventory_sha256": "9842dc91055aa2c4c1984a706028684ea72ca713d0117b2c8ff450faddb58336",
+        "report_id": "geo06-f8bee6d8f950343215dd24afeff5091669b8940e7d2106e6834e904b6ec4c074",
+        "zip_sha256": "9523a907b67dd576c6a107b849b6cd415095a711e839bcbdc4f52e77d8d6b6d8",
     },
     "opt04-20261013T172839Z-6451c4b89d3b": {
         "inventory_sha256": "238ff015f68d98e385593d844436a562317e12bb0f7cdedbe07e96af7f32bda7",

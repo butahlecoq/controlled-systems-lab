@@ -1,24 +1,35 @@
 """Validate EXT-07 capture receipts and save an immutable report record."""
+
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
 import os
-from pathlib import Path
-import shutil
 import statistics
 import subprocess
-
+from pathlib import Path
 
 LEGACY_SOURCE_FILES = (
-    "driver.cpp", "smoke.jsonl", "measure.jsonl", "smoke.stderr.txt",
-    "measure.stderr.txt", "prebuild.json", "postrun.json", "host.json",
-    "configure.log", "build.log", "CMakeCXXCompiler.raw.cmake",
+    "driver.cpp",
+    "smoke.jsonl",
+    "measure.jsonl",
+    "smoke.stderr.txt",
+    "measure.stderr.txt",
+    "prebuild.json",
+    "postrun.json",
+    "host.json",
+    "configure.log",
+    "build.log",
+    "CMakeCXXCompiler.raw.cmake",
 )
 PROCESS_CPU_SOURCE_FILES = ("driver.cpp", "process_cpu_json.hpp", *LEGACY_SOURCE_FILES[1:])
-SOURCE_FILES = ("driver.cpp", "process_cpu_json.hpp", "operation_cpu_json.hpp",
-                *LEGACY_SOURCE_FILES[1:])
+SOURCE_FILES = (
+    "driver.cpp",
+    "process_cpu_json.hpp",
+    "operation_cpu_json.hpp",
+    *LEGACY_SOURCE_FILES[1:],
+)
 EXPECTED_PROVIDER = "csl.lp.highs@1.1.0+highs.1.11.0"
 EXPECTED_VERIFIER = "csl.hybrid.one-step-scalar-interval"
 TOLERANCE = 1e-8
@@ -29,9 +40,11 @@ def source_files_for_record(record: dict) -> tuple[str, ...]:
         return LEGACY_SOURCE_FILES
     if record.get("schema") == "csl.ext07-hybrid-profile-report/2":
         return PROCESS_CPU_SOURCE_FILES
-    require(record.get("schema") in {"csl.ext07-hybrid-profile-report/3",
-                                      "csl.ext07-hybrid-profile-report/4"},
-            "Unsupported EXT-07 report schema")
+    require(
+        record.get("schema")
+        in {"csl.ext07-hybrid-profile-report/3", "csl.ext07-hybrid-profile-report/4"},
+        "Unsupported EXT-07 report schema",
+    )
     return SOURCE_FILES
 
 
@@ -55,70 +68,115 @@ def read_json(path: Path) -> dict:
 
 
 def jsonl(path: Path, expected_count: int) -> list[dict]:
-    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
-    require(len(rows) == expected_count and all(isinstance(row, dict) for row in rows),
-            "EXT-07 JSONL row count or shape differs: " + path.name)
+    rows = [
+        json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()
+    ]
+    require(
+        len(rows) == expected_count and all(isinstance(row, dict) for row in rows),
+        "EXT-07 JSONL row count or shape differs: " + path.name,
+    )
     return rows
 
 
-def validate_run(row: dict, phase: str, repetition: int, calls: int,
-                 process_cpu: bool = True, operation_cpu: bool = False,
-                 provider_invocation: bool = False) -> None:
-    require(row.get("phase") == phase and row.get("repetition") == repetition and
-            row.get("calls") == calls and row.get("failures") == 0 and
-            row.get("status") == "passed" and row.get("path_count") == 1,
-            "EXT-07 run status or identity differs")
-    require(row.get("relation_rows") == 7 and row.get("relation_matrix_elements") == 28,
-            "EXT-07 joint relation resource record differs")
-    require(abs(row.get("objective", float("nan"))) <= TOLERANCE and
-            abs(row.get("control", float("nan"))) <= TOLERANCE,
-            "EXT-07 optimizer result differs from analytic zero minimum")
-    require(row.get("provider") == EXPECTED_PROVIDER and row.get("termination") == "completed" and
-            row.get("outcome") == "optimal", "EXT-07 solver identity or outcome differs")
-    require(row.get("verifier") == EXPECTED_VERIFIER and row.get("verifier_version") == "1" and
-            row.get("feasibility") == row.get("optimality") == row.get("coverage") == "established",
-            "EXT-07 complete-family verifier result differs")
+def validate_run(
+    row: dict,
+    phase: str,
+    repetition: int,
+    calls: int,
+    process_cpu: bool = True,
+    operation_cpu: bool = False,
+    provider_invocation: bool = False,
+) -> None:
+    require(
+        row.get("phase") == phase
+        and row.get("repetition") == repetition
+        and row.get("calls") == calls
+        and row.get("failures") == 0
+        and row.get("status") == "passed"
+        and row.get("path_count") == 1,
+        "EXT-07 run status or identity differs",
+    )
+    require(
+        row.get("relation_rows") == 7 and row.get("relation_matrix_elements") == 28,
+        "EXT-07 joint relation resource record differs",
+    )
+    require(
+        abs(row.get("objective", float("nan"))) <= TOLERANCE
+        and abs(row.get("control", float("nan"))) <= TOLERANCE,
+        "EXT-07 optimizer result differs from analytic zero minimum",
+    )
+    require(
+        row.get("provider") == EXPECTED_PROVIDER
+        and row.get("termination") == "completed"
+        and row.get("outcome") == "optimal",
+        "EXT-07 solver identity or outcome differs",
+    )
+    require(
+        row.get("verifier") == EXPECTED_VERIFIER
+        and row.get("verifier_version") == "1"
+        and row.get("feasibility") == row.get("optimality") == row.get("coverage") == "established",
+        "EXT-07 complete-family verifier result differs",
+    )
     if process_cpu:
         validate_process_cpu_observations(row, calls, 1)
     if operation_cpu:
         validate_operation_observations(row, calls, [8])
     if provider_invocation:
         validate_provider_invocation_observations(row, calls, 1)
-    for name in ("setup_total_ns", "assembly_total_ns", "solve_total_ns", "verify_total_ns",
-                 "end_to_end_total_ns"):
-        require(isinstance(row.get(name), int) and row[name] > 0,
-                "EXT-07 timing field unavailable or nonpositive: " + name)
+    for name in (
+        "setup_total_ns",
+        "assembly_total_ns",
+        "solve_total_ns",
+        "verify_total_ns",
+        "end_to_end_total_ns",
+    ):
+        require(
+            isinstance(row.get(name), int) and row[name] > 0,
+            "EXT-07 timing field unavailable or nonpositive: " + name,
+        )
     for name in ("objective_lower", "objective_upper"):
         value = row.get(name)
-        require(value is None or abs(value) <= TOLERANCE,
-                "EXT-07 solver objective bound excludes the analytic optimum")
+        require(
+            value is None or abs(value) <= TOLERANCE,
+            "EXT-07 solver objective bound excludes the analytic optimum",
+        )
     for name in ("primal_row_violation", "primal_variable_violation"):
         value = row.get(name)
-        require(value is None or 0 <= value <= TOLERANCE,
-                "EXT-07 solver residual exceeds the reported feasibility tolerance")
+        require(
+            value is None or 0 <= value <= TOLERANCE,
+            "EXT-07 solver residual exceeds the reported feasibility tolerance",
+        )
     require(not row.get("error"), "EXT-07 driver recorded an error")
 
 
 def validate_process_cpu_observations(row: dict, calls: int, branches: int) -> None:
     observations = row.get("process_cpu_observations")
-    require(isinstance(observations, list) and len(observations) == calls,
-            "EXT-07 process CPU observation count differs from calls")
+    if not isinstance(observations, list) or len(observations) != calls:
+        raise ValueError("EXT-07 process CPU observation count differs from calls")
     allowed_reasons = {"unsupported_platform", "clock_read_failed", "clock_regressed"}
     for call in observations:
-        require(isinstance(call, list) and len(call) == branches,
-                "EXT-07 process CPU observations do not match branch inventory")
+        require(
+            isinstance(call, list) and len(call) == branches,
+            "EXT-07 process CPU observations do not match branch inventory",
+        )
         for value in call:
             require(isinstance(value, dict), "EXT-07 process CPU observation is not an object")
             if value.get("status") == "observed":
                 nanos = value.get("nanoseconds")
-                require(isinstance(nanos, int) and not isinstance(nanos, bool) and nanos >= 0 and
-                        set(value) == {"status", "nanoseconds"},
-                        "EXT-07 process CPU duration is invalid")
+                require(
+                    isinstance(nanos, int)
+                    and not isinstance(nanos, bool)
+                    and nanos >= 0
+                    and set(value) == {"status", "nanoseconds"},
+                    "EXT-07 process CPU duration is invalid",
+                )
             else:
-                require(value.get("status") == "unavailable" and
-                        value.get("reason") in allowed_reasons and
-                        set(value) == {"status", "reason"},
-                        "EXT-07 process CPU unavailable reason is invalid")
+                require(
+                    value.get("status") == "unavailable"
+                    and value.get("reason") in allowed_reasons
+                    and set(value) == {"status", "reason"},
+                    "EXT-07 process CPU unavailable reason is invalid",
+                )
 
 
 def process_cpu_summary(rows: list[dict], branch_labels: list[str]) -> dict:
@@ -134,15 +192,17 @@ def process_cpu_summary(rows: list[dict], branch_labels: list[str]) -> dict:
                 else:
                     reason = value["reason"]
                     unavailable[reason] = unavailable.get(reason, 0) + 1
-        result.append({
-            "branch": label,
-            "observed_calls": len(observed),
-            "unavailable_calls": sum(unavailable.values()),
-            "unavailable_reasons": unavailable,
-            "min_nanoseconds": min(observed) if observed else None,
-            "median_nanoseconds": int(statistics.median(observed)) if observed else None,
-            "max_nanoseconds": max(observed) if observed else None,
-        })
+        result.append(
+            {
+                "branch": label,
+                "observed_calls": len(observed),
+                "unavailable_calls": sum(unavailable.values()),
+                "unavailable_reasons": unavailable,
+                "min_nanoseconds": min(observed) if observed else None,
+                "median_nanoseconds": int(statistics.median(observed)) if observed else None,
+                "max_nanoseconds": max(observed) if observed else None,
+            }
+        )
     return {
         "scope": "process CPU accumulated across all threads during workspace creation and branch execution",
         "attribution": "process-scoped, not provider-only; unrelated concurrent process work may contribute",
@@ -152,20 +212,27 @@ def process_cpu_summary(rows: list[dict], branch_labels: list[str]) -> dict:
 
 def validate_provider_invocation_observations(row: dict, calls: int, branches: int) -> None:
     observations = row.get("provider_invocation_observations")
-    require(isinstance(observations, list) and len(observations) == calls,
-            "EXT-07 provider invocation observation count differs from calls")
+    if not isinstance(observations, list) or len(observations) != calls:
+        raise ValueError("EXT-07 provider invocation observation count differs from calls")
     for call in observations:
-        require(isinstance(call, list) and len(call) == branches,
-                "EXT-07 provider invocation observations differ from branch inventory")
+        require(
+            isinstance(call, list) and len(call) == branches,
+            "EXT-07 provider invocation observations differ from branch inventory",
+        )
         for observation in call:
-            require(isinstance(observation, dict) and
-                    set(observation) == {"elapsed_wall_nanoseconds", "process_cpu"},
-                    "EXT-07 provider invocation observation shape differs")
+            require(
+                isinstance(observation, dict)
+                and set(observation) == {"elapsed_wall_nanoseconds", "process_cpu"},
+                "EXT-07 provider invocation observation shape differs",
+            )
             wall = observation["elapsed_wall_nanoseconds"]
-            require(isinstance(wall, int) and not isinstance(wall, bool) and wall >= 0,
-                    "EXT-07 provider invocation wall time is invalid")
+            require(
+                isinstance(wall, int) and not isinstance(wall, bool) and wall >= 0,
+                "EXT-07 provider invocation wall time is invalid",
+            )
             validate_process_cpu_observations(
-                {"process_cpu_observations": [[observation["process_cpu"]]]}, 1, 1)
+                {"process_cpu_observations": [[observation["process_cpu"]]]}, 1, 1
+            )
 
 
 def provider_invocation_summary(rows: list[dict], branch_labels: list[str]) -> dict:
@@ -179,91 +246,145 @@ def provider_invocation_summary(rows: list[dict], branch_labels: list[str]) -> d
                 wall_values.append(observation["elapsed_wall_nanoseconds"])
                 cpu_rows.append({"process_cpu_observations": [[observation["process_cpu"]]]})
         cpu = process_cpu_summary(cpu_rows, [label])["branches"][0]
-        summaries.append({
-            "path": label,
-            "observed_calls": len(wall_values),
-            "wall_min_nanoseconds": min(wall_values) if wall_values else None,
-            "wall_median_nanoseconds": int(statistics.median(wall_values)) if wall_values else None,
-            "wall_max_nanoseconds": max(wall_values) if wall_values else None,
-            "process_cpu": cpu,
-        })
+        summaries.append(
+            {
+                "path": label,
+                "observed_calls": len(wall_values),
+                "wall_min_nanoseconds": min(wall_values) if wall_values else None,
+                "wall_median_nanoseconds": int(statistics.median(wall_values))
+                if wall_values
+                else None,
+                "wall_max_nanoseconds": max(wall_values) if wall_values else None,
+                "process_cpu": cpu,
+            }
+        )
     return {
         "scope": "synchronous provider invocation; process CPU includes clock sampling and may include helper threads or unrelated concurrent process work",
         "branches": summaries,
     }
 
 
-OPERATION_KINDS = {"initial_state", "post_state_invariant", "mode_flow",
-                   "continuous_control", "pre_reset_invariant", "transition_guard",
-                   "reset_relation"}
+OPERATION_KINDS = {
+    "initial_state",
+    "post_state_invariant",
+    "mode_flow",
+    "continuous_control",
+    "pre_reset_invariant",
+    "transition_guard",
+    "reset_relation",
+}
 OPERATION_UNAVAILABLE_REASONS = {"unsupported_platform", "read_failed", "clock_regressed"}
 
 
 def operation_signature(operation: dict) -> tuple:
-    return (operation["kind"], operation["stage"], operation["mode"], operation["edge"],
-            operation["implementation_id"], operation["implementation_version"],
-            operation["joint_variables"])
+    return (
+        operation["kind"],
+        operation["stage"],
+        operation["mode"],
+        operation["edge"],
+        operation["implementation_id"],
+        operation["implementation_version"],
+        operation["joint_variables"],
+    )
 
 
-def validate_operation_observations(row: dict, calls: int,
-                                    operations_per_path: list[int]) -> None:
+def validate_operation_observations(row: dict, calls: int, operations_per_path: list[int]) -> None:
     observations = row.get("operation_observations")
-    require(isinstance(observations, list) and len(observations) == calls,
-            "EXT-07 operation observation count differs from calls")
+    if not isinstance(observations, list) or len(observations) != calls:
+        raise ValueError("EXT-07 operation observation count differs from calls")
     reference = None
-    expected_keys = {"kind", "stage", "mode", "edge", "implementation_id", "implementation_version",
-                     "joint_variables", "rows_added", "matrix_elements_added",
-                     "cumulative_rows", "cumulative_matrix_elements",
-                     "elapsed_wall_nanoseconds", "completed", "thread_cpu"}
+    expected_keys = {
+        "kind",
+        "stage",
+        "mode",
+        "edge",
+        "implementation_id",
+        "implementation_version",
+        "joint_variables",
+        "rows_added",
+        "matrix_elements_added",
+        "cumulative_rows",
+        "cumulative_matrix_elements",
+        "elapsed_wall_nanoseconds",
+        "completed",
+        "thread_cpu",
+    }
     for call in observations:
-        require(isinstance(call, list) and len(call) == len(operations_per_path),
-                "EXT-07 operation paths differ from the path inventory")
+        require(
+            isinstance(call, list) and len(call) == len(operations_per_path),
+            "EXT-07 operation paths differ from the path inventory",
+        )
         identities = []
         for path_index, path in enumerate(call):
-            require(isinstance(path, list) and len(path) == operations_per_path[path_index],
-                    "EXT-07 operation count differs from the composer trace")
+            require(
+                isinstance(path, list) and len(path) == operations_per_path[path_index],
+                "EXT-07 operation count differs from the composer trace",
+            )
             path_identities = []
             for operation in path:
-                require(isinstance(operation, dict) and set(operation) == expected_keys,
-                        "EXT-07 operation record has an invalid shape")
-                require(operation["kind"] in OPERATION_KINDS and
-                        isinstance(operation["stage"], int) and not isinstance(operation["stage"], bool) and
-                        operation["stage"] >= 0 and
-                        (operation["mode"] is None or isinstance(operation["mode"], str)) and
-                        (operation["edge"] is None or isinstance(operation["edge"], str)) and
-                        isinstance(operation["implementation_id"], str) and operation["implementation_id"] and
-                        isinstance(operation["implementation_version"], str) and operation["implementation_version"],
-                        "EXT-07 operation identity is invalid")
-                for name in ("joint_variables", "rows_added", "matrix_elements_added",
-                             "cumulative_rows", "cumulative_matrix_elements",
-                             "elapsed_wall_nanoseconds"):
-                    require(isinstance(operation[name], int) and not isinstance(operation[name], bool) and
-                            operation[name] >= 0, "EXT-07 operation count or duration is invalid: " + name)
-                require(operation["joint_variables"] > 0 and operation["completed"] is True and
-                        operation["matrix_elements_added"] ==
-                        operation["rows_added"] * operation["joint_variables"] and
-                        operation["cumulative_matrix_elements"] ==
-                        operation["cumulative_rows"] * operation["joint_variables"],
-                        "EXT-07 successful operation resource deltas differ")
+                require(
+                    isinstance(operation, dict) and set(operation) == expected_keys,
+                    "EXT-07 operation record has an invalid shape",
+                )
+                require(
+                    operation["kind"] in OPERATION_KINDS
+                    and isinstance(operation["stage"], int)
+                    and not isinstance(operation["stage"], bool)
+                    and operation["stage"] >= 0
+                    and (operation["mode"] is None or isinstance(operation["mode"], str))
+                    and (operation["edge"] is None or isinstance(operation["edge"], str))
+                    and isinstance(operation["implementation_id"], str)
+                    and operation["implementation_id"]
+                    and isinstance(operation["implementation_version"], str)
+                    and operation["implementation_version"],
+                    "EXT-07 operation identity is invalid",
+                )
+                for name in (
+                    "joint_variables",
+                    "rows_added",
+                    "matrix_elements_added",
+                    "cumulative_rows",
+                    "cumulative_matrix_elements",
+                    "elapsed_wall_nanoseconds",
+                ):
+                    require(
+                        isinstance(operation[name], int)
+                        and not isinstance(operation[name], bool)
+                        and operation[name] >= 0,
+                        "EXT-07 operation count or duration is invalid: " + name,
+                    )
+                require(
+                    operation["joint_variables"] > 0
+                    and operation["completed"] is True
+                    and operation["matrix_elements_added"]
+                    == operation["rows_added"] * operation["joint_variables"]
+                    and operation["cumulative_matrix_elements"]
+                    == operation["cumulative_rows"] * operation["joint_variables"],
+                    "EXT-07 successful operation resource deltas differ",
+                )
                 cpu = operation["thread_cpu"]
                 require(isinstance(cpu, dict), "EXT-07 thread CPU observation is not an object")
                 if cpu.get("status") == "observed":
-                    require(set(cpu) == {"status", "nanoseconds"} and
-                            isinstance(cpu["nanoseconds"], int) and
-                            not isinstance(cpu["nanoseconds"], bool) and cpu["nanoseconds"] >= 0,
-                            "EXT-07 observed thread CPU duration is invalid")
+                    require(
+                        set(cpu) == {"status", "nanoseconds"}
+                        and isinstance(cpu["nanoseconds"], int)
+                        and not isinstance(cpu["nanoseconds"], bool)
+                        and cpu["nanoseconds"] >= 0,
+                        "EXT-07 observed thread CPU duration is invalid",
+                    )
                 else:
-                    require(cpu.get("status") == "unavailable" and
-                            cpu.get("reason") in OPERATION_UNAVAILABLE_REASONS and
-                            set(cpu) == {"status", "reason"},
-                            "EXT-07 thread CPU unavailable reason is invalid")
+                    require(
+                        cpu.get("status") == "unavailable"
+                        and cpu.get("reason") in OPERATION_UNAVAILABLE_REASONS
+                        and set(cpu) == {"status", "reason"},
+                        "EXT-07 thread CPU unavailable reason is invalid",
+                    )
                 path_identities.append(operation_signature(operation))
             identities.append(path_identities)
         if reference is None:
             reference = identities
         else:
-            require(identities == reference,
-                    "EXT-07 operation identity/order changed across calls")
+            require(identities == reference, "EXT-07 operation identity/order changed across calls")
 
 
 def operation_cpu_summary(rows: list[dict]) -> dict:
@@ -273,8 +394,14 @@ def operation_cpu_summary(rows: list[dict]) -> dict:
             for path_index, path in enumerate(call):
                 for operation_index, operation in enumerate(path):
                     key = (path_index, operation_index)
-                    summary = summaries.setdefault(key, {"identity": operation_signature(operation),
-                        "observed": [], "unavailable": {}})
+                    summary = summaries.setdefault(
+                        key,
+                        {
+                            "identity": operation_signature(operation),
+                            "observed": [],
+                            "unavailable": {},
+                        },
+                    )
                     cpu = operation["thread_cpu"]
                     if cpu["status"] == "observed":
                         summary["observed"].append(cpu["nanoseconds"])
@@ -283,85 +410,163 @@ def operation_cpu_summary(rows: list[dict]) -> dict:
                         summary["unavailable"][reason] = summary["unavailable"].get(reason, 0) + 1
     return {
         "scope": "CPU consumed by the synchronous composing thread during each relation operation",
-        "operations": [{
-            "path_index": path_index,
-            "operation_index": operation_index,
-            "identity": {name: value for name, value in zip(
-                ("kind", "stage", "mode", "edge", "implementation_id", "implementation_version",
-                 "joint_variables"), summary["identity"])},
-            "observed_calls": len(summary["observed"]),
-            "unavailable_calls": sum(summary["unavailable"].values()),
-            "unavailable_reasons": summary["unavailable"],
-            "min_nanoseconds": min(summary["observed"]) if summary["observed"] else None,
-            "median_nanoseconds": int(statistics.median(summary["observed"])) if summary["observed"] else None,
-            "max_nanoseconds": max(summary["observed"]) if summary["observed"] else None,
-        } for (path_index, operation_index), summary in sorted(summaries.items())],
+        "operations": [
+            {
+                "path_index": path_index,
+                "operation_index": operation_index,
+                "identity": {
+                    name: value
+                    for name, value in zip(
+                        (
+                            "kind",
+                            "stage",
+                            "mode",
+                            "edge",
+                            "implementation_id",
+                            "implementation_version",
+                            "joint_variables",
+                        ),
+                        summary["identity"],
+                        strict=True,
+                    )
+                },
+                "observed_calls": len(summary["observed"]),
+                "unavailable_calls": sum(summary["unavailable"].values()),
+                "unavailable_reasons": summary["unavailable"],
+                "min_nanoseconds": min(summary["observed"]) if summary["observed"] else None,
+                "median_nanoseconds": int(statistics.median(summary["observed"]))
+                if summary["observed"]
+                else None,
+                "max_nanoseconds": max(summary["observed"]) if summary["observed"] else None,
+            }
+            for (path_index, operation_index), summary in sorted(summaries.items())
+        ],
     }
 
 
 def collect(capture: Path, source: Path, output_root: Path) -> Path:
     capture = capture.resolve(strict=True)
     source = source.resolve(strict=True)
-    pre, post, host = (read_json(capture / name) for name in
-                       ("prebuild.json", "postrun.json", "host.json"))
+    pre, post, host = (
+        read_json(capture / name) for name in ("prebuild.json", "postrun.json", "host.json")
+    )
     commit = pre["commit"]
-    require(pre.get("phase") == "prebuild" and post.get("phase") == "postrun" and
-            pre.get("status") == post.get("status") == [] and
-            pre.get("commit") == post.get("commit") == host.get("source_commit") == commit and
-            pre.get("tree") == post.get("tree") == host.get("source_tree") and
-            pre.get("observed_utc") < post.get("observed_utc") <= host.get("collected_utc"),
-            "EXT-07 frozen source receipts differ")
+    pre_utc = pre.get("observed_utc")
+    post_utc = post.get("observed_utc")
+    collected_utc = host.get("collected_utc")
+    require(
+        pre.get("phase") == "prebuild"
+        and post.get("phase") == "postrun"
+        and pre.get("status") == post.get("status") == []
+        and pre.get("commit") == post.get("commit") == host.get("source_commit") == commit
+        and pre.get("tree") == post.get("tree") == host.get("source_tree")
+        and isinstance(pre_utc, str)
+        and isinstance(post_utc, str)
+        and isinstance(collected_utc, str)
+        and pre_utc < post_utc <= collected_utc,
+        "EXT-07 frozen source receipts differ",
+    )
     driver = source / "benchmarks/reporting/ext07/driver.cpp"
     cpu_header = source / "benchmarks/reporting/ext07/process_cpu_json.hpp"
     operation_cpu_header = source / "benchmarks/reporting/ext07/operation_cpu_json.hpp"
-    require(driver.read_bytes() == subprocess.check_output(
-        ["git", "show", commit + ":benchmarks/reporting/ext07/driver.cpp"], cwd=source),
-        "EXT-07 driver differs from its frozen source commit")
-    require(cpu_header.read_bytes() == subprocess.check_output(
-        ["git", "show", commit + ":benchmarks/reporting/ext07/process_cpu_json.hpp"], cwd=source),
-        "EXT-07 CPU JSON helper differs from its frozen source commit")
-    require(operation_cpu_header.read_bytes() == subprocess.check_output(
-        ["git", "show", commit + ":benchmarks/reporting/ext07/operation_cpu_json.hpp"], cwd=source),
-        "EXT-07 operation CPU JSON helper differs from its frozen source commit")
-    executable = capture / ("build/Release/csl_ext07_hybrid_report.exe" if os.name == "nt"
-                            else "build/csl_ext07_hybrid_report")
-    require(sha(executable.read_bytes()) == post.get("executable_sha256"),
-            "EXT-07 measured executable hash differs")
+    require(
+        driver.read_bytes()
+        == subprocess.check_output(
+            ["git", "show", commit + ":benchmarks/reporting/ext07/driver.cpp"], cwd=source
+        ),
+        "EXT-07 driver differs from its frozen source commit",
+    )
+    require(
+        cpu_header.read_bytes()
+        == subprocess.check_output(
+            ["git", "show", commit + ":benchmarks/reporting/ext07/process_cpu_json.hpp"], cwd=source
+        ),
+        "EXT-07 CPU JSON helper differs from its frozen source commit",
+    )
+    require(
+        operation_cpu_header.read_bytes()
+        == subprocess.check_output(
+            ["git", "show", commit + ":benchmarks/reporting/ext07/operation_cpu_json.hpp"],
+            cwd=source,
+        ),
+        "EXT-07 operation CPU JSON helper differs from its frozen source commit",
+    )
+    executable = capture / (
+        "build/Release/csl_ext07_hybrid_report.exe"
+        if os.name == "nt"
+        else "build/csl_ext07_hybrid_report"
+    )
+    require(
+        sha(executable.read_bytes()) == post.get("executable_sha256"),
+        "EXT-07 measured executable hash differs",
+    )
     cache = (capture / "CMakeCache.raw.txt").read_text(encoding="utf-8", errors="replace")
-    multiconfig_release = ("CMAKE_CONFIGURATION_TYPES:STRING=Debug;Release;MinSizeRel;RelWithDebInfo" in cache and
-                           "CMAKE_GENERATOR:INTERNAL=Visual Studio 17 2022" in cache)
-    singleconfig_release = ("CMAKE_BUILD_TYPE:STRING=Release" in cache and
-                            "CMAKE_GENERATOR:INTERNAL=Unix Makefiles" in cache)
-    require(all(key in cache for key in (
-        "BUILD_TESTING:BOOL=OFF", "CSL_ENABLE_HIGHS:BOOL=ON",
-        "CSL_ENABLE_QHULL:BOOL=OFF", "CSL_BUILD_EXT07_REPORT:BOOL=ON")) and
-        (multiconfig_release or singleconfig_release),
-        "EXT-07 measured Release configuration differs")
-    require((capture / "smoke.stderr.txt").read_bytes() ==
-            (capture / "measure.stderr.txt").read_bytes() == b"",
-            "EXT-07 report driver wrote stderr")
+    multiconfig_release = (
+        "CMAKE_CONFIGURATION_TYPES:STRING=Debug;Release;MinSizeRel;RelWithDebInfo" in cache
+        and "CMAKE_GENERATOR:INTERNAL=Visual Studio 17 2022" in cache
+    )
+    singleconfig_release = (
+        "CMAKE_BUILD_TYPE:STRING=Release" in cache
+        and "CMAKE_GENERATOR:INTERNAL=Unix Makefiles" in cache
+    )
+    require(
+        all(
+            key in cache
+            for key in (
+                "BUILD_TESTING:BOOL=OFF",
+                "CSL_ENABLE_HIGHS:BOOL=ON",
+                "CSL_ENABLE_QHULL:BOOL=OFF",
+                "CSL_BUILD_EXT07_REPORT:BOOL=ON",
+            )
+        )
+        and (multiconfig_release or singleconfig_release),
+        "EXT-07 measured Release configuration differs",
+    )
+    require(
+        (capture / "smoke.stderr.txt").read_bytes()
+        == (capture / "measure.stderr.txt").read_bytes()
+        == b"",
+        "EXT-07 report driver wrote stderr",
+    )
     smoke = jsonl(capture / "smoke.jsonl", 1)
     measure = jsonl(capture / "measure.jsonl", 8)
     validate_run(smoke[0], "smoke", 0, 1, operation_cpu=True, provider_invocation=True)
     validate_run(measure[0], "warmup", 0, 10, operation_cpu=True, provider_invocation=True)
     for repetition, row in enumerate(measure[1:]):
         validate_run(row, "trial", repetition, 20, operation_cpu=True, provider_invocation=True)
-    source_hashes = {name: sha((driver if name == "driver.cpp" else
-                                cpu_header if name == "process_cpu_json.hpp" else
-                                operation_cpu_header if name == "operation_cpu_json.hpp" else
-                                capture / name).read_bytes()) for name in SOURCE_FILES}
+    source_hashes = {
+        name: sha(
+            (
+                driver
+                if name == "driver.cpp"
+                else cpu_header
+                if name == "process_cpu_json.hpp"
+                else operation_cpu_header
+                if name == "operation_cpu_json.hpp"
+                else capture / name
+            ).read_bytes()
+        )
+        for name in SOURCE_FILES
+    }
     rows = measure[1:]
+
     def median_total(key: str) -> int:
         return int(statistics.median(row[key] for row in rows))
+
     scenario = {
-        "horizon": 1, "modes": ["coast", "terminal"],
+        "horizon": 1,
+        "modes": ["coast", "terminal"],
         "allowed_terminal_modes": ["terminal"],
         "edges": [{"id": "coast-to-terminal", "source": "coast", "target": "terminal"}],
-        "state_dimension": 1, "control_dimension": 1,
-        "initial_mode": "coast", "initial_state": [0],
+        "state_dimension": 1,
+        "control_dimension": 1,
+        "initial_mode": "coast",
+        "initial_state": [0],
         "dynamics": {"A": [[1]], "B": [[1]], "offset": [0]},
-        "control_interval": [0, 1], "source_invariants": "universal",
-        "transition_guard": [0, 0.5], "reset": {"type": "identity"},
+        "control_interval": [0, 1],
+        "source_invariants": "universal",
+        "transition_guard": [0, 0.5],
+        "reset": {"type": "identity"},
         "terminal_invariant": "universal",
         "terminal_mode_data": {
             "flow": {"A": [[1]], "B": [[1]], "offset": [0]},
@@ -387,15 +592,22 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
         },
         "capability_profile": {
             "supported_case": "one-step scalar linear dynamics, bounded interval control/guard, deterministic scalar affine reset, linear objective",
-            "dimensions_and_counts": {"horizon": 1, "modes": 2, "edges": 1,
-                                      "state_dimension": 1, "control_dimension": 1,
-                                      "paths": 1, "joint_variables": 4},
+            "dimensions_and_counts": {
+                "horizon": 1,
+                "modes": 2,
+                "edges": 1,
+                "state_dimension": 1,
+                "control_dimension": 1,
+                "paths": 1,
+                "joint_variables": 4,
+            },
             "assurance": "numerical binary64; this report does not establish validated arithmetic or broader scalability",
         },
         "source_receipts": {"prebuild": pre, "postrun": post},
         "environment": host,
         "measurement": {
-            "warmup": measure[0], "trials": rows,
+            "warmup": measure[0],
+            "trials": rows,
             "raw_smoke_sha256": source_hashes["smoke.jsonl"],
             "raw_measure_sha256": source_hashes["measure.jsonl"],
             "measured_calls": sum(row["calls"] for row in rows),
@@ -403,10 +615,16 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
             "median_batch_end_to_end_ns": median_total("end_to_end_total_ns"),
             "min_batch_end_to_end_ns": min(row["end_to_end_total_ns"] for row in rows),
             "max_batch_end_to_end_ns": max(row["end_to_end_total_ns"] for row in rows),
-            "median_phase_total_ns": {key.removesuffix("_total_ns"): median_total(key)
-                                       for key in ("setup_total_ns", "assembly_total_ns",
-                                                   "solve_total_ns", "verify_total_ns",
-                                                   "end_to_end_total_ns")},
+            "median_phase_total_ns": {
+                key.removesuffix("_total_ns"): median_total(key)
+                for key in (
+                    "setup_total_ns",
+                    "assembly_total_ns",
+                    "solve_total_ns",
+                    "verify_total_ns",
+                    "end_to_end_total_ns",
+                )
+            },
             "process_cpu": process_cpu_summary(rows, ["coast-to-terminal"]),
             "provider_invocation": provider_invocation_summary(rows, ["coast-to-terminal"]),
             "operation_thread_cpu": operation_cpu_summary(rows),
@@ -431,10 +649,17 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
     require(not destination.exists(), "EXT-07 report destination must be new")
     destination.mkdir()
     for name in SOURCE_FILES:
-        (destination / name).write_bytes((driver if name == "driver.cpp" else
-                                          cpu_header if name == "process_cpu_json.hpp" else
-                                          operation_cpu_header if name == "operation_cpu_json.hpp" else
-                                          capture / name).read_bytes())
+        (destination / name).write_bytes(
+            (
+                driver
+                if name == "driver.cpp"
+                else cpu_header
+                if name == "process_cpu_json.hpp"
+                else operation_cpu_header
+                if name == "operation_cpu_json.hpp"
+                else capture / name
+            ).read_bytes()
+        )
     (destination / "records.json").write_bytes(encoded(record))
     return destination
 
