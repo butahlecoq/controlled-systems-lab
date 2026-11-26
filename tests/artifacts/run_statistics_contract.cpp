@@ -412,7 +412,7 @@ TEST_CASE("two exclusive producer threads preserve deterministic fixed ordering"
     std::jthread first([&]{launch.wait();(void)even.record(completion(2));(void)even.record(completion(0));});
     std::optional<std::jthread> second;
     try {second.emplace([&]{launch.wait();(void)odd.record(completion(3));(void)odd.record(completion(1));});}
-    catch(...){launch.count_down();throw;} // Release a started producer if second launch fails.
+    catch(...){launch.count_down();throw;}
     launch.count_down();first.join();second->join();
     std::vector<ob::ObservationShard> shards;shards.push_back(std::move(even));shards.push_back(std::move(odd));const auto result=accepted(ob::merge_observations(plan,std::move(shards)));
     for(std::size_t i=0;i<4;++i)CHECK(result.description().spans[i].descriptor.id.value==i);
@@ -1180,7 +1180,6 @@ TEST_CASE("v4 selection preserves direction tolerance and raw distinct counts") 
 
 TEST_CASE("historical v2 and v3 migrate nondefault recorded query facts and source identity") {
     for(const bool v2:{true,false}) {
-        // Alter owning copies only; the archival fixture bytes remain unchanged.
         auto legacy=nlohmann::json::parse(v2?fixture_v2_text():fixture_text());
         const auto original=accepted(ar::decode_run(legacy.dump()));
         auto config=original.description().configuration.description();

@@ -99,7 +99,6 @@ class MPC10PublicationTests(unittest.TestCase):
     def test_reader_mutation_rejects_after_inventory_renewal(self):
         with tempfile.TemporaryDirectory() as temporary:
             copy=Path(temporary)/'reading';shutil.copytree(S.READING,copy);receipt=json.loads((copy/'verification.json').read_bytes());receipt['checking_sources']={};(copy/'verification.json').write_bytes(S.encoded(receipt));(copy/'SHA256SUMS').write_text(''.join(S.digest(p.read_bytes())+'  '+p.name+'\n' for p in sorted(copy.iterdir()) if p.name!='SHA256SUMS'))
-            # Exercise the structural receipt boundary after renewing the outer pin too.
             with patch.object(S,'READING_SHA',S.digest((copy/'SHA256SUMS').read_bytes())):
                 with self.assertRaisesRegex(ValueError,'saved bindings/metrics check failed'):S.validate(reading=copy)
 

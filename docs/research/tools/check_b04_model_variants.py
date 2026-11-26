@@ -27,7 +27,7 @@ ROOT = Path(__file__).resolve().parents[3]
 MANIFEST = ROOT / "benchmarks/scenarios/b04-historical.json"
 SAVED = ROOT / "docs/research/evidence/b04-saved-witnesses.json"
 
-EXPECTED_STOCK_COUPLING = Fraction(-25, 4)  # N[1,0] = N[3,2] = -6.25 per stage
+EXPECTED_STOCK_COUPLING = Fraction(-25, 4)
 NOMINAL_OXIDIZER_FLOW = Fraction(1200)
 NOMINAL_FUEL_FLOW = Fraction(450)
 
