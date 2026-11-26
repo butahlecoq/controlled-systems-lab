@@ -271,7 +271,7 @@ class NominalExactHRelation final : public JointRelationPayload {
     explicit NominalExactHRelation(sets::SetData relation) : relation_(std::move(relation)) {}
     const sets::SetData *h_relation_for_recording() const noexcept override { return &relation_; }
 };
-} // namespace
+}
 namespace detail {
 class StrategyAExecutionRunner final : public SynthesisWorkspace,
                                        public registry::detail::StrategyARuntimeReceiptSource {

@@ -244,7 +244,7 @@ void restore_certificates_outside_policy(const PointCloud &cloud, HullReduction 
         std::sort(output.retained.begin(), output.retained.end());
     }
 }
-} // namespace
+}
 
 detail::CandidateClassification detail::classify_candidate(const PointCloud &cloud,
                                                            const std::vector<std::size_t> &support,
@@ -283,7 +283,7 @@ class LPHullReducerWorkspace final : public HullReducerWorkspace {
         return reduce_hull(cloud, lp, context);
     }
 };
-} // namespace
+}
 
 HullReductionResult detail::reduce_hull_in_order(const PointCloud &cloud, LPWorkspace &lp,
                                                  const ExecutionContext &context,

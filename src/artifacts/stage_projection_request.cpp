@@ -36,7 +36,7 @@ std::optional<ArtifactError> resolve_coordinate(const StateCoordinate &coordinat
     return {};
 }
 
-} // namespace
+}
 
 StageProjectionRequestValidation
 validate_stage_projection_request(const StageProjectionCaptureRequest &request) {

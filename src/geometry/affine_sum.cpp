@@ -1150,7 +1150,7 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
         return apply_supported(context);
     }
 };
-} // namespace
+}
 
 registry::Registration<registry::GeometryPort>
 make_affine_sum_registration(AffineSumDependencies dependencies, AffineSumOptions options) {

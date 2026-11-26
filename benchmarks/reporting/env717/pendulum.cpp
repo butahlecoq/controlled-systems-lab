@@ -196,7 +196,7 @@ Json result_record(const SearchResult& best,
             "the best plan is exact over the declared finite catalogue under binary64 evaluation",
             "timings are descriptive for one implementation and do not compare algorithms"})}};
 }
-} // namespace
+}
 
 int main(int argc, char** argv) {
     try {

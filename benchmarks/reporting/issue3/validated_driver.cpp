@@ -273,7 +273,7 @@ void run(std::string_view name, const ValidatedFiniteActionMinimaxRequest& reque
         {"result",final}}.dump() << '\n';
 }
 
-} // namespace
+}
 
 int main(int argc,char** argv) {
     try {

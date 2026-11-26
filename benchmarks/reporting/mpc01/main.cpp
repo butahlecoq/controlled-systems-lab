@@ -552,7 +552,7 @@ void run_case(const MpcCase& problem, bool hpipm_first, std::uint32_t repetition
     }
 }
 
-} // namespace
+}
 
 int main(int argc, char** argv) {
     try {

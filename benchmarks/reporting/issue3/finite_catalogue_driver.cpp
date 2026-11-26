@@ -376,7 +376,7 @@ void emit(std::string_view name,Case run,std::size_t round,bool warmup,std::size
                    {"absolute_tolerance",name=="b08_rounded"?1e-8:0.0},
                    {"passed",true}}}}.dump()<<'\n';
 }
-} // namespace
+}
 
 int main(int argc,char** argv) {
     try {

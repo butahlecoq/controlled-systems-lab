@@ -159,7 +159,7 @@ void print(const geometry::PointCloud& cloud, Method method, bool warmup, int ro
     std::cout << "]}\n" << std::flush;
 }
 
-} // namespace
+}
 
 int main(int argc, char** argv) {
     int repetitions = 5;

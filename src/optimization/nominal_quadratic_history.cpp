@@ -69,7 +69,7 @@ ConvexDataResult<CompiledNominalQuadraticHistory> fail(Diagnostic error) {
     return Diagnostics{std::move(error)};
 }
 
-} // namespace
+}
 
 std::optional<std::size_t>
 HistoryVariableLayout::state_index(std::size_t stage, std::size_t coordinate) const noexcept {

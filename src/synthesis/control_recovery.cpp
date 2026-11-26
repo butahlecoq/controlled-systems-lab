@@ -383,7 +383,7 @@ ControlRecoveryOutcome recover_history(const problem::ResolvedProblem &resolved,
     return JointHistoryRelation{coordinates, std::get<sets::SetData>(std::move(result))};
 }
 
-} // namespace
+}
 
 ControlRecoveryOutcome recover_joint_history(const problem::ResolvedProblem &resolved,
                                              const sets::SetData &terminal_relation) {

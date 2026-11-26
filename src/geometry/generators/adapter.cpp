@@ -404,7 +404,7 @@ class ConversionWorkspace final : public RepresentationConverterWorkspace {
             });
     }
 };
-} // namespace
+}
 
 registry::Registration<registry::GeometryPort> make_operation_registration() {
     return {{{"csl.geometry.generators.operations"}, "1.1.0"},

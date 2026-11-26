@@ -248,7 +248,7 @@ registry::Capability capabilities(const OperationRequest &request,
     output.assurance = Assurance::numerical;
     return registry::Offer{output};
 }
-} // namespace
+}
 
 registry::Registration<registry::GeometryPort> make_support_registration() {
     return {{{module}, "1.0.0"}, capabilities, [](const OperationRequest &request) {

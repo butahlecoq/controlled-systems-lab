@@ -80,7 +80,7 @@ Json cpu_model() {
 }
 #endif
 
-} // namespace
+}
 
 Json environment_manifest(std::string_view executable, bool hpipm_first) {
     const auto logical = std::thread::hardware_concurrency();

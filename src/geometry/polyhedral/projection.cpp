@@ -476,7 +476,7 @@ class MaterializerWorkspace final : public RepresentationConverterWorkspace {
         return std::get<OperationStopped>(std::move(result));
     }
 };
-} // namespace
+}
 
 std::variant<LazyProjectionDescription, Diagnostics>
 inspect_lazy_projection(const SetHandle &handle) {

@@ -159,7 +159,7 @@ void print(const Result& r, std::size_t repetition) {
             << ",\"calls\":" << r.calls
             << ",\"batch_ns\":" << r.batch_ns << "}\n";
 }
-} // namespace
+}
 
 int main(int argc, char** argv) {
   try {

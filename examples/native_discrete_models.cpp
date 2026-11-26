@@ -41,7 +41,7 @@ std::string csv(std::string_view value) {
     }
     return result + '"';
 }
-} // namespace
+}
 
 int main(int argc, char **argv) try {
     using namespace csl;

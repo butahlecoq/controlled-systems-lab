@@ -146,7 +146,7 @@ template <class Policy> Json deploy(const std::vector<Point> &states, int count)
     }
     return result;
 }
-} // namespace
+}
 
 int main(int argc, char **argv) {
     try {

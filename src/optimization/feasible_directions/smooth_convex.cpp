@@ -50,7 +50,7 @@ SmoothStopReason map_stop(zoutendijk::ProjectionStopReason reason) {
     }
     return SmoothStopReason::numerical_failure;
 }
-} // namespace
+}
 
 SmoothOutcome minimize(const LinearProgram &feasible_set, const SmoothObjective &objective,
                        std::span<const double> feasible_start, LPWorkspace &projection_workspace,

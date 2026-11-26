@@ -468,7 +468,7 @@ make_registration(ModuleId id, std::optional<CasadiHistoryScaling> scaling,
             return std::make_unique<NativeWorkspace>(scaling, detect_dependencies);
         }};
 }
-} // namespace
+}
 
 registry::Registration<registry::HistoryOptimizerPort>
 make_casadi_history_optimizer_registration() {

@@ -185,7 +185,7 @@ class Workspace final : public SetOperatorWorkspace {
             {metadata, std::move(payload), id}, SetRelation::equivalent, std::move(evidence)};
     }
 };
-} // namespace
+}
 
 std::variant<ExpressionDescription, Diagnostics> inspect_expression(const SetHandle &handle) {
     const auto payload = std::dynamic_pointer_cast<const Payload>(handle.payload);

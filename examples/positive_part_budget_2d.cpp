@@ -48,7 +48,7 @@ CompiledNominalQuadraticHistory make_program() {
         throw std::runtime_error("Positive-part 2D QP did not compile");
     return std::get<CompiledNominalQuadraticHistory>(std::move(compiled));
 }
-} // namespace
+}
 
 int main(int argc, char **argv) try {
     using namespace csl;

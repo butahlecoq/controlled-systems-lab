@@ -159,7 +159,7 @@ class A44Workspace final : public HullReducerWorkspace {
     }
 };
 
-} // namespace
+}
 
 HullReductionResult reduce_itis17_a43_hull(const PointCloud &cloud, LPWorkspace &lp,
                                            const ExecutionContext &context) {
