@@ -107,7 +107,7 @@ def verify_private(papers, pixel_check, figure_check):
         return
     if shutil.which('pdfimages') is None:
         raise ValueError('pixel check requires existing Poppler pdfimages')
-    from PIL import Image  # Optional existing figure environment; no installation.
+    from PIL import Image
     with tempfile.TemporaryDirectory(prefix='issue1-pdf-image-') as temporary:
         root = Path(temporary)
         subprocess.run(['pdfimages', '-png', str(papers/SOURCES['draft_pdf'][0]), str(root/'image')], check=True)
@@ -124,7 +124,7 @@ def verify_private(papers, pixel_check, figure_check):
 
 
 def verify_nearby_figure(papers):
-    from scipy.io import loadmat  # Optional existing source-inspection environment.
+    from scipy.io import loadmat
     import numpy as np
     series = []
     def walk(value):
