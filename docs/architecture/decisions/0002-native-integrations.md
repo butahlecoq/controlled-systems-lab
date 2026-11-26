@@ -233,3 +233,32 @@ second `std::async` launch throws, so stack unwinding cannot wait forever for
 the first worker at the barrier. These are fixture and adapter contract checks;
 they do not establish general HiGHS thread safety or arbitrary warm-start
 performance.
+
+## 2026-11-26 update: LP/QP session and native-status decisions
+
+Shared session configuration is limited to the callback and logging wiring in
+`configure_common`. Tolerance, iteration limits, solver selection, model
+clearing and reuse, warm starts, and QP readback stay in each adapter's audited
+numerical profile so an LP or QP change is reviewed against that profile.
+
+Linear objectives carry an owning `O(n)` empty CSR Hessian. The convex
+preflight scans eigenvalues only when the objective actually holds quadratic
+coefficients; it does not materialize or scan an `n²` Hessian for a linear
+objective.
+
+A warm-start QP basis can label a nonbasic free slack `kZero`, while the QP
+initializer represents inactive rows as `kNonbasic`. The adapter translates
+only those free-row `kZero` statuses and preserves the basic partition, primal
+values, and every other bound status. A basis accepted by HiGHS remains only a
+hint: if the resulting point is not an independently checked optimum, the
+adapter discards that solver instance and solves once more with a fresh, cold
+native solver.
+
+When the private free row exists and dual readback is allowed, the adapter
+requires a valid, correctly sized, finite, zero multiplier for that row. A
+nonzero free-row multiplier would change stationarity in original coordinates,
+so the dual is withheld rather than silently dropped.
+
+HiGHS can report `ModelEmpty` for zero-column models without checking constant
+rows. The adapter therefore evaluates those rows' exact comparisons in original
+space before accepting an empty model's feasibility.
