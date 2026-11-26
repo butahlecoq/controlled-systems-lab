@@ -37,3 +37,20 @@ vertex order or local object lifetimes change.
 These fixtures pin the stated exact interval arithmetic and numerical Qhull /
 HiGHS execution paths. They do not establish a general validated-geometry
 guarantee or a hard real-time deadline for arbitrary providers.
+
+## Exact H/V certificate boundaries (2026-11-26)
+
+- **Axis-aligned box certificate.** `certify_h_box` requires every returned V
+  point to lie inside the exact stored-dyadic axis-aligned H box and every
+  distinct box corner to be present. Supported dimensions are 2 through 12;
+  corner expansion is bounded by `maximum_certified_box_corners` (4096) before
+  any allocation or bit shift.
+- **Degenerate box axes.** When an axis has equal exact endpoints, one V point
+  at that coordinate covers every corner mask that differs only on the
+  degenerate axes. The certifier expands those masks explicitly rather than
+  requiring duplicate V vertices.
+- **Independent interval check.** The ambient-one interval certificate
+  evaluates the original H rows directly with exact dyadic comparisons. It is
+  independent of the LP, numerical conversion, and floating-point equality
+  reduction that produced the V vertices; endpoint error is rounded outward
+  from the exact stored-dyadic discrepancy.

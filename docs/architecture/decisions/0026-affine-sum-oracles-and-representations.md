@@ -38,3 +38,21 @@ These tests give independent oracles for the stated rational fixtures and
 explicitly separate set semantics, representation details, and floating-point
 evaluation. They do not establish exact arithmetic for general binary64
 geometry or require every affine-sum provider to minimize its vertex list.
+
+## Affine-sum implementation decisions (2026-11-26)
+
+- **LP query identity.** Length-prefix each problem, request, and ideal-output
+  field when constructing affine-sum hull-membership LP problem IDs so distinct
+  concurrent geometry requests cannot alias one another.
+- **Certificate error propagation.** Compute each removal certificate's local
+  reconstruction residual from the original candidate coordinates. Then
+  propagate conservative infinity-norm residual bounds from final retained
+  points through the certificate dependency DAG in time and memory linear in
+  the certificate edge count; a certificate that depends on another removed
+  point is not an independent local claim.
+- **Degenerate factor summands.** A zero factor denotes the exact singleton
+  `{center}`. A factor-ellipsoid Minkowski sum returns the other summand's
+  factor unchanged when one factor is zero, rather than inflating it by an
+  arbitrary limiting `beta`.
+- **Coordinate labels.** A general affine map does not retain source coordinate
+  names in the output. A projection retains the selected source labels.

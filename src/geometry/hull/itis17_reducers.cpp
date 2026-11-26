@@ -112,10 +112,6 @@ class A44Workspace final : public HullReducerWorkspace {
             }
         }
 
-        // The paper seeds X_pr with the first k+1 points, described as the
-        // points farthest from the box center, then classifies the remainder.
-        // Its earlier "increasing distance" sentence conflicts with that
-        // description; this implementation records the farthest-first reading.
         const auto seed_count = std::min(order.size(), dimension + 1);
         std::vector<std::size_t> retained(order.begin(),
                                           order.begin() + static_cast<std::ptrdiff_t>(seed_count));

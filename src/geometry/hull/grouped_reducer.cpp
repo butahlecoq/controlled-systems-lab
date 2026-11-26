@@ -140,7 +140,6 @@ HullReductionResult reduce_grouped_hull(const PointCloud &cloud, LPWorkspace &lp
         }
         if (grouping_supported && redundant_streak >= consecutive_redundant_trigger) {
             metrics.grouping_triggered = true;
-            // The source includes its tenth redundant point in the grouped remainder.
             if (!prior_certificates.empty() && prior_certificates.back().removed == candidate)
                 prior_certificates.pop_back();
             break;
