@@ -79,6 +79,23 @@ on:
       - 'scripts/reports/mpc06_online/model.py'
       - 'reports/algorithm-results/mpc06-completion-v2/**'
       - 'reports/algorithm-results/mpc06-online-anchor-portable-v3/**'
+      - 'scripts/reports/mpc06_offline/**'
+      - 'scripts/reports/stage_mpc06_offline_costs.py'
+      - 'tests/reporting/test_mpc06_offline.py'
+      - 'reports/algorithm-results/mpc06-online-anchor-v1/result.json'
+      - 'reports/algorithm-results/mpc06-completion-v2/invariant-tightenings.svg'
+      - 'reports/algorithm-results/mpc06-offline-costs-8f58473d-20261110/**'
+      - 'reports/published-route-preservation/mpc06-offline-costs-*.zip'
+      - 'scripts/reports/mpc03/b08_report.py'
+      - 'scripts/reports/mpc03/b08_miqcp.py'
+      - 'scripts/reports/mpc05/reference.py'
+      - 'scripts/reports/stage_mpc03_b08.py'
+      - 'scripts/reports/stage_mpc05_causal_tree.py'
+      - 'tests/reporting/test_mpc03_b08_report.py'
+      - 'tests/reporting/test_mpc05_causal_tree_publication.py'
+      - 'tests/reporting/test_mpc05_reference.py'
+      - 'reports/algorithm-results/mpc03-b08-l04-miQCP-v1/**'
+      - 'reports/algorithm-results/mpc05-causal-tree-pilot-v2/**'
       - 'tests/reporting/test_report_data.py'
       - 'tests/reporting/test_render.py'
       - 'tests/reporting/test_publication_policy.py'
@@ -243,6 +260,18 @@ on:
       - 'scripts/reports/figure_style.py'
       - 'scripts/reports/control_figure_data.py'
       - 'scripts/reports/control_figures.py'
+      - 'scripts/reports/stage_ext01.py'
+      - 'scripts/reports/stage_syn06.py'
+      - 'tests/reporting/test_ext01_saved_report.py'
+      - 'tests/reporting/test_syn06_report.py'
+      - 'scripts/reports/ext01/render_saved.py'
+      - 'scripts/reports/syn06/collect.py'
+      - 'reports/algorithm-results/tooling/syn06/collect.py'
+      - 'reports/algorithm-results/catalog.json'
+      - 'reports/algorithm-results/ext01-publications.json'
+      - 'reports/algorithm-results/syn06-publications.json'
+      - 'reports/algorithm-results/ext01-fixed-plan-20261016-11b7bc74/**'
+      - 'reports/algorithm-results/syn06-verifier-20261012-f0e32e2b/**'
       - 'scripts/reports/recorded_closed_loop_figures.py'
       - 'scripts/reports/geo03/**'
       - 'tests/reporting/test_geo03_report.py'
@@ -489,6 +518,48 @@ on:
       - 'scripts/reports/pages_route_retirement.py'
       - 'tests/reporting/test_pages_route_retirement.py'
       - 'scripts/reports/audit_visual_routes.py'
+      - 'tests/reporting/test_visual_route_inventory.py'
+      - 'scripts/reports/feedback_geometry_example.py'
+      - 'scripts/reports/visual_example_fuel_layers.py'
+      - 'tests/reporting/test_feedback_geometry_example.py'
+      - 'tests/reporting/test_visual_example_fuel_layers.py'
+      - 'examples/feedback_geometry_2d.html'
+      - 'examples/feedback-geometry-tiny-fd28/**'
+      - 'docs/examples/fuel-reachability-layers/**'
+      - 'docs/research/tools/render_mpc02_figures.py'
+      - 'docs/examples/mpc02-slew-*'
+      - 'scripts/reports/viz10_plot_companions.py'
+      - 'tests/reporting/test_viz10_plot_companions.py'
+      - 'docs/examples/viz10/**'
+      - 'reports/algorithm-results/b07-owner-approved-eight-case-v1/README.md'
+      - 'reports/algorithm-results/b07-owner-approved-eight-case-v1/results.jsonl'
+      - 'reports/algorithm-results/b08-exact-b0d0e85d4d338f56/records.json'
+      - 'reports/algorithm-results/b09-a08-source-reference-4818ddde/results.jsonl'
+      - 'reports/algorithm-results/b09-a08-source-reference-4818ddde/scenario.json'
+      - 'reports/algorithm-results/exp04-replay-93fe3b87795e1d3a/records.json'
+      - 'reports/algorithm-results/issue3-finite-catalogue-b4632ce76510aa4f/records.json'
+      - 'reports/algorithm-results/issue3-validated-minimax-20261023-r1/records.json'
+      - 'reports/algorithm-results/issue4-volterra-7dce05b47c50c27a/records.json'
+      - 'scripts/reports/b04_native_smoke_companion.py'
+      - 'scripts/reports/control_witness_companions.py'
+      - 'tests/reporting/test_b04_native_smoke_companion.py'
+      - 'scripts/reports/mpc01/b04_native_smoke_projection.py'
+      - 'scripts/reports/mpc01/b04_projection_example.py'
+      - 'docs/research/evidence/b04-reference-v1/**'
+      - 'scripts/reports/geometry_opt_companions.py'
+      - 'tests/reporting/test_geometry_opt_companions.py'
+      - 'scripts/reports/mpc01/summarize_strategy_ab.py'
+      - 'reports/algorithm-results/syn06-publications.json'
+      - 'reports/algorithm-results/exp02-paired-profiles-20261027-r1/**'
+      - 'reports/algorithm-results/syn01-nominal-*/records.json'
+      - 'reports/algorithm-results/syn02-terminal-*/records.json'
+      - 'reports/algorithm-results/syn03-strategy-a-*/records.json'
+      - 'reports/algorithm-results/syn04-strategy-b-*/records.json'
+      - 'reports/algorithm-results/syn06-verifier-*/records.json'
+      - 'reports/algorithm-results/syn-ts01-paired-*/records.json'
+      - 'docs/research/evidence/mpc01-external-qps-20261026-r3/**'
+      - 'examples/scenarios/two-stage-integrator.json'
+      - 'tests/reporting/test_geometry_figures.py'
       - 'scripts/reports/approx_extension_companions.py'
       - 'scripts/reports/geometry_figures.py'
       - 'reports/algorithm-results/**'
@@ -688,6 +759,15 @@ on:
       - 'reports/algorithm-results/exp03-two-points-approx-pilot-*/**'
       - 'reports/algorithm-results/syn03-nominal-exact-2d-8b94095/**'
       - 'reports/algorithm-results/perf03-ts01-single-process-correlation-20261014/**'
+      - 'scripts/reports/syn03/strategy_a_report.py'
+      - 'scripts/reports/syn03_ts02/report.py'
+      - 'scripts/reports/syn03_ts02/provenance.py'
+      - 'scripts/reports/syn03_strategy_a_*_reports.py'
+      - 'reports/algorithm-results/catalog.json'
+      - 'reports/algorithm-results/index.html'
+      - 'reports/algorithm-results/legacy-publications.json'
+      - 'reports/algorithm-results/syn03-strategy-a-ts0[12]-*/**'
+      - 'reports/algorithm-results/syn03-strategy-a-ts0[12]-*.zip'
       - 'tests/reporting/test_opt07_*.py'
       - 'reports/algorithm-results/catalog.json'
       - 'reports/algorithm-results/convex-*.zip'
@@ -764,6 +844,26 @@ jobs:
         run: python -m unittest tests.reporting.test_mpc01_pages_augmentation
       - name: Check types
         run: ty check
+      - name: Replay the saved EXT-01 fixed-plan and SYN-06 verifier catalogues
+        env:
+          MPLBACKEND: Agg
+        run: |
+          python -m unittest tests.reporting.test_ext01_saved_report tests.reporting.test_syn06_report
+          reports=reports/algorithm-results
+          site=$(mktemp -d "$RUNNER_TEMP/fixed-plan-verifier.XXXXXXXX")
+          printf '<html><body><ul></ul></body></html>\n' > "$site/index.html"
+          for topic in ext01 syn06; do
+            catalogue="$reports/$topic-publications.json"
+            source_id=$(jq -er '.reports[0].source_report_id' "$catalogue")
+            report_id=$(jq -er '.reports[0].report_id' "$catalogue")
+            checksum=$(jq -er '.reports[0].zip_sha256' "$catalogue")
+            stager="scripts/reports/stage_$topic.py"
+            python "$stager" --source "$reports/$source_id" > "$site/$topic.catalogue.json"
+            jq --sort-keys . "$catalogue" > "$site/$topic.expected.json"
+            jq --sort-keys . "$site/$topic.catalogue.json" | cmp "$site/$topic.expected.json" -
+            python "$stager" --catalog "$catalogue" --site "$site"
+            printf '%s  %s\n' "$checksum" "$site/$report_id.zip" | sha256sum --check
+          done
       - name: Reject new prose comments in maintained Python scopes
         env:
           COMMENT_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
@@ -1238,8 +1338,49 @@ jobs:
           diff -r "$source" "$site/$route"
       - name: Replay the saved MPC-06 completion report and archive
         run: python -m unittest tests.reporting.test_mpc06_delivery tests.reporting.test_mpc06_delivery_publication
+      - name: Verify the saved geometry publication adapters
+        run: >-
+          python -m unittest
+          tests.reporting.test_geo02_publication
+          tests.reporting.test_geo05_publication
+          tests.reporting.test_geo06_publication
+      - name: Replay the saved MPC-06 offline-cost study and archive
+        run: python -m unittest tests.reporting.test_mpc06_offline
       - name: Replay all three saved Strategy B profiles
         run: python -m unittest tests.reporting.test_syn04_strategy_b_report tests.reporting.test_syn04_ts02_report tests.reporting.test_syn04_ts03_report
+      - name: Replay the MPC-03 B08 and MPC-05 causal-tree saved reports
+        run: python -m unittest tests.reporting.test_mpc03_b08_report tests.reporting.test_mpc05_causal_tree_publication tests.reporting.test_mpc05_reference
+      - name: Verify saved planar geometry exports
+        env:
+          MPLBACKEND: Agg
+        run: python -m unittest tests.reporting.test_geometry_figures
+      - name: Replay the saved MPC-02 analytic figures
+        env:
+          MPLBACKEND: Agg
+        run: |
+          scratch=$(mktemp -d "$RUNNER_TEMP/mpc02-figures.XXXXXXXX")
+          cd "$scratch"
+          export TMPDIR="$scratch" PYTHONDONTWRITEBYTECODE=1
+          printf '%s\n' 'axes.facecolor: red' >matplotlibrc
+          env -u PYTHONPATH -u MPLCONFIGDIR python "$GITHUB_WORKSPACE/docs/research/tools/render_mpc02_figures.py" --out output
+          test "$(find "$scratch" -mindepth 1 -maxdepth 1 | wc -l)" -eq 2
+          test "$(find "$scratch/output" -type f | wc -l)" -eq 6
+          for projection in memory terminal-state; do
+            stem="mpc02-slew-${projection}-projection"
+            for suffix in .svg .png -export.json; do
+              cmp "$GITHUB_WORKSPACE/docs/examples/$stem$suffix" "$scratch/output/$stem$suffix"
+            done
+          done
+      - name: Replay the saved VIZ-10 plots and manifest
+        env:
+          MPLBACKEND: Agg
+        run: python -m unittest tests.reporting.test_viz10_plot_companions
+      - name: Replay saved feedback geometry and fuel gallery assets
+        run: python -m unittest tests.reporting.test_feedback_geometry_example tests.reporting.test_visual_example_fuel_layers
+      - name: Validate saved B04 phase-plane inputs
+        run: python -m unittest tests.reporting.test_b04_native_smoke_companion
+      - name: Validate saved geometry and optimization timing rows
+        run: python -m unittest tests.reporting.test_geometry_opt_companions
       - name: Check the four-state projection approximation report
         run: python -m unittest discover -s tests/reporting -p 'test_four_state_projection_approximations.py'
       - name: Replay saved EXP-04, EXT-05, GEO-08 and OPT-10 catalogues
@@ -1322,10 +1463,29 @@ jobs:
           python -m unittest discover -s tools/legacy-ports/A29 -p test_port.py
           python -m unittest discover -s tools/legacy-ports/A33 -p test_port.py
 
+  python-visual-route-inventory:
+    needs: route
+    if: needs.route.outputs.python_quality == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.14'
+      - name: Verify and regenerate the saved visual route inventory
+        run: |
+          python -m unittest tests.reporting.test_visual_route_inventory
+          inventory=$(mktemp "$RUNNER_TEMP/visual-route-inventory.XXXXXXXX")
+          python scripts/reports/audit_visual_routes.py --out "$inventory"
+          cmp scripts/reports/visual-route-inventory.json "$inventory"
+
   python-quality-status:
     name: Python quality validation
     if: always()
-    needs: [route, python-ci-quality]
+    needs: [route, python-ci-quality, python-visual-route-inventory]
     runs-on: ubuntu-24.04
     steps:
       - name: Require Python quality when its path scope changed
@@ -1333,10 +1493,13 @@ jobs:
           ROUTE_RESULT: ${{ needs.route.result }}
           REQUIRED: ${{ needs.route.outputs.python_quality }}
           QUALITY_RESULT: ${{ needs.python-ci-quality.result }}
+          INVENTORY_RESULT: ${{ needs.python-visual-route-inventory.result }}
         run: |
           test "$ROUTE_RESULT" = success
           if [ "$REQUIRED" = true ]; then
             test "$QUALITY_RESULT" = success
+            test "$INVENTORY_RESULT" = success
           else
             test "$QUALITY_RESULT" = skipped
+            test "$INVENTORY_RESULT" = skipped
           fi

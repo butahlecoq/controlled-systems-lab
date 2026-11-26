@@ -90,7 +90,15 @@ class PublishedRoutePreservationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             site = Path(directory)
             assets = preservation.payloads()
-            self.assertEqual(preservation.stage(site)["preserved_routes"], 1061)
+            manifest = json.loads((preservation.SOURCE / "manifest.json").read_bytes())
+            routes = {alias["route"] for alias in manifest["aliases"]}
+            for archive in manifest["archives"]:
+                routes.add(archive["path"])
+                routes.update(
+                    name for name, member in archive["members"].items() if member["publish"]
+                )
+            self.assertEqual(set(assets), routes)
+            self.assertEqual(preservation.stage(site)["preserved_routes"], len(routes))
             self.assertEqual(
                 {
                     p.relative_to(site).as_posix(): p.read_bytes()
@@ -99,10 +107,11 @@ class PublishedRoutePreservationTests(unittest.TestCase):
                 },
                 assets,
             )
-            self.assertEqual(preservation.stage(site)["preserved_routes"], 1061)
-            self.assertEqual(preservation.stage(site)["preserved_top_level_zips"], 9)
-            self.assertEqual(sum(n.endswith(".zip") for n in assets), 38)
-            self.assertFalse(any(".git" in Path(n).parts for n in assets))
+            self.assertEqual(preservation.stage(site)["preserved_routes"], len(routes))
+            self.assertEqual(
+                preservation.stage(site)["preserved_top_level_zips"], len(manifest["archives"])
+            )
+            self.assertFalse(any(".git" in Path(p).parts for p in assets))
 
     def test_original_mpc08_mpc10_namespaces_and_offline_source_objects_survive(self):
         archives = {

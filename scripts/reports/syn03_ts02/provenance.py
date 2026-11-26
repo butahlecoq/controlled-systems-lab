@@ -1,4 +1,5 @@
 """Sanitize public provenance at the saved-report export boundary."""
+
 from __future__ import annotations
 
 import hashlib
@@ -36,18 +37,34 @@ def sanitizer(build):
     source = next(x.split("=", 1)[1] for x in configure if x.startswith("-DCSL_SOURCE_ROOT="))
     binary = configure[configure.index("-B") + 1]
     runner = configure[configure.index("-S") + 1].replace("\\", "/")
-    suffix = next((item for item in ("/reports/algorithm-results/tooling/syn03_ts02/runner",
-                                    "/benchmarks/reporting/syn03_ts02/runner") if runner.endswith(item)), None)
+    suffix = next(
+        (
+            item
+            for item in (
+                "/reports/algorithm-results/tooling/syn03_ts02/runner",
+                "/benchmarks/reporting/syn03_ts02/runner",
+            )
+            if runner.endswith(item)
+        ),
+        None,
+    )
     if suffix is None:
         raise ValueError("unexpected measured harness root")
-    dependency = build["dependencies"]["resolved_sources"]["CSL_HIGHS"]["source"].replace("\\", "/").rsplit("/", 1)[0]
+    dependency = (
+        build["dependencies"]["resolved_sources"]["CSL_HIGHS"]["source"]
+        .replace("\\", "/")
+        .rsplit("/", 1)[0]
+    )
     cmake = build["cmake"].replace("\\", "/")
     marker = "/Common7/"
     if marker not in cmake:
         raise ValueError("unexpected measured Visual Studio CMake installation")
     roots = {
-        source: "SOURCE_ROOT", binary: "BUILD_ROOT", runner[:-len(suffix)]: "HARNESS_ROOT",
-        dependency: "DEPENDENCY_ROOT", cmake.split(marker, 1)[0]: "VISUAL_STUDIO_ROOT",
+        source: "SOURCE_ROOT",
+        binary: "BUILD_ROOT",
+        runner[: -len(suffix)]: "HARNESS_ROOT",
+        dependency: "DEPENDENCY_ROOT",
+        cmake.split(marker, 1)[0]: "VISUAL_STUDIO_ROOT",
         binary.replace("\\", "/").rsplit("/", 1)[0]: "MEASUREMENT_ROOT",
         cmake.split("/Microsoft Visual Studio/", 1)[0]: "PROGRAM_FILES_ROOT",
     }
@@ -58,7 +75,7 @@ def sanitizer(build):
 
     def text(value):
         for pattern, label in patterns:
-            value = pattern.sub(lambda _: label, value)
+            value = pattern.sub(lambda _, replacement=label: replacement, value)
         return value
 
     def value(item):

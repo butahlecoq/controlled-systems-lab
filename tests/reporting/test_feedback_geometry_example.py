@@ -1,16 +1,17 @@
 from __future__ import annotations
 
 import hashlib
-from html.parser import HTMLParser
-from pathlib import Path
 import shutil
 import sys
 import tempfile
 import unittest
+from html.parser import HTMLParser
+from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import feedback_geometry_example as example
+import feedback_geometry_example as example  # noqa: E402
 
 
 class FeedbackGeometryExampleTests(unittest.TestCase):
@@ -20,17 +21,22 @@ class FeedbackGeometryExampleTests(unittest.TestCase):
         self.assertIn('id="' + example.ANCHOR + '"', card)
         record = ROOT / "examples" / example.DATA / "box/response.jsonl"
         self.assertEqual(assets[example.DATA + "/box/response.jsonl"], record.read_bytes())
-        self.assertEqual(hashlib.sha256(assets[example.DATA + "/producer.py"]).hexdigest(),
-            "351862fcf70461dd54b829652a0b60618ef402cfc4f3e9331b7045a1460c4976")
+        self.assertEqual(
+            hashlib.sha256(assets[example.DATA + "/producer.py"]).hexdigest(),
+            "351862fcf70461dd54b829652a0b60618ef402cfc4f3e9331b7045a1460c4976",
+        )
         self.assertIn(b"<svg", assets[example.FIGURE])
+
         class Links(HTMLParser):
             def __init__(self):
                 super().__init__()
-                self.links = []
+                self.links: list[str] = []
+
             def handle_starttag(self, tag, attrs):
                 value = dict(attrs).get("href")
                 if tag == "a" and value and not value.startswith("https:"):
                     self.links.append(value)
+
         links = Links()
         links.feed(assets[example.PAGE].decode("utf-8"))
         for link in links.links:
@@ -45,3 +51,21 @@ class FeedbackGeometryExampleTests(unittest.TestCase):
             (root / "examples" / example.DATA / "box/request.jsonl").write_text("changed")
             with self.assertRaisesRegex(ValueError, "does not match"):
                 example.build(root)
+
+    def test_stages_the_same_bytes_that_were_checked(self):
+        source = ROOT / "examples" / example.DATA / "box/response.jsonl"
+        original = source.read_bytes()
+        read_bytes = Path.read_bytes
+        count = 0
+
+        def read(path):
+            nonlocal count
+            if path == source:
+                count += 1
+                return original if count == 1 else b"contents replaced after the checked read"
+            return read_bytes(path)
+
+        with patch.object(Path, "read_bytes", read):
+            assets, _, _ = example.build()
+        self.assertEqual(assets[f"{example.DATA}/box/response.jsonl"], original)
+        self.assertEqual(count, 1)
