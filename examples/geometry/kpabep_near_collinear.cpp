@@ -25,13 +25,15 @@ void print_result(const char* label, const Outcome<KpabepResult>& result,
     std::cout << "returned_original_ids=";
     for (const auto local_id : reduction.retained_indices)
         std::cout << source_order[local_id] << ',';
-    std::cout << " MODIF_calls=" << reduction.modif_calls
+    std::cout << "simplex_pivot_calls=" << reduction.modif_calls
               << " pivots=" << reduction.pivots << '\n';
 }
 
 } // namespace
 
 int main() {
+    std::cout << "When tolerance removes a true hull vertex\n"
+                 "Candidate-elimination hull reducer (KPABEP), driven by the simplex pivot oracle (MODIF)\n";
     const std::vector<Vector> points{
         {121.95041958088437, 61.00721298737068},
         {121.70061953288986, 61.001215386986715},

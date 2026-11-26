@@ -110,7 +110,7 @@ std::variant<std::pair<Vector, Vector>, ValidationError> variable_bounds(const M
     return std::pair{std::move(lower), std::move(upper)};
 }
 
-} // namespace
+}
 
 MappingResult make_osqp_problem(const MpcCase& problem) {
     if (auto error = validate(problem)) return *error;

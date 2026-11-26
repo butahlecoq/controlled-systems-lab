@@ -358,7 +358,7 @@ bool run(std::size_t index,int round,bool warmup,int batch) {
     std::cout.flush();
     return error.empty();
 }
-} // namespace
+}
 
 int main(int argc,char** argv) {
     try {

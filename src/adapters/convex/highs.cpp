@@ -80,8 +80,6 @@ Diagnostics admission(const ConvexProgram &p, bool scale_rows, std::vector<int> 
         return unsupported("highs.convex.variables",
                            "maximum_variables=4096; actual=" + std::to_string(n));
     const auto csr = std::get<numeric::CsrInput>(q.constraints().descriptor());
-    // Reserve a private free row and its unit entry whenever effective A is empty.
-    // The zero-Q route does not use it; this conservative preflight still precedes translation.
     const bool empty_a =
         std::none_of(csr.values.begin(), csr.values.end(), [](double value) { return value != 0; });
     const Wide padding = n > 0 && empty_a ? 1 : 0;
@@ -141,7 +139,6 @@ Diagnostics admission(const ConvexProgram &p, bool scale_rows, std::vector<int> 
                 plan->push_back(*power);
         }
     }
-    // Linear objectives have an owning O(n) empty CSR Hessian. Do not scan n^2.
     if (std::holds_alternative<QuadraticCoefficients>(q.objective().coefficients()))
         for (std::size_t i = 0; i < n; ++i)
             for (std::size_t j = 0; j <= i; ++j)
@@ -264,9 +261,6 @@ HighsModel translate(const ConvexProgram &p, std::span<const int> powers) {
     const bool private_free_row =
         !hessian.value_.empty() &&
         std::none_of(csr.values.begin(), csr.values.end(), [](double value) { return value != 0; });
-    // -inf < x0 < +inf changes neither the feasible x-space nor the objective.
-    // Its unit entry avoids the pinned basis empty-transpose invariant; a zero
-    // row cannot do that, including when authored rows have only zero entries.
     if (private_free_row) {
         ++lp.num_row_;
         lp.row_lower_.push_back(-kHighsInf);
@@ -339,9 +333,6 @@ void set_hint(Highs &h, const HighsSolution &start, std::ostringstream &raw, con
 std::pair<HighsBasis, std::size_t> qp_start_basis(const HighsLp &lp, HighsBasis basis) {
     std::size_t inactive_free_rows = 0;
     for (std::size_t i = 0; i < basis.row_status.size(); ++i) {
-        // The QP initializer represents inactive rows with kNonbasic. A warm
-        // simplex basis can instead label a nonbasic free slack kZero.
-        // Preserve the basic partition, primal values and all bound statuses.
         if (lp.row_lower_[i] == -kHighsInf && lp.row_upper_[i] == kHighsInf &&
             basis.row_status[i] == HighsBasisStatus::kZero) {
             basis.row_status[i] = HighsBasisStatus::kNonbasic;
@@ -490,8 +481,6 @@ void candidate(ProgramResult &result, const ConvexProgram &p, const ExecutionCon
     raw << "\nobjective.original=" << e->original_objective
         << "\nobjective.solver=" << e->solver_objective;
     if (private_free_row && allow_dual) {
-        // A free row has no lower/upper multiplier. Dropping a nonzero native
-        // value would change stationarity in original coordinates, so withhold it.
         if (!s.dual_valid || s.row_dual.size() != q.rows().size() + 1 ||
             !std::isfinite(s.row_dual.back()) || s.row_dual.back() != 0) {
             raw << "\ndual.unavailable=private free row multiplier is not zero";

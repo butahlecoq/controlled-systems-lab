@@ -521,7 +521,7 @@ bool supported_set(const AdmissibleSet &input, std::size_t dimension) {
         return false;
     return !std::holds_alternative<sets::VRepresentation>(data->representation());
 }
-} // namespace
+}
 
 bool nominal_linear_exact_profile_valid(const problem::ResolvedProblem &problem,
                                         const FamilyRequest &family,

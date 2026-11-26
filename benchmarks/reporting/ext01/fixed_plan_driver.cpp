@@ -180,7 +180,7 @@ void emit(std::string_view name,Case run,std::size_t round,bool warmup,std::size
         {"checked_calls",batch},{"elapsed_ns",elapsed},
         {"result",result}}.dump()<<'\n';
 }
-} // namespace
+}
 
 int main(int argc,char** argv) {
     try {

@@ -910,7 +910,7 @@ def main() -> int:
                 "not_a_hull_reducer_port": True,
             },
             "legacy_btulshor": {
-                "component_profile": "source-faithful KPABEP/REACH finite fixtures",
+                "component_profile": "source-faithful candidate-elimination hull reducer and affine reachability vertex generator finite fixtures",
                 "model_dimensions": "public request-specific",
             },
             "finite_action_nominal": {

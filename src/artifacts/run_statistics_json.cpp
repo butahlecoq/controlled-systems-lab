@@ -334,7 +334,7 @@ Json configuration_record(const ConfigurationInput &c, bool semantic) {
             {"strategy", std::move(strategy)},
             {"workspace_policy", c.workspace == WorkspacePolicy::fresh ? "fresh" : "reused"}};
 }
-} // namespace
+}
 ArtifactResult<std::string> configuration_json(const ConfigurationInput &input, bool semantic) {
     try {
         std::string out;
@@ -1084,7 +1084,7 @@ ConfigurationInput parse_configuration(const Json &j) {
     c.workspace = workspace == "fresh" ? WorkspacePolicy::fresh : WorkspacePolicy::reused;
     return c;
 }
-} // namespace
+}
 } // namespace csl::artifacts
 
 namespace csl::artifacts {

@@ -269,7 +269,7 @@ Diagnostic validate_history(const SlewCoordinateMap &map, const ControlHistory &
     return {DiagnosticCode::invalid_input, {}, {}};
 }
 
-} // namespace
+}
 
 SlewLiftResult lift_one_step_slew(const Problem &authored, const SlewMemoryRequest &request) {
     if (!authored.model)

@@ -68,14 +68,9 @@ inline std::vector<TransformStepIdentity> expected_ts01_lineage(const ProblemId 
     return expected_nominal_lineage(problem, 2);
 }
 inline std::vector<TransformStepIdentity> expected_ts02_lineage(const ProblemId &problem) {
-    // T-S02 currently executes the same six deterministic reach-back steps as
-    // T-S01. The immutable FamilyRequest profile/objective distinguishes the
-    // proof authority; only this expected-lineage name is profile-specific.
     return expected_ts01_lineage(problem);
 }
 inline std::vector<TransformStepIdentity> expected_ts03_lineage(const ProblemId &problem) {
-    // T-S03 uses the same two-transition Strategy A operation sequence as
-    // T-S01; keep a profile-specific name at admission and receipt boundaries.
     return expected_ts01_lineage(problem);
 }
 

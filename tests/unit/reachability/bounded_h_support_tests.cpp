@@ -131,7 +131,6 @@ int main() {
     check(std::holds_alternative<Unsupported>(invalid_factors));
     // A negative inequality multiplier cannot justify the bound.
     check(std::holds_alternative<Diagnostics>(residual_corrected_support(input, {-1}, {})));
-    // Equality multipliers and cross-coordinate support in four dimensions.
     BoundedHSupportInput four{{0,4,{}}, {}, {1,4,{1,1,0,0}}, {1},
         {-2,-2,-1,-1}, {2,2,1,1}, {1,1,1,1}};
     auto result4 = residual_corrected_support(four, {}, {1});

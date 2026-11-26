@@ -1136,7 +1136,7 @@ ScalarParameterBranch evaluate_scalar_parameter_path(const HybridSystem &system,
     return result;
 }
 
-} // namespace
+}
 
 HybridFamilyVerificationCapabilities
 OneStepScalarIntervalHybridFamilyVerifier::capabilities() const noexcept {

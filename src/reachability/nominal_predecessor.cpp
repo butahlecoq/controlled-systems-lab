@@ -139,9 +139,6 @@ NominalPredecessorOutcome PreparedNominalPredecessor::run(const ExecutionContext
                                          DiagnosticCode::evidence_mismatch)});
     result.evidence.reference = {request_.identity,
                                  {request_.states.id, request_.controls.id, request_.target.id}};
-    // The provider's projection theorem/evidence concerns the compiled binary64
-    // joint rows. It cannot certify that those rows equal the authored dynamics
-    // pullback over reals. Never upgrade the original predecessor claim.
     result.evidence.support = Unestablished{};
     result.evidence.error_bound.reset();
     result.evidence.assumptions.push_back(

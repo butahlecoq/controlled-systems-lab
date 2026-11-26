@@ -25,9 +25,6 @@ class StrategyAExecutionRunner;
 
 namespace csl::registry::detail {
 
-// Private, one-shot proof that Strategy B's internal direct-joint runner
-// completed the selected exact-profile construction/extraction path or the
-// approved T-S02 analytic relation from the retained feasible artifact.
 class StrategyBRuntimeLineageReceipt {
     StrategyRequest binding_;
     std::shared_ptr<const synthesis::strategy_b::JointProgram> build_output_;
@@ -55,9 +52,6 @@ class StrategyBRuntimeLineageReceipt {
                  const StrategyRegistration::CompleteFamilyVerifierKey &) const;
 };
 
-// Private, one-shot evidence that Strategy A's exact T-S01 path executed its
-// forward reachability, feasible recovery, terminal minimization, and optimal
-// recovery stages before proposing the reviewed analytic family.
 class StrategyARuntimeLineageReceipt {
     StrategyRequest binding_;
     std::shared_ptr<const reachability::ForwardTube> forward_;

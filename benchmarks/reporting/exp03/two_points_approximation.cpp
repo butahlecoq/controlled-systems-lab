@@ -442,7 +442,7 @@ Json run(const Json& reference, bool measure) {
         {"projections", projection_data}, {"measurements", measurements},
         {"inner_methods", inner_methods}};
 }
-} // namespace
+}
 
 int main(int argc, char** argv) {
     try {

@@ -102,7 +102,6 @@ Rows constraints(const sets::HRepresentation &h, std::size_t n) {
     return r;
 }
 OptimumEvidence evidence(const ProgramResult &r, ProblemId id) {
-    // Program evidence alone does not prove this is the complete terminal slice.
     OptimumEvidence e{{id, Unestablished{}}, {}};
     if (r.objective.lower)
         e.bounds.lower = ObjectiveBound{r.objective.lower->value, {id, Unestablished{}}};

@@ -549,7 +549,7 @@ Json run() {
         {"controllers", Json::array({ce, robust})},
         {"observation_timing_checks", observation_timing_checks(map)}};
 }
-} // namespace
+}
 
 int main() {
     try {

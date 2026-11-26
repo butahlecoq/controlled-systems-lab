@@ -158,7 +158,8 @@ file(MAKE_DIRECTORY "${example_source}/scenarios")
 foreach(example_file CMakeLists.txt registered_lp.cpp registered_convex.cpp
     resolved_scenario.cpp scenario_file.cpp backend_substitution.cpp registered_synthesis_comparison.cpp
     nominal_linear_exact_2d.cpp scenario_cli.cpp continuous_policy.cpp
-    source_index_geometry_2d.cpp adaptive_ode_replay.cpp scenario_backend_substitution.cpp
+    source_index_geometry_2d.cpp source_index_geometry_2d_alias_check.cmake
+    adaptive_ode_replay.cpp scenario_backend_substitution.cpp
     native_slide50_reachability.cpp native_model_catalogue.cpp native_four_state_reachability.cpp
     native_four_state_approximation.cpp
     native_discrete_models.cpp native_model_tracking.cpp native_catalogue_projection.hpp

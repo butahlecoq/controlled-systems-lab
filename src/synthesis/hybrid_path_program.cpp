@@ -2165,9 +2165,6 @@ HybridFamilyVerificationResult verify_hybrid_portfolio_family(
                 {DiagnosticCode::evidence_mismatch, "hybrid.verification.branch_path",
                  "Verifier report must contain each enumerated path exactly once and in order"});
     for (std::size_t i = 0; i < paths.size(); ++i) {
-        // These observations come from the admitted program/candidate inputs,
-        // not from the replaceable verifier, so an adapter cannot omit or
-        // rewrite the operation and provider lineage in its report.
         report.branches[i].relation_limits = programs[i].relation_limits;
         report.branches[i].relation_operations = programs[i].relation_operations;
         const auto candidate =

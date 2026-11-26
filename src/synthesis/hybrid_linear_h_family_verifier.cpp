@@ -191,7 +191,7 @@ std::size_t saturated_increment(std::size_t value) {
     return value == std::numeric_limits<std::size_t>::max() ? value : value + 1;
 }
 
-} // namespace
+}
 
 HybridFamilyVerificationCapabilities
 ExactLinearHHybridFamilyVerifier::capabilities() const noexcept {

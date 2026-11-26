@@ -404,7 +404,7 @@ RequestProvenance provenance(const ConversionRequest &request,
             selected.actual ? std::optional<ModuleId>{selected.actual->id} : std::nullopt,
             selected.actual ? std::optional<std::string>{selected.actual->version} : std::nullopt};
 }
-} // namespace
+}
 
 registry::Registration<registry::ConversionPort> make_materializer(MaterializationBudget budget) {
     return {

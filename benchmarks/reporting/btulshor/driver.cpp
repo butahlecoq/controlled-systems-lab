@@ -338,7 +338,7 @@ Json comparison(const Json& fixture) {
     result["schema"] = "csl.btulshor-comparison/1";
     return result;
 }
-} // namespace
+}
 
 int main(int argc, char** argv) {
     try {

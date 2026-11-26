@@ -75,7 +75,7 @@ void row(std::string_view phase, std::size_t repetition, std::size_t calls) {
               << ',' << result.objective << ',' << result.projected_residual << ','
               << result.iterations << ',' << result.objective_evaluations << '\n';
 }
-} // namespace
+}
 
 int main(int argc, char** argv) try {
     if (argc != 2) throw std::runtime_error("Expected smoke or measure mode");

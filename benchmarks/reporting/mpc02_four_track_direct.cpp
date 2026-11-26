@@ -131,7 +131,7 @@ MeasurementObservation run_direct(const input::LoadedScenario& scenario, const T
         check->original_objective};
 }
 
-} // namespace
+}
 
 int main(int argc, char** argv) try {
     using namespace csl;

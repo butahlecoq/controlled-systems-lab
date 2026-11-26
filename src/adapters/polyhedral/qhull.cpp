@@ -296,7 +296,7 @@ class LpRunner {
     }
 };
 
-} // namespace
+}
 
 namespace {
 class Workspace final : public RepresentationConverterWorkspace {
@@ -1002,7 +1002,7 @@ registry::Capability check_capability(const ConversionRequest &request,
                           "Qhull's signed-int dimension or point-count limit is exceeded.");
     return registry::Offer{{request.output, Assurance::numerical, SetRelation::equivalent, {}, {}}};
 }
-} // namespace
+}
 
 QhullRegistrationResult make_qhull_registration(registry::Registration<registry::LPPort> lp,
                                                 QhullOptions options) {

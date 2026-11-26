@@ -100,7 +100,7 @@ void validate(const geometry::HullCheckRecord &record) {
         (record.status != geometry::HullCheckStatus::incorrect && record.counterexample_index))
         throw std::invalid_argument("Inconsistent checker fields");
 }
-} // namespace
+}
 
 ArtifactResult<std::string> encode_bounded_hull_check(const geometry::HullCheckRecord &record) {
     try {

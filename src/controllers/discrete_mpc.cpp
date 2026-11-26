@@ -582,7 +582,7 @@ std::vector<double> episode_times(const NominalMpcTask &task) {
     return times;
 }
 
-} // namespace
+}
 
 ProfileAdmission make_source_task_profile(std::string_view model_id,
                                           const AuthoredTaskChoices &choices) {

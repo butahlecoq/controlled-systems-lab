@@ -63,6 +63,6 @@ int main() {
 
     if (reached != std::set<std::pair<double, double>>{{0, 0}, {1, 0}, {1, 2}, {2, 2}}) return 11;
 
-    std::cout << "Installed legacy BTULSHOR client: MODIF, KPABEP port and REACH source pairs passed\n";
+    std::cout << "Installed legacy source-index geometry routines passed: simplex pivot oracle (MODIF), candidate-elimination hull reducer (KPABEP) port and affine reachability vertex generator (REACH) source pairs\n";
     return 0;
 }

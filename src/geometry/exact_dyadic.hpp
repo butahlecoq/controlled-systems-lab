@@ -15,11 +15,6 @@ static_assert(std::numeric_limits<double>::is_iec559 && std::numeric_limits<doub
                   std::numeric_limits<double>::min_exponent == -1021,
               "Exact geometry dyadic arithmetic requires IEEE-754 binary64 double");
 
-// A binary64 significand has at most 53 bits. A finite binary64 value has
-// exponent at most 971 in this representation and at least -1074, so a
-// product spans fewer than 4200 positions after scaling by 2^-2148. Even
-// summing size_t::max products adds fewer than 64 bits; 8192 bits therefore
-// suffice. Every insertion and carry is still checked and fails closed.
 inline constexpr std::size_t limb_count = 128;
 inline constexpr int common_exponent = -2148;
 
@@ -135,9 +130,6 @@ inline bool add_product(Integer &target, Dyadic lhs, Dyadic rhs) noexcept {
     const int shift = lhs.exponent + rhs.exponent - common_exponent;
     if (shift < 0)
         return false;
-    // Multiply two at-most-53-bit significands in four 32-bit words. The
-    // largest intermediate is (2^32-1)^2 + 2(2^32-1) = 2^64-1, so uint64_t
-    // is sufficient. Four words cover the at-most-106-bit product.
     const std::array<std::uint32_t, 2> a{static_cast<std::uint32_t>(lhs.significand),
                                          static_cast<std::uint32_t>(lhs.significand >> 32)};
     const std::array<std::uint32_t, 2> b{static_cast<std::uint32_t>(rhs.significand),

@@ -138,7 +138,7 @@ def main() -> int:
     print(
         f"inventory source check passed: {len(records)} records, {len(hull_ids)} HullReducerPort IDs, "
         f"{len(source_index_ids)} source-index IDs, "
-        f"{len(legacy_symbols)} faithful BTULSHOR symbols"
+        f"{len(legacy_symbols)} legacy source-index symbols"
     )
     return 0
 

@@ -1009,7 +1009,7 @@ parent_reachable_envelope(const FiniteActionNominalRequest &request,
                         context, observations, observer, absolute_stage, parent_node_id);
 }
 
-} // namespace
+}
 
 static FiniteActionGraphOutcome finite_action_stage_layered_graph_impl(
     const FiniteActionNominalRequest &request, FiniteActionGraphLimits limits,

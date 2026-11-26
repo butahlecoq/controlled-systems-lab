@@ -1108,6 +1108,14 @@ class _HistoricalPublicationPin(TypedDict):
 
 
 _HISTORICAL_PUBLICATIONS: dict[str, _HistoricalPublicationPin] = {
+    "opt12-7b732a53716c": {
+        "report_id": "opt12-warm-start-b45c68fc3a6b164919ba3dac5e863688fd39cbb867dcc06c75f1e124c94b1386",
+        "inventory_sha256": "2d3186d04ab0aec0d411fcd609f0dd9e52cab41076043a8ca8f3d6156565b23f",
+        "identity_files_sha256": {
+            "opt12-7b732a53716c.zip": "10c245099268e77fcc2ecfba31f5cca9cbf5cf247d782fc058f66f0a5ea75e7e"
+        },
+        "zip_sha256": "116a0a1dd5b1551f1ef37591da88af10682dfe822a782c9b1b6d0a63366a85ed",
+    },
     "geo02-20261012T235755Z-6b1f504ad3db": {
         "identity_files_sha256": {
             "geo02-20261012T235755Z-6b1f504ad3db.zip": "faa9ec723875f6ab9072b38aaa0f3d0d4be30eb7732b887f1c9aa99f46d00b40"
@@ -1141,6 +1149,14 @@ _HISTORICAL_PUBLICATIONS: dict[str, _HistoricalPublicationPin] = {
         "inventory_sha256": "4e01fdca414522270a70b80818273c1e7b8baf80a223d4e76514936a4cb46f1c",
         "report_id": "geo05-8918ad3ac4b0b3d1ff9c8b807d6b509f324ef3e9b11716be496c8e6e437f6795",
         "zip_sha256": "51826297b765b011423ca58fb3160fbdd4884c176d73adaf5eabc5f2508fefba",
+    },
+    "geo06-b010fb3df212604b": {
+        "identity_files_sha256": {
+            "geo06-b010fb3df212604b.source.zip": "6aa7302c1f50f57006d66af5b5833dc9e7944c0a263513e529f1e924138f093b"
+        },
+        "inventory_sha256": "9842dc91055aa2c4c1984a706028684ea72ca713d0117b2c8ff450faddb58336",
+        "report_id": "geo06-f8bee6d8f950343215dd24afeff5091669b8940e7d2106e6834e904b6ec4c074",
+        "zip_sha256": "9523a907b67dd576c6a107b849b6cd415095a711e839bcbdc4f52e77d8d6b6d8",
     },
     "opt04-20261013T172839Z-6451c4b89d3b": {
         "inventory_sha256": "238ff015f68d98e385593d844436a562317e12bb0f7cdedbe07e96af7f32bda7",
@@ -1179,11 +1195,17 @@ _HISTORICAL_PUBLICATIONS: dict[str, _HistoricalPublicationPin] = {
         "zip_sha256": "c75227f9fcdb0bb90b724d698a170306662562e79ef4835589be26b0b0c5da11",
     },
     "syn01-nominal-20261013-f7ba310d-48a679cfc0d4": {
+        "identity_files_sha256": {
+            "syn01-nominal-20261013-f7ba310d-48a679cfc0d4.zip": "95be8cdf2d2b805cc1076536dae0e21b0abd3b096c6e48e5b3e5f736ec675c85",
+        },
         "inventory_sha256": "f977f289ac3942098140373435e7322dae5f43eb030239952c25a3ac29c47aa3",
         "report_id": "syn01-6e207b2ee1f300929f054e679c8cd5707f979c02b173292660520e403ebf2852",
         "zip_sha256": "84de33d3a3f6500a9e8aea07fe8297a71cdbd44b269f94aa4358bc332b28ec65",
     },
     "syn02-terminal-20261013-c234a1a0-35de886a7fb4": {
+        "identity_files_sha256": {
+            "syn02-terminal-20261013-c234a1a0-35de886a7fb4.zip": "32bbc42048fc555097c06a9fd2e565303cb554655a1cba9c02daff636c55d407",
+        },
         "inventory_sha256": "0212ce9d7f65bf66de374895853c5119214e27c531e578a7751ddb3c1843e843",
         "report_id": "syn02-1b07970d73d90c79c4bba2c65d429ba05bd798751d885146cb21d8a876a067c3",
         "zip_sha256": "8acb23c42447455385e63aefccbf25a680384d39de5f50339838e98af7f10bf8",
@@ -1249,6 +1271,40 @@ _HISTORICAL_PUBLICATIONS: dict[str, _HistoricalPublicationPin] = {
         "zip_sha256": "c046a49dea35dc3c12f77061d92b3166f994c821f9a2f14fb494354541b8fda9",
     },
 }
+
+
+def source_zip_identity(
+    bundle: Path, members: set[str] | list[str], *, index_root: bool = False, prefixed: bool = False
+) -> tuple[str, str]:
+    """Validate a sibling source ZIP and return its stable identity name and digest."""
+    bundle = Path(bundle)
+    name = bundle.name + ".zip"
+    path = bundle.parent / name
+    expected = set(members)
+    if prefixed:
+        expected = {f"{bundle.name}/{member}" for member in expected}
+    if index_root:
+        expected.add("index.html")
+    if Path(name).name != name or path.is_symlink() or not path.is_file():
+        raise ValueError("source ZIP is missing or unsafe: " + name)
+    try:
+        with zipfile.ZipFile(path) as archive:
+            infos = archive.infolist()
+            names = [info.filename for info in infos]
+            if len(names) != len(set(names)) or set(names) != expected:
+                raise ValueError("source ZIP inventory differs from the validated bundle")
+            for info in infos:
+                content = archive.read(info)
+                if info.filename == "index.html":
+                    continue
+                member = info.filename.split("/", 1)[1] if prefixed else info.filename
+                if content != (bundle / member).read_bytes():
+                    raise ValueError(
+                        "source ZIP member differs from the validated bundle: " + member
+                    )
+    except (OSError, RuntimeError, NotImplementedError, zipfile.BadZipFile) as exc:
+        raise ValueError("invalid source ZIP: " + name) from exc
+    return name, hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def preserve_historical_publication(bundle, publication, archive_builder):
