@@ -13,9 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "reports"))
 import geo05_registered_reports as geo05
-
 import report_site
-
 
 SCENARIOS = (
     "singular_a",

@@ -700,6 +700,25 @@ bool measurement_matches_arm(AttemptStatus status, const Json &measurement, cons
     if (spec.strategies.empty())
         return true;
     const auto schema = measurement.value("schema", std::string{});
+    if (schema == "csl.closed-loop-paired-timing-event/1") {
+        const auto nonnegative_integer = [](const Json &value) {
+            if (value.is_number_unsigned())
+                return true;
+            return value.is_number_integer() && value.get<std::int64_t>() >= 0;
+        };
+        return exact_fields(measurement, {"schema", "status", "strategy", "instrumentation",
+                                          "repetition", "warmup", "order_index",
+                                          "end_to_end_wall_seconds", "worker_wall_seconds"}) &&
+               measurement.at("strategy") == spec.strategies.at(arm) &&
+               measurement.at("instrumentation") == spec.instrumentation.at(arm) &&
+               measurement.at("repetition") == repetition + 1 &&
+               measurement.at("warmup") == false &&
+               nonnegative_integer(measurement.at("order_index")) &&
+               measurement.at("end_to_end_wall_seconds").is_number() &&
+               measurement.at("end_to_end_wall_seconds").get<double>() >= 0.0 &&
+               measurement.at("worker_wall_seconds").is_number() &&
+               measurement.at("worker_wall_seconds").get<double>() >= 0.0;
+    }
     if (schema == "csl.approximation-check-event/1")
         return run.value("schema", std::string{}) == "csl.external-method-run/1" &&
                approximation_check_event_matches(measurement, run, spec, arm, repetition);
@@ -884,19 +903,6 @@ bool measurement_matches_arm(AttemptStatus status, const Json &measurement, cons
             return true;
         return value.is_number_integer() && value.get<std::int64_t>() >= 0;
     };
-    if (schema == "csl.closed-loop-paired-timing-event/1")
-        return exact_fields(measurement, {"schema", "status", "strategy", "instrumentation",
-                                          "repetition", "warmup", "order_index",
-                                          "end_to_end_wall_seconds", "worker_wall_seconds"}) &&
-               measurement.at("strategy") == spec.strategies.at(arm) &&
-               measurement.at("instrumentation") == spec.instrumentation.at(arm) &&
-               measurement.at("repetition") == repetition + 1 &&
-               measurement.at("warmup") == false &&
-               nonnegative_integer(measurement.at("order_index")) &&
-               measurement.at("end_to_end_wall_seconds").is_number() &&
-               measurement.at("end_to_end_wall_seconds").get<double>() >= 0.0 &&
-               measurement.at("worker_wall_seconds").is_number() &&
-               measurement.at("worker_wall_seconds").get<double>() >= 0.0;
     const auto canonical_count = [](const Json &value) {
         if (!value.is_string())
             return std::optional<std::uint64_t>{};
