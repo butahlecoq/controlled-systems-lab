@@ -331,7 +331,7 @@ Arguments arguments(int argc, char** argv) {
     return result;
 }
 
-} // namespace
+}
 
 int main(int argc, char** argv) {
     const auto started = std::chrono::steady_clock::now();

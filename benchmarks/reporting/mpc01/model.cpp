@@ -38,7 +38,7 @@ std::optional<ValidationError> box_shape(const std::optional<Box>& box,
     return std::nullopt;
 }
 
-} // namespace
+}
 
 std::optional<ValidationError> validate(const MpcCase& problem) {
     const auto nx = problem.state_dimension();

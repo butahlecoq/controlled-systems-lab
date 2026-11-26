@@ -42,7 +42,7 @@ bool same_graph(const HullCandidateGraph &left, const HullCandidateGraph &right)
            left.request_profile == right.request_profile;
 }
 
-} // namespace
+}
 
 HullReducerCatalogue make_hull_reducer_catalogue(registry::Registration<registry::LPPort> lp) {
     registry::Registry<registry::HullReducerPort> reducers;

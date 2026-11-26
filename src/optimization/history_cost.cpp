@@ -109,7 +109,7 @@ HistoryCostCompilation compile_failure(Diagnostic diagnostic) {
     return Diagnostics{std::move(diagnostic)};
 }
 
-} // namespace
+}
 
 HistoryCostCompilation compile_history_cost(const synthesis::JointHistoryRelation &history,
                                             const TerminalObjective &terminal,

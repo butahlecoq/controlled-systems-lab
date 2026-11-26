@@ -71,7 +71,6 @@ class NativePublicationTests(unittest.TestCase):
 
     def test_publication_preserves_every_saved_byte_and_lesson_links(self):
         files, entries, cards = native.build(self.root)
-        # Navigation crosses publishers; verify those routes against their outputs.
         linked_files = dict(files)
         for publisher in ("stage_native_extended_models", "stage_native_flexible_pitch"):
             linked_files.update(importlib.import_module(publisher).build(ROOT)[0])

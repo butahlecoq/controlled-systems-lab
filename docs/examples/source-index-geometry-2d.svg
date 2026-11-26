@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 405" role="img" aria-labelledby="title desc">
 <title id="title">Source-index input, affine image, and one-step control sum in data coordinates</title>
-<desc id="desc">Each panel labels x and y in data coordinates and shows the zero axes. The affine image vertices and control-sum vertices come from the saved QuickHull record. They match the saved BTULSHOR record. Negative y coordinates appear below the horizontal zero axis.</desc>
+<desc id="desc">Each panel labels x and y in data coordinates and shows the zero axes. The affine image vertices and control-sum vertices come from the saved QuickHull record. They match the saved record for the Candidate-elimination hull reducer. Negative y coordinates appear below the horizontal zero axis.</desc>
 <style>text{font:14px system-ui,sans-serif;fill:#18212b}.title{font-weight:650;font-size:16px}.tick{font-size:11px;text-anchor:middle}.ytick{text-anchor:end}.grid{stroke:#e1e6eb;stroke-width:1}.axis{stroke:#405366;stroke-width:2}.axis-label,.axis-name{font-size:12px;font-weight:600}.shape{stroke-width:3;fill-opacity:.4}.hull{fill:#91c8aa;stroke:#287357}.image{fill:#e9c76d;stroke:#9b6c13}.sum{fill:#9cbfdf;stroke:#32658f}.vertex{fill:#153f2f}.edge{fill:#bd6c22}.duplicate{fill:#7657a6}.interior{fill:#bd3f36}</style>
 <rect width="1020" height="405" fill="#fbfcfe"/>
 <g class="plot" aria-label="Input cloud">

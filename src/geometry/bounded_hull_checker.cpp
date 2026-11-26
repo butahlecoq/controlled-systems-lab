@@ -32,9 +32,6 @@ void append_u64(std::vector<std::byte> &bytes, std::uint64_t value) {
         bytes.push_back(static_cast<std::byte>((value >> shift) & 0xffU));
 }
 
-// The six expanded products avoid rounded binary64 subtraction. This
-// arithmetic primitive is shared; the containment oracle is independent of
-// QuickHull's endpoint, side, farthest-point, and recursive hull algorithm.
 bool orientation(const Vector &a, const Vector &b, const Vector &c, int &sign) {
     Integer value;
     const auto term = [&](double x, double y, bool negative) {
@@ -69,7 +66,7 @@ bool in_triangle(const Vector &point, const Vector &a, const Vector &b, const Ve
         return false;
     }
     if (area == 0)
-        return false; // pairs handle degenerate triples
+        return false;
     return area > 0 ? (ab >= 0 && bc >= 0 && ca >= 0) : (ab <= 0 && bc <= 0 && ca <= 0);
 }
 

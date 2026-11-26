@@ -362,7 +362,7 @@ FinitePlanParallelotopeOutcome parallelotope_planar(const FixedPlanRequest &requ
     return trace;
 }
 
-} // namespace
+}
 
 FinitePlanParallelotopeOutcome finite_plan_parallelotope(const FixedPlanRequest &request,
                                                          const ExecutionContext &context) {

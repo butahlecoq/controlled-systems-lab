@@ -1434,6 +1434,10 @@ class GalleryTests(unittest.TestCase):
             (ROOT / "examples/feedback-geometry-tiny-fd28/box/response.jsonl").read_bytes(),
         )
         self.assertIn('id="source-index-geometry-2d"', page)
+        self.assertIn(gallery.SOURCE_INDEX_TITLE, page)
+        self.assertIn(gallery.NEAR_TOLERANCE_TITLE, page)
+        self.assertIn("candidate-elimination hull reducer", page)
+        self.assertNotIn("Source-index hulls in a 2D geometry pipeline", page)
         self.assertTrue((self.site / "examples/source-index-geometry-2d-records.json").is_file())
         for figure in figures:
             if figure.name in {

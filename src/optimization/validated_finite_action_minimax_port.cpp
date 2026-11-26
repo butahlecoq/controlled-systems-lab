@@ -125,7 +125,7 @@ class ReferenceWorkspace final : public ValidatedFiniteActionMinimaxWorkspace {
     }
 };
 
-} // namespace
+}
 
 registry::Requirements validated_finite_action_minimax_requirements() {
     registry::Requirements requirements;

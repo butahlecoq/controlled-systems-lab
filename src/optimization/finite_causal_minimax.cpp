@@ -19,7 +19,7 @@ bool tied(double left, double right, const Options &options) {
            options.absolute_value_tolerance + options.relative_value_tolerance * scale;
 }
 
-} // namespace
+}
 
 std::optional<Diagnostic> validate(const Game &game, const Options &options) {
     if (!std::isfinite(options.absolute_value_tolerance) ||

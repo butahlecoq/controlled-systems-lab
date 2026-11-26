@@ -122,8 +122,6 @@ FactorEllipsoidResult outer_minkowski_sum(const FactorEllipsoid &left, const Fac
     Vector center(dimension);
     for (std::size_t row = 0; row < dimension; ++row)
         center[row] = left.center[row] + right.center[row];
-    // A zero factor is the exact singleton {center}; avoid inflating the other
-    // summand by an arbitrary limiting beta.
     if (zero_factor(left.factor))
         return make_factor_ellipsoid(std::move(center), right.factor);
     if (zero_factor(right.factor))

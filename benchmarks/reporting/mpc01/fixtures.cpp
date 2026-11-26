@@ -203,7 +203,7 @@ FixtureLoad from_loaded_scenario(const input::LoadedScenario& loaded,
     return result;
 }
 
-} // namespace
+}
 
 MpcCase make_ts01() {
     MpcCase result;

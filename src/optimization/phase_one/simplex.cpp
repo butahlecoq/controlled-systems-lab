@@ -641,7 +641,7 @@ ProgramOutcome Worker::do_solve(const LinearProgram &p, const ExecutionContext &
         return finish(f.reason);
     }
 }
-} // namespace
+}
 RegistrationResult make_registration(Options options) {
     if (!std::isfinite(options.pivot_relative_tolerance) || options.pivot_relative_tolerance < 0 ||
         options.pivot_relative_tolerance >= 1)

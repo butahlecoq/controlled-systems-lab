@@ -687,7 +687,7 @@ nominal_forward_impl(const problem::ResolvedProblem &resolved, RequestId request
                                         "Forward stage storage exceeds container capacity."});
     }
 }
-} // namespace
+}
 
 NominalForwardOutcome nominal_forward(const problem::ResolvedProblem &resolved, RequestId request,
                                       const ForwardDependencies &dependencies,

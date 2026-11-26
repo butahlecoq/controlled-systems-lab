@@ -223,7 +223,7 @@ void write_rows(std::ofstream &output, std::string_view scenario, std::string_vi
         output << '\n';
     }
 }
-} // namespace
+}
 
 int main(int argc, char **argv) try {
     if (argc != 2)

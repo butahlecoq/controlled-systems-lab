@@ -224,7 +224,7 @@ Json run() {
             "analytic policy is a reference candidate verified through differential identities and boundary conditions",
             "finite catalogue minimum is exact over the declared 5^10 catalogue under binary64 evaluation"})}};
 }
-} // namespace
+}
 
 int main() {
     try {

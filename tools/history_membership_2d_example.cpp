@@ -135,7 +135,7 @@ void write_outputs(const std::filesystem::path &directory,
     if (!html)
         throw std::runtime_error("failed to write index.html");
 }
-} // namespace
+}
 
 int main(int argc, char **argv) {
     if (argc != 2) {

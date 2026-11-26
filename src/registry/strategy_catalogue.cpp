@@ -209,7 +209,7 @@ bool matches(const StrategyRegistry &strategies, const StrategyCandidateGraph &g
            graph.module_slots == expected.module_slots && graph.lineage == expected.lineage;
 }
 
-} // namespace
+}
 
 std::vector<StrategyCandidateRow> enumerate_strategy_candidates(const StrategyRegistry &strategies,
                                                                 const StrategyRequest &request) {

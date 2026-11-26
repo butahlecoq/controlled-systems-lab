@@ -164,7 +164,7 @@ void verify_safe_smoke_is_inconclusive(const HContinuousPolicyResult& result) {
         throw std::runtime_error("correlation was not preserved in the H-domain witness");
 }
 
-} // namespace
+}
 
 int main(int argc, char** argv) try {
     if (argc != 2 || (std::string_view(argv[1]) != "smoke" &&

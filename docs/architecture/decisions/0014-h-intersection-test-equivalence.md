@@ -24,3 +24,14 @@ The test accepts redundant output rows and positive rescaling while still
 checking both containment directions. It does not require preservation of
 redundant input inequalities. Changes to row order or normalization do not
 break the test when the represented set remains the same.
+
+## Structural H containment in approximation evidence (2026-11-26)
+
+The approximation policy may use literal H-row containment as a structural
+basis for an inner or outer enclosure. Adding an authored constraint can only
+shrink the defined set, so when every required inequality and equality row
+matches a stored available row exactly, the available H set is contained in the
+required H set. Compare finite stored coefficients and bounds; do not infer
+algebraic equivalence, positive rescaling, or validity of a changed bound. This
+structural test is a sufficient admission basis, not a general set-equivalence
+oracle.

@@ -440,7 +440,7 @@ JointProgramOutcome build_joint_program_impl(const problem::ResolvedProblem &p,
                         std::move(objective),
                         std::move(*program)};
 }
-} // namespace
+}
 JointProgramOutcome build_joint_program(const problem::ResolvedProblem &p,
                                         const FamilyRequest &request) {
     return build_joint_program_impl(p, request, nullptr);

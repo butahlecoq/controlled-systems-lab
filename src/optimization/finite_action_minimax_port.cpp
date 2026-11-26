@@ -119,7 +119,7 @@ class ReferenceWorkspace final : public FiniteActionMinimaxWorkspace {
     }
 };
 
-} // namespace
+}
 
 registry::Requirements finite_action_minimax_requirements() {
     registry::Requirements required;

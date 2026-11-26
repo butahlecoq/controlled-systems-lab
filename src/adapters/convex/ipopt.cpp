@@ -288,7 +288,7 @@ class Workspace final : public ConvexWorkspace {
   public:
     explicit Workspace(ipindex limit) : limit_(limit) {}
 };
-} // namespace
+}
 
 std::variant<registry::Registration<registry::ConvexPort>, Diagnostics>
 make_ipopt_registration(IpoptConvexOptions options) {

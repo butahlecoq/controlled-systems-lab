@@ -191,7 +191,7 @@ auto ellipsoid_support(const Stage &stage) {
                          detail::outward_upper(static_cast<double>(center + radius))};
     };
 }
-} // namespace
+}
 
 std::variant<FinitePlanEllipsoidTrace::Stage, Unsupported, OperationStopped>
 propagate_existential_control_ellipsoid(const model::DynamicsStage &dynamics,

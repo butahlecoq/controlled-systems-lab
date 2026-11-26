@@ -20,8 +20,6 @@ struct RawRelationResult {
     std::string reason;
 };
 
-// Reconstruct the path relation directly from the model's stage data. This
-// deliberately does not call the production joint-H composer or use its trace.
 inline RawRelationResult reconstruct_path_relation(const model::HybridSystem &system,
                                                    const model::HybridRequest &request,
                                                    const model::HybridPath &path,

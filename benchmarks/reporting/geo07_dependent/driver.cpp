@@ -276,7 +276,7 @@ bool batch(std::size_t index,int round,bool warmup,int calls_per_batch) {
     std::cout.flush();
     return error.empty();
 }
-} // namespace
+}
 
 int main(int argc,char** argv) {
     try {
