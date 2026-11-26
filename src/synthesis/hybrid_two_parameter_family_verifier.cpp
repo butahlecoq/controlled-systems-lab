@@ -503,7 +503,7 @@ Branch eval(const HybridSystem &sys, const HybridRequest &req, const HybridPath 
     b.state = Branch::State::feasible;
     return b;
 }
-} // namespace
+}
 
 HybridFamilyVerificationCapabilities
 TwoParameterScalarPolytopeHybridFamilyVerifier::capabilities() const noexcept {

@@ -489,7 +489,7 @@ RelationCheck relation_is_exact_point(const sets::SetData &data, const std::vect
     return RelationCheck::matches;
 }
 
-} // namespace
+}
 
 HybridFamilyVerificationCapabilities
 ExactSingletonHybridFamilyVerifier::capabilities() const noexcept {

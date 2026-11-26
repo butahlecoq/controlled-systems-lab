@@ -291,7 +291,7 @@ auto zonotope_support(const FinitePlanZonotopeTrace::Stage &stage) {
     };
 }
 
-} // namespace
+}
 
 std::variant<FinitePlanZonotopeTrace::Stage, Unsupported, OperationStopped>
 propagate_existential_control_zonotope(const model::DynamicsStage &dynamics,

@@ -33,7 +33,7 @@ std::optional<sets::SetData> make_h(const SetId &id, std::size_t dimension,
         return *set;
     return {};
 }
-} // namespace
+}
 
 SetResult intersect_h(const sets::SetData &left, const sets::SetData &right, SetId output_id) {
     if (output_id.value.empty())
@@ -232,7 +232,7 @@ class IntersectionWorkspace final : public SetOperatorWorkspace {
         }
     }
 };
-} // namespace
+}
 
 registry::Registration<registry::GeometryPort> make_intersection_registration() {
     return {{{intersection_module}, "1.0.0"},

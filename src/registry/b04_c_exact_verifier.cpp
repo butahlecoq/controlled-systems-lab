@@ -508,7 +508,7 @@ bool relations_equal(const Payload &left, const Payload &right) {
            left.optimal_controls == right.optimal_controls;
 }
 
-} // namespace
+}
 
 bool strategy_a_b04_c_exact_profile_valid(const problem::ResolvedProblem &problem,
                                           const FamilyRequest &family,

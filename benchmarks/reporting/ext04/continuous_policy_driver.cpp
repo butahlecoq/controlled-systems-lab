@@ -91,7 +91,7 @@ Observed verify(const ContinuousPolicyResult& result) {
     return observed;
 }
 
-} // namespace
+}
 
 int main(int argc, char** argv) try {
     if (argc != 2 || (std::string_view(argv[1]) != "smoke" &&

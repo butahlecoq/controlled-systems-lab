@@ -682,7 +682,7 @@ class HighsLPBackend final : public LPBackend {
         return std::make_unique<HighsLPWorkspace>(options_);
     }
 };
-} // namespace
+}
 #if defined(CSL_HIGHSLP_TESTING)
 void test_support::reject_next_warm_basis_installation() noexcept {
     reject_next_warm_basis_installation_for_test = true;

@@ -172,7 +172,7 @@ CornerScoreOutcome score_corners(const reachability::ParallelotopeStage &termina
                            "Terminal frame-box corners produced no finite score.");
     return CornerScore{maximum, count};
 }
-} // namespace
+}
 
 FiniteActionParallelotopeMinimaxOutcome
 finite_action_parallelotope_minimax(const FiniteActionMinimaxRequest &request,

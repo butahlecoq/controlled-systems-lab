@@ -462,7 +462,7 @@ as_intersection_result(NominalPredecessorOutcome outcome, NominalTubeStage &reco
     return std::move(result.result);
 }
 
-} // namespace
+}
 
 NominalTubeOutcome nominal_tube(const problem::ResolvedProblem &resolved, RequestId request,
                                 const SetHandle &terminal_feasibility,

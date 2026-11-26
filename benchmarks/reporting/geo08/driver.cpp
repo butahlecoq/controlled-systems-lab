@@ -136,7 +136,7 @@ bool batch(const SetHandle& source, const Providers& selected,
               << (verified ? "5,16,0" : "unavailable,unavailable,unavailable") << '\n';
     return verified;
 }
-} // namespace
+}
 
 int main(int argc, char** argv) {
     if (argc != 2 || (std::string_view(argv[1]) != "smoke" &&

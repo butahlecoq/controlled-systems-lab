@@ -396,7 +396,7 @@ void batch(const char *phase, std::size_t repetition, std::size_t calls,
   if (failures)
     throw std::runtime_error("One or more measured verifier calls failed");
 }
-} // namespace
+}
 
 int main(int argc, char **argv) try {
   if (argc != 2)

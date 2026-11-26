@@ -126,7 +126,7 @@ void classify_status(OSQPInt status, NativeAttempt& attempt) {
     }
 }
 
-} // namespace
+}
 
 NativeAttempt solve_osqp(const MpcCase& problem, const SparseQp& qp,
                          const NativeAttempt* warm_start) {

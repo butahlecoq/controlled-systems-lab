@@ -197,7 +197,7 @@ bool h_contains(const sets::HRepresentation &h, std::span<const double> state,
            h_rows_contain(h.equalities, h.equality_values, true, {0, h.equalities.rows()}, state,
                           policy);
 }
-} // namespace
+}
 
 Diagnostics check_history_domain_memberships(const HistoryDomain &domain) {
     Diagnostics errors;

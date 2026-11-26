@@ -255,7 +255,7 @@ void describe() {
 #endif
     std::cout << ",\"batch_calls\":100,\"repetitions\":7}\n";
 }
-} // namespace
+}
 
 int main(int argc, char** argv) {
     try {

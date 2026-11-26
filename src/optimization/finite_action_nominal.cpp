@@ -607,7 +607,7 @@ NominalTrackOutcome ellipsoid_track(const FiniteActionNominalRequest &nominal,
                                search_stopped.outcome};
 }
 
-} // namespace
+}
 
 FiniteActionNominalOutcome finite_action_nominal(const FiniteActionNominalRequest &request,
                                                  FiniteActionNominalLimits limits,

@@ -178,7 +178,7 @@ std::string quote(const std::string& value) {
     return result;
 }
 
-} // namespace
+}
 
 int main(int argc, char** argv) try {
     using namespace csl;

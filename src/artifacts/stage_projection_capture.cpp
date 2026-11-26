@@ -33,7 +33,7 @@ void append_failure(
          failed(identity, std::move(selected_provider), std::move(cause), std::move(cost))});
 }
 
-} // namespace
+}
 
 StageProjectionCaptureOutcome
 capture_stage_projections(const StageProjectionCaptureRequest &request,

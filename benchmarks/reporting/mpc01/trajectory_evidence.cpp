@@ -23,7 +23,7 @@ TrajectoryDiagnostics invalid_trajectory() {
     return {infinity, infinity, infinity};
 }
 
-} // namespace
+}
 
 TrajectoryDiagnostics check_trajectory(const MpcCase& problem, const Trajectory& trajectory) {
     if (trajectory.states.size() != problem.horizon() + 1 ||

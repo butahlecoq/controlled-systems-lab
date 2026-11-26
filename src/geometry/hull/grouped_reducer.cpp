@@ -87,7 +87,7 @@ bool stop_outcome(MembershipOutcome outcome) {
     return outcome == MembershipOutcome::unsupported || outcome == MembershipOutcome::stopped;
 }
 
-} // namespace
+}
 
 HullReductionResult reduce_grouped_hull(const PointCloud &cloud, LPWorkspace &lp,
                                         const ExecutionContext &context) {

@@ -319,7 +319,7 @@ void print(const Fixture& fixture, Method method, bool warmup, int round,
     std::cout << "}\n" << std::flush;
 }
 
-} // namespace
+}
 
 int main(int argc, char** argv) {
     int repetitions = 7;

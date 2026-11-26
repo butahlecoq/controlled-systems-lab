@@ -79,7 +79,7 @@ bool in_box(Point value, double bound) {
     return std::abs(value[0]) <= bound && std::abs(value[1]) <= bound;
 }
 
-} // namespace
+}
 
 int main() {
     // x+ = Ax + Bu + Ew, u = v + Ke.  K makes F=A+BK nilpotent of index 2.
