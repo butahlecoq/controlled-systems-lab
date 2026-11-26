@@ -31,3 +31,11 @@ The API composes a terminal-relation producer with a history-lifting
 operation. Optimality and completeness claims must be supported by the
 producer's evidence and the applicable relation checks, rather than inferred
 from successful history recovery.
+
+## Terminal minimizer completeness (2026-11-26)
+
+`terminal_minimizers` records a program's bounds and mathematical outcome but
+does not infer that the selected terminal slice is the complete minimizer set.
+A completed program result establishes a program-scoped optimum. Completeness of
+the terminal minimizer relation requires separate relation evidence, so the
+reported support stays unestablished unless that evidence is supplied.
