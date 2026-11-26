@@ -1,20 +1,22 @@
 """Render the EXT-07 saved report and 2D joint-state/control example without execution."""
+
 from __future__ import annotations
 
 import argparse
 import csv
-import hashlib
-from html import escape
 import importlib.util
 import io
 import json
-from pathlib import Path
 import zipfile
+from html import escape
+from pathlib import Path
 
 _collect_spec = importlib.util.spec_from_file_location(
-    "csl_ext07_report_collect", Path(__file__).with_name("ext07_collect.py"))
+    "csl_ext07_report_collect", Path(__file__).with_name("ext07_collect.py")
+)
+if _collect_spec is None or _collect_spec.loader is None:
+    raise ImportError("Cannot load the EXT-07 collector")
 collect = importlib.util.module_from_spec(_collect_spec)
-assert _collect_spec.loader is not None
 _collect_spec.loader.exec_module(collect)
 
 RENDERED = ("index.html", "example-2d.html", "joint-relation-2d.svg", "summary.csv")
@@ -26,24 +28,35 @@ def validate(bundle: Path) -> dict:
     record = collect.read_json(bundle / "records.json")
     unsigned = {key: value for key, value in record.items() if key != "report_id"}
     schema = record.get("schema")
-    require(schema in {"csl.ext07-hybrid-profile-report/1",
-                       "csl.ext07-hybrid-profile-report/2",
-                       "csl.ext07-hybrid-profile-report/3",
-                       "csl.ext07-hybrid-profile-report/4"} and
-            record.get("report_id") == bundle.name ==
-            "ext07-hybrid-" + collect.sha(collect.encoded(unsigned))[:16],
-            "EXT-07 record identity differs")
+    require(
+        schema
+        in {
+            "csl.ext07-hybrid-profile-report/1",
+            "csl.ext07-hybrid-profile-report/2",
+            "csl.ext07-hybrid-profile-report/3",
+            "csl.ext07-hybrid-profile-report/4",
+        }
+        and record.get("report_id")
+        == bundle.name
+        == "ext07-hybrid-" + collect.sha(collect.encoded(unsigned))[:16],
+        "EXT-07 record identity differs",
+    )
     for name in collect.source_files_for_record(record):
         path = bundle / name
-        require(path.is_file() and not path.is_symlink() and
-                collect.sha(path.read_bytes()) == record["source_sha256"][name],
-                "EXT-07 source file differs: " + name)
+        require(
+            path.is_file()
+            and not path.is_symlink()
+            and collect.sha(path.read_bytes()) == record["source_sha256"][name],
+            "EXT-07 source file differs: " + name,
+        )
     pre, post = (record["source_receipts"][key] for key in ("prebuild", "postrun"))
-    require(pre["status"] == post["status"] == [] and
-            pre["commit"] == post["commit"] == record["source_commit"] and
-            pre["tree"] == post["tree"] == record["source_tree"] and
-            pre["observed_utc"] < post["observed_utc"] <= record["environment"]["collected_utc"],
-            "EXT-07 frozen-source receipts differ")
+    require(
+        pre["status"] == post["status"] == []
+        and pre["commit"] == post["commit"] == record["source_commit"]
+        and pre["tree"] == post["tree"] == record["source_tree"]
+        and pre["observed_utc"] < post["observed_utc"] <= record["environment"]["collected_utc"],
+        "EXT-07 frozen-source receipts differ",
+    )
     smoke = collect.jsonl(bundle / "smoke.jsonl", 1)
     measure = collect.jsonl(bundle / "measure.jsonl", 8)
     has_process_cpu = schema.endswith(("/2", "/3"))
@@ -51,38 +64,63 @@ def validate(bundle: Path) -> dict:
     has_provider_invocation = schema.endswith("/4")
     has_process_cpu = has_process_cpu or has_provider_invocation
     has_operation_cpu = has_operation_cpu or has_provider_invocation
-    collect.validate_run(smoke[0], "smoke", 0, 1, has_process_cpu, has_operation_cpu, has_provider_invocation)
-    collect.validate_run(measure[0], "warmup", 0, 10, has_process_cpu, has_operation_cpu, has_provider_invocation)
+    collect.validate_run(
+        smoke[0], "smoke", 0, 1, has_process_cpu, has_operation_cpu, has_provider_invocation
+    )
+    collect.validate_run(
+        measure[0], "warmup", 0, 10, has_process_cpu, has_operation_cpu, has_provider_invocation
+    )
     for repetition, row in enumerate(measure[1:]):
-        collect.validate_run(row, "trial", repetition, 20, has_process_cpu, has_operation_cpu, has_provider_invocation)
+        collect.validate_run(
+            row,
+            "trial",
+            repetition,
+            20,
+            has_process_cpu,
+            has_operation_cpu,
+            has_provider_invocation,
+        )
     trials = measure[1:]
     measurement = record["measurement"]
-    require(measurement["trials"] == trials and measurement["warmup"] == measure[0] and
-            measurement["raw_smoke_sha256"] == record["source_sha256"]["smoke.jsonl"] and
-            measurement["raw_measure_sha256"] == record["source_sha256"]["measure.jsonl"] and
-            measurement["measured_calls"] == 140 and measurement["failures"] == 0,
-            "EXT-07 saved trial data differs from the raw capture")
+    require(
+        measurement["trials"] == trials
+        and measurement["warmup"] == measure[0]
+        and measurement["raw_smoke_sha256"] == record["source_sha256"]["smoke.jsonl"]
+        and measurement["raw_measure_sha256"] == record["source_sha256"]["measure.jsonl"]
+        and measurement["measured_calls"] == 140
+        and measurement["failures"] == 0,
+        "EXT-07 saved trial data differs from the raw capture",
+    )
     durations = [row["end_to_end_total_ns"] for row in trials]
-    require(measurement["median_batch_end_to_end_ns"] == int(__import__("statistics").median(durations)) and
-            measurement["min_batch_end_to_end_ns"] == min(durations) and
-            measurement["max_batch_end_to_end_ns"] == max(durations),
-            "EXT-07 timing summary differs from raw repetitions")
+    require(
+        measurement["median_batch_end_to_end_ns"] == int(__import__("statistics").median(durations))
+        and measurement["min_batch_end_to_end_ns"] == min(durations)
+        and measurement["max_batch_end_to_end_ns"] == max(durations),
+        "EXT-07 timing summary differs from raw repetitions",
+    )
     if schema.endswith(("/2", "/3", "/4")):
-        require(measurement["process_cpu"] ==
-                collect.process_cpu_summary(trials, ["coast-to-terminal"]),
-                "EXT-07 process CPU summary differs from raw observations")
+        require(
+            measurement["process_cpu"]
+            == collect.process_cpu_summary(trials, ["coast-to-terminal"]),
+            "EXT-07 process CPU summary differs from raw observations",
+        )
     if has_operation_cpu:
-        require(measurement["operation_thread_cpu"] == collect.operation_cpu_summary(trials),
-                "EXT-07 operation thread CPU summary differs from raw observations")
+        require(
+            measurement["operation_thread_cpu"] == collect.operation_cpu_summary(trials),
+            "EXT-07 operation thread CPU summary differs from raw observations",
+        )
     if has_provider_invocation:
-        require(measurement["provider_invocation"] ==
-                collect.provider_invocation_summary(trials, ["coast-to-terminal"]),
-                "EXT-07 provider invocation summary differs from raw observations")
+        require(
+            measurement["provider_invocation"]
+            == collect.provider_invocation_summary(trials, ["coast-to-terminal"]),
+            "EXT-07 provider invocation summary differs from raw observations",
+        )
     return record
 
 
 def figure() -> bytes:
-    return ('''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" role="img" aria-labelledby="title desc">
+    return (
+        """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" role="img" aria-labelledby="title desc">
 <title id="title">One-step scalar hybrid feasible relation and minimizer</title>
 <desc id="desc">The horizontal axis is the scalar control u0 from zero to one half. The vertical axis is terminal state x1. The feasible joint relation is x1 equals u0 on the interval from zero to one half. The unique minimum of x1 is at u0 equals zero and x1 equals zero.</desc>
 <rect width="720" height="440" fill="#16161e"/>
@@ -101,34 +139,65 @@ def figure() -> bytes:
 <text x="110" y="320">global minimum (u₀,x₁)=(0,0)</text>
 <text x="405" y="135">feasible: x₁=u₀, 0≤u₀≤0.5</text>
 </g>
-</svg>\n''').encode()
+</svg>\n"""
+    ).encode()
 
 
 def summary_csv(record: dict) -> bytes:
     output = io.StringIO(newline="")
     writer = csv.writer(output, lineterminator="\n")
-    header = ["repetition", "calls", "failures", "assembly_total_ns", "solve_total_ns",
-                     "verify_total_ns", "end_to_end_total_ns", "objective", "control",
-                     "relation_rows", "relation_matrix_elements"]
+    header = [
+        "repetition",
+        "calls",
+        "failures",
+        "assembly_total_ns",
+        "solve_total_ns",
+        "verify_total_ns",
+        "end_to_end_total_ns",
+        "objective",
+        "control",
+        "relation_rows",
+        "relation_matrix_elements",
+    ]
     if record["schema"].endswith(("/2", "/3", "/4")):
-        header += ["process_cpu_coast_to_terminal_min_ns",
-                   "process_cpu_coast_to_terminal_median_ns",
-                   "process_cpu_coast_to_terminal_max_ns",
-                   "process_cpu_coast_to_terminal_unavailable"]
+        header += [
+            "process_cpu_coast_to_terminal_min_ns",
+            "process_cpu_coast_to_terminal_median_ns",
+            "process_cpu_coast_to_terminal_max_ns",
+            "process_cpu_coast_to_terminal_unavailable",
+        ]
     if record["schema"].endswith(("/3", "/4")):
-        header += ["operation_thread_cpu_min_ns", "operation_thread_cpu_median_ns",
-                   "operation_thread_cpu_max_ns", "operation_thread_cpu_unavailable"]
+        header += [
+            "operation_thread_cpu_min_ns",
+            "operation_thread_cpu_median_ns",
+            "operation_thread_cpu_max_ns",
+            "operation_thread_cpu_unavailable",
+        ]
     if record["schema"].endswith("/4"):
-        header += ["provider_wall_min_ns", "provider_wall_median_ns", "provider_wall_max_ns",
-                   "provider_cpu_min_ns", "provider_cpu_median_ns", "provider_cpu_max_ns",
-                   "provider_cpu_unavailable"]
+        header += [
+            "provider_wall_min_ns",
+            "provider_wall_median_ns",
+            "provider_wall_max_ns",
+            "provider_cpu_min_ns",
+            "provider_cpu_median_ns",
+            "provider_cpu_max_ns",
+            "provider_cpu_unavailable",
+        ]
     writer.writerow(header)
     for row in record["measurement"]["trials"]:
-        values = [row["repetition"], row["calls"], row["failures"],
-                         row["assembly_total_ns"], row["solve_total_ns"],
-                         row["verify_total_ns"], row["end_to_end_total_ns"],
-                         row["objective"], row["control"], row["relation_rows"],
-                         row["relation_matrix_elements"]]
+        values = [
+            row["repetition"],
+            row["calls"],
+            row["failures"],
+            row["assembly_total_ns"],
+            row["solve_total_ns"],
+            row["verify_total_ns"],
+            row["end_to_end_total_ns"],
+            row["objective"],
+            row["control"],
+            row["relation_rows"],
+            row["relation_matrix_elements"],
+        ]
         if record["schema"].endswith(("/2", "/3", "/4")):
             values.extend(_process_cpu_trial_summary(row))
         if record["schema"].endswith(("/3", "/4")):
@@ -140,39 +209,72 @@ def summary_csv(record: dict) -> bytes:
 
 
 def _process_cpu_trial_summary(row: dict) -> list[object]:
-    values = [observation["nanoseconds"]
-              for call in row["process_cpu_observations"]
-              for observation in call if observation["status"] == "observed"]
-    unavailable = sum(1 for call in row["process_cpu_observations"]
-                      for observation in call if observation["status"] == "unavailable")
+    values = [
+        observation["nanoseconds"]
+        for call in row["process_cpu_observations"]
+        for observation in call
+        if observation["status"] == "observed"
+    ]
+    unavailable = sum(
+        1
+        for call in row["process_cpu_observations"]
+        for observation in call
+        if observation["status"] == "unavailable"
+    )
     import statistics
-    return [min(values) if values else "", int(statistics.median(values)) if values else "",
-            max(values) if values else "", unavailable]
+
+    return [
+        min(values) if values else "",
+        int(statistics.median(values)) if values else "",
+        max(values) if values else "",
+        unavailable,
+    ]
 
 
 def _operation_cpu_trial_summary(row: dict) -> list[object]:
-    values = [operation["thread_cpu"]["nanoseconds"]
-              for call in row["operation_observations"]
-              for path in call for operation in path
-              if operation["thread_cpu"]["status"] == "observed"]
-    unavailable = sum(operation["thread_cpu"]["status"] == "unavailable"
-                      for call in row["operation_observations"]
-                      for path in call for operation in path)
+    values = [
+        operation["thread_cpu"]["nanoseconds"]
+        for call in row["operation_observations"]
+        for path in call
+        for operation in path
+        if operation["thread_cpu"]["status"] == "observed"
+    ]
+    unavailable = sum(
+        operation["thread_cpu"]["status"] == "unavailable"
+        for call in row["operation_observations"]
+        for path in call
+        for operation in path
+    )
     import statistics
-    return [min(values) if values else "", int(statistics.median(values)) if values else "",
-            max(values) if values else "", unavailable]
+
+    return [
+        min(values) if values else "",
+        int(statistics.median(values)) if values else "",
+        max(values) if values else "",
+        unavailable,
+    ]
 
 
 def _provider_invocation_trial_summary(row: dict) -> list[object]:
     invocations = [call[0] for call in row["provider_invocation_observations"]]
     wall = [value["elapsed_wall_nanoseconds"] for value in invocations]
-    cpu = [value["process_cpu"]["nanoseconds"] for value in invocations
-           if value["process_cpu"]["status"] == "observed"]
+    cpu = [
+        value["process_cpu"]["nanoseconds"]
+        for value in invocations
+        if value["process_cpu"]["status"] == "observed"
+    ]
     unavailable = sum(value["process_cpu"]["status"] == "unavailable" for value in invocations)
     import statistics
-    return [min(wall), int(statistics.median(wall)), max(wall),
-            min(cpu) if cpu else "", int(statistics.median(cpu)) if cpu else "",
-            max(cpu) if cpu else "", unavailable]
+
+    return [
+        min(wall),
+        int(statistics.median(wall)),
+        max(wall),
+        min(cpu) if cpu else "",
+        int(statistics.median(cpu)) if cpu else "",
+        max(cpu) if cpu else "",
+        unavailable,
+    ]
 
 
 def page(record: dict, example: bool) -> bytes:
@@ -183,14 +285,17 @@ def page(record: dict, example: bool) -> bytes:
     if record["schema"].endswith(("/2", "/3")):
         branch = measurement["process_cpu"]["branches"][0]
         if branch["observed_calls"]:
-            cpu_range = (f"{branch['min_nanoseconds']:,}–{branch['max_nanoseconds']:,} ns; "
-                         f"median {branch['median_nanoseconds']:,} ns")
+            cpu_range = (
+                f"{branch['min_nanoseconds']:,}–{branch['max_nanoseconds']:,} ns; "
+                f"median {branch['median_nanoseconds']:,} ns"
+            )
         else:
             cpu_range = "unavailable for all calls"
         process_cpu_note = (
             f" Process CPU around the branch interval: {escape(cpu_range)}. "
             "This sums all process threads and may include unrelated concurrent work; "
-            "it is not provider-only CPU. Heap use remains unmeasured.")
+            "it is not provider-only CPU. Heap use remains unmeasured."
+        )
     operation_cpu_table = ""
     if record["schema"].endswith(("/3", "/4")):
         rows = []
@@ -201,50 +306,79 @@ def page(record: dict, example: bool) -> bytes:
                 label += f" · mode {identity['mode']}"
             if identity["edge"] is not None:
                 label += f" · edge {identity['edge']}"
-            median = (f"{item['median_nanoseconds']:,}" if item["median_nanoseconds"] is not None
-                      else "unavailable")
-            reasons = escape(", ".join(f"{reason}: {count}" for reason, count in
-                                       sorted(item["unavailable_reasons"].items())))
-            rows.append(f"<tr><td>{escape(label)}</td><td>{median}</td>"
-                        f"<td>{item['observed_calls']}</td><td>{item['unavailable_calls']}</td>"
-                        f"<td>{reasons}</td></tr>")
+            median = (
+                f"{item['median_nanoseconds']:,}"
+                if item["median_nanoseconds"] is not None
+                else "unavailable"
+            )
+            reasons = escape(
+                ", ".join(
+                    f"{reason}: {count}"
+                    for reason, count in sorted(item["unavailable_reasons"].items())
+                )
+            )
+            rows.append(
+                f"<tr><td>{escape(label)}</td><td>{median}</td>"
+                f"<td>{item['observed_calls']}</td><td>{item['unavailable_calls']}</td>"
+                f"<td>{reasons}</td></tr>"
+            )
         operation_cpu_table = (
             '\n<div class="section"><h2>Per-operation composing-thread CPU</h2>'
-            '<p>CPU nanoseconds on the synchronous thread that constructs the relation. '
-            'This excludes helper-thread CPU and is separate from process-wide branch CPU.</p>'
-            '<table><thead><tr><th>Operation</th><th>Median CPU (ns)</th><th>Observed calls</th>'
-            '<th>Unavailable</th><th>Unavailable reasons</th></tr></thead><tbody>' +
-            "".join(rows) + "</tbody></table></div>")
+            "<p>CPU nanoseconds on the synchronous thread that constructs the relation. "
+            "This excludes helper-thread CPU and is separate from process-wide branch CPU.</p>"
+            "<table><thead><tr><th>Operation</th><th>Median CPU (ns)</th><th>Observed calls</th>"
+            "<th>Unavailable</th><th>Unavailable reasons</th></tr></thead><tbody>"
+            + "".join(rows)
+            + "</tbody></table></div>"
+        )
     provider_invocation_note = ""
     if record["schema"].endswith("/4"):
         entry = measurement["provider_invocation"]["branches"][0]
         cpu = entry["process_cpu"]
-        cpu_summary = (f"median {cpu['median_nanoseconds']:,} ns" if cpu["observed_calls"]
-                       else "unavailable")
+        cpu_summary = (
+            f"median {cpu['median_nanoseconds']:,} ns" if cpu["observed_calls"] else "unavailable"
+        )
         provider_invocation_note = (
             f" Provider invocation interval: wall median {entry['wall_median_nanoseconds']:,} ns "
             f"(range {entry['wall_min_nanoseconds']:,}–{entry['wall_max_nanoseconds']:,} ns); "
             f"process CPU {cpu_summary}. This interval covers synchronous provider execution; "
             "process CPU sums all process threads, includes clock sampling, and may include helper threads or unrelated work. "
-            "It is not provider-only CPU, and memory remains unmeasured.")
+            "It is not provider-only CPU, and memory remains unmeasured."
+        )
     medians = measurement["median_phase_total_ns"]
     trials = measurement["trials"]
     provider = escape(trials[0]["provider"])
-    bounds_returned = all(row["objective_lower"] is not None and row["objective_upper"] is not None
-                          for row in trials)
-    bound_note = ("The solver returned objective bounds for every repetition."
-                  if bounds_returned else
-                  "The LP adapter returned no objective interval bounds; the bounded independent scalar family verifier checked the global minimum and complete minimizer set.")
-    row_residuals = [row["primal_row_violation"] for row in trials if row["primal_row_violation"] is not None]
-    variable_residuals = [row["primal_variable_violation"] for row in trials
-                          if row["primal_variable_violation"] is not None]
-    residual_note = ("Maximum reported primal row residual: " + format(max(row_residuals), ".3g") +
-                     "; variable residual: " + format(max(variable_residuals), ".3g") + "."
-                     if row_residuals and variable_residuals else
-                     "Primal residual counters were unavailable.")
+    bounds_returned = all(
+        row["objective_lower"] is not None and row["objective_upper"] is not None for row in trials
+    )
+    bound_note = (
+        "The solver returned objective bounds for every repetition."
+        if bounds_returned
+        else "The LP adapter returned no objective interval bounds; the bounded independent scalar family verifier checked the global minimum and complete minimizer set."
+    )
+    row_residuals = [
+        row["primal_row_violation"] for row in trials if row["primal_row_violation"] is not None
+    ]
+    variable_residuals = [
+        row["primal_variable_violation"]
+        for row in trials
+        if row["primal_variable_violation"] is not None
+    ]
+    residual_note = (
+        "Maximum reported primal row residual: "
+        + format(max(row_residuals), ".3g")
+        + "; variable residual: "
+        + format(max(variable_residuals), ".3g")
+        + "."
+        if row_residuals and variable_residuals
+        else "Primal residual counters were unavailable."
+    )
     title = "2D joint-relation example" if example else "Hybrid profile numerical report"
-    intro = ("The axes show the joint relation between one scalar control and the terminal state."
-             if example else "Recorded execution of the public hybrid path, optimization and family-verification route.")
+    intro = (
+        "The axes show the joint relation between one scalar control and the terminal state."
+        if example
+        else "Recorded execution of the public hybrid path, optimization and family-verification route."
+    )
     html = f'''<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>EXT-07 · {title}</title><style>
@@ -288,10 +422,10 @@ The verifier uses numerical binary64 checks; this is not validated arithmetic. {
 {escape(residual_note)}</p></div>
 <div class="section"><h2>Measurements</h2>
 <p>One excluded 10-call warmup preceded seven measured 20-call batches: 140 measured calls and
-zero observed failures. Median total batch duration: {measurement['median_batch_end_to_end_ns']:,} ns
-(range {measurement['min_batch_end_to_end_ns']:,}–{measurement['max_batch_end_to_end_ns']:,} ns).
-Median accumulated phase durations: setup {medians['setup']:,} ns, relation assembly {medians['assembly']:,} ns,
-solve {medians['solve']:,} ns, verify {medians['verify']:,} ns, and end-to-end {medians['end_to_end']:,} ns.
+zero observed failures. Median total batch duration: {measurement["median_batch_end_to_end_ns"]:,} ns
+(range {measurement["min_batch_end_to_end_ns"]:,}–{measurement["max_batch_end_to_end_ns"]:,} ns).
+Median accumulated phase durations: setup {medians["setup"]:,} ns, relation assembly {medians["assembly"]:,} ns,
+solve {medians["solve"]:,} ns, verify {medians["verify"]:,} ns, and end-to-end {medians["end_to_end"]:,} ns.
 End-to-end includes fixture/provider setup, path enumeration, relation construction, solve and family verification.
 Phase medians are calculated separately across batches and are not additive to the end-to-end median;
 output serialization and rendering are excluded.{process_cpu_note}{provider_invocation_note}</p>{operation_cpu_table}
@@ -301,7 +435,7 @@ are retained in the <a href="records.json">versioned record</a>,
 <a href="measure.jsonl">raw trials</a>, <a href="smoke.jsonl">smoke row</a>,
 <a href="summary.csv">summary CSV</a>, <a href="manifest.json">manifest</a>, and
 <a href="{report_id}.zip">offline ZIP</a>. Frozen source: <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{source}">{source}</a>.</p></div>
-<p><a href="{'index.html' if example else 'example-2d.html'}">{'Full report' if example else 'Open the 2D example'}</a></p>
+<p><a href="{"index.html" if example else "example-2d.html"}">{"Full report" if example else "Open the 2D example"}</a></p>
 </div><div>EXT-07 · one-step scalar interval evidence only</div></body></html>'''
     return html.encode()
 
@@ -320,8 +454,12 @@ def offline_zip(files: dict[str, bytes]) -> bytes:
 
 def render(bundle: Path, check: bool) -> dict:
     record = validate(bundle)
-    files = {"index.html": page(record, False), "example-2d.html": page(record, True),
-             "joint-relation-2d.svg": figure(), "summary.csv": summary_csv(record)}
+    files = {
+        "index.html": page(record, False),
+        "example-2d.html": page(record, True),
+        "joint-relation-2d.svg": figure(),
+        "summary.csv": summary_csv(record),
+    }
     for name, content in files.items():
         path = bundle / name
         if check:
@@ -330,33 +468,46 @@ def render(bundle: Path, check: bool) -> dict:
             collect.require(not path.exists(), "EXT-07 rendered output already exists: " + name)
             path.write_bytes(content)
     source_files = collect.source_files_for_record(record)
-    inventory = {name: collect.sha((bundle / name).read_bytes()) for name in
-                 (*source_files, "records.json", *RENDERED)}
-    manifest = {"schema": "csl.ext07-manifest/1", "report_id": bundle.name,
-                "source_commit": record["source_commit"], "sha256": inventory}
+    inventory = {
+        name: collect.sha((bundle / name).read_bytes())
+        for name in (*source_files, "records.json", *RENDERED)
+    }
+    manifest = {
+        "schema": "csl.ext07-manifest/1",
+        "report_id": bundle.name,
+        "source_commit": record["source_commit"],
+        "sha256": inventory,
+    }
     manifest_path = bundle / "manifest.json"
     if check:
-        collect.require(manifest_path.read_bytes() == collect.encoded(manifest),
-                        "EXT-07 manifest differs")
+        collect.require(
+            manifest_path.read_bytes() == collect.encoded(manifest), "EXT-07 manifest differs"
+        )
     else:
         collect.require(not manifest_path.exists(), "EXT-07 manifest already exists")
         manifest_path.write_bytes(collect.encoded(manifest))
     files["manifest.json"] = manifest_path.read_bytes()
-    zip_bytes = offline_zip({name: (bundle / name).read_bytes() for name in
-                             (*inventory, "manifest.json")})
+    zip_bytes = offline_zip(
+        {name: (bundle / name).read_bytes() for name in (*inventory, "manifest.json")}
+    )
     zip_path = bundle / (bundle.name + ".zip")
     if check:
         collect.require(zip_path.read_bytes() == zip_bytes, "EXT-07 offline ZIP differs")
     else:
         collect.require(not zip_path.exists(), "EXT-07 offline ZIP already exists")
         zip_path.write_bytes(zip_bytes)
-    collect.require({path.name for path in bundle.iterdir()} ==
-                    set((*inventory, "manifest.json", zip_path.name)),
-                    "EXT-07 bundle inventory differs")
-    return {"report_id": bundle.name, "source_commit": record["source_commit"],
-            "manifest_sha256": collect.sha(manifest_path.read_bytes()),
-            "zip_sha256": collect.sha(zip_bytes),
-            "index_sha256": collect.sha(files["index.html"])}
+    collect.require(
+        {path.name for path in bundle.iterdir()}
+        == set((*inventory, "manifest.json", zip_path.name)),
+        "EXT-07 bundle inventory differs",
+    )
+    return {
+        "report_id": bundle.name,
+        "source_commit": record["source_commit"],
+        "manifest_sha256": collect.sha(manifest_path.read_bytes()),
+        "zip_sha256": collect.sha(zip_bytes),
+        "index_sha256": collect.sha(files["index.html"]),
+    }
 
 
 if __name__ == "__main__":

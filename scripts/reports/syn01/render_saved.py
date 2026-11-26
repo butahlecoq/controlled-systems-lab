@@ -1,4 +1,5 @@
 """Render a validated SYN-01 record without invoking the numerical driver."""
+
 import argparse
 import json
 from pathlib import Path
