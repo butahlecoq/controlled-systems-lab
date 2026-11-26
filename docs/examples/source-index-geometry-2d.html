@@ -2,7 +2,7 @@
 <html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Source-index hulls in a 2D geometry pipeline</title>
+<title>Legacy source-index geometry routines in a 2D pipeline</title>
 <style>
   body{font:16px/1.55 system-ui,sans-serif;max-width:980px;margin:2rem auto;padding:0 1rem;color:#18212b}
   svg{display:block;width:min(100%,900px);height:auto;background:#fbfcfe;border:1px solid #ccd5df}
@@ -12,17 +12,18 @@
   .interior{fill:#bd3f36}.label{font-size:15px;fill:#18212b}.small{font-size:13px;fill:#405366}
   code{background:#eef2f5;padding:.1rem .3rem;border-radius:3px} pre{overflow:auto;background:#f4f6f8;padding:1rem}
 </style>
-<h1>Two source-index methods inside the same 2D geometry operation</h1>
+<h1>Compare QuickHull2D with the candidate-elimination hull reducer</h1>
 <p>The input cloud is the unit square with four corners (IDs 0–3), a boundary point (ID 4),
 duplicate corner (ID 5), and the non-dyadic interior point (ID 6). QuickHull2D and the
-source-faithful BTULSHOR KPABEP/MODIF profile each propose original IDs. The affine-sum
+candidate-elimination hull reducer (KPABEP), driven by the simplex pivot oracle (MODIF) in the
+legacy source-index geometry routines (historical BTULSHOR), each propose original IDs. The affine-sum
 operation independently checks all generated points against those IDs with exact dyadic
 membership before it applies them. The checker is a separate invocation and its time/status
 is recorded separately.</p>
-<p>See also the <a href="kpabep-near-collinear-20261115.html">near-collinear inclusion failure</a>, where the source-faithful reducer omits a genuine input vertex under its historical tolerance.</p>
+<p>See also <a href="kpabep-near-collinear-20261115.html">When tolerance removes a true hull vertex</a>, where the candidate-elimination hull reducer omits a genuine input vertex under its historical tolerance.</p>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 405" role="img" aria-labelledby="title desc">
 <title id="title">Source-index input, affine image, and one-step control sum in data coordinates</title>
-<desc id="desc">Each panel labels x and y in data coordinates and shows the zero axes. The affine image vertices and control-sum vertices come from the saved QuickHull record. They match the saved BTULSHOR record. Negative y coordinates appear below the horizontal zero axis.</desc>
+<desc id="desc">Each panel labels x and y in data coordinates and shows the zero axes. The affine image vertices and control-sum vertices come from the saved QuickHull record. They match the saved record for the Candidate-elimination hull reducer. Negative y coordinates appear below the horizontal zero axis.</desc>
 <style>text{font:14px system-ui,sans-serif;fill:#18212b}.title{font-weight:650;font-size:16px}.tick{font-size:11px;text-anchor:middle}.ytick{text-anchor:end}.grid{stroke:#e1e6eb;stroke-width:1}.axis{stroke:#405366;stroke-width:2}.axis-label,.axis-name{font-size:12px;font-weight:600}.shape{stroke-width:3;fill-opacity:.4}.hull{fill:#91c8aa;stroke:#287357}.image{fill:#e9c76d;stroke:#9b6c13}.sum{fill:#9cbfdf;stroke:#32658f}.vertex{fill:#153f2f}.edge{fill:#bd6c22}.duplicate{fill:#7657a6}.interior{fill:#bd3f36}</style>
 <rect width="1020" height="405" fill="#fbfcfe"/>
 <g class="plot" aria-label="Input cloud">
@@ -122,11 +123,13 @@ cmake --install build/dev --prefix "$PWD/build/install"
 cmake -S examples -B build/examples -DCMAKE_PREFIX_PATH="$PWD/build/install"
 cmake --build build/examples --target source_index_geometry_2d -j1
 ./build/examples/source_index_geometry_2d quickhull
-./build/examples/source_index_geometry_2d btulshor</code></pre>
+./build/examples/source_index_geometry_2d candidate-elimination</code></pre>
+<p>The descriptive alias and the retained <code>btulshor</code> alias both select
+<code>csl.hull.source.btulshor-kpabep@1.0.0</code>; provider identity and output do not change.</p>
 <p>The executable emits JSON with method identity, retained IDs, source trace/status, independent
 checker status and timing, and output vertices. It uses a 5,000 ms / 64-point checker budget.
-The input hull uses the declared square corners. The affine image and control sum are plotted from the saved QuickHull vertices. The saved BTULSHOR vertices match both plots. Tick labels show data coordinates, and the axes mark x=0 and y=0. This is a functional illustration, not a performance comparison or
-a claim of historical REACH reproduction. The legacy selection is the recovered Pascal source
+The input hull uses the declared square corners. The affine image and control sum are plotted from the saved QuickHull vertices. The saved candidate-elimination hull reducer vertices match both plots. Tick labels show data coordinates, and the axes mark x=0 and y=0. This is a functional illustration, not a performance comparison or
+a claim of historical affine reachability vertex generator (REACH) reproduction. The legacy selection is the recovered Pascal source
 profile; no distinct baseline/modified source implementation has been identified.</p>
 <p><a href="https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/include/csl/geometry/affine_sum.hpp">Public operation API</a> ·
 <a href="source-index-geometry-2d-records.json">Saved raw execution records</a></p>

@@ -17,7 +17,7 @@ class OrderedHullReducerWorkspace final : public HullReducerWorkspace {
     }
 };
 
-} // namespace
+}
 
 HullReductionResult reduce_ordered_hull(const PointCloud &cloud, LPWorkspace &lp,
                                         const ExecutionContext &context) {

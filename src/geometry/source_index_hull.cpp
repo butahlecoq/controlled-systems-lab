@@ -87,7 +87,7 @@ class LegacyKpabepWorkspace final : public SourceIndexHullWorkspace {
                                          "kernel_returned_after_interruption",
                                          reason,
                                          {std::string{legacy_btulshor::reach_source_id},
-                                          "BTULSHOR invocation returned before context recheck"},
+                                          "Candidate-elimination hull reducer (KPABEP) invocation returned before context recheck"},
                                          std::nullopt};
             if (const auto *raw = std::get_if<legacy_btulshor::KpabepResult>(&result)) {
                 proposal.retained_indices = raw->retained_indices;
@@ -111,7 +111,7 @@ class LegacyKpabepWorkspace final : public SourceIndexHullWorkspace {
         SourceIndexProposal proposal{
             SourceIndexProposalStatus::completed,
             raw.retained_indices,
-            "completed; epsilon=1e-5; MODIF source statuses retained verbatim",
+            "completed; epsilon=1e-5; simplex pivot oracle (MODIF); MODIF source statuses retained verbatim",
             {},
             {},
             raw.modif_calls + 1};
@@ -124,7 +124,7 @@ class LegacyKpabepWorkspace final : public SourceIndexHullWorkspace {
             "; max_dense_entries=" + std::to_string(options_.max_dense_entries) +
             "; capture_trace=" + (options_.capture_trace ? "true" : "false") +
             "; max_trace_events=" + std::to_string(options_.max_trace_events) +
-            "; source status 2 uses the original retain/swap branch; all other raw MODIF statuses are preserved and are not interpreted as a hull certificate");
+            "; method=Candidate-elimination hull reducer (KPABEP); source status 2 uses the original retain/swap branch; all other raw MODIF statuses are preserved and are not interpreted as a hull certificate");
         for (const auto &step : raw.candidate_trace)
             proposal.trace.push_back("candidate=" + std::to_string(step.candidate_index) +
                                      "; modif_status=" + std::to_string(step.original_status) +
@@ -176,7 +176,8 @@ make_source_index_hull_catalogue(LegacyKpabepOptions legacy_options) {
     if (const auto rejection =
             providers.add(make_legacy_kpabep_source_index_registration(legacy_options)))
         throw std::logic_error(
-            "Built-in source-index catalogue contains an invalid BTULSHOR registration: " +
+            "Built-in source-index catalogue contains an invalid candidate-elimination hull reducer "
+            "(KPABEP) registration: " +
             rejection->diagnostics.front().explanation);
     return providers;
 }

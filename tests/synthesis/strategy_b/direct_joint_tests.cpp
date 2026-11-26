@@ -198,8 +198,8 @@ TEST_CASE("one-stage affine dynamics preserve neutral relation indexing and auth
     CHECK(q.coordinates.dimensions.control==1);
     CHECK(q.coordinates.horizon==1);
     CHECK(feasible(q,{4,7.9,0.3}));
-    CHECK_FALSE(feasible(q,{4,8.5,0.5})); // dynamics/control valid; state bound fails
-    CHECK_FALSE(feasible(q,{4,7,0}));     // dynamics/state valid; control bound fails
+    CHECK_FALSE(feasible(q,{4,8.5,0.5}));
+    CHECK_FALSE(feasible(q,{4,7,0}));
 
     const auto transition=std::find_if(q.rows.begin(),q.rows.end(),[](const auto& row) {
         return row.source==RowSource::transition;
@@ -1163,7 +1163,6 @@ TEST_CASE("T-S01 extracts all correlated optimal histories without claiming comp
     CHECK(r.incumbents[0].witness.original_objective==0);
     CHECK_FALSE(r.family->registry_verified());
 
-    // Both strategies receive the same resolved problem and effective request.
     const auto a_result=run_strategy_a(p,request(p));
     CHECK(a_result.termination==Termination::completed);
     CHECK(a_result.outcome.value==MathematicalOutcome::undetermined);
@@ -2126,7 +2125,6 @@ TEST_CASE("Strategy B rejects unsupported completeness support at the public str
     const auto& verified=std::get<CompleteOptimalFamily>(trusted_result.family->outcome());
     CompleteFamilyProposal proposal{trusted_result.family->identity(),verified};
 
-    // Preserve the valid problem/request/strategy binding and mutate only the support variant.
     const std::vector<CompletenessSupport> unsupported_supports{
         Unestablished{},
         SymbolicArgument{"problem:"+p.identity().value, "unchecked symbolic assertion"},

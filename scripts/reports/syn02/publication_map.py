@@ -1,5 +1,7 @@
 """Explicit projection from the SYN-02 native record to the shared report contract."""
+
 from __future__ import annotations
+
 import hashlib
 import json
 
@@ -8,20 +10,39 @@ MAP_SCHEMA = "csl.algorithm-report-publication-map/1"
 CATALOG_SCHEMA = "csl.algorithm-report-catalog/3"
 ENVELOPE_SCHEMA = "csl.algorithm-report-envelope/1"
 STAGED_SOURCE_FILES = [
-    "build-log.txt", "build-provenance.json", "collect.py",
-    "configure-log.txt", "environment.json", "etw-profile-attempt.txt",
-    "latency.svg", "manifest.json", "measurement-command.txt",
-    "profile-evidence.json", "profile-note.txt", "profile-raw.jsonl",
-    "publication-map.json", "publication_map.py", "raw-events.jsonl", "records.json",
-    "render_saved.py", "summary.csv", "terminal_driver.cpp", "test_report.py", "trials.csv",
+    "build-log.txt",
+    "build-provenance.json",
+    "collect.py",
+    "configure-log.txt",
+    "environment.json",
+    "etw-profile-attempt.txt",
+    "latency.svg",
+    "manifest.json",
+    "measurement-command.txt",
+    "profile-evidence.json",
+    "profile-note.txt",
+    "profile-raw.jsonl",
+    "publication-map.json",
+    "publication_map.py",
+    "raw-events.jsonl",
+    "records.json",
+    "render_saved.py",
+    "summary.csv",
+    "terminal_driver.cpp",
+    "test_report.py",
+    "trials.csv",
 ]
 STAGED_FILES = sorted([*STAGED_SOURCE_FILES, "index.html", "report-envelope.json"])
 HISTORICAL_STAGED_SOURCE_FILES = sorted([*STAGED_SOURCE_FILES, "README.md"])
-HISTORICAL_STAGED_FILES = sorted([*HISTORICAL_STAGED_SOURCE_FILES, "index.html", "report-envelope.json"])
+HISTORICAL_STAGED_FILES = sorted(
+    [*HISTORICAL_STAGED_SOURCE_FILES, "index.html", "report-envelope.json"]
+)
 
 
 def canonical(value):
-    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
+    return json.dumps(
+        value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False
+    ).encode("utf-8")
 
 
 def digest(value):
@@ -85,7 +106,14 @@ def project(record):
                 "meaning": "exact staged artifact inventory: relative path to SHA-256 of staged bytes",
                 "entries": STAGED_FILES,
                 "excludes": ["publication-manifest.json"],
-            "includes": ["generated index.html", "latency.svg", "raw evidence", "trials.csv", "summary.csv", "report-envelope.json"],
+                "includes": [
+                    "generated index.html",
+                    "latency.svg",
+                    "raw evidence",
+                    "trials.csv",
+                    "summary.csv",
+                    "report-envelope.json",
+                ],
             },
         },
         "immutable_public_id": {
@@ -106,9 +134,27 @@ def project(record):
             "site_import_point": "scripts/reports/site.py adapter imports",
             "site_kind_allowlist_point": "site.stage schema-3 registered report_kind dispatch tuple",
             "site_dispatch_point": "site.stage publisher selection expression",
-            "required_adapter_operations": ["adapt", "render_page", "publication_artifacts", "offline_zip"],
-            "required_validation": ["safe source ID/path", "native schema and source identity", "trial-to-summary consistency including failures", "raw/evidence file inventory and SHA256 manifest", "SVG safety", "envelope field projection", "deterministic offline ZIP"],
-            "required_staging": ["schema-3 catalogue projection", "site.stage validation", "main-only Pages deployment", "verify immutable live page and ZIP URLs"],
+            "required_adapter_operations": [
+                "adapt",
+                "render_page",
+                "publication_artifacts",
+                "offline_zip",
+            ],
+            "required_validation": [
+                "safe source ID/path",
+                "native schema and source identity",
+                "trial-to-summary consistency including failures",
+                "raw/evidence file inventory and SHA256 manifest",
+                "SVG safety",
+                "envelope field projection",
+                "deterministic offline ZIP",
+            ],
+            "required_staging": [
+                "schema-3 catalogue projection",
+                "site.stage validation",
+                "main-only Pages deployment",
+                "verify immutable live page and ZIP URLs",
+            ],
             "publishable_now": False,
             "blocking_reason": "The publisher adapter is registered; captured measurements must be regenerated under the reviewed harness, pass schema-3 staging, and complete independent report review before publication.",
         },

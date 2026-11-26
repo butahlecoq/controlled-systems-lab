@@ -94,7 +94,7 @@ support_score(const reachability::FinitePlanEllipsoidTrace::Stage &terminal,
                            "Terminal ellipsoid support estimate is nonfinite.");
     return score;
 }
-} // namespace
+}
 
 FiniteActionEllipsoidMinimaxOutcome
 finite_action_ellipsoid_minimax(const FiniteActionMinimaxRequest &request,

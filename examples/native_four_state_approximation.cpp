@@ -559,7 +559,7 @@ void write_svg(const std::filesystem::path &output, std::string_view projection_
         << "\" text-anchor=\"middle\" font-size=\"12\">All panels share axes. Projections are from the 4D generator sets; no objective is defined.</text></g></svg>\n";
 }
 
-} // namespace
+}
 
 int main(int argc, char **argv) try {
     if (argc > 2 || (argc == 2 && std::string_view(argv[1]).starts_with("--")))

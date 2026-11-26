@@ -275,7 +275,7 @@ class RecursiveHullReducerWorkspace final : public HullReducerWorkspace {
     registry::Registration<registry::LPPort> provider_;
 };
 
-} // namespace
+}
 
 registry::Registration<registry::HullReducerPort>
 make_recursive_hull_reducer_registration(registry::Registration<registry::LPPort> lp_provider) {

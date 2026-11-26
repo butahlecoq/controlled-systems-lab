@@ -769,6 +769,11 @@
       "owner": "docs/examples/kpabep-near-collinear-20261115.html"
     },
     {
+      "route": "examples/parallelotope-frame-cover-2d.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/parallelotope-frame-cover-2d.html"
+    },
+    {
       "route": "examples/lotka-volterra-sampled-v1.html",
       "disposition": "maintained",
       "owner": "scripts/reports/approx_extension_companions.py"

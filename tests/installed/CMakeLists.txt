@@ -125,7 +125,7 @@ target_link_libraries(installed_legacy_btulshor_client PRIVATE CSL::legacy_btuls
 set_target_properties(installed_legacy_btulshor_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_legacy_btulshor_client COMMAND installed_legacy_btulshor_client)
 set_tests_properties(installed_legacy_btulshor_client PROPERTIES
-  PASS_REGULAR_EXPRESSION "Installed legacy BTULSHOR client: MODIF, KPABEP port and REACH source pairs passed")
+  PASS_REGULAR_EXPRESSION "Installed legacy source-index geometry routines passed: simplex pivot oracle \\(MODIF\\), candidate-elimination hull reducer \\(KPABEP\\) port and affine reachability vertex generator \\(REACH\\) source pairs")
 
 if(TARGET CSL::highs_lp AND TARGET CSL::qhull_conversion)
 add_executable(installed_conversion_client conversion_client.cpp)

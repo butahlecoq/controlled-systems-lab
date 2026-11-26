@@ -52,7 +52,6 @@ std::vector<Point> hull(std::vector<Point> points) {
 }
 
 sets::SetData correlated_simplex() {
-    // Relation storage is deliberately ordered x2, x0, x3, x1.
     Matrix vertices{6, 4, {
         0, 0, 0, 0,
         1, 0, 0, 0,
@@ -144,7 +143,6 @@ TEST_CASE("four-state correlated geometry matches an independent oracle in all o
 }
 
 TEST_CASE("nonfuel planar geometry preserves named coordinate order against an independent oracle") {
-    // The relation stores north then east, while the state schema declares east then north.
     Matrix vertices{4, 2, {0, 0, 0, 2, 3, 2, 3, 0}};
     Matrix rays{0, 2, {}};
     const auto source = take(sets::make_v({{"planar-integrator"}, 2, {"north", "east"}},

@@ -240,6 +240,36 @@ TEST_CASE("REACH stops when finite inputs overflow during a transform") {
     CHECK(std::get<Stopped>(translated).reason == StopReason::non_finite_arithmetic);
 }
 
+TEST_CASE("legacy geometry diagnostics lead with descriptive names and retain stable IDs") {
+    CHECK(source_modif_port().id == "csl.legacy.btulshor.modif.source-v1");
+    CHECK(source_kpabep_port().id == "csl.legacy.btulshor.kpabep.source-v1");
+    CHECK(reach_source_id == "csl.legacy.btulshor.reach.source-v1");
+
+    const auto oracle_stop = modif({.a = {2, 0, {}}, .x = {1, 0}});
+    REQUIRE(std::holds_alternative<Stopped>(oracle_stop));
+    CHECK(std::get<Stopped>(oracle_stop).message.starts_with("Simplex pivot oracle (MODIF)"));
+
+    const std::vector<csl::Vector> no_dimension{{}};
+    const auto reducer_stop = kpabep(no_dimension);
+    REQUIRE(std::holds_alternative<Stopped>(reducer_stop));
+    CHECK(std::get<Stopped>(reducer_stop).message.starts_with(
+        "Candidate-elimination hull reducer (KPABEP)"));
+
+    const auto generator_stop = reach({});
+    REQUIRE(std::holds_alternative<Stopped>(generator_stop));
+    CHECK(std::get<Stopped>(generator_stop).message.starts_with(
+        "Affine reachability vertex generator (REACH)"));
+
+    std::stop_source stop_source;
+    Limits cancelled;
+    cancelled.cancellation = stop_source.get_token();
+    stop_source.request_stop();
+    const auto family_stop = modif({.a = {3, 0, {}}, .x = {1, 0, 0}}, cancelled);
+    REQUIRE(std::holds_alternative<Stopped>(family_stop));
+    CHECK(std::get<Stopped>(family_stop).message.starts_with(
+        "Legacy source-index geometry routines (BTULSHOR)"));
+}
+
 TEST_CASE("MODIF rejects malformed dense input and respects allocation capacity") {
     const auto malformed = modif({.a = {3, 1, {1, 2}}, .x = {1, 0, 0}});
     REQUIRE(std::holds_alternative<Stopped>(malformed));

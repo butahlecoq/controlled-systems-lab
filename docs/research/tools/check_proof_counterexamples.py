@@ -32,7 +32,6 @@ def observations():
         return (u, u * u)
 
     def squared_cost(u0, u1, w0):
-        # A=((1,0),(1,1)), B=(1,0), E=(1,-1), w1=0.
         x1 = (u0 + w0, -w0)
         x2 = (x1[0] + u1, x1[0] + x1[1])
         return sum(coordinate * coordinate for coordinate in x2)

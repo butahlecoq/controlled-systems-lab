@@ -241,7 +241,7 @@ class A43PaperWorkspace final : public HullReducerWorkspace {
     A43PivotRule rule_;
 };
 
-} // namespace
+}
 
 HullReductionResult reduce_itis17_a43_paper_hull(const PointCloud &cloud, LPWorkspace &lp,
                                                  const ExecutionContext &context,

@@ -68,8 +68,13 @@ target_compile_features(source_index_geometry_2d_example PRIVATE cxx_std_20)
 csl_strict_warnings(source_index_geometry_2d_example)
 add_test(NAME source_index_geometry_2d_quickhull COMMAND source_index_geometry_2d_example quickhull)
 add_test(NAME source_index_geometry_2d_btulshor COMMAND source_index_geometry_2d_example btulshor)
+add_test(NAME source_index_geometry_2d_descriptive_aliases
+  COMMAND "${CMAKE_COMMAND}"
+    "-DEXAMPLE_EXE=$<TARGET_FILE:source_index_geometry_2d_example>"
+    -P "${PROJECT_SOURCE_DIR}/examples/source_index_geometry_2d_alias_check.cmake")
 set_tests_properties(source_index_geometry_2d_quickhull source_index_geometry_2d_btulshor
-  PROPERTIES LABELS "geometry;example" TIMEOUT 30)
+  source_index_geometry_2d_descriptive_aliases
+  PROPERTIES LABELS "geometry;example" TIMEOUT 60)
 
 if(TARGET CSL::highs_lp)
   add_executable(quickhull_2d_lp_test tests/unit/geometry/quickhull_2d_lp_test.cpp)

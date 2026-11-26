@@ -767,6 +767,17 @@ class LearningBookTests(unittest.TestCase):
             page = (site / "learn/module-catalogue.html").read_text()
             modules = self.inventory["modules"]
             self.assertIn("registered_provider", page)
+            self.assertIn(
+                "Candidate-elimination hull reducer <code>csl.hull.source.btulshor-kpabep</code>",
+                page,
+            )
+            self.assertIn(
+                "Simplex pivot oracle <code>csl::geometry::legacy_btulshor::modif</code>", page
+            )
+            self.assertIn(
+                "Affine reachability vertex generator <code>csl::geometry::legacy_btulshor::reach</code>",
+                page,
+            )
             self.assertEqual(page.count("Actual interface or route."), len(modules))
             for module in modules:
                 identity = module["identity"].get("id") or module["identity"].get("symbol")
@@ -808,16 +819,16 @@ class LearningBookTests(unittest.TestCase):
                     "Affine map matrix A: 1, 0; 0.5, 1",
                     "Affine offset b: 0.25; -0.5",
                     "One-step sum translation x₀: 0.25; 0.5",
-                    "BTULSHOR near-tolerance refusal cloud: 0, 0; 1, 0; 1, 1; 0, 1; 0.5, 1.00000001",
-                    "Near-tolerance affine map, also legacy REACH state map A: 1, 0; 0, 1",
+                    "Candidate-elimination hull reducer near-tolerance refusal cloud: 0, 0; 1, 0; 1, 1; 0, 1; 0.5, 1.00000001",
+                    "Near-tolerance affine map, also the affine reachability vertex generator (REACH) state map A: 1, 0; 0, 1",
                     "Near-tolerance affine offset: 0; 0",
-                    "Installed legacy MODIF matrix A: 1; 2; -1",
-                    "Installed legacy MODIF initial x: 1; 2; -1",
-                    "<td>MODIF initial status</td><td>1</td>",
-                    "Installed legacy KPABEP input cloud: 0, 0; 1, 0; 1, 1; 0, 1; 0.5, 0.5",
-                    "Installed legacy REACH control map B: 1; 2",
-                    "Installed legacy REACH initial vertices: 0, 0; 1, 0",
-                    "Installed legacy REACH control vertices: 0; 1",
+                    "Installed simplex pivot oracle matrix A: 1; 2; -1",
+                    "Installed simplex pivot oracle initial x: 1; 2; -1",
+                    "<td>Simplex pivot oracle (MODIF) initial status</td><td>1</td>",
+                    "Installed candidate-elimination hull reducer input cloud: 0, 0; 1, 0; 1, 1; 0, 1; 0.5, 0.5",
+                    "Installed affine reachability vertex generator control map B: 1; 2",
+                    "Installed affine reachability vertex generator initial vertices: 0, 0; 1, 0",
+                    "Installed affine reachability vertex generator control vertices: 0; 1",
                 ],
                 "terminal-optimization": [
                     "Terminal constraints Ax ≤ b in variables (x,y): -1, 0; 0, -1; -1, -1; 1, 0; 0, 1",

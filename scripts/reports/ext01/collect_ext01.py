@@ -155,7 +155,6 @@ def main() -> None:
         raise ValueError("source-to-harness delta differs from reviewed report harness")
     if not EXE.is_file():
         raise ValueError("Release report binary absent")
-    # The shared collector produces a fresh clean verbose Release rebuild log.
     def run_build(command: list[str]) -> tuple[str, str, int, bool]:
         cmake = "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe"
         completed = subprocess.run([cmake, *command[1:]], cwd=ROOT,

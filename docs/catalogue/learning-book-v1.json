@@ -295,16 +295,17 @@
       ],
       "source": "simplex-and-comparators.html",
       "summary": "Check every input point, including interior points, edge points, and duplicates. KPABEP/MODIF preserve source order, pivots, epsilon, and stops. QuickHull is a distinct modern comparator. Saved timings do not imply a general speedup.",
-      "mathematical_input": "The ordered cloud is [(0,0),(1,0),(1,1),(0,1),(0.5,0),(0,0),(1/3,1/3)]. The affine map is (x,y) ↦ (x+0.25, 0.5x+y−0.5). The one-step sum adds x0=(0.25,0.5) to the same control square. The BTULSHOR run also submits the cloud [(0,0),(1,0),(1,1),(0,1),(0.5,1.00000001)] under the identity affine map and retains its unsupported or stopped outcome. The separate installed legacy client uses MODIF A=[1,2,−1]ᵀ, x=[1,2,−1]ᵀ, initial status 1; KPABEP uses the square with center (0.5,0.5); REACH uses A=I, B=[1,2]ᵀ, initial vertices (0,0),(1,0) and control vertices 0,1.",
-      "command": "ctest --test-dir build/dev -C Release -R \"^installed_public_client$\" --output-on-failure\nbuild/dev/installed-consumer/examples-build/source_index_geometry_2d quickhull\nbuild/dev/installed-consumer/examples-build/source_index_geometry_2d btulshor\nbuild/dev/installed-consumer/build/installed_legacy_btulshor_client",
-      "expected_output": "Both source-index runs return affine-image vertices {(0.25,-0.5),(1.25,0),(1.25,1),(0.25,0.5)} and one-step-sum vertices {(0.25,0.5),(1.25,0.5),(1.25,1.5),(0.25,1.5)}. Each reports checker status=verified. The legacy consumer reports MODIF, KPABEP port and REACH source pairs passed.",
+      "mathematical_input": "The ordered cloud is [(0,0),(1,0),(1,1),(0,1),(0.5,0),(0,0),(1/3,1/3)]. The affine map is (x,y) ↦ (x+0.25, 0.5x+y−0.5). The one-step sum adds x0=(0.25,0.5) to the same control square. The legacy source-index geometry run also submits the cloud [(0,0),(1,0),(1,1),(0,1),(0.5,1.00000001)] under the identity affine map and retains its unsupported or stopped outcome. The separate installed legacy client uses simplex pivot oracle (MODIF) A=[1,2,−1]ᵀ, x=[1,2,−1]ᵀ, initial status 1; the candidate-elimination hull reducer (KPABEP) uses the square with center (0.5,0.5); the affine reachability vertex generator (REACH) uses A=I, B=[1,2]ᵀ, initial vertices (0,0),(1,0) and control vertices 0,1.",
+      "command": "ctest --test-dir build/dev -C Release -R \"^installed_public_client$\" --output-on-failure\nbuild/dev/installed-consumer/examples-build/source_index_geometry_2d quickhull\nbuild/dev/installed-consumer/examples-build/source_index_geometry_2d candidate-elimination\nbuild/dev/installed-consumer/build/installed_legacy_btulshor_client",
+      "expected_output": "Both source-index runs return affine-image vertices {(0.25,-0.5),(1.25,0),(1.25,1),(0.25,0.5)} and one-step-sum vertices {(0.25,0.5),(1.25,0.5),(1.25,1.5),(0.25,1.5)}. Each reports checker status=verified. The legacy consumer reports the simplex pivot oracle, candidate-elimination hull reducer and affine reachability vertex generator source pairs passed.",
       "intermediate_geometry": "The affine map produces vertical edges at x=0.25 and x=1.25. Its lower-left vertex is below y=0. Adding x0=(0.25,0.5) to the unit control square produces the translated square [0.25,1.25]×[0.5,1.5].",
-      "support_limits": "The saved source-index result is a bounded 2D numerical operation with a 5,000 ms and 64-point exact checker. The checker verifies every generated input point is contained by the selected source IDs; it does not prove minimality. BTULSHOR preserves source-order behavior. These outputs are not a performance comparison or historical REACH reproduction. First complete the installed-consumer setup in the opening chapter. Its CTest installs the current package and builds the isolated clients with find_package(CSL CONFIG).",
+      "support_limits": "The saved source-index result is a bounded 2D numerical operation with a 5,000 ms and 64-point exact checker. The checker verifies every generated input point is contained by the selected source IDs; it does not prove minimality. The legacy source-index geometry routines preserve source-order behavior. These outputs are not a performance comparison or historical affine reachability vertex generator (REACH) reproduction. First complete the installed-consumer setup in the opening chapter. Its CTest installs the current package and builds the isolated clients with find_package(CSL CONFIG).",
       "figure_ids": [],
       "records": [
         {
           "label": "examples/source_index_geometry_2d.cpp",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/examples/source_index_geometry_2d.cpp"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/examples/source_index_geometry_2d.cpp",
+          "source_sha256": "a03944915c97bdc2d5effe1e1a7947dbc8adff1c6c0da3da53721486e3c80eb3"
         },
         {
           "label": "Saved source-index execution records",
@@ -312,7 +313,8 @@
         },
         {
           "label": "tests/installed/legacy_btulshor_client.cpp",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/legacy_btulshor_client.cpp"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/legacy_btulshor_client.cpp",
+          "source_sha256": "9c9869b31fbbd88f9512ca771caeffb63a4d43eec89010c9566a9430d23a7c09"
         },
         {
           "label": "Classic nominal versus finite minimax TwoPoints report",
@@ -396,7 +398,7 @@
           ]
         },
         {
-          "label": "BTULSHOR near-tolerance refusal cloud",
+          "label": "Candidate-elimination hull reducer near-tolerance refusal cloud",
           "rows": [
             [
               0,
@@ -421,7 +423,7 @@
           ]
         },
         {
-          "label": "Near-tolerance affine map, also legacy REACH state map A",
+          "label": "Near-tolerance affine map, also the affine reachability vertex generator (REACH) state map A",
           "rows": [
             [
               1,
@@ -445,7 +447,7 @@
           ]
         },
         {
-          "label": "Installed legacy MODIF matrix A",
+          "label": "Installed simplex pivot oracle matrix A",
           "rows": [
             [
               1
@@ -459,7 +461,7 @@
           ]
         },
         {
-          "label": "Installed legacy MODIF initial x",
+          "label": "Installed simplex pivot oracle initial x",
           "rows": [
             [
               1
@@ -473,7 +475,7 @@
           ]
         },
         {
-          "label": "Installed legacy KPABEP input cloud",
+          "label": "Installed candidate-elimination hull reducer input cloud",
           "rows": [
             [
               0,
@@ -498,7 +500,7 @@
           ]
         },
         {
-          "label": "Installed legacy REACH control map B",
+          "label": "Installed affine reachability vertex generator control map B",
           "rows": [
             [
               1
@@ -509,7 +511,7 @@
           ]
         },
         {
-          "label": "Installed legacy REACH initial vertices",
+          "label": "Installed affine reachability vertex generator initial vertices",
           "rows": [
             [
               0,
@@ -522,7 +524,7 @@
           ]
         },
         {
-          "label": "Installed legacy REACH control vertices",
+          "label": "Installed affine reachability vertex generator control vertices",
           "rows": [
             [
               0
@@ -542,7 +544,7 @@
           ],
           "rows": [
             [
-              "MODIF initial status",
+              "Simplex pivot oracle (MODIF) initial status",
               "1"
             ],
             [

@@ -18,12 +18,14 @@ try:
     import mathematical_notation
     import site_additions
     import site_design
+    import source_index_names
 except ModuleNotFoundError as error:
     if error.name not in {
         "site_design",
         "site_additions",
         "mathematical_notation",
         "learning_model_tracks",
+        "source_index_names",
     }:
         raise
     sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -31,6 +33,7 @@ except ModuleNotFoundError as error:
     import mathematical_notation
     import site_additions
     import site_design
+    import source_index_names
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -1163,7 +1166,15 @@ def _module_catalogue_page(manifest: dict, inventory: dict) -> str:
         identity = module["identity"]
         module_id = identity.get("id") or identity.get("symbol")
         title = module.get("role", module.get("group", "Module"))
-        page.append(f'<li id="module-{number}"><h2><code>{escape(module_id)}</code></h2>')
+        display_name = (
+            source_index_names.display_name_for_identity(module_id) if module_id else None
+        )
+        heading = (
+            f"{escape(display_name)} <code>{escape(module_id)}</code>"
+            if display_name
+            else f"<code>{escape(module_id)}</code>"
+        )
+        page.append(f'<li id="module-{number}"><h2>{heading}</h2>')
         page.append(
             f"<p><strong>Topic.</strong> {escape(str(module.get('group', 'unspecified')))}. "
             f"<strong>Entry kind.</strong> <code>{escape(str(module.get('kind', 'unspecified')))}</code>. "

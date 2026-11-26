@@ -37,7 +37,7 @@ bool exceeds_decimal_bit_cap(std::string_view value) {
     return value.size() >= 2467;
 }
 
-} // namespace
+}
 
 HistoryMembership contains_exact_history(const JointRelation &relation,
                                          std::span<const RationalCoordinate> history) {

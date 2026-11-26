@@ -31,7 +31,7 @@
     },
     {
       "id": "btulshor-source-faithful",
-      "name": "Source-faithful BTULSHOR hull comparison",
+      "name": "Legacy source-index geometry routines: saved hull comparison",
       "composition": "standalone-legacy-source-comparison",
       "modules": [
         "CSL::hull"

@@ -33,6 +33,10 @@ the expected digest is derived from the same serialization code under test.
   struct/hashlib reference over literal mathematical fields, not values
   derived from the product's own serializer or digest helper. Include
   padding-boundary and multi-block inputs in content-digest checks.
+- Emit matrix identity dimensions before coordinates. A zero-width matrix
+  returns after its row and column counts, so arbitrarily many empty rows —
+  such as zero-width native V records — cost no per-row hashing while the
+  declared row count remains part of the identity.
 
 ## Consequences
 

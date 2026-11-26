@@ -50,7 +50,7 @@ double stage_cost(const AbsoluteStageControlCost &stage, std::span<const double>
     return total;
 }
 
-} // namespace
+}
 
 Diagnostics validate_running_control_cost(const RunningControlCost &cost,
                                           std::size_t absolute_stage_offset, std::size_t horizon,

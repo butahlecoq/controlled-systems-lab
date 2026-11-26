@@ -256,7 +256,7 @@ Json record(const GameData& game, const FiniteMinimaxOptimal& open,
             {"architecture", CSL_ENV717_MULTIPOINT_ARCHITECTURE}}}};
 }
 
-} // namespace
+}
 
 int main() {
     try {

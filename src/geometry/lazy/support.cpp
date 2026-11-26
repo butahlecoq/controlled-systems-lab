@@ -445,7 +445,7 @@ class Workspace final : public SetOperatorWorkspace {
         return result;
     }
 };
-} // namespace
+}
 
 registry::Registration<registry::GeometryPort>
 make_support_registration(registry::PreparedProvider<registry::GeometryPort> leaf_support) {

@@ -70,8 +70,6 @@ template <class Check> class CallbackGuard {
     }
     ~CallbackGuard() { detach(); }
 };
-// Keep tolerance, iteration limits, solver selection, model clearing/reuse,
-// warm starts and QP readback in each adapter's audited numerical profile.
 template <class Check> void configure_common(Highs &h, Check check) {
     // HiGHS 1.11 requires log_to_console for callbacks; the active logging
     // callback captures these messages instead of writing to the console.

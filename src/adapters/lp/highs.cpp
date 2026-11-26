@@ -388,8 +388,6 @@ class HighsLPWorkspace final : public LPWorkspace {
             result.raw_diagnostics = raw.str();
             return result;
         }
-        // HiGHS reports ModelEmpty for zero columns without checking constant
-        // rows. Evaluate these exact comparisons explicitly in original space.
         if (p.variables().empty()) {
             bool feasible = true;
             for (const auto &row : p.rows())
@@ -642,9 +640,6 @@ class HighsLPWorkspace final : public LPWorkspace {
             if (valid_result) {
                 warm_basis_ = WarmBasisCache{basis, p.rows().size(), p.variables().size()};
             } else if (warm_accepted) {
-                // A basis accepted by HiGHS is still only a hint. If its result
-                // is not an independently checked optimum, discard that solver
-                // instance and solve once with a fresh, cold native solver.
                 return retry_cold("cold_after_invalid_result");
             }
         }
@@ -682,7 +677,7 @@ class HighsLPBackend final : public LPBackend {
         return std::make_unique<HighsLPWorkspace>(options_);
     }
 };
-} // namespace
+}
 #if defined(CSL_HIGHSLP_TESTING)
 void test_support::reject_next_warm_basis_installation() noexcept {
     reject_next_warm_basis_installation_for_test = true;

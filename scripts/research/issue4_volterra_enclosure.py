@@ -120,7 +120,7 @@ def run() -> dict:
             r1 + step * (a * r1 - b * r1 * r2),
             r2 + step * (-c * r2 + d * r1 * r2),
         ]
-        r1, r2 = reference  # candidate matrix reads the next reference sample
+        r1, r2 = reference
         matrix = [
             [q(1) + step * (a - b * r2), -(step * b * r1)],
             [step * d * r2, q(1) + step * (-c + d * r1)],

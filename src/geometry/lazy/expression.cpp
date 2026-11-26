@@ -67,7 +67,7 @@ output_labels(const GeometryOperation &operation) {
         auto source = labels(affine->input);
         if (std::holds_alternative<Diagnostics>(source))
             return std::get<Diagnostics>(std::move(source));
-        return std::vector<std::string>{}; // General maps do not retain source coordinate names.
+        return std::vector<std::string>{};
     }
     if (const auto *projection = std::get_if<Projection>(&operation)) {
         auto source = labels(projection->input);
@@ -185,7 +185,7 @@ class Workspace final : public SetOperatorWorkspace {
             {metadata, std::move(payload), id}, SetRelation::equivalent, std::move(evidence)};
     }
 };
-} // namespace
+}
 
 std::variant<ExpressionDescription, Diagnostics> inspect_expression(const SetHandle &handle) {
     const auto payload = std::dynamic_pointer_cast<const Payload>(handle.payload);

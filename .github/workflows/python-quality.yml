@@ -101,8 +101,18 @@ on:
       - 'reports/algorithm-results/catalog.json'
       - 'reports/algorithm-results/index.html'
       - 'reports/algorithm-results/legacy-publications.json'
+      - 'scripts/reports/syn01/**'
+      - 'scripts/reports/syn02/**'
+      - 'scripts/reports/syn0[12]_registered_reports.py'
+      - 'tests/reporting/test_syn01_publication.py'
+      - 'tests/reporting/test_syn02_publication.py'
+      - 'reports/algorithm-results/syn01-nominal-*/**'
+      - 'reports/algorithm-results/syn01-nominal-*.zip'
+      - 'reports/algorithm-results/syn02-terminal-*/**'
+      - 'reports/algorithm-results/syn02-terminal-*.zip'
       - 'tests/reporting/test_landing.py'
       - 'tests/reporting/test_ext07_resource_observation.py'
+      - 'tests/reporting/test_ext07_saved.py'
       - 'tests/reporting/test_plot.py'
       - 'scripts/reports/geo04/**'
       - 'reports/algorithm-results/geo04-20261012T224946Z-c37852bcc80d/**'
@@ -196,6 +206,11 @@ on:
       - 'docs/examples/b04-reference-trajectory-projections.svg'
       - 'docs/examples/b04-reference-trajectory-projections.html'
       - 'scripts/reports/learning_book.py'
+      - 'scripts/reports/source_index_figure.py'
+      - 'scripts/reports/source_index_names.py'
+      - 'docs/catalogue/source-index-geometry-names.json'
+      - 'tests/reporting/test_source_index_figure.py'
+      - 'tests/reporting/test_source_index_names.py'
       - 'tests/reporting/test_mpc06_online.py'
       - 'scripts/reports/mpc06_online/**'
       - 'reports/algorithm-results/mpc06-online-anchor-v1/**'
@@ -306,6 +321,16 @@ on:
       - 'reports/algorithm-results/env717-pendulum-terminal-pilot-v1/**'
       - 'reports/algorithm-results/env717-earth-orbit-pilot-v1/**'
       - 'benchmarks/reporting/env717/earth_orbit.cpp'
+      - 'reports/algorithm-results/geo04-*/**'
+      - 'reports/algorithm-results/geo05-*.zip'
+      - 'reports/algorithm-results/geo05-*/**'
+      - 'reports/algorithm-results/geo06-*.zip'
+      - 'reports/algorithm-results/geo06-*/**'
+      - 'scripts/reports/geo02_registered_reports.py'
+      - 'scripts/reports/geo05_registered_reports.py'
+      - 'tests/reporting/test_geo02_publication.py'
+      - 'tests/reporting/test_geo05_publication.py'
+      - 'tests/reporting/test_geo06_publication.py'
       - 'scripts/reports/stage_geo07_port.py'
       - 'scripts/reports/stage_env717_broken_triangle.py'
       - 'scripts/reports/stage_env717_multipoint_cost_game.py'
@@ -322,7 +347,10 @@ on:
       - 'reports/algorithm-results/env717-cartpole-pilot-v1/**'
       - 'tests/reporting/test_convex_report.py'
       - 'tests/reporting/test_opt07_collector.py'
-      - 'tests/reporting/test_opt12_collector.py'
+      - 'scripts/reports/opt12_*.py'
+      - 'tests/reporting/test_opt12_*.py'
+      - 'reports/algorithm-results/opt12-*/**'
+      - 'reports/algorithm-results/opt12-*.zip*'
       - 'tests/reporting/test_visual_examples.py'
       - 'scripts/reports/stage_buryatia_dim4.py'
       - 'scripts/reports/buryatia/capture_dim4.py'
@@ -879,6 +907,12 @@ jobs:
           python -m unittest discover -s tests/reporting -p 'test_syn03_strategy_a_report.py'
           python -m unittest tests.reporting.test_review05_build_phases tests.reporting.test_review05_capture_tools tests.reporting.test_review05_family_query tests.reporting.test_review05_publication tests.reporting.test_review05_resource_receipt tests.reporting.test_scalar_query_oracle
           python -m unittest discover -s tests/reporting -p 'test_syn03_ts02_report.py'
+      - name: Verify the saved geometry publication adapters
+        run: >-
+          python -m unittest
+          tests.reporting.test_geo02_publication
+          tests.reporting.test_geo05_publication
+          tests.reporting.test_geo06_publication
       - name: Check six saved environment routes and offline ZIPs
         run: >-
           python -m unittest
@@ -919,6 +953,12 @@ jobs:
           python -m unittest discover -s reports/algorithm-results/tooling/geo02 -p test_report_tools.py
       - name: Replay the saved paired T-S01 report and offline ZIP
         run: python -m unittest tests.reporting.test_syn_ts01_paired_report tests.reporting.test_syn_ts01_paired_publication
+      - name: Replay the nominal-forward and terminal-minimizer saved reports
+        run: |
+          python -m unittest tests.reporting.test_syn01_publication tests.reporting.test_syn02_publication
+          python -m unittest discover -s scripts/reports/syn01 -p 'test_*.py'
+          python -m unittest discover -s scripts/reports/syn02 -p 'test_*.py'
+          python -m unittest discover -s reports/algorithm-results/tooling/syn02 -p 'test_report.py'
       - name: Replay saved MPC replanning and output feedback
         run: |
           reports=reports/algorithm-results
@@ -1008,10 +1048,27 @@ jobs:
         env:
           MPLBACKEND: Agg
         run: |
-          python -m unittest tests.reporting.test_convex_report tests.reporting.test_opt07_collector tests.reporting.test_opt12_collector tests.reporting.test_visual_examples tests.reporting.test_geo07_publication tests.reporting.test_geo07_port_publication tests.reporting.test_geo07_dependent_publication tests.reporting.test_finite_feedback_publication tests.reporting.test_ext04_publication tests.reporting.test_report_lifecycle
+          python -m unittest tests.reporting.test_convex_report tests.reporting.test_opt07_collector tests.reporting.test_visual_examples tests.reporting.test_geo07_publication tests.reporting.test_geo07_port_publication tests.reporting.test_geo07_dependent_publication tests.reporting.test_finite_feedback_publication tests.reporting.test_ext04_publication tests.reporting.test_report_lifecycle
 
-      - name: Replay the saved EXT-07 resource observation route
-        run: python -m unittest tests.reporting.test_ext07_resource_observation
+      - name: Replay the saved EXT-07 catalogue and report archives
+        run: |
+          python -m unittest tests.reporting.test_ext07_saved tests.reporting.test_ext07_resource_observation
+          capability=reports/algorithm-results/ext07-capability-scale-3d8fdf8589b7194f
+          capability_output="$RUNNER_TEMP/ext07-capability-summary"
+          python scripts/reports/ext07/capability_collect.py --raw "$capability/measure.jsonl" --out "$capability_output"
+          cmp "$capability/summary.csv" "$capability_output/summary.csv"
+          cmp "$capability/summary.json" "$capability_output/summary.json"
+          catalog=reports/algorithm-results/ext07-publications.json
+          site="$RUNNER_TEMP/ext07-saved-site"
+          mkdir "$site"
+          printf '%s\n' '<html><body><ul></ul></body></html>' > "$site/index.html"
+          mapfile -t ids < <(jq -er '.reports[].report_id' "$catalog")
+          args=()
+          for id in "${ids[@]}"; do args+=(--source "reports/algorithm-results/$id"); done
+          python scripts/reports/stage_ext07.py "${args[@]}" > "$RUNNER_TEMP/ext07-catalogue.json"
+          diff -u "$catalog" "$RUNNER_TEMP/ext07-catalogue.json"
+          python scripts/reports/stage_ext07.py --catalog "$catalog" --site "$site"
+          for id in "${ids[@]}"; do diff -r "reports/algorithm-results/$id" "$site/$id"; done
 
       - name: Check the saved MPC-06 online evidence and entry points
         run: |
@@ -1284,6 +1341,11 @@ jobs:
           python -m unittest discover -s tests/reporting -p 'test_discrete_mpc_2d.py'
           python -m unittest tests.reporting.test_catalogue_forward_publication tests.reporting.test_catalogue_disturbance_publication
           python -m unittest tests.reporting.test_mpc_crossover_publication tests.reporting.test_native_source_constrained_mpc_publication tests.reporting.test_native_history_strategy_publication
+      - name: Check OPT-12 collection, rendering and immutable publication
+        run: |
+          python -m unittest tests.reporting.test_opt12_collector tests.reporting.test_opt12_render tests.reporting.test_opt12_publication
+          python scripts/reports/opt12_collect.py --help
+          python scripts/reports/opt12_render.py --help
       - name: Exercise OPT07 and OPT11 collectors, oracles and saved reports
         run: |
           python -m unittest discover -s tests/reporting -p 'test_opt07_*.py'

@@ -179,7 +179,7 @@ class Writer {
         count(rows);
         count(cols);
         if (cols == 0)
-            return; // Zero-width native V records can have arbitrarily many empty rows.
+            return;
         for (std::size_t row = 0; row < rows; ++row)
             for (std::size_t col = 0; col < cols; ++col)
                 number(read(row, col));

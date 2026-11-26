@@ -72,11 +72,11 @@ TEST_CASE("exact verifier rejects malformed, negative, nonfinite, and absent-end
     CHECK(std::holds_alternative<Diagnostics>(verify_linear_infeasibility_certificate(program,invalid)));
     invalid=valid;invalid.variable_upper[0]=std::numeric_limits<double>::infinity();
     CHECK(std::holds_alternative<Diagnostics>(verify_linear_infeasibility_certificate(program,invalid)));
-    invalid=valid;invalid.row_upper[0]=1; // row zero has no upper endpoint
+    invalid=valid;invalid.row_upper[0]=1;
     CHECK(std::holds_alternative<Diagnostics>(verify_linear_infeasibility_certificate(program,invalid)));
-    invalid=valid;invalid.row_lower[1]=1; // row one has no lower endpoint
+    invalid=valid;invalid.row_lower[1]=1;
     CHECK(std::holds_alternative<Diagnostics>(verify_linear_infeasibility_certificate(program,invalid)));
-    invalid=valid;invalid.variable_lower[0]=1; // variable is free
+    invalid=valid;invalid.variable_lower[0]=1;
     CHECK(std::holds_alternative<Diagnostics>(verify_linear_infeasibility_certificate(program,invalid)));
 }
 

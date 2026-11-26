@@ -71,7 +71,7 @@ bool proves_redundant(const ProgramResult &result, const LinearProgram &program,
     const double maximum_violation_upper = -result.objective.lower->value - bound;
     return std::isfinite(maximum_violation_upper) && maximum_violation_upper <= 0.0;
 }
-} // namespace
+}
 
 HalfspaceReductionResult remove_redundant_halfspaces(const sets::SetData &input, SetId output_id,
                                                      LPWorkspace &lp,

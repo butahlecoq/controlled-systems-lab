@@ -38,7 +38,6 @@ int main() {
     const auto image=take(sets::from_generator_handle(image_result.output));
     if(image.center()!=Vector{7} || image.generators().values!=Vector{2,3} ||
        image.factor_ids()!=std::vector<sets::FactorId>{{"horizontal"},{"vertical"}}) return 2;
-    // Literal physical H oracle: x<=12 and -x<=-2.
     for(double x:Vector{2,7,12}) if(x>12 || -x>-2) return 3;
     for(double x:Vector{1,13}) if(x<=12 && -x<=-2) return 4;
     if(image.center()[0]-image.generators().values[0]-image.generators().values[1]!=2 ||
@@ -58,7 +57,6 @@ int main() {
     const auto cancellation=take(sets::from_generator_handle(dependent_result.output));
     if(cancellation.center()!=Vector{0} || cancellation.generators().values!=Vector{0} ||
         cancellation.factor_ids()!=std::vector<sets::FactorId>{{"history.0"}}) return 10;
-    // Literal physical H oracle: x<=0 and -x<=0.
     if(cancellation.center()[0]>0 || -cancellation.center()[0]>0) return 11;
     const OperationRequest independent{{{"installed-geo07"},{"independent"},{"interval"}},
         {"csl.geometry.generators.operations"},MinkowskiSum{left.as_handle(),right.as_handle()},

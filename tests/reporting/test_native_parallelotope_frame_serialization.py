@@ -162,8 +162,6 @@ class NativeParallelotopeFrameSerializationTests(unittest.TestCase):
         self.assertAlmostEqual(plan_states[0][0], 1.0, places=10)
         self.assertNotAlmostEqual((first["lower"][0] + first["upper"][0]) / 2, 1.0, places=3)
 
-        # Feed the actual packet through the saved-stage collector that builds
-        # report data, not only its lower-level geometry helper.
         with tempfile.TemporaryDirectory() as temporary:
             capture_root = Path(temporary)
             from attempt_records import (
@@ -296,7 +294,6 @@ class NativeParallelotopeFrameSerializationTests(unittest.TestCase):
                 self.assertAlmostEqual(max(actual), max(expected), places=9)
 
             if render_cli:
-                # The actual public CLI can select this fresh, referenced capture.
                 output = capture_root / "rendered"
                 script = Path(figures.__file__).resolve()
                 subprocess.run(

@@ -190,7 +190,7 @@ bool emit_case(const problem::ResolvedProblem& problem,const char* label,
     }
     return true;
 }
-} // namespace
+}
 
 int main(int argc,char** argv) {
     try {

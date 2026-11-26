@@ -26,6 +26,7 @@ import qhull_highs_strategy_a_example
 import report_data
 import site_additions
 import site_design
+import source_index_names
 import stage_buryatia_dim4
 import stage_buryatia_volterra
 import stage_catalogue_disturbance_control
@@ -54,6 +55,11 @@ import visual_illustrations
 from mathematical_notation import matrix_html
 
 ext07_reports = stage_ext07
+
+FAMILY_NAME = str(source_index_names.family()["display_name"])
+REDUCER_NAME = str(source_index_names.routine("kpabep")["display_name"])
+SOURCE_INDEX_TITLE = str(source_index_names.example("source-index-geometry-2d")["display_name"])
+NEAR_TOLERANCE_TITLE = str(source_index_names.example("near-tolerance")["display_name"])
 
 CASE_OWNERS = {
     "hull": geometry_examples,
@@ -342,7 +348,7 @@ SAVED_FIGURES = (
         family="Strategy A · Nominal one-step control",
         title="Exercise each admitted Strategy A pipeline choice",
         alt="Returned unit-square terminal family with public recovered linear and quadratic histories.",
-        summary="A saved 128-tuple run records 64 structural contract exclusions, 62 complete admitted attempts, and two retained KPABEP-to-HiGHS numerical refusals. The one-step open-loop case makes no feedback, complete-family, or performance claim.",
+        summary=f"A saved 128-tuple run records 64 structural contract exclusions, 62 complete admitted attempts, and two retained numerical refusals when {REDUCER_NAME.lower()} output reached HiGHS. The one-step open-loop case makes no feedback, complete-family, or performance claim.",
     ),
     dict(
         route="issue944-strategy-a-each-choice-postfix-v1",
@@ -362,10 +368,10 @@ _BTULSHOR_FIGURE = dict(
     image="point-projections.svg",
     page="index.html",
     records="raw/summary.json",
-    family="Convex hulls · source comparison",
-    title="Inspect saved BTULSHOR hull projections",
-    alt="Saved two-dimensional input points and method hull projections for the BTULSHOR comparison.",
-    summary="The figure uses saved input and output coordinates from the measured source-faithful comparison. The linked report preserves exact-check statuses, including any near-tolerance failure.",
+    family=f"Convex hulls · {FAMILY_NAME}",
+    title=f"Inspect saved {FAMILY_NAME.lower()} hull projections",
+    alt=f"Saved two-dimensional input points and method hull projections from the {FAMILY_NAME.lower()} comparison.",
+    summary=f"The figure uses saved input and output coordinates from the measured {REDUCER_NAME.lower()} comparison. The linked report preserves exact-check statuses, including any near-tolerance failure.",
 )
 _catalog_path = Path(__file__).parents[2] / "reports/algorithm-results/catalog.json"
 if _catalog_path.is_file():
@@ -1357,9 +1363,9 @@ def build(catalog, site):
     )
     saved_figures += (
         '<article class="saved-figure" id="source-index-geometry-2d"><p class="eyebrow">Geometry · Public-interface example</p>'
-        '<h3><a href="source-index-geometry-2d.html">Source-index hulls in a 2D geometry pipeline</a></h3>'
+        f'<h3><a href="source-index-geometry-2d.html">{SOURCE_INDEX_TITLE}</a></h3>'
         '<a href="source-index-geometry-2d.html"><img src="source-index-geometry-2d.svg" alt="A square point cloud with edge, duplicate and interior points, followed by its affine image and one-step control sum"></a>'
-        "<p>QuickHull2D and the recovered BTULSHOR KPABEP/MODIF profile propose original point IDs; an independent exact checker validates each generated cloud before the affine or control sum applies those IDs.</p>"
+        f"<p>QuickHull2D and the {REDUCER_NAME.lower()} from the {FAMILY_NAME.lower()} propose original point IDs; an independent exact checker validates each generated cloud before the affine or control sum applies those IDs.</p>"
         '<p><a href="source-index-geometry-2d.html">Inputs, answer and reproduction details ↗</a> · '
         '<a href="source-index-geometry-2d-records.json">Raw records ↗</a></p></article>'
     )
@@ -1629,7 +1635,19 @@ def build(catalog, site):
         source = adaptive_assets / name
         require(
             source.is_file() and not source.is_symlink(),
-            "missing source-index/KPABEP geometry example asset: " + name,
+            f"missing {FAMILY_NAME.lower()} example asset: " + name,
+        )
+        outputs[name] = (
+            source.read_bytes() if source.suffix != ".html" else source.read_text(encoding="utf-8")
+        )
+    for name in (
+        "parallelotope-frame-cover-2d.html",
+        "parallelotope-frame-cover-2d.json",
+    ):
+        source = adaptive_assets / name
+        require(
+            source.is_file() and not source.is_symlink(),
+            "missing parallelotope frame cover example asset: " + name,
         )
         outputs[name] = (
             source.read_bytes() if source.suffix != ".html" else source.read_text(encoding="utf-8")
@@ -1683,7 +1701,7 @@ def build(catalog, site):
     gallery_inventory.append(
         {
             "family": "Geometry and control reachability",
-            "title": "Source-index hulls in a 2D geometry pipeline",
+            "title": SOURCE_INDEX_TITLE,
             "status": "educational-example",
             "anchor": "source-index-geometry-2d",
             "page": "source-index-geometry-2d.html",
@@ -1694,14 +1712,26 @@ def build(catalog, site):
     )
     gallery_inventory.append(
         {
-            "family": "Convex hull · source-faithful legacy reducer",
-            "title": "When tolerance removes a true hull vertex",
+            "family": f"Convex hull · {FAMILY_NAME}",
+            "title": NEAR_TOLERANCE_TITLE,
             "status": "educational-example",
             "anchor": "kpabep-near-collinear-20261115",
             "page": "kpabep-near-collinear-20261115.html",
             "figure": "kpabep-near-collinear-20261115.html",
             "source_page": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c741260362092c988fdb4aa4ee6a793575a59e4/examples/geometry/kpabep_near_collinear.cpp",
             "raw_record": "kpabep-near-collinear-20261115.json",
+        }
+    )
+    gallery_inventory.append(
+        {
+            "family": "Feedback geometry · parallelotope frames",
+            "title": "A rotated frame can enclose a diamond exactly",
+            "status": "educational-example",
+            "anchor": "parallelotope-frame-cover-2d",
+            "page": "parallelotope-frame-cover-2d.html",
+            "figure": "parallelotope-frame-cover-2d.html",
+            "source_page": "https://github.com/butahlecoq/controlled-systems-lab/blob/main/src/reachability/parallelotope_frame.cpp",
+            "raw_record": "parallelotope-frame-cover-2d.json",
         }
     )
     qhull_example_source = qhull_highs_strategy_a_example.load_record()["source_commit"]
@@ -2103,12 +2133,12 @@ def build(catalog, site):
     navigation += '<a href="#saved-report-figures">More saved algorithm figures</a>'
     kpabep_card = (
         '<article class="saved-figure" id="kpabep-near-collinear-20261115">'
-        '<p class="eyebrow">Convex hull · source-faithful legacy reducer</p>'
-        '<h3><a href="kpabep-near-collinear-20261115.html">When tolerance removes a true hull vertex</a></h3>'
-        '<a href="kpabep-near-collinear-20261115.html" aria-label="Open the near-collinear KPABEP example">'
+        f'<p class="eyebrow">Convex hull · {FAMILY_NAME}</p>'
+        f'<h3><a href="kpabep-near-collinear-20261115.html">{NEAR_TOLERANCE_TITLE}</a></h3>'
+        f'<a href="kpabep-near-collinear-20261115.html" aria-label="Open the example: {NEAR_TOLERANCE_TITLE}">'
         '<svg viewBox="0 0 300 105" role="img" aria-labelledby="kpabep-card-title kpabep-card-desc">'
         '<title id="kpabep-card-title">A near-collinear point outside the returned segment</title>'
-        '<desc id="kpabep-card-desc">The green segment joins the retained endpoints. A red point, omitted by KPABEP, lies just below the segment.</desc>'
+        f'<desc id="kpabep-card-desc">The green segment joins the retained endpoints. A red point, omitted by the {REDUCER_NAME.lower()}, lies just below the segment.</desc>'
         '<line x1="30" y1="50" x2="270" y2="50" stroke="#287357" stroke-width="5"/>'
         '<line x1="150" y1="50" x2="150" y2="72" stroke="#a73434" stroke-width="2" stroke-dasharray="4 3"/>'
         '<circle cx="30" cy="50" r="6" fill="#287357"/><circle cx="270" cy="50" r="6" fill="#287357"/>'
@@ -2118,6 +2148,24 @@ def build(catalog, site):
         "<p>Exact binary64 orientation detects a genuine vertex 3.55 × 10⁻¹⁵ from the returned segment. The faithful reducer returns an inner approximation with no established error bound.</p>"
         '<p><a href="kpabep-near-collinear-20261115.html">Open the complete plotted reproduction →</a> · '
         '<a href="kpabep-near-collinear-20261115.json">Evidence record</a></p></article>'
+    )
+    parallelotope_card = (
+        '<article class="saved-figure" id="parallelotope-frame-cover-2d">'
+        '<p class="eyebrow">Feedback geometry · parallelotope frames</p>'
+        '<h3><a href="parallelotope-frame-cover-2d.html">A rotated frame can enclose a diamond exactly</a></h3>'
+        '<a href="parallelotope-frame-cover-2d.html" aria-label="Open the parallelotope frame cover example">'
+        '<svg viewBox="0 0 300 120" role="img" aria-labelledby="parallelotope-card-title parallelotope-card-desc">'
+        '<title id="parallelotope-card-title">A rotated frame cover equals a diamond</title>'
+        '<desc id="parallelotope-card-desc">A green diamond lies inside a dashed red axis-aligned square. Two green arrows show the rotated frame columns.</desc>'
+        '<rect x="75" y="10" width="150" height="100" fill="none" stroke="#a73434" stroke-width="2" stroke-dasharray="6 4"/>'
+        '<polygon points="150,15 205,60 150,105 95,60" fill="#287357" fill-opacity=".14" stroke="#287357" stroke-width="3"/>'
+        '<line x1="150" y1="60" x2="184" y2="26" stroke="#287357" stroke-width="3"/>'
+        '<line x1="150" y1="60" x2="116" y2="26" stroke="#287357" stroke-width="3"/>'
+        '<text x="188" y="26" fill="#287357" font-size="12">u1</text>'
+        '<text x="98" y="26" fill="#287357" font-size="12">u2</text></svg></a>'
+        "<p>On |x+y| ≤ 1 and |x−y| ≤ 1, the 45° frame has factor bounds ±1/√2 and width product 2; the identity frame keeps the bounding box with product 4.</p>"
+        '<p><a href="parallelotope-frame-cover-2d.html">Open the complete plotted reproduction →</a> · '
+        '<a href="parallelotope-frame-cover-2d.json">Evidence record</a></p></article>'
     )
     body = (
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
@@ -2158,6 +2206,7 @@ def build(catalog, site):
         '<div class="saved-grid">'
         + visual_illustrations.cards(analytic_inventory)
         + kpabep_card
+        + parallelotope_card
         + "</div></section>"
         + '<section id="algorithm-coverage"><p class="eyebrow">Implementation map</p>'
         "<h2>Algorithm families and 2D limits</h2><p>This map follows the current framework composition document and published report catalog. "

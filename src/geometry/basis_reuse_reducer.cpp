@@ -226,7 +226,7 @@ class BasisReuseWorkspace final : public HullReducerWorkspace {
     registry::Registration<registry::LPPort> basis_provider_;
 };
 
-} // namespace
+}
 
 HullReductionResult reduce_hull_basis_reuse(const PointCloud &cloud, LPWorkspace &lp,
                                             const ExecutionContext &context) {

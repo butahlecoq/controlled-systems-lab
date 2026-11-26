@@ -247,6 +247,13 @@ example_check(source_index_geometry_quickhull source_index_geometry_2d "quickhul
   "csl.hull.source.quickhull-2d.*status=verified.*csl.geometry.bounded-hull-checker")
 example_check(source_index_geometry_btulshor source_index_geometry_2d "btulshor" 0
   "csl.hull.source.btulshor-kpabep.*status=verified.*csl.geometry.bounded-hull-checker")
+if(TARGET source_index_geometry_2d)
+  add_test(NAME source_index_geometry_descriptive_aliases
+    COMMAND "${CMAKE_COMMAND}"
+      "-DEXAMPLE_EXE=$<TARGET_FILE:source_index_geometry_2d>"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/source_index_geometry_2d_alias_check.cmake")
+  set_tests_properties(source_index_geometry_descriptive_aliases PROPERTIES TIMEOUT 60)
+endif()
 example_check(scenario_cli_valid scenario_cli "--validate-only;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json" 0
   "validation=valid.*schema=csl.scenario/1.*requested=comparison.*mode=validate_only solvers=not_invoked")
 example_check(scenario_cli_npoa_2017_fuel scenario_cli

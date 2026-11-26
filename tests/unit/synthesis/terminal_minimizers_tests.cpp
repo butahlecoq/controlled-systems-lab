@@ -134,7 +134,6 @@ TEST_CASE("program evidence is retained without asserting global problem optimum
     auto r=solve(LinearTerminal{{1,0},7},{0,0},7);REQUIRE(r.optimum);REQUIRE(r.optimization);CHECK(std::holds_alternative<Unestablished>(r.optimum->optimum.support));REQUIRE(r.optimum->bounds.upper);CHECK(std::holds_alternative<Unestablished>(r.optimum->bounds.upper->evidence.support));CHECK(std::holds_alternative<SymbolicArgument>(r.optimization->objective.upper->evidence.support));
 }
 
-// ---- Issue #69 [TEST-11]: independently designed oracle expansions ----
 
 TEST_CASE("linear cost x on [0,1]^2 gives the whole edge x=0") {
     // Independent oracle: minimize c'x with c=(1,0) on [0,1]^2.
@@ -190,7 +189,6 @@ TEST_CASE("strictly convex quadratic has analytically unique minimizer") {
 }
 
 TEST_CASE("unbounded attainment result is retained without a relation") {
-    // Analytic oracle: unbounded outcome on a bounded slice must not produce a relation.
     auto [p,q]=linear_setup();
     auto r=analytic_optimizer({0,0},0,false,MathematicalOutcome::unbounded).solve(p,q,{p.identity(),box()},{});
     CHECK(r.outcome==MathematicalOutcome::unbounded);
@@ -198,7 +196,6 @@ TEST_CASE("unbounded attainment result is retained without a relation") {
 }
 
 TEST_CASE("undetermined attainment result is retained without a relation") {
-    // Analytic oracle: undetermined outcome must not produce a relation.
     auto [p,q]=linear_setup();
     auto r=analytic_optimizer({0,0},0,false,MathematicalOutcome::undetermined).solve(p,q,{p.identity(),box()},{});
     CHECK(r.outcome==MathematicalOutcome::undetermined);
@@ -220,14 +217,12 @@ TEST_CASE("objective tolerance does not change exact level-set construction") {
 TEST_CASE("infeasible terminal slice is rejected") {
     // An empty terminal reachability slice must yield infeasible, not an empty relation.
     auto [p,q]=linear_setup();
-    // Create an empty box (infeasible): x <= 1 and -x <= -2 (i.e. x >= 2)
     auto empty_box=accepted(sets::make_h({{"empty-box"},2,{}},{matrix({4,2,{1,0,-1,0,0,1,0,-1}}),vector({1,-2,1,0}),matrix({0,2,{}}),vector({})}));
     auto r=analytic_optimizer({0,0},0,false,MathematicalOutcome::infeasible).solve(p,q,{p.identity(),empty_box},{});
     CHECK(r.outcome==MathematicalOutcome::infeasible);
     CHECK_FALSE(r.relation);
 }
 
-// ---- Issue #69 [TEST-11]: coverage-gap additions from code review ----
 
 TEST_CASE("solver bounds do not change exact level-set construction") {
     // The exact level-set {x: c'x=c'a} is independent of solver bounds

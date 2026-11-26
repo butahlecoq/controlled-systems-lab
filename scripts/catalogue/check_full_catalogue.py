@@ -98,7 +98,7 @@ def check_current_factory_rows(rows: list[dict], root: Path) -> None:
             assert graph["graph_id"] not in expected
             expected[graph["graph_id"]] = (manifest, graph, path)
 
-    assert len(expected) == 99
+    assert len(expected) == 105
     assert {row["graph_id"] for row in rows} == set(expected)
     assert len({row["graph_id"] for row in rows}) == len(rows)
     assert len({row["graph_fingerprint"] for row in rows}) == len(rows)

@@ -310,7 +310,7 @@ class CoverWorkspace final : public SetApproximatorWorkspace {
                                SetRelation::outer, std::move(proof)};
     }
 };
-} // namespace
+}
 
 registry::Registration<registry::ConversionPort>
 make_zero_generator_removal_registration(SetId output_id) {

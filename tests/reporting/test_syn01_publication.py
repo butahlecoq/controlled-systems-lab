@@ -1,73 +1,159 @@
 """SYN-01 schema-3 adapter boundary tests over saved synthetic analytic records."""
+
 import hashlib
+import importlib
 import importlib.util
 import json
-from pathlib import Path
+import subprocess
 import sys
 import tempfile
 import unittest
+import zipfile
+from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
-TOOLING = ROOT / "reports" / "algorithm-results" / "tooling" / "syn01"
-sys.path.insert(0, str(ROOT / "scripts" / "reports"))
-sys.path.insert(0, str(TOOLING))
+REPORT_SCRIPTS = ROOT / "scripts" / "reports"
+SAVED_REPORTS = ROOT / "reports" / "algorithm-results"
+sys.path.insert(0, str(REPORT_SCRIPTS))
+TOOLING = SAVED_REPORTS / "tooling" / "syn01"
 
-import report
-import publication_map
-import syn01_registered_reports as adapter
-import registered_reports
-import report_site
 
-COLLECT_SPEC = importlib.util.spec_from_file_location("csl_syn01_test_collect", TOOLING / "collect.py")
-collect = importlib.util.module_from_spec(COLLECT_SPEC)
-COLLECT_SPEC.loader.exec_module(collect)
+def _load_module(name, path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
+
+report = _load_module("csl_syn01_test_report", TOOLING / "report.py")
+publication_map = _load_module("csl_syn01_test_map", TOOLING / "publication_map.py")
+with mock.patch.dict(sys.modules, {"report": report, "publication_map": publication_map}):
+    collect = _load_module("csl_syn01_test_collect", TOOLING / "collect.py")
+adapter = importlib.import_module("syn01_registered_reports")
+registered_reports = importlib.import_module("registered_reports")
+report_site = _load_module("csl_syn01_test_site", REPORT_SCRIPTS / "site.py")
 SOURCE = "a" * 40
 HARNESS = "b" * 40
-PROVIDER_IDS = {name: {"id": "csl." + name, "version": "1.0.0"} for name in (
-    "projection", "affine_sum", "conversion", "lp_backend", "hull_reducer")}
-PROVENANCE = {"algorithm_module": {"id": "csl.reachability.nominal-forward", "version": "0.1.0"},
-              "providers": PROVIDER_IDS,
-              "dependency_edges": {"affine_sum": ["hull_reducer", "lp_backend", "conversion"],
-                                   "conversion": ["lp_backend"]},
-              "runtime_settings": report.RUNTIME_SETTINGS,
-              "native_thread_observation": {"status": "unavailable", "observed_threads": None,
-                  "reason": "The driver has no supported runtime API to observe effective native worker threads."},
-              "build_configuration": {"configuration": "Release", "generator": "Visual Studio 17 2022",
-                  "generator_platform": "x64", "cxx_standard": "c++20", "compiler_id": "MSVC",
-                  "compiler_version": "19.44.35215.0", "compiler_executable": "cl.exe", "cmake_version": "3.31.6",
-                  "cmake_release_flags": "/O2 /Ob2 /DNDEBUG",
-                  "target_release_properties": {"LanguageStandard": "stdcpp20", "Optimization": "MaxSpeed"},
-                  "effective_release_flags": ["/std:c++20", "/O2", "/Ob2", "/DNDEBUG", "/W4", "/WX", "/permissive-"],
-                  "evidence_sha256": {"CMakeCache.txt": "a" * 64, "build_configuration_file": "b" * 64,
-                                       "release_build_log": "c" * 64}}}
+PROVIDER_IDS = {
+    name: {"id": "csl." + name, "version": "1.0.0"}
+    for name in ("projection", "affine_sum", "conversion", "lp_backend", "hull_reducer")
+}
+PROVENANCE = {
+    "algorithm_module": {"id": "csl.reachability.nominal-forward", "version": "0.1.0"},
+    "providers": PROVIDER_IDS,
+    "dependency_edges": {
+        "affine_sum": ["hull_reducer", "lp_backend", "conversion"],
+        "conversion": ["lp_backend"],
+    },
+    "runtime_settings": report.RUNTIME_SETTINGS,
+    "native_thread_observation": {
+        "status": "unavailable",
+        "observed_threads": None,
+        "reason": "The driver has no supported runtime API to observe effective native worker threads.",
+    },
+    "build_configuration": {
+        "configuration": "Release",
+        "generator": "Visual Studio 17 2022",
+        "generator_platform": "x64",
+        "cxx_standard": "c++20",
+        "compiler_id": "MSVC",
+        "compiler_version": "19.44.35215.0",
+        "compiler_executable": "cl.exe",
+        "cmake_version": "3.31.6",
+        "cmake_release_flags": "/O2 /Ob2 /DNDEBUG",
+        "target_release_properties": {"LanguageStandard": "stdcpp20", "Optimization": "MaxSpeed"},
+        "effective_release_flags": [
+            "/std:c++20",
+            "/O2",
+            "/Ob2",
+            "/DNDEBUG",
+            "/W4",
+            "/WX",
+            "/permissive-",
+        ],
+        "evidence_sha256": {
+            "CMakeCache.txt": "a" * 64,
+            "build_configuration_file": "b" * 64,
+            "release_build_log": "c" * 64,
+        },
+    },
+}
 
 
 def make_event(scenario, repetition):
-    return {"schema": report.EVENT_SCHEMA, "scenario": scenario, "repetition": repetition,
-            "warmup": repetition == 0, "status": "passed", "outcome": "forward_tube",
-            "expected_marginals": report.EXPECTED[scenario], "observed_marginals": report.EXPECTED[scenario],
-            "oracle_passed": True, "setup_ns": 100 + repetition, "solve_ns": 200 + repetition,
-            "setup_state": "available", "solve_state": "available",
-            "oracle_ns": 20, "oracle_state": "available", "execute_ns": 400 + repetition,
-            "execute_state": "available", "provider_identities": PROVIDER_IDS,
-            "execution_settings": report.RUNTIME_SETTINGS,
-            "provider_operation_counts": {"csl.geometry.affine-sum": 4,
-                                           "csl.geometry.polyhedral-projection": 2},
-            "provider_operation_timing_ns": None, "detail": ""}
+    return {
+        "schema": report.EVENT_SCHEMA,
+        "scenario": scenario,
+        "repetition": repetition,
+        "warmup": repetition == 0,
+        "status": "passed",
+        "outcome": "forward_tube",
+        "expected_marginals": report.EXPECTED[scenario],
+        "observed_marginals": report.EXPECTED[scenario],
+        "oracle_passed": True,
+        "setup_ns": 100 + repetition,
+        "solve_ns": 200 + repetition,
+        "setup_state": "available",
+        "solve_state": "available",
+        "oracle_ns": 20,
+        "oracle_state": "available",
+        "execute_ns": 400 + repetition,
+        "execute_state": "available",
+        "provider_identities": PROVIDER_IDS,
+        "execution_settings": report.RUNTIME_SETTINGS,
+        "provider_operation_counts": {
+            "csl.geometry.affine-sum": 4,
+            "csl.geometry.polyhedral-projection": 2,
+        },
+        "provider_operation_timing_ns": None,
+        "detail": "",
+    }
 
 
 class Syn01PublicationTests(unittest.TestCase):
+    def test_saved_renderer_reproduces_the_archived_page_and_plot(self):
+        source = SAVED_REPORTS / "syn01-nominal-20261013-f7ba310d-48a679cfc0d4"
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary) / "rendered"
+            subprocess.run(
+                [
+                    sys.executable,
+                    REPORT_SCRIPTS / "syn01/render_saved.py",
+                    source / "records.json",
+                    output,
+                ],
+                check=True,
+            )
+            with zipfile.ZipFile(source.with_suffix(".zip")) as archive:
+                files = {
+                    f"{source.name}/{path.name}": path
+                    for path in source.iterdir()
+                    if path.is_file()
+                }
+                self.assertCountEqual(archive.namelist(), ["index.html", *files])
+                for name, path in files.items():
+                    self.assertEqual(path.read_bytes(), archive.read(name), name)
+            for name in ("index.html", "latency.svg"):
+                self.assertEqual((output / name).read_bytes(), (source / name).read_bytes(), name)
+
     def test_future_capture_excludes_working_reproduction_note(self):
         self.assertNotIn("README.md", adapter.FILES)
         self.assertFalse((ROOT / "scripts/reports/syn01/README.md").exists())
 
     def make_bundle(self, root):
         root.mkdir(parents=True, exist_ok=True)
-        trials = [make_event(name, repetition) for repetition in range(8) for name in report.SCENARIOS]
-        record = report.make_record(trials, source_commit=SOURCE, harness_commit=HARNESS,
-                                    environment={"os": "fixture", "processor": "fixture"},
-                                    provenance={**PROVENANCE, "configuration": "Release", "compiler_id": "fixture"})
+        trials = [
+            make_event(name, repetition) for repetition in range(8) for name in report.SCENARIOS
+        ]
+        record = report.make_record(
+            trials,
+            source_commit=SOURCE,
+            harness_commit=HARNESS,
+            environment={"os": "fixture", "processor": "fixture"},
+            provenance={**PROVENANCE, "configuration": "Release", "compiler_id": "fixture"},
+        )
         record["report_id"] = "syn01-nominal-20261013-aaaaaaaa-" + "c" * 12
         bundle = root / record["report_id"]
         bundle.mkdir()
@@ -76,8 +162,13 @@ class Syn01PublicationTests(unittest.TestCase):
             "raw-events.jsonl": b"".join(collect.canonical(row) + b"\n" for row in trials),
             "trials.csv": collect.trials_csv(trials),
             "summary.csv": collect.summary_csv(record),
-            "scenarios.json": collect.canonical({"fixture_catalog": record["fixture_catalog"],
-                                                  "scenario_hashes": record["scenario_hashes"]}) + b"\n",
+            "scenarios.json": collect.canonical(
+                {
+                    "fixture_catalog": record["fixture_catalog"],
+                    "scenario_hashes": record["scenario_hashes"],
+                }
+            )
+            + b"\n",
             "environment.json": collect.canonical(record["environment"]) + b"\n",
             "build-provenance.json": collect.canonical(record["provenance"]) + b"\n",
             "configure-log.txt": b"Release configure fixture\n",
@@ -88,14 +179,75 @@ class Syn01PublicationTests(unittest.TestCase):
             "index.html": report.render_html(record).encode("utf-8"),
             "latency.svg": report.render_svg(record).encode("utf-8"),
         }
-        contents["publication-map.json"] = collect.canonical(publication_map.project(record)) + b"\n"
+        contents["publication-map.json"] = (
+            collect.canonical(publication_map.project(record)) + b"\n"
+        )
         for name, content in contents.items():
             (bundle / name).write_bytes(content)
-        manifest = {"schema": "csl.syn01-report-manifest/1", "report_id": record["report_id"],
-                    "source_commit": SOURCE, "harness_commit": HARNESS,
-                    "files": {name: hashlib.sha256(content).hexdigest() for name, content in contents.items()}}
+        manifest = {
+            "schema": "csl.syn01-report-manifest/1",
+            "report_id": record["report_id"],
+            "source_commit": SOURCE,
+            "harness_commit": HARNESS,
+            "files": {
+                name: hashlib.sha256(content).hexdigest() for name, content in contents.items()
+            },
+        }
         (bundle / "manifest.json").write_bytes(collect.canonical(manifest) + b"\n")
+        collect.zip_bundle(bundle, bundle.with_suffix(".zip"))
         return bundle
+
+    def _rewrite_source_zip(self, bundle, *, compression, date_time, comment):
+        path = bundle.with_suffix(".zip")
+        path.unlink()
+        with zipfile.ZipFile(path, "w", compression=compression) as archive:
+            archive.comment = comment
+            archive.writestr("index.html", b"offline source page")
+            for member in sorted(bundle.iterdir()):
+                if member.is_file():
+                    info = zipfile.ZipInfo(f"{bundle.name}/{member.name}", date_time=date_time)
+                    info.compress_type = compression
+                    archive.writestr(info, member.read_bytes())
+
+    def test_source_zip_bytes_are_bound_into_new_publication_identity(self):
+        with tempfile.TemporaryDirectory() as directory:
+            first = self.make_bundle(Path(directory) / "first" / "reports")
+            second = self.make_bundle(Path(directory) / "second" / "reports")
+            original = adapter.adapt(first).report_id
+            self.assertEqual(original, adapter.adapt(second).report_id)
+            self._rewrite_source_zip(
+                first,
+                compression=zipfile.ZIP_STORED,
+                date_time=(2026, 1, 2, 0, 0, 0),
+                comment=b"first repack",
+            )
+            self._rewrite_source_zip(
+                second,
+                compression=zipfile.ZIP_DEFLATED,
+                date_time=(2026, 1, 3, 0, 0, 0),
+                comment=b"second repack",
+            )
+            self.assertNotEqual(original, adapter.adapt(first).report_id)
+            self.assertNotEqual(adapter.adapt(first).report_id, adapter.adapt(second).report_id)
+
+    def test_source_zip_inventory_and_presence_are_revalidated(self):
+        with tempfile.TemporaryDirectory() as directory:
+            missing = self.make_bundle(Path(directory) / "missing" / "reports")
+            missing.with_suffix(".zip").unlink()
+            with self.assertRaisesRegex(ValueError, "source ZIP"):
+                adapter.adapt(missing)
+            extra = self.make_bundle(Path(directory) / "extra" / "reports")
+            with zipfile.ZipFile(extra.with_suffix(".zip"), "a") as archive:
+                archive.writestr(extra.name + "/unlisted.txt", b"extra")
+            with self.assertRaisesRegex(ValueError, "source ZIP inventory"):
+                adapter.adapt(extra)
+
+    def test_historical_saved_report_retains_its_pinned_publication_id(self):
+        source = SAVED_REPORTS / "syn01-nominal-20261013-f7ba310d-48a679cfc0d4"
+        self.assertEqual(
+            "syn01-6e207b2ee1f300929f054e679c8cd5707f979c02b173292660520e403ebf2852",
+            adapter.adapt(source).report_id,
+        )
 
     def test_valid_bundle_projects_schema3_envelope_and_deterministic_zip(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -108,18 +260,39 @@ class Syn01PublicationTests(unittest.TestCase):
             self.assertNotIn("README.md", files)
             self.assertIn("report-envelope.json", files)
             self.assertIn("publication-manifest.json", files)
-            self.assertTrue(registered_reports.validate_publication_manifest(
-                _write_publication(Path(directory), item, files), {"report_id": item.report_id,
-                    "report_kind": item.kind, "payload_schema": item.payload_schema,
-                    "payload_sha256": item.payload_sha256, "native_payload_sha256": item.native_payload_sha256,
-                    "source_commit": SOURCE, "measured_scope": item.measured_scope,
-                    "evidence_limits": item.evidence_limits, "source_report_id": item.source_report_id}))
-            report_site.OfflineHTML(set(item.files) | {"report-envelope.json", "publication-manifest.json"}).feed(
-                adapter.render_page(bundle, item))
-            catalogue = {"schema": "csl.algorithm-report-catalog/3", "artifact_ref": "main", "reports": [{
-                "report_id": item.report_id, "report_kind": item.kind, "source_report_id": item.source_report_id,
-                "measured_scope": item.measured_scope, "evidence_limits": item.evidence_limits,
-                "source_commit": item.source_commit}]}
+            self.assertTrue(
+                registered_reports.validate_publication_manifest(
+                    _write_publication(Path(directory), item, files),
+                    {
+                        "report_id": item.report_id,
+                        "report_kind": item.kind,
+                        "payload_schema": item.payload_schema,
+                        "payload_sha256": item.payload_sha256,
+                        "native_payload_sha256": item.native_payload_sha256,
+                        "source_commit": SOURCE,
+                        "measured_scope": item.measured_scope,
+                        "evidence_limits": item.evidence_limits,
+                        "source_report_id": item.source_report_id,
+                    },
+                )
+            )
+            report_site.OfflineHTML(
+                set(item.files) | {"report-envelope.json", "publication-manifest.json"}
+            ).feed(adapter.render_page(bundle, item))
+            catalogue = {
+                "schema": "csl.algorithm-report-catalog/3",
+                "artifact_ref": "main",
+                "reports": [
+                    {
+                        "report_id": item.report_id,
+                        "report_kind": item.kind,
+                        "source_report_id": item.source_report_id,
+                        "measured_scope": item.measured_scope,
+                        "evidence_limits": item.evidence_limits,
+                        "source_commit": item.source_commit,
+                    }
+                ],
+            }
             index = report_site.catalogue_index(catalogue)
             self.assertIn(item.report_id + "/index.html", index)
             self.assertEqual(adapter.offline_zip(bundle, item), adapter.offline_zip(bundle, item))
@@ -137,7 +310,9 @@ class Syn01PublicationTests(unittest.TestCase):
             (bundle / "raw-events.jsonl").write_text("{}\n", encoding="utf-8")
             manifest_path = bundle / "manifest.json"
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-            manifest["files"]["raw-events.jsonl"] = hashlib.sha256((bundle / "raw-events.jsonl").read_bytes()).hexdigest()
+            manifest["files"]["raw-events.jsonl"] = hashlib.sha256(
+                (bundle / "raw-events.jsonl").read_bytes()
+            ).hexdigest()
             manifest_path.write_bytes(collect.canonical(manifest) + b"\n")
             with self.assertRaisesRegex(ValueError, "raw event stream"):
                 adapter.adapt(bundle)

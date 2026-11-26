@@ -87,7 +87,7 @@ void extract_trajectory(const MpcCase& problem, d_ocp_qp_sol& solution,
     attempt.original_objective = original_terminal_objective(problem, attempt.witness->states.back());
 }
 
-} // namespace
+}
 
 NativeAttempt solve_hpipm(const MpcCase& problem, const OcpQp& qp,
                           const NativeAttempt* warm_start) {
