@@ -18,7 +18,7 @@ FiniteActionHistoryCursor cursor(const FiniteDomain& domain,std::size_t horizon)
 }
 
 TEST_CASE("finite action history cursor streams distinct catalogue indices in order") {
-    const FiniteDomain domain{1,{{-1},{-1}}}; // Equal values remain separate choices.
+    const FiniteDomain domain{1,{{-1},{-1}}};
     auto search=cursor(domain,2);
 
     const auto first=search.take_prefix(1);

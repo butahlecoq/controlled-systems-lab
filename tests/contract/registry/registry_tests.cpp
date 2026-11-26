@@ -340,7 +340,6 @@ TEST_CASE("public selector binds omitted provenance without promoting a candidat
 TEST_CASE("public selector rejects conflicting source identity even for the same problem") {
     AdversarialSelectorWorkspace workspace;
     const SelectorRequest request{candidate_family(),{3,0.001,{{1}},29}};
-    // Establish successful selection before trying independent identity conflicts.
     workspace.reported_source=request.family.identity();
     const auto accepted=SelectorPort::run(workspace,request,context());
     REQUIRE(std::holds_alternative<WitnessSelection>(accepted));

@@ -251,7 +251,7 @@ def enumerate_paths(query: dict) -> list[dict]:
         running = 0.0
         for action_index in actions:
             u = query["actions"][action_index][0]
-            running += 0.5 * u * u  # coefficient / original N = 1/2
+            running += 0.5 * u * u
             states.append([states[-1][0] + u, states[-1][1]])
         terminal = states[-1][0] ** 2 + states[-1][1] ** 2
         safe = all(
