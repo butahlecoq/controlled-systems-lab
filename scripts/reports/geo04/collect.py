@@ -61,7 +61,6 @@ HARNESS_PATH_ALLOWLIST = {
     "reports/algorithm-results/tooling/geo04/test_report_tools.py",
 }
 
-# Maintained counterparts of the original explicitly reviewed harness paths.
 HARNESS_PATH_ALLOWLIST |= {
     "benchmarks/reporting/geo04/polyhedral_intersection_driver.cpp",
     "scripts/reports/collector_common.py",

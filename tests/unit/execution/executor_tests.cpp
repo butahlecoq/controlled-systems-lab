@@ -348,7 +348,7 @@ TEST_CASE("failure then external cancellation then late return retains all timin
     CHECK(t.admission_closed->observed_at<=*t.external_cancellation_observed_at);
     CHECK(t.external_cancellation_observed_at<=report.tasks[1].timing.call_finished_at);
     CHECK(*report.tasks[1].timing.call_finished_at<=t.workers_joined_at);CHECK(t.workers_joined_at<=t.completed_at);
-    CHECK(*report.tasks[1].timing.call_finished_at<*t.configured_deadline); // zero lateness, no extreme subtraction
+    CHECK(*report.tasks[1].timing.call_finished_at<*t.configured_deadline);
     CHECK(t.workers_joined_at-t.admission_closed->observed_at>=std::chrono::steady_clock::duration::zero());
     CHECK(*report.tasks[1].timing.call_finished_at-*t.external_cancellation_observed_at>=std::chrono::steady_clock::duration::zero());
 }

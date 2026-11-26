@@ -1786,7 +1786,7 @@ TEST_CASE("post-terminal cancellation keeps scoped optimizer and completed termi
     CHECK_FALSE(history.terminal->optimization->objective.lower);
     CHECK_FALSE(history.terminal->optimization->objective.upper);
     CHECK(history.terminal->optimization->raw_diagnostics.find("bounds=unavailable")!=std::string::npos);
-    CHECK(contains(history.history.relation,{0,1,2,1,1})); // unrecovered feasible candidate stays correctly scoped
+    CHECK(contains(history.history.relation,{0,1,2,1,1}));
     const auto& lineage=result.family->identity().lineage;
     REQUIRE(lineage.size()==5);
     CHECK(lineage.back().output==history.terminal->relation->metadata()->id);
@@ -2181,7 +2181,7 @@ TEST_CASE("Strategy A publishes planned wall spans for its run and mathematical 
 
     const auto result=run(exact_ts02_request(problem),false,std::move(context));
     REQUIRE(result.termination==Termination::completed);
-    CHECK(result.spans.empty()); // Legacy seconds are not populated from collector ticks.
+    CHECK(result.spans.empty());
     auto report=collector->snapshot();
     REQUIRE(std::holds_alternative<ob::TimingReport>(report));
     const auto& timing=std::get<ob::TimingReport>(report);
