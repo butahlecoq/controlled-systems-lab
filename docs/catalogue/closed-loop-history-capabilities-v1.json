@@ -6420,8 +6420,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "46cdb60581e39890c3ec4d29c007add855745bb6aaf0979a769632c3ae40c568",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-mpc/1/cfg-46cdb60581e39890",
+      "graph_fingerprint": "7cba0be21d9100c83549001d4a09f9495ca0037dd9fd4f748d9ea30671ff58fd",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-mpc/1/cfg-7cba0be21d9100c8",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -6467,7 +6467,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -6531,7 +6531,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
@@ -6615,8 +6615,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "7a9a4ab35ac0214ed25842e6e3289b739102c95d8a9ac86f34e329291e45e683",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-box-ipopt/1/cfg-7a9a4ab35ac0214e",
+      "graph_fingerprint": "acdb01dccc0bb9a4f845c97968443310c3d45119b79e8d99c8e78445b2dd4b1c",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-box-ipopt/1/cfg-acdb01dccc0bb9a4",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -6669,7 +6669,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -6817,7 +6817,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
@@ -6901,8 +6901,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "6b019d56f5d245803e497af01cc680eb962ac9e40d52b1c1c8cfb8931e2a9f2a",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-polytope-ipopt/1/cfg-6b019d56f5d24580",
+      "graph_fingerprint": "1db74829aebba656dc24af8b4cd3927073724c9e8e479e3274f1e6092b3df127",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-polytope-ipopt/1/cfg-1db74829aebba656",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -6955,7 +6955,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -7103,7 +7103,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
@@ -7187,8 +7187,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "d0544e9839d673742bd981dfed691d932e103f3e0ff8ce5e5989887b1bbfab6e",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-zonotope-ipopt/1/cfg-d0544e9839d67374",
+      "graph_fingerprint": "3e06ec77929175a8e7f9b1106b92642a1e14a45ebeb43fd6c91b2311e6a2d2ae",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-zonotope-ipopt/1/cfg-3e06ec77929175a8",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -7241,7 +7241,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -7389,7 +7389,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
@@ -7473,8 +7473,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "77d8f79822b10b21c620cbe77e45b17be4bf67b66ba7ad0249ed28c5e2e4f933",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-parallelotope-ipopt/1/cfg-77d8f79822b10b21",
+      "graph_fingerprint": "e8e3de9a12dc32edcafc397c959b10e336d3d4c57a20df10b1b4b3fea908072a",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-parallelotope-ipopt/1/cfg-e8e3de9a12dc32ed",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -7527,7 +7527,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -7675,7 +7675,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
@@ -7759,8 +7759,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "d58fd8f11329212fdee024501b66eb060e44abd355b0c2201e2e8638a57c09b1",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-ellipsoid-ipopt/1/cfg-d58fd8f11329212f",
+      "graph_fingerprint": "eb60675e0c395270445fbc1dff491cdc1e65837db8782c25ef1d09edaf1bcd59",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-ellipsoid-ipopt/1/cfg-eb60675e0c395270",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -7813,7 +7813,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -7961,7 +7961,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
@@ -8045,8 +8045,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "049417f4a7f60a2d49a050623c7240f8d2f1d020665e059b2ba7641e666767ba",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-parallelotope-rotated-ipopt/1/cfg-049417f4a7f60a2d",
+      "graph_fingerprint": "75db552b3c741d34d8c892d054eeece6fe63c4f45684f3aee23a790f1a1587dc",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-parallelotope-rotated-ipopt/1/cfg-75db552b3c741d34",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -8100,7 +8100,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -8248,7 +8248,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
@@ -8332,8 +8332,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "31d659f984575d8341c624a0849342c58ac4393ac495d359a469ca62a0743646",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-parallelotope-selected-ipopt/1/cfg-31d659f984575d83",
+      "graph_fingerprint": "3e74dcc272d0d1579db271c308f637a3f6171a8ba4f24b763e43702ee14a6f6e",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-parallelotope-selected-ipopt/1/cfg-3e74dcc272d0d157",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -8387,7 +8387,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -8535,7 +8535,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
@@ -8620,8 +8620,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "98eebf6bf1557a313501fd0d1b8fc16e7969c1ff13baac588d89ddd370c006e5",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-certified-stagewise-polytope-ipopt/1/cfg-98eebf6bf1557a31",
+      "graph_fingerprint": "743279c6b6348368e36a16db1758fa0118757d5146c1618cbd353a598b2174ba",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-certified-stagewise-polytope-ipopt/1/cfg-743279c6b6348368",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -8674,7 +8674,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -8826,7 +8826,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
@@ -8911,8 +8911,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "e44f0527745aae54f4bbdb6ea2532e4fe4fc00d7fcd5daa0f06a912a14c87fa5",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-lifted-polytope-ipopt/1/cfg-e44f0527745aae54",
+      "graph_fingerprint": "1f316651869d1d3ba315dd2fbc20c529b18f04e8a7ae66f697bcfca2bc8380c5",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-lifted-polytope-ipopt/1/cfg-1f316651869d1d3b",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -8963,7 +8963,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -9115,7 +9115,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
@@ -9257,8 +9257,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "61da7e005e0b7002a98f752ff8983f1b851d8c3935de2642c829072aca3ca3c8",
-      "graph_id": "closed-loop/earth-orbit/native-strategy-a-history-polytope/1/cfg-61da7e005e0b7002",
+      "graph_fingerprint": "623ab685dba7d281e7d512a64dd98ef9381388fc436a04e9a36903d669554eab",
+      "graph_id": "closed-loop/earth-orbit/native-strategy-a-history-polytope/1/cfg-623ab685dba7d281",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -9321,7 +9321,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -9513,7 +9513,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
@@ -9655,8 +9655,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "1a611dcb8f4ea9b3fa3d0136b8cfbe2618cd7b3c7bb604a628f1649d17bed14e",
-      "graph_id": "closed-loop/earth-orbit/native-strategy-b-history-polytope/1/cfg-1a611dcb8f4ea9b3",
+      "graph_fingerprint": "7c1d90c6bc8d5eaab0079df96a4b2b405870894f9fa034c46a68a8d0d8eab4b2",
+      "graph_id": "closed-loop/earth-orbit/native-strategy-b-history-polytope/1/cfg-7c1d90c6bc8d5eaa",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -9719,7 +9719,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -9911,7 +9911,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
@@ -10052,8 +10052,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "6bc2a6be63890d2791dadee44bbc89130adaa021b2125fc1969718f9a0dfffaa",
-      "graph_id": "closed-loop/earth-orbit/native-strategy-a-history-box/1/cfg-6bc2a6be63890d27",
+      "graph_fingerprint": "1228013ea362b5c32f5177a247ed8b18f42e0e16c04373838962c377ca9803a7",
+      "graph_id": "closed-loop/earth-orbit/native-strategy-a-history-box/1/cfg-1228013ea362b5c3",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -10118,7 +10118,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -10306,7 +10306,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
@@ -10447,8 +10447,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "5ff08d16587de99943f8cc6fb71663b7e77f5c9f47e6114b0fb413993e0d168d",
-      "graph_id": "closed-loop/earth-orbit/native-strategy-b-history-box/1/cfg-5ff08d16587de999",
+      "graph_fingerprint": "9d1a2a3f024b7d0b0669907899dac0990eaf0c9240583b73c376b18c16a0ee00",
+      "graph_id": "closed-loop/earth-orbit/native-strategy-b-history-box/1/cfg-9d1a2a3f024b7d0b",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -10513,7 +10513,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -10701,7 +10701,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
@@ -10842,8 +10842,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "97cfb39997c0b9662f675ddf651dfe5e55d2cf26ddbcd427b2b651b99b78f6dd",
-      "graph_id": "closed-loop/earth-orbit/native-strategy-a-history-zonotope/1/cfg-97cfb39997c0b966",
+      "graph_fingerprint": "7c9074470a0ec1dbfda7a6a95d000cdeb25afedd77b7929a95e337732ed0528d",
+      "graph_id": "closed-loop/earth-orbit/native-strategy-a-history-zonotope/1/cfg-7c9074470a0ec1db",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -10908,7 +10908,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -11096,7 +11096,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
@@ -11237,8 +11237,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "451f5f54a101b772ac4d229c7fed3ddba373e45ffbc1ef080b5149c0a26b8fe9",
-      "graph_id": "closed-loop/earth-orbit/native-strategy-b-history-zonotope/1/cfg-451f5f54a101b772",
+      "graph_fingerprint": "d28578e624052b06ab15988c785df70309908b5bec0caede52ba841909aeb470",
+      "graph_id": "closed-loop/earth-orbit/native-strategy-b-history-zonotope/1/cfg-d28578e624052b06",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -11303,7 +11303,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -11491,7 +11491,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
@@ -11632,8 +11632,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "a634d9d97e22286712821cfa880204cb5b8f84bc1cbfabbf627639fc63035591",
-      "graph_id": "closed-loop/earth-orbit/native-strategy-a-history-parallelotope/1/cfg-a634d9d97e222867",
+      "graph_fingerprint": "c0228bb6aeb1305c232adc8ed19588aaaf0672b3cfc1db9c35679a755fa16c43",
+      "graph_id": "closed-loop/earth-orbit/native-strategy-a-history-parallelotope/1/cfg-c0228bb6aeb1305c",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -11698,7 +11698,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -11886,7 +11886,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
@@ -12027,8 +12027,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "9918365daac9a1670c675bcb5cb080b514260d1bc4e824dbf20660f3db6ab2d8",
-      "graph_id": "closed-loop/earth-orbit/native-strategy-b-history-parallelotope/1/cfg-9918365daac9a167",
+      "graph_fingerprint": "a1dee5f113f5b3f0c15750022f0c7f56465c452b6904a03365223416f7750a76",
+      "graph_id": "closed-loop/earth-orbit/native-strategy-b-history-parallelotope/1/cfg-a1dee5f113f5b3f0",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -12093,7 +12093,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -12281,7 +12281,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
@@ -12422,8 +12422,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "f2596e40b37b512d8e46d2b0c4bdfa6a9df068c9183ef79770cfc902c1b924e9",
-      "graph_id": "closed-loop/earth-orbit/native-strategy-a-history-ellipsoid/1/cfg-f2596e40b37b512d",
+      "graph_fingerprint": "cdb47f6df37ff974e318696a0638a984a6d17e208fcfb8b3f5e376d141b70271",
+      "graph_id": "closed-loop/earth-orbit/native-strategy-a-history-ellipsoid/1/cfg-cdb47f6df37ff974",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -12488,7 +12488,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -12676,7 +12676,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
@@ -12817,8 +12817,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "f7b91d7ee6f8bbd604485fdf97e880d6f595bed2150152d3305a8b99164b32f9",
-      "graph_id": "closed-loop/earth-orbit/native-strategy-b-history-ellipsoid/1/cfg-f7b91d7ee6f8bbd6",
+      "graph_fingerprint": "b53e12b152dcb565bec5fafafcd788d0b99e39c75e93ae7df6200f3751aa0485",
+      "graph_id": "closed-loop/earth-orbit/native-strategy-b-history-ellipsoid/1/cfg-b53e12b152dcb565",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -12883,7 +12883,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -13071,7 +13071,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "syn-nl-fuel-01/continuous-receding/1/continuous-control/1",
@@ -20560,8 +20560,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "e55e1e8d5a74c3aa91f8eaa39595ee1755c7e47a7f5938daf0d1db6e1869aebd",
-      "graph_id": "closed-loop/earth-orbit/fixed-tail-polytope-ipopt/1/cfg-e55e1e8d5a74c3aa",
+      "graph_fingerprint": "77792b794e7b7de87142315ed8ca3a50b52ff0c6332191e8463d82facaf054d8",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-polytope-ipopt/1/cfg-77792b794e7b7de8",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -20616,7 +20616,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -20684,7 +20684,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
@@ -20766,8 +20766,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "c5ab0c292084330cb20046330a50b963a8fe8e98a91da70285af2f344b0aafe2",
-      "graph_id": "closed-loop/earth-orbit/fixed-tail-box-ipopt/1/cfg-c5ab0c292084330c",
+      "graph_fingerprint": "aa84ce4316949d1145a22fb2f250d6395e8c0d962e5cef7b091d3c1644665503",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-box-ipopt/1/cfg-aa84ce4316949d11",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -20822,7 +20822,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -20890,7 +20890,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
@@ -20972,8 +20972,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "c61306ce7feacb6bdebab86fde482050d1f51a860313a740354442575fcc7ba3",
-      "graph_id": "closed-loop/earth-orbit/fixed-tail-zonotope-ipopt/1/cfg-c61306ce7feacb6b",
+      "graph_fingerprint": "650d2cd06d12233940b83ed4eac92399c056b9112a2736c2143b11407cc856f0",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-zonotope-ipopt/1/cfg-650d2cd06d122339",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -21028,7 +21028,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -21096,7 +21096,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
@@ -21178,8 +21178,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "09c9b7c8c43c11facc1cb1cdc08d3b5df8afd2ba19c449a842ab3aaae711ab40",
-      "graph_id": "closed-loop/earth-orbit/fixed-tail-parallelotope-ipopt/1/cfg-09c9b7c8c43c11fa",
+      "graph_fingerprint": "3467e7c88caebe1ae48e20602c293447e5444df80beb1d8b5b87e086906cf578",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-parallelotope-ipopt/1/cfg-3467e7c88caebe1a",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -21234,7 +21234,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -21302,7 +21302,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
@@ -21384,8 +21384,8 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "3cd8200ab07f0cc9fd914f6aee0cfaa205b70adf386821bc6ffd5376c871c145",
-      "graph_id": "closed-loop/earth-orbit/fixed-tail-ellipsoid-ipopt/1/cfg-3cd8200ab07f0cc9",
+      "graph_fingerprint": "a123f0eb3331d147886a7e8467fff4e088d0efa70f310791bf4818a3f33ac51f",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-ellipsoid-ipopt/1/cfg-a123f0eb3331d147",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -21440,7 +21440,7 @@
         },
         {
           "path": "benchmarks/reporting/env717/earth_orbit.cpp",
-          "sha256": "99cda2471630c458a98570a5171c09371c9602a15cd0fbb3b0f4e46f28d4b33a"
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
         },
         {
           "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
@@ -21508,7 +21508,7 @@
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
-      "task_sha256": "f7422c77d6e60b16e5bc66a4885cb1c8337230819c73ffbe61a13828b16798b4"
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
     },
     {
       "action_profile_id": "syn-nl-fuel-01/continuous-receding/1/continuous-control/1",

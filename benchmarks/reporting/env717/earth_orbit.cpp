@@ -142,7 +142,7 @@ int read_repetitions(int argc, char** argv) {
     return count;
 }
 
-}
+} // namespace
 
 int main(int argc, char** argv) {
     try {
