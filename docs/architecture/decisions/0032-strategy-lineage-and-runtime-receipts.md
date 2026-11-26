@@ -1,4 +1,4 @@
-# ADR 0031: Keep strategy lineage names and runtime receipts profile-specific
+# ADR 0032: Keep strategy lineage names and runtime receipts profile-specific
 
 Date: 2026-11-26
 Status: Accepted
