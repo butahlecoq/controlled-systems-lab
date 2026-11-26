@@ -518,6 +518,48 @@ on:
       - 'scripts/reports/pages_route_retirement.py'
       - 'tests/reporting/test_pages_route_retirement.py'
       - 'scripts/reports/audit_visual_routes.py'
+      - 'tests/reporting/test_visual_route_inventory.py'
+      - 'scripts/reports/feedback_geometry_example.py'
+      - 'scripts/reports/visual_example_fuel_layers.py'
+      - 'tests/reporting/test_feedback_geometry_example.py'
+      - 'tests/reporting/test_visual_example_fuel_layers.py'
+      - 'examples/feedback_geometry_2d.html'
+      - 'examples/feedback-geometry-tiny-fd28/**'
+      - 'docs/examples/fuel-reachability-layers/**'
+      - 'docs/research/tools/render_mpc02_figures.py'
+      - 'docs/examples/mpc02-slew-*'
+      - 'scripts/reports/viz10_plot_companions.py'
+      - 'tests/reporting/test_viz10_plot_companions.py'
+      - 'docs/examples/viz10/**'
+      - 'reports/algorithm-results/b07-owner-approved-eight-case-v1/README.md'
+      - 'reports/algorithm-results/b07-owner-approved-eight-case-v1/results.jsonl'
+      - 'reports/algorithm-results/b08-exact-b0d0e85d4d338f56/records.json'
+      - 'reports/algorithm-results/b09-a08-source-reference-4818ddde/results.jsonl'
+      - 'reports/algorithm-results/b09-a08-source-reference-4818ddde/scenario.json'
+      - 'reports/algorithm-results/exp04-replay-93fe3b87795e1d3a/records.json'
+      - 'reports/algorithm-results/issue3-finite-catalogue-b4632ce76510aa4f/records.json'
+      - 'reports/algorithm-results/issue3-validated-minimax-20261023-r1/records.json'
+      - 'reports/algorithm-results/issue4-volterra-7dce05b47c50c27a/records.json'
+      - 'scripts/reports/b04_native_smoke_companion.py'
+      - 'scripts/reports/control_witness_companions.py'
+      - 'tests/reporting/test_b04_native_smoke_companion.py'
+      - 'scripts/reports/mpc01/b04_native_smoke_projection.py'
+      - 'scripts/reports/mpc01/b04_projection_example.py'
+      - 'docs/research/evidence/b04-reference-v1/**'
+      - 'scripts/reports/geometry_opt_companions.py'
+      - 'tests/reporting/test_geometry_opt_companions.py'
+      - 'scripts/reports/mpc01/summarize_strategy_ab.py'
+      - 'reports/algorithm-results/syn06-publications.json'
+      - 'reports/algorithm-results/exp02-paired-profiles-20261027-r1/**'
+      - 'reports/algorithm-results/syn01-nominal-*/records.json'
+      - 'reports/algorithm-results/syn02-terminal-*/records.json'
+      - 'reports/algorithm-results/syn03-strategy-a-*/records.json'
+      - 'reports/algorithm-results/syn04-strategy-b-*/records.json'
+      - 'reports/algorithm-results/syn06-verifier-*/records.json'
+      - 'reports/algorithm-results/syn-ts01-paired-*/records.json'
+      - 'docs/research/evidence/mpc01-external-qps-20261026-r3/**'
+      - 'examples/scenarios/two-stage-integrator.json'
+      - 'tests/reporting/test_geometry_figures.py'
       - 'scripts/reports/approx_extension_companions.py'
       - 'scripts/reports/geometry_figures.py'
       - 'reports/algorithm-results/**'
@@ -1308,6 +1350,37 @@ jobs:
         run: python -m unittest tests.reporting.test_syn04_strategy_b_report tests.reporting.test_syn04_ts02_report tests.reporting.test_syn04_ts03_report
       - name: Replay the MPC-03 B08 and MPC-05 causal-tree saved reports
         run: python -m unittest tests.reporting.test_mpc03_b08_report tests.reporting.test_mpc05_causal_tree_publication tests.reporting.test_mpc05_reference
+      - name: Verify saved planar geometry exports
+        env:
+          MPLBACKEND: Agg
+        run: python -m unittest tests.reporting.test_geometry_figures
+      - name: Replay the saved MPC-02 analytic figures
+        env:
+          MPLBACKEND: Agg
+        run: |
+          scratch=$(mktemp -d "$RUNNER_TEMP/mpc02-figures.XXXXXXXX")
+          cd "$scratch"
+          export TMPDIR="$scratch" PYTHONDONTWRITEBYTECODE=1
+          printf '%s\n' 'axes.facecolor: red' >matplotlibrc
+          env -u PYTHONPATH -u MPLCONFIGDIR python "$GITHUB_WORKSPACE/docs/research/tools/render_mpc02_figures.py" --out output
+          test "$(find "$scratch" -mindepth 1 -maxdepth 1 | wc -l)" -eq 2
+          test "$(find "$scratch/output" -type f | wc -l)" -eq 6
+          for projection in memory terminal-state; do
+            stem="mpc02-slew-${projection}-projection"
+            for suffix in .svg .png -export.json; do
+              cmp "$GITHUB_WORKSPACE/docs/examples/$stem$suffix" "$scratch/output/$stem$suffix"
+            done
+          done
+      - name: Replay the saved VIZ-10 plots and manifest
+        env:
+          MPLBACKEND: Agg
+        run: python -m unittest tests.reporting.test_viz10_plot_companions
+      - name: Replay saved feedback geometry and fuel gallery assets
+        run: python -m unittest tests.reporting.test_feedback_geometry_example tests.reporting.test_visual_example_fuel_layers
+      - name: Validate saved B04 phase-plane inputs
+        run: python -m unittest tests.reporting.test_b04_native_smoke_companion
+      - name: Validate saved geometry and optimization timing rows
+        run: python -m unittest tests.reporting.test_geometry_opt_companions
       - name: Check the four-state projection approximation report
         run: python -m unittest discover -s tests/reporting -p 'test_four_state_projection_approximations.py'
       - name: Replay saved EXP-04, EXT-05, GEO-08 and OPT-10 catalogues
@@ -1390,10 +1463,29 @@ jobs:
           python -m unittest discover -s tools/legacy-ports/A29 -p test_port.py
           python -m unittest discover -s tools/legacy-ports/A33 -p test_port.py
 
+  python-visual-route-inventory:
+    needs: route
+    if: needs.route.outputs.python_quality == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.14'
+      - name: Verify and regenerate the saved visual route inventory
+        run: |
+          python -m unittest tests.reporting.test_visual_route_inventory
+          inventory=$(mktemp "$RUNNER_TEMP/visual-route-inventory.XXXXXXXX")
+          python scripts/reports/audit_visual_routes.py --out "$inventory"
+          cmp scripts/reports/visual-route-inventory.json "$inventory"
+
   python-quality-status:
     name: Python quality validation
     if: always()
-    needs: [route, python-ci-quality]
+    needs: [route, python-ci-quality, python-visual-route-inventory]
     runs-on: ubuntu-24.04
     steps:
       - name: Require Python quality when its path scope changed
@@ -1401,10 +1493,13 @@ jobs:
           ROUTE_RESULT: ${{ needs.route.result }}
           REQUIRED: ${{ needs.route.outputs.python_quality }}
           QUALITY_RESULT: ${{ needs.python-ci-quality.result }}
+          INVENTORY_RESULT: ${{ needs.python-visual-route-inventory.result }}
         run: |
           test "$ROUTE_RESULT" = success
           if [ "$REQUIRED" = true ]; then
             test "$QUALITY_RESULT" = success
+            test "$INVENTORY_RESULT" = success
           else
             test "$QUALITY_RESULT" = skipped
+            test "$INVENTORY_RESULT" = skipped
           fi
