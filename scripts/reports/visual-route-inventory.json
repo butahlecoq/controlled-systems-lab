@@ -1434,8 +1434,11 @@
     },
     {
       "source": "scripts/reports/stage_app02_nonaxis_ab.py",
-      "signal_count": 3,
-      "asset_name_literals": [],
+      "signal_count": 6,
+      "asset_name_literals": [
+        "-projections.svg",
+        "-support-excess.svg"
+      ],
       "disposition": "publication-validation-or-frozen-route"
     },
     {
@@ -2744,8 +2747,8 @@
       "companion_route": "examples/app02-diamond-v1.html"
     },
     {
-      "route": "app02-nonaxis-ab-b6a4479fad2ac722",
-      "source_bundle": "app02-nonaxis-ab-b6a4479fad2ac722",
+      "route": "app02-nonaxis-ab-0c77ee6e5c221655",
+      "source_bundle": "app02-nonaxis-ab-0c77ee6e5c221655",
       "assets": [
         "earth-orbit-motion-support-excess.svg",
         "earth-orbit-position-support-excess.svg",
@@ -2756,7 +2759,7 @@
         "syn-nl-lv-01-populations-support-excess.svg",
         "syn-nl-lv-01-projections.svg"
       ],
-      "index_sha256": "a28cfa6fc3dee8da90e60a00d74efd1582d04ea272cca7654e7ba63fc9df07ec",
+      "index_sha256": "d127562021a8fb6b63ec483e0d3c08896b2cef8e1ef57556c045b68a88377ee6",
       "disposition": "reviewed: three observed-state tasks compare the axis, fixed-45 and support-selected nonaxis frames with projection figures, sampled support excess and budgeted cost outcomes"
     },
     {

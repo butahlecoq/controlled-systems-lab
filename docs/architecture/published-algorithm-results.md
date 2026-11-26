@@ -503,26 +503,34 @@ Pages deployment and live-byte verification remain publication gates.
 ## APP-02 nonaxis parallelotope frames
 
 Issue [APP-02 #1096](https://github.com/butahlecoq/controlled-systems-lab/issues/1096)
-has a saved [paired A/B campaign](../../reports/algorithm-results/app02-nonaxis-ab-b6a4479fad2ac722/)
+has a saved [paired A/B campaign](../../reports/algorithm-results/app02-nonaxis-ab-0c77ee6e5c221655/)
 at source commit `3c3c694331497f2f3e991dbe7c1a6e328052af56`. The campaign runs the
 admitted axis profile against the fixed 45° frame and against the deterministic
 support-selected rule on Lotka–Volterra, Earth orbit and fuel transfer, with one
 excluded warmup and five alternating measured repetitions per side (60 measured
-attempts, all complete). The saved bundle keeps the projection figures, sampled
-directional support excess for 32 directions per 2D plane, certified
-frame-direction margins, per-attempt budgets, and the machine-readable summaries.
-Framed memberships and independent geometry receipts passed 5,580/5,580, and all
-certified frame-direction margins were non-negative within floating-point noise.
+attempts, all complete). The saved bundle keeps the projection and support-excess
+figures, sampled directional support excess, certified frame-direction margins,
+per-attempt budgets, and the machine-readable summaries. Support and certificate
+rows come from measured repetition 1; the native frame bounds are deterministic
+across repetitions. Sampled excess used up to 32 directions per 2D plane, but six
+rows used only 2 directions, including the two largest Earth-orbit rotated maxima.
+The 5,580 framed-membership checks repeat 1,116 unique stage/role rows across the
+five measured attempts; the frame check verifies orthonormality, ordered bounds and
+the H rows rather than boundedness or cover tightness, so the vacuous rotated orbit
+boxes still pass it. Independent receipts passed 60/60, and certified margins span
+`-5.4e-11` upward with none below the `1e-9` noise threshold.
 
 Two limits stay explicit. The support-selected rule retained the axis frame for
 all 1,395 selected memberships, so axis vs selected is a numerical near-control
 rather than a second nonaxis treatment; the fixed 45° profile is the only realized
 nonaxis orientation. On Earth orbit that rotated profile exported frame bounds up
-to `3.7e37` and five numeric blow-up attempts, so it is a conditioning finding,
-not a successful nonaxis result. Sampled excess remains a diagnostic, not a uniform
-error bound, and the timings support no speed winner. Independent saved-result
-review, main-only Pages deployment and live-byte verification remain publication
-gates.
+to `3.7e37` and five numeric blow-up attempts with sampled excess up to `3.6e21`;
+on Lotka–Volterra and fuel it stayed finite but much looser than axis (maximum
+sampled excess `100` and `40` against about `1e-12`). It is therefore a conditioning
+finding, not a successful nonaxis result. Sampled excess remains a diagnostic, not
+a uniform error bound, and the timings support no speed winner. Independent
+saved-result review, main-only Pages deployment and live-byte verification remain
+publication gates.
 
 ## APP-03 zonotope reduction and enclosure
 

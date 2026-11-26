@@ -2895,22 +2895,22 @@
     }
   ],
   "figures": [
-    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence/figures/syn-nl-lv-01-projections.svg",
-    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence/figures/syn-nl-lv-01-projections.png",
-    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence/figures/earth-orbit-projections.svg",
-    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence/figures/earth-orbit-projections.png",
-    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence/figures/syn-nl-fuel-01-projections.svg",
-    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence/figures/syn-nl-fuel-01-projections.png",
-    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence/figures/syn-nl-lv-01-populations-support-excess.svg",
-    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence/figures/syn-nl-lv-01-populations-support-excess.png",
-    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence/figures/earth-orbit-position-support-excess.svg",
-    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence/figures/earth-orbit-position-support-excess.png",
-    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence/figures/earth-orbit-motion-support-excess.svg",
-    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence/figures/earth-orbit-motion-support-excess.png",
-    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence/figures/syn-nl-fuel-01-masses-support-excess.svg",
-    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence/figures/syn-nl-fuel-01-masses-support-excess.png",
-    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence/figures/syn-nl-fuel-01-flows-support-excess.svg",
-    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence/figures/syn-nl-fuel-01-flows-support-excess.png"
+    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence-v2/figures/syn-nl-lv-01-projections.svg",
+    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence-v2/figures/syn-nl-lv-01-projections.png",
+    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence-v2/figures/earth-orbit-projections.svg",
+    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence-v2/figures/earth-orbit-projections.png",
+    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence-v2/figures/syn-nl-fuel-01-projections.svg",
+    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence-v2/figures/syn-nl-fuel-01-projections.png",
+    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence-v2/figures/syn-nl-lv-01-populations-support-excess.svg",
+    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence-v2/figures/syn-nl-lv-01-populations-support-excess.png",
+    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence-v2/figures/earth-orbit-position-support-excess.svg",
+    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence-v2/figures/earth-orbit-position-support-excess.png",
+    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence-v2/figures/earth-orbit-motion-support-excess.svg",
+    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence-v2/figures/earth-orbit-motion-support-excess.png",
+    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence-v2/figures/syn-nl-fuel-01-masses-support-excess.svg",
+    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence-v2/figures/syn-nl-fuel-01-masses-support-excess.png",
+    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence-v2/figures/syn-nl-fuel-01-flows-support-excess.svg",
+    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1096-ab-evidence-v2/figures/syn-nl-fuel-01-flows-support-excess.png"
   ],
   "frames": {
     "attempts": [

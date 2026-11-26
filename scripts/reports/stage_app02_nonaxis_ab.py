@@ -9,7 +9,9 @@ built report site.
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
+import io
 import json
 import sys
 from html import escape
@@ -70,10 +72,16 @@ def _fmt(value: float, digits: int = 6) -> str:
     return f"{value:.{digits}g}"
 
 
-def render_index(summary: dict, figure_names: list[str]) -> bytes:
+def render_index(summary: dict, figure_names: list[str], support_samples: list[int]) -> bytes:
     costs = summary["costs"]
     gaps = [row for row in summary["support"] if row["role"] == "all"]
     frames = summary["frames"]
+    unique_rows = sum(
+        row["independent_geometry_rows"] for row in frames["attempts"] if row["repetition"] == 1
+    )
+    min_margin = min(row["min_margin"] for row in summary["certificates"])
+    directions = max(support_samples) if support_samples else 0
+    short_rows = sum(1 for value in support_samples if value < directions)
     condition: dict[tuple[str, str, str], dict[str, float]] = {}
     for row in frames["attempts"]:
         key = (row["pair"], row["task"], row["frame"])
@@ -98,7 +106,11 @@ def render_index(summary: dict, figure_names: list[str]) -> bytes:
         "no speed winner is claimed.</p>",
         "<p><strong>Scope.</strong> Sampled 2D directional support excess is a diagnostic, not a "
         "uniform error bound or inclusion certificate. The frame-coordinate cover and the certified "
-        "frame-direction margins are the cover checks. Unsupported and failed routes are retained.</p>",
+        "frame-direction margins are the cover checks. Unsupported and failed routes are retained. "
+        "Frame membership counts repeat the same stage/role rows across the five measured attempts: "
+        f"{frames['totals'].get('framed_memberships', 0):,} checks cover {unique_rows:,} unique rows. "
+        "The frame check verifies orthonormality, ordered frame bounds and the H rows, not "
+        "boundedness or cover tightness, so the vacuous Earth-orbit rotated boxes still pass it.</p>",
         "<h2>Coverage and cost</h2><table><thead><tr><th>Pair</th><th>Task</th><th>Frame</th>"
         "<th>Measured</th><th>Complete</th><th>Wall median (s)</th><th>Wall range (s)</th>"
         "<th>CPU median (s)</th><th>Max RSS (KiB)</th><th>Objective median</th></tr></thead><tbody>",
@@ -116,9 +128,11 @@ def render_index(summary: dict, figure_names: list[str]) -> bytes:
     parts += [
         "</tbody></table>",
         "<h2>Sampled directional support excess</h2>",
-        "<p>32 directions per 2D projection at the first query, all stages and roles. Positive "
-        "values mean the parallelotope projection is looser than the exported full-state H "
-        "reference.</p><table><thead><tr><th>Pair</th><th>Task</th><th>Frame</th><th>Plane</th>"
+        f"<p>Up to {directions} directions per 2D projection at the first query, all stages and "
+        f"roles; {short_rows} rows used only 2 directions, including the two largest Earth-orbit "
+        "rotated maxima below. Positive values mean the parallelotope projection is looser than the "
+        "exported full-state H reference. Rows come from measured repetition 1; the native frame "
+        "bounds are deterministic across measured repetitions.</p><table><thead><tr><th>Pair</th><th>Task</th><th>Frame</th><th>Plane</th>"
         "<th>Rows</th><th>Max excess</th><th>Median row max</th><th>Frame checks</th></tr></thead><tbody>",
     ]
     for row in gaps:
@@ -133,18 +147,24 @@ def render_index(summary: dict, figure_names: list[str]) -> bytes:
     parts += [
         "</tbody></table>",
         "<h2>Frame findings</h2>",
-        f"<p>Framed memberships checked: {totals.get('frame_checks_passed', 0)} / "
-        f"{totals.get('framed_memberships', 0)}. Independent geometry rows passed: "
-        f"{totals.get('independent_geometry_passed', 0)} / {totals.get('independent_geometry_rows', 0)}. "
-        f"Independent receipts accepted: {totals.get('independent_accepted', 0)} / "
-        f"{totals.get('attempts', 0)} measured attempts.</p>",
+        f"<p>Framed memberships checked: {totals.get('frame_checks_passed', 0):,} / "
+        f"{totals.get('framed_memberships', 0):,}, covering {unique_rows:,} unique stage/role rows "
+        "repeated across five measured attempts. Independent geometry rows passed: "
+        f"{totals.get('independent_geometry_passed', 0):,} / "
+        f"{totals.get('independent_geometry_rows', 0):,}. Independent receipts accepted: "
+        f"{totals.get('independent_accepted', 0)} / {totals.get('attempts', 0)} measured attempts. "
+        f"Certified margins span {_fmt(min_margin)} upward; none falls below the 1e-9 noise "
+        "threshold, so they are directional necessary conditions rather than an inclusion proof.</p>",
         "<h2>Limitations</h2>",
         "<p>The support-selected rule retained the axis frame, so axis vs selected is a numerical "
         "near-control rather than a second nonaxis treatment. The fixed 45 degree profile is the "
         "only realized nonaxis orientation; on Earth orbit it exported frame bounds above the "
-        "1e6 diagnostic threshold in five attempts. Those outcomes are retained in the tables and "
-        "records above, not treated as successful nonaxis samples. Sampled excess is a diagnostic, "
-        "not a uniform error bound, and the timings claim no speed winner.</p>",
+        "1e6 diagnostic threshold in five attempts, and its sampled excess reaches 3.6e21. On "
+        "Lotka-Volterra and fuel the rotated bounds stay finite but are much looser: maximum "
+        "sampled excess 100 and 40 against about 1e-12 for the axis profile. Those outcomes are "
+        "retained in the tables and records above, not treated as successful nonaxis samples. "
+        "Sampled excess is a diagnostic, not a uniform error bound, and the timings claim no "
+        "speed winner.</p>",
         f"<p>Selected-frame choices: <code>{escape(json.dumps(frames['selected_choices'], sort_keys=True))}</code>. "
         "A selected count of <code>selected axis</code> equal to the selected membership count "
         "means the support-selected controller retained the axis frame; the axis-vs-selected pair "
@@ -161,22 +181,32 @@ def render_index(summary: dict, figure_names: list[str]) -> bytes:
         )
     parts += [
         "</tbody></table>",
-        "<h2>Projection figures</h2>",
-        "<p>Each figure is drawn from the saved observed-state replay of the first affine query. "
-        "Solid lines are frame boxes; dashed lines are sampled supports of the exported H set.</p>",
+        "<h2>Figures</h2>",
+        "<p>The <code>*-projections.svg</code> figures are drawn from the saved observed-state "
+        "replay of the first affine query: solid lines are frame boxes and dashed lines are sampled "
+        "supports of the exported H set. The <code>*-support-excess.svg</code> figures instead plot "
+        "maximum sampled directional excess against stage for each task and plane; they contain no "
+        "replay or H-set overlay.</p>",
     ]
     for name in figure_names:
         stem = Path(name).stem
+        kind = (
+            "Projection figure"
+            if name.endswith("-projections.svg")
+            else "Sampled support-excess figure"
+        )
         parts.append(
-            f"<figure><img src=\"{escape(name)}\" alt=\"Projection figure {escape(stem)}\">"
+            f"<figure><img src=\"{escape(name)}\" alt=\"{kind} {escape(stem)}\">"
             f"<figcaption><code>{escape(stem)}</code></figcaption></figure>"
         )
     parts += [
         "<h2>Files</h2><ul>",
         "<li><a href=\"summary.json\">Machine-readable summary</a></li>",
         "<li><a href=\"attempts.csv\">Per-attempt outcomes and resources</a></li>",
-        "<li><a href=\"support-gaps.csv\">Per stage/role/plane sampled excess</a></li>",
-        "<li><a href=\"certificates.csv\">Certified frame-direction support margins</a></li>",
+        "<li><a href=\"support-gaps.csv\">Per stage/role/plane sampled excess from measured "
+        "repetition 1</a></li>",
+        "<li><a href=\"certificates.csv\">Certified frame-direction support margins from measured "
+        "repetition 1</a></li>",
         "<li><a href=\"bundle.zip\">Offline ZIP of this report</a> · "
         "<a href=\"bundle.zip.sha256\">checksum</a></li>",
         "</ul></body></html>\n",
@@ -204,7 +234,11 @@ def build_bundle(evidence: Path, out: Path) -> str:
         "campaign summary source differs",
     )
     figure_names = sorted(name for name in members if name.endswith(".svg"))
-    members["index.html"] = render_index(summary, figure_names)
+    support_samples = [
+        int(row["samples"])
+        for row in csv.DictReader(io.StringIO(members["support-gaps.csv"].decode("utf-8")))
+    ]
+    members["index.html"] = render_index(summary, figure_names, support_samples)
     digest_material = "\n".join(f"{name} {sha(members[name])}" for name in sorted(members))
     report_id = PREFIX + sha(digest_material.encode())[:16]
     manifest = {

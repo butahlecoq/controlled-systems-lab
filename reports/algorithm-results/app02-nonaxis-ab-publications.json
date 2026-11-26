@@ -2,13 +2,13 @@
   "schema": "csl.app02-nonaxis-publications/1",
   "reports": [
     {
-      "report_id": "app02-nonaxis-ab-b6a4479fad2ac722",
+      "report_id": "app02-nonaxis-ab-0c77ee6e5c221655",
       "source_commit": "3c3c694331497f2f3e991dbe7c1a6e328052af56",
       "schema": "csl.app02-nonaxis-campaign/1",
-      "manifest_sha256": "43d73a69a3b6ec99e72ef8ed2df729701be79cc94a62a2287e5bbd31c6e28516",
-      "zip_sha256": "5eb1a9ad363fd6e876decbc4b66d9ecafb3b7ab3c5a82b5335897d2634bca693",
-      "builder_sha256": "ad3965c06125ac6e6e79dad7cbf9be804ab2831eb269592d142fffd6e1d2a615",
-      "stager_sha256": "ad3965c06125ac6e6e79dad7cbf9be804ab2831eb269592d142fffd6e1d2a615"
+      "manifest_sha256": "838fb13c8e92433d7a33dccb35657763f5a6769b270bbf16418c6f60a25cbfec",
+      "zip_sha256": "72c3d5ab0afb53c0e7d38941be4d28fd8b166ecfca0a54956dc66e18c80eff0e",
+      "builder_sha256": "08d42dfc531f4d2a4d58cb42d4348e2326a774ccddf1535d20652ed440b387b2",
+      "stager_sha256": "08d42dfc531f4d2a4d58cb42d4348e2326a774ccddf1535d20652ed440b387b2"
     }
   ]
 }

@@ -1,0 +1,39 @@
+{
+  "campaign": {
+    "controllers": {
+      "axis": "native-continuous-history-parallelotope-ipopt/1",
+      "fixed-45": "native-continuous-history-parallelotope-rotated-ipopt/1",
+      "selected": "native-continuous-history-parallelotope-selected-ipopt/1"
+    },
+    "measured_repetitions": 5,
+    "pairs": [
+      "axis-vs-rotated",
+      "axis-vs-selected"
+    ],
+    "tasks": [
+      "syn-nl-lv-01",
+      "earth-orbit",
+      "syn-nl-fuel-01"
+    ],
+    "warmup_pairs": 1
+  },
+  "files_sha256": {
+    "attempts.csv": "12647a855f2bed721265c3ba7a1520a2d0bc58562b34470a8e7f09a0529cb9dd",
+    "certificates.csv": "ab4666be99ebe87242234d7929c9262fb6216752d40eb97418efd8bf0fb618ce",
+    "earth-orbit-motion-support-excess.svg": "904983cb31d9bf9f3d285ba42aebc6b439406c53c5bb1b6891dba3caeeb84596",
+    "earth-orbit-position-support-excess.svg": "1cbdfbc7e9ac66578ef8f108b7e00437f5fe6b201a2a2df14e30bda8cea041b2",
+    "earth-orbit-projections.svg": "2fa1b28f6b06d7491cfef106b597cb46abf7e330843a4b47e80aa9f2076f23fa",
+    "index.html": "d127562021a8fb6b63ec483e0d3c08896b2cef8e1ef57556c045b68a88377ee6",
+    "summary.json": "ce01c27ed7c17f8d8a1600c27e42edb583a30ceabecf0ae6b7b20976939a6e54",
+    "support-gaps.csv": "72875ca2a0088bb632d17eab35cc6cb41915f84b1f41057cc6eee3fb920fb3a0",
+    "syn-nl-fuel-01-flows-support-excess.svg": "73896e91ce98378418f1676cc372d3a7b5555d3b0417ab80778ff94c44514cf3",
+    "syn-nl-fuel-01-masses-support-excess.svg": "a5e8333b5029a628ecc514bb5fbe64b53b49fc179c4a3d330e89048ff9096284",
+    "syn-nl-fuel-01-projections.svg": "4a3f77788b766e60b3b7b8cee282ab5a11042fa3baf9759fa5f13b0aaf6bafff",
+    "syn-nl-lv-01-populations-support-excess.svg": "f5f3eafe5b0ecfbc5d0026b54a968ac13105ec7764cdbc869683a9f815d58e27",
+    "syn-nl-lv-01-projections.svg": "5510dd30da98064968a0b2ff3128b15f8e9aaee412dc70ef157070a96b188635"
+  },
+  "freeze_sha256": "b85d389458e2fd96e43b823fc7a61d23b682ea99853dc9c23bad036d3915f36d",
+  "report_id": "app02-nonaxis-ab-0c77ee6e5c221655",
+  "schema": "csl.app02-nonaxis-campaign/1",
+  "source_commit": "3c3c694331497f2f3e991dbe7c1a6e328052af56"
+}

@@ -291,7 +291,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertTrue(backends["disposition"].startswith("reviewed:"))
         self.assertNotIn("follow_up_issue", backends)
         reviewed_routes.add(backends["route"])
-        campaign = routes["app02-nonaxis-ab-b6a4479fad2ac722"]
+        campaign = routes["app02-nonaxis-ab-0c77ee6e5c221655"]
         self.assertEqual(
             campaign["assets"],
             [

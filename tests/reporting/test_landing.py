@@ -98,7 +98,7 @@ class LandingTests(unittest.TestCase):
         self.assertIn("do not establish a general performance comparison", family.summary)
 
     def test_nonaxis_campaign_route_has_a_bounded_extensions_description(self):
-        family = landing.FAMILIES[landing.family_for("app02-nonaxis-ab-b6a4479fad2ac722")]
+        family = landing.FAMILIES[landing.family_for("app02-nonaxis-ab-0c77ee6e5c221655")]
         self.assertEqual(family.group, "extensions")
         self.assertIn("retained the axis frame", family.summary)
         self.assertIn("no nonaxis benefit or speed winner", family.summary)

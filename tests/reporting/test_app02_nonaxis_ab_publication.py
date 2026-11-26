@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import csv
 import json
 import sys
 import tempfile
@@ -63,16 +64,50 @@ class NonaxisCampaignPublicationTests(unittest.TestCase):
         blowups = self.summary["frames"]["totals"]["numerical_blowup_attempts"]
         self.assertEqual(blowups, 5, "the Earth-orbit fixed-45 blow-up must remain disclosed")
 
+    def test_csvs_are_structurally_valid_and_disclose_coverage(self):
+        widths = {"support-gaps.csv": 14, "certificates.csv": 13, "attempts.csv": 29}
+        for name, width in widths.items():
+            with (self.bundle / name).open(newline="", encoding="utf-8") as stream:
+                rows = list(csv.reader(stream))
+            self.assertTrue(rows, name)
+            self.assertEqual(len(rows[0]), width, name)
+            self.assertTrue(all(len(row) == width for row in rows[1:]), name)
+
+        with (self.bundle / "support-gaps.csv").open(newline="", encoding="utf-8") as stream:
+            gaps = list(csv.DictReader(stream))
+        for row in gaps:
+            self.assertIsInstance(json.loads(row["frame_check"]), dict)
+        samples = [int(row["samples"]) for row in gaps]
+        self.assertEqual(min(samples), 2)
+        self.assertEqual(sum(1 for value in samples if value == 2), 6)
+        self.assertEqual({row["repetition"] for row in gaps}, {"1"})
+        self.assertEqual(len(gaps), 1818)
+
+        with (self.bundle / "certificates.csv").open(newline="", encoding="utf-8") as stream:
+            certificates = list(csv.DictReader(stream))
+        self.assertEqual({row["repetition"] for row in certificates}, {"1"})
+        margins = [float(row["margin"]) for row in certificates]
+        self.assertLess(min(margins), 0.0)
+        self.assertGreater(min(margins), -1e-9)
+
     def test_index_lists_figures_and_files(self):
         index = (self.bundle / "index.html").read_text(encoding="utf-8")
         for name in self.manifest["files_sha256"]:
-            if name.endswith(".svg"):
-                self.assertIn(name, index)
+            if name.endswith("-projections.svg"):
+                self.assertIn(f'{name}" alt="Projection figure', index)
+            elif name.endswith("-support-excess.svg"):
+                self.assertIn(f'{name}" alt="Sampled support-excess figure', index)
         for name in ("summary.json", "attempts.csv", "support-gaps.csv", "certificates.csv"):
             self.assertIn(name, index)
         self.assertIn("not a uniform error bound", index)
         self.assertIn("Limitations", index)
         self.assertIn("five attempts", index)
+        self.assertIn("1,116 unique", index)
+        self.assertIn("2 directions", index)
+        self.assertIn("support-excess.svg", index)
+        self.assertIn("from measured repetition 1", index)
+        self.assertIn("none falls below the 1e-9", index)
+        self.assertIn("100 and 40", index)
 
     def test_stager_adds_the_route_once(self):
         with tempfile.TemporaryDirectory() as directory:
