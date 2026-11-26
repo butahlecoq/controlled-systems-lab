@@ -1,5 +1,7 @@
 """Canonical schema-3 mapping and immutable identity for SYN-01 reports."""
+
 from __future__ import annotations
+
 import hashlib
 import json
 
@@ -9,7 +11,9 @@ KIND = "syn01-nominal-forward"
 
 
 def canonical(value):
-    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
+    return json.dumps(
+        value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False
+    ).encode("utf-8")
 
 
 def digest(value):
@@ -17,10 +21,12 @@ def digest(value):
 
 
 def public_report_id(source_report_id, source_hashes, publisher_source):
-    identity = {"schema": "csl.registered-publication-identity/1",
-                "source_report_id": source_report_id,
-                "source_files": {name: source_hashes[name] for name in sorted(source_hashes)},
-                "publisher_sha256": hashlib.sha256(publisher_source.replace(b"\r\n", b"\n")).hexdigest()}
+    identity = {
+        "schema": "csl.registered-publication-identity/1",
+        "source_report_id": source_report_id,
+        "source_files": {name: source_hashes[name] for name in sorted(source_hashes)},
+        "publisher_sha256": hashlib.sha256(publisher_source.replace(b"\r\n", b"\n")).hexdigest(),
+    }
     return "syn01-" + digest(identity)
 
 

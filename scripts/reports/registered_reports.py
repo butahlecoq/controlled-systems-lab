@@ -1179,11 +1179,17 @@ _HISTORICAL_PUBLICATIONS: dict[str, _HistoricalPublicationPin] = {
         "zip_sha256": "c75227f9fcdb0bb90b724d698a170306662562e79ef4835589be26b0b0c5da11",
     },
     "syn01-nominal-20261013-f7ba310d-48a679cfc0d4": {
+        "identity_files_sha256": {
+            "syn01-nominal-20261013-f7ba310d-48a679cfc0d4.zip": "95be8cdf2d2b805cc1076536dae0e21b0abd3b096c6e48e5b3e5f736ec675c85",
+        },
         "inventory_sha256": "f977f289ac3942098140373435e7322dae5f43eb030239952c25a3ac29c47aa3",
         "report_id": "syn01-6e207b2ee1f300929f054e679c8cd5707f979c02b173292660520e403ebf2852",
         "zip_sha256": "84de33d3a3f6500a9e8aea07fe8297a71cdbd44b269f94aa4358bc332b28ec65",
     },
     "syn02-terminal-20261013-c234a1a0-35de886a7fb4": {
+        "identity_files_sha256": {
+            "syn02-terminal-20261013-c234a1a0-35de886a7fb4.zip": "32bbc42048fc555097c06a9fd2e565303cb554655a1cba9c02daff636c55d407",
+        },
         "inventory_sha256": "0212ce9d7f65bf66de374895853c5119214e27c531e578a7751ddb3c1843e843",
         "report_id": "syn02-1b07970d73d90c79c4bba2c65d429ba05bd798751d885146cb21d8a876a067c3",
         "zip_sha256": "8acb23c42447455385e63aefccbf25a680384d39de5f50339838e98af7f10bf8",
@@ -1249,6 +1255,40 @@ _HISTORICAL_PUBLICATIONS: dict[str, _HistoricalPublicationPin] = {
         "zip_sha256": "c046a49dea35dc3c12f77061d92b3166f994c821f9a2f14fb494354541b8fda9",
     },
 }
+
+
+def source_zip_identity(
+    bundle: Path, members: set[str] | list[str], *, index_root: bool = False, prefixed: bool = False
+) -> tuple[str, str]:
+    """Validate a sibling source ZIP and return its stable identity name and digest."""
+    bundle = Path(bundle)
+    name = bundle.name + ".zip"
+    path = bundle.parent / name
+    expected = set(members)
+    if prefixed:
+        expected = {f"{bundle.name}/{member}" for member in expected}
+    if index_root:
+        expected.add("index.html")
+    if Path(name).name != name or path.is_symlink() or not path.is_file():
+        raise ValueError("source ZIP is missing or unsafe: " + name)
+    try:
+        with zipfile.ZipFile(path) as archive:
+            infos = archive.infolist()
+            names = [info.filename for info in infos]
+            if len(names) != len(set(names)) or set(names) != expected:
+                raise ValueError("source ZIP inventory differs from the validated bundle")
+            for info in infos:
+                content = archive.read(info)
+                if info.filename == "index.html":
+                    continue
+                member = info.filename.split("/", 1)[1] if prefixed else info.filename
+                if content != (bundle / member).read_bytes():
+                    raise ValueError(
+                        "source ZIP member differs from the validated bundle: " + member
+                    )
+    except (OSError, RuntimeError, NotImplementedError, zipfile.BadZipFile) as exc:
+        raise ValueError("invalid source ZIP: " + name) from exc
+    return name, hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def preserve_historical_publication(bundle, publication, archive_builder):
