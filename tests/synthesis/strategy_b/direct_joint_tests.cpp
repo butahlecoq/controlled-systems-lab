@@ -2125,7 +2125,6 @@ TEST_CASE("Strategy B rejects unsupported completeness support at the public str
     const auto& verified=std::get<CompleteOptimalFamily>(trusted_result.family->outcome());
     CompleteFamilyProposal proposal{trusted_result.family->identity(),verified};
 
-    // Preserve the valid problem/request/strategy binding and mutate only the support variant.
     const std::vector<CompletenessSupport> unsupported_supports{
         Unestablished{},
         SymbolicArgument{"problem:"+p.identity().value, "unchecked symbolic assertion"},
